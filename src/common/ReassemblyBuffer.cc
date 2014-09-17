@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ReassemblyBuffer.h"
+#include "inet/common/ReassemblyBuffer.h"
 
 namespace inet {
 

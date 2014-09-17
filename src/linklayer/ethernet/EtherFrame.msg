@@ -17,9 +17,9 @@
 
 
 cplusplus {{
-#include "Ethernet.h"
-#include "MACAddress.h"
-#include "Ieee802Ctrl_m.h" // for enums
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 }}
 
 namespace inet;

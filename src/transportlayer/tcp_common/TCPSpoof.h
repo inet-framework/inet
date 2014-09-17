@@ -14,10 +14,10 @@
 #ifndef __INET_TCPSPOOF_H
 #define __INET_TCPSPOOF_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSegment.h"
-#include "L3AddressResolver.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

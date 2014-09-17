@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DimensionalUtils.h"
+#include "inet/physicallayer/dimensional/DimensionalUtils.h"
 
 namespace inet {
 

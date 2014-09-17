@@ -18,12 +18,12 @@
 #ifndef __INET_RIPROUTING_H
 #define __INET_RIPROUTING_H
 
-#include "INETDefs.h"
-#include "IRoute.h"
-#include "IRoutingTable.h"
-#include "IInterfaceTable.h"
-#include "ILifecycle.h"
-#include "UDPSocket.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IRoute.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

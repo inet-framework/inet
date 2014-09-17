@@ -18,7 +18,7 @@
 #ifndef __INET_BGPKEEPALIVE_H
 #define __INET_BGPKEEPALIVE_H
 
-#include "BGPKeepAlive_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPKeepAlive_m.h"
 
 namespace inet {
 

@@ -16,11 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCP_NSC_VirtualDataQueues.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_VirtualDataQueues.h"
 
-#include "TCPCommand_m.h"
-#include "TCP_NSC_Connection.h"
-#include "TCPSerializer.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 namespace inet {
 

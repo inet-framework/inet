@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MACAddressType.h"
+#include "inet/linklayer/common/MACAddressType.h"
 
 namespace inet {
 

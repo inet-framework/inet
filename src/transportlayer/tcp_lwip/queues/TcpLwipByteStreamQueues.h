@@ -19,10 +19,10 @@
 #ifndef __INET_TCPLWIPBYTESTREAMQUEUES_H
 #define __INET_TCPLWIPBYTESTREAMQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ByteArrayBuffer.h"
-#include "TcpLwipQueues.h"
+#include "inet/common/ByteArrayBuffer.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
 

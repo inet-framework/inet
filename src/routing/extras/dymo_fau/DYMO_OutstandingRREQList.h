@@ -22,9 +22,9 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DYMO_Timer.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Timer.h"
 
 namespace inet {
 

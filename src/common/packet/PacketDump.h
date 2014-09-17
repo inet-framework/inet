@@ -21,7 +21,7 @@
 #ifndef __INET_PACKETDUMP_H
 #define __INET_PACKETDUMP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

@@ -18,10 +18,10 @@
 #ifndef __INET_TCPSENDQUEUE_H
 #define __INET_TCPSENDQUEUE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPConnection.h"
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

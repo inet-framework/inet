@@ -28,9 +28,9 @@
 #endif
 #include <errno.h>
 #else
-#include "debug_dymo.h"
-#include "defs_dymo.h"
-#include "pending_rreq.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/pending_rreq.h"
 
 #include <stdlib.h>
 #include <errno.h>

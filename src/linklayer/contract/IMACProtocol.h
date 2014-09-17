@@ -18,7 +18,7 @@
 #ifndef __INET_IMACPROTOCOL_H
 #define __INET_IMACPROTOCOL_H
 
-#include "IMACProtocolControlInfo.h"
+#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 
 namespace inet {
 

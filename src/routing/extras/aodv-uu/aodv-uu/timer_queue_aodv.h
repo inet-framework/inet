@@ -28,8 +28,8 @@
 #include <sys/time.h>
 #endif
 
-#include "defs_aodv.h"
-#include "list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 
 namespace inet {
 

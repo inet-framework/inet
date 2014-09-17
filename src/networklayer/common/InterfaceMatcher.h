@@ -19,8 +19,8 @@
 #define __INET_INTERFACEMATCHER_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
-#include "InterfaceEntry.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

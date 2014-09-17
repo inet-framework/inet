@@ -28,10 +28,10 @@
 //
 // ***************************************************************************
 
-#include "HttpBrowserBase.h"
+#include "inet/applications/httptools/browser/HttpBrowserBase.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

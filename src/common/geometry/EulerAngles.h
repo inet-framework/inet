@@ -1,7 +1,7 @@
 #ifndef __INET_EULERANGLES_H
 #define __INET_EULERANGLES_H
 
-#include "INETMath.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

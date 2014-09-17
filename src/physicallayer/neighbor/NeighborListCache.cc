@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "NeighborListCache.h"
-#include "ModuleAccess.h"
+#include "inet/physicallayer/neighbor/NeighborListCache.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

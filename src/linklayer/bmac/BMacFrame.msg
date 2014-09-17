@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-    #include "MACFrameBase_m.h"
+    #include "inet/linklayer/common/MACFrameBase_m.h"
 }}
 
 namespace inet;

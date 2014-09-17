@@ -19,7 +19,7 @@
 
 
 cplusplus {{
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet::rtp;

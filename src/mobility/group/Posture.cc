@@ -40,7 +40,7 @@
  *
  **************************************************************************/
 
-#include "Posture.h"
+#include "inet/mobility/group/Posture.h"
 
 namespace inet {
 

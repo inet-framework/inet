@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Cuboid.h"
-#include "Polygon.h"
-#include "Plane.h"
-#include "Prism.h"
+#include "inet/common/geometry/Cuboid.h"
+#include "inet/common/geometry/Polygon.h"
+#include "inet/common/geometry/Plane.h"
+#include "inet/common/geometry/Prism.h"
 
 namespace inet {
 

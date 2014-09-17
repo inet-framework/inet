@@ -19,7 +19,7 @@
 #ifndef __INET_IQUEUEACCESS_H
 #define __INET_IQUEUEACCESS_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

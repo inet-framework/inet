@@ -21,7 +21,7 @@
  *****************************************************************************/
 #include <stdlib.h>
 
-#include "list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 
 namespace inet {
 

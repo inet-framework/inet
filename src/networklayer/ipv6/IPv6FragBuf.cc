@@ -18,13 +18,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6FragBuf.h"
-#include "ICMPv6.h"
-#include "ICMPv6Message_m.h"    // for TIME_EXCEEDED
-#include "IPv6Datagram.h"
-#include "IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/IPv6FragBuf.h"
+#include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"    // for TIME_EXCEEDED
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 namespace inet {
 

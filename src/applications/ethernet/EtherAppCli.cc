@@ -19,12 +19,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "EtherAppCli.h"
+#include "inet/applications/ethernet/EtherAppCli.h"
 
-#include "EtherApp_m.h"
-#include "Ieee802Ctrl.h"
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

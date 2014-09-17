@@ -20,9 +20,9 @@
 #include <exception>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "HttpUtils.h"
+#include "inet/applications/httptools/common/HttpUtils.h"
 
 namespace inet {
 

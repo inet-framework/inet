@@ -15,21 +15,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "AODVRouting.h"
-#include "IPv4Route.h"
+#include "inet/routing/aodv/AODVRouting.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
 
 #ifdef WITH_IDEALWIRELESS
-#include "IdealMacFrame_m.h"
+#include "inet/linklayer/ideal/IdealMacFrame_m.h"
 #endif // ifdef WITH_IDEALWIRELESS
 
 #ifdef WITH_IEEE80211
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "IPSocket.h"
-#include "UDPControlInfo.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

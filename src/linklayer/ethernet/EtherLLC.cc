@@ -15,13 +15,13 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EtherLLC.h"
+#include "inet/linklayer/ethernet/EtherLLC.h"
 
-#include "EtherFrame.h"
-#include "Ethernet.h"
-#include "Ieee802Ctrl.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

@@ -18,9 +18,9 @@
 #ifndef __INET_DIMENSIONALNOISE_H
 #define __INET_DIMENSIONALNOISE_H
 
-#include "FlatNoiseBase.h"
-#include "MappingBase.h"
-#include "MappingUtils.h"
+#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
 
 namespace inet {
 

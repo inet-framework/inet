@@ -31,7 +31,7 @@
 #ifndef __OLSROPT_omnet_h__
 
 #define __OLSROPT_omnet_h__
-#include "OLSR.h"
+#include "inet/routing/extras/olsr/OLSR.h"
 
 namespace inet {
 

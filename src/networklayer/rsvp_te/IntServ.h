@@ -15,7 +15,7 @@
 #ifndef __INET_INTSERV_H
 #define __INET_INTSERV_H
 
-#include "IntServ_m.h"
+#include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ListeningBase.h"
+#include "inet/physicallayer/base/ListeningBase.h"
 
 namespace inet {
 

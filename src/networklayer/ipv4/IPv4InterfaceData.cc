@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include "IPv4InterfaceData.h"
-#include "IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

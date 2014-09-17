@@ -19,9 +19,9 @@
 #ifndef __INET_TCPRECEIVEQUEUE_H
 #define __INET_TCPRECEIVEQUEUE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPConnection.h"
+#include "inet/transportlayer/tcp/TCPConnection.h"
 
 namespace inet {
 

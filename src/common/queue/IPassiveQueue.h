@@ -18,7 +18,7 @@
 #ifndef __INET_IPASSIVEQUEUE_H
 #define __INET_IPASSIVEQUEUE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

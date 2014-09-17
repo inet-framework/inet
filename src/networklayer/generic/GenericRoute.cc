@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "GenericRoute.h"
-#include "GenericRoutingTable.h"
+#include "inet/networklayer/generic/GenericRoute.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
 
 namespace inet {
 

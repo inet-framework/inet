@@ -34,9 +34,9 @@
 #include <set>
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

@@ -20,8 +20,8 @@
  * Authors: Alfonso Ariza Quintana.<aarizaq@uma.ea>
  *
  *****************************************************************************/
-#include "dsr-pkt_omnet.h"
-#include "IPv4ControlInfo.h"
+#include "inet/routing/extras/dsr/dsr-pkt_omnet.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 
 namespace inet {
 

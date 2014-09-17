@@ -32,8 +32,8 @@
 
 #endif /*omnetpp*/
 
-#include "dsr-uu/dsr-pkt.h"
-#include "dsr-uu/timer.h"
+#include "dsr-pkt.h"
+#include "timer.h"
 
 
 #ifndef NO_GLOBALS

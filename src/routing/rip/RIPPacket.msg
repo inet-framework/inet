@@ -18,7 +18,7 @@
 class noncobject L3Address;
 
 cplusplus {{
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 }}
 
 namespace inet;

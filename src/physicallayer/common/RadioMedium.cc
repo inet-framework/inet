@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Radio.h"
-#include "RadioMedium.h"
-#include "RadioControlInfo_m.h"
-#include "IMACFrame.h"
-#include "NotifierConsts.h"
-#include "ModuleAccess.h"
-#include "IInterfaceTable.h"
-#include "PhysicalEnvironment.h"
+#include "inet/physicallayer/common/Radio.h"
+#include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/linklayer/contract/IMACFrame.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/environment/PhysicalEnvironment.h"
 
 namespace inet {
 

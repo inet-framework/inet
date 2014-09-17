@@ -31,13 +31,13 @@
 #ifndef __OLSR_omnet_h__
 
 #define __OLSR_omnet_h__
-#include "ManetRoutingBase.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
 
-#include "OLSRpkt_m.h"
-#include "OLSR_state.h"
-#include "OLSR_rtable.h"
-#include "OLSR_repositories.h"
-#include "INETUtils.h"
+#include "inet/routing/extras/olsr/OLSRpkt_m.h"
+#include "inet/routing/extras/olsr/OLSR_state.h"
+#include "inet/routing/extras/olsr/OLSR_rtable.h"
+#include "inet/routing/extras/olsr/OLSR_repositories.h"
+#include "inet/common/INETUtils.h"
 
 #include <map>
 #include <vector>

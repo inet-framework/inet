@@ -19,8 +19,8 @@
 cplusplus {{
 #include <vector>
 
-#include "L3Address.h"
-#include "SCTPCommand.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand.h"
 }}
 
 namespace inet;

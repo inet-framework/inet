@@ -25,10 +25,10 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "InterfaceEntry.h"
-#include "IPv4Address.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

@@ -26,9 +26,9 @@
 #ifndef __OLSR_printer_h__
 #define __OLSR_printer_h__
 
-#include "OLSR.h"
-#include "OLSRpkt_m.h"
-#include "OLSR_repositories.h"
+#include "inet/routing/extras/olsr/OLSR.h"
+#include "inet/routing/extras/olsr/OLSRpkt_m.h"
+#include "inet/routing/extras/olsr/OLSR_repositories.h"
 
 #if 0
 #include <packet.h>

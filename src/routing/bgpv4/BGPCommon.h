@@ -18,11 +18,11 @@
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "BGPCommon_m.h"
-#include "InterfaceEntry.h"
-#include "IPv4Datagram.h"
+#include "inet/routing/bgpv4/BGPCommon_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

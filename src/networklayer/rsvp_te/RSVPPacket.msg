@@ -15,7 +15,7 @@
 
 
 cplusplus {{
-#include "IntServ_m.h"
+#include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 #define PATH_MESSAGE   1
 #define RESV_MESSAGE   2

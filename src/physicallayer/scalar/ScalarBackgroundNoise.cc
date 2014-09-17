@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ScalarBackgroundNoise.h"
-#include "ScalarNoise.h"
-#include "BandListening.h"
+#include "inet/physicallayer/scalar/ScalarBackgroundNoise.h"
+#include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
 

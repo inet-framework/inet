@@ -15,5 +15,5 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPPacket_m.h"
+#include "inet/transportlayer/udp/UDPPacket_m.h"
 

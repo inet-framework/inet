@@ -26,9 +26,9 @@
 #ifndef __OLSR_state_h__
 #define __OLSR_state_h__
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "OLSR_repositories.h"
+#include "inet/routing/extras/olsr/OLSR_repositories.h"
 
 namespace inet {
 

@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPEchoApp.h"
+#include "inet/applications/tcpapp/TCPEchoApp.h"
 
-#include "ByteArrayMessage.h"
-#include "TCPCommand_m.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

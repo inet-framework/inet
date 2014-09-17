@@ -22,8 +22,8 @@
 #define __DYMO_NB_H__
 
 #ifndef NS_NO_GLOBALS
-#include "dlist.h"
-#include "timer_queue.h"
+#include "inet/routing/extras/dymo/dymoum/dlist.h"
+#include "inet/routing/extras/dymo/dymoum/timer_queue.h"
 #include <sys/types.h>
 
 namespace inet {

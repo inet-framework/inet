@@ -20,8 +20,8 @@
 
 #include <string>
 #include <map>
-#include "INETDefs.h"
-#include "Units.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 

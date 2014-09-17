@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModulePathAddress.h"
+#include "inet/networklayer/common/ModulePathAddress.h"
 
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "L3AddressResolver.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

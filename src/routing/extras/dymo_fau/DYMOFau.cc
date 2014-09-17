@@ -19,15 +19,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DYMOFau.h"
-#include "UDPControlInfo_m.h"
-#include "UDPSocket.h"
-#include "IPProtocolId_m.h"
-#include "INetworkProtocolControlInfo.h"
-#include "UDPPacket.h"
-#include "ModuleAccess.h"
-#include "IPv4.h"
-#include "ControlManetRouting_m.h"
+#include "inet/routing/extras/dymo_fau/DYMOFau.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/routing/extras/base/ControlManetRouting_m.h"
 
 namespace inet {
 

@@ -17,9 +17,9 @@
 #ifndef __INET_LIFECYCLECONTROLLER_H
 #define __INET_LIFECYCLECONTROLLER_H
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "IScriptable.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
 

@@ -21,8 +21,8 @@
 #include <math.h>
 #include <vector>
 
-#include "OSPFcommon.h"
-#include "OSPFPacket_m.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/OSPFPacket_m.h"
 
 namespace inet {
 

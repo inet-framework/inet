@@ -18,10 +18,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "IPv4FragBuf.h"
+#include "inet/networklayer/ipv4/IPv4FragBuf.h"
 
-#include "ICMP.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_PHYSICALLAYERDEFS_H
 #define __INET_PHYSICALLAYERDEFS_H
 
-#include "INETMath.h"
-#include "Units.h"
+#include "inet/common/INETMath.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 

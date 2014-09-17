@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211SCRAMBLER_H_
 #define __INET_IEEE80211SCRAMBLER_H_
 
-#include "INETDefs.h"
-#include "BitVector.h"
-#include "ShortBitVector.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/BitVector.h"
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {

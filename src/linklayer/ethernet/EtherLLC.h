@@ -18,11 +18,11 @@
 #ifndef __INET_ETHERLLC_H
 #define __INET_ETHERLLC_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
-#include "NodeStatus.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

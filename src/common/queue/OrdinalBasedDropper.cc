@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OrdinalBasedDropper.h"
+#include "inet/common/queue/OrdinalBasedDropper.h"
 
 namespace inet {
 

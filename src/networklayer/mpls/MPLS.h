@@ -18,16 +18,16 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MPLSPacket.h"
-#include "IPv4Datagram.h"
-#include "ConstType.h"
+#include "inet/networklayer/mpls/MPLSPacket.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/mpls/ConstType.h"
 
-#include "LIBTable.h"
-#include "IInterfaceTable.h"
+#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
-#include "IClassifier.h"
+#include "inet/networklayer/mpls/IClassifier.h"
 
 namespace inet {
 

@@ -31,14 +31,14 @@
 #else
 #include "../aodv_uu_omnet.h"
 #endif
-#include "list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 #else
-#include "seek_list.h"
-#include "timer_queue_aodv.h"
-#include "aodv_timeout.h"
-#include "defs_aodv.h"
-#include "params.h"
-#include "debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/seek_list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
 #include "list.h"
 #endif
 

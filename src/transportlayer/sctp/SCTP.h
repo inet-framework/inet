@@ -25,12 +25,12 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "UDPSocket.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 namespace inet {
 

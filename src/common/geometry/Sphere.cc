@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sphere.h"
-#include "Plane.h"
+#include "inet/common/geometry/Sphere.h"
+#include "inet/common/geometry/Plane.h"
 
 namespace inet {
 

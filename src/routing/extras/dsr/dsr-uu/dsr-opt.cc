@@ -13,20 +13,20 @@
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
 
-#include "debug_dsr.h"
-#include "dsr.h"
-#include "dsr-opt.h"
-#include "dsr-rreq.h"
-#include "dsr-rrep.h"
-#include "dsr-rerr.h"
-#include "dsr-srt.h"
-#include "dsr-ack.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rreq.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rrep.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rerr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-ack.h"
 
 namespace inet {
 

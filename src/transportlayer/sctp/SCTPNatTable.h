@@ -21,8 +21,8 @@
 
 #include <vector>
 #include <omnetpp.h>
-#include "L3Address.h"
-#include "SCTPAssociation.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 namespace inet {
 

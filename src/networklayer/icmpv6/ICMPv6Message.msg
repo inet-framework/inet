@@ -18,7 +18,7 @@
 //
 
 cplusplus {{
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 #define ICMPv6_HEADER_BYTES  8
 }}
 

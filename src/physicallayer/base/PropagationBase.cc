@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PropagationBase.h"
+#include "inet/physicallayer/base/PropagationBase.h"
 
 namespace inet {
 

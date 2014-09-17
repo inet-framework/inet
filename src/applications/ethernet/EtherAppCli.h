@@ -18,11 +18,11 @@
 #ifndef __INET_ETHERAPPCLI_H
 #define __INET_ETHERAPPCLI_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MACAddress.h"
-#include "NodeStatus.h"
-#include "ILifecycle.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

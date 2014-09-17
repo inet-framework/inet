@@ -22,20 +22,20 @@
 //#include <algorithm>
 //#include <sstream>
 
-#include "InterfaceEntry.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
-#include "IInterfaceTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

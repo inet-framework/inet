@@ -18,10 +18,10 @@
 #ifndef __INET_MODULEIDADDRESSTYPE_H
 #define __INET_MODULEIDADDRESSTYPE_H
 
-#include "INETDefs.h"
-#include "IL3AddressType.h"
-#include "ModuleIdAddress.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/ModuleIdAddress.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 

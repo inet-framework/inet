@@ -18,9 +18,9 @@
 #ifndef __INET_GENERICROUTE_H
 #define __INET_GENERICROUTE_H
 
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "IRoute.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/IRoute.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_LINKSTATEACKNOWLEDGEMENTHANDLER_H
 #define __INET_LINKSTATEACKNOWLEDGEMENTHANDLER_H
 
-#include "IMessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 

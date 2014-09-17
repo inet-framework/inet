@@ -18,9 +18,9 @@
 #ifndef __INET_FLATNETWORKCONFIGURATOR_H
 #define __INET_FLATNETWORKCONFIGURATOR_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

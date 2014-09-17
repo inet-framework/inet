@@ -20,12 +20,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Loopback.h"
+#include "inet/linklayer/loopback/Loopback.h"
 
-#include "INETUtils.h"
-#include "IInterfaceTable.h"
-#include "IPassiveQueue.h"
-#include "NotifierConsts.h"
+#include "inet/common/INETUtils.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/NotifierConsts.h"
 
 namespace inet {
 

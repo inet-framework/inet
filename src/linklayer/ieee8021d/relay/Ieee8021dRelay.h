@@ -18,13 +18,13 @@
 #ifndef __INET_IEEE8021DRELAY_H
 #define __INET_IEEE8021DRELAY_H
 
-#include "INETDefs.h"
-#include "InterfaceTable.h"
-#include "IMACAddressTable.h"
-#include "EtherFrame_m.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "Ieee8021dBPDU_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
 
 namespace inet {
 

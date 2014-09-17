@@ -30,18 +30,18 @@
 #include "../aodv_uu_omnet.h"
 #endif
 #else
-#include "routing_table.h"
-#include "aodv_timeout.h"
-#include "aodv_rerr.h"
-#include "aodv_hello.h"
-#include "aodv_socket.h"
-#include "aodv_neighbor.h"
-#include "timer_queue_aodv.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
-#include "params.h"
-#include "seek_list.h"
-#include "nl.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rerr.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_hello.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_neighbor.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/seek_list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/nl.h"
 extern int llfeedback;
 #endif              /* NS_PORT */
 

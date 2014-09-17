@@ -18,8 +18,8 @@
 #ifndef __INET_CUBOID_H
 #define __INET_CUBOID_H
 
-#include "Shape3D.h"
-#include "Rotation.h"
+#include "inet/common/geometry/Shape3D.h"
+#include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 

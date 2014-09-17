@@ -27,15 +27,15 @@
 #include "ns/aodv-uu.h"
 #else
 #include "../aodv_uu_omnet.h"
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif
 #else
 #include <netdb.h>
 extern int h_errno;
 
-#include "locality.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/locality.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
 
 extern int gw_prefix;
 #endif

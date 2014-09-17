@@ -20,7 +20,7 @@
 #ifndef __INET_NODESTATUS_H
 #define __INET_NODESTATUS_H
 
-#include "ILifecycle.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

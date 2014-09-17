@@ -21,9 +21,9 @@
 
 #include <vector>
 
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "ILifecycle.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

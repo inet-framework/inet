@@ -20,8 +20,8 @@
 #ifndef __INET_TESTOPERATION_H_
 #define __INET_TESTOPERATION_H_
 
-#include "INETDefs.h"
-#include "NodeOperations.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 class INET_API TestNodeStartOperation : public NodeStartOperation {
   public:

@@ -18,7 +18,7 @@
 #ifndef __INET_RECEPTIONDECISION_H
 #define __INET_RECEPTIONDECISION_H
 
-#include "IReceptionDecision.h"
+#include "inet/physicallayer/contract/IReceptionDecision.h"
 
 namespace inet {
 

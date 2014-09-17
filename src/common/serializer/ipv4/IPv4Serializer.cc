@@ -20,31 +20,31 @@
 #include <algorithm>    // std::min
 #include <platdep/sockets.h>
 
-#include "IPv4Serializer.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 
-#include "headers/defs.h"
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-#include "headers/ip.h"
+#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/ipv4/headers/ip.h"
 
-#include "ICMPSerializer.h"
-#include "IGMPSerializer.h"
-#include "IPProtocolId_m.h"
+#include "inet/common/serializer/ipv4/ICMPSerializer.h"
+#include "inet/common/serializer/ipv4/IGMPSerializer.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_UDP
-#include "UDPSerializer.h"
+#include "inet/common/serializer/udp/UDPSerializer.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
-#include "SCTPSerializer.h"    //I.R.
+#include "inet/common/serializer/sctp/SCTPSerializer.h"    //I.R.
 #endif // ifdef WITH_SCTP
 
-#include "TCPIPchecksum.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
-#include "TCPSerializer.h"    //I.R.
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"    //I.R.
 #endif // ifdef WITH_TCP_COMMON
 
 #if defined(_MSC_VER)

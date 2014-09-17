@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TelnetApp.h"
+#include "inet/applications/tcpapp/TelnetApp.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "GenericAppMsg_m.h"
 
 namespace inet {

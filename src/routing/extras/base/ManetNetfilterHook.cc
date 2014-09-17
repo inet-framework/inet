@@ -16,21 +16,19 @@
 //
 // @author: Zoltan Bojthe
 
-#include "ManetNetfilterHook.h"
+#include "inet/routing/extras/base/ManetNetfilterHook.h"
 
-#include "ControlManetRouting_m.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
-#include "IRoutingTable.h"
-#include "IPv4.h"
-#include "IIPv4RoutingTable.h"
-#include "INetworkProtocolControlInfo.h"
-#include "ProtocolMap.h"
-#include "ModuleAccess.h"
+#include "inet/routing/extras/base/ControlManetRouting_m.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/common/ModuleAccess.h"
 
-#include "dsr-pkt_omnet.h"
+#include "inet/routing/extras/dsr/dsr-pkt_omnet.h"
 
 namespace inet {
 

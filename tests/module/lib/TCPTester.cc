@@ -19,9 +19,9 @@
 
 #include "TCPTester.h"
 
-#include "NetworkProtocolCommand_m.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 
 namespace inet {
 

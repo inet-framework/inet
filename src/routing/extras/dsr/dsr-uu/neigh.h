@@ -12,8 +12,8 @@
 #include <linux/if_ether.h>
 #endif
 
-#include "dsr.h"
-#include "dsr-uu/timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "timer.h"
 
 #ifndef NO_GLOBALS
 

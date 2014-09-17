@@ -24,10 +24,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include <OLSR_ETX_state.h>
-#include <OLSR_ETX.h>
+#include "OLSR_ETX_state.h"
+#include "OLSR_ETX.h"
 
 namespace inet {
 

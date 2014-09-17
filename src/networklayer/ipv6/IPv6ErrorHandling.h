@@ -23,10 +23,10 @@
 #ifndef __INET_IPV6ERRORHANDLING_H
 #define __INET_IPV6ERRORHANDLING_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6ControlInfo.h"
-#include "ICMPv6Message_m.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 
 namespace inet {
 

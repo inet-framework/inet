@@ -18,8 +18,8 @@
 #ifndef __INET_IPV4CONTROLINFO_H
 #define __INET_IPV4CONTROLINFO_H
 
-#include "INetworkProtocolControlInfo.h"
-#include "IPv4ControlInfo_m.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo_m.h"
 
 namespace inet {
 

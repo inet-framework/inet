@@ -1,7 +1,7 @@
 #ifndef __INET_BATMANMSG_H
 #define __INET_BATMANMSG_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 #include "BatmanMsg_m.h"
 

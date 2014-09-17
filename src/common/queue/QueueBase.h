@@ -18,7 +18,7 @@
 #ifndef __INET_QUEUEBASE_H
 #define __INET_QUEUEBASE_H
 
-#include "AbstractQueue.h"
+#include "inet/common/queue/AbstractQueue.h"
 
 namespace inet {
 

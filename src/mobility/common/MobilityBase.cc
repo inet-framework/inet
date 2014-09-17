@@ -20,9 +20,9 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "MobilityBase.h"
-#include "INETMath.h"
-#include "PhysicalEnvironment.h"
+#include "inet/mobility/common/MobilityBase.h"
+#include "inet/common/INETMath.h"
+#include "inet/environment/PhysicalEnvironment.h"
 
 namespace inet {
 

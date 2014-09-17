@@ -18,10 +18,10 @@
 #ifndef __INET_GENERICDATAGRAM_H
 #define __INET_GENERICDATAGRAM_H
 
-#include "INETDefs.h"
-#include "INetworkDatagram.h"
-#include "GenericDatagram_m.h"
-#include "IPProtocolId_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/generic/GenericDatagram_m.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 namespace inet {
 

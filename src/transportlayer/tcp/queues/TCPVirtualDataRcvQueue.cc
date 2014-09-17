@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPVirtualDataRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
 
 namespace inet {
 

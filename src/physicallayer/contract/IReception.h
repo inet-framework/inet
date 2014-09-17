@@ -18,7 +18,7 @@
 #ifndef __INET_IRECEPTION_H
 #define __INET_IRECEPTION_H
 
-#include "ITransmission.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

@@ -21,14 +21,14 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "IARP.h"
-#include "ILifecycle.h"
-#include "IPv4Address.h"
-#include "MACAddress.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

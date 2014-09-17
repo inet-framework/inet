@@ -27,8 +27,8 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "dymo_uerr.h"
-#include "dymo_socket.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_uerr.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_socket.h"
 
 #endif  /* NS_PORT */
 

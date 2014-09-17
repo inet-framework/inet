@@ -18,11 +18,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "UDPBasicBurst.h"
+#include "inet/applications/udpapp/UDPBasicBurst.h"
 
-#include "UDPControlInfo_m.h"
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

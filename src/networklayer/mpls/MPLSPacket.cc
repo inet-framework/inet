@@ -13,9 +13,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MPLSPacket.h"
+#include "inet/networklayer/mpls/MPLSPacket.h"
 
 namespace inet {
 

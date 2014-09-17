@@ -12,7 +12,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "ByteArrayMessage.h"
+#include "inet/common/ByteArrayMessage.h"
 
 namespace inet {
 

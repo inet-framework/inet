@@ -19,11 +19,11 @@
 #ifndef __INET_TRACIDEMO_H
 #define __INET_TRACIDEMO_H
 
-#include "INETDefs.h"
-#include "UDPSocket.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
-#include "TraCIMobility.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/mobility/group/TraCIMobility.h"
 
 namespace inet {
 

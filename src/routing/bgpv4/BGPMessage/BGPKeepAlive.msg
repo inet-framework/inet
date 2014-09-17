@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "BGPHeader_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
 }}
 
 namespace inet::bgp;

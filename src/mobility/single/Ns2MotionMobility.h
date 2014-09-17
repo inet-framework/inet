@@ -20,9 +20,9 @@
 #ifndef __INET_NS2MOTIONMOBILITY_H
 #define __INET_NS2MOTIONMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
 
 namespace inet {
 

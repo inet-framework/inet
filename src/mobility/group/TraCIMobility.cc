@@ -24,8 +24,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "INETMath.h"    // for M_PI
-#include "TraCIMobility.h"
+#include "inet/common/INETMath.h"    // for M_PI
+#include "inet/mobility/group/TraCIMobility.h"
 
 namespace inet {
 

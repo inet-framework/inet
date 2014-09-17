@@ -18,7 +18,7 @@
 #ifndef __INET_ARRIVAL_H
 #define __INET_ARRIVAL_H
 
-#include "IArrival.h"
+#include "inet/physicallayer/contract/IArrival.h"
 
 namespace inet {
 

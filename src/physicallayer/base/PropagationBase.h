@@ -18,7 +18,7 @@
 #ifndef __INET_PROPAGATIONBASE_H
 #define __INET_PROPAGATIONBASE_H
 
-#include "IPropagation.h"
+#include "inet/physicallayer/contract/IPropagation.h"
 
 namespace inet {
 

@@ -22,8 +22,8 @@
 #include <string>
 #include <algorithm>
 
-#include "INETDefs.h"
-#include "BerParseFile.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {
 

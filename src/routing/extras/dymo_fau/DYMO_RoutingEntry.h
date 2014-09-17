@@ -23,12 +23,12 @@
 #include <string.h>
 #include <sstream>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include <IPv4Address.h>
-#include <InterfaceTable.h>
-#include "IPv4RoutingTable.h"
-#include "DYMO_Timer.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Timer.h"
 
 namespace inet {
 

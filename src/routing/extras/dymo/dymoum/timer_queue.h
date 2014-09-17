@@ -22,8 +22,8 @@
 #define __TIMER_QUEUE_H__
 
 #ifndef NS_NO_GLOBALS
-#include "defs_dymo.h"
-#include "dlist.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dlist.h"
 
 #ifndef _WIN32
 #include <sys/time.h>

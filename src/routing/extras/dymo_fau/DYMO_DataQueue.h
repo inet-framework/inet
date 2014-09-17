@@ -24,14 +24,14 @@
 #include <list>
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
-#include "IPv4ControlInfo_m.h"
-#include "IPv4Datagram.h"
-#include "InterfaceTable.h"
-#include "IPv4RoutingTable.h"
-#include "IPv4.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo_m.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPSocket.h"
-#include "IPProtocolId_m.h"
-#include "NetworkProtocolCommand_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 
 namespace inet {
 

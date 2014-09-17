@@ -27,13 +27,13 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "rtable.h"
-#include "defs_dymo.h"
-#include "debug_dymo.h"
-#include "k_route.h"
-#include "pending_rreq.h"
-#include "dymo_timeout.h"
-#include "dymo_netlink.h"
+#include "inet/routing/extras/dymo/dymoum/rtable.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/k_route.h"
+#include "inet/routing/extras/dymo/dymoum/pending_rreq.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_timeout.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_netlink.h"
 
 #include <stdlib.h>
 #include <stdio.h>

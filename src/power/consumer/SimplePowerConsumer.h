@@ -18,8 +18,8 @@
 #ifndef __INET_SIMPLEPOWERCONSUMER_H
 #define __INET_SIMPLEPOWERCONSUMER_H
 
-#include "IPowerConsumer.h"
-#include "IPowerSource.h"
+#include "inet/power/contract/IPowerConsumer.h"
+#include "inet/power/contract/IPowerSource.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_LAYEREDPROTOCOLBASE_H
 #define __INET_LAYEREDPROTOCOLBASE_H
 
-#include "OperationalBase.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 
 namespace inet {
 

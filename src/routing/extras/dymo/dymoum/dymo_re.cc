@@ -25,19 +25,19 @@
 #include "ns/dymo_um.h"
 #else
 #include "../dymo_um_omnet.h"
-#include "MeshControlInfo_m.h"
+#include "inet/routing/extras/base/MeshControlInfo_m.h"
 #endif
 #else
 #include <string.h>
 
-#include "dymo_re.h"
-#include "dymo_generic.h"
-#include "dymo_socket.h"
-#include "icmp_socket.h"
-#include "dymo_timeout.h"
-#include "rtable.h"
-#include "pending_rreq.h"
-#include "blacklist.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_re.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_generic.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_socket.h"
+#include "inet/routing/extras/dymo/dymoum/icmp_socket.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_timeout.h"
+#include "inet/routing/extras/dymo/dymoum/rtable.h"
+#include "inet/routing/extras/dymo/dymoum/pending_rreq.h"
+#include "inet/routing/extras/dymo/dymoum/blacklist.h"
 
 extern int no_path_acc, s_bit;
 #endif  /* NS_PORT */

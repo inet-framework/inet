@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211AgentSTA.h"
-#include "Ieee80211Primitives_m.h"
-#include "ModuleAccess.h"
-#include "NotifierConsts.h"
-#include "INETUtils.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSTA.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

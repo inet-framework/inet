@@ -19,17 +19,17 @@
 #ifndef __INET_GPSR_H
 #define __INET_GPSR_H
 
-#include "INETDefs.h"
-#include "Coord.h"
-#include "ILifecycle.h"
-#include "IMobility.h"
-#include "IL3AddressType.h"
-#include "INetfilter.h"
-#include "IRoutingTable.h"
-#include "NodeStatus.h"
-#include "PositionTable.h"
-#include "UDPPacket.h"
-#include "GPSR_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/routing/gpsr/PositionTable.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/routing/gpsr/GPSR_m.h"
 
 namespace inet {
 

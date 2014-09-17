@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "BindingCache.h"
+#include "inet/networklayer/xmipv6/BindingCache.h"
 
 namespace inet {
 

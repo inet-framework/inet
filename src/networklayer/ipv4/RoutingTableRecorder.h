@@ -18,13 +18,13 @@
 #ifndef __INET_ROUTINGTABLERECORDER_H
 #define __INET_ROUTINGTABLERECORDER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 #if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
 #include <map>
-#include "IIPv4RoutingTable.h"
-#include "IRoute.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IRoute.h"
 
 /**
  * Records interface table and routing table changes into the eventlog.

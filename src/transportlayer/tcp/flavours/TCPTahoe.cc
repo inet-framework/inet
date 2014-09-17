@@ -16,8 +16,8 @@
 //
 
 #include <algorithm>    // min,max
-#include "TCPTahoe.h"
-#include "TCP.h"
+#include "inet/transportlayer/tcp/flavours/TCPTahoe.h"
+#include "inet/transportlayer/tcp/TCP.h"
 
 namespace inet {
 

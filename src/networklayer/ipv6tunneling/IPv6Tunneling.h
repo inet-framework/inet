@@ -27,10 +27,10 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

@@ -32,18 +32,18 @@
 #else
 #include <netinet/in.h>
 
-#include "aodv_rreq.h"
-#include "aodv_rrep.h"
-#include "routing_table.h"
-#include "aodv_timeout.h"
-#include "timer_queue_aodv.h"
-#include "aodv_socket.h"
-#include "params.h"
-#include "seek_list.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rreq.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rrep.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/seek_list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
 
-#include "locality.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/locality.h"
 #endif
 
 /* Comment this to remove packet field output: */

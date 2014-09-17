@@ -19,9 +19,9 @@
 #define __INET_FACE_H_
 
 #include <vector>
-#include "PolytopePoint.h"
-#include "Edge.h"
-#include "Coord.h"
+#include "inet/common/geometry/polytope/PolytopePoint.h"
+#include "inet/common/geometry/polytope/Edge.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

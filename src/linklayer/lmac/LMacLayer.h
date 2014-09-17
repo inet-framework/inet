@@ -12,11 +12,11 @@
 #ifndef __INET_LMACLAYER_H
 #define __INET_LMACLAYER_H
 
-#include "IRadio.h"
-#include "IMACProtocol.h"
-#include "MACAddress.h"
-#include "MACProtocolBase.h"
-#include "LMacFrame_m.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/linklayer/contract/IMACProtocol.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACProtocolBase.h"
+#include "inet/linklayer/lmac/LMacFrame_m.h"
 
 namespace inet {
 

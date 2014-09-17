@@ -16,11 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "VoIPStreamReceiver.h"
+#include "inet/applications/voipstream/VoIPStreamReceiver.h"
 
-#include "INETEndians.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/INETEndians.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

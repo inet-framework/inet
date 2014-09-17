@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "PhysicalLayerDefs.h"
+#include "inet/physicallayer/base/PhysicalLayerDefs.h"
 }}
 
 namespace inet;

@@ -29,7 +29,7 @@
 #ifndef __OLSR_ETX_parameter_h__
 #define __OLSR_ETX_parameter_h__
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

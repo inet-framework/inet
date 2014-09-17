@@ -18,11 +18,11 @@
 #ifndef __INET_GRIDOBJECTCACHE_H
 #define __INET_GRIDOBJECTCACHE_H
 
-#include "IObjectCache.h"
-#include "SpatialGrid.h"
-#include "PhysicalEnvironment.h"
-#include "PhysicalObject.h"
-#include "IVisitor.h"
+#include "inet/environment/cache/IObjectCache.h"
+#include "inet/common/geometry/SpatialGrid.h"
+#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/PhysicalObject.h"
+#include "inet/common/IVisitor.h"
 
 namespace inet {
 

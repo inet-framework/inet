@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "Utils.h"
-#include "IntServ.h"
+#include "inet/networklayer/rsvp_te/Utils.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 #include "TCPMsgBasedSendQueue.h"
 
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

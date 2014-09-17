@@ -15,7 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "RicianFading.h"
+#include "inet/physicallayer/pathloss/RicianFading.h"
 
 namespace inet {
 

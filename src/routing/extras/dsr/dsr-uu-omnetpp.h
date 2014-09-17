@@ -14,22 +14,22 @@
 #endif
 
 
-#include "compatibility_dsr.h"
+#include "inet/routing/extras/base/compatibility_dsr.h"
 
 // Force to considere all links bi dir (link cache disjktra)
 #define BIDIR
 //#include <stdarg.h>
 
 #ifndef MobilityFramework
-#include "IPv4Datagram.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4InterfaceData.h"
-#include "IInterfaceTable.h"
-#include "ProtocolMap.h"
-#include "ControlManetRouting_m.h"
-#include "IPv4ControlInfo.h"
-#include "ManetNetfilterHook.h"
-#include "ICMP.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/routing/extras/base/ControlManetRouting_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/routing/extras/base/ManetNetfilterHook.h"
+#include "inet/networklayer/ipv4/ICMP.h"
 #else
 #include "Blackboard.h"
 #include "LinkBreak.h"
@@ -159,7 +159,7 @@ static inline char *print_pkt(char *p, int len)
 #include "dsr-uu/dsr-srt.h"
 #include "dsr-uu/neigh.h"
 #include "dsr-uu/link-cache.h"
-#include "dsr-pkt_omnet.h"
+#include "inet/routing/extras/dsr/dsr-pkt_omnet.h"
 #include "dsr-uu/path-cache.h"
 #undef NO_DECLS
 

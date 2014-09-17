@@ -21,10 +21,10 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "PacketDump.h"
-#include "PcapDump.h"
+#include "inet/common/packet/PacketDump.h"
+#include "inet/common/packet/PcapDump.h"
 
 namespace inet {
 

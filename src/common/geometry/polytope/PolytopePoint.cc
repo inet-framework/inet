@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PolytopePoint.h"
+#include "inet/common/geometry/polytope/PolytopePoint.h"
 
 namespace inet {
 

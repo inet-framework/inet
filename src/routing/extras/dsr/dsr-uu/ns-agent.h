@@ -31,23 +31,23 @@ namespace inet { namespace inetmanet { class DSRUU; } }
 #define ConfVal(name) DSRUU::get_confval(name)
 #define ConfValToUsecs(cv) DSRUU::confval_to_usecs(cv)
 
-#include "tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
 #include "endian.h"
-#include "timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/timer.h"
 
 #define NO_DECLS
-#include "debug_dsr.h"
-#include "dsr.h"
-#include "dsr-opt.h"
-#include "send-buf.h"
-#include "dsr-rreq.h"
-#include "dsr-pkt.h"
-#include "dsr-rrep.h"
-#include "dsr-rerr.h"
-#include "dsr-ack.h"
-#include "dsr-srt.h"
-#include "neigh.h"
-#include "link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/send-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rreq.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-pkt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rrep.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rerr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-ack.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/neigh.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
 #undef NO_DECLS
 
 typedef dsr_opt_hdr hdr_dsr;
@@ -137,7 +137,7 @@ class DSRUU:public Tap, public Agent
 #include "dsr-opt.h"
 
 #undef _DSR_IO_H
-#include "dsr-io.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-io.h"
 
 #undef _DSR_RREQ_H
 #include "dsr-rreq.h"
@@ -161,7 +161,7 @@ class DSRUU:public Tap, public Agent
 #include "neigh.h"
 
 #undef _MAINT_BUF_H
-#include "maint-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/maint-buf.h"
 
 #undef _LINK_CACHE_H
 #include "link-cache.h"

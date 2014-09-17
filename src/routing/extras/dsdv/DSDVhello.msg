@@ -13,7 +13,7 @@ cplusplus {{
  * INET and OMNET++ works(more specifically INET 20061020 and omnet++ 3.3).
  * Also we hope it will help in the developing of routing protocols using INET.
 */
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 }}
 

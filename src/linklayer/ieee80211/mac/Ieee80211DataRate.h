@@ -1,9 +1,9 @@
 #ifndef __INET_IEEE80211DATARATE_H
 #define __INET_IEEE80211DATARATE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ModulationType.h"
+#include "inet/physicallayer/common/ModulationType.h"
 
 namespace inet {
 

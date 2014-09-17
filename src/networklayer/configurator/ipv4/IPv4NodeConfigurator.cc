@@ -18,10 +18,10 @@
 // Authors: Levente Meszaros
 //
 
-#include "IPv4NodeConfigurator.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "NodeOperations.h"
+#include "inet/networklayer/configurator/ipv4/IPv4NodeConfigurator.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

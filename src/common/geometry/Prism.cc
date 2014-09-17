@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Prism.h"
+#include "inet/common/geometry/Prism.h"
 
 namespace inet {
 

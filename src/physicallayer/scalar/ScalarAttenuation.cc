@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ScalarAttenuation.h"
-#include "ScalarTransmission.h"
-#include "ScalarReception.h"
-#include "IRadioMedium.h"
+#include "inet/physicallayer/scalar/ScalarAttenuation.h"
+#include "inet/physicallayer/scalar/ScalarTransmission.h"
+#include "inet/physicallayer/scalar/ScalarReception.h"
+#include "inet/physicallayer/contract/IRadioMedium.h"
 
 namespace inet {
 

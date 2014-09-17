@@ -21,12 +21,12 @@
 #ifndef __INET_IPV4NODECONFIGURATOR_H
 #define __INET_IPV4NODECONFIGURATOR_H
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4NetworkConfigurator.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
 
 namespace inet {
 

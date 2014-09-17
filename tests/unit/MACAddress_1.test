@@ -2,8 +2,8 @@
 Test MACAddress::formInterfaceIdentifier()
 
 %includes:
-#include "MACAddress.h"
-#include "InterfaceToken.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/common/InterfaceToken.h"
 #include <iomanip>
 
 static std::ostream& operator<<(std::ostream& os, const InterfaceToken& token)

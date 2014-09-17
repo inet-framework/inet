@@ -22,15 +22,15 @@
 #include <list>
 #include <map>
 
-#include "IARP.h"
-#include "INetworkProtocol.h"
-#include "QueueBase.h"
-#include "IInterfaceTable.h"
-#include "INetfilter.h"
-#include "GenericRoutingTable.h"
-#include "GenericNetworkProtocolControlInfo.h"
-#include "GenericDatagram.h"
-#include "ProtocolMap.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/common/queue/QueueBase.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
+#include "inet/networklayer/generic/GenericDatagram.h"
+#include "inet/common/ProtocolMap.h"
 
 namespace inet {
 

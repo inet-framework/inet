@@ -20,20 +20,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "xMIPv6.h"
+#include "inet/networklayer/xmipv6/xMIPv6.h"
 
 #include <algorithm>
 
-#include "L3AddressResolver.h"
-#include "BindingCache.h"
-#include "BindingUpdateList.h"
-#include "IInterfaceTable.h"
-#include "IPv6ControlInfo.h"
-#include "IPv6InterfaceData.h"
-#include "IPv6NeighbourDiscovery.h"
-#include "IPv6Tunneling.h"
-#include "IPv6RoutingTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/xmipv6/BindingCache.h"
+#include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

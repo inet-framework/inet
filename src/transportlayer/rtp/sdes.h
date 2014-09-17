@@ -18,7 +18,7 @@
 #ifndef __INET_SDES_H
 #define __INET_SDES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

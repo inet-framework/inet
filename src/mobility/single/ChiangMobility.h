@@ -18,9 +18,9 @@
 #ifndef __INET_CHIANGMOBILITY_H
 #define __INET_CHIANGMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
 
 namespace inet {
 

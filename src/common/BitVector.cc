@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BitVector.h"
+#include "inet/common/BitVector.h"
 #include <algorithm>
 
 namespace inet {

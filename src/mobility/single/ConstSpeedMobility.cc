@@ -17,8 +17,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "ConstSpeedMobility.h"
-#include "INETMath.h"
+#include "inet/mobility/single/ConstSpeedMobility.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

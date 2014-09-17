@@ -11,10 +11,10 @@
 #include <vector>
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ManetRoutingBase.h"
-#include "BatmanMsg.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
+#include "inet/routing/extras/batman/BatmanMsg.h"
 
 namespace inet {
 

@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TokenBucketMeter.h"
-#include "DiffservUtil.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/diffserv/TokenBucketMeter.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

@@ -26,12 +26,12 @@
 #include <vector>
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
-#include "BindingUpdateList.h"
-#include "IPv6Tunneling.h"
-#include "MobilityHeader.h"    // for HAOpt & RH2
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/xmipv6/MobilityHeader.h"    // for HAOpt & RH2
 
 namespace inet {
 

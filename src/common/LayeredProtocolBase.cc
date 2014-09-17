@@ -14,7 +14,7 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "LayeredProtocolBase.h"
+#include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {
 

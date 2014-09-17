@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DipoleAntenna.h"
+#include "inet/physicallayer/antenna/DipoleAntenna.h"
 
 namespace inet {
 

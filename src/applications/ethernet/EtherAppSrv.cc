@@ -18,13 +18,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "EtherAppSrv.h"
+#include "inet/applications/ethernet/EtherAppSrv.h"
 
-#include "EtherApp_m.h"
-#include "Ieee802Ctrl.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
+#include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

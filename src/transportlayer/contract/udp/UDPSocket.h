@@ -19,10 +19,10 @@
 #define __INET_UDPSOCKET_H
 
 #include <vector>
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "UDPControlInfo.h"
-#include "IInterfaceTable.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

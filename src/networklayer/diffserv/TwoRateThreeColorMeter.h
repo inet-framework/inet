@@ -19,7 +19,7 @@
 #ifndef __INET_TWORATETHREECOLORMETER_H
 #define __INET_TWORATETHREECOLORMETER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

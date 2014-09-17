@@ -19,15 +19,15 @@
 //
 
 #include <set>
-#include "stlutils.h"
-#include "GenericRoutingTable.h"
-#include "IInterfaceTable.h"
-#include "L3AddressResolver.h"
-#include "GenericNetworkConfigurator.h"
-#include "InterfaceEntry.h"
-#include "GenericNetworkProtocolInterfaceData.h"
-#include "PatternMatcher.h"
-#include "ModuleAccess.h"
+#include "inet/common/stlutils.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

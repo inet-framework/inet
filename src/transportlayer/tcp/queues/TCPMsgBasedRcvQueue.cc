@@ -18,8 +18,8 @@
 
 #include "TCPMsgBasedRcvQueue.h"
 
-#include "TCPCommand_m.h"
-#include "TCPSegment.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

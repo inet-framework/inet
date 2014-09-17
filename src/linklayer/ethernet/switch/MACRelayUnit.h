@@ -16,10 +16,10 @@
 #ifndef __INET_MACRELAYUNIT_H
 #define __INET_MACRELAYUNIT_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ILifecycle.h"
-#include "IMACAddressTable.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
 
 namespace inet {
 

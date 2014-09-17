@@ -17,12 +17,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DHCPClient.h"
+#include "inet/applications/dhcp/DHCPClient.h"
 
-#include "IPv4InterfaceData.h"
-#include "NodeStatus.h"
-#include "NotifierConsts.h"
-#include "NodeOperations.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

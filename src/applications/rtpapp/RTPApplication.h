@@ -17,9 +17,9 @@
 #ifndef __INET_RTPAPPLICATION_H
 #define __INET_RTPAPPLICATION_H
 
-#include "INETDefs.h"
-#include "IPv4Address.h"
-#include "ILifecycle.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

@@ -19,15 +19,15 @@
 
 #include <algorithm>
 
-#include "DHCPServer.h"
+#include "inet/applications/dhcp/DHCPServer.h"
 
-#include "UDPControlInfo_m.h"
-#include "L3AddressResolver.h"
-#include "InterfaceTable.h"
-#include "IPv4InterfaceData.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "NotifierConsts.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/NotifierConsts.h"
 
 namespace inet {
 

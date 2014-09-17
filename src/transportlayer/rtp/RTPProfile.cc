@@ -17,11 +17,11 @@
 
 #include <string.h>
 
-#include "RTPProfile.h"
+#include "inet/transportlayer/rtp/RTPProfile.h"
 
-#include "RTPInnerPacket.h"
-#include "RTPPayloadReceiver.h"
-#include "RTPPayloadSender.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPPayloadReceiver.h"
+#include "inet/transportlayer/rtp/RTPPayloadSender.h"
 
 namespace inet {
 

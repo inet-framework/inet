@@ -18,9 +18,9 @@
 //
 
 cplusplus {{
-#include "DYMO_PacketBBMessage_m.h"
-#include "DYMO_AddressBlock.h"
-#include "InspectorHelpers.h"
+#include "inet/routing/extras/dymo_fau/DYMO_PacketBBMessage_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_AddressBlock.h"
+#include "inet/routing/extras/dymo_fau/InspectorHelpers.h"
 #include <vector>
 #include <sys/types.h>
 }}

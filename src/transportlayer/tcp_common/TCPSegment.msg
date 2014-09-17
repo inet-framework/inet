@@ -19,8 +19,8 @@
 
 cplusplus {{
 #include <iostream>
-#include "INETDefs.h"
-#include "ByteArray.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ByteArray.h"
 }}
 
 namespace inet::tcp;

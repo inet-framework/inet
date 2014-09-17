@@ -18,9 +18,9 @@
 #ifndef __INET_PHYSICALLAYERBASE_H
 #define __INET_PHYSICALLAYERBASE_H
 
-#include "OperationalBase.h"
-#include "NodeOperations.h"
-#include "IPhysicalLayer.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/physicallayer/contract/IPhysicalLayer.h"
 
 namespace inet {
 

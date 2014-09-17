@@ -19,9 +19,9 @@
 #ifndef __INET_LINEARMOBILITY_H
 #define __INET_LINEARMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MovingMobilityBase.h"
+#include "inet/mobility/common/MovingMobilityBase.h"
 
 namespace inet {
 

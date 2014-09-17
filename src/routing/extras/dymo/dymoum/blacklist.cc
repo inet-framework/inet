@@ -28,8 +28,8 @@
 #endif
 #include <errno.h>
 #else
-#include "blacklist.h"
-#include "debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/blacklist.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
 
 #include <stdlib.h>
 #include <errno.h>

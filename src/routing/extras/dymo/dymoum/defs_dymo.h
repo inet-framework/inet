@@ -22,7 +22,7 @@
 #define __DEFS_H__
 
 #ifdef OMNETPP
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #endif
 
 #ifndef NS_NO_GLOBALS

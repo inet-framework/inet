@@ -20,11 +20,11 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
-#include "Flood.h"
-#include "IL3AddressType.h"
-#include "INetworkProtocolControlInfo.h"
-#include "SimpleLinkLayerControlInfo.h"
-#include "SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/flood/Flood.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
 
 namespace inet {
 

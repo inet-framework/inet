@@ -18,7 +18,7 @@
 #ifndef __INET_IMESSAGEHANDLER_H
 #define __INET_IMESSAGEHANDLER_H
 
-#include "OSPFPacket_m.h"
+#include "inet/routing/ospfv2/OSPFPacket_m.h"
 
 namespace inet {
 

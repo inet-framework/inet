@@ -18,10 +18,10 @@
 #ifndef __INET_IINTERFACETABLE_H
 #define __INET_IINTERFACETABLE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "InterfaceEntry.h"    // not strictly required, but clients will need it anyway
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/InterfaceEntry.h"    // not strictly required, but clients will need it anyway
 
 namespace inet {
 

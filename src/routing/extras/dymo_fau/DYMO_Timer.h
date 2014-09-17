@@ -21,9 +21,9 @@
 
 #include <iostream>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DYMO_Timeout_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Timeout_m.h"
 
 namespace inet {
 

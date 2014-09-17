@@ -19,7 +19,7 @@
 #ifndef __INET_FLATNETWORKCONFIGURATOR6_H
 #define __INET_FLATNETWORKCONFIGURATOR6_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

@@ -20,9 +20,9 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPassiveQueue.h"
+#include "inet/common/queue/IPassiveQueue.h"
 
 namespace inet {
 

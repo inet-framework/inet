@@ -36,15 +36,15 @@
 #include <limits.h>
 
 #include <omnetpp.h>
-#include "IPv4Datagram.h"
-#include "UDPPacket.h"
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
-#include "NotifierConsts.h"
+#include "inet/common/NotifierConsts.h"
 
-#include "OLSRpkt_m.h"
-#include "OLSR_ETX.h"
-#include "OLSR_ETX_dijkstra.h"
+#include "inet/routing/extras/olsr/OLSRpkt_m.h"
+#include "inet/routing/extras/olsr/OLSR_ETX.h"
+#include "inet/routing/extras/olsr/OLSR_ETX_dijkstra.h"
 
 namespace inet {
 

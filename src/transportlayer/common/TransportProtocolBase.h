@@ -18,8 +18,8 @@
 #ifndef __INET_TRANSPORTPROTOCOLBASE_H
 #define __INET_TRANSPORTPROTOCOLBASE_H
 
-#include "LayeredProtocolBase.h"
-#include "NodeOperations.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

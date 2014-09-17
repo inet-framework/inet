@@ -23,7 +23,7 @@
 #ifndef __INET_REPORTS_H
 #define __INET_REPORTS_H
 
-#include "reports_m.h"
+#include "inet/transportlayer/rtp/reports_m.h"
 
 namespace inet {
 

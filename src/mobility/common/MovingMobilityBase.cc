@@ -20,8 +20,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "MovingMobilityBase.h"
-#include "PhysicalEnvironment.h"
+#include "inet/mobility/common/MovingMobilityBase.h"
+#include "inet/environment/PhysicalEnvironment.h"
 
 namespace inet {
 

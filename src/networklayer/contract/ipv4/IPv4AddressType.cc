@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv4AddressType.h"
+#include "inet/networklayer/contract/ipv4/IPv4AddressType.h"
 
 namespace inet {
 

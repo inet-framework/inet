@@ -15,19 +15,19 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTCP.h"
+#include "inet/transportlayer/rtp/RTCP.h"
 
-#include "IPv4Address.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "RTCPPacket.h"
-#include "RTPInnerPacket.h"
-#include "RTPParticipantInfo.h"
-#include "RTPReceiverInfo.h"
-#include "RTPSenderInfo.h"
-#include "UDPControlInfo_m.h"
-#include "UDPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/rtp/RTCPPacket.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
+#include "inet/transportlayer/rtp/RTPReceiverInfo.h"
+#include "inet/transportlayer/rtp/RTPSenderInfo.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

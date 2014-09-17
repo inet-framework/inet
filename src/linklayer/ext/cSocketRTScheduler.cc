@@ -21,9 +21,9 @@
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
 
-#include "cSocketRTScheduler.h"
+#include "inet/linklayer/ext/cSocketRTScheduler.h"
 
-#include "headers/ethernethdr.h"
+#include "inet/common/serializer/headers/ethernethdr.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>

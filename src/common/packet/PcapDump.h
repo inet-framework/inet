@@ -21,7 +21,7 @@
 #ifndef __INET_PCAPDUMP_H
 #define __INET_PCAPDUMP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

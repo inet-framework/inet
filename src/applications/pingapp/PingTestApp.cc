@@ -17,25 +17,25 @@
 
 #include <iostream>
 
-#include "PingTestApp.h"
+#include "inet/applications/pingapp/PingTestApp.h"
 
-#include "InterfaceEntry.h"
-#include "IL3AddressType.h"
-#include "IInterfaceTable.h"
-#include "INetworkProtocolControlInfo.h"
-#include "L3AddressResolver.h"
-#include "PingPayload_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_IPv4
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

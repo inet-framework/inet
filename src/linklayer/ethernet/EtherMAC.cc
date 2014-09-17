@@ -19,13 +19,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "EtherMAC.h"
+#include "inet/linklayer/ethernet/EtherMAC.h"
 
-#include "EtherFrame.h"
-#include "Ethernet.h"
-#include "Ieee802Ctrl.h"
-#include "IPassiveQueue.h"
-#include "InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

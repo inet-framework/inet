@@ -17,10 +17,10 @@
 
 #include <vector>
 
-#include "LinkStateRequestHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
 
-#include "OSPFNeighbor.h"
-#include "OSPFRouter.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

@@ -21,7 +21,7 @@
 #ifndef __INET_ERRORHANDLING_H
 #define __INET_ERRORHANDLING_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

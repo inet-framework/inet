@@ -21,10 +21,10 @@
 #include <map>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSegment.h"
-#include "TCPVirtualDataRcvQueue.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
 
 namespace inet {
 

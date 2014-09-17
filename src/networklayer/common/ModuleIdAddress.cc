@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModuleIdAddress.h"
+#include "inet/networklayer/common/ModuleIdAddress.h"
 
 namespace inet {
 

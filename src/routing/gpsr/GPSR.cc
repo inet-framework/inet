@@ -16,12 +16,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "GPSR.h"
-#include "IPProtocolId_m.h"
-#include "IPSocket.h"
-#include "NodeOperations.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
+#include "inet/routing/gpsr/GPSR.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

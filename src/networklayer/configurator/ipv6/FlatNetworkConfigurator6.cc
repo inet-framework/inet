@@ -18,12 +18,12 @@
 
 #include <algorithm>
 
-#include "FlatNetworkConfigurator6.h"
+#include "inet/networklayer/configurator/ipv6/FlatNetworkConfigurator6.h"
 
-#include "IInterfaceTable.h"
-#include "L3AddressResolver.h"
-#include "IPv6InterfaceData.h"
-#include "IPv6RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 
 namespace inet {
 

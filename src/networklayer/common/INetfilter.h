@@ -19,8 +19,8 @@
 #define __INET_INETFILTER_H
 
 #include <omnetpp.h>
-#include "InterfaceEntry.h"
-#include "INetworkDatagram.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
 
 namespace inet {
 

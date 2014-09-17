@@ -57,11 +57,11 @@
 
 /* System-dependent datatypes */
 /* Needed by some network-related datatypes */
-#include "ManetRoutingBase.h"
-#include "Ieee80211Frame_m.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "dymoum/dlist.h"
 #include "dymo_msg_struct.h"
-#include "INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
 
 #include <map>
 
@@ -97,7 +97,7 @@ namespace inet { namespace inetmanet { class DYMOUM; } }
 #include "dymoum/dymo_hello.h"
 #include "dymoum/dymo_nb.h"
 
-#include "dymo_packet_queue_omnet.h"
+#include "inet/routing/extras/dymo/dymo_packet_queue_omnet.h"
 
 #undef NS_NO_DECLARATIONS
 

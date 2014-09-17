@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Radio.h"
-#include "RadioMedium.h"
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/physicallayer/common/Radio.h"
+#include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

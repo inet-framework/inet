@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DropTailQueue.h"
+#include "inet/common/queue/DropTailQueue.h"
 
 namespace inet {
 

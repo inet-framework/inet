@@ -19,12 +19,12 @@
 #ifndef __INET_TCPLWIPCONNECTION_H
 #define __INET_TCPLWIPCONNECTION_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "lwip/lwip_tcp.h"
-#include "TCPSegment.h"
-#include "TCPCommand_m.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
 

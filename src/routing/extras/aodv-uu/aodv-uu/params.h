@@ -23,7 +23,7 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
-#include "defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
 
 namespace inet {
 

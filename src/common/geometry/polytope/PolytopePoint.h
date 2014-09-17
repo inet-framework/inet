@@ -20,8 +20,8 @@
 
 #include <vector>
 #include <map>
-#include "Face.h"
-#include "Coord.h"
+#include "inet/common/geometry/polytope/Face.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

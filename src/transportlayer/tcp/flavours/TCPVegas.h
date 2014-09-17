@@ -1,10 +1,10 @@
 #ifndef __INET_TCPVEGAS_H
 #define __INET_TCPVEGAS_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPBaseAlg.h"
-#include "TCPSegmentTransmitInfoList.h"
+#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TCPSegmentTransmitInfoList.h"
 
 namespace inet {
 

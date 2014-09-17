@@ -18,9 +18,9 @@
 #ifndef __INET_STATIONARYMOBILITY_H
 #define __INET_STATIONARYMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MobilityBase.h"
+#include "inet/mobility/common/MobilityBase.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 #ifndef __INET_BYTEARRAYMESSAGE_H
 #define __INET_BYTEARRAYMESSAGE_H
 
-#include "ByteArrayMessage_m.h"
+#include "inet/common/ByteArrayMessage_m.h"
 
 namespace inet {
 

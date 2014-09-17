@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OSPFRoutingTableEntry.h"
+#include "inet/routing/ospfv2/router/OSPFRoutingTableEntry.h"
 
 namespace inet {
 

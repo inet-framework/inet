@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DYMO_Timer.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Timer.h"
 #include <stdexcept>
 #include <sstream>
 

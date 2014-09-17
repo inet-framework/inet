@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BonnMotionMobility.h"
-#include "BonnMotionFileCache.h"
-#include "INETMath.h"
+#include "inet/mobility/single/BonnMotionMobility.h"
+#include "inet/mobility/single/BonnMotionFileCache.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

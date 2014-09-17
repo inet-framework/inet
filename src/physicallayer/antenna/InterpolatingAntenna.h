@@ -18,7 +18,7 @@
 #ifndef __INET_INTERPOLATINGANTENNA_H
 #define __INET_INTERPOLATINGANTENNA_H
 
-#include "AntennaBase.h"
+#include "inet/physicallayer/base/AntennaBase.h"
 
 namespace inet {
 

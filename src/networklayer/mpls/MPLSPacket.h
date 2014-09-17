@@ -18,7 +18,7 @@
 
 #include <stack>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

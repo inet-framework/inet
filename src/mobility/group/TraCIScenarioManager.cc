@@ -34,9 +34,9 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #define MYSOCKET    (*(SOCKET *)socketPtr)
 
-#include "TraCIScenarioManager.h"
-#include "TraCIConstants.h"
-#include "TraCIMobility.h"
+#include "inet/mobility/group/TraCIScenarioManager.h"
+#include "inet/mobility/group/TraCIConstants.h"
+#include "inet/mobility/group/TraCIMobility.h"
 
 #ifdef WITH_TRACI
 

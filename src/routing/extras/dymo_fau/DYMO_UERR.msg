@@ -18,7 +18,7 @@
 //
 
 cplusplus {{
-#include "DYMO_PacketBBMessage_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_PacketBBMessage_m.h"
 }}
 
 namespace inet::inetmanet;

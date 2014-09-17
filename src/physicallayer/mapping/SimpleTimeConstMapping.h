@@ -21,7 +21,7 @@
 #ifndef __INET_SIMPLETIMECONSTMAPPING_H
 #define __INET_SIMPLETIMECONSTMAPPING_H
 
-#include "MappingBase.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
 
 namespace inet {
 

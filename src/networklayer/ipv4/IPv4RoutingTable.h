@@ -30,11 +30,11 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
-#include "IIPv4RoutingTable.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

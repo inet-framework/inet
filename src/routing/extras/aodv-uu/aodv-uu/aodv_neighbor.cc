@@ -29,14 +29,14 @@
 #include "../aodv_uu_omnet.h"
 #endif
 #else
-#include "aodv_neighbor.h"
-#include "aodv_rerr.h"
-#include "aodv_hello.h"
-#include "aodv_socket.h"
-#include "routing_table.h"
-#include "params.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_neighbor.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rerr.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_hello.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
 
 extern int llfeedback;
 #endif              /* NS_PORT */

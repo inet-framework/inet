@@ -20,7 +20,7 @@
 #ifndef __INET_DELAYER_H
 #define __INET_DELAYER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

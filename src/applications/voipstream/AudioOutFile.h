@@ -21,7 +21,7 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

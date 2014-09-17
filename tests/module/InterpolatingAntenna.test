@@ -3,7 +3,7 @@
 Tests InterpolatingAntenna for a simple configuration.
 
 %file: test.cc
-#include "IAntenna.h"
+#include "inet/physicallayer/contract/IAntenna.h"
 
 namespace InterpolatingAntenna {
 

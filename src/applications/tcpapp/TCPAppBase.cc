@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPAppBase.h"
+#include "inet/applications/tcpapp/TCPAppBase.h"
 
-#include "L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

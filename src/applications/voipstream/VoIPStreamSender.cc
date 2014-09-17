@@ -16,11 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "VoIPStreamSender.h"
+#include "inet/applications/voipstream/VoIPStreamSender.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "UDPControlInfo_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
 

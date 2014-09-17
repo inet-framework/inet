@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BVHTree.h"
+#include "inet/common/geometry/BVHTree.h"
 #include <limits>
 #include <algorithm>
-#include "Cuboid.h"
+#include "inet/common/geometry/Cuboid.h"
 
 namespace inet {
 

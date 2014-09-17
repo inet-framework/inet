@@ -18,7 +18,7 @@
 #ifndef __INET_RTPINNERPACKET_H
 #define __INET_RTPINNERPACKET_H
 
-#include "RTPInnerPacket_m.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket_m.h"
 
 namespace inet {
 

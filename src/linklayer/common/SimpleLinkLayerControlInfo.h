@@ -18,9 +18,9 @@
 #ifndef __INET_SIMPLELINKLAYERCONTROLINFO_H
 #define __INET_SIMPLELINKLAYERCONTROLINFO_H
 
-#include "INETDefs.h"
-#include "IMACProtocolControlInfo.h"
-#include "SimpleLinkLayerControlInfo_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo_m.h"
 
 namespace inet {
 

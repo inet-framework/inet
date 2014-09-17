@@ -21,10 +21,10 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
-#include "InterfaceEntry.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

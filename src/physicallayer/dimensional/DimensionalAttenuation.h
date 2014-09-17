@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALATTENUATION_H
 #define __INET_DIMENSIONALATTENUATION_H
 
-#include "AttenuationBase.h"
+#include "inet/physicallayer/base/AttenuationBase.h"
 
 namespace inet {
 

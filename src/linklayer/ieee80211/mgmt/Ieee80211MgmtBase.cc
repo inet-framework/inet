@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211MgmtBase.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
-#include "Ieee802Ctrl.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 #ifndef __INET_MODULATION_H
 #define __INET_MODULATION_H
 
-#include "IModulation.h"
+#include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 

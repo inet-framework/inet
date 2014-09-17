@@ -18,14 +18,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "SCTPNatServer.h"
+#include "inet/applications/sctpapp/SCTPNatServer.h"
 
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "SCTPMessage_m.h"
-#include "SCTPSocket.h"
-#include "L3AddressResolver.h"
-#include "SCTPNatTable.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPMessage_m.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/sctp/SCTPNatTable.h"
 
 namespace inet {
 

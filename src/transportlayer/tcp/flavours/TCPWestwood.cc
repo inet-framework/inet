@@ -1,7 +1,7 @@
 #include <algorithm>    // min,max
 
-#include "TCP.h"
-#include "TCPWestwood.h"
+#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/flavours/TCPWestwood.h"
 
 namespace inet {
 

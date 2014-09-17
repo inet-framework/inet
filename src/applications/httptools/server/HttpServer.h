@@ -17,9 +17,9 @@
 #ifndef __INET_HTTPSERVER_H
 #define __INET_HTTPSERVER_H
 
-#include "TCPSocket.h"
-#include "TCPSocketMap.h"
-#include "HttpServerBase.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
 

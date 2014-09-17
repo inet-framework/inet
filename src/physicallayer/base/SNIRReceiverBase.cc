@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SNIRReceiverBase.h"
-#include "ReceptionDecision.h"
+#include "inet/physicallayer/base/SNIRReceiverBase.h"
+#include "inet/physicallayer/common/ReceptionDecision.h"
 
 namespace inet {
 

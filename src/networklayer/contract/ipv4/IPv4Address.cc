@@ -25,7 +25,7 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //
 
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

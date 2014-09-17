@@ -15,7 +15,7 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTPAVProfile.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfile.h"
 
 namespace inet {
 

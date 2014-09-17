@@ -18,9 +18,9 @@
 #ifndef __INET_SCENARIOMANAGER_H
 #define __INET_SCENARIOMANAGER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IScriptable.h"
+#include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
 

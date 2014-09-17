@@ -18,11 +18,11 @@
 #ifndef __INET_SIMPLEBATTERY_H
 #define __INET_SIMPLEBATTERY_H
 
-#include "IPowerAccumulator.h"
-#include "PowerSourceBase.h"
-#include "PowerSinkBase.h"
-#include "LifecycleController.h"
-#include "NodeStatus.h"
+#include "inet/power/contract/IPowerAccumulator.h"
+#include "inet/power/base/PowerSourceBase.h"
+#include "inet/power/base/PowerSinkBase.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

@@ -2,8 +2,8 @@
 Tests UDPSocket::bind() can not be called more than once on a socket.
 
 %file: TestApp.cc
-#include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 using namespace inet;
 namespace UDPSocket_2 {

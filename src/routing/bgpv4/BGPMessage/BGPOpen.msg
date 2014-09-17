@@ -16,8 +16,8 @@
 //
 
 cplusplus {{
-#include "BGPHeader_m.h"
-#include "IPv4Address.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet { namespace bgp { const int BGP_OPEN_OCTETS = 10; } }
 

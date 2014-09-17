@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

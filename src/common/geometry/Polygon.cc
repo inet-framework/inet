@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Polygon.h"
+#include "inet/common/geometry/Polygon.h"
 
 namespace inet {
 

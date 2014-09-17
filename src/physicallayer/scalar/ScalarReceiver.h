@@ -18,8 +18,8 @@
 #ifndef __INET_SCALARRECEIVER_H
 #define __INET_SCALARRECEIVER_H
 
-#include "FlatReceiverBase.h"
-#include "IModulation.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 

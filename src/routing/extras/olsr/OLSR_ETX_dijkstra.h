@@ -29,8 +29,8 @@
 #ifndef __OLSR_ETX_dijkstra_h__
 #define __OLSR_ETX_dijkstra_h__
 
-#include <OLSR_ETX_parameter.h>
-#include <OLSR_repositories.h>
+#include "OLSR_ETX_parameter.h"
+#include "OLSR_repositories.h"
 #include <vector>
 #include <set>
 #include <map>

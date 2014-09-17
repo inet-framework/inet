@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211SCALARTRANSMISSION_H
 #define __INET_IEEE80211SCALARTRANSMISSION_H
 
-#include "ScalarTransmission.h"
-#include "WifiPreambleType.h"
+#include "inet/physicallayer/scalar/ScalarTransmission.h"
+#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
 
 namespace inet {
 

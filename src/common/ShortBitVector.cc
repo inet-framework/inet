@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ShortBitVector.h"
+#include "inet/common/ShortBitVector.h"
 #include <algorithm>
 
 namespace inet {

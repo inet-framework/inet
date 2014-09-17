@@ -15,12 +15,12 @@
 #include <vector>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ModuleAccess.h"
-#include "InterfaceEntry.h"
-#include "INetfilter.h"
-#include "INetworkDatagram.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
 
 namespace inet {
 

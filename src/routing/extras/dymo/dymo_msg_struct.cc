@@ -3,7 +3,7 @@
 #include  <string.h>
 
 #include "dymo_msg_struct.h"
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

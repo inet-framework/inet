@@ -22,7 +22,7 @@
 #define __DEBUG_H__
 
 #ifndef NS_NO_GLOBALS
-#include "defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
 /* win 32 code */
 #ifndef _WIN32
 #include <syslog.h>
@@ -42,7 +42,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 
 #endif
 #endif  /* NS_NO_GLOBALS */

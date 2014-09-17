@@ -18,7 +18,7 @@
 #ifndef __INET_HTTPSERVERDIRECT_H
 #define __INET_HTTPSERVERDIRECT_H
 
-#include "HttpServerBase.h"
+#include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
 

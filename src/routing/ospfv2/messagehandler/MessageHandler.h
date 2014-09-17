@@ -18,15 +18,15 @@
 #ifndef __INET_MESSAGEHANDLER_H
 #define __INET_MESSAGEHANDLER_H
 
-#include "DatabaseDescriptionHandler.h"
-#include "HelloHandler.h"
-#include "IMessageHandler.h"
-#include "IPv4ControlInfo.h"
-#include "LinkStateAcknowledgementHandler.h"
-#include "LinkStateRequestHandler.h"
-#include "LinkStateUpdateHandler.h"
-#include "OSPFInterface.h"
-#include "OSPFTimer.h"
+#include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
+#include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateRequestHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
+#include "inet/routing/ospfv2/OSPFTimer.h"
 
 namespace inet {
 

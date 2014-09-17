@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IdealAttenuation.h"
-#include "IdealTransmission.h"
-#include "IdealReception.h"
-#include "IArrival.h"
-#include "IRadioMedium.h"
+#include "inet/physicallayer/ideal/IdealAttenuation.h"
+#include "inet/physicallayer/ideal/IdealTransmission.h"
+#include "inet/physicallayer/ideal/IdealReception.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/IRadioMedium.h"
 
 namespace inet {
 

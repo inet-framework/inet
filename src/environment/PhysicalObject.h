@@ -18,9 +18,9 @@
 #ifndef __INET_PHYSICALOBJECT_H
 #define __INET_PHYSICALOBJECT_H
 
-#include "Shape3D.h"
-#include "EulerAngles.h"
-#include "Material.h"
+#include "inet/common/geometry/Shape3D.h"
+#include "inet/common/geometry/EulerAngles.h"
+#include "inet/environment/Material.h"
 
 namespace inet {
 

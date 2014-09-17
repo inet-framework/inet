@@ -26,7 +26,7 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
 
 #include <stdlib.h>
 #include <stdio.h>

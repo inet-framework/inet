@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MessageChecker.h"
+#include "inet/common/misc/MessageChecker.h"
 
 namespace inet {
 

@@ -19,13 +19,13 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "HostAutoConfigurator.h"
+#include "inet/networklayer/configurator/ipv4/HostAutoConfigurator.h"
 
-#include "L3AddressResolver.h"
-#include "IPv4InterfaceData.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "IPv4Address.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

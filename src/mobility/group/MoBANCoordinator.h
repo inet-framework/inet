@@ -46,11 +46,11 @@
 #include <vector>
 #include <iostream>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
-#include "Posture.h"
-#include "PostureTransition.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
+#include "inet/mobility/group/Posture.h"
+#include "inet/mobility/group/PostureTransition.h"
 
 namespace inet {
 

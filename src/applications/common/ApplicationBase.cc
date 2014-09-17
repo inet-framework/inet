@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ApplicationBase.h"
+#include "inet/applications/common/ApplicationBase.h"
 
 namespace inet {
 

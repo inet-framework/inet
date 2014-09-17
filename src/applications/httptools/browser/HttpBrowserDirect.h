@@ -18,7 +18,7 @@
 #ifndef __INET_HTTPBROWSERDIRECT_H
 #define __INET_HTTPBROWSERDIRECT_H
 
-#include "HttpBrowserBase.h"
+#include "inet/applications/httptools/browser/HttpBrowserBase.h"
 
 namespace inet {
 

@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DimensionalTransmitter.h"
-#include "DimensionalTransmission.h"
-#include "DimensionalUtils.h"
-#include "IRadio.h"
-#include "IMobility.h"
+#include "inet/physicallayer/dimensional/DimensionalTransmitter.h"
+#include "inet/physicallayer/dimensional/DimensionalTransmission.h"
+#include "inet/physicallayer/dimensional/DimensionalUtils.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

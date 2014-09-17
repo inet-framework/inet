@@ -26,8 +26,8 @@
 ///     state of an OLSR node.
 ///
 
-#include "OLSR_state.h"
-#include "OLSR.h"
+#include "inet/routing/extras/olsr/OLSR_state.h"
+#include "inet/routing/extras/olsr/OLSR.h"
 
 namespace inet {
 

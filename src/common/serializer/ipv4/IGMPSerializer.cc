@@ -17,17 +17,17 @@
 
 #include <platdep/sockets.h>
 
-#include "IGMPSerializer.h"
+#include "inet/common/serializer/ipv4/IGMPSerializer.h"
 
-#include "headers/defs.h"
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-#include "headers/ip.h"
-#include "headers/igmp.h"
+#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/ipv4/headers/ip.h"
+#include "inet/common/serializer/ipv4/headers/igmp.h"
 
-#include "IPv4Serializer.h"
-#include "TCPIPchecksum.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...

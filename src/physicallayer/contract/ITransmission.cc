@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ITransmission.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

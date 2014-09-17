@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211ScalarReceiver.h"
-#include "ModulationType.h"
-#include "WifiMode.h"
-#include "BerParseFile.h"
-#include "Ieee80211Consts.h"
-#include "yans-error-rate-model.h"
-#include "nist-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarReceiver.h"
+#include "inet/physicallayer/common/ModulationType.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/BerParseFile.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/physicallayer/ieee80211/errormodel/yans-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/errormodel/nist-error-rate-model.h"
 
 namespace inet {
 

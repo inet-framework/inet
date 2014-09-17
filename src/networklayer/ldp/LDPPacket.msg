@@ -12,7 +12,7 @@
 
 
 cplusplus {{
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 // base header: version, length, LSR ID, Label space
 #define LDP_BASEHEADER_BYTES  10

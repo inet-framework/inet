@@ -23,9 +23,9 @@
 #ifndef __INET_BINDINGCACHE_H
 #define __INET_BINDINGCACHE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
 

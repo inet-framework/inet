@@ -18,7 +18,7 @@
 #ifndef __INET_DIPOLEANTENNA_H
 #define __INET_DIPOLEANTENNA_H
 
-#include "AntennaBase.h"
+#include "inet/physicallayer/base/AntennaBase.h"
 
 namespace inet {
 

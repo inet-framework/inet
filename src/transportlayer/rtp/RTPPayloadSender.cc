@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTPPayloadSender.h"
+#include "inet/transportlayer/rtp/RTPPayloadSender.h"
 
-#include "RTPInterfacePacket_m.h"
-#include "RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
 
 namespace inet {
 

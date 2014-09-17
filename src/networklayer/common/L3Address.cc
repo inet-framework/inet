@@ -15,12 +15,12 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "L3Address.h"
-#include "IPv4AddressType.h"
-#include "IPv6AddressType.h"
-#include "MACAddressType.h"
-#include "ModuleIdAddressType.h"
-#include "ModulePathAddressType.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4AddressType.h"
+#include "inet/networklayer/contract/ipv6/IPv6AddressType.h"
+#include "inet/linklayer/common/MACAddressType.h"
+#include "inet/networklayer/common/ModuleIdAddressType.h"
+#include "inet/networklayer/common/ModulePathAddressType.h"
 
 namespace inet {
 

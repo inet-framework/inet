@@ -18,7 +18,7 @@
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
 
-#include "nist-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/errormodel/nist-error-rate-model.h"
 
 namespace inet {
 

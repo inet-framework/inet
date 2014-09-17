@@ -19,9 +19,9 @@
 #define __INET_IPV6DATAGRAM_H
 
 #include <list>
-#include "INETDefs.h"
-#include "INetworkDatagram.h"
-#include "IPv6Datagram_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram_m.h"
 
 namespace inet {
 

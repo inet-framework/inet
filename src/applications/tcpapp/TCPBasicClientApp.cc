@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPBasicClientApp.h"
+#include "inet/applications/tcpapp/TCPBasicClientApp.h"
 
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "GenericAppMsg_m.h"
 
 namespace inet {

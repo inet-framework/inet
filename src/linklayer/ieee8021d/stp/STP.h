@@ -21,14 +21,14 @@
 #ifndef __INET_STP_H
 #define __INET_STP_H
 
-#include "INETDefs.h"
-#include "MACAddress.h"
-#include "Ieee8021dBPDU_m.h"
-#include "InterfaceTable.h"
-#include "Ieee8021dInterfaceData.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "STPBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee8021d/common/STPBase.h"
 
 namespace inet {
 

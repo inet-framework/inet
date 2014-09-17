@@ -19,9 +19,9 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "INETDefs.h"
-#include "WifiPreambleType.h"
-#include "ModulationType.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+#include "inet/physicallayer/common/ModulationType.h"
 
 namespace inet {
 

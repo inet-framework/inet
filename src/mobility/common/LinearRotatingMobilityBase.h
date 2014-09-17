@@ -16,7 +16,7 @@
 #ifndef __INET_LINEARROTATINGMOBILITYBASE_H
 #define __INET_LINEARROTATINGMOBILITYBASE_H
 
-#include "RotatingMobilityBase.h"
+#include "inet/mobility/common/RotatingMobilityBase.h"
 
 namespace inet {
 

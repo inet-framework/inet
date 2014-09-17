@@ -18,7 +18,7 @@
 #ifndef __INET_CONSTANTGAINANTENNA_H
 #define __INET_CONSTANTGAINANTENNA_H
 
-#include "AntennaBase.h"
+#include "inet/physicallayer/base/AntennaBase.h"
 
 namespace inet {
 

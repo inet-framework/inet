@@ -18,7 +18,7 @@
 #ifndef __INET_POWERSOURCEBASE_H
 #define __INET_POWERSOURCEBASE_H
 
-#include "IPowerSource.h"
+#include "inet/power/contract/IPowerSource.h"
 
 namespace inet {
 

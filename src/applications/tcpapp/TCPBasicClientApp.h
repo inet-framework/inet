@@ -18,11 +18,11 @@
 #ifndef __INET_TCPBASICCLIENTAPP_H
 #define __INET_TCPBASICCLIENTAPP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPAppBase.h"
-#include "NodeStatus.h"
-#include "ILifecycle.h"
+#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

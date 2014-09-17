@@ -8,8 +8,8 @@
 #ifndef __INET_BATMANMAIN_H
 #define __INET_BATMANMAIN_H
 
-#include "ManetRoutingBase.h"
-#include "batman.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
+#include "inet/routing/extras/batman/batmand/batman.h"
 
 namespace inet {
 

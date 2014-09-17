@@ -18,8 +18,8 @@
 #ifndef __INET_GRIDNEIGHBORCACHE_H
 #define __INET_GRIDNEIGHBORCACHE_H
 
-#include "RadioMedium.h"
-#include "SpatialGrid.h"
+#include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/common/geometry/SpatialGrid.h"
 
 namespace inet {
 

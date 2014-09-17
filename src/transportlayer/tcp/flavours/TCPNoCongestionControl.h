@@ -18,9 +18,9 @@
 #ifndef __INET_TCPNOCONGESTIONCONTROL_H
 #define __INET_TCPNOCONGESTIONCONTROL_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
 
 namespace inet {
 

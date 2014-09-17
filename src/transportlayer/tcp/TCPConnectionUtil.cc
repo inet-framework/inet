@@ -20,18 +20,18 @@
 #include <string.h>
 #include <algorithm>    // min,max
 
-#include "TCP.h"
-#include "TCPConnection.h"
-#include "TCPSegment.h"
-#include "TCPCommand_m.h"
-#include "IL3AddressType.h"
-#include "INetworkProtocolControlInfo.h"
-#include "IPProtocolId_m.h"
-#include "TCPSendQueue.h"
-#include "TCPSACKRexmitQueue.h"
-#include "TCPReceiveQueue.h"
-#include "TCPAlgorithm.h"
-#include "INETUtils.h"
+#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

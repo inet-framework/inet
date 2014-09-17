@@ -18,10 +18,10 @@
 #ifndef __INET_SPATIALGRID_H_
 #define __INET_SPATIALGRID_H_
 
-#include "INETDefs.h"
-#include "Coord.h"
-#include "LineSegment.h"
-#include "IVisitor.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/LineSegment.h"
+#include "inet/common/IVisitor.h"
 
 namespace inet {
 

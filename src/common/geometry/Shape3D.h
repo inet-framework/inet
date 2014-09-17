@@ -18,7 +18,7 @@
 #ifndef __INET_SHAPE3D_H
 #define __INET_SHAPE3D_H
 
-#include "LineSegment.h"
+#include "inet/common/geometry/LineSegment.h"
 
 namespace inet {
 

@@ -24,17 +24,17 @@
  ***************************************************************************
  * part of:    Modifications to the MF-2 framework by CSEM
  **************************************************************************/
-#include "CSMA.h"
+#include "inet/linklayer/csma/CSMA.h"
 
 #include <cassert>
 
-#include "INETUtils.h"
-#include "INETMath.h"
-#include "InterfaceEntry.h"
-#include "IMACProtocolControlInfo.h"
-#include "FindModule.h"
-#include "SimpleLinkLayerControlInfo.h"
-#include "CSMAFrame_m.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/INETMath.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
+#include "inet/common/FindModule.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/linklayer/csma/CSMAFrame_m.h"
 
 namespace inet {
 

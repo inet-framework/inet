@@ -18,9 +18,9 @@
 #ifndef __INET_ECHOPROTOCOL_H
 #define __INET_ECHOPROTOCOL_H
 
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "EchoPacket_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/EchoPacket_m.h"
 
 namespace inet {
 

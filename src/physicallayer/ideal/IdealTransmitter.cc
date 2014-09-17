@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IdealTransmitter.h"
-#include "IdealTransmission.h"
-#include "IMobility.h"
+#include "inet/physicallayer/ideal/IdealTransmitter.h"
+#include "inet/physicallayer/ideal/IdealTransmission.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

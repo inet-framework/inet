@@ -18,7 +18,7 @@
 #ifndef __INET_IPV4SERIALIZER_H
 #define __INET_IPV4SERIALIZER_H
 
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

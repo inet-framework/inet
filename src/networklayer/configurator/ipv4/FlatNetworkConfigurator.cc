@@ -16,12 +16,12 @@
 //
 
 #include <algorithm>
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "L3AddressResolver.h"
-#include "FlatNetworkConfigurator.h"
-#include "InterfaceEntry.h"
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/configurator/ipv4/FlatNetworkConfigurator.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 namespace inet {
 

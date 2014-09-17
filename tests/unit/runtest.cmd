@@ -15,8 +15,7 @@ del work\work.exe 2>nul
 call opp_test -N -g -v %TESTFILES% || goto end
 
 cd work || goto end
-set root=..\..\..
-call opp_nmakemake -f -N -w -u cmdenv -c %root%\inetconfig.vc -I%root%\Network\Contract -I%root%\Network\IPv6 -I%root%\Base -I%root%\Util -I%root%\Network\ICMPv6 -I%root%\NetworkInterfaces\Contract || goto end
+call opp_nmakemake -f -N -w -u cmdenv -c ..\..\..\inetconfig.vc --no-deep-includes -I..\..\..\src || goto end
 nmake -f makefile.vc || cd .. && goto end
 cd .. || goto end
 

@@ -18,7 +18,7 @@
 #ifndef __INET_ETHERNET_H
 #define __INET_ETHERNET_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

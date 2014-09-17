@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Interleaver.h"
 
 namespace inet {
 namespace physicallayer {

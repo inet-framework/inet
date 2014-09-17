@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALATTENUATION_H
 #define __INET_IDEALATTENUATION_H
 
-#include "IAttenuation.h"
+#include "inet/physicallayer/contract/IAttenuation.h"
 
 namespace inet {
 

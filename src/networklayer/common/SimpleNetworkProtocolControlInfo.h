@@ -18,9 +18,9 @@
 #ifndef __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 #define __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 
-#include "L3Address.h"
-#include "SimpleNetworkProtocolControlInfo_m.h"
-#include "INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo_m.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 namespace inet {
 

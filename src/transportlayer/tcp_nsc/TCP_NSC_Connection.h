@@ -23,9 +23,9 @@
 #error Please install NSC or disable 'TCP_NSC' feature
 #endif // ifndef HAVE_NSC
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 // forward declarations:
 class INetStack;

@@ -20,11 +20,11 @@
 #define __INET_SIMPLEVOIPSENDER_H
 
 #include <string.h>
-#include "INETDefs.h"
-#include "UDPSocket.h"
-#include "L3AddressResolver.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

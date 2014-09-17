@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "LinkStateUpdateHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
 
-#include "OSPFArea.h"
-#include "OSPFcommon.h"
-#include "OSPFNeighbor.h"
-#include "OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

@@ -5,7 +5,7 @@
  *      Author: Damien Piguet, Dimitris Kotsakos, Jérôme Rousselot
  */
 
-#include "AdaptiveProbabilisticBroadcast.h"
+#include "inet/networklayer/probabilistic/AdaptiveProbabilisticBroadcast.h"
 
 namespace inet {
 

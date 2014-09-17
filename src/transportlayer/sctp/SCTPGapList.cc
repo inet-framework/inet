@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "SCTPGapList.h"
-#include "SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPGapList.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 namespace inet {
 

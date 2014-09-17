@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ScalarTransmitter.h"
-#include "ScalarTransmission.h"
-#include "RadioControlInfo_m.h"
-#include "IMobility.h"
+#include "inet/physicallayer/scalar/ScalarTransmitter.h"
+#include "inet/physicallayer/scalar/ScalarTransmission.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

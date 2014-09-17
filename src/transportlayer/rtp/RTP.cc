@@ -15,21 +15,21 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTP.h"
+#include "inet/transportlayer/rtp/RTP.h"
 
-#include "InterfaceEntry.h"
-#include "IPv4Address.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "RTPInnerPacket.h"
-#include "RTPInterfacePacket_m.h"
-#include "RTPProfile.h"
-#include "RTPSenderControlMessage_m.h"
-#include "RTPSenderStatusMessage_m.h"
-#include "UDPControlInfo_m.h"
-#include "UDPSocket.h"
-#include "IIPv4RoutingTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RTPProfile.h"
+#include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
+#include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 namespace inet {
 

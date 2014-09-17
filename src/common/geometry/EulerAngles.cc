@@ -2,7 +2,7 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-#include <EulerAngles.h>
+#include "inet/common/geometry/EulerAngles.h"
 
 namespace inet {
 

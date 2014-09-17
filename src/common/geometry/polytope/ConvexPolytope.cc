@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ConvexPolytope.h"
+#include "inet/common/geometry/polytope/ConvexPolytope.h"
 #include <algorithm>
 
 namespace inet {

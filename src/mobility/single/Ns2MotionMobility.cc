@@ -21,8 +21,8 @@
 #include <sstream>
 #include <string>
 
-#include "Ns2MotionMobility.h"
-#include "INETMath.h"
+#include "inet/mobility/single/Ns2MotionMobility.h"
+#include "inet/common/INETMath.h"
 
 #ifndef atoi
 #include <cstdlib>

@@ -17,16 +17,16 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IScriptable.h"
-#include "IntServ.h"
+#include "inet/common/scenario/IScriptable.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
 #include "RSVPPathMsg.h"
 #include "RSVPResvMsg.h"
 #include "RSVPHelloMsg.h"
 #include "SignallingMsg_m.h"
-#include "IRSVPClassifier.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

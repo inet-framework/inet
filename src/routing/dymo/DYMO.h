@@ -22,15 +22,15 @@
 #include <vector>
 #include <map>
 #include <omnetpp.h>
-#include "ILifecycle.h"
-#include "IL3AddressType.h"
-#include "INetfilter.h"
-#include "IRoutingTable.h"
-#include "NodeStatus.h"
-#include "UDPPacket.h"
-#include "DYMOdefs.h"
-#include "DYMORouteData.h"
-#include "DYMO_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/routing/dymo/DYMOdefs.h"
+#include "inet/routing/dymo/DYMORouteData.h"
+#include "inet/routing/dymo/DYMO_m.h"
 
 namespace inet {
 

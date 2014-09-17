@@ -17,10 +17,10 @@
 //
 
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 #include "SomeUDPApp.h"
-#include "UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "AddressResolver.h"
 
 

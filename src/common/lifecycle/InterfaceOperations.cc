@@ -17,10 +17,10 @@
 //// Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
 ////
 //
-//#include "InterfaceOperations.h"
-//#include "IInterfaceTable.h"
-//#include "L3AddressResolver.h"
-//#include "ModuleAccess.h"
+//#include "inet/common/lifecycle/InterfaceOperations.h"
+//#include "inet/networklayer/common/IInterfaceTable.h"
+//#include "inet/networklayer/common/L3AddressResolver.h"
+//#include "inet/common/ModuleAccess.h"
 //
 //Register_Class(InterfaceDownOperation);
 //Register_Class(InterfaceUpOperation);

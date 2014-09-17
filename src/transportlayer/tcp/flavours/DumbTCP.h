@@ -18,9 +18,9 @@
 #ifndef __INET_DUMBTCP_H
 #define __INET_DUMBTCP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TCPAlgorithm.h"
 
 namespace inet {
 

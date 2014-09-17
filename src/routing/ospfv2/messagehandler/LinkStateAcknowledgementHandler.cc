@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "LinkStateAcknowledgementHandler.h"
+#include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
 
-#include "OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

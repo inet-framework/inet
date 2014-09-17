@@ -19,10 +19,10 @@
 #ifndef __INET_IGMPV2_H
 #define __INET_IGMPV2_H
 
-#include "INETDefs.h"
-#include "IPv4Address.h"
-#include "IGMPMessage_m.h"
-#include "InterfaceEntry.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IGMPMessage_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 #include <set>
 

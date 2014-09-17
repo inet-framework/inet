@@ -18,9 +18,9 @@
 #ifndef __INET_ATTENUATIONBASE_H
 #define __INET_ATTENUATIONBASE_H
 
-#include "IAttenuation.h"
-#include "IArrival.h"
-#include "ITransmission.h"
+#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

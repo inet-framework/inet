@@ -25,7 +25,7 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -35,13 +35,13 @@ extern "C" {
 #include <iostream>
 #include <sys/stat.h>
 
-#include "L3AddressResolver.h"
-#include "UDPControlInfo_m.h"
-#include "UDPSocket.h"
-#include "VoIPStreamPacket_m.h"
-#include "AudioOutFile.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/applications/voipstream/VoIPStreamPacket_m.h"
+#include "inet/applications/voipstream/AudioOutFile.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

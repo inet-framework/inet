@@ -40,11 +40,12 @@
  *
  **************************************************************************/
 
-#include <PostureTransition.h>
 #include <stdio.h>
 #include <string.h>
-#include <INETMath.h>
 #include <assert.h>
+
+#include "inet/common/INETMath.h"
+#include "inet/mobility/group/PostureTransition.h"
 
 namespace inet {
 

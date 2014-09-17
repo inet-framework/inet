@@ -19,11 +19,11 @@
 #ifndef __INET_TCPSERIALIZER_H
 #define __INET_TCPSERIALIZER_H
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
-#include "headers/defs.h"
+#include "inet/common/serializer/headers/defs.h"
 
-#include "headers/tcphdr.h"
+#include "inet/common/serializer/tcp/headers/tcphdr.h"
 
 namespace inet {
 

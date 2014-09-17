@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "NetworkDatagramMultiplexer.h"
+#include "inet/networklayer/multi/NetworkDatagramMultiplexer.h"
 
 #ifdef WITH_IPv4
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6ControlInfo.h"
-#include "IPv6Datagram.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "GenericNetworkProtocolControlInfo.h"
-#include "GenericDatagram.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
+#include "inet/networklayer/generic/GenericDatagram.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

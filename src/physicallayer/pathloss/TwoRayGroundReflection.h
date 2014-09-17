@@ -18,7 +18,7 @@
 #ifndef __INET_TWORAYGROUNDREFLECTION_H
 #define __INET_TWORAYGROUNDREFLECTION_H
 
-#include "FreeSpacePathLoss.h"
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

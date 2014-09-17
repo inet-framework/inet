@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211Radio.h"
-#include "Ieee80211Consts.h"
-#include "FlatTransmitterBase.h"
-#include "FlatReceiverBase.h"
-#include "RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Radio.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
 
 namespace inet {
 

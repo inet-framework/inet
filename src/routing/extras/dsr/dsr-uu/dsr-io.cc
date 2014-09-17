@@ -9,29 +9,29 @@
 #define OMNETPP
 
 #ifdef OMNETPP
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #else
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #else
-#include "dsr-dev.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-dev.h"
 #endif
 #endif
 
-#include "dsr.h"
-#include "dsr-pkt.h"
-#include "dsr-rreq.h"
-#include "dsr-rrep.h"
-#include "dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-pkt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rreq.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rrep.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-ack.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rtc.h"
 #include "dsr-ack.h"
-#include "dsr-rtc.h"
-#include "dsr-ack.h"
-#include "maint-buf.h"
-#include "neigh.h"
-#include "dsr-opt.h"
-#include "link-cache.h"
-#include "debug_dsr.h"
-#include "send-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/maint-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/neigh.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/send-buf.h"
 
 namespace inet {
 

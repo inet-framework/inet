@@ -17,8 +17,8 @@
 //
 
 cplusplus {{
-#include "L3Address.h"
-#include "IPProtocolId_m.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;

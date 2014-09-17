@@ -18,7 +18,7 @@
 #ifndef __INET_TESTRADIO_H_
 #define __INET_TESTRADIO_H_
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

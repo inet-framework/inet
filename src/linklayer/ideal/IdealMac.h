@@ -20,10 +20,10 @@
 #ifndef __INET_IDEALMAC_H
 #define __INET_IDEALMAC_H
 
-#include "INETDefs.h"
-#include "IRadio.h"
-#include "MACAddress.h"
-#include "MACProtocolBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACProtocolBase.h"
 
 namespace inet {
 

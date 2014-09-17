@@ -19,14 +19,14 @@
 #include <stdio.h>
 #include <sstream>
 
-#include "IPv4Route.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
-#include "InterfaceEntry.h"
-#include "IIPv4RoutingTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #ifdef WITH_AODV
-#include "AODVRouteData.h"
+#include "inet/routing/aodv/AODVRouteData.h"
 #endif // ifdef WITH_AODV
 
 namespace inet {

@@ -21,10 +21,10 @@
 #ifndef __INET_TCPDUMP_H
 #define __INET_TCPDUMP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "PcapDump.h"
-#include "PacketDump.h"
+#include "inet/common/packet/PcapDump.h"
+#include "inet/common/packet/PacketDump.h"
 
 namespace inet {
 

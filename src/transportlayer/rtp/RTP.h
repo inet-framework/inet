@@ -18,12 +18,12 @@
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "L3Address.h"
-#include "RTPInnerPacket.h"
-#include "RTPInterfacePacket_m.h"
-#include "UDPSocket.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

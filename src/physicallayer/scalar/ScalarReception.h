@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARRECEPTION_H
 #define __INET_SCALARRECEPTION_H
 
-#include "FlatReceptionBase.h"
+#include "inet/physicallayer/base/FlatReceptionBase.h"
 
 namespace inet {
 

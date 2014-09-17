@@ -24,10 +24,10 @@
 #define	__INET_IEEE802154UWBIRTRANSMITTER_H
 
 #include <vector>
-#include "MappingBase.h"
-#include "MappingUtils.h"
-#include "TransmitterBase.h"
-#include "Ieee802154UWBIRMode.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
+#include "inet/physicallayer/base/TransmitterBase.h"
+#include "inet/physicallayer/ieee802154/Ieee802154UWBIRMode.h"
 
 namespace inet {
 

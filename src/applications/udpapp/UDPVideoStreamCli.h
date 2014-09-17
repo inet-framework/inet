@@ -20,10 +20,10 @@
 #ifndef __INET_UDPVIDEOSTREAMCLI_H
 #define __INET_UDPVIDEOSTREAMCLI_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ApplicationBase.h"
-#include "UDPSocket.h"
+#include "inet/applications/common/ApplicationBase.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

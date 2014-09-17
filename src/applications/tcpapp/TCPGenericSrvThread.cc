@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPGenericSrvThread.h"
+#include "inet/applications/tcpapp/TCPGenericSrvThread.h"
 
 #include "GenericAppMsg_m.h"
 

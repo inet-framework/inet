@@ -24,14 +24,14 @@
 #include <string.h>
 
 #include <platdep/sockets.h>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ExtInterface.h"
+#include "inet/linklayer/ext/ExtInterface.h"
 
-#include "InterfaceEntry.h"
-#include "InterfaceTable.h"
-#include "IPv4Serializer.h"
-#include "INETUtils.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

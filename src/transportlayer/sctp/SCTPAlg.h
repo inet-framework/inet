@@ -19,9 +19,9 @@
 #ifndef __INET_SCTPALG_H
 #define __INET_SCTPALG_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
 
 namespace inet {
 

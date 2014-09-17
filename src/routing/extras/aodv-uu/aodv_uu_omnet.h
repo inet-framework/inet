@@ -63,10 +63,10 @@
 
 /* System-dependent datatypes */
 /* Needed by some network-related datatypes */
-#include "ManetRoutingBase.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
 #include "aodv-uu/list.h"
 
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 #include "aodv_msg_struct.h"
 /* Forward declaration needed to be able to reference the class */
@@ -94,7 +94,7 @@ namespace inet { namespace inetmanet { class AODVUU; } }
 #include "aodv-uu/seek_list.h"
 #include "aodv-uu/locality.h"
 
-#include "packet_queue_omnet.h"
+#include "inet/routing/extras/aodv-uu/packet_queue_omnet.h"
 
 #undef NS_NO_DECLARATIONS
 

@@ -18,9 +18,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "TraCITestApp.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/applications/traci/TraCITestApp.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include <cmath>
 
 namespace inet {

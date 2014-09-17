@@ -18,7 +18,7 @@
 #ifndef __INET_FSMA_H
 #define __INET_FSMA_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

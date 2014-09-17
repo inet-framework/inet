@@ -23,9 +23,9 @@
 
 #ifndef NS_NO_GLOBALS
 
-#include "defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
 #ifdef OMNETPP
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #else
 #include <netinet/in.h>
 #include <sys/types.h>

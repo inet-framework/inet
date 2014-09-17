@@ -18,7 +18,7 @@
 #ifndef __INET_NAKAGAMIFADING_H
 #define __INET_NAKAGAMIFADING_H
 
-#include "FreeSpacePathLoss.h"
+#include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 

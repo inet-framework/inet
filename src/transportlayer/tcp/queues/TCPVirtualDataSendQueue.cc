@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPVirtualDataSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataSendQueue.h"
 
 namespace inet {
 

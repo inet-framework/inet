@@ -16,38 +16,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "TCP_lwIP.h"
+#include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"
 
 //#include "headers/defs.h"   // for endian macros
 //#include "headers/in_systm.h"
 #include "lwip/lwip_ip.h"
 
 #ifdef WITH_IPv4
-#include "ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "IL3AddressType.h"
-#include "IPSocket.h"
-#include "INetworkProtocolControlInfo.h"
-#include "IPProtocolId_m.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #include "headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
-#include "TCPCommand_m.h"
-#include "TCPIPchecksum.h"
-#include "TcpLwipConnection.h"
-#include "TcpLwipByteStreamQueues.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
 #include "TcpLwipMsgBasedQueues.h"
-#include "TcpLwipVirtualDataQueues.h"
-#include "TCPSegment.h"
-#include "TCPSerializer.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipVirtualDataQueues.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

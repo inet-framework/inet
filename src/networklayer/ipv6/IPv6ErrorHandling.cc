@@ -20,10 +20,10 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6ErrorHandling.h"
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ErrorHandling.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 
 namespace inet {
 

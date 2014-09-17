@@ -15,33 +15,33 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCP.h"
+#include "inet/transportlayer/tcp/TCP.h"
 
-#include "IPSocket.h"
-#include "INetworkProtocolControlInfo.h"
-#include "IPProtocolId_m.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "TCPConnection.h"
-#include "TCPSegment.h"
-#include "TCPCommand_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 #ifdef WITH_IPv4
-#include "ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "TCPByteStreamRcvQueue.h"
-#include "TCPByteStreamSendQueue.h"
-#include "TCPMsgBasedRcvQueue.h"
-#include "TCPMsgBasedSendQueue.h"
-#include "TCPVirtualDataRcvQueue.h"
-#include "TCPVirtualDataSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPByteStreamRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPByteStreamSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPMsgBasedRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPMsgBasedSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataSendQueue.h"
 
 namespace inet {
 

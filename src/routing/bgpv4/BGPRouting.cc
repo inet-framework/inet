@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BGPRouting.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "OSPFRouting.h"
-#include "BGPSession.h"
+#include "inet/routing/bgpv4/BGPRouting.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/routing/ospfv2/OSPFRouting.h"
+#include "inet/routing/bgpv4/BGPSession.h"
 
 namespace inet {
 

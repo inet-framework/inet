@@ -16,12 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPBasicApp.h"
+#include "inet/applications/udpapp/UDPBasicApp.h"
 
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "UDPControlInfo_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
 

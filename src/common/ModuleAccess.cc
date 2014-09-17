@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModuleAccess.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

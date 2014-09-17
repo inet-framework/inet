@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PowerSourceBase.h"
+#include "inet/power/base/PowerSourceBase.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 //
 
 #include "Ieee80211BitDomainTest.h"
-#include "BitVector.h"
-#include "ShortBitVector.h"
+#include "inet/common/BitVector.h"
+#include "inet/common/ShortBitVector.h"
 #include <fstream>
 
 namespace inet {

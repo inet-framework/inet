@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPGenericSrvApp.h"
+#include "inet/applications/tcpapp/TCPGenericSrvApp.h"
 
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "TCPSocket.h"
-#include "TCPCommand_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
 
 namespace inet {

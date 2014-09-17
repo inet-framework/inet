@@ -19,8 +19,8 @@
 // ***************************************************************************
 
 cplusplus {{
-#include "OLSR_ETX_parameter.h"
-#include "L3Address.h"
+#include "inet/routing/extras/olsr/OLSR_ETX_parameter.h"
+#include "inet/networklayer/common/L3Address.h"
 #include <string.h>
 }}
 

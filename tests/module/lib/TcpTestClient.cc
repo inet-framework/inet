@@ -15,9 +15,9 @@
 #include <vector>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 

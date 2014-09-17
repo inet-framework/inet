@@ -16,21 +16,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ICMPv6.h"
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
-#include "ICMPv6Message_m.h"
-#include "IPv6ControlInfo.h"
-#include "IPv6Datagram.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 
-#include "IInterfaceTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
-#include "PingPayload_m.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 
 namespace inet {
 

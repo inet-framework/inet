@@ -18,12 +18,12 @@
 #ifndef __INET_ETHERAPPSRV_H
 #define __INET_ETHERAPPSRV_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MACAddress.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
-#include "NodeStatus.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

@@ -20,13 +20,13 @@
 
 #include <memory.h>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "LSA.h"
-#include "OSPFcommon.h"
-#include "OSPFPacket_m.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/OSPFPacket_m.h"
 
 namespace inet {
 

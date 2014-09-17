@@ -18,10 +18,10 @@
 
 //  Cleanup and rewrite: Andras Varga, 2004
 
-#include "ErrorHandling.h"
+#include "inet/networklayer/ipv4/ErrorHandling.h"
 
-#include "ICMPMessage.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

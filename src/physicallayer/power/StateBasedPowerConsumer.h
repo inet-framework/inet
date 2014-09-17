@@ -18,8 +18,8 @@
 #ifndef __INET_STATEBASEDPOWERCONSUMER_H
 #define __INET_STATEBASEDPOWERCONSUMER_H
 
-#include "IPowerSource.h"
-#include "IRadio.h"
+#include "inet/power/contract/IPowerSource.h"
+#include "inet/physicallayer/contract/IRadio.h"
 
 namespace inet {
 

@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "FlatReceiverBase.h"
-#include "FlatTransmissionBase.h"
-#include "FlatReceptionBase.h"
-#include "FlatNoiseBase.h"
-#include "Modulation.h"
-#include "BandListening.h"
-#include "ListeningDecision.h"
-#include "ReceptionDecision.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/FlatReceptionBase.h"
+#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/common/Modulation.h"
+#include "inet/physicallayer/common/BandListening.h"
+#include "inet/physicallayer/common/ListeningDecision.h"
+#include "inet/physicallayer/common/ReceptionDecision.h"
 
 namespace inet {
 

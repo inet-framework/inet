@@ -18,10 +18,10 @@
 #ifndef __INET_IPV6ADDRESSTYPE_H
 #define __INET_IPV6ADDRESSTYPE_H
 
-#include "INETDefs.h"
-#include "IL3AddressType.h"
-#include "IPv6Address.h"
-#include "IPv6ControlInfo.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
 namespace inet {
 

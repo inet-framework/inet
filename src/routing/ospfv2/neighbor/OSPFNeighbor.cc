@@ -17,14 +17,14 @@
 
 #include <memory.h>
 
-#include "OSPFNeighbor.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
 
-#include "IPv4Datagram_m.h"
-#include "MessageHandler.h"
-#include "OSPFArea.h"
-#include "OSPFNeighborState.h"
-#include "OSPFNeighborStateDown.h"
-#include "OSPFRouter.h"
+#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighborStateDown.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

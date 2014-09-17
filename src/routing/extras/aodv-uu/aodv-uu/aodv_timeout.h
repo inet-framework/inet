@@ -24,7 +24,7 @@
 #define _AODV_TIMEOUT_H
 
 #ifndef NS_NO_GLOBALS
-#include "defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
 
 #endif              /* NS_NO_GLOBALS */
 

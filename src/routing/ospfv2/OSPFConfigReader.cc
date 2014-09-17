@@ -21,19 +21,19 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include "OSPFConfigReader.h"
+#include "inet/routing/ospfv2/OSPFConfigReader.h"
 
-#include "IInterfaceTable.h"
-#include "IPv4Address.h"
-#include "IPv4InterfaceData.h"
-#include "L3AddressResolver.h"
-#include "MessageHandler.h"
-#include "OSPFArea.h"
-#include "OSPFcommon.h"
-#include "OSPFInterface.h"
-#include "PatternMatcher.h"
-#include "XMLUtils.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/XMLUtils.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

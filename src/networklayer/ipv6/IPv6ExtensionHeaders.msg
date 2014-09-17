@@ -18,9 +18,9 @@
 //
 
 cplusplus {{
-#include "IPv6Address.h"
-#include "IPv6Datagram.h"
-#include "IPProtocolId_m.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
 }}

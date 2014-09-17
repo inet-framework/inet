@@ -26,11 +26,11 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "defs_dymo.h"
-#include "dymo_hello.h"
-#include "timer_queue.h"
-#include "dymo_socket.h"
-#include "dymo_nb.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_hello.h"
+#include "inet/routing/extras/dymo/dymoum/timer_queue.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_socket.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_nb.h"
 #include <sys/time.h>
 #include <stdlib.h>
 

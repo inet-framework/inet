@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-   #include "MACAddress.h"
+   #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;

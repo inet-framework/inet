@@ -22,13 +22,13 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ILifecycle.h"
-#include "L3Address.h"
-#include "TCPCommand_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "lwip/lwip_tcp.h"
-#include "LwipTcpStackIf.h"
+#include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
 
 namespace inet {
 

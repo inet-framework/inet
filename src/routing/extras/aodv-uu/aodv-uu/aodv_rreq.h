@@ -35,9 +35,9 @@
 #endif
 #endif
 
-#include "defs_aodv.h"
-#include "seek_list.h"
-#include "routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/seek_list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
 
 
 /* RREQ Flags: */

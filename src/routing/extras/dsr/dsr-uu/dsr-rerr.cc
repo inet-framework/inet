@@ -7,26 +7,26 @@
  */
 #define OMNETPP
 #ifdef __KERNEL__
-#include "dsr-dev.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-dev.h"
 #endif
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
 
 
-#include "dsr.h"
-#include "dsr-rerr.h"
-#include "dsr-opt.h"
-#include "debug_dsr.h"
-#include "dsr-srt.h"
-#include "dsr-ack.h"
-#include "link-cache.h"
-#include "maint-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rerr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-ack.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/maint-buf.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_IPATHLOSS_H
 #define __INET_IPATHLOSS_H
 
-#include "IPrintableObject.h"
+#include "inet/physicallayer/contract/IPrintableObject.h"
 
 namespace inet {
 

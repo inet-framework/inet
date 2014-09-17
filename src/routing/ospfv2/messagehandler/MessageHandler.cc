@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 
-#include "ICMPMessage.h"
-#include "OSPFRouter.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

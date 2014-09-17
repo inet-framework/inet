@@ -2,7 +2,7 @@
 Test parsing IPv6 addresses with prefix
 
 %includes:
-#include "IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 %global:
 static void parseAddr(const char *s)

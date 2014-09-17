@@ -18,19 +18,19 @@
 
 #include "cnedvalue.h"
 
-#include "InterfaceEntry.h"
-#include "INETUtils.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/INETUtils.h"
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
-#include "DiffservUtil.h"
-#include "DSCP_m.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
+#include "inet/networklayer/diffserv/DSCP_m.h"
 
 namespace inet {
 

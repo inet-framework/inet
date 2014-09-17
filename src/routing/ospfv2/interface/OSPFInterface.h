@@ -22,12 +22,12 @@
 #include <vector>
 #include <list>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "OSPFcommon.h"
-#include "OSPFNeighbor.h"
-#include "OSPFTimer.h"
-#include "IInterfaceTable.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
+#include "inet/routing/ospfv2/OSPFTimer.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

@@ -18,9 +18,9 @@
 #ifndef __INET_IATTENUATION_H
 #define __INET_IATTENUATION_H
 
-#include "IRadio.h"
-#include "ITransmission.h"
-#include "IReception.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/ITransmission.h"
+#include "inet/physicallayer/contract/IReception.h"
 
 namespace inet {
 

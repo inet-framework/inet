@@ -20,9 +20,9 @@
 #ifndef __INET_CLOUDDELAYERBASE_H
 #define __INET_CLOUDDELAYERBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "INetfilter.h"
+#include "inet/networklayer/common/INetfilter.h"
 
 namespace inet {
 

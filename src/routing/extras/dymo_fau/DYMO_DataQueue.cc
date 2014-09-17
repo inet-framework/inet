@@ -16,13 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DYMO_DataQueue.h"
-#include "IPv4InterfaceData.h"
-#include "Ieee802Ctrl.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4.h"
+#include "inet/routing/extras/dymo_fau/DYMO_DataQueue.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4.h"
 
 
 namespace inet {

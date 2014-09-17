@@ -18,19 +18,19 @@
 
 #include <platdep/sockets.h>
 
-#include "headers/defs.h"
+#include "inet/common/serializer/headers/defs.h"
 
-#include "headers/in_systm.h"
-#include "headers/ip.h"
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/sctphdr.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/ipv4/headers/ip.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/sctp/headers/sctphdr.h"
 
-#include "SCTPSerializer.h"
+#include "inet/common/serializer/sctp/SCTPSerializer.h"
 
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "IPv4Serializer.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...

@@ -19,8 +19,8 @@
 #define __INET_TCPSEGMENT_H
 
 #include <list>
-#include "INETDefs.h"
-#include "TCPSegment_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 
 namespace inet {
 

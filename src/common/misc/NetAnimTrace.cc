@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "NetAnimTrace.h"
+#include "inet/common/misc/NetAnimTrace.h"
 
-#include "Coord.h"
-#include "IMobility.h"
-#include "ModuleAccess.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

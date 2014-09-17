@@ -18,10 +18,10 @@
 #ifndef __INET_ITRANSMISSION_H
 #define __INET_ITRANSMISSION_H
 
-#include "Units.h"
-#include "Coord.h"
-#include "EulerAngles.h"
-#include "IPrintableObject.h"
+#include "inet/common/Units.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/EulerAngles.h"
+#include "inet/physicallayer/contract/IPrintableObject.h"
 
 namespace inet {
 

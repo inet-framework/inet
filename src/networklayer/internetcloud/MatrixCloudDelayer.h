@@ -20,9 +20,9 @@
 #ifndef __INET_MATRIXCLOUDDELAYER_H
 #define __INET_MATRIXCLOUDDELAYER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "CloudDelayerBase.h"
+#include "inet/networklayer/internetcloud/CloudDelayerBase.h"
 
 namespace inet {
 

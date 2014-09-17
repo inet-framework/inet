@@ -18,8 +18,8 @@
 #ifndef __INET_APPLICATIONBASE_H
 #define __INET_APPLICATIONBASE_H
 
-#include "OperationalBase.h"
-#include "NodeOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

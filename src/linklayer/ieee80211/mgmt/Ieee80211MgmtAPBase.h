@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211MGMTAPBASE_H
 #define __INET_IEEE80211MGMTAPBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Ieee80211MgmtBase.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
 namespace inet {
 

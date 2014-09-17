@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ScalarReceiver.h"
-#include "ScalarReception.h"
-#include "ScalarNoise.h"
-#include "BandListening.h"
+#include "inet/physicallayer/scalar/ScalarReceiver.h"
+#include "inet/physicallayer/scalar/ScalarReception.h"
+#include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
 

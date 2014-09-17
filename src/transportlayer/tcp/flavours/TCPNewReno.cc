@@ -16,8 +16,8 @@
 //
 
 #include <algorithm>    // min,max
-#include "TCPNewReno.h"
-#include "TCP.h"
+#include "inet/transportlayer/tcp/flavours/TCPNewReno.h"
+#include "inet/transportlayer/tcp/TCP.h"
 
 namespace inet {
 

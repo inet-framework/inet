@@ -18,18 +18,18 @@
 #ifndef __INET_BGPROUTING_H
 #define __INET_BGPROUTING_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSocket.h"
-#include "TCPSocketMap.h"
-#include "BGPRoutingTableEntry.h"
-#include "BGPCommon.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4Address.h"
-#include "BGPOpen.h"
-#include "BGPKeepAlive.h"
-#include "BGPUpdate.h"
-#include "ILifecycle.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/routing/bgpv4/BGPRoutingTableEntry.h"
+#include "inet/routing/bgpv4/BGPCommon.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPOpen.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPKeepAlive.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <ctype.h>
 
-#include "HttpUtils.h"
+#include "inet/applications/httptools/common/HttpUtils.h"
 
 namespace inet {
 

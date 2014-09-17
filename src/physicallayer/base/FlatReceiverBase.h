@@ -18,8 +18,8 @@
 #ifndef __INET_FLATRECEIVERBASE_H
 #define __INET_FLATRECEIVERBASE_H
 
-#include "SNIRReceiverBase.h"
-#include "IModulation.h"
+#include "inet/physicallayer/base/SNIRReceiverBase.h"
+#include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 

@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RSTP.h"
+#include "inet/linklayer/ieee8021d/rstp/RSTP.h"
 
-#include "Ieee802Ctrl.h"
-#include "InterfaceEntry.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

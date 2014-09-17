@@ -18,11 +18,11 @@
 #ifndef __INET_BVHOBJECTCACHE_H
 #define __INET_BVHOBJECTCACHE_H
 
-#include "IObjectCache.h"
-#include "BVHTree.h"
-#include "PhysicalEnvironment.h"
-#include "PhysicalObject.h"
-#include "IVisitor.h"
+#include "inet/environment/cache/IObjectCache.h"
+#include "inet/common/geometry/BVHTree.h"
+#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/PhysicalObject.h"
+#include "inet/common/IVisitor.h"
 
 namespace inet {
 

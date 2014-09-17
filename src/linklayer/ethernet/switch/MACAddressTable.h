@@ -17,8 +17,8 @@
 #ifndef __INET_MACADDRESSTABLE_H
 #define __INET_MACADDRESSTABLE_H
 
-#include "MACAddress.h"
-#include "IMACAddressTable.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
 
 namespace inet {
 

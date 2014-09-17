@@ -14,16 +14,16 @@
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
-#include "Ieee802Ctrl.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #endif
 
-#include "debug_dsr.h"
-#include "dsr-opt.h"
-#include "dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
 
 namespace inet {
 

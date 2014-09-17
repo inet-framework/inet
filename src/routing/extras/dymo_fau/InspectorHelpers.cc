@@ -17,9 +17,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "InspectorHelpers.h"
+#include "inet/routing/extras/dymo_fau/InspectorHelpers.h"
 
 
 using namespace std;

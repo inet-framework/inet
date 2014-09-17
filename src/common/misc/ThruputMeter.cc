@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ThruputMeter.h"
+#include "inet/common/misc/ThruputMeter.h"
 
 namespace inet {
 

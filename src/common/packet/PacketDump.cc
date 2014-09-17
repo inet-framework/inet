@@ -21,29 +21,29 @@
 
 #include <errno.h>
 
-#include "PacketDump.h"
+#include "inet/common/packet/PacketDump.h"
 
 #ifdef WITH_UDP
-#include "UDPPacket_m.h"
+#include "inet/transportlayer/udp/UDPPacket_m.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
-#include "SCTPMessage.h"
-#include "SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPMessage.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_IPv4
-#include "ARPPacket_m.h"
-#include "ICMPMessage.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

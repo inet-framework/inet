@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "INETMath.h"
-#include "TractorMobility.h"
+#include "inet/common/INETMath.h"
+#include "inet/mobility/single/TractorMobility.h"
 
 namespace inet {
 

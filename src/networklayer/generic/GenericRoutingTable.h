@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "GenericRoute.h"
-#include "IRoutingTable.h"
+#include "inet/networklayer/generic/GenericRoute.h"
+#include "inet/networklayer/common/IRoutingTable.h"
 
 namespace inet {
 

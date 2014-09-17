@@ -20,12 +20,12 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "BGPCommon.h"
-#include "TCPSocket.h"
-#include "BGPRouting.h"
-#include "BGPFSM.h"
+#include "inet/routing/bgpv4/BGPCommon.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/routing/bgpv4/BGPRouting.h"
+#include "inet/routing/bgpv4/BGPFSM.h"
 
 namespace inet {
 

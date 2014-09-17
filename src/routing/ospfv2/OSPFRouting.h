@@ -20,13 +20,13 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "OSPFPacket_m.h"
-#include "OSPFRouter.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/routing/ospfv2/OSPFPacket_m.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

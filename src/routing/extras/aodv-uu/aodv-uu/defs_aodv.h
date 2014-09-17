@@ -30,7 +30,7 @@
 #include <sys/types.h>
 //#include <syslog.h>
 #endif
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 
 
 #ifndef NS_PORT
@@ -48,7 +48,7 @@
 #include <fcntl.h>
 
 #ifndef NS_PORT
-#include "timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
 
 #endif
 

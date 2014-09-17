@@ -4,9 +4,9 @@ Adapted from IPFragBuf_1.test.
 
 %includes:
 #include <vector>
-#include "IPv6FragBuf.h"
-#include "IPv6Datagram.h"
-#include "IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/IPv6FragBuf.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 %global:
 struct Frag

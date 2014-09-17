@@ -19,26 +19,26 @@
 // @author Zoltan Bojthe
 //
 
-#include "L3AddressResolver.h"
-#include "IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
-#include "ModulePathAddress.h"
-#include "ModuleIdAddress.h"
+#include "inet/networklayer/common/ModulePathAddress.h"
+#include "inet/networklayer/common/ModuleIdAddress.h"
 
 #ifdef WITH_IPv4
-#include "IPv4NetworkConfigurator.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
-#include "IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "GenericNetworkProtocolInterfaceData.h"
-#include "GenericRoutingTable.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

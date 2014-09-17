@@ -16,13 +16,13 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "GenericARP.h"
-#include "InterfaceEntry.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "L3AddressResolver.h"
-#include "GenericNetworkProtocolControlInfo_m.h"
-#include "Ieee802Ctrl.h"
+#include "inet/networklayer/arp/generic/GenericARP.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

@@ -15,10 +15,10 @@
 #ifndef __INET_LINKSTATEROUTING_H
 #define __INET_LINKSTATEROUTING_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LinkStatePacket_m.h"
-#include "IntServ.h"
+#include "inet/networklayer/ted/LinkStatePacket_m.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
 
 namespace inet {
 

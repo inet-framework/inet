@@ -19,7 +19,7 @@
 
 #include <string>
 #include <vector>
-#include "HttpNodeBase.h"
+#include "inet/applications/httptools/common/HttpNodeBase.h"
 
 namespace inet {
 

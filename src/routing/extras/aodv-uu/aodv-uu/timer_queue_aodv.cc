@@ -35,10 +35,10 @@
 #include "../aodv_uu_omnet.h"
 #endif
 #else
-#include "timer_queue_aodv.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
-#include "list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 
 static LIST(TQ);
 

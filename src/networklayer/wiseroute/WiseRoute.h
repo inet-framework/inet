@@ -26,11 +26,11 @@
 #ifndef __INET_WISEROUTE_H
 #define __INET_WISEROUTE_H
 
-#include "INetworkProtocol.h"
-#include "IARP.h"
-#include "NetworkProtocolBase.h"
-#include "L3Address.h"
-#include "WiseRouteDatagram.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/common/NetworkProtocolBase.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/wiseroute/WiseRouteDatagram.h"
 
 namespace inet {
 

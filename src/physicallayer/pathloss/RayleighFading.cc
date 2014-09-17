@@ -15,7 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "RayleighFading.h"
+#include "inet/physicallayer/pathloss/RayleighFading.h"
 
 namespace inet {
 

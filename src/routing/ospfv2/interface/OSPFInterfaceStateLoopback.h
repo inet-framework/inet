@@ -18,7 +18,7 @@
 #ifndef __INET_OSPFINTERFACESTATELOOPBACK_H
 #define __INET_OSPFINTERFACESTATELOOPBACK_H
 
-#include "OSPFInterfaceState.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceState.h"
 
 namespace inet {
 

@@ -3,12 +3,12 @@
 #include  <string.h>
 
 #include "aodv_msg_struct.h"
-#include "InterfaceTable.h"
-#include "UDPPacket.h"
-#include "ICMPMessage_m.h"
-#include "IPv4Datagram.h"
-#include "IPv4RoutingTable.h"
-#include "ProtocolMap.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/common/ProtocolMap.h"
 
 namespace inet {
 

@@ -16,12 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
 
-#include "EtherFrame.h"
-#include "IPassiveQueue.h"
-#include "NotifierConsts.h"
-#include "InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

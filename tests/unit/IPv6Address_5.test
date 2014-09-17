@@ -2,7 +2,7 @@
 test IPv6Address scope and multicast scope
 
 %includes:
-#include "IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 %activity:
 #define P(X)  EV << #X << "  " << IPv6Address::scopeName(X.getScope()) << " " << \

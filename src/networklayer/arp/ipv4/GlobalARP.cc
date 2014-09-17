@@ -17,17 +17,17 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "GlobalARP.h"
+#include "inet/networklayer/arp/ipv4/GlobalARP.h"
 
-#include "ARPPacket_m.h"
-#include "Ieee802Ctrl.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
-#include "IPv4InterfaceData.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

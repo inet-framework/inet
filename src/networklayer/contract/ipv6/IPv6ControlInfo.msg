@@ -17,8 +17,8 @@
 
 
 cplusplus {{
-#include "IPv6Address.h"
-#include "IPProtocolId_m.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;

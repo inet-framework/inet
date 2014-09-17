@@ -33,12 +33,12 @@
 #include <math.h>
 #include <limits.h>
 
-#include "UDPPacket.h"
-#include "IPv4InterfaceData.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
-#include "OLSRpkt_m.h"
-#include "OLSROPT.h"
-#include "Ieee802Ctrl.h"
+#include "inet/routing/extras/olsr/OLSRpkt_m.h"
+#include "inet/routing/extras/olsr/OLSROPT.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

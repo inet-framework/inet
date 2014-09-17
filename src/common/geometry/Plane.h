@@ -18,7 +18,7 @@
 #ifndef __INET_PLANE_H
 #define __INET_PLANE_H
 
-#include "LineSegment.h"
+#include "inet/common/geometry/LineSegment.h"
 
 namespace inet {
 

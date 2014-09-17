@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DimensionalReceiver.h"
-#include "DimensionalReception.h"
-#include "DimensionalNoise.h"
-#include "DimensionalUtils.h"
-#include "BandListening.h"
+#include "inet/physicallayer/dimensional/DimensionalReceiver.h"
+#include "inet/physicallayer/dimensional/DimensionalReception.h"
+#include "inet/physicallayer/dimensional/DimensionalNoise.h"
+#include "inet/physicallayer/dimensional/DimensionalUtils.h"
+#include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
 

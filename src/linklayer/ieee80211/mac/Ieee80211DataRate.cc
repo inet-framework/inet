@@ -18,9 +18,9 @@
 
 #include <algorithm>
 
-#include "Ieee80211DataRate.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
-#include "WifiMode.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
 
 namespace inet {
 

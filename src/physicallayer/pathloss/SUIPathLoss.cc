@@ -14,7 +14,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "SUIPathLoss.h"
+#include "inet/physicallayer/pathloss/SUIPathLoss.h"
 
 namespace inet {
 

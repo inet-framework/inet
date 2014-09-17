@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Quaternion.h"
+#include "inet/common/geometry/Quaternion.h"
 
 namespace inet {
 

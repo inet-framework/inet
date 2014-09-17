@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TcpLwipByteStreamQueues.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
 
-#include "ByteArrayMessage.h"
-#include "TCPCommand_m.h"
-#include "TcpLwipConnection.h"
-#include "TCPSegment.h"
-#include "TCPSerializer.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_DIMENSIONALUTILS_H
 #define __INET_DIMENSIONALUTILS_H
 
-#include "PhysicalLayerDefs.h"
-#include "MappingUtils.h"
+#include "inet/physicallayer/base/PhysicalLayerDefs.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
 
 namespace inet {
 

@@ -19,14 +19,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PcapRecorder.h"
+#include "inet/common/packet/PcapRecorder.h"
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

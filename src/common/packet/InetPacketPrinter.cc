@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "INetworkDatagram.h"
-#include "PingPayload_m.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_IPv4
-#include "ICMPMessage.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #else // ifdef WITH_IPv4
 namespace inet {
 class ICMPMessage;
@@ -32,13 +32,13 @@ class IPv4Datagram;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #else // ifdef WITH_TCP_COMMON
 namespace inet { namespace tcp { class TCPSegment; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
-#include "UDPPacket.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 #else // ifdef WITH_UDP
 namespace inet { class UDPPacket; }
 #endif // ifdef WITH_UDP

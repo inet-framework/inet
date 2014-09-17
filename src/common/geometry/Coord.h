@@ -20,9 +20,9 @@
 #ifndef __INET_COORD_H
 #define __INET_COORD_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "INETMath.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

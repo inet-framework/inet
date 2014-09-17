@@ -18,8 +18,8 @@
 #ifndef __INET_IPSOCKET_H
 #define __INET_IPSOCKET_H
 
-#include "INETDefs.h"
-#include "IPProtocolId_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 namespace inet {
 

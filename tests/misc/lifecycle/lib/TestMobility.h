@@ -20,8 +20,8 @@
 #ifndef __INET_TESTMOBILITY_H_
 #define __INET_TESTMOBILITY_H_
 
-#include "INETDefs.h"
-#include "Lifecycle.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 class INET_API TestMobility : public cSimpleModule, public ILifecycle {
   private:

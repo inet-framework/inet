@@ -27,7 +27,7 @@
 
 #include <cmath>
 #include <limits>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

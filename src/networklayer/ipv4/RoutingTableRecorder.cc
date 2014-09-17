@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 #if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
-#include "NotifierConsts.h"
-#include "IInterfaceTable.h"
-#include "IRoutingTable.h"
-#include "IPv4RoutingTable.h"
-#include "IPv6RoutingTable.h"
-#include "GenericRoutingTable.h"
-#include "IPv4InterfaceData.h"    // TODO: remove?
-#include "ModuleAccess.h"
-#include "RoutingTableRecorder.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"    // TODO: remove?
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 
 Define_Module(RoutingTableRecorder);
 
@@ -195,13 +195,13 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 
 #else /*OMNETPP_VERSION*/
 
-#include "NotifierConsts.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4Route.h"
-#include "IInterfaceTable.h"
-#include "IPv4InterfaceData.h"
-#include "ModuleAccess.h"
-#include "RoutingTableRecorder.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 
 namespace inet {
 

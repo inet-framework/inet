@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARNOISE_H
 #define __INET_SCALARNOISE_H
 
-#include "FlatNoiseBase.h"
+#include "inet/physicallayer/base/FlatNoiseBase.h"
 
 namespace inet {
 

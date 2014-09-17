@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BVHObjectCache.h"
-#include "ModuleAccess.h"
+#include "inet/environment/cache/BVHObjectCache.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

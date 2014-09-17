@@ -18,12 +18,12 @@
 #ifndef __INET_IRECEIVER_H
 #define __INET_IRECEIVER_H
 
-#include "IListening.h"
-#include "INoise.h"
-#include "IReception.h"
-#include "IListeningDecision.h"
-#include "IReceptionDecision.h"
-#include "RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/IListening.h"
+#include "inet/physicallayer/contract/INoise.h"
+#include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/contract/IListeningDecision.h"
+#include "inet/physicallayer/contract/IReceptionDecision.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
 
 namespace inet {
 

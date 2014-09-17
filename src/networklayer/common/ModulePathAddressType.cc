@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModulePathAddressType.h"
+#include "inet/networklayer/common/ModulePathAddressType.h"
 
 namespace inet {
 

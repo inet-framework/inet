@@ -11,8 +11,8 @@
 #ifndef _DSR_PATH_CACHE_H
 #define _DSR_PATH_CACHE_H
 
-#include "dsr-uu/tbl.h"
-#include "dsr-uu/timer.h"
+#include "tbl.h"
+#include "timer.h"
 
 #ifndef NO_GLOBALS
 

@@ -19,9 +19,9 @@
 #ifndef __INET_RANDOMWPMOBILITY_H
 #define __INET_RANDOMWPMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
 
 namespace inet {
 

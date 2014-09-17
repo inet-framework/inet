@@ -15,7 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "IARP.h"
+#include "inet/networklayer/arp/IARP.h"
 
 namespace inet {
 

@@ -16,14 +16,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPvXTrafGen.h"
+#include "inet/applications/generic/IPvXTrafGen.h"
 
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "L3AddressResolver.h"
-#include "IPSocket.h"
-#include "IL3AddressType.h"
-#include "INetworkProtocolControlInfo.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 namespace inet {
 

@@ -19,22 +19,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "IPv4.h"
+#include "inet/networklayer/ipv4/IPv4.h"
 
-#include "ARPPacket_m.h"
-#include "IARP.h"
-#include "ICMPMessage_m.h"
-#include "Ieee802Ctrl.h"
-#include "IIPv4RoutingTable.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
-#include "IPv4InterfaceData.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "IPSocket.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

@@ -23,14 +23,14 @@
  *****************************************************************************/
 
 //#include <iostream>
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 
-#include "IPSocket.h"
-#include "IPv4Address.h"
-#include "Ieee802Ctrl.h"
-#include "Ieee80211Frame_m.h"
-#include "ICMPMessage_m.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

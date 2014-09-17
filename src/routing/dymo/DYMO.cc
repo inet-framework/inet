@@ -16,24 +16,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "DYMO.h"
-#include "IPSocket.h"
-#include "IPProtocolId_m.h"
+#include "inet/routing/dymo/DYMO.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_IDEALWIRELESS
-#include "IdealMacFrame_m.h"
+#include "inet/linklayer/ideal/IdealMacFrame_m.h"
 #endif // ifdef WITH_IDEALWIRELESS
 
 #ifdef WITH_IEEE80211
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "L3AddressResolver.h"
-#include "INetworkProtocolControlInfo.h"
-#include "UDPControlInfo.h"
-#include "NodeOperations.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

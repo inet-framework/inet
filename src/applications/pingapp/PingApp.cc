@@ -18,14 +18,14 @@
 
 #include <iostream>
 
-#include "PingApp.h"
+#include "inet/applications/pingapp/PingApp.h"
 
-#include "L3AddressResolver.h"
-#include "PingPayload_m.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "IL3AddressType.h"
-#include "INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 namespace inet {
 

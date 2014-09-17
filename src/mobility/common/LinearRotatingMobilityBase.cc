@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <LinearRotatingMobilityBase.h>
+#include "inet/mobility/common/LinearRotatingMobilityBase.h"
 
 namespace inet {
 

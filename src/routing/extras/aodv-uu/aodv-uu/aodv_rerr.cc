@@ -31,13 +31,13 @@
 #endif
 #else
 #include <netinet/in.h>
-#include "aodv_rerr.h"
-#include "routing_table.h"
-#include "aodv_socket.h"
-#include "aodv_timeout.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
-#include "params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rerr.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
 #endif
 
 namespace inet {

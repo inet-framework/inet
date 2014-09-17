@@ -19,10 +19,10 @@
 #ifndef __INET_TCPLWIPMSGBASEDQUEUES_H
 #define __INET_TCPLWIPMSGBASEDQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TcpLwipQueues.h"
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

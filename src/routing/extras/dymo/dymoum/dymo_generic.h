@@ -23,12 +23,12 @@
 
 #ifndef NS_NO_GLOBALS
 
-#include "defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
 #ifndef OMNETPP
 #include <sys/types.h>
 #include <netinet/in.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #endif
 
 /* Broadcast address (255.255.255.255) */

@@ -22,10 +22,10 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DYMO_RoutingEntry.h"
-#include "IIPv4RoutingTable.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RoutingEntry.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 namespace inet {
 

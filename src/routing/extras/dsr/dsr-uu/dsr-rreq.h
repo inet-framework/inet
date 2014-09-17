@@ -8,7 +8,7 @@
 #ifndef _DSR_RREQ_H
 #define _DSR_RREQ_H
 
-#include "dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
 
 #ifdef NS2
 #ifndef OMNETPP

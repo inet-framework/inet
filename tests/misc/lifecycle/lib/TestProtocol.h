@@ -20,8 +20,8 @@
 #ifndef __INET_TESTPROTOCOL_H_
 #define __INET_TESTPROTOCOL_H_
 
-#include "INETDefs.h"
-#include "Lifecycle.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 class INET_API TestProtocol : public cSimpleModule, public ILifecycle {
   private:

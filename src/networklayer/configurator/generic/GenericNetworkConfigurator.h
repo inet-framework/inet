@@ -22,11 +22,11 @@
 #define __INET_GENERICNETWORKCONFIGURATOR_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
-#include "Topology.h"
-#include "IInterfaceTable.h"
-#include "GenericRoutingTable.h"
-#include "L3Address.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/Topology.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

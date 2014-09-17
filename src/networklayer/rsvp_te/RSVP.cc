@@ -12,19 +12,19 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "RSVP.h"
-#include "IPv4ControlInfo.h"
-#include "L3AddressResolver.h"
-#include "Utils.h"
-#include "XMLUtils.h"
-#include "IPv4InterfaceData.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "IPSocket.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "TED.h"
+#include "inet/networklayer/rsvp_te/RSVP.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/rsvp_te/Utils.h"
+#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ted/TED.h"
 
 namespace inet {
 

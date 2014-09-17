@@ -19,7 +19,7 @@
 #ifndef __INET_TCPIPCHECKSUM_H
 #define __INET_TCPIPCHECKSUM_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

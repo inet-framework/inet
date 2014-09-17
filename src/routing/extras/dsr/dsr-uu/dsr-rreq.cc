@@ -12,27 +12,27 @@
 #include <net/ip.h>
 #include <linux/random.h>
 
-#include "dsr-dev.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-dev.h"
 #endif
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
 
 
-#include "debug_dsr.h"
-#include "dsr.h"
-#include "tbl.h"
-#include "dsr-rrep.h"
-#include "dsr-rreq.h"
-#include "dsr-opt.h"
-#include "link-cache.h"
-#include "send-buf.h"
-#include "neigh.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rrep.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rreq.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/send-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/neigh.h"
 
 #ifndef OMNETPP
 #ifndef NS2

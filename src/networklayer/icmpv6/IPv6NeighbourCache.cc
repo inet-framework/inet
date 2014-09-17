@@ -16,7 +16,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "IPv6NeighbourCache.h"
+#include "inet/networklayer/icmpv6/IPv6NeighbourCache.h"
 
 namespace inet {
 

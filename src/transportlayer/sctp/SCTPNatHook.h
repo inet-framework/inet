@@ -1,9 +1,9 @@
 #ifndef __INET_SCTPNATHOOK_H
 #define __INET_SCTPNATHOOK_H
 
-#include "INetfilter.h"
-#include "SCTPNatTable.h"
-#include "INETDefs.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/transportlayer/sctp/SCTPNatTable.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

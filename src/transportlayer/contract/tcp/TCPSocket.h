@@ -18,10 +18,10 @@
 #ifndef __INET_TCPSOCKET_H
 #define __INET_TCPSOCKET_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPCommand_m.h"
-#include "L3Address.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

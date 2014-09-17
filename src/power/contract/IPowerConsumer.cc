@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPowerConsumer.h"
+#include "inet/power/contract/IPowerConsumer.h"
 
 namespace inet {
 

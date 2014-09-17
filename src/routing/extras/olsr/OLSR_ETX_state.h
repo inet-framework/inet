@@ -31,8 +31,8 @@
 #ifndef __OLSR_ETX_state_h__
 #define __OLSR_ETX_state_h__
 
-#include <OLSR_ETX_repositories.h>
-#include <OLSR_state.h>
+#include "OLSR_ETX_repositories.h"
+#include "OLSR_state.h"
 
 namespace inet {
 

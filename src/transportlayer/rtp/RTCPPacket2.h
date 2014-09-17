@@ -20,9 +20,9 @@
 #ifndef __INET_RTCPPACKET2_H
 #define __INET_RTCPPACKET2_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "RTCPPacket2_m.h"
+#include "inet/transportlayer/rtp/RTCPPacket2_m.h"
 
 namespace inet {
 

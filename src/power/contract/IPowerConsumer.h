@@ -18,7 +18,7 @@
 #ifndef __INET_IPOWERCONSUMER_H
 #define __INET_IPOWERCONSUMER_H
 
-#include "PowerDefs.h"
+#include "inet/power/base/PowerDefs.h"
 
 namespace inet {
 

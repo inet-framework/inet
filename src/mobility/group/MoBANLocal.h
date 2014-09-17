@@ -42,10 +42,10 @@
 #ifndef __INET_MOBANLOCAL_H
 #define __INET_MOBANLOCAL_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
-#include "MoBANCoordinator.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
+#include "inet/mobility/group/MoBANCoordinator.h"
 
 namespace inet {
 

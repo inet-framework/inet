@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Arrival.h"
+#include "inet/physicallayer/common/Arrival.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
  **************************************************************************/
 
 #include "assert.h"
-#include "Coord.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

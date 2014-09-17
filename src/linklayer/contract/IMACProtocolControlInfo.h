@@ -18,7 +18,7 @@
 #ifndef __INET_IMACPROTOCOLCONTROLINFO_H
 #define __INET_IMACPROTOCOLCONTROLINFO_H
 
-#include "MACAddress.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

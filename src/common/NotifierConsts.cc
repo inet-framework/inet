@@ -16,7 +16,7 @@
 //
 
 #include <stdio.h>
-#include "NotifierConsts.h"
+#include "inet/common/NotifierConsts.h"
 
 namespace inet {
 

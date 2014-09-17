@@ -14,20 +14,20 @@
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #else
-#include "dsr.h"
-#include "debug_dsr.h"
-#include "tbl.h"
-#include "neigh.h"
-#include "dsr-ack.h"
-#include "link-cache.h"
-#include "dsr-rerr.h"
-#include "dsr-dev.h"
-#include "dsr-srt.h"
-#include "dsr-opt.h"
-#include "timer.h"
-#include "maint-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/neigh.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-ack.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rerr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-dev.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/maint-buf.h"
 
 
 #define MAINT_BUF_PROC_FS_NAME "maint_buf"
@@ -38,7 +38,7 @@ static DSRUUTimer ack_timer;
 
 #endif              /* NS2 */
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif /* omnetpp */
 
 namespace inet {

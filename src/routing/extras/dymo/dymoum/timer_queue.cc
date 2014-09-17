@@ -28,7 +28,7 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "timer_queue.h"
+#include "inet/routing/extras/dymo/dymoum/timer_queue.h"
 
 #include <time.h>
 #include <stdlib.h>

@@ -28,7 +28,7 @@
 //
 // ***************************************************************************
 
-#include "HttpController.h"
+#include "inet/applications/httptools/configurator/HttpController.h"
 
 namespace inet {
 

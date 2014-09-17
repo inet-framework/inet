@@ -21,14 +21,14 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include "OSPFRouting.h"
+#include "inet/routing/ospfv2/OSPFRouting.h"
 
-#include "MessageHandler.h"
-#include "OSPFConfigReader.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "IPSocket.h"
-#include "ModuleAccess.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/OSPFConfigReader.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

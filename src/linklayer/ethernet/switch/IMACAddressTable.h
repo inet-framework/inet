@@ -18,8 +18,8 @@
 #ifndef __INET_IMACADDRESSTABLE_H
 #define __INET_IMACADDRESSTABLE_H
 
-#include "INETDefs.h"
-#include "MACAddress.h"
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

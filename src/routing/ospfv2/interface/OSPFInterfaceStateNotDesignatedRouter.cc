@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OSPFInterfaceStateNotDesignatedRouter.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateNotDesignatedRouter.h"
 
-#include "MessageHandler.h"
-#include "OSPFArea.h"
-#include "OSPFInterfaceStateDown.h"
-#include "OSPFInterfaceStateLoopback.h"
-#include "OSPFRouter.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateDown.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateLoopback.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

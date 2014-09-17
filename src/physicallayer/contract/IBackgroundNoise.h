@@ -18,9 +18,9 @@
 #ifndef __INET_IBACKGROUNDNOISE_H
 #define __INET_IBACKGROUNDNOISE_H
 
-#include "IReception.h"
-#include "IListening.h"
-#include "INoise.h"
+#include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/contract/IListening.h"
+#include "inet/physicallayer/contract/INoise.h"
 
 namespace inet {
 

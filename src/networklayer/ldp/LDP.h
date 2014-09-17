@@ -20,15 +20,15 @@
 #include <iostream>
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LDPPacket_m.h"
-#include "UDPSocket.h"
-#include "TCPSocket.h"
-#include "TCPSocketMap.h"
-#include "IClassifier.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
+#include "inet/networklayer/ldp/LDPPacket_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

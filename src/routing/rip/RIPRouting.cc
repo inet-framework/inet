@@ -18,16 +18,16 @@
 #include <algorithm>
 #include <functional>
 
-#include "IL3AddressType.h"
-#include "InterfaceMatcher.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "NotifierConsts.h"
-#include "UDP.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/InterfaceMatcher.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/transportlayer/udp/UDP.h"
+#include "inet/common/ModuleAccess.h"
 
-#include "RIPPacket_m.h"
-#include "RIPRouting.h"
+#include "inet/routing/rip/RIPPacket_m.h"
+#include "inet/routing/rip/RIPRouting.h"
 
 namespace inet {
 

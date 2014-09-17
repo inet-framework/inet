@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PowerSinkBase.h"
+#include "inet/power/base/PowerSinkBase.h"
 
 namespace inet {
 

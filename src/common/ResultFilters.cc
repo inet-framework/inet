@@ -17,10 +17,10 @@
 // @author Zoltan Bojthe
 //
 
-#include "ResultFilters.h"
+#include "inet/common/ResultFilters.h"
 
-#include "Coord.h"
-#include "IMobility.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

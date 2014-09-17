@@ -18,17 +18,17 @@
 #ifndef __INET_AODVROUTING_H
 #define __INET_AODVROUTING_H
 
-#include "INETDefs.h"
-#include "IInterfaceTable.h"
-#include "IL3AddressType.h"
-#include "IRoutingTable.h"
-#include "INetfilter.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
-#include "UDPSocket.h"
-#include "AODVRouteData.h"
-#include "UDPPacket.h"
-#include "AODVControlPackets_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/routing/aodv/AODVRouteData.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/routing/aodv/AODVControlPackets_m.h"
 #include <map>
 
 namespace inet {

@@ -17,7 +17,7 @@
 #ifndef __INET_LIFECYCLEOPERATION_H
 #define __INET_LIFECYCLEOPERATION_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

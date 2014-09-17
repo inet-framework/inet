@@ -26,9 +26,9 @@
 /// \brief  Implementation of our routing table.
 ///
 
-#include "OLSR.h"
-#include "OLSR_rtable.h"
-#include "OLSR_repositories.h"
+#include "inet/routing/extras/olsr/OLSR.h"
+#include "inet/routing/extras/olsr/OLSR_rtable.h"
+#include "inet/routing/extras/olsr/OLSR_repositories.h"
 
 namespace inet {
 

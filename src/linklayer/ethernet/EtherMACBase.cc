@@ -18,15 +18,15 @@
 
 #include <stdlib.h>
 
-#include "EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMACBase.h"
 
-#include "EtherFrame.h"
-#include "Ethernet.h"
-#include "ModuleAccess.h"
-#include "InterfaceEntry.h"
-#include "IPassiveQueue.h"
-#include "NodeOperations.h"
-#include "INETUtils.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

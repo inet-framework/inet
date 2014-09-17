@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IRadio.h"
+#include "inet/physicallayer/contract/IRadio.h"
 
 namespace inet {
 

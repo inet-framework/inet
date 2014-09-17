@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ThresholdDropper.h"
+#include "inet/common/queue/ThresholdDropper.h"
 
 namespace inet {
 

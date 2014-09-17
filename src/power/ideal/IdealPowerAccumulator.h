@@ -18,9 +18,9 @@
 #ifndef __INET_IDEALPOWERACCUMULATOR_H
 #define __INET_IDEALPOWERACCUMULATOR_H
 
-#include "IPowerAccumulator.h"
-#include "PowerSourceBase.h"
-#include "PowerSinkBase.h"
+#include "inet/power/contract/IPowerAccumulator.h"
+#include "inet/power/base/PowerSourceBase.h"
+#include "inet/power/base/PowerSinkBase.h"
 
 namespace inet {
 

@@ -31,16 +31,16 @@
 #endif
 #else
 #include <netinet/in.h>
-#include "aodv_hello.h"
-#include "aodv_timeout.h"
-#include "aodv_rrep.h"
-#include "aodv_rreq.h"
-#include "routing_table.h"
-#include "timer_queue_aodv.h"
-#include "params.h"
-#include "aodv_socket.h"
-#include "defs_aodv.h"
-#include "debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_hello.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rrep.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rreq.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
 #define DEBUG_HELLO
 extern int unidir_hack, receive_n_hellos, hello_jittering, optimized_hellos;
 static struct timer hello_timer;

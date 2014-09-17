@@ -20,13 +20,13 @@
 #ifndef __INET_ETHERMACBASE_H
 #define __INET_ETHERMACBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPassiveQueue.h"
-#include "MACBase.h"
-#include "MACAddress.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

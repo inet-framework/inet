@@ -20,9 +20,9 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Ieee80211MgmtAPBase.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
 namespace inet {
 

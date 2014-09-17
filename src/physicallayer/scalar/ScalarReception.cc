@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ScalarReception.h"
+#include "inet/physicallayer/scalar/ScalarReception.h"
 
 namespace inet {
 

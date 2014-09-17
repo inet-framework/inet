@@ -23,14 +23,14 @@
 
 #ifndef NS_NO_GLOBALS
 
-#include "defs_dymo.h"
-#include "dlist.h"
-#include "timer_queue.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dlist.h"
+#include "inet/routing/extras/dymo/dymoum/timer_queue.h"
 #ifndef OMNETPP
 #include <netinet/in.h>
 #include <sys/types.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 
 #endif
 

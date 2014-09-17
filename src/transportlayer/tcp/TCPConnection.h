@@ -20,11 +20,11 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "TCP.h"
-#include "TCPSegment.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

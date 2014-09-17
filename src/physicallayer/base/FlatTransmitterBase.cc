@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "FlatTransmitterBase.h"
-#include "Modulation.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/common/Modulation.h"
 
 namespace inet {
 

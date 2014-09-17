@@ -24,10 +24,10 @@
 #define __INET_FLOOD_H
 
 #include <list>
-#include "INetworkProtocol.h"
-#include "NetworkProtocolBase.h"
-#include "L3Address.h"
-#include "FloodDatagram.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/common/NetworkProtocolBase.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/flood/FloodDatagram.h"
 
 namespace inet {
 

@@ -16,11 +16,11 @@
 #ifndef __INET_L2NODECONFIGURATOR_H
 #define __INET_L2NODECONFIGURATOR_H
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
-#include "IInterfaceTable.h"
-#include "L2NetworkConfigurator.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
 
 namespace inet {
 

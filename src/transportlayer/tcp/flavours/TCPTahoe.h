@@ -18,9 +18,9 @@
 #ifndef __INET_TCPTAHOE_H
 #define __INET_TCPTAHOE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TCPTahoeRenoFamily.h"
 
 namespace inet {
 

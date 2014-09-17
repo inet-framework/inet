@@ -16,20 +16,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTP.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "IL3AddressType.h"
-#include "INetworkProtocolControlInfo.h"
-#include "IPSocket.h"
-#include "ModuleAccess.h"
+#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/common/ModuleAccess.h"
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
-#include "UDPControlInfo_m.h"
-#include "UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

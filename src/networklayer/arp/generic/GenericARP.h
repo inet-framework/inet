@@ -18,13 +18,13 @@
 #ifndef __INET_GENERICARP_H
 #define __INET_GENERICARP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "MACAddress.h"
-#include "ModuleAccess.h"
-#include "InterfaceEntry.h"
-#include "IARP.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/arp/IARP.h"
 
 namespace inet {
 

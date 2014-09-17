@@ -24,8 +24,8 @@
 #define __INET_INSPECTORHELPERS_H
 
 #include <iostream>
-#include "DYMO_RM_m.h"
-#include "DYMO_RERR_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RM_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RERR_m.h"
 
 namespace inet {
 

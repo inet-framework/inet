@@ -18,7 +18,7 @@
 #ifndef __INET_DATABASEDESCRIPTIONHANDLER_H
 #define __INET_DATABASEDESCRIPTIONHANDLER_H
 
-#include "IMessageHandler.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 

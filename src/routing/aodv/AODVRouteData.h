@@ -19,8 +19,8 @@
 #define __INET_AODVROUTEDATA_H
 
 #include <set>
-#include "L3Address.h"
-#include "INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

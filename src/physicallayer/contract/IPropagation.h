@@ -18,9 +18,9 @@
 #ifndef __INET_IPROPAGATION_H
 #define __INET_IPROPAGATION_H
 
-#include "IMobility.h"
-#include "IArrival.h"
-#include "ITransmission.h"
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

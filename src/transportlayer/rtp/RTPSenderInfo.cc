@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTPSenderInfo.h"
+#include "inet/transportlayer/rtp/RTPSenderInfo.h"
 
-#include "reports.h"
-#include "RTPPacket.h"
+#include "inet/transportlayer/rtp/reports.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 

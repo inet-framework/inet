@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211RADIO_H
 #define __INET_IEEE80211RADIO_H
 
-#include "Radio.h"
+#include "inet/physicallayer/common/Radio.h"
 
 namespace inet {
 

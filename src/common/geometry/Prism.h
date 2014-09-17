@@ -18,9 +18,9 @@
 #ifndef __INET_PRISM_H
 #define __INET_PRISM_H
 
-#include "Shape3D.h"
-#include "Polygon.h"
-#include "Rotation.h"
+#include "inet/common/geometry/Shape3D.h"
+#include "inet/common/geometry/Polygon.h"
+#include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 

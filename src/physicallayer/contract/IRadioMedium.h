@@ -18,17 +18,17 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
-#include "Material.h"
-#include "IRadio.h"
-#include "IRadioFrame.h"
-#include "IArrival.h"
-#include "IPropagation.h"
-#include "IPathLoss.h"
-#include "IObstacleLoss.h"
-#include "IAttenuation.h"
-#include "IBackgroundNoise.h"
-#include "IReceptionDecision.h"
-#include "IListeningDecision.h"
+#include "inet/environment/Material.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/IRadioFrame.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/IPropagation.h"
+#include "inet/physicallayer/contract/IPathLoss.h"
+#include "inet/physicallayer/contract/IObstacleLoss.h"
+#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/contract/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/IReceptionDecision.h"
+#include "inet/physicallayer/contract/IListeningDecision.h"
 
 namespace inet {
 

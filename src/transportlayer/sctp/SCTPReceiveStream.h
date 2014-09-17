@@ -19,9 +19,9 @@
 #ifndef __INET_SCTPRECEIVESTREAM_H
 #define __INET_SCTPRECEIVESTREAM_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "SCTPQueue.h"
+#include "inet/transportlayer/sctp/SCTPQueue.h"
 
 namespace inet {
 

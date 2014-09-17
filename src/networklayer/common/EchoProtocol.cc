@@ -16,10 +16,10 @@
 //
 
 #include <string.h>
-#include "EchoProtocol.h"
-#include "IPSocket.h"
-#include "INetworkProtocolControlInfo.h"
-#include "PingPayload_m.h"
+#include "inet/networklayer/common/EchoProtocol.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 
 namespace inet {
 

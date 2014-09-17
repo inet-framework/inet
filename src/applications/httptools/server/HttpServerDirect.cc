@@ -15,7 +15,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "HttpServerDirect.h"
+#include "inet/applications/httptools/server/HttpServerDirect.h"
 
 namespace inet {
 

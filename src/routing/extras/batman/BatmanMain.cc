@@ -1,12 +1,12 @@
 /*
   */
-#include "BatmanMain.h"
+#include "inet/routing/extras/batman/BatmanMain.h"
 
-#include "INetworkProtocolControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "L3AddressResolver.h"
-#include "UDPPacket_m.h"
-#include "Ieee802Ctrl.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

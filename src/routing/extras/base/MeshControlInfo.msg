@@ -18,7 +18,7 @@
 
 
 cplusplus {{
-#include "Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 }}
 
 class noncobject inet::Ieee802Ctrl;

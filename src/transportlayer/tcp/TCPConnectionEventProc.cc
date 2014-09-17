@@ -16,13 +16,13 @@
 //
 
 #include <string.h>
-#include "TCP.h"
-#include "TCPConnection.h"
-#include "TCPSegment.h"
-#include "TCPCommand_m.h"
-#include "TCPSendQueue.h"
-#include "TCPReceiveQueue.h"
-#include "TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TCPAlgorithm.h"
 
 namespace inet {
 

@@ -19,9 +19,9 @@
 #include <sstream>
 #include <algorithm>
 
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
-#include "IInterfaceTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

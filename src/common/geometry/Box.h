@@ -18,8 +18,8 @@
 #ifndef __INET_BOX_H_
 #define __INET_BOX_H_
 
-#include "INETDefs.h"
-#include "Coord.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

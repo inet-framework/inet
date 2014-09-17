@@ -19,7 +19,7 @@
 #define __INET_NETANIMTRACE_H
 
 #include <fstream>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

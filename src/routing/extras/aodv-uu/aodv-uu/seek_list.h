@@ -24,9 +24,9 @@
 #define _SEEK_LIST_H
 
 #ifndef NS_NO_GLOBALS
-#include "defs_aodv.h"
-#include "timer_queue_aodv.h"
-#include "list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/list.h"
 
 namespace inet {
 

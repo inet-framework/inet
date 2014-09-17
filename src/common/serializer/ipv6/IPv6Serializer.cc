@@ -18,24 +18,24 @@
 #include <algorithm>    // std::min
 #include <platdep/sockets.h>
 
-#include "IPv6Serializer.h"
+#include "inet/common/serializer/ipv6/IPv6Serializer.h"
 
-#include "headers/defs.h"
-#include "headers/ip6.h"
+#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/ipv6/headers/ip6.h"
 
 #ifdef WITH_UDP
-#include "UDPSerializer.h"
+#include "inet/common/serializer/udp/UDPSerializer.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
-#include "SCTPSerializer.h"
+#include "inet/common/serializer/sctp/SCTPSerializer.h"
 #endif // ifdef WITH_SCTP
 
-#include "TCPIPchecksum.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
-#include "TCPSerializer.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 #endif // ifdef WITH_TCP_COMMON
 
 #if defined(_MSC_VER)

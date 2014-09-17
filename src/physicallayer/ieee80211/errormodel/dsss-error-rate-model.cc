@@ -19,8 +19,8 @@
  */
 
 #include <math.h>
-#include "INETDefs.h"
-#include "dsss-error-rate-model.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
 
 namespace inet {
 

@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OSPFNeighborState.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
 
-#include "OSPFArea.h"
-#include "OSPFInterface.h"
-#include "OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

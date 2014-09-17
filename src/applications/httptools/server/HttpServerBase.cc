@@ -15,10 +15,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "HttpServerBase.h"
+#include "inet/applications/httptools/server/HttpServerBase.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

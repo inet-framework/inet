@@ -18,10 +18,10 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
-#include "EtherFrame.h"
-#include "STP.h"
-#include "Ieee802Ctrl.h"
-#include "InterfaceEntry.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ieee8021d/stp/STP.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

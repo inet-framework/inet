@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmission.h"
 
 namespace inet {
 

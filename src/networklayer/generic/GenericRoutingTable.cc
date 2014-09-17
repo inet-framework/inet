@@ -18,13 +18,13 @@
 #include <algorithm>
 #include <sstream>
 
-#include "GenericRoutingTable.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
 
-#include "IInterfaceTable.h"
-#include "GenericRoute.h"
-#include "GenericNetworkProtocolInterfaceData.h"
-#include "NotifierConsts.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/generic/GenericRoute.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

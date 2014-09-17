@@ -14,9 +14,9 @@
 //
 
 cplusplus {{
-#include "RTCPPacket2.h"
-#include "reports.h"
-#include "sdes.h"
+#include "inet/transportlayer/rtp/RTCPPacket2.h"
+#include "inet/transportlayer/rtp/reports.h"
+#include "inet/transportlayer/rtp/sdes.h"
 }}
 
 namespace inet::rtp;

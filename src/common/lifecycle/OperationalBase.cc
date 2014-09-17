@@ -17,10 +17,10 @@
 // author: Zoltan Bojthe
 //
 
-#include "OperationalBase.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

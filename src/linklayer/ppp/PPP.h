@@ -18,13 +18,13 @@
 #ifndef __INET_PPP_H
 #define __INET_PPP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "PPPFrame_m.h"
-#include "TxNotifDetails.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
-#include "MACBase.h"
+#include "inet/linklayer/ppp/PPPFrame_m.h"
+#include "inet/linklayer/common/TxNotifDetails.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/MACBase.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "BonnMotionFileCache.h"
+#include "inet/mobility/single/BonnMotionFileCache.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EtherHub.h"
+#include "inet/linklayer/ethernet/EtherHub.h"
 
 namespace inet {
 

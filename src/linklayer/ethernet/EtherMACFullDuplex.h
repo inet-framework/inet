@@ -18,9 +18,9 @@
 #ifndef __INET_ETHERMACFULLDUPLEX_H
 #define __INET_ETHERMACFULLDUPLEX_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMACBase.h"
 
 namespace inet {
 

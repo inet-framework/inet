@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARBACKGROUNDNOISE_H
 #define __INET_SCALARBACKGROUNDNOISE_H
 
-#include "IBackgroundNoise.h"
+#include "inet/physicallayer/contract/IBackgroundNoise.h"
 
 namespace inet {
 

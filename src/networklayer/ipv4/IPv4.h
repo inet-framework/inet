@@ -19,17 +19,17 @@
 #ifndef __INET_IPV4_H
 #define __INET_IPV4_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IARP.h"
-#include "ICMP.h"
-#include "ILifecycle.h"
-#include "INetfilter.h"
-#include "INetworkProtocol.h"
-#include "IPv4Datagram.h"
-#include "IPv4FragBuf.h"
-#include "ProtocolMap.h"
-#include "QueueBase.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4FragBuf.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/common/queue/QueueBase.h"
 
 namespace inet {
 

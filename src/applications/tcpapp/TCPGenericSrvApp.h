@@ -18,9 +18,9 @@
 #ifndef __INET_TCPGENERICSRVAPP_H
 #define __INET_TCPGENERICSRVAPP_H
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

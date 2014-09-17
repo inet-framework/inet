@@ -21,12 +21,12 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "IPvXTrafSink.h"
-#include "ILifecycle.h"
-#include "NodeStatus.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/applications/generic/IPvXTrafSink.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

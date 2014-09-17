@@ -16,28 +16,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6.h"
+#include "inet/networklayer/ipv6/IPv6.h"
 
-#include "IPSocket.h"
+#include "inet/networklayer/common/IPSocket.h"
 
-#include "IPv6ControlInfo.h"
-#include "IPv6NDMessage_m.h"
-#include "Ieee802Ctrl.h"
-#include "ICMPv6Message_m.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
 
 #ifdef WITH_xMIPv6
-#include "MobilityHeader.h"
+#include "inet/networklayer/xmipv6/MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
 
-#include "IPv6ExtensionHeaders.h"
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

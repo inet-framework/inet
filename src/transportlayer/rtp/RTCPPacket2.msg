@@ -14,9 +14,9 @@
 //
 
 cplusplus {{
-#include "RTCPPacket1.h"
-#include "reports.h"
-#include "sdes.h"
+#include "inet/transportlayer/rtp/RTCPPacket1.h"
+#include "inet/transportlayer/rtp/reports.h"
+#include "inet/transportlayer/rtp/sdes.h"
 }}
 
 class cArray;

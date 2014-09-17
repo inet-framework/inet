@@ -17,9 +17,9 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IntServ.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
 
 namespace inet {
 

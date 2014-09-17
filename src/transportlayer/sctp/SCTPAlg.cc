@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTPAlg.h"
-#include "SCTP.h"
+#include "inet/transportlayer/sctp/SCTPAlg.h"
+#include "inet/transportlayer/sctp/SCTP.h"
 
 namespace inet {
 

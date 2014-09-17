@@ -22,10 +22,10 @@
 
 
 cplusplus {{
-#include "INETDefs.h"
-#include "IPv6Address.h"
-#include "IPv6Datagram.h" // added by CB
-#include "IPv6ExtensionHeaders.h" // 17.10.07 - CB
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h" // added by CB
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
 namespace inet;

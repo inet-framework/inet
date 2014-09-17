@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPBaseAlg.h"
-#include "TCP.h"
-#include "TCPSACKRexmitQueue.h"
+#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
 
 namespace inet {
 

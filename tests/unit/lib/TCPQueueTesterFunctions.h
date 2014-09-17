@@ -2,7 +2,7 @@
 
 #include "TCPMsgBasedRcvQueue.h"
 #include "TCPMsgBasedSendQueue.h"
-#include "TCPVirtualDataRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
 
 // TCPMsgBasedSendQueue:
 

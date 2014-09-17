@@ -18,9 +18,9 @@
 #ifndef __INET_TCPGENERICSRVTHREAD_H
 #define __INET_TCPGENERICSRVTHREAD_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSrvHostApp.h"
+#include "inet/applications/tcpapp/TCPSrvHostApp.h"
 
 namespace inet {
 

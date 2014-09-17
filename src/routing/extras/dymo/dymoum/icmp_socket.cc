@@ -26,9 +26,9 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "debug_dymo.h"
-#include "icmp_socket.h"
-#include "blacklist.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/icmp_socket.h"
+#include "inet/routing/extras/dymo/dymoum/blacklist.h"
 
 #include <stdlib.h>
 #include <unistd.h>

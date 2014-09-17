@@ -18,10 +18,10 @@
 #ifndef __INET_SCTPALGORITHM_H
 #define __INET_SCTPALGORITHM_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "SCTPAssociation.h"
-#include "SCTPQueue.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPQueue.h"
 
 namespace inet {
 

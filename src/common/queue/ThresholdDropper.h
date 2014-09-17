@@ -19,8 +19,8 @@
 #ifndef __INET_THRESHOLDDROPPER_H
 #define __INET_THRESHOLDDROPPER_H
 
-#include "INETDefs.h"
-#include "AlgorithmicDropperBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/queue/AlgorithmicDropperBase.h"
 
 namespace inet {
 

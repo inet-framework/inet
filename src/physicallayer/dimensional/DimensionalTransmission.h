@@ -18,9 +18,9 @@
 #ifndef __INET_DIMENSIONALTRANSMISSION_H
 #define __INET_DIMENSIONALTRANSMISSION_H
 
-#include "FlatTransmissionBase.h"
-#include "MappingBase.h"
-#include "MappingUtils.h"
+#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
 
 namespace inet {
 

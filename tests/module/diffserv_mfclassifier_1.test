@@ -14,10 +14,10 @@ simple TestApp
 %file: TestApp.cc
 
 #include <fstream>
-#include "INETDefs.h"
-#include "IPv4Datagram.h"
-#include "IPv6Datagram.h"
-#include "UDPPacket.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 
 using namespace inet;
 namespace diffserv_mfclassifier_1

@@ -9,13 +9,13 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "INETUtils.h"
-#include "LMacLayer.h"
-#include "INETMath.h"
-#include "LMacFrame_m.h"
-#include "InterfaceEntry.h"
-#include "SimpleLinkLayerControlInfo.h"
-#include "FindModule.h"
+#include "inet/common/INETUtils.h"
+#include "inet/linklayer/lmac/LMacLayer.h"
+#include "inet/common/INETMath.h"
+#include "inet/linklayer/lmac/LMacFrame_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/common/FindModule.h"
 
 namespace inet {
 

@@ -20,10 +20,10 @@
 
 #include <list>
 
-#include "LSA.h"
-#include "OSPFcommon.h"
-#include "OSPFPacket_m.h"
-#include "OSPFTimer.h"
+#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/OSPFPacket_m.h"
+#include "inet/routing/ospfv2/OSPFTimer.h"
 
 namespace inet {
 

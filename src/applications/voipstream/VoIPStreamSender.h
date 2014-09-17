@@ -28,7 +28,7 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -42,12 +42,12 @@ extern "C" {
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 };
 
-#include "AudioOutFile.h"
-#include "L3AddressResolver.h"
-#include "UDPSocket.h"
-#include "VoIPStreamPacket_m.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/applications/voipstream/AudioOutFile.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/applications/voipstream/VoIPStreamPacket_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

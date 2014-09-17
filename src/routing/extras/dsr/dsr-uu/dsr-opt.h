@@ -25,7 +25,7 @@
 #define __LITTLE_ENDIAN_BITFIELD 1234
 #endif
 
-#include "dsr-uu/dsr.h"
+#include "dsr.h"
 
 
 #ifndef NO_GLOBALS

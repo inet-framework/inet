@@ -20,8 +20,8 @@
 
 #include <cassert>
 
-#include "INETDefs.h"
-#include "RTPParticipantInfo.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
 
 namespace inet {
 

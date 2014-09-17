@@ -17,17 +17,17 @@
 //
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
-#include "DSCP_m.h"
-#include "DSCPMarker.h"
+#include "inet/networklayer/diffserv/DSCP_m.h"
+#include "inet/networklayer/diffserv/DSCPMarker.h"
 
-#include "DiffservUtil.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
 
 namespace inet {
 

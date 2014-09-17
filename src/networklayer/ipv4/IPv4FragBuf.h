@@ -20,10 +20,10 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
-#include "ReassemblyBuffer.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/ReassemblyBuffer.h"
 
 namespace inet {
 

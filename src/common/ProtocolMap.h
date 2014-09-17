@@ -19,7 +19,7 @@
 #define __INET_PROTOCOLMAP_H
 
 #include <vector>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

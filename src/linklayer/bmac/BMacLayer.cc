@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "INETUtils.h"
-#include "INETMath.h"
-#include "InterfaceEntry.h"
-#include "ModuleAccess.h"
-#include "IMACProtocolControlInfo.h"
-#include "SimpleLinkLayerControlInfo.h"
-#include "BMacLayer.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/INETMath.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/linklayer/bmac/BMacLayer.h"
 
 namespace inet {
 

@@ -25,11 +25,11 @@
 #define MAX_MTU_SIZE    4000
 #endif // ifndef MAX_MTU_SIZE
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MACBase.h"
-#include "ExtFrame_m.h"
-#include "cSocketRTScheduler.h"
+#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/ext/ExtFrame_m.h"
+#include "inet/linklayer/ext/cSocketRTScheduler.h"
 
 namespace inet {
 

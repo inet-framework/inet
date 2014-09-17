@@ -19,14 +19,14 @@
 
 #include <stdlib.h>
 
-#include "MACBase.h"
+#include "inet/linklayer/common/MACBase.h"
 
-#include "NodeStatus.h"
-#include "NotifierConsts.h"
-#include "InterfaceEntry.h"
-#include "IInterfaceTable.h"
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

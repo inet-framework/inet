@@ -19,11 +19,11 @@
 #ifndef __INET_SCTPSERVER_H
 #define __INET_SCTPSERVER_H
 
-#include "INETDefs.h"
-#include "SCTPAssociation.h"
-#include "SCTPSocket.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

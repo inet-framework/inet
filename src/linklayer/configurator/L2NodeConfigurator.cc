@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "L2NodeConfigurator.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "NodeOperations.h"
+#include "inet/linklayer/configurator/L2NodeConfigurator.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IdealListening.h"
+#include "inet/physicallayer/ideal/IdealListening.h"
 
 namespace inet {
 

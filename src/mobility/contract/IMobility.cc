@@ -19,7 +19,7 @@
  * part of:     framework implementation developed by tkn
  *************************************************************************/
 
-#include "IMobility.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALTRANSMITTER_H
 #define __INET_IDEALTRANSMITTER_H
 
-#include "TransmitterBase.h"
+#include "inet/physicallayer/base/TransmitterBase.h"
 
 namespace inet {
 

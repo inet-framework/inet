@@ -16,8 +16,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv6Route.h"
-#include "IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/IPv6Route.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 
 #include "IPv6RoutingTable.h"
 

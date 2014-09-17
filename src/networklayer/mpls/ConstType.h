@@ -16,7 +16,7 @@
 #ifndef __INET_CONSTTYPE_H
 #define __INET_CONSTTYPE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 // Author: Benjamin Martin Seregi
 //
 
-#include "Ieee8021dInterfaceData.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
 namespace inet {
 

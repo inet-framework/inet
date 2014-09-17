@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211ECLASSIFIER_H
 #define __INET_IEEE80211ECLASSIFIER_H
 
-#include "IQoSClassifier.h"
+#include "inet/linklayer/ieee80211/mac/IQoSClassifier.h"
 
 namespace inet {
 

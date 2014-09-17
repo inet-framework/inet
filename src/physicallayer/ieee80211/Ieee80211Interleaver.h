@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211INTERLEAVER_H_
 #define __INET_IEEE80211INTERLEAVER_H_
 
-#include "INETDefs.h"
-#include "BitVector.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/BitVector.h"
 
 namespace inet {
 namespace physicallayer {

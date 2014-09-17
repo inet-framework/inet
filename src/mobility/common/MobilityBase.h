@@ -22,11 +22,11 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
-#include "INETDefs.h"
-#include "ModuleAccess.h"
-#include "Coord.h"
-#include "EulerAngles.h"
-#include "IMobility.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/EulerAngles.h"
+#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 

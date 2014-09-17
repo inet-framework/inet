@@ -19,9 +19,9 @@
 // Required for MACAddress declarations
 //
 cplusplus {{
-#include "Ieee80211Consts.h"
-#include "MACAddress.h"
-#include "Ieee802Ctrl_m.h" // for ~EtherType
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
 }}
 
 class noncobject MACAddress;

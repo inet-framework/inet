@@ -19,7 +19,7 @@
 #else
 
 #include <omnetpp.h>
-#include "compatibility_dsr.h"
+#include "inet/routing/extras/base/compatibility_dsr.h"
 
 namespace inet {
 

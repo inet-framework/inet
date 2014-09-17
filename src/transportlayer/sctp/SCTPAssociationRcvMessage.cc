@@ -19,19 +19,19 @@
 #include <string.h>
 #include <assert.h>
 
-#include "SCTP.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "SCTPMessage_m.h"
-#include "SCTPQueue.h"
-#include "SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPMessage_m.h"
+#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
 
 #ifdef WITH_IPv4
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

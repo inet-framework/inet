@@ -15,7 +15,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "HttpServerEvilB.h"
+#include "inet/applications/httptools/server/HttpServerEvilB.h"
 
 namespace inet {
 

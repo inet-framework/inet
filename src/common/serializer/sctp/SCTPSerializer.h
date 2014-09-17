@@ -18,7 +18,7 @@
 #ifndef __INET_SCTPSERIALIZER_H
 #define __INET_SCTPSERIALIZER_H
 
-#include "SCTPMessage.h"
+#include "inet/transportlayer/sctp/SCTPMessage.h"
 
 namespace inet {
 

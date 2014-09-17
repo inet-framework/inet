@@ -18,9 +18,9 @@
 #ifndef __INET_FLOODDATAGRAM_H
 #define __INET_FLOODDATAGRAM_H
 
-#include "INETDefs.h"
-#include "INetworkDatagram.h"
-#include "FloodDatagram_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/flood/FloodDatagram_m.h"
 
 namespace inet {
 

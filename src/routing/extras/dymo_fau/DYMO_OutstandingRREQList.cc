@@ -18,8 +18,8 @@
  */
 
 #include <stdexcept>
-#include "DYMO_OutstandingRREQList.h"
-#include "IPv4Address.h"
+#include "inet/routing/extras/dymo_fau/DYMO_OutstandingRREQList.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 

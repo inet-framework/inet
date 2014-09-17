@@ -16,7 +16,7 @@
 #ifndef __INET_RSVPPACKET_H
 #define __INET_RSVPPACKET_H
 
-#include "RSVPPacket_m.h"
+#include "inet/networklayer/rsvp_te/RSVPPacket_m.h"
 
 namespace inet {
 

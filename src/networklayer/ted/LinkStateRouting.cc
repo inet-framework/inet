@@ -14,17 +14,17 @@
 
 #include <algorithm>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LinkStateRouting.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "NotifierConsts.h"
-#include "IIPv4RoutingTable.h"
-#include "ModuleAccess.h"
-#include "IInterfaceTable.h"
-#include "TED.h"
+#include "inet/networklayer/ted/LinkStateRouting.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ted/TED.h"
 
 namespace inet {
 

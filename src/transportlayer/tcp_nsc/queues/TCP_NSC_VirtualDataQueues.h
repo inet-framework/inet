@@ -19,9 +19,9 @@
 #ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 #define __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCP_NSC_Queues.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 
 namespace inet {
 

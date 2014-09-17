@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 
 #endif
 #ifndef OMNETPP

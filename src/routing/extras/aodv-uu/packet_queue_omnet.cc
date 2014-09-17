@@ -20,9 +20,9 @@
  *
  *****************************************************************************/
 
-#include "aodv_uu_omnet.h"
-#include "IPv4Datagram.h"
-#include "Ieee802Ctrl.h"
+#include "inet/routing/extras/aodv-uu/aodv_uu_omnet.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

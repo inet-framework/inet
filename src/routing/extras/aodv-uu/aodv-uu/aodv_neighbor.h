@@ -24,8 +24,8 @@
 #define _AODV_NEIGHBOR_H
 
 #ifndef NS_NO_GLOBALS
-#include "defs_aodv.h"
-#include "routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
 
 #endif              /* NS_NO_GLOBALS */
 

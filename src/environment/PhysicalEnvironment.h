@@ -18,12 +18,12 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
-#include "IObjectCache.h"
-#include "IVisitor.h"
-#include "Shape3D.h"
-#include "PhysicalObject.h"
-#include "LineSegment.h"
-#include "Rotation.h"
+#include "inet/environment/cache/IObjectCache.h"
+#include "inet/environment/PhysicalObject.h"
+#include "inet/common/IVisitor.h"
+#include "inet/common/geometry/Shape3D.h"
+#include "inet/common/geometry/LineSegment.h"
+#include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 

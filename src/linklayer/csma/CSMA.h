@@ -27,11 +27,11 @@
 #ifndef __INET_CSMA_H
 #define __INET_CSMA_H
 
-#include "IRadio.h"
-#include "IMACProtocol.h"
-#include "MACAddress.h"
-#include "MACProtocolBase.h"
-#include "CSMAFrame_m.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/linklayer/contract/IMACProtocol.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACProtocolBase.h"
+#include "inet/linklayer/csma/CSMAFrame_m.h"
 
 namespace inet {
 

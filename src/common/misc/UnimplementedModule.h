@@ -18,7 +18,7 @@
 #ifndef __INET_UNIMPLEMENTEDMODULE_H
 #define __INET_UNIMPLEMENTEDMODULE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

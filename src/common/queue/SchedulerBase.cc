@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "SchedulerBase.h"
+#include "inet/common/queue/SchedulerBase.h"
 
 namespace inet {
 

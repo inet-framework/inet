@@ -16,11 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TcpLwipVirtualDataQueues.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipVirtualDataQueues.h"
 
-#include "TCPCommand_m.h"
-#include "TcpLwipConnection.h"
-#include "TCPSerializer.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 namespace inet {
 

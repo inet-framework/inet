@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTPClient.h"
+#include "inet/applications/sctpapp/SCTPClient.h"
 
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
 

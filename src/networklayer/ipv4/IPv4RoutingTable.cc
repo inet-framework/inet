@@ -21,17 +21,17 @@
 #include <algorithm>
 #include <sstream>
 
-#include "IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
-#include "IInterfaceTable.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4Route.h"
-#include "NotifierConsts.h"
-#include "RoutingTableParser.h"
-#include "NodeOperations.h"
-#include "NodeStatus.h"
-#include "INETUtils.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/ipv4/RoutingTableParser.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

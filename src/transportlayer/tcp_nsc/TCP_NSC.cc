@@ -17,41 +17,41 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "TCP_NSC.h"
+#include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
 
 #include "headers/defs.h"    // for endian macros
 
 #ifdef WITH_IPv4
-#include "ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "IL3AddressType.h"
-#include "IPSocket.h"
-#include "INetworkProtocolControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
 #include "headers/tcphdr.h"
-#include "TCPCommand_m.h"
-#include "TCPIPchecksum.h"
-#include "TCP_NSC_Queues.h"
-#include "TCPSegment.h"
-#include "TCPSerializer.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 #include <assert.h>
 #include <dlfcn.h>
 #include <netinet/in.h>
 
-#include "TCP_NSC_VirtualDataQueues.h"
-#include "TCP_NSC_ByteStreamQueues.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_VirtualDataQueues.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_ByteStreamQueues.h"
 
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "INETUtils.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/INETUtils.h"
 
 #include <sim_errno.h>
 

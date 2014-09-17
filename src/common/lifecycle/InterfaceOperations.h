@@ -20,7 +20,7 @@
 //#ifndef __INET_INTERFACEOPERATIONS_H_
 //#define __INET_INTERFACEOPERATIONS_H_
 //
-//#include "LifecycleOperation.h"
+//#include "inet/common/lifecycle/LifecycleOperation.h"
 //
 //class InterfaceEntry;
 //

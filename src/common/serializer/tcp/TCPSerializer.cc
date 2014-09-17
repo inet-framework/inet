@@ -19,20 +19,20 @@
 //Define_Module(TCPSerializer);
 #include <platdep/sockets.h>
 
-#include "TCPSerializer.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
 
-#include "IPProtocolId_m.h"
-#include "TCPIPchecksum.h"
-#include "TCPSegment.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 
 namespace serializer {
 
 // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
 
 } // namespace serializer
 

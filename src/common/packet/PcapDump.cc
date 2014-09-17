@@ -21,22 +21,22 @@
 
 #include <errno.h>
 
-#include "PcapDump.h"
+#include "inet/common/packet/PcapDump.h"
 
-#include "IPProtocolId_m.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_UDP
-#include "UDPPacket_m.h"
+#include "inet/transportlayer/udp/UDPPacket_m.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
-#include "IPv4Serializer.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
-#include "IPv6Serializer.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/common/serializer/ipv6/IPv6Serializer.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211MgmtAdhoc.h"
-#include "Ieee802Ctrl.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

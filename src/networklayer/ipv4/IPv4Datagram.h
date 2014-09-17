@@ -18,9 +18,9 @@
 #ifndef __INET_IPV4DATAGRAM_H
 #define __INET_IPV4DATAGRAM_H
 
-#include "INETDefs.h"
-#include "INetworkDatagram.h"
-#include "IPv4Datagram_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
 
 namespace inet {
 

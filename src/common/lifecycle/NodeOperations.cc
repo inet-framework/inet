@@ -17,8 +17,8 @@
 // Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
 //
 
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

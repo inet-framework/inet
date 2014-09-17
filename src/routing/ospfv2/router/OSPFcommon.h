@@ -22,8 +22,8 @@
 #include <functional>
 #include <stdio.h>
 
-#include "IPv4Address.h"
-#include "L3AddressResolver.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

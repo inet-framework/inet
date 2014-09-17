@@ -16,28 +16,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "L3AddressResolver.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_UDP
-#include "UDPPacket.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #endif // ifdef WITH_TCP_COMMON
 
-#include "MultiFieldClassifier.h"
-#include "DiffservUtil.h"
+#include "inet/networklayer/diffserv/MultiFieldClassifier.h"
+#include "inet/networklayer/diffserv/DiffservUtil.h"
 
 namespace inet {
 

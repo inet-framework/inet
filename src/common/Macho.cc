@@ -13,7 +13,7 @@
 //
 // See Macho.hpp for more information.
 
-#include "Macho.h"
+#include "inet/common/Macho.h"
 
 namespace inet {
 

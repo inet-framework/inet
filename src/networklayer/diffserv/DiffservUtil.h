@@ -19,8 +19,8 @@
 #ifndef __INET_DIFFSERVUTIL_H
 #define __INET_DIFFSERVUTIL_H
 
-#include "INETDefs.h"
-#include "IInterfaceTable.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPSessionApp.h"
+#include "inet/applications/tcpapp/TCPSessionApp.h"
 
-#include "ByteArrayMessage.h"
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

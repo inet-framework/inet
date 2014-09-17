@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ConvolutionalCoder.h"
-#include "BitVector.h"
-#include "ShortBitVector.h"
+#include "inet/physicallayer/common/ConvolutionalCoder.h"
+#include "inet/common/BitVector.h"
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {

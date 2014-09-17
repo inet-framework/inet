@@ -21,13 +21,13 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include "IRadioMedium.h"
-#include "IArrival.h"
-#include "IPropagation.h"
-#include "IAttenuation.h"
-#include "IBackgroundNoise.h"
-#include "MACAddress.h"
-#include "TrailFigure.h"
+#include "inet/physicallayer/contract/IRadioMedium.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/IPropagation.h"
+#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/contract/IBackgroundNoise.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/TrailFigure.h"
 
 namespace inet {
 

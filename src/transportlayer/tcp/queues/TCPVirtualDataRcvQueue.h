@@ -23,8 +23,8 @@
 #include <list>
 #include <string>
 
-#include "TCPSegment.h"
-#include "TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
 
 namespace inet {
 

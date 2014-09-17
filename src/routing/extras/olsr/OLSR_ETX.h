@@ -35,10 +35,10 @@
 
 #define __OLSR_ETX_h__
 
-#include "OLSR.h"
-#include "OLSR_ETX_state.h"
-#include "OLSR_ETX_repositories.h"
-#include "OLSR_ETX_parameter.h"
+#include "inet/routing/extras/olsr/OLSR.h"
+#include "inet/routing/extras/olsr/OLSR_ETX_state.h"
+#include "inet/routing/extras/olsr/OLSR_ETX_repositories.h"
+#include "inet/routing/extras/olsr/OLSR_ETX_parameter.h"
 
 namespace inet {
 

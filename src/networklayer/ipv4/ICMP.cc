@@ -20,15 +20,15 @@
 
 #include <string.h>
 
-#include "ICMP.h"
+#include "inet/networklayer/ipv4/ICMP.h"
 
-#include "IPSocket.h"
-#include "IPv4Datagram.h"
-#include "IPv4ControlInfo.h"
-#include "PingPayload_m.h"
-#include "IPv4InterfaceData.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

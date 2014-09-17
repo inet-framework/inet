@@ -18,7 +18,7 @@
 #ifndef __INET_BITVECTOR_H_
 #define __INET_BITVECTOR_H_
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

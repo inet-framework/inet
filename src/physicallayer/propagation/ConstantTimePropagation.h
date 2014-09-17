@@ -18,7 +18,7 @@
 #ifndef __INET_CONSTANTTIMEPROPAGATION_H
 #define __INET_CONSTANTTIMEPROPAGATION_H
 
-#include "PropagationBase.h"
+#include "inet/physicallayer/base/PropagationBase.h"
 
 namespace inet {
 

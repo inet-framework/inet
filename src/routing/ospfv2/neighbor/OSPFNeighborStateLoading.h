@@ -18,7 +18,7 @@
 #ifndef __INET_OSPFNEIGHBORSTATELOADING_H
 #define __INET_OSPFNEIGHBORSTATELOADING_H
 
-#include "OSPFNeighborState.h"
+#include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
 
 namespace inet {
 

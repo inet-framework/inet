@@ -18,7 +18,7 @@
 #ifndef __INET_SPHERE_H
 #define __INET_SPHERE_H
 
-#include "Shape3D.h"
+#include "inet/common/geometry/Shape3D.h"
 
 namespace inet {
 

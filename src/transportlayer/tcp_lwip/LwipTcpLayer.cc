@@ -22,8 +22,8 @@
 
 #include "lwip/memp.h"
 
-#include "L3Address.h"
-#include "LwipTcpStackIf.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
 
 namespace inet {
 

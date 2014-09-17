@@ -23,14 +23,14 @@
 
 #include <algorithm>
 #include <omnetpp.h>
-#include "INETDefs.h"
-#include "Topology.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4Address.h"
-#include "L3AddressResolver.h"
-#include "IPv4InterfaceData.h"
-#include "PatternMatcher.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/Topology.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/PatternMatcher.h"
 
 namespace inet {
 

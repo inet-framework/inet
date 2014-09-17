@@ -18,7 +18,7 @@
 #ifndef __INET_BGPOPEN_H
 #define __INET_BGPOPEN_H
 
-#include "BGPOpen_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPOpen_m.h"
 
 namespace inet {
 

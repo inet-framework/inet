@@ -18,10 +18,10 @@
 #include <fstream>
 
 #include "cstringtokenizer.h"
-#include "INETDefs.h"
-#include "IScriptable.h"
-#include "IRoutingTable.h"
-#include "IL3AddressType.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/scenario/IScriptable.h"
+#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/common/IL3AddressType.h"
 
 using namespace std;
 

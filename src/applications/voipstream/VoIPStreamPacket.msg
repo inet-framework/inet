@@ -21,7 +21,7 @@ cplusplus {{
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
 
-#include "ByteArrayMessage.h"
+#include "inet/common/ByteArrayMessage.h"
 }};
 
 namespace inet;

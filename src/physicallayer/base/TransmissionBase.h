@@ -18,8 +18,8 @@
 #ifndef __INET_TRANSMISSIONBASE_H
 #define __INET_TRANSMISSIONBASE_H
 
-#include "IRadio.h"
-#include "ITransmission.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

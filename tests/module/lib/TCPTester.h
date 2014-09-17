@@ -19,12 +19,12 @@
 #ifndef __TCPTESTER_H
 #define __TCPTESTER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
-#include "IPv4Datagram_m.h"
-#include "TCPSegment.h"
-#include "PacketDump.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/packet/PacketDump.h"
 
 namespace inet {
 

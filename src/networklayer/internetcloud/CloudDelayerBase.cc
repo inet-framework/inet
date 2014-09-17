@@ -17,9 +17,9 @@
 // @author Zoltan Bojthe
 //
 
-#include "CloudDelayerBase.h"
+#include "inet/networklayer/internetcloud/CloudDelayerBase.h"
 
-#include "IPv4.h"
+#include "inet/networklayer/ipv4/IPv4.h"
 
 namespace inet {
 

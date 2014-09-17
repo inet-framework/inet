@@ -23,14 +23,14 @@
 
 #ifndef NS_NO_GLOBALS
 
-#include "defs_dymo.h"
-#include "rtable.h"
-#include "debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/rtable.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
 #ifndef OMNETPP
 #include <sys/types.h>
 #include <netinet/in.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #endif
 #include <stdlib.h>
 #include <assert.h>

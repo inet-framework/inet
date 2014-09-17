@@ -18,11 +18,11 @@
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
-#include "RTPParticipantInfo_m.h"
+#include "inet/transportlayer/rtp/RTPParticipantInfo_m.h"
 
-#include "INETDefs.h"
-#include "IPv4Address.h"
-#include "sdes.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/rtp/sdes.h"
 
 namespace inet {
 

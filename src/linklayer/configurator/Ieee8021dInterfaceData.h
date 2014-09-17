@@ -20,9 +20,9 @@
 #ifndef __INET_IEEE8021DINTERFACEDATA_H
 #define __INET_IEEE8021DINTERFACEDATA_H
 
-#include "INETDefs.h"
-#include "InterfaceEntry.h"
-#include "MACAddress.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

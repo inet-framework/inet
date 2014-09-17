@@ -6,8 +6,8 @@
 #define __INET_DYMOROUTEDATA_H
 
 #include <omnetpp.h>
-#include "IRoute.h"
-#include "DYMOdefs.h"
+#include "inet/networklayer/common/IRoute.h"
+#include "inet/routing/dymo/DYMOdefs.h"
 
 namespace inet {
 

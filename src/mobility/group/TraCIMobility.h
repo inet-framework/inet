@@ -30,10 +30,10 @@
 
 #include <omnetpp.h>
 
-#include "INETDefs.h"
-#include "MobilityBase.h"
-#include "ModuleAccess.h"
-#include "TraCIScenarioManager.h"
+#include "inet/common/INETDefs.h"
+#include "inet/mobility/common/MobilityBase.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/mobility/group/TraCIScenarioManager.h"
 
 namespace inet {
 

@@ -16,11 +16,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "TraCIDemo.h"
+#include "inet/applications/traci/TraCIDemo.h"
 
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "UDPSocket.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

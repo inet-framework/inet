@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv6AddressType.h"
+#include "inet/networklayer/contract/ipv6/IPv6AddressType.h"
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

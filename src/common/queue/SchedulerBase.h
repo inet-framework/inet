@@ -19,8 +19,8 @@
 #ifndef __INET_SCHEDULERBASE_H
 #define __INET_SCHEDULERBASE_H
 
-#include "INETDefs.h"
-#include "IPassiveQueue.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/queue/IPassiveQueue.h"
 
 namespace inet {
 

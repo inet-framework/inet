@@ -16,23 +16,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Ieee80211eClassifier.h"
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211eClassifier.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #ifdef WITH_IPv4
-  #include "IPv4Datagram.h"
-  #include "ICMPMessage_m.h"
+  #include "inet/networklayer/ipv4/IPv4Datagram.h"
+  #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-  #include "IPv6Datagram.h"
-  #include "ICMPv6Message_m.h"
+  #include "inet/networklayer/ipv6/IPv6Datagram.h"
+  #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 #ifdef WITH_UDP
-  #include "UDPPacket_m.h"
+  #include "inet/transportlayer/udp/UDPPacket_m.h"
 #endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
-  #include "TCPSegment.h"
+  #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #endif // ifdef WITH_TCP_COMMON
 
 namespace inet {

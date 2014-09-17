@@ -20,8 +20,8 @@
 #define __INET_SCTPMESSAGE_H
 
 #include <list>
-#include "INETDefs.h"
-#include "SCTPMessage_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/sctp/SCTPMessage_m.h"
 
 namespace inet {
 

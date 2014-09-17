@@ -14,13 +14,13 @@
 // GNU General Public License for more details.
 //
 
-#include "RTPApplication.h"
+#include "inet/applications/rtpapp/RTPApplication.h"
 
-#include "L3AddressResolver.h"
-#include "LifecycleOperation.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "RTPInterfacePacket_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
 
 namespace inet {
 

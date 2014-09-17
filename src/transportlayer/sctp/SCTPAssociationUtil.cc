@@ -20,27 +20,27 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "SCTP.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "SCTPQueue.h"
-#include "SCTPAlgorithm.h"
-#include "IL3AddressType.h"
-#include "IPv4RoutingTable.h"
-#include "IPv6RoutingTable.h"
-#include "InterfaceTable.h"
-#include "IPProtocolId_m.h"
+#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_IPv4
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-#include "UDPControlInfo_m.h"
-#include "INETUtils.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

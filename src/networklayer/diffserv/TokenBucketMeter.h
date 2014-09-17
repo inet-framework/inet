@@ -19,7 +19,7 @@
 #ifndef __INET_TOKENBUCKETMETER_H
 #define __INET_TOKENBUCKETMETER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

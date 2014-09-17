@@ -15,7 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EtherBus.h"
+#include "inet/linklayer/ethernet/EtherBus.h"
 
 namespace inet {
 

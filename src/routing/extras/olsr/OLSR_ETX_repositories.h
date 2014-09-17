@@ -33,9 +33,9 @@
 #define __OLSR_ETX_repositories_h__
 
 //#include <OLSRpkt_m.h>
-#include <OLSR_ETX_parameter.h>
-#include <OLSR_repositories.h>
-#include <OLSRpkt_m.h>
+#include "OLSR_ETX_parameter.h"
+#include "OLSR_repositories.h"
+#include "OLSRpkt_m.h"
 #include <assert.h>
 
 namespace inet {

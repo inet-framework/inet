@@ -17,11 +17,11 @@
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ILifecycle.h"
-#include "IPv4Address.h"
-#include "UDPSocket.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

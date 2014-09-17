@@ -15,7 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "NakagamiFading.h"
+#include "inet/physicallayer/pathloss/NakagamiFading.h"
 
 namespace inet {
 

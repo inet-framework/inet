@@ -18,10 +18,10 @@
 #ifndef __INET_MACADDRESSTYPE_H
 #define __INET_MACADDRESSTYPE_H
 
-#include "INETDefs.h"
-#include "IL3AddressType.h"
-#include "MACAddress.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 

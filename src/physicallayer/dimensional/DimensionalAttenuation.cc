@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DimensionalAttenuation.h"
-#include "DimensionalTransmission.h"
-#include "DimensionalReception.h"
-#include "IRadioMedium.h"
+#include "inet/physicallayer/dimensional/DimensionalAttenuation.h"
+#include "inet/physicallayer/dimensional/DimensionalTransmission.h"
+#include "inet/physicallayer/dimensional/DimensionalReception.h"
+#include "inet/physicallayer/contract/IRadioMedium.h"
 
 namespace inet {
 

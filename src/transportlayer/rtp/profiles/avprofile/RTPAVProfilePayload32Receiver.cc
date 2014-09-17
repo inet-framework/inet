@@ -20,10 +20,10 @@
  *  * implemented.
  *  */
 
-#include "RTPAVProfilePayload32Receiver.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Receiver.h"
 
-#include "RTPMpegPacket_m.h"
-#include "RTPPacket.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 

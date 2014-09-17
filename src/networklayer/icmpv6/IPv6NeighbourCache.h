@@ -22,10 +22,10 @@
 #include <map>
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
-#include "MACAddress.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

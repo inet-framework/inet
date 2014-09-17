@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211MgmtAP.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
 
-#include "Ieee80211Frame_m.h"
-#include "Ieee802Ctrl.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
 #endif // ifdef WITH_ETHERNET
 
-#include "IRadio.h"
-#include "ModuleAccess.h"
-#include "NotifierConsts.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
 
 namespace inet {
 

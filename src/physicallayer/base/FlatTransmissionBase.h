@@ -18,8 +18,8 @@
 #ifndef __INET_FLATTRANSMISSIONBASE_H
 #define __INET_FLATTRANSMISSIONBASE_H
 
-#include "TransmissionBase.h"
-#include "IModulation.h"
+#include "inet/physicallayer/base/TransmissionBase.h"
+#include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 

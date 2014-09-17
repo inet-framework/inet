@@ -19,9 +19,9 @@
 #ifndef __INET_TCPLWIPVIRTUALDATAQUEUES_H
 #define __INET_TCPLWIPVIRTUALDATAQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TcpLwipQueues.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
 

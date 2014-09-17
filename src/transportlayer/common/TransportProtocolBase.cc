@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TransportProtocolBase.h"
+#include "inet/transportlayer/common/TransportProtocolBase.h"
 
 namespace inet {
 

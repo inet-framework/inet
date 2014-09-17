@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "FlatNoiseBase.h"
+#include "inet/physicallayer/base/FlatNoiseBase.h"
 
 namespace inet {
 

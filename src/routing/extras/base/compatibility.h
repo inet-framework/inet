@@ -7,7 +7,7 @@
 //#include <sys/types.h>
 //#endif
 #include <omnetpp.h>
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

@@ -8,8 +8,8 @@
 #ifndef _LINK_CACHE_H
 #define _LINK_CACHE_H
 
-#include "tbl.h"
-#include "timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/timer.h"
 
 //#define LC_TIMER
 

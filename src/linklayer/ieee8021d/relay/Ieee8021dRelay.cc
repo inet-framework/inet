@@ -15,11 +15,11 @@
 //
 // Author: Benjamin Martin Seregi
 
-#include "Ieee8021dRelay.h"
-#include "Ieee802Ctrl.h"
-#include "InterfaceEntry.h"
-#include "Ieee8021dInterfaceData.h"
-#include "ModuleAccess.h"
+#include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

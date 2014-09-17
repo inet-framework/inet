@@ -22,7 +22,7 @@
 #ifndef _NL_H
 #define _NL_H
 
-/* #include "routing_table.h" */
+/* #include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h" */
 
 void nl_init(void);
 void nl_cleanup(void);

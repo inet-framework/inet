@@ -22,10 +22,10 @@
 #include <set>
 #include <list>
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
-#include "TraCIMobility.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/mobility/group/TraCIMobility.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_WISEROUTEDATAGRAM_H
 #define __INET_WISEROUTEDATAGRAM_H
 
-#include "INetworkDatagram.h"
-#include "WiseRouteDatagram_m.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/wiseroute/WiseRouteDatagram_m.h"
 
 namespace inet {
 

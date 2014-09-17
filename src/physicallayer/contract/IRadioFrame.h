@@ -18,8 +18,8 @@
 #ifndef __INET_IRADIOFRAME_H
 #define __INET_IRADIOFRAME_H
 
-#include "IPhysicalLayerFrame.h"
-#include "ITransmission.h"
+#include "inet/physicallayer/contract/IPhysicalLayerFrame.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 

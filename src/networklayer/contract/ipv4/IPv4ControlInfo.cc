@@ -15,10 +15,10 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv4ControlInfo.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 
 #ifdef WITH_IPv4
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 namespace inet {

@@ -18,13 +18,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "PPP.h"
+#include "inet/linklayer/ppp/PPP.h"
 
-#include "INETUtils.h"
-#include "IInterfaceTable.h"
-#include "IPassiveQueue.h"
-#include "NotifierConsts.h"
-#include "NodeOperations.h"
+#include "inet/common/INETUtils.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

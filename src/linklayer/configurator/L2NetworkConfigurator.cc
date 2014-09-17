@@ -22,11 +22,11 @@
 #include <sstream>
 #include <queue>
 
-#include "L2NetworkConfigurator.h"
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
-#include "ModuleAccess.h"
-#include "stlutils.h"
+#include "inet/linklayer/configurator/L2NetworkConfigurator.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 

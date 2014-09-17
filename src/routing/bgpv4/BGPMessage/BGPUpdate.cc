@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BGPUpdate.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
 
 namespace inet {
 

@@ -18,11 +18,11 @@
 #ifndef __INET_CONVEXPOLYTOPE_H_
 #define __INET_CONVEXPOLYTOPE_H_
 
-#include "PolytopePoint.h"
-#include "Edge.h"
-#include "Face.h"
-#include "Shape3D.h"
-#include "Rotation.h"
+#include "inet/common/geometry/polytope/PolytopePoint.h"
+#include "inet/common/geometry/polytope/Edge.h"
+#include "inet/common/geometry/polytope/Face.h"
+#include "inet/common/geometry/Shape3D.h"
+#include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 

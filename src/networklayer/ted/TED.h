@@ -15,11 +15,11 @@
 #ifndef __INET_TED_H
 #define __INET_TED_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TED_m.h"
-#include "IntServ.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/ted/TED_m.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

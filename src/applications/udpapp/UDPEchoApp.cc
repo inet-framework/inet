@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPEchoApp.h"
+#include "inet/applications/udpapp/UDPEchoApp.h"
 
-#include "ModuleAccess.h"
-#include "UDPControlInfo_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
 

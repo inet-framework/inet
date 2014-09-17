@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "simtime_t.h"
 }}
 

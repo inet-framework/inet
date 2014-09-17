@@ -18,10 +18,10 @@
 #ifndef __INET_IEEE80211SCALARRECEIVER_H
 #define __INET_IEEE80211SCALARRECEIVER_H
 
-#include "ScalarReceiver.h"
-#include "WifiPreambleType.h"
-#include "IIeee80211ErrorModel.h"
-#include "BerParseFile.h"
+#include "inet/physicallayer/scalar/ScalarReceiver.h"
+#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+#include "inet/physicallayer/ieee80211/errormodel/IIeee80211ErrorModel.h"
+#include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {
 

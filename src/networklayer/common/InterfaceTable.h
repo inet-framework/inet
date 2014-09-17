@@ -20,11 +20,11 @@
 
 #include <vector>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

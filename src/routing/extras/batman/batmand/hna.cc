@@ -20,7 +20,7 @@
  */
 
 
-#include "BatmanMain.h"
+#include "inet/routing/extras/batman/BatmanMain.h"
 
 
 #if 0

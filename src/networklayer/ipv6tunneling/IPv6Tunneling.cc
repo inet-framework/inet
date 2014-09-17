@@ -34,19 +34,19 @@
 // TODO
 //  - 8.: Tunnel Error Reporting and Processing
 
-#include "IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
 
-#include "IPv6ControlInfo.h"
-#include "IPv6Datagram.h"
-#include "IPv6InterfaceData.h"
-#include "IPv6RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 #ifdef WITH_xMIPv6
-#include "xMIPv6.h"
-#include "MobilityHeader_m.h"    // for HA Option header
+#include "inet/networklayer/xmipv6/xMIPv6.h"
+#include "inet/networklayer/xmipv6/MobilityHeader_m.h"    // for HA Option header
 #endif // ifdef WITH_xMIPv6
 
 #include <algorithm>

@@ -23,13 +23,13 @@
 
 #ifndef NS_NO_GLOBALS
 
-#include "defs_dymo.h"
-#include "dymo_generic.h"
-#include "dymo_re.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_generic.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_re.h"
 #ifndef OMNETPP
 #include <netinet/in.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #endif
 /* We are allowing a maximum DYMO message size of a RE message
    which advertises MAX_RE_BLOCKS RENodeAddresses */

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TracingObstacleLoss.h"
-#include "Rotation.h"
+#include "inet/physicallayer/obstacle/TracingObstacleLoss.h"
+#include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 

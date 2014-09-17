@@ -13,16 +13,16 @@
 #endif
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
-/* #include "debug.h" */
-#include "dsr-rtc.h"
-#include "dsr-srt.h"
-#include "tbl.h"
-#include "link-cache.h"
+/* #include "inet/transportlayer/tcp_lwip/lwip/include/lwip/debug.h" */
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rtc.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
 
 #ifdef __KERNEL__
 #define DEBUG(f, args...)

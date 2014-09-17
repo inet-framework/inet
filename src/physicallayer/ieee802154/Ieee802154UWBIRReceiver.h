@@ -19,10 +19,10 @@
 #define __INET_IEEE802154UWBIRRECEIVER_H
 
 #include <vector>
-#include "MappingBase.h"
-#include "MappingUtils.h"
-#include "ReceiverBase.h"
-#include "Ieee802154UWBIRMode.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
+#include "inet/physicallayer/base/ReceiverBase.h"
+#include "inet/physicallayer/ieee802154/Ieee802154UWBIRMode.h"
 
 namespace inet {
 

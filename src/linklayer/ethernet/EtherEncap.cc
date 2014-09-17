@@ -17,11 +17,11 @@
 
 #include <stdio.h>
 
-#include "EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
 
-#include "EtherFrame.h"
-#include "IInterfaceTable.h"
-#include "Ieee802Ctrl.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

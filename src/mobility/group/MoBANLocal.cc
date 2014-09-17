@@ -39,8 +39,8 @@
  *
  **************************************************************************/
 
-#include <INETMath.h>
-#include "MoBANLocal.h"
+#include "inet/common/INETMath.h"
+#include "inet/mobility/group/MoBANLocal.h"
 
 namespace inet {
 

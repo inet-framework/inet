@@ -18,11 +18,11 @@
 #ifndef __INET_TCPSRVHOSTAPP_H
 #define __INET_TCPSRVHOSTAPP_H
 
-#include "INETDefs.h"
-#include "TCPSocket.h"
-#include "TCPSocketMap.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

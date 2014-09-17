@@ -18,8 +18,8 @@
 #ifndef __INET_MAPPINGUTILS_H
 #define __INET_MAPPINGUTILS_H
 
-#include "INETDefs.h"
-#include "MappingBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/mapping/MappingBase.h"
 
 namespace inet {
 

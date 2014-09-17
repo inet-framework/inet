@@ -15,7 +15,7 @@
 #define DSR_RTC_PROC_NAME "dsr_rtc"
 #endif
 
-#include "dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
 
 namespace inet {
 

@@ -14,9 +14,9 @@
 //
 
 cplusplus {{
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ByteArray.h"
+#include "inet/common/ByteArray.h"
 }}
 
 namespace inet;

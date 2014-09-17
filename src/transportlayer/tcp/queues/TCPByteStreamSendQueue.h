@@ -21,8 +21,8 @@
 
 #include <list>
 
-#include "ByteArrayBuffer.h"
-#include "TCPSendQueue.h"
+#include "inet/common/ByteArrayBuffer.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 namespace inet {
 

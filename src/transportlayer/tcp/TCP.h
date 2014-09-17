@@ -22,11 +22,11 @@
 #include <map>
 #include <set>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ILifecycle.h"
-#include "L3Address.h"
-#include "TCPCommand_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
 

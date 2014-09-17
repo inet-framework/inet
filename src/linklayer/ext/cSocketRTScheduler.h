@@ -23,10 +23,10 @@
 
 #include <platdep/sockets.h>
 #include <platdep/timeutil.h>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 // prevent pcap.h to redefine int8_t,... types on Windows
-#include "bsdint.h"
+#include "inet/common/serializer/headers/bsdint.h"
 #define HAVE_U_INT8_T
 #define HAVE_U_INT16_T
 #define HAVE_U_INT32_T
@@ -34,7 +34,7 @@
 #ifdef HAVE_PCAP
 #include <pcap.h>
 #endif // ifdef HAVE_PCAP
-#include "ExtFrame_m.h"
+#include "inet/linklayer/ext/ExtFrame_m.h"
 
 namespace inet {
 

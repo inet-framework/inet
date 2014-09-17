@@ -18,8 +18,8 @@
 #ifndef __INET_CONVEXPOLYTOPETEST_H_
 #define __INET_CONVEXPOLYTOPETEST_H_
 
-#include "ConvexPolytope.h"
-#include "Coord.h"
+#include "inet/common/geometry/polytope/ConvexPolytope.h"
+#include "inet/common/geometry/Coord.h"
 #include <vector>
 
 namespace inet {

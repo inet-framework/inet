@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BandListening.h"
+#include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
 

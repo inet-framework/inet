@@ -20,8 +20,8 @@
 #include <fstream>
 #include <iomanip>
 
-#include "INETDefs.h"
-#include "IPv4Datagram.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 using namespace std;
 

@@ -16,7 +16,7 @@
 #ifndef __INET_IIEEE80211ERRORMODEL_H
 #define __INET_IIEEE80211ERRORMODEL_H
 
-#include "ModulationType.h"
+#include "inet/physicallayer/common/ModulationType.h"
 
 namespace inet {
 

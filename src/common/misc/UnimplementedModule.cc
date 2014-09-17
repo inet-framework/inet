@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UnimplementedModule.h"
+#include "inet/common/misc/UnimplementedModule.h"
 
 namespace inet {
 

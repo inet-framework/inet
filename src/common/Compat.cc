@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Compat.h"
+#include "inet/common/Compat.h"
 
 #ifdef EV_GLOBAL_STREAM
 // TODO: compiles but it doesn't do what it supposed to do

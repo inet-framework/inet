@@ -21,9 +21,9 @@
 #define __INET_NIST_ERROR_RATE_MODEL_H
 
 //#include <stdint.h>
-#include "WifiMode.h"
-#include "IIeee80211ErrorModel.h"
-#include "dsss-error-rate-model.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/errormodel/IIeee80211ErrorModel.h"
+#include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
 
 namespace inet {
 

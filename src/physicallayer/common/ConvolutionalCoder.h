@@ -18,9 +18,9 @@
 #ifndef __INET_CONVOLUTIONALCODER_H_
 #define __INET_CONVOLUTIONALCODER_H_
 
-#include "INETDefs.h"
-#include "BitVector.h"
-#include "ShortBitVector.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/BitVector.h"
+#include "inet/common/ShortBitVector.h"
 #include <vector>
 #include <queue>
 

@@ -20,9 +20,9 @@
  */
 
 
-#include "batman.h"
-#include "BatmanMain.h"
-#include "IPv4InterfaceData.h"
+#include "inet/routing/extras/batman/batmand/batman.h"
+#include "inet/routing/extras/batman/BatmanMain.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 namespace inet {
 

@@ -17,9 +17,9 @@
 //
 
 cplusplus {{
-#include "ICMPv6Message_m.h"
-#include "IPv6Address.h"
-#include "MACAddress.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;

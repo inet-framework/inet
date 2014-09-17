@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211Scrambler.h"
-#include "ShortBitVector.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Scrambler.h"
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {

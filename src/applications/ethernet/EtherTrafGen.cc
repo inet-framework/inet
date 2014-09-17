@@ -19,11 +19,11 @@
 #include <string.h>
 #include <math.h>
 
-#include "EtherTrafGen.h"
+#include "inet/applications/ethernet/EtherTrafGen.h"
 
-#include "Ieee802Ctrl.h"
-#include "NodeOperations.h"
-#include "ModuleAccess.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

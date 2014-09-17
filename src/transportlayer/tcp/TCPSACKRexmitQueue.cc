@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPSACKRexmitQueue.h"
+#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
 
 namespace inet {
 

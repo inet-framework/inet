@@ -19,8 +19,8 @@
 #ifndef __INET_ALGORITHMICDROPPERBASE_H
 #define __INET_ALGORITHMICDROPPERBASE_H
 
-#include "INETDefs.h"
-#include "IQueueAccess.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/queue/IQueueAccess.h"
 
 namespace inet {
 

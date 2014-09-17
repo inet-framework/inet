@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#include "dymo_um_omnet.h"
-#include "Ieee802Ctrl.h"
+#include "inet/routing/extras/dymo/dymo_um_omnet.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

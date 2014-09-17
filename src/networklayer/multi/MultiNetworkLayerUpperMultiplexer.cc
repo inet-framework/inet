@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MultiNetworkLayerUpperMultiplexer.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "inet/networklayer/multi/MultiNetworkLayerUpperMultiplexer.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 

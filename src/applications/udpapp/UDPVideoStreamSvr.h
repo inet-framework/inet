@@ -21,10 +21,10 @@
 
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ApplicationBase.h"
-#include "UDPSocket.h"
+#include "inet/applications/common/ApplicationBase.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

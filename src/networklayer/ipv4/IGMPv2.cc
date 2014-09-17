@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IGMPv2.h"
-#include "IPSocket.h"
-#include "IPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IGMPv2.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 #include <algorithm>
 

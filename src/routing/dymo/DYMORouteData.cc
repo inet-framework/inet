@@ -2,7 +2,7 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-#include "DYMORouteData.h"
+#include "inet/routing/dymo/DYMORouteData.h"
 
 namespace inet {
 

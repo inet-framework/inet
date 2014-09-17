@@ -30,7 +30,7 @@
    Modifications: Alfonso Ariza Quintana, Zoltan Bojthe et al.
  */
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

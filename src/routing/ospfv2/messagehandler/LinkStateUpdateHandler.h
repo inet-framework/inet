@@ -18,8 +18,8 @@
 #ifndef __INET_LINKSTATEUPDATEHANDLER_H
 #define __INET_LINKSTATEUPDATEHANDLER_H
 
-#include "IMessageHandler.h"
-#include "OSPFcommon.h"
+#include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
 
 namespace inet {
 

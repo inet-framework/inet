@@ -18,8 +18,8 @@
 #ifndef __INET_INETWORKPROTOCOL_H
 #define __INET_INETWORKPROTOCOL_H
 
-#include "INetworkProtocolControlInfo.h"
-#include "NetworkProtocolCommand_m.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 
 namespace inet {
 

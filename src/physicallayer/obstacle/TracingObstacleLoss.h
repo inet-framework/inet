@@ -18,10 +18,10 @@
 #ifndef __INET_TRACINGOBSTACLELOSS_H
 #define __INET_TRACINGOBSTACLELOSS_H
 
-#include "IRadioMedium.h"
-#include "IObstacleLoss.h"
-#include "TrailFigure.h"
-#include "PhysicalEnvironment.h"
+#include "inet/physicallayer/contract/IRadioMedium.h"
+#include "inet/physicallayer/contract/IObstacleLoss.h"
+#include "inet/common/TrailFigure.h"
+#include "inet/environment/PhysicalEnvironment.h"
 
 namespace inet {
 

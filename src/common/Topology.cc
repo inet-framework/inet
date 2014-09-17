@@ -22,9 +22,9 @@
 #include <list>
 #include <algorithm>
 #include <sstream>
-#include "Topology.h"
-#include "PatternMatcher.h"
-#include "stlutils.h"
+#include "inet/common/Topology.h"
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 

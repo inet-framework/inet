@@ -18,8 +18,8 @@
 #ifndef __INET_POLYGON_H
 #define __INET_POLYGON_H
 
-#include "Coord.h"
-#include "LineSegment.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/LineSegment.h"
 
 namespace inet {
 

@@ -26,19 +26,19 @@
 #include <assert.h>
 
 
-#include "UDPPacket.h"
-#include "INetworkProtocolControlInfo.h"
-#include "ICMPMessage_m.h"
-#include "NotifierConsts.h"
-#include "IPv4Datagram.h"
-#include "IPv4InterfaceData.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
-#include "ProtocolMap.h"
-#include "IPv4Address.h"
-#include "L3Address.h"
-#include "ControlManetRouting_m.h"
-#include "Ieee802Ctrl.h"
-#include "aodv_uu_omnet.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/routing/extras/base/ControlManetRouting_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/routing/extras/aodv-uu/aodv_uu_omnet.h"
 
 namespace inet {
 

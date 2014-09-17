@@ -16,7 +16,7 @@
 //
 
 
-#include "ManetAddress.h"
+#include "inet/routing/extras/base/ManetAddress.h"
 
 namespace inet {
 

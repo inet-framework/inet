@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 namespace inet {
 

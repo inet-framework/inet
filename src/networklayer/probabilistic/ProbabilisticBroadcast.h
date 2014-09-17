@@ -10,10 +10,10 @@
 
 #include <set>
 #include <map>
-#include "INetworkProtocol.h"
-#include "NetworkProtocolBase.h"
-#include "ProbabilisticBroadcastDatagram.h"
-#include "L3Address.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/common/NetworkProtocolBase.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastDatagram.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

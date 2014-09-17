@@ -15,10 +15,10 @@
 #ifndef __INET_ICLASSIFIER_H
 #define __INET_ICLASSIFIER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Datagram.h"
-#include "LIBTable.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/mpls/LIBTable.h"
 
 namespace inet {
 

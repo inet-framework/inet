@@ -18,10 +18,10 @@
 #ifndef __INET_IPV4ADDRESSTYPE_H
 #define __INET_IPV4ADDRESSTYPE_H
 
-#include "INETDefs.h"
-#include "IL3AddressType.h"
-#include "IPv4Address.h"
-#include "IPv4ControlInfo.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 
 namespace inet {
 

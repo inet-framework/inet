@@ -1,13 +1,13 @@
 #include <algorithm>
 #include <fstream>
 
-#include "INETDefs.h"
-#include "IScriptable.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4ControlInfo.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IGMPv2.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/scenario/IScriptable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IGMPv2.h"
 
 namespace inet {
 

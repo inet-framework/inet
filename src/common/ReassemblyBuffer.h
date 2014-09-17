@@ -20,7 +20,7 @@
 
 #include <map>
 #include <vector>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

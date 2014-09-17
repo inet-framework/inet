@@ -19,9 +19,9 @@
 #ifndef __INET_TCPBASEALG_H
 #define __INET_TCPBASEALG_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TCPAlgorithm.h"
 
 namespace inet {
 

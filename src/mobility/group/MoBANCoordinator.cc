@@ -42,10 +42,10 @@
 #include <string>
 #include <stdio.h>
 #include <assert.h>
-#include <INETMath.h>
 
-#include "MoBANCoordinator.h"
-#include "MoBANLocal.h"
+#include "inet/common/INETMath.h"
+#include "inet/mobility/group/MoBANCoordinator.h"
+#include "inet/mobility/group/MoBANLocal.h"
 
 namespace inet {
 

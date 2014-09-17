@@ -18,8 +18,8 @@
 #ifndef __INET_BGPROUTINGTABLEENTRY_H
 #define __INET_BGPROUTINGTABLEENTRY_H
 
-#include "IPv4RoutingTable.h"
-#include "BGPCommon.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/routing/bgpv4/BGPCommon.h"
 
 namespace inet {
 

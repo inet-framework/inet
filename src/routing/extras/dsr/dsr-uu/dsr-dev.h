@@ -11,8 +11,8 @@
 #include <linux/netdevice.h>
 #include <linux/init.h>
 
-#include "dsr.h"
-#include "dsr-pkt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-pkt.h"
 
 namespace inet {
 

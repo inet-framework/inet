@@ -24,9 +24,9 @@
 #define _AODV_HELLO_H
 
 #ifndef NS_NO_GLOBALS
-#include "defs_aodv.h"
-#include "aodv_rrep.h"
-#include "routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rrep.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
 
 #endif              /* NS_NO_GLOBALS */
 

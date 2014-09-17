@@ -20,7 +20,7 @@
 #ifndef __INET_NODEOPERATIONS_H
 #define __INET_NODEOPERATIONS_H
 
-#include "LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 

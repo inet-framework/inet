@@ -18,7 +18,7 @@
 #else
 #include <stdlib.h>
 #include <errno.h>
-#include "dsr_list.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr_list.h"
 #endif
 #else
 #include <errno.h>

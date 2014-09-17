@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 
 namespace inet {
 

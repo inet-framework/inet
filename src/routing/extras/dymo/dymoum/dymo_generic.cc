@@ -26,18 +26,18 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "dymo_generic.h"
-#include "dymo_re.h"
-#include "dymo_uerr.h"
-#include "dymo_rerr.h"
-#include "dymo_hello.h"
-#include "defs_dymo.h"
-#include "debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_generic.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_re.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_uerr.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_rerr.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_hello.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
 #ifndef OMNETPP
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #else
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 #endif
 #endif  /* NS_PORT */
 

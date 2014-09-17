@@ -14,7 +14,7 @@
 
 
 cplusplus {{
-#include "TED_m.h"
+#include "inet/networklayer/ted/TED_m.h"
 }}
 
 namespace inet;

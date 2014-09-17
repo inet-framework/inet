@@ -15,20 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
 #else // ifdef WITH_ETHERNET
 namespace inet { class EtherFrame; }
 #endif // ifdef WITH_ETHERNET
 
 #ifdef WITH_IPv4
-#include "ARPPacket_m.h"
-#include "ICMPMessage.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #else // ifdef WITH_IPv4
 
 namespace inet {
@@ -42,35 +42,35 @@ class IPv4Datagram;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #else // ifdef WITH_TCP_COMMON
 namespace inet { namespace tcp { class TCPSegment; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
-#include "UDPPacket.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 #else // ifdef WITH_UDP
 namespace inet { class UDPPacket; }
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IEEE80211
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #else // ifdef WITH_IEEE80211
 namespace inet { namespace ieee80211 { class Ieee80211Frame; } }
 #endif // ifdef WITH_IEEE80211
 
-#include "INetworkDatagram.h"
-#include "PingPayload_m.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_RIP
-#include "RIPPacket_m.h"
+#include "inet/routing/rip/RIPPacket_m.h"
 #else // ifdef WITH_RIP
 class RIPPacket;
 #endif // ifdef WITH_RIP
 
 #ifdef WITH_RADIO
-#include "RadioFrame.h"
-#include "ScalarTransmission.h"
+#include "inet/physicallayer/common/RadioFrame.h"
+#include "inet/physicallayer/scalar/ScalarTransmission.h"
 #else // ifdef WITH_RADIO
 namespace inet { namespace physicallayer { class RadioFrame; } }
 #endif // ifdef WITH_RADIO

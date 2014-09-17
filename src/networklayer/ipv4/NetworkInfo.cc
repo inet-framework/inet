@@ -18,11 +18,11 @@
 #include <fstream>
 #include <algorithm>
 
-#include "NetworkInfo.h"
+#include "inet/networklayer/ipv4/NetworkInfo.h"
 
-#include "InterfaceEntry.h"
-#include "L3AddressResolver.h"
-#include "IIPv4RoutingTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 namespace inet {
 

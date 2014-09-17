@@ -1,10 +1,10 @@
-#include "IPv4ControlInfo.h"
-#include "IPv4.h"
-#include "ModuleAccess.h"
-#include "SCTPNatHook.h"
-#include "IPv4InterfaceData.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/transportlayer/sctp/SCTPNatHook.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
 

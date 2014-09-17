@@ -18,11 +18,11 @@
 #ifndef __INET_IRADIO_H
 #define __INET_IRADIO_H
 
-#include "IPhysicalLayer.h"
-#include "IRadioFrame.h"
-#include "IAntenna.h"
-#include "IReceiver.h"
-#include "ITransmitter.h"
+#include "inet/physicallayer/contract/IPhysicalLayer.h"
+#include "inet/physicallayer/contract/IRadioFrame.h"
+#include "inet/physicallayer/contract/IAntenna.h"
+#include "inet/physicallayer/contract/IReceiver.h"
+#include "inet/physicallayer/contract/ITransmitter.h"
 
 namespace inet {
 

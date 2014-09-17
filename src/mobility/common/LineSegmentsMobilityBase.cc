@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "LineSegmentsMobilityBase.h"
-#include "INETMath.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 

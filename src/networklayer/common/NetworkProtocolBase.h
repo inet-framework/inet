@@ -18,10 +18,10 @@
 #ifndef __INET_NETWORKPROTOCOLBASE_H
 #define __INET_NETWORKPROTOCOLBASE_H
 
-#include "LayeredProtocolBase.h"
-#include "NodeOperations.h"
-#include "ProtocolMap.h"
-#include "IInterfaceTable.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_QUATERNION_H_
 #define __INET_QUATERNION_H_
 
-#include "Coord.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

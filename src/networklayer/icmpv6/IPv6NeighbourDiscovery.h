@@ -23,12 +23,12 @@
 #include <set>
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv6Address.h"
-#include "IPv6NDMessage_m.h"
-#include "IPv6NeighbourCache.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
+#include "inet/networklayer/icmpv6/IPv6NeighbourCache.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

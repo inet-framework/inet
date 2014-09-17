@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPSrvHostApp.h"
+#include "inet/applications/tcpapp/TCPSrvHostApp.h"
 
-#include "L3AddressResolver.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "INETUtils.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

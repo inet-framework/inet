@@ -21,12 +21,12 @@
 #include <map>
 #include <vector>
 
-#include "LSA.h"
-#include "MessageHandler.h"
-#include "OSPFArea.h"
-#include "OSPFcommon.h"
-#include "OSPFInterface.h"
-#include "OSPFRoutingTableEntry.h"
+#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/router/OSPFcommon.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
+#include "inet/routing/ospfv2/router/OSPFRoutingTableEntry.h"
 
 namespace inet {
 

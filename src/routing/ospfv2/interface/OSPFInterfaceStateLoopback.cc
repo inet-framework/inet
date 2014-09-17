@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OSPFInterfaceStateLoopback.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateLoopback.h"
 
-#include "OSPFInterfaceStateDown.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateDown.h"
 
 namespace inet {
 

@@ -13,29 +13,29 @@
 #include <linux/string.h>
 #include <linux/if_ether.h>
 #include <net/ip.h>
-#include "dsr-dev.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-dev.h"
 
 #endif              /* __KERNEL__ */
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
 
 
-#include "dsr.h"
-#include "debug_dsr.h"
-#include "tbl.h"
-#include "dsr-rrep.h"
-#include "dsr-rreq.h"
-#include "dsr-opt.h"
-#include "dsr-srt.h"
-#include "link-cache.h"
-#include "send-buf.h"
-#include "timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rrep.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-rreq.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-opt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/send-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/timer.h"
 
 #define GRAT_RREP_TBL_MAX_LEN 64
 #define GRAT_REPLY_HOLDOFF 1

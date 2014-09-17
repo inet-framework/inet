@@ -13,12 +13,12 @@
 //
 
 #include <iostream>
-#include "SimpleClassifier.h"
-#include "XMLUtils.h"
-#include "LIBTable.h"
-#include "IIPv4RoutingTable.h"
-#include "ModuleAccess.h"
-#include "RSVP.h"
+#include "inet/networklayer/rsvp_te/SimpleClassifier.h"
+#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/rsvp_te/RSVP.h"
 
 namespace inet {
 

@@ -19,14 +19,14 @@
 //
 
 #include <set>
-#include "stlutils.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "L3AddressResolver.h"
-#include "IPv4NetworkConfigurator.h"
-#include "InterfaceEntry.h"
-#include "ModuleAccess.h"
-#include "XMLUtils.h"
+#include "inet/common/stlutils.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/XMLUtils.h"
 
 namespace inet {
 

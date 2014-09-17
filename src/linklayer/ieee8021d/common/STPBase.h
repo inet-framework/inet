@@ -18,11 +18,11 @@
 #ifndef __INET_STPBASE_H
 #define __INET_STPBASE_H
 
-#include "ILifecycle.h"
-#include "MACAddress.h"
-#include "IMACAddressTable.h"
-#include "InterfaceTable.h"
-#include "Ieee8021dInterfaceData.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
 namespace inet {
 

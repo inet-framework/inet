@@ -18,7 +18,7 @@
 #ifndef __INET_LINESEGMENT_H
 #define __INET_LINESEGMENT_H
 
-#include "Coord.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

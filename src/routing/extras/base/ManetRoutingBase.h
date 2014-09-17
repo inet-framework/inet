@@ -26,16 +26,15 @@
 #include <sys/time.h>
 #endif
 
-#include "compatibility.h"
-#include "Coord.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "L3Address.h"
-#include "L3Address.h"
-#include "ManetNetfilterHook.h"
-#include "NotifierConsts.h"
-#include "ICMP.h"
-#include "IPv4.h"
+#include "inet/routing/extras/base/compatibility.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/routing/extras/base/ManetNetfilterHook.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/ipv4/IPv4.h"
 
 #include <vector>
 #include <set>

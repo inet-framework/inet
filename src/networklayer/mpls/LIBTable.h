@@ -19,11 +19,11 @@
 #include <vector>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ConstType.h"
-#include "IPv4Address.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/mpls/ConstType.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
 

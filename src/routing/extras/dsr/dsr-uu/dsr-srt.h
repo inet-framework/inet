@@ -8,9 +8,9 @@
 #ifndef _DSR_SRT_H
 #define _DSR_SRT_H
 
-#include "dsr-uu/dsr.h"
-#include "dsr-uu/debug_dsr.h"
-#include "dsr-uu-omnetpp.h"
+#include "dsr.h"
+#include "debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 
 
 #ifdef NS2

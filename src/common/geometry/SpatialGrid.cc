@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SpatialGrid.h"
+#include "inet/common/geometry/SpatialGrid.h"
 
 namespace inet {
 

@@ -20,9 +20,9 @@
 
 #include <map>
 #include <vector>
-#include "INETDefs.h"
-#include "ReassemblyBuffer.h"
-#include "IPv6Address.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ReassemblyBuffer.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
 

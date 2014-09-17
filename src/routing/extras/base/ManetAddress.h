@@ -20,10 +20,10 @@
 #ifndef __INET_MANETADDRESS_H
 #define __INET_MANETADDRESS_H
 
-#include "IPv4Address.h"
-#include "IPv6Address.h"
-#include "L3Address.h"
-#include "MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

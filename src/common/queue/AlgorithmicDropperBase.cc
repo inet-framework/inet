@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "AlgorithmicDropperBase.h"
+#include "inet/common/queue/AlgorithmicDropperBase.h"
 
 namespace inet {
 

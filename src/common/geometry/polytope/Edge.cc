@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 // 
 
-#include "Edge.h"
+#include "inet/common/geometry/polytope/Edge.h"
 
 namespace inet {
 

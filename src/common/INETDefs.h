@@ -23,7 +23,7 @@
 //
 
 #include <omnetpp.h>
-#include "Compat.h"
+#include "inet/common/Compat.h"
 
 #if OMNETPP_VERSION < 0x0403
 #  error At least OMNeT++/OMNEST version 4.3 required
@@ -37,7 +37,7 @@
 #  define INET_API
 #endif // if defined(INET_EXPORT)
 
-#include "InitStages.h"
+#include "inet/common/InitStages.h"
 
 /// main namespace of INET framework
 namespace inet {

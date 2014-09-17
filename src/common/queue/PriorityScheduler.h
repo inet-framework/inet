@@ -19,8 +19,8 @@
 #ifndef __INET_PRIORITYSCHEDULER_H
 #define __INET_PRIORITYSCHEDULER_H
 
-#include "INETDefs.h"
-#include "SchedulerBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/queue/SchedulerBase.h"
 
 namespace inet {
 

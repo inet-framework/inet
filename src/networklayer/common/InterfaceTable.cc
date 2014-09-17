@@ -22,22 +22,22 @@
 #include <algorithm>
 #include <sstream>
 
-#include "InterfaceTable.h"
-#include "ModuleAccess.h"
-#include "NotifierConsts.h"
-#include "NodeStatus.h"
-#include "NodeOperations.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 #ifdef WITH_GENERIC
-#include "GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #endif // ifdef WITH_GENERIC
 
 #ifdef WITH_IPv4
-#include "IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {

@@ -34,8 +34,8 @@
 #include <list>
 #include <math.h>
 
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
 

@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPVideoStreamSvr.h"
+#include "inet/applications/udpapp/UDPVideoStreamSvr.h"
 
-#include "UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
 

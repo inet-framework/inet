@@ -25,21 +25,21 @@
 
 #include <string.h>
 #include <assert.h>
-#include "dymo_um_omnet.h"
+#include "inet/routing/extras/dymo/dymo_um_omnet.h"
 
-#include "UDPPacket.h"
-#include "IPv4ControlInfo.h"
-#include "ICMPMessage_m.h"
-#include "NotifierConsts.h"
-#include "Ieee802Ctrl.h"
-#include "Ieee80211Frame_m.h"
-#include "IPv4InterfaceData.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 
-#include "ProtocolMap.h"
-#include "IPv4Address.h"
-#include "L3Address.h"
-#include "ControlManetRouting_m.h"
+#include "inet/common/ProtocolMap.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/routing/extras/base/ControlManetRouting_m.h"
 #ifdef WITH_80211MESH
 #include "LocatorNotificationInfo_m.h"
 #endif

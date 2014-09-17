@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "REDDropper.h"
-#include "INETUtils.h"
+#include "inet/common/queue/REDDropper.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

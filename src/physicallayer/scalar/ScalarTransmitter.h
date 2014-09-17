@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARTRANSMITTER_H
 #define __INET_SCALARTRANSMITTER_H
 
-#include "FlatTransmitterBase.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
 
 namespace inet {
 

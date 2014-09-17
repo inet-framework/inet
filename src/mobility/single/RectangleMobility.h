@@ -18,9 +18,9 @@
 #ifndef __INET_RECTANGLEMOBILITY_H
 #define __INET_RECTANGLEMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MovingMobilityBase.h"
+#include "inet/mobility/common/MovingMobilityBase.h"
 
 namespace inet {
 

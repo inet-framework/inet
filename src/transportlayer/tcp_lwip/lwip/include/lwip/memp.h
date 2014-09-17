@@ -98,7 +98,7 @@ extern const u16_t memp_sizes[MEMP_MAX];
 
 #if MEMP_MEM_MALLOC
 
-#include "mem.h"
+#include "inet/transportlayer/tcp_lwip/lwip/include/lwip/mem.h"
 
 namespace inet {
 

@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTPNatPeer.h"
-#include "SCTPSocket.h"
-#include "SCTPCommand_m.h"
-#include "SCTPMessage_m.h"
+#include "inet/applications/sctpapp/SCTPNatPeer.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPMessage_m.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "SCTPAssociation.h"
-#include "L3AddressResolver.h"
-#include "NodeStatus.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

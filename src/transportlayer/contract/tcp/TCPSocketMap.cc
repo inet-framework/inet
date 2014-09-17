@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
 
 namespace inet {
 

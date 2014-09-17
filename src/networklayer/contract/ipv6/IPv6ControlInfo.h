@@ -18,8 +18,8 @@
 #ifndef __INET_IPV6CONTROLINFO_H
 #define __INET_IPV6CONTROLINFO_H
 
-#include "INetworkProtocolControlInfo.h"
-#include "IPv6ControlInfo_m.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo_m.h"
 
 namespace inet {
 

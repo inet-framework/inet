@@ -19,10 +19,10 @@
 #ifndef __INET_TCP_NSC_BYTESTREAMQUEUES_H
 #define __INET_TCP_NSC_BYTESTREAMQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCP_NSC_Queues.h"
-#include "ByteArrayBuffer.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
+#include "inet/common/ByteArrayBuffer.h"
 
 namespace inet {
 

@@ -20,30 +20,30 @@
 #ifndef __INET_DYMO_H
 #define __INET_DYMO_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Address.h"
-#include "IPv4.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "Ieee802Ctrl.h"
-#include "ICMPMessage.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
-#include "ManetRoutingBase.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
 
-#include "DYMO_Packet_m.h"
-#include "DYMO_RoutingTable.h"
-#include "DYMO_OutstandingRREQList.h"
-#include "DYMO_RM_m.h"
-#include "DYMO_RREQ_m.h"
-#include "DYMO_RREP_m.h"
-#include "DYMO_AddressBlock.h"
-#include "DYMO_RERR_m.h"
-#include "DYMO_UERR_m.h"
-#include "DYMO_DataQueue.h"
-#include "DYMO_Timeout_m.h"
-#include "DYMO_TokenBucket.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Packet_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RoutingTable.h"
+#include "inet/routing/extras/dymo_fau/DYMO_OutstandingRREQList.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RM_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RREQ_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RREP_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_AddressBlock.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RERR_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_UERR_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_DataQueue.h"
+#include "inet/routing/extras/dymo_fau/DYMO_Timeout_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_TokenBucket.h"
 
 namespace inet {
 

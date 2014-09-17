@@ -20,8 +20,8 @@
 #ifndef __INET_TRACTORMOBILITY_H
 #define __INET_TRACTORMOBILITY_H
 
-#include "INETDefs.h"
-#include "LineSegmentsMobilityBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
 
 namespace inet {
 

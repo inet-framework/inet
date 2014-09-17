@@ -18,7 +18,7 @@
 #ifndef __INET_NOISEBASE_H
 #define __INET_NOISEBASE_H
 
-#include "INoise.h"
+#include "inet/physicallayer/contract/INoise.h"
 
 namespace inet {
 

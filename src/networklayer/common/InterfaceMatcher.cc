@@ -16,14 +16,14 @@
 //
 
 #include <set>
-#include "IInterfaceTable.h"
-#include "L3AddressResolver.h"
-#include "InterfaceEntry.h"
-#include "PatternMatcher.h"
-#include "ModuleAccess.h"
-#include "stlutils.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 
-#include "InterfaceMatcher.h"
+#include "inet/networklayer/common/InterfaceMatcher.h"
 
 namespace inet {
 

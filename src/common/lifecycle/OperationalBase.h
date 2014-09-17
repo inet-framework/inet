@@ -18,7 +18,7 @@
 #ifndef __INET_OPERATIONALBASE_H
 #define __INET_OPERATIONALBASE_H
 
-#include "ILifecycle.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

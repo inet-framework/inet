@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OrdinalBasedDuplicator.h"
+#include "inet/common/queue/OrdinalBasedDuplicator.h"
 
 namespace inet {
 

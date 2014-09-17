@@ -28,9 +28,9 @@
 #ifndef __INET_ROUTINGTABLEPARSER_H
 #define __INET_ROUTINGTABLEPARSER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
 namespace inet {
 

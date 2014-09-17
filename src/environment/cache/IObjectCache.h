@@ -18,9 +18,9 @@
 #ifndef __INET_IOBJECTCACHE_H
 #define __INET_IOBJECTCACHE_H
 
-#include "IVisitor.h"
-#include "PhysicalObject.h"
-#include "LineSegment.h"
+#include "inet/common/IVisitor.h"
+#include "inet/environment/PhysicalObject.h"
+#include "inet/common/geometry/LineSegment.h"
 
 namespace inet {
 

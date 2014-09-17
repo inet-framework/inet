@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TransmissionBase.h"
+#include "inet/physicallayer/base/TransmissionBase.h"
 
 namespace inet {
 

@@ -19,19 +19,19 @@
 #ifndef __INET_SCTPASSOCIATION_H
 #define __INET_SCTPASSOCIATION_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "IPv4Address.h"
-#include "SCTP.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv6RoutingTable.h"
-#include "SCTPGapList.h"
-#include "SCTPQueue.h"
-#include "SCTPSendStream.h"
-#include "SCTPReceiveStream.h"
-#include "SCTPMessage.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/transportlayer/sctp/SCTPGapList.h"
+#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SCTPSendStream.h"
+#include "inet/transportlayer/sctp/SCTPReceiveStream.h"
+#include "inet/transportlayer/sctp/SCTPMessage.h"
 #include <list>
 #include <iostream>
 #include <errno.h>

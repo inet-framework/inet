@@ -18,10 +18,10 @@
 #ifndef __INET_HTTPBROWSER_H
 #define __INET_HTTPBROWSER_H
 
-#include "TCPSocket.h"
-#include "TCPSocketMap.h"
-#include "L3AddressResolver.h"
-#include "HttpBrowserBase.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/applications/httptools/browser/HttpBrowserBase.h"
 
 namespace inet {
 

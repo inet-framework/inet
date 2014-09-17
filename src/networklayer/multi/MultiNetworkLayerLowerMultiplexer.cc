@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MultiNetworkLayerLowerMultiplexer.h"
+#include "inet/networklayer/multi/MultiNetworkLayerLowerMultiplexer.h"
 
 #ifdef WITH_IPv4
-#include "ARPPacket_m.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "GenericDatagram.h"
+#include "inet/networklayer/generic/GenericDatagram.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

@@ -18,7 +18,7 @@
 #ifndef __INET_OSPFINTERFACESTATE_H
 #define __INET_OSPFINTERFACESTATE_H
 
-#include "OSPFInterface.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
 
 namespace inet {
 

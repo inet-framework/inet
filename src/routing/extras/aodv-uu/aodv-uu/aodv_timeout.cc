@@ -32,19 +32,19 @@
 #include "../aodv_uu_omnet.h"
 #endif
 #else
-#include "defs_aodv.h"
-#include "aodv_timeout.h"
-#include "aodv_socket.h"
-#include "aodv_neighbor.h"
-#include "aodv_rreq.h"
-#include "aodv_hello.h"
-#include "aodv_rerr.h"
-#include "timer_queue_aodv.h"
-#include "debug_aodv.h"
-#include "params.h"
-#include "routing_table.h"
-#include "seek_list.h"
-#include "nl.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_timeout.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_socket.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_neighbor.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rreq.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_hello.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rerr.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/timer_queue_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/debug_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/routing_table.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/seek_list.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/nl.h"
 
 extern int expanding_ring_search, local_repair;
 void route_delete_timeout(void *arg);

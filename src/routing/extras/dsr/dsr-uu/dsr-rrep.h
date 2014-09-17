@@ -8,8 +8,8 @@
 #ifndef _DSR_RREP_H
 #define _DSR_RREP_H
 
-#include "dsr.h"
-#include "dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
 
 
 #ifndef NO_GLOBALS

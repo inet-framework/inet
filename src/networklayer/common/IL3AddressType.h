@@ -18,10 +18,10 @@
 #ifndef __INET_IL3ADDRESSTYPE_H
 #define __INET_IL3ADDRESSTYPE_H
 
-#include "INETDefs.h"
-#include "L3Address.h"
-#include "INetworkProtocolControlInfo.h"
-#include "InterfaceEntry.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

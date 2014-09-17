@@ -20,7 +20,7 @@
 #define __INET_HOSTAUTOCONFIGURATOR_H
 
 #include <omnetpp.h>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

@@ -20,8 +20,8 @@
 #include <stdexcept>
 #include <sstream>
 #include <algorithm>
-#include "DYMO_RoutingTable.h"
-#include "DYMOFau.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RoutingTable.h"
+#include "inet/routing/extras/dymo_fau/DYMOFau.h"
 
 namespace inet {
 

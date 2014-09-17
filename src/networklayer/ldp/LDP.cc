@@ -17,22 +17,22 @@
 #include <fstream>
 #include <algorithm>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LDP.h"
+#include "inet/networklayer/ldp/LDP.h"
 
-//#include "ConstType.h"
-#include "LIBTable.h"
-#include "IPv4InterfaceData.h"
-#include "NotifierConsts.h"
-#include "UDPControlInfo_m.h"
-#include "UDPPacket.h"
-#include "TCPSegment.h"
-#include "NodeOperations.h"
-#include "IIPv4RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "TED.h"
+//#include "inet/networklayer/mpls/ConstType.h"
+#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ted/TED.h"
 
 namespace inet {
 

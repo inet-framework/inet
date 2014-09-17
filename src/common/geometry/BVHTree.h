@@ -18,10 +18,10 @@
 #ifndef __INET_BVHTREE_H_
 #define __INET_BVHTREE_H_
 
-#include "INETDefs.h"
-#include "IVisitor.h"
-#include "LineSegment.h"
-#include "PhysicalObject.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/IVisitor.h"
+#include "inet/common/geometry/LineSegment.h"
+#include "inet/environment/PhysicalObject.h"
 
 namespace inet {
 

@@ -22,8 +22,8 @@
 #include <map>
 #include <list>
 
-#include "ILifecycle.h"
-#include "UDPControlInfo.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
 namespace inet {
 

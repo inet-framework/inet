@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MappingUtils.h"
+#include "inet/physicallayer/mapping/MappingUtils.h"
 
 namespace inet {
 

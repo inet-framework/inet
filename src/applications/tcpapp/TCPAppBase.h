@@ -18,8 +18,8 @@
 #ifndef __INET_TCPAPPBASE_H
 #define __INET_TCPAPPBASE_H
 
-#include "INETDefs.h"
-#include "TCPSocket.h"
+#include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 

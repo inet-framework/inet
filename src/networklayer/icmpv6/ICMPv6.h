@@ -19,10 +19,10 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "ICMPv6Message_m.h"
-#include "ILifecycle.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

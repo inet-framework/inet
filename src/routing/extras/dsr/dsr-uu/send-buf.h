@@ -8,7 +8,7 @@
 #ifndef _SEND_BUF_H
 #define _SEND_BUF_H
 
-#include "dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
 
 #ifndef NO_GLOBALS
 
@@ -17,13 +17,13 @@
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 typedef void (DSRUU::*xmit_fct_t) (struct dsr_pkt *);
 #else
 typedef int (*xmit_fct_t) (struct dsr_pkt *);
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 
 namespace inet {
 

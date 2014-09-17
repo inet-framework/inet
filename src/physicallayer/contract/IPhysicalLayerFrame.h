@@ -18,7 +18,7 @@
 #ifndef __INET_IPHYSICALLAYERFRAME_H
 #define __INET_IPHYSICALLAYERFRAME_H
 
-#include "PhysicalLayerDefs.h"
+#include "inet/physicallayer/base/PhysicalLayerDefs.h"
 
 namespace inet {
 

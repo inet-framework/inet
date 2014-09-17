@@ -16,18 +16,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "TcpLwipConnection.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 
 #include "headers/defs.h"    // for endian macros
 #include "headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
-#include "TCP_lwIP.h"
-#include "TCPCommand_m.h"
-#include "TCPIPchecksum.h"
-#include "TcpLwipQueues.h"
-#include "TCPSegment.h"
-#include "TCPSerializer.h"
-#include "INETUtils.h"
+#include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

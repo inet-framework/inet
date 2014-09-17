@@ -20,13 +20,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "IdealMac.h"
+#include "inet/linklayer/ideal/IdealMac.h"
 
-#include "IdealMacFrame_m.h"
-#include "Ieee802Ctrl.h"
-#include "IInterfaceTable.h"
-#include "IPassiveQueue.h"
-#include "INETUtils.h"
+#include "inet/linklayer/ideal/IdealMacFrame_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 

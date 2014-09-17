@@ -23,9 +23,9 @@
 #ifndef __INET_MOBILITYHEADER_H
 #define __INET_MOBILITYHEADER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MobilityHeader_m.h"
+#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
 
 namespace inet {
 

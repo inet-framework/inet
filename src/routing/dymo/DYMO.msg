@@ -17,8 +17,8 @@
 //
 
 cplusplus {{
-#include "L3Address.h"
-#include "DYMOdefs.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/routing/dymo/DYMOdefs.h"
 }}
 
 namespace inet::dymo;

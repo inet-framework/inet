@@ -21,22 +21,22 @@
 
 ///
 
-#include "ManetRoutingBase.h"
-#include "UDPPacket.h"
-#include "IPSocket.h"
-#include "IPv4Datagram.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "IPv6AddressType.h"
-#include "IPv6ControlInfo.h"
-#include "Ieee802Ctrl.h"
-#include "IARP.h"
-#include "Coord.h"
-#include "ControlInfoBreakLink_m.h"
-#include "Ieee80211Frame_m.h"
-#include "IMobility.h"
-#include "Ieee80211MgmtAP.h"
-#include "ModuleAccess.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv6/IPv6AddressType.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/arp/IARP.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/routing/extras/base/ControlInfoBreakLink_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

@@ -7,7 +7,7 @@
 //#include <unistd.h>
 //#include <sys/time.h>
 //#include <sys/types.h>
-#include "compatibility.h"
+#include "inet/routing/extras/base/compatibility.h"
 
 #include "aodv_msg_struct_m.h"
 

@@ -18,8 +18,8 @@
 //
 
 cplusplus {{
-#include "MACAddress.h"
-#include "IPv4Address.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;

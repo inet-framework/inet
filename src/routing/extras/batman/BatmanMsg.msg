@@ -19,7 +19,7 @@
 // ***************************************************************************
 
 cplusplus {{
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 #define DIRECTLINK 0x40
 #define UNIDIRECTIONAL 0x80
 

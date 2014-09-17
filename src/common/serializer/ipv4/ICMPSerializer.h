@@ -19,7 +19,7 @@
 #ifndef __INET_ICMPSERIALIZER_H
 #define __INET_ICMPSERIALIZER_H
 
-#include "ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
 
 namespace inet {
 

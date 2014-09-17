@@ -18,9 +18,9 @@
 #ifndef __INET_QUADTREE_H
 #define __INET_QUADTREE_H
 
-#include "INETDefs.h"
-#include "Coord.h"
-#include "IVisitor.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/IVisitor.h"
 #include <algorithm>
 
 namespace inet {

@@ -18,15 +18,15 @@
 
 #include <algorithm>
 
-#include "INETUtils.h"
+#include "inet/common/INETUtils.h"
 
-#include "IPv6RoutingTable.h"
-#include "IInterfaceTable.h"
-#include "ModuleAccess.h"
-#include "IPv6Tunneling.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
 
-#include "IPv6InterfaceData.h"
-#include "NodeOperations.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

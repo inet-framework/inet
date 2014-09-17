@@ -18,8 +18,8 @@
 
 #include <iostream>
 #include <sstream>
-#include "IPv6Address.h"
-#include "InterfaceToken.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/common/InterfaceToken.h"
 
 namespace inet {
 

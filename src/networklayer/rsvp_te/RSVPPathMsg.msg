@@ -15,8 +15,8 @@
 
 
 cplusplus {{
-#include "IntServ.h"
-#include "RSVPPacket.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/networklayer/rsvp_te/RSVPPacket.h"
 }}
 
 namespace inet;

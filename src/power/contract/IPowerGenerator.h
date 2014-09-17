@@ -18,7 +18,7 @@
 #ifndef __INET_IPOWERGENERATOR_H
 #define __INET_IPOWERGENERATOR_H
 
-#include "PowerDefs.h"
+#include "inet/power/base/PowerDefs.h"
 
 namespace inet {
 

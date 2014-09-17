@@ -3,8 +3,8 @@ Test the IP fragmentation reassembly buffer (IPv4FragBuf class)
 
 %includes:
 #include <vector>
-#include "IPv4FragBuf.h"
-#include "IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4FragBuf.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 %global:
 struct Frag

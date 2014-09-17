@@ -18,7 +18,7 @@
 #ifndef __INET_TCPVIRTUALDATASENDQUEUE_H
 #define __INET_TCPVIRTUALDATASENDQUEUE_H
 
-#include "TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 namespace inet {
 

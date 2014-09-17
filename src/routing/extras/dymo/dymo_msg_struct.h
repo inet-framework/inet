@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include  <string.h>
-#include "compatibility.h"
-#include "L3Address.h"
+#include "inet/routing/extras/base/compatibility.h"
+#include "inet/networklayer/common/L3Address.h"
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

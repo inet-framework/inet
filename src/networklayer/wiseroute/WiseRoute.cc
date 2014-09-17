@@ -27,15 +27,15 @@
 #include <limits>
 #include <algorithm>
 
-#include "WiseRoute.h"
-#include "INETMath.h"
-#include "IL3AddressType.h"
-#include "MACAddress.h"
-#include "L3AddressResolver.h"
-#include "FindModule.h"
-#include "ModuleAccess.h"
-#include "SimpleLinkLayerControlInfo.h"
-#include "SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/wiseroute/WiseRoute.h"
+#include "inet/common/INETMath.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/FindModule.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
 
 namespace inet {
 

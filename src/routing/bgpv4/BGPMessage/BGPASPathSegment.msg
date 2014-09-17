@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "BGPCommon_m.h"
+#include "inet/routing/bgpv4/BGPCommon_m.h"
 }}
 
 namespace inet::bgp;

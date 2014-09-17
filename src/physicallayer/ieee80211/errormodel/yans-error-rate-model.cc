@@ -17,7 +17,7 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "yans-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/errormodel/yans-error-rate-model.h"
 #include <math.h>
 
 namespace inet {

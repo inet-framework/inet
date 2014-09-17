@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTPSendStream.h"
+#include "inet/transportlayer/sctp/SCTPSendStream.h"
 
-#include "SCTPCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
 

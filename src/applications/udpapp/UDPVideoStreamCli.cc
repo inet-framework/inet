@@ -17,10 +17,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPVideoStreamCli.h"
+#include "inet/applications/udpapp/UDPVideoStreamCli.h"
 
-#include "UDPControlInfo_m.h"
-#include "L3AddressResolver.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 

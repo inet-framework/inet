@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPByteStreamRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPByteStreamRcvQueue.h"
 
-#include "ByteArrayMessage.h"
-#include "TCPCommand_m.h"
-#include "TCPSegment.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

@@ -17,9 +17,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DYMO_RoutingEntry.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RoutingEntry.h"
 
-#include "DYMOFau.h"
+#include "inet/routing/extras/dymo_fau/DYMOFau.h"
 
 namespace inet {
 

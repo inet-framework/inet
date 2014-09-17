@@ -18,9 +18,9 @@
 #ifndef __INET_CIRCLEMOBILITY_H
 #define __INET_CIRCLEMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MovingMobilityBase.h"
+#include "inet/mobility/common/MovingMobilityBase.h"
 
 namespace inet {
 

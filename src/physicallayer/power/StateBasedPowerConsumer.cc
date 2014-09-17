@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "StateBasedPowerConsumer.h"
-#include "ModuleAccess.h"
+#include "inet/physicallayer/power/StateBasedPowerConsumer.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

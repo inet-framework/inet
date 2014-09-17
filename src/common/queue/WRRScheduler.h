@@ -19,8 +19,8 @@
 #ifndef __INET_WRRSCHEDULER_H
 #define __INET_WRRSCHEDULER_H
 
-#include "INETDefs.h"
-#include "SchedulerBase.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/queue/SchedulerBase.h"
 
 namespace inet {
 

@@ -22,9 +22,9 @@
 #ifndef __INET_MOVINGMOBILITYBASE_H
 #define __INET_MOVINGMOBILITYBASE_H
 
-#include "INETDefs.h"
-#include "MobilityBase.h"
-#include "TrailFigure.h"
+#include "inet/common/INETDefs.h"
+#include "inet/mobility/common/MobilityBase.h"
+#include "inet/common/TrailFigure.h"
 
 namespace inet {
 

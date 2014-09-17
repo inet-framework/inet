@@ -11,9 +11,9 @@
  *
  ******************************************************/
 
-#include "EthernetApplication.h"
-#include "EtherApp_m.h"
-#include "Ieee802Ctrl.h"
+#include "inet/applications/ethernet/EthernetApplication.h"
+#include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

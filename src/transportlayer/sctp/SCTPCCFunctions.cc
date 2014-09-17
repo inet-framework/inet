@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 namespace inet {
 

@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "MACRelayUnit.h"
-#include "EtherFrame.h"
-#include "EtherMACBase.h"
-#include "Ethernet.h"
-#include "ModuleAccess.h"
-#include "NodeOperations.h"
+#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherMACBase.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 

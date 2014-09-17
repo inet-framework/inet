@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "QueueBase.h"
+#include "inet/common/queue/QueueBase.h"
 
 namespace inet {
 

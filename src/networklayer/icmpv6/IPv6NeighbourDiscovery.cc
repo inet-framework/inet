@@ -16,19 +16,19 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "IPv6NeighbourDiscovery.h"
+#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
 
-#include "IPv6ControlInfo.h"
-#include "IPv6Datagram.h"
-#include "IPv6InterfaceData.h"
-#include "IInterfaceTable.h"
-#include "IPv6RoutingTable.h"
-#include "ModuleAccess.h"
-#include "NodeStatus.h"
-#include "ICMPv6.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/icmpv6/ICMPv6.h"
 
 #ifdef WITH_xMIPv6
-#include "xMIPv6.h"
+#include "inet/networklayer/xmipv6/xMIPv6.h"
 #endif /* WITH_xMIPv6 */
 
 namespace inet {

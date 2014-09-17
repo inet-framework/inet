@@ -19,7 +19,7 @@
 #define __INET_HTTPSERVERDIRECTEVILA_H
 
 #include <string>
-#include "HttpServerDirect.h"
+#include "inet/applications/httptools/server/HttpServerDirect.h"
 
 namespace inet {
 

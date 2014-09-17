@@ -10,8 +10,8 @@
 
 #include <map>
 
-#include "ProbabilisticBroadcast.h"
-#include "L3Address.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

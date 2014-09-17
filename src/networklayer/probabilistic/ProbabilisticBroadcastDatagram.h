@@ -18,8 +18,8 @@
 #ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
 #define __INET_PROBABILISTICBROADCASTDATAGRAM_H
 
-#include "INetworkDatagram.h"
-#include "ProbabilisticBroadcastDatagram_m.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastDatagram_m.h"
 
 namespace inet {
 

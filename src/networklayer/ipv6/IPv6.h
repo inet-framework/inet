@@ -18,19 +18,19 @@
 #ifndef __INET_IPV6_H
 #define __INET_IPV6_H
 
-#include "INETDefs.h"
-#include "INetfilter.h"
-#include "INetworkProtocol.h"
-#include "QueueBase.h"
-#include "IPv6RoutingTable.h"
-#include "ICMPv6.h"
-#include "IPv6NeighbourDiscovery.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/common/queue/QueueBase.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
 
-#include "IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
 
-#include "IPv6Datagram.h"
-#include "IPv6FragBuf.h"
-#include "ProtocolMap.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6FragBuf.h"
+#include "inet/common/ProtocolMap.h"
 
 namespace inet {
 

@@ -17,9 +17,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "SCTPAssociation.h"
-#include "SCTPAlgorithm.h"
-#include "SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 #include <assert.h>
 #include <algorithm>

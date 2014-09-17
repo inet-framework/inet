@@ -18,11 +18,11 @@
 #ifndef __INET_IEEE80211MGMTSTA_H
 #define __INET_IEEE80211MGMTSTA_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Ieee80211MgmtBase.h"
-#include "Ieee80211Primitives_m.h"
-#include "IInterfaceTable.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
 
 namespace inet {
 

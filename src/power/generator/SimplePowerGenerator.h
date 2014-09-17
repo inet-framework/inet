@@ -18,8 +18,8 @@
 #ifndef __INET_SIMPLEPOWERGENERATOR_H
 #define __INET_SIMPLEPOWERGENERATOR_H
 
-#include "IPowerGenerator.h"
-#include "IPowerSink.h"
+#include "inet/power/contract/IPowerGenerator.h"
+#include "inet/power/contract/IPowerSink.h"
 
 namespace inet {
 

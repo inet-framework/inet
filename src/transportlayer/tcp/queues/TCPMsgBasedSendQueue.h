@@ -19,7 +19,7 @@
 #define __INET_TCPMSGBASEDSENDQUEUE_H
 
 #include <list>
-#include "TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 namespace inet {
 

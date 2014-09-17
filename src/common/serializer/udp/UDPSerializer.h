@@ -19,7 +19,7 @@
 #ifndef __INET_UDPSERIALIZER_H
 #define __INET_UDPSERIALIZER_H
 
-#include "UDPPacket.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 
 namespace inet {
 

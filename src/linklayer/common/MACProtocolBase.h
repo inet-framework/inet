@@ -18,9 +18,9 @@
 #ifndef __INET_MACPROTOCOLBASE_H
 #define __INET_MACPROTOCOLBASE_H
 
-#include "LayeredProtocolBase.h"
-#include "NodeOperations.h"
-#include "InterfaceEntry.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 

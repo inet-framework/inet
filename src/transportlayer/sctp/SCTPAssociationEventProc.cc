@@ -17,10 +17,10 @@
 //
 
 #include <string.h>
-#include "SCTP.h"
-#include "SCTPAssociation.h"
-#include "SCTPCommand_m.h"
-#include "SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
 
 namespace inet {
 

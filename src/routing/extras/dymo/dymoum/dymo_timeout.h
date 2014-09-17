@@ -22,7 +22,7 @@
 #define __DYMO_TIMEOUT_H__
 
 #ifndef NS_NO_GLOBALS
-#include "defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
 
 #endif  /* NS_NO_GLOBALS */
 

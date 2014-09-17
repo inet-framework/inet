@@ -18,8 +18,8 @@
 #ifndef __INET_IRECEPTIONDECISION_H
 #define __INET_IRECEPTIONDECISION_H
 
-#include "IReception.h"
-#include "RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
 
 namespace inet {
 

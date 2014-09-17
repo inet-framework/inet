@@ -18,10 +18,10 @@
 //
 
 cplusplus {{
-#include "INETDefs.h"
-#include "IPv4Address.h"
-#include "RTPSenderControlMessage_m.h"
-#include "RTPSenderStatusMessage_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
+#include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
 }}
 
 namespace inet::rtp;

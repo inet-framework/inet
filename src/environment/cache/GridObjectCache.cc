@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "GridObjectCache.h"
-#include "ModuleAccess.h"
+#include "inet/environment/cache/GridObjectCache.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

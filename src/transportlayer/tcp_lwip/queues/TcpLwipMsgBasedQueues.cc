@@ -18,10 +18,10 @@
 
 #include "TcpLwipMsgBasedQueues.h"
 
-#include "TCPCommand_m.h"
-#include "TcpLwipConnection.h"
-#include "TCPSerializer.h"
-#include "TCP_lwIP.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
+#include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"
 
 namespace inet {
 

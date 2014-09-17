@@ -19,7 +19,7 @@
 #ifndef __INET_TCPLWIPQUEUES_H
 #define __INET_TCPLWIPQUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

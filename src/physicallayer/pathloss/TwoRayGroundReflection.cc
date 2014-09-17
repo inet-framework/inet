@@ -15,7 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "TwoRayGroundReflection.h"
+#include "inet/physicallayer/pathloss/TwoRayGroundReflection.h"
 
 namespace inet {
 

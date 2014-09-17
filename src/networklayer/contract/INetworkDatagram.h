@@ -18,7 +18,7 @@
 #ifndef __INET_INETWORKDATAGRAM_H
 #define __INET_INETWORKDATAGRAM_H
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

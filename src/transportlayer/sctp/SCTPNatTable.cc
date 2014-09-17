@@ -23,9 +23,9 @@
 #include <algorithm>
 #include <sstream>
 
-#include "SCTPNatTable.h"
-#include "NotifierConsts.h"
-#include "SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SCTPNatTable.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 namespace inet {
 

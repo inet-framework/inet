@@ -36,7 +36,7 @@
 
 #include "lwip/inet.h"
 
-#include "L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 

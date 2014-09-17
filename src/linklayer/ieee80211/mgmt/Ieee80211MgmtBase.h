@@ -18,13 +18,13 @@
 #ifndef __INET_IEEE80211MGMTBASE_H
 #define __INET_IEEE80211MGMTBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MACAddress.h"
-#include "PassiveQueueBase.h"
-#include "Ieee80211Frame_m.h"
-#include "Ieee80211MgmtFrames_m.h"
-#include "ILifecycle.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/queue/PassiveQueueBase.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 

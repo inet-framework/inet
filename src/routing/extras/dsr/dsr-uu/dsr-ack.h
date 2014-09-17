@@ -8,7 +8,7 @@
 #ifndef _DSR_ACK_H
 #define _DSR_ACK_H
 
-#include "dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr.h"
 
 
 #ifndef NO_GLOBALS

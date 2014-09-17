@@ -19,9 +19,9 @@
 #ifndef __INET_STATICGRIDMOBILITY_H
 #define __INET_STATICGRIDMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "StationaryMobility.h"
+#include "inet/mobility/static/StationaryMobility.h"
 
 namespace inet {
 

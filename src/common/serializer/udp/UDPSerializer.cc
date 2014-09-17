@@ -17,16 +17,16 @@
 
 #include <platdep/sockets.h>
 
-#include "UDPSerializer.h"
+#include "inet/common/serializer/udp/UDPSerializer.h"
 
-#include "headers/defs.h"
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-#include "headers/udphdr.h"
+#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/udp/headers/udphdr.h"
 
-#include "ByteArrayMessage.h"
-#include "TCPIPchecksum.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...

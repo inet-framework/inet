@@ -18,10 +18,10 @@
 #include <fstream>
 #include <string.h>
 
-#include "RTPAVProfilePayload32Sender.h"
-#include "RTPInnerPacket.h"
-#include "RTPMpegPacket_m.h"
-#include "RTPPacket.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 

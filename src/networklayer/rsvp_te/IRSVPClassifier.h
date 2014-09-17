@@ -15,10 +15,10 @@
 #ifndef __INET_IRSVPCLASSIFIER_H
 #define __INET_IRSVPCLASSIFIER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IntServ.h"
-#include "IClassifier.h"
+#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/networklayer/mpls/IClassifier.h"
 
 namespace inet {
 

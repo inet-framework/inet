@@ -18,7 +18,7 @@
 //
 
 cplusplus {{
-#include "DYMO_RM_m.h"
+#include "inet/routing/extras/dymo_fau/DYMO_RM_m.h"
 }}
 
 namespace inet::inetmanet;

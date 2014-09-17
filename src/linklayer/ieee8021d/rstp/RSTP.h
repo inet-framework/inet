@@ -20,14 +20,14 @@
 #ifndef __INET_RSTP_H
 #define __INET_RSTP_H
 
-#include "ILifecycle.h"
-#include "Ieee8021dBPDU_m.h"
-#include "MACAddress.h"
-#include "EtherFrame.h"
-#include "MACAddressTable.h"
-#include "InterfaceTable.h"
-#include "Ieee8021dInterfaceData.h"
-#include "STPBase.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/switch/MACAddressTable.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/linklayer/ieee8021d/common/STPBase.h"
 
 namespace inet {
 

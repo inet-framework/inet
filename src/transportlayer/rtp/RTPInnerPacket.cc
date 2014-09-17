@@ -15,9 +15,9 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
 
-#include "RTPPacket.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 

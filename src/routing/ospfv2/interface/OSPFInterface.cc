@@ -18,14 +18,14 @@
 #include <vector>
 #include <memory.h>
 
-#include "OSPFInterface.h"
+#include "inet/routing/ospfv2/interface/OSPFInterface.h"
 
-#include "IPv4Datagram_m.h"
-#include "IPv4InterfaceData.h"
-#include "MessageHandler.h"
-#include "OSPFArea.h"
-#include "OSPFInterfaceStateDown.h"
-#include "OSPFRouter.h"
+#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
+#include "inet/routing/ospfv2/router/OSPFArea.h"
+#include "inet/routing/ospfv2/interface/OSPFInterfaceStateDown.h"
+#include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {
 

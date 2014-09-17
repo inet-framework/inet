@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 // 
 
-#include "ConvexPolytopeTest.h"
-#include "PolytopePoint.h"
-#include "Face.h"
+#include "inet/common/geometry/polytope/ConvexPolytopeTest.h"
+#include "inet/common/geometry/polytope/PolytopePoint.h"
+#include "inet/common/geometry/polytope/Face.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "PassiveQueueBase.h"
+#include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {
 

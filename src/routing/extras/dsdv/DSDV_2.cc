@@ -13,10 +13,10 @@
  * Also we hope it will help in the developing of routing protocols using INET.
 */
 
-#include "DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
-#include "DSDV_2.h"
-#include "IPSocket.h"
-#include "ModuleAccess.h"
+#include "inet/routing/extras/dsdv/DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
+#include "inet/routing/extras/dsdv/DSDV_2.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 

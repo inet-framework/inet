@@ -21,7 +21,7 @@
 #ifndef __DLIST_H__
 #define __DLIST_H__
 
-#include "defs_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/defs_dymo.h"
 
 namespace inet {
 

@@ -21,9 +21,9 @@
 #ifndef __INET_TRACISCENARIOMANAGERLAUNCHD_H
 #define __INET_TRACISCENARIOMANAGERLAUNCHD_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TraCIScenarioManager.h"
+#include "inet/mobility/group/TraCIScenarioManager.h"
 
 #ifdef WITH_TRACI
 

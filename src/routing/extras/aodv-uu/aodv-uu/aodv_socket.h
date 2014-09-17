@@ -29,9 +29,9 @@
 #include <netinet/ip.h>
 #endif
 
-#include "defs_aodv.h"
-#include "aodv_rerr.h"
-#include "params.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/defs_aodv.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/aodv_rerr.h"
+#include "inet/routing/extras/aodv-uu/aodv-uu/params.h"
 
 
 #ifndef OMNETPP

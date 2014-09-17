@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "SimplePowerConsumer.h"
+#include "inet/power/consumer/SimplePowerConsumer.h"
 
 namespace inet {
 

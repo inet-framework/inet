@@ -15,9 +15,9 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "RTPProfile.h"
+#include "inet/transportlayer/rtp/RTPProfile.h"
 
 namespace inet {
 

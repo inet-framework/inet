@@ -17,10 +17,10 @@
 
 #include <fstream>
 
-#include "RTPPayloadReceiver.h"
+#include "inet/transportlayer/rtp/RTPPayloadReceiver.h"
 
-#include "RTPInnerPacket.h"
-#include "RTPPacket.h"
+#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 

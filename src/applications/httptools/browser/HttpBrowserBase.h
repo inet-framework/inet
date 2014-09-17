@@ -18,9 +18,9 @@
 #ifndef __INET_HTTPBROWSERBASE_H
 #define __INET_HTTPBROWSERBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "HttpNodeBase.h"
+#include "inet/applications/httptools/common/HttpNodeBase.h"
 
 namespace inet {
 

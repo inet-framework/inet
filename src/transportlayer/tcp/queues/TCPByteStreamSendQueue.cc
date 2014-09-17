@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPByteStreamSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPByteStreamSendQueue.h"
 
-#include "ByteArrayMessage.h"
-#include "TCPSegment.h"
+#include "inet/common/ByteArrayMessage.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

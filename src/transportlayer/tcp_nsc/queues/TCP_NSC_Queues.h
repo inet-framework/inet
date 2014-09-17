@@ -19,9 +19,9 @@
 #ifndef __INET_TCP_NSC_QUEUES_H
 #define __INET_TCP_NSC_QUEUES_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

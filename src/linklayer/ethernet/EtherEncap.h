@@ -18,9 +18,9 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Ethernet.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
 
 namespace inet {
 

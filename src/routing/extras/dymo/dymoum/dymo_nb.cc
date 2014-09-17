@@ -28,9 +28,9 @@
 #endif
 #include <errno.h>
 #else
-#include "dymo_nb.h"
-#include "debug_dymo.h"
-#include "dymo_timeout.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_nb.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_timeout.h"
 #include <stdlib.h>
 #include <errno.h>
 

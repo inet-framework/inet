@@ -18,8 +18,8 @@
 #ifndef __INET_ROTATION_H_
 #define __INET_ROTATION_H_
 
-#include "EulerAngles.h"
-#include "Coord.h"
+#include "inet/common/geometry/EulerAngles.h"
+#include "inet/common/geometry/Coord.h"
 
 namespace inet {
 

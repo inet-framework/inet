@@ -27,14 +27,14 @@
 #include "../dymo_um_omnet.h"
 #endif
 #else
-#include "dymo_timeout.h"
-#include "dymo_re.h"
-#include "dymo_netlink.h"
-#include "pending_rreq.h"
-#include "rtable.h"
-#include "blacklist.h"
-#include "dymo_nb.h"
-#include "debug_dymo.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_timeout.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_re.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_netlink.h"
+#include "inet/routing/extras/dymo/dymoum/pending_rreq.h"
+#include "inet/routing/extras/dymo/dymoum/rtable.h"
+#include "inet/routing/extras/dymo/dymoum/blacklist.h"
+#include "inet/routing/extras/dymo/dymoum/dymo_nb.h"
+#include "inet/routing/extras/dymo/dymoum/debug_dymo.h"
 
 
 extern int reissue_rreq;

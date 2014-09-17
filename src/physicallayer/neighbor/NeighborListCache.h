@@ -18,7 +18,7 @@
 #ifndef __INET_NEIGHBORLISTCACHE_H
 #define __INET_NEIGHBORLISTCACHE_H
 
-#include "RadioMedium.h"
+#include "inet/physicallayer/common/RadioMedium.h"
 #include <set>
 #include <vector>
 

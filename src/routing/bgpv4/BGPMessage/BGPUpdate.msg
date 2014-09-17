@@ -16,9 +16,9 @@
 //
 
 cplusplus {{
-#include "BGPHeader_m.h"
-#include "BGPUpdatePathAttributes_m.h"
-#include "IPv4Address.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPUpdatePathAttributes_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)

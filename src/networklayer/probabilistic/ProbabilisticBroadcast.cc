@@ -4,14 +4,14 @@
  *  Created on: Nov 4, 2008
  *      Author: Damien Piguet
  */
-#include "ProbabilisticBroadcast.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
 
 #include <cassert>
 
-#include "SimpleLinkLayerControlInfo.h"
-#include "SimpleNetworkProtocolControlInfo.h"
-#include "IL3AddressType.h"
-#include "MACAddress.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
 

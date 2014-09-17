@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE802CTRL_H
 #define __INET_IEEE802CTRL_H
 
-#include "INETDefs.h"
-#include "IMACProtocolControlInfo.h"
-#include "Ieee802Ctrl_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
+#include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
 namespace inet {
 

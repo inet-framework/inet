@@ -21,18 +21,18 @@
 
 #ifndef OMNETPP
 #ifdef NS2
-#include "ns-agent.h"
+#include "inet/routing/extras/dsr/dsr-uu/ns-agent.h"
 #endif
 #else
-#include "dsr-uu-omnetpp.h"
+#include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 #endif
 
-#include "tbl.h"
-#include "send-buf.h"
-#include "debug_dsr.h"
-#include "link-cache.h"
-#include "dsr-srt.h"
-#include "timer.h"
+#include "inet/routing/extras/dsr/dsr-uu/tbl.h"
+#include "inet/routing/extras/dsr/dsr-uu/send-buf.h"
+#include "inet/routing/extras/dsr/dsr-uu/debug_dsr.h"
+#include "inet/routing/extras/dsr/dsr-uu/link-cache.h"
+#include "inet/routing/extras/dsr/dsr-uu/dsr-srt.h"
+#include "inet/routing/extras/dsr/dsr-uu/timer.h"
 
 #ifdef __KERNEL__
 #define SEND_BUF_PROC_FS_NAME "send_buf"

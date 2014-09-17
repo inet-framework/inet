@@ -20,10 +20,10 @@
 #ifndef __INET_LOOPBACK_H
 #define __INET_LOOPBACK_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MACBase.h"
-#include "TxNotifDetails.h"
+#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/common/TxNotifDetails.h"
 
 namespace inet {
 

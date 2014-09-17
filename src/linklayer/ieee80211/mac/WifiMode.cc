@@ -17,8 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "WifiMode.h"
-#include "Ieee80211DataRate.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
 namespace inet {
 

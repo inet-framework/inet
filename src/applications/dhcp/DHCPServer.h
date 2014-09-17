@@ -23,13 +23,13 @@
 #include <vector>
 #include <map>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "DHCPMessage_m.h"
-#include "DHCPLease.h"
-#include "InterfaceTable.h"
-#include "ARP.h"
-#include "UDPSocket.h"
+#include "inet/applications/dhcp/DHCPMessage_m.h"
+#include "inet/applications/dhcp/DHCPLease.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/arp/ipv4/ARP.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
 

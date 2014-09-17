@@ -19,10 +19,10 @@
 
 #include <vector>
 
-#include "INETDefs.h"
-#include "LifecycleOperation.h"
-#include "TCPAppBase.h"
-#include "NodeStatus.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

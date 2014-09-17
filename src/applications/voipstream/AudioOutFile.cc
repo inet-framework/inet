@@ -20,9 +20,9 @@
 #define __STDC_CONSTANT_MACROS
 #include <stdint.h>
 
-#include "AudioOutFile.h"
+#include "inet/applications/voipstream/AudioOutFile.h"
 
-#include "INETEndians.h"
+#include "inet/common/INETEndians.h"
 
 extern "C" {
 #include <libavutil/audioconvert.h>

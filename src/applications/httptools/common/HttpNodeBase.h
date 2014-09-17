@@ -24,13 +24,13 @@
 #include <iostream>
 #include <fstream>
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
-#include "LifecycleOperation.h"
-#include "HttpController.h"
-#include "HttpMessages_m.h"
-#include "HttpRandom.h"
-#include "HttpUtils.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/applications/httptools/configurator/HttpController.h"
+#include "inet/applications/httptools/common/HttpMessages_m.h"
+#include "inet/applications/httptools/common/HttpRandom.h"
+#include "inet/applications/httptools/common/HttpUtils.h"
 
 namespace inet {
 

@@ -18,10 +18,10 @@
 #ifndef __INET_BONNMOTIONMOBILITY_H
 #define __INET_BONNMOTIONMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "LineSegmentsMobilityBase.h"
-#include "BonnMotionFileCache.h"
+#include "inet/mobility/common/LineSegmentsMobilityBase.h"
+#include "inet/mobility/single/BonnMotionFileCache.h"
 
 namespace inet {
 

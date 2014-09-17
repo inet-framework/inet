@@ -18,7 +18,7 @@
 #ifndef __INET_POWERSINKBASE_H
 #define __INET_POWERSINKBASE_H
 
-#include "IPowerSink.h"
+#include "inet/power/contract/IPowerSink.h"
 
 namespace inet {
 

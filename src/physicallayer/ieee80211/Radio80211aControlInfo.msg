@@ -21,7 +21,7 @@
 // Control info for controlling the physical layer (the radio).
 //
 cplusplus {{
-#include "ModulationType.h"
+#include "inet/physicallayer/common/ModulationType.h"
 }}
 
 namespace inet;

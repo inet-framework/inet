@@ -26,8 +26,8 @@
 
 /*** New File Added ***/
 
-#include <OLSR_ETX_dijkstra.h>
-#include <OLSR_ETX.h>
+#include "OLSR_ETX_dijkstra.h"
+#include "OLSR_ETX.h"
 
 namespace inet {
 

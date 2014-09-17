@@ -22,10 +22,10 @@
 #ifndef __INET_IMOBILITY_H
 #define __INET_IMOBILITY_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "Coord.h"
-#include "EulerAngles.h"
+#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/EulerAngles.h"
 
 namespace inet {
 

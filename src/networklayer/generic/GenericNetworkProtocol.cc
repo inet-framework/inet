@@ -16,16 +16,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "GenericNetworkProtocol.h"
+#include "inet/networklayer/generic/GenericNetworkProtocol.h"
 
-#include "GenericDatagram.h"
-#include "GenericNetworkProtocolControlInfo.h"
-#include "GenericNetworkProtocolInterfaceData.h"
-#include "GenericRoute.h"
-#include "GenericRoutingTable.h"
-#include "ModuleAccess.h"
-#include "Ieee802Ctrl.h"
-#include "IPSocket.h"
+#include "inet/networklayer/generic/GenericDatagram.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/generic/GenericRoute.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/common/IPSocket.h"
 
 namespace inet {
 

@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "L3AddressResolver.h"
-#include "SCTPAssociation.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 namespace inet {
 

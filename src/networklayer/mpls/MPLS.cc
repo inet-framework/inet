@@ -15,17 +15,17 @@
 
 #include <string.h>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "MPLS.h"
-#include "Utils.h"
+#include "inet/networklayer/mpls/MPLS.h"
+#include "inet/networklayer/rsvp_te/Utils.h"
 
-#include "IClassifier.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/common/ModuleAccess.h"
 
 // FIXME temporary fix
-#include "LDP.h"
-#include "TCPSegment.h"
+#include "inet/networklayer/ldp/LDP.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 

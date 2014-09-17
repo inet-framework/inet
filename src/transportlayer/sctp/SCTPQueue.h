@@ -19,10 +19,10 @@
 #ifndef __INET_SCTPQUEUE_H
 #define __INET_SCTPQUEUE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "L3Address.h"
-#include "SCTP.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/sctp/SCTP.h"
 
 namespace inet {
 

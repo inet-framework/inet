@@ -13,7 +13,7 @@
 #endif
 
 // #include <endian.h>
-#include "compatibility_dsr.h"
+#include "inet/routing/extras/base/compatibility_dsr.h"
 #include "dsr-uu/dsr-opt.h"
 
 
@@ -25,8 +25,8 @@
 #endif
 #define IPv4Datagram NetwPkt
 #else
-#include <IPv4Datagram.h>
-#include <IPProtocolId_m.h>
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 #endif
 
 #ifdef MobilityFramework

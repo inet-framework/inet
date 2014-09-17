@@ -15,7 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "LogNormalShadowing.h"
+#include "inet/physicallayer/pathloss/LogNormalShadowing.h"
 
 namespace inet {
 

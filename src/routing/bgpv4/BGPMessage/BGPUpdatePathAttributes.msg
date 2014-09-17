@@ -16,9 +16,9 @@
 //
 
 cplusplus {{
-#include "IPv4Address.h"
-#include "BGPASPathSegment_m.h"
-#include "BGPCommon_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPASPathSegment_m.h"
+#include "inet/routing/bgpv4/BGPCommon_m.h"
 }}
 
 namespace inet::bgp;

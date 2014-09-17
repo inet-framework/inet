@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211ScalarTransmitter.h"
-#include "Ieee80211ScalarTransmission.h"
-#include "IMobility.h"
-#include "IRadio.h"
-#include "WifiMode.h"
-#include "ModulationType.h"
-#include "RadioControlInfo_m.h"
-#include "Ieee80211Consts.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmitter.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmission.h"
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/common/ModulationType.h"
+#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
 
