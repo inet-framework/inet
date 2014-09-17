@@ -5,6 +5,7 @@ Test serializing frames
 #include <stdio.h>
 #include <iostream>
 #include "pcap.h"
+#include "SerializerUtil.h"
 #include "EthernetSerializer.h"
 #include "Ieee80211Serializer.h"
 
@@ -18,7 +19,7 @@ static void printobject(cObject* object)
     }
 }
 
-static void testRecord(const char* filename)
+static void testRecord(const char* filename, bool fcs = true)
 {
     FILE *pcapFile;
     struct pcap_hdr fileHeader;
@@ -31,7 +32,23 @@ static void testRecord(const char* filename)
 
     pcapFile  = fopen(filename, "rb");
     fread(&fileHeader, sizeof(fileHeader), 1, pcapFile);
+    if (fileHeader.magic != 0xa1b2c3d4)
+    {
+        fileHeader.version_major = swapByteOrder16(fileHeader.version_major);
+        fileHeader.version_minor = swapByteOrder16(fileHeader.version_minor);
+        fileHeader.thiszone = swapByteOrder32(fileHeader.thiszone);
+        fileHeader.sigfigs = swapByteOrder32(fileHeader.sigfigs);
+        fileHeader.snaplen = swapByteOrder32(fileHeader.snaplen);
+        fileHeader.network = swapByteOrder32(fileHeader.network);
+    }
     fread(&recordHeader, sizeof(recordHeader), 1, pcapFile);
+    if (fileHeader.magic != 0xa1b2c3d4)
+    {
+        recordHeader.ts_sec = swapByteOrder32(recordHeader.ts_sec);
+        recordHeader.ts_usec = swapByteOrder32(recordHeader.ts_usec);
+        recordHeader.orig_len = swapByteOrder32(recordHeader.orig_len);
+        recordHeader.incl_len = swapByteOrder32(recordHeader.incl_len);
+    }
     fread(&readBuf, recordHeader.orig_len, 1, pcapFile);
     fclose(pcapFile);
 
@@ -49,6 +66,7 @@ static void testRecord(const char* filename)
                 temp = temp->getEncapsulatedPacket();
             }
             serializedLength = EthernetSerializer().serialize((EthernetIIFrame *)etherFrame, writeBuf, sizeof(writeBuf));
+            delete etherFrame;
             break;
         }
         case LINKTYPE_IEEE801_11:
@@ -61,19 +79,23 @@ static void testRecord(const char* filename)
                 temp = temp->getEncapsulatedPacket();
             }
             serializedLength = Ieee80211Serializer().serialize((Ieee80211Frame *)ieee80211Frame, writeBuf, sizeof(writeBuf));
+            delete ieee80211Frame;
             break;
         }
     }
-
+    
+    if (!fcs)
+        serializedLength -= 4;
     if(recordHeader.incl_len == serializedLength && !memcmp(readBuf, writeBuf, serializedLength))
-        EV << "Frames are the same\n";
+        EV << "Frames are the same" << endl;
     else
-        EV << "Frames are not the same\n";
+        EV << "Frames are not the same" << endl;
 }
 
 %activity:
-testRecord("../../arp.pcap");
-testRecord("../../tcp.pcap");
+testRecord("../../arp.pcap", false);
+testRecord("../../tcp.pcap", false);
+testRecord("../../80211ack.pcap", false);
 
 %contains-regex: stdout
 dest: FF-FF-FF-FF-FF-FF
@@ -100,6 +122,18 @@ transportProtocol: 6
 srcPort: 56760
 destPort: 23
 sequenceNo: 3671007701
+.*
+Frames are the same
+.*
+duration: 0
+type: 29
+toDS: false
+fromDS: false
+retry: false
+moreFragments: false
+duration: 0
+AID: -1
+receiverAddress: 00-01-E3-41-BD-6E
 .*
 Frames are the same
 
