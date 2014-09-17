@@ -30,4 +30,7 @@ uint32_t getFourByte(const unsigned char *buf, unsigned int offset = 0);
 void getNByte(uint8_t *value, unsigned int n, const unsigned char *buf, unsigned int offset = 0);
 bool getBit(unsigned int bitOffset, const unsigned char *buf, unsigned int offset = 0);
 
+uint16_t swapByteOrder16(uint16_t v);
+uint32_t swapByteOrder32(uint32_t v);
+
 #endif /* SERIALIZERUTIL_H_ */

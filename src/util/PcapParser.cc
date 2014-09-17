@@ -17,6 +17,8 @@
 
 #include "PcapParser.h"
 
+#include <SerializerUtil.h>
+
 #include <EthernetSerializer.h>
 #include <Ieee80211Serializer.h>
 
@@ -75,6 +77,15 @@ void PcapParser::closePcap()
 void PcapParser::readHeader()
 {
     fread(&fileHeader, sizeof(fileHeader), 1, pcapFile);
+    if (fileHeader.magic != 0xa1b2c3d4)
+    {
+        fileHeader.version_major = swapByteOrder16(fileHeader.version_major);
+        fileHeader.version_minor = swapByteOrder16(fileHeader.version_minor);
+        fileHeader.thiszone = swapByteOrder32(fileHeader.thiszone);
+        fileHeader.sigfigs = swapByteOrder32(fileHeader.sigfigs);
+        fileHeader.snaplen = swapByteOrder32(fileHeader.snaplen);
+        fileHeader.network = swapByteOrder32(fileHeader.network);
+    }
 }
 
 void PcapParser::readRecord()
@@ -82,10 +93,18 @@ void PcapParser::readRecord()
     struct pcaprec_hdr recordHeader;
     if(fread(&recordHeader, sizeof(recordHeader), 1, pcapFile))
     {
+        if (fileHeader.magic != 0xa1b2c3d4)
+        {
+            recordHeader.ts_sec = swapByteOrder32(recordHeader.ts_sec);
+            recordHeader.ts_usec = swapByteOrder32(recordHeader.ts_usec);
+            recordHeader.orig_len = swapByteOrder32(recordHeader.orig_len);
+            recordHeader.incl_len = swapByteOrder32(recordHeader.incl_len);
+        }
+
         EV_DEBUG<< "Timestamp seconds: " << recordHeader.ts_sec <<endl;
         EV_DEBUG<< "Timestamp microseconds: " << recordHeader.ts_usec <<endl;
         EV_DEBUG<< "Original length: " << recordHeader.orig_len <<endl;
-        EV_DEBUG<< "Included length: " << recordHeader.orig_len <<endl;
+        EV_DEBUG<< "Included length: " << recordHeader.incl_len <<endl;
 
         uint8 buf[MAXBUFLENGTH];
         memset((void*)&buf, 0, sizeof(buf));

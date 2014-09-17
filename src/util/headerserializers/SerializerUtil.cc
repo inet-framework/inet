@@ -94,3 +94,12 @@ bool getBit(unsigned int bitOffset, const unsigned char *buf, unsigned int offse
     uint8_t byteValue = 1U << bitOffset;
     return *p & byteValue;
 }
+
+
+uint16_t swapByteOrder16(uint16_t v){
+  return ((v & 0xFF) << 8) | ((v & 0xFF00) >> 8);
+}
+
+uint32_t swapByteOrder32(uint32_t v){
+  return ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | ((v & 0xFF000000) >> 24);
+}
