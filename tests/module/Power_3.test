@@ -1,0 +1,45 @@
+%description:
+
+Test for battery charging. Battery should not be depleted but should be charged.
+
+%file: test.ned
+
+import inet.power.accumulator.SimpleBattery;
+import inet.power.consumer.SimplePowerConsumer;
+import inet.power.generator.SimplePowerGenerator;
+
+network Test
+{
+    submodules:
+        battery: SimpleBattery;
+        consumer: SimplePowerConsumer;
+        generator: SimplePowerGenerator;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 10s
+cmdenv-express-mode = false
+
+**.battery.nominalCapacity = 10 J
+**.battery.initialCapacity = 5 J
+**.consumer.sleepInterval = uniform(10ms, 20ms)
+**.consumer.consumptionInterval = uniform(5ms, 10ms)
+**.consumer.powerConsumption = uniform(1W, 2W)
+**.generator.sleepInterval = uniform(10ms, 20ms)
+**.generator.generationInterval = uniform(5ms, 10ms)
+**.generator.powerGeneration = uniform(2W, 4W)
+
+%contains: stdout
+Battery charged
+%not-contains: stdout
+Battery depleted
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
