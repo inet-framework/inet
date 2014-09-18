@@ -42,6 +42,7 @@ void FlatTransmitterBase::initialize(int stage)
             throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
+        // TODO: modulator will be a module
     }
 }
 

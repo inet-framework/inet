@@ -55,17 +55,7 @@ void FlatReceiverBase::initialize(int stage)
         sensitivity = mW(math::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL") == 0);
-// TODO:            modulator = new NullModulation();
-        else if (strcmp(modulationName, "BPSK") == 0)
-            modulator = new OFDMModulator("BPSK");
-        else if (strcmp(modulationName, "16-QAM") == 0)
-            modulator = new OFDMModulator("16-QAM");
-        else if (strcmp(modulationName, "256-QAM") == 0)
-            modulator = new OFDMModulator("256-QAM");
-        else
-            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
+        // TODO: modulator will be a module
     }
 }
 

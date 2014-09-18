@@ -20,7 +20,6 @@
 
 #include "inet/physicallayer/base/SNIRReceiverBase.h"
 #include "IModulator.h"
-#include "OFDMModulator.h"
 #include "inet/physicallayer/contract/IErrorModel.h"
 
 namespace inet {
