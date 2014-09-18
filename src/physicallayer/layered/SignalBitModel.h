@@ -56,13 +56,9 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     {}
 
     virtual void printToStream(std::ostream &stream) const;
-
     virtual int getBitLength() const { return bitLength; }
-
     virtual double getBitRate() const { return bitRate; }
-
     virtual const BitVector& getBits() const { return bits; }
-
     virtual const IForwardErrorCorrectionInfo *getForwardErrorCorrectionInfo() const { return forwardErrorCorrectionInfo; }
     virtual const IScramblerInfo *getScramblerInfo() const { return scramblerInfo; }
     virtual const IInterleaverInfo *getInterleaverInfo() const { return interleaverInfo; }
@@ -98,9 +94,7 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
         ber(ber),
         bitErrorCount(bitErrorCount)
     {}
-
     virtual double getBER() const { return ber; }
-
     virtual int getBitErrorCount() const { return bitErrorCount; }
 };
 
