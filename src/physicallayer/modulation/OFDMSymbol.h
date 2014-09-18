@@ -23,15 +23,19 @@
 
 namespace inet {
 namespace physicallayer {
-
+// TODO: Revise name: It is Ieee80211 specific implementation (uses fixed size vector). Ieee80211OFDMSymbol?
 class INET_API OFDMSymbol : public ISymbol
 {
     protected:
-        std::vector<APSKSymbol> subcarrierSymbols;
+        std::vector<const APSKSymbol *> subcarrierSymbols;
 
     public:
-        const std::vector<APSKSymbol>& getSubCarrierSymbols() const { return subcarrierSymbols; }
+        OFDMSymbol(const std::vector<const APSKSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
+        OFDMSymbol() { subcarrierSymbols.resize(64); }
+        const std::vector<const APSKSymbol>& getSubCarrierSymbols() const { return subcarrierSymbols; }
         int symbolSize() const { return subcarrierSymbols.size(); }
+        void pushAPSKSymbol(const APSKSymbol* apskSymbol, int subcarrierIndex);
+        void clearSymbols() { subcarrierSymbols.clear(); }
 };
 
 } /* namespace physicallayer */

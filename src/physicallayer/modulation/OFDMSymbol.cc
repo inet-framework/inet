@@ -20,6 +20,12 @@
 namespace inet {
 namespace physicallayer {
 
+void physicallayer::OFDMSymbol::pushAPSKSymbol(const APSKSymbol* apskSymbol, int subcarrierIndex)
+{
+    if (subcarrierIndex >= 52)
+        throw cRuntimeError("Out of range with subcarrierIndex = %d", subcarrierIndex);
+    subcarrierSymbols[subcarrierIndex] = apskSymbol;
+}
 
 } /* namespace physicallayer */
 } /* namespace inet */
