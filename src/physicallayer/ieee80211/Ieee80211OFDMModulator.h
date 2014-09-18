@@ -37,6 +37,7 @@ class INET_API Ieee80211OFDMModulator : public cSimpleModule, public IModulator
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("The module doesn't handle self messages"); }
+    int getSubcarrierIndex(int ofdmSymbolIndex) const;
 
   public:
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
