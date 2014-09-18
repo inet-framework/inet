@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,23 +15,34 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "OFDMModulator.h"
+#include "Ieee80211OFDMModulator.h"
+#include "QAM16Modulation.h"
+#include "QAM64Modulation.h"
+#include "BPSKModulation.h"
+#include "QPSKModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-OFDMModulator::OFDMModulator() :
-    preambleSymbolLength(-1),
-    modulationScheme(NULL)
-{}
-
-OFDMModulator::OFDMModulator(const char* modulationScheme)
+void Ieee80211OFDMModulator::initialize(int stage)
 {
-
+    if (stage == INITSTAGE_LOCAL)
+    {
+        const char *modulationSchemeStr = par("modulationScheme");
+        if (!strcmp("QAM-16", modulationSchemeStr))
+            modulationScheme = &QAM16Modulation::singleton;
+        else if (!strcmp("QAM-64", modulationSchemeStr))
+            modulationScheme = &QAM64Modulation::singleton;
+        else if (!strcmp("QPSK", modulationSchemeStr))
+            modulationScheme = &QPSKModulation::singleton;
+        else if (!strcmp("BPSK", modulationSchemeStr))
+            modulationScheme = &BPSKModulation::singleton;
+        else
+            throw cRuntimeError("Unknown modulation scheme = %s", modulationSchemeStr);
+    }
 }
 
-const ITransmissionSymbolModel *OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
+const ITransmissionSymbolModel *Ieee80211OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     const int codeWordLength = modulationScheme->getCodeWordLength();
     const int symbolLength = preambleSymbolLength + (bitModel->getBitLength() + codeWordLength - 1) / codeWordLength;
@@ -41,5 +52,4 @@ const ITransmissionSymbolModel *OFDMModulator::modulate(const ITransmissionBitMo
 
 
 } // namespace physicallayer
-
 } // namespace inet

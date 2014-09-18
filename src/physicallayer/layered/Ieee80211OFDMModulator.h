@@ -19,31 +19,33 @@
 #define __INET_OFDMMODULATOR_H
 
 #include "IModulator.h"
-#include "IModulationScheme.h"
 #include "SignalBitModel.h"
 #include "SignalSymbolModel.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API OFDMModulator : public IModulator
+class INET_API Ieee80211OFDMModulator : public cSimpleModule, public IModulator
 {
   protected:
     int preambleSymbolLength;
-    const IModulationScheme *modulationScheme;
+    const APSKModulationBase *modulationScheme;
+
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("The module doesn't handle self messages"); }
 
   public:
-    OFDMModulator();
-    OFDMModulator(const char *modulationScheme);
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
     double calculateBER(double snir, double bandwidth, double bitrate) const { return 42; } // TODO: (Modulator, ModulationScheme) -> BER
-    const IModulationScheme *getModulation() const { return modulationScheme; }
+    const IModulation *getModulation() const { return modulationScheme; }
     void printToStream(std::ostream& stream) const { stream << "TODO"; }
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif /* __INET_OFDMMODULATOR_H */
