@@ -20,6 +20,7 @@
 
 #include "ISymbol.h"
 #include "IPrintableObject.h"
+#include "IModulation.h"
 
 namespace inet {
 namespace physicallayer {
