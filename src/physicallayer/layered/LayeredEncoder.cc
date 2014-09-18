@@ -38,13 +38,18 @@ void LayeredEncoder::initialize(int stage)
 
 const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
-    const int bitLength = headerBitLength + packetModel->getPacket()->getBitLength();
     const cPacket *packet = packetModel->getPacket();
     BitVector serializedPacket = serializer->serialize(packet);
-    BitVector scrambledBits = scrambler->scramble(serializedPacket);
-    BitVector fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
-    BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
-    return new TransmissionBitModel(bitLength, bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo(), interleaver->getInfo());
+    BitVector scrambledBits = serializedPacket;
+    if (scrambler)
+        scrambledBits = scrambler->scramble(serializedPacket);
+    BitVector fecEncodedBits = scrambledBits;
+    if (forwardErrorCorrection)
+        fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
+    BitVector interleavedBits = fecEncodedBits;
+    if (interleaver)
+        interleavedBits = interleaver->interleaving(fecEncodedBits);
+    return new TransmissionBitModel(interleavedBits.getSize(), bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo(), interleaver->getInfo());
 }
 
 } // namespace physicallayer
