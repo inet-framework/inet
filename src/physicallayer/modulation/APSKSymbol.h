@@ -24,7 +24,7 @@
 namespace inet {
 namespace physicallayer {
 
-class APSKSymbol : public Complex, public ISymbol
+class INET_API APSKSymbol : public Complex, public ISymbol
 {
     public:
         APSKSymbol(const double& q, const double& i) : Complex(q, i) {}
