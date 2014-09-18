@@ -19,9 +19,9 @@
 #define __INET_SIGNALSYMBOLMODEL_H
 
 #include "ISignalSymbolModel.h"
+#include "IModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
@@ -29,11 +29,11 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
   protected:
     const int symbolLength;
     const double symbolRate;
-    const std::vector<int> *symbols;
-    const IModulationScheme *modulation;
+    const std::vector<const ISymbol*> *symbols;
+    const IModulation *modulation;
 
   public:
-    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation) :
+    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation) :
         symbolLength(symbolLength),
         symbolRate(symbolRate),
         symbols(symbols),
@@ -41,20 +41,16 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
     {}
 
     virtual void printToStream(std::ostream &stream) const;
-
     virtual int getSymbolLength() const { return symbolLength; }
-
     virtual double getSymbolRate() const { return symbolRate; }
-
-    virtual const std::vector<int> *getSymbols() const { return symbols; }
-
-    virtual const IModulationScheme *getModulation() const { return modulation; }
+    virtual const IModulation *getModulation() const { return modulation; }
+    virtual const std::vector<const ISymbol*> *getSymbols() const { return symbols; }
 };
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
 {
   public:
-    TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation) :
+    TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation) :
         SignalSymbolModel(symbolLength, symbolRate, symbols, modulation)
     {}
 };
@@ -66,14 +62,13 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
     const double symbolErrorCount;
 
   public:
-    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation, double ser, double symbolErrorCount) :
+    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation, double ser, double symbolErrorCount) :
         SignalSymbolModel(symbolLength, symbolRate, symbols, modulation),
         ser(ser),
         symbolErrorCount(symbolErrorCount)
     {}
 
     virtual double getSER() const { return ser; }
-
     virtual int getSymbolErrorCount() const { return symbolErrorCount; }
 };
 
