@@ -19,12 +19,12 @@
 #define __INET_IAPSKMODULATION_H_
 
 #include "IPrintableObject.h"
-#include "Complex.h"
+#include "IModulation.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API IAPSKModulation : public IPrintableObject
+class INET_API IAPSKModulation : public IPrintableObject, public IModulation
 {
     public:
         virtual void printToStream(std::ostream &stream) const = 0;
