@@ -27,12 +27,12 @@ void APSKModulationBase::printToStream(std::ostream &stream) const
     stream << " normalization factor = " << normalizationFactor << endl;
 }
 
-const Complex& APSKModulationBase::map(const ShortBitVector& symbol) const
+const APSKSymbol *APSKModulationBase::mapToConstellationDiagram(const ShortBitVector& symbol) const
 {
     int decimalSymbol = symbol.toDecimal();
     if (decimalSymbol >= constellationSize)
         throw cRuntimeError("Unknown input: %d", decimalSymbol);
-    return encodingTable[decimalSymbol];
+    return &encodingTable[decimalSymbol];
 }
 
 } /* namespace physicallayer */

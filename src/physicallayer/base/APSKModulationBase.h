@@ -20,6 +20,7 @@
 
 #include "IAPSKModulation.h"
 #include "ShortBitVector.h"
+#include "APSKSymbol.h"
 
 namespace inet {
 namespace physicallayer {
@@ -27,23 +28,23 @@ namespace physicallayer {
 class INET_API APSKModulationBase : public IAPSKModulation
 {
     protected:
-        const Complex *encodingTable;
+        const APSKSymbol *encodingTable;
         const int codeWordLength;
         const int constellationSize;
         double normalizationFactor;
 
     public:
-        APSKModulationBase(const Complex *encodingTable, int codeWordLength, int constellationSize, double normalizationFactor) :
+        APSKModulationBase(const APSKSymbol *encodingTable, int codeWordLength, int constellationSize, double normalizationFactor) :
           encodingTable(encodingTable),
           codeWordLength(codeWordLength),
           constellationSize(constellationSize),
           normalizationFactor(normalizationFactor)
       {}
-      virtual void printToStream(std::ostream &stream) const = 0;
+      virtual void printToStream(std::ostream &stream) const;
       virtual int getCodeWordLength() const { return codeWordLength; }
       virtual int getConstellationSize() const { return constellationSize; }
       virtual double getNormalizationFactor() const { return normalizationFactor; }
-      virtual const Complex& map(const ShortBitVector& symbol) const;
+      virtual const APSKSymbol *mapToConstellationDiagram(const ShortBitVector& symbol) const;
 };
 
 } /* namespace physicallayer */
