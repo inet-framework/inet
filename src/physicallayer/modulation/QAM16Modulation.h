@@ -25,9 +25,13 @@ namespace physicallayer {
 
 class INET_API QAM16Modulation : public APSKModulationBase
 {
+    public:
+        static const QAM16Modulation singleton;
+
     protected:
         static const Complex encodingTable[16];
         static const double kMOD;
+
     public:
         QAM16Modulation();
 };

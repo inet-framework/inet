@@ -25,12 +25,16 @@ namespace physicallayer {
 
 class INET_API BPSKModulation : public APSKModulationBase
 {
+    public:
+        static const BPSKModulation singleton;
+
     protected:
         static const Complex encodingTable[2];
         static const double kMOD;
 
     public:
         BPSKModulation();
+
 };
 
 } /* namespace physicallayer */
