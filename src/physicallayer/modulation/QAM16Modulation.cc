@@ -21,12 +21,11 @@ namespace inet {
 namespace physicallayer {
 
 const double QAM16Modulation::kMOD = 1/sqrt(10);
-const Complex QAM16Modulation::encodingTable[] = {kMOD * Complex(-1, -3), kMOD * Complex(1, -3), kMOD * Complex(3, -3),
-                                                  kMOD * Complex(-3, -1), kMOD * Complex(-1, -1), kMOD * Complex(1, -1),
-                                                  kMOD * Complex(3, -1), kMOD * Complex(-3, 1), kMOD * Complex(-1, 1),
-                                                  kMOD * Complex(1, 1), kMOD * Complex(3, 1), kMOD * Complex(-3, 3),
-                                                  kMOD * Complex(-1, 3), kMOD * Complex(1, 3), kMOD * Complex(3, 3)};
-
+const APSKSymbol QAM16Modulation::encodingTable[] = {kMOD * APSKSymbol(-1, -3), kMOD * APSKSymbol(1, -3), kMOD * APSKSymbol(3, -3),
+                                                  kMOD * APSKSymbol(-3, -1), kMOD * APSKSymbol(-1, -1), kMOD * APSKSymbol(1, -1),
+                                                  kMOD * APSKSymbol(3, -1), kMOD * APSKSymbol(-3, 1), kMOD * APSKSymbol(-1, 1),
+                                                  kMOD * APSKSymbol(1, 1), kMOD * APSKSymbol(3, 1), kMOD * APSKSymbol(-3, 3),
+                                                  kMOD * APSKSymbol(-1, 3), kMOD * APSKSymbol(1, 3), kMOD * APSKSymbol(3, 3)};
 const QAM16Modulation QAM16Modulation::singleton;
 QAM16Modulation::QAM16Modulation() : APSKModulationBase(encodingTable, 4,16, kMOD)
 {

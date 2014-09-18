@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 const double BPSKModulation::kMOD = 1;
-const Complex BPSKModulation::encodingTable[] = {Complex(-1,0), Complex(1,0)};
+const APSKSymbol BPSKModulation::encodingTable[] = {APSKSymbol(-1,0), APSKSymbol(1,0)};
 const BPSKModulation BPSKModulation::singleton;
 
 BPSKModulation::BPSKModulation() : APSKModulationBase(encodingTable, 1, 2, kMOD)

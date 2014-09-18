@@ -29,7 +29,7 @@ class INET_API QPSKModulation : public APSKModulationBase
         static const QPSKModulation singleton;
 
     protected:
-        static const Complex encodingTable[4];
+        static const APSKSymbol encodingTable[4];
         static const double kMOD;
 
     public:

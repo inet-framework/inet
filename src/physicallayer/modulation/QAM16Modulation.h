@@ -29,7 +29,7 @@ class INET_API QAM16Modulation : public APSKModulationBase
         static const QAM16Modulation singleton;
 
     protected:
-        static const Complex encodingTable[16];
+        static const APSKSymbol encodingTable[16];
         static const double kMOD;
 
     public:

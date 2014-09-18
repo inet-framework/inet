@@ -29,7 +29,7 @@ class INET_API BPSKModulation : public APSKModulationBase
         static const BPSKModulation singleton;
 
     protected:
-        static const Complex encodingTable[2];
+        static const APSKSymbol encodingTable[2];
         static const double kMOD;
 
     public:

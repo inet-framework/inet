@@ -29,7 +29,7 @@ class INET_API QAM64Modulation : public APSKModulationBase
         static const QAM64Modulation singleton;
 
     protected:
-        static const Complex encodingTable[64];
+        static const APSKSymbol encodingTable[64];
         static const double kMOD;
 
     public:
