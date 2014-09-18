@@ -28,10 +28,10 @@ Demodulator::Demodulator() :
 
 const IReceptionBitModel *Demodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
-    const int codeWordLength = modulation->getCodeWordLength();
-    const int bitLength = (symbolModel->getSymbolLength() - preambleSymbolLength) * codeWordLength; // TODO: -
-    const double bitRate = symbolModel->getSymbolRate() * codeWordLength;
-    return new ReceptionBitModel(bitLength, bitRate, BitVector::UNDEF, NULL, NULL, NULL, 0, 0);
+//    const int codeWordLength = modulation->getCodeWordLength();
+//    const int bitLength = (symbolModel->getSymbolLength() - preambleSymbolLength) * codeWordLength; // TODO: -
+//    const double bitRate = symbolModel->getSymbolRate() * codeWordLength;
+//    return new ReceptionBitModel(bitLength, bitRate, BitVector::UNDEF, NULL, NULL, NULL, 0, 0);
 }
 
 } // namespace physicallayer
