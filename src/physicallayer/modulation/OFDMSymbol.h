@@ -32,7 +32,7 @@ class INET_API OFDMSymbol : public ISymbol
     public:
         OFDMSymbol(const std::vector<const APSKSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
         OFDMSymbol() { subcarrierSymbols.resize(64); }
-        const std::vector<const APSKSymbol>& getSubCarrierSymbols() const { return subcarrierSymbols; }
+        const std::vector<const APSKSymbol *>& getSubCarrierSymbols() const { return subcarrierSymbols; }
         int symbolSize() const { return subcarrierSymbols.size(); }
         void pushAPSKSymbol(const APSKSymbol* apskSymbol, int subcarrierIndex);
         void clearSymbols() { subcarrierSymbols.clear(); }
