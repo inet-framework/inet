@@ -18,6 +18,8 @@
 #ifndef __INET_IMODULATION_H_
 #define __INET_IMODULATION_H_
 
+#include "INETDefs.h"
+
 namespace inet {
 namespace physicallayer {
 
