@@ -19,9 +19,9 @@
 #define __INET_DEMODULATOR_H
 
 #include "IDemodulator.h"
-#include "IModulationScheme.h"
 #include "SignalBitModel.h"
 #include "SignalSymbolModel.h"
+#include "IModulation.h"
 
 namespace inet {
 
@@ -31,7 +31,7 @@ class INET_API Demodulator : public IDemodulator
 {
   protected:
     int preambleSymbolLength;
-    const IModulationScheme *modulation;
+    const IModulation *modulation;
 
   public:
     Demodulator();
