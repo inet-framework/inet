@@ -18,10 +18,10 @@
 #ifndef __INET_ISIGNALSYMBOLMODEL_H
 #define __INET_ISIGNALSYMBOLMODEL_H
 
-#include "IModulationScheme.h"
+#include "ISymbol.h"
+#include "IPrintableObject.h"
 
 namespace inet {
-
 namespace physicallayer {
 
 /**
@@ -32,12 +32,9 @@ class INET_API ISignalSymbolModel : public IPrintableObject
 {
   public:
     virtual int getSymbolLength() const = 0;
-
     virtual double getSymbolRate() const = 0;
-
-    virtual const std::vector<int> *getSymbols() const = 0;
-
-    virtual const IModulationScheme *getModulation() const = 0;
+    virtual const std::vector<const ISymbol*> *getSymbols() const = 0;
+    virtual const IModulation *getModulation() const = 0;
 };
 
 class INET_API ITransmissionSymbolModel : public virtual ISignalSymbolModel
