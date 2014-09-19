@@ -462,9 +462,11 @@ void PhysicalEnvironment::updateCanvas()
             figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineWidth(object->getLineWidth());
             figure->setLineColor(object->getLineColor());
-            figure->setLineOpacity(object->getOpacity());
             figure->setFillColor(object->getFillColor());
+#if OMNETPP_CANVAS_VERSION>=0x20140908
+            figure->setLineOpacity(object->getOpacity());
             figure->setFillOpacity(object->getOpacity());
+#endif
             figure->setTags(object->getTags());
             objectsLayer->addFigure(figure);
         }
@@ -518,9 +520,11 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());
         figure->setLineColor(object->getLineColor());
-        figure->setLineOpacity(object->getOpacity());
         figure->setFillColor(object->getFillColor());
+#if OMNETPP_CANVAS_VERSION>=0x20140908
+        figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
+#endif
         figure->setTags(object->getTags());
         objectsLayer->addFigure(figure);
     }
