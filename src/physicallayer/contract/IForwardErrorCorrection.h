@@ -30,7 +30,7 @@ class INET_API IForwardErrorCorrectionInfo : public IPrintableObject
 
 };
 
-class INET_API IForwardErrorCorrection
+class INET_API IForwardErrorCorrection // TODO: rename to IForwardErrorCorrectionEncoder or FECEncoder
 {
     public:
         virtual BitVector encode(const BitVector& informationBits) const = 0;
