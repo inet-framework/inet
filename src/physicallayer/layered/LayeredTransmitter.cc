@@ -43,9 +43,15 @@ void LayeredTransmitter::initialize(int stage)
     }
 }
 
-const ITransmission *LayeredTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmissionPacketModel* LayeredTransmitter::createPacketModel(const cPacket *macFrame) const
 {
     const ITransmissionPacketModel *packetModel = new TransmissionPacketModel(macFrame);
+    return packetModel;
+}
+
+const ITransmission *LayeredTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+{
+    const ITransmissionPacketModel *packetModel = createPacketModel(macFrame);
     const ITransmissionBitModel *bitModel = encoder->encode(packetModel);
     const ITransmissionSymbolModel *symbolModel = modulator->modulate(bitModel);
     const ITransmissionSampleModel *sampleModel = pulseShaper->shape(symbolModel);
