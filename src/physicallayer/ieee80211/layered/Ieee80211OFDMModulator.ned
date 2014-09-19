@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.layered;
 
 import inet.physicallayer.contract.IModulator;
 
