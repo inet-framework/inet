@@ -49,7 +49,7 @@ const ITransmissionSymbolModel *APSKModulator::modulate(const ITransmissionBitMo
     const int symbolLength = preambleSymbolLength + (bitModel->getBitLength() + codeWordLength - 1) / codeWordLength;
     const double symbolRate = bitModel->getBitRate() / codeWordLength;
     const BitVector& bits = bitModel->getBits();
-    std::vector<const ISymbol*> *symbols = new std::vector<const ISymbol *>(); // TODO: who should delete it? TransmissionSymbolModel?
+    std::vector<ISymbol> *symbols = new std::vector<ISymbol>(); // FIXME: Sample model should delete it
     ShortBitVector subcarrierBits;
     for (unsigned int i = 0; i < bits.getSize(); i++)
     {
@@ -57,7 +57,7 @@ const ITransmissionSymbolModel *APSKModulator::modulate(const ITransmissionBitMo
         if (i % codeWordLength == codeWordLength - 1)
         {
            const ISymbol *apskSymbol = modulationScheme->mapToConstellationDiagram(subcarrierBits);
-           symbols->push_back(apskSymbol);
+           symbols->push_back(*apskSymbol);
         }
     }
     return new TransmissionSymbolModel(symbolLength, symbolRate, symbols, modulationScheme);
