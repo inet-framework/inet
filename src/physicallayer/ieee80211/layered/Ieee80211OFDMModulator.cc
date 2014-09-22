@@ -129,8 +129,6 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
             symbolID++;
         }
     }
-    // TODO: Four subcarriers are inserted as pilots into positions -21, -7, 7, and 21. The total number of
-    // the subcarriers is 52 (48 + 4).
 
     // TODO: For each group of subcarriers -26 to 26, convert the subcarriers to time domain using inverse
     // Fourier transform. Prepend to the Fourier-transformed waveform a circular extension of itself thus
