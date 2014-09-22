@@ -68,14 +68,13 @@ const ITransmissionBitModel* Ieee80211LayeredEncoder::encode(const ITransmission
         dataField.appendBit(serializedPacket.getBit(i));
     BitVector encodedSignalField = signalFieldEncode(signalField);
     BitVector encodedDataField = dataFieldEncode(dataField);
-    BitVector encodedBits;
+    BitVector *encodedBits = new BitVector();
     for (unsigned int i = 0; i < encodedSignalField.getSize(); i++)
-        encodedBits.appendBit(encodedSignalField.getBit(i));
+        encodedBits->appendBit(encodedSignalField.getBit(i));
     for (unsigned int i = 0; i < encodedDataField.getSize(); i++)
-        encodedBits.appendBit(encodedDataField.getBit(i));
+        encodedBits->appendBit(encodedDataField.getBit(i));
     // TODO: bitrate
-    return new TransmissionBitModel(encodedBits.getSize(), bitRate, encodedBits, dataFECEncoder->getInfo(), scrambler->getInfo(), interleaver->getInfo());
-
+    return new TransmissionBitModel(encodedBits->getSize(), bitRate, encodedBits, dataFECEncoder->getInfo(), scrambler->getInfo(), interleaver->getInfo());
 }
 
 } /* namespace physicallayer */
