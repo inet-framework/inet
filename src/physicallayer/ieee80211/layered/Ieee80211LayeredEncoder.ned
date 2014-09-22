@@ -31,6 +31,7 @@ module Ieee80211LayeredEncoder extends LayeredEncoder
         interleaverType = "Ieee80211Interleaver";
 
         @display("bgb=158,396");
+        @class(Ieee80211LayeredEncoder);
     submodules:
         signalFECEncoder: <signalFECType> like IFECEncoder if signalFECType != "" {
             @display("p=72,328");

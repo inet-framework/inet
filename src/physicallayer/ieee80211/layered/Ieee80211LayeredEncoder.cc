@@ -20,6 +20,8 @@
 namespace inet {
 namespace physicallayer {
 
+Define_Module(Ieee80211LayeredEncoder);
+
 void Ieee80211LayeredEncoder::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
