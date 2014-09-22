@@ -150,14 +150,14 @@ void Ieee80211OFDMModulator::insertPilotSubcarriers(OFDMSymbol& ofdmSymbol, int 
 const ITransmissionSymbolModel *Ieee80211OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     std::vector<ISymbol> *ofdmSymbols = new std::vector<ISymbol>(); // FIXME: Sample model should delete it
-    const BitVector& bits = bitModel->getBits();
+    const BitVector *bits = bitModel->getBits();
     BitVector signalField;
     for (unsigned int i = 0; i < OFDM_SYMBOL_SIZE; i++)
-        signalField.appendBit(bits.getBit(i));
+        signalField.appendBit(bits->getBit(i));
     modulateSignalField(signalField, ofdmSymbols);
     BitVector dataField;
-    for (unsigned int i = OFDM_SYMBOL_SIZE; i < bits.getSize(); i++)
-        dataField.appendBit(bits.getBit(i));
+    for (unsigned int i = OFDM_SYMBOL_SIZE; i < bits->getSize(); i++)
+        dataField.appendBit(bits->getBit(i));
     modulateDataField(dataField, ofdmSymbols);
     return new TransmissionSymbolModel(0, 0, ofdmSymbols, modulationScheme);
 }

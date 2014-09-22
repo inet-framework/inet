@@ -48,12 +48,12 @@ const ITransmissionSymbolModel *APSKModulator::modulate(const ITransmissionBitMo
     const int codeWordLength = modulationScheme->getCodeWordLength();
     const int symbolLength = preambleSymbolLength + (bitModel->getBitLength() + codeWordLength - 1) / codeWordLength;
     const double symbolRate = bitModel->getBitRate() / codeWordLength;
-    const BitVector& bits = bitModel->getBits();
+    const BitVector *bits = bitModel->getBits();
     std::vector<ISymbol> *symbols = new std::vector<ISymbol>(); // FIXME: Sample model should delete it
     ShortBitVector subcarrierBits;
-    for (unsigned int i = 0; i < bits.getSize(); i++)
+    for (unsigned int i = 0; i < bits->getSize(); i++)
     {
-        subcarrierBits.setBit(i % codeWordLength, bits.getBit(i));
+        subcarrierBits.setBit(i % codeWordLength, bits->getBit(i));
         if (i % codeWordLength == codeWordLength - 1)
         {
            const ISymbol *apskSymbol = modulationScheme->mapToConstellationDiagram(subcarrierBits);
