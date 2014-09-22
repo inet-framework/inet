@@ -16,7 +16,9 @@ TEXCHAPTERS = \
 	 ch-node-architecture.tex \
 	 ch-ppp.tex \
 	 ch-ethernet.tex \
-	 ch-radio.tex \
+	 ch-environment.tex \
+	 ch-power.tex \
+	 ch-physicallayer.tex \
 	 ch-80211.tex \
 	 ch-mobility.tex \
 	 ch-ipv4.tex \

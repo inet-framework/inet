@@ -1,0 +1,162 @@
+\chapter{The Physical Environment}
+\label{cha:environment}
+
+\section{Overview}
+
+Todays wireless communication networks are heavily affected by their physical
+environment. Mobile networks operate in densely built urban areas, wireless
+networks work inside large buildings, low power wireless sensors communicate
+in industrial environments, batteries operate in various external conditions,
+and so on.
+
+The propagation of communication signals, the movement of communicating agents,
+or battery exhaustion depend on the surrounding physical environment. For
+example, signals can be absorbed by objects, can pass through objects, can be
+refracted by surfaces, can be reflected from surfaces, etc. These effects cannot
+be ignored in high fidelity simulations.
+
+The physical environment model is separated from the rest of the communication
+related models. It's main goal is to describe buildings, walls, vegetation,
+terrain, weather and other physical conditions that might have effect on signal
+propagation, movement, batteries, etc. The separation makes the model reusable
+by other simulation models that depend on these circumstances.
+
+This chapter provides a brief overview of the physical environment model. 
+
+\section{Physical Objects}
+
+The most important aspect of the physical environment is the objects which are
+present in it. For example, simulating an indoor wifi scenario needs to model
+walls, floors, ceilings, doors, windows, furniture, etc. Most of these objects
+have very basic shapes and homogeneous materials. So the physical object model
+has the following properties:
+
+\begin{itemize}
+  \item \ttt{shape}: describes the 3D shape of the object independently of its
+position and orientation
+  \item \ttt{position}: determines where the object is located in the 3D space
+  \item \ttt{orientation}: determines how the object is rotated relative to its
+default orientation
+  \item \ttt{material}: describes various material specific physical properties  
+  \item \ttt{graphical properties}: provides parameters for better visualization
+\end{itemize}
+
+The physical objects are also mostly immobile. In the current model they cannot
+change their position or orientation over time.
+
+Since the shape of the physical objects might be quite diverse, the model is
+designed to be extensible with new shapes. Concave shapes are not yet supported,
+such shapes should be split up into convex parts. The current implementation
+provides the following convex shapes:
+
+\begin{itemize}
+  \item \cppclass{Sphere}: specified by a radius 
+  \item \cppclass{Cuboid}: specified by a length, a width, and a height
+  \item \cppclass{Prism}: specified by a 2 dimensional polygon base and a height
+  \item \cppclass{Polyhedron}: specified by a set of 3 dimensional vertices
+\end{itemize}
+
+In order to model the physical environment in detail a scenario might contain
+several thousands or even more physical objects. Other simulation models might
+need to query these objects quite often. For example, when the physical layer
+computes obstacle loss for a transmission, it needs to find the obstructing
+physical objects for each receiver. This requires computing the intersection
+between physical objects and the path traveled by the signal. For this purpose,
+the physical environment supports storing physical objects in one of the
+following efficient cache data structures:
+
+\begin{itemize}
+  \item \nedtype{GridObjectCache}: organizes objects into a spatial grid with
+a configurable constant cell size, cells contain those objects that intersect
+with them
+  \item \nedtype{BVHObjectCache}: organizes objects into a tree data structure,
+tree leaves contain a configurable number of closely positioned objects
+\end{itemize}
+
+\iffalse TODO: the implementation is either incomplete or unused yet
+\section{Physical Properties}
+
+The physical environment also provides certain global physical properties such
+as the following:
+
+\begin{itemize}
+  \item \ttt{space limits}: constraints for physical objects, signal propagation
+and movement 
+  \item \ttt{temperature}: might have effects on battery models 
+\end{itemize}
+\fi
+
+\section{Initialization}
+
+In order to easily define thousands of physical objects the model needs to use a
+flexible and concise representation. For this purpose, the physical environment
+provides an XML file format. This file can be used to define reusable shapes,
+reusable materials, and physical objects. The following example demonstrates the
+XML file format:
+
+\begin{verbatim}
+<environment>
+  <!-- defines a sphere shape -->
+  <shape id="1" type="sphere" radius="10"/>
+  <!-- defines a cuboid shape -->
+  <shape id="2" type="cuboid" size="20 30 40"/>
+  <!-- defines a prism (e.g. a cube) shape -->
+  <shape id="3" type="prism" height="100"
+         points="0 0 100 0 100 100 0 100"/>
+  <!-- defines a polyhedron (e.g. a cube) shape -->
+  <shape id="4" type="polyhedron"
+         points="0 0 0 100 0 0 100 100 0 0 100 0 ..."/>
+  <!-- defines a material -->
+  <material id="1" resistivity="100"
+            relativePermittivity="4.5" relativePermeability="1"/>
+  <!-- defines an object using the previously defined shapes and materials -->
+  <object position="min 100 200 0" orientation="45 -30 0"
+          shape="1" material="1"
+          line-color="0 0 0" fill-color="112 128 144" opacity="0.5"/>
+  <!-- defines another object similar to the previous one
+       using an inline shape and a predefined material -->
+  <object position="min 100 200 0" orientation="45 -30 0"
+          shape="cuboid 20 30 40" material="concrete"
+          line-color="0 0 0" fill-color="112 128 144" tags="Building"/>
+</environment>          
+\end{verbatim}
+
+For more details on the XML file format please refer to the documentation in the
+\nedtype{PhysicalEnvironment} NED file.
+
+\section{Visualization}
+
+Understanding the abstract physical environment model from numerical log output
+or debugging other simulation models based on the numerical data structures
+is difficult. Therefore the physical environment supports visualizing the
+physical objects on the graphical user interface. The visualization is done by
+drawing the physical objects on the parent compound module as a separate layer. 
+In order to help distinguish among physical objects they have the following 
+graphical properties:
+
+\begin{itemize}
+  \item \ttt{line width}: surface outline 
+  \item \ttt{line color}: surface outline
+  \item \ttt{fill color}: surface filling 
+  \item \ttt{opacity}: surface outline and filling
+  \item \ttt{tags}: allows filtering objects on the graphical user interface
+\end{itemize}
+
+Although the physical objects are really modeled in 3 dimensions, the
+visualization is only 2 dimensional. The projection which converts physical
+objects to 2 dimensional shapes can be parameterized with an arbitrary view
+angle. The default view angle is the Z axis, in which case the layer shows the
+physical objects from above. The view angle can be changed during runtime using
+the parameter editor of the graphical user interface.
+
+The projection is also used by other models for their own visualizations. This
+approach makes visualizations well integrated with each other. For example, the
+mobility models position network nodes, the physical layer draws ongoing
+transmissions, the obstacle loss draws intersections, etc. on the canvas
+according to the projection described above. 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+
