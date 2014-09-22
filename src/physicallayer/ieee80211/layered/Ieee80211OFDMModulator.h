@@ -22,6 +22,7 @@
 #include "SignalBitModel.h"
 #include "SignalSymbolModel.h"
 #include "APSKModulationBase.h"
+#include "OFDMSymbol.h"
 
 namespace inet {
 
@@ -32,12 +33,15 @@ class INET_API Ieee80211OFDMModulator : public cSimpleModule, public IModulator
   protected:
     int preambleSymbolLength;
     const APSKModulationBase *modulationScheme;
+    const APSKModulationBase *signalModulationScheme;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("The module doesn't handle self messages"); }
     int getSubcarrierIndex(int ofdmSymbolIndex) const;
+    void modulateSignalField(const BitVector& signalField, std::vector<ISymbol> *ofdmSymbols) const;
+    void modulateDataField(const BitVector& dataField, std::vector<ISymbol> *ofdmSymbols) const;
 
   public:
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
