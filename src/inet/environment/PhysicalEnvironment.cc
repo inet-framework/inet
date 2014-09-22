@@ -32,8 +32,6 @@ Define_Module(PhysicalEnvironment);
 
 PhysicalEnvironment::PhysicalEnvironment() :
     temperature(sNaN),
-    pressure(sNaN),
-    relativeHumidity(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
     objectCache(NULL),
@@ -43,11 +41,11 @@ PhysicalEnvironment::PhysicalEnvironment() :
 
 PhysicalEnvironment::~PhysicalEnvironment()
 {
-    for (std::map<int, const Shape3D *>::iterator it = idToShapes.begin(); it != idToShapes.end(); it++)
-        delete it->second;
-    for (std::map<int, const Material *>::iterator it =  idToMaterials.begin(); it != idToMaterials.end(); it++)
-        delete it->second;
-    for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
+    for (std::vector<const Shape3D *>::iterator it = shapes.begin(); it != shapes.end(); it++)
+        delete *it;
+    for (std::vector<const Material *>::iterator it = materials.begin(); it != materials.end(); it++)
+        delete *it;
+    for (std::vector<const PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
         delete *it;
 }
 
@@ -57,8 +55,6 @@ void PhysicalEnvironment::initialize(int stage)
     {
         objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
         temperature = K(par("temperature"));
-        pressure = Pa(par("pressure"));
-        relativeHumidity = percent(par("relativeHumidity"));
         spaceMin.x = par("spaceMinX");
         spaceMin.y = par("spaceMinY");
         spaceMin.z = par("spaceMinZ");
@@ -73,7 +69,7 @@ void PhysicalEnvironment::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
     {
-        cXMLElement *environment = par("environment");
+        cXMLElement *environment = par("config");
         parseShapes(environment);
         parseMaterials(environment);
         parseObjects(environment);
@@ -86,14 +82,10 @@ void PhysicalEnvironment::initialize(int stage)
 
 void PhysicalEnvironment::parseShapes(cXMLElement *xml)
 {
-    cXMLElementList children = xml->getChildren();
-    // TODO: move parsers to the appropriate classes
+    cXMLElementList children = xml->getChildrenByTagName("shape");
     for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         cXMLElement *element = *it;
-        const char *tag = element->getTagName();
-        if (strcmp(tag, "shape"))
-            continue;
         Shape3D *shape = NULL;
         // id
         const char *idAttribute = element->getAttribute("id");
@@ -180,53 +172,53 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
-        idToShapes.insert(std::pair<int, const Shape3D *>(id, shape));
+        if (idToShapeMap.find(id) != idToShapeMap.end())
+            throw cRuntimeError("Shape already exists with the same id: '%d'", id);
+        idToShapeMap.insert(std::pair<int, const Shape3D *>(id, shape));
     }
 }
 
 void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
 {
-    cXMLElementList children = xml->getChildren();
-    // TODO: move parsers to the appropriate classes
+    cXMLElementList children = xml->getChildrenByTagName("material");
     for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         cXMLElement *element = *it;
-        const char *tag = element->getTagName();
-        if (strcmp(tag, "material"))
-            continue;
         // id
         const char *idAttribute = element->getAttribute("id");
-        int id = -1;
-        if (idAttribute)
-            id = atoi(idAttribute);
+        if (!idAttribute)
+            throw cRuntimeError("Missing mandatory id attribute of material");
+        int id = atoi(idAttribute);
         // name
         const char *name = element->getAttribute("name");
         // resistivity
-        Ohmm resistivity = Ohmm(NaN);
         const char *resistivityAttribute = element->getAttribute("resistivity");
-        if (resistivityAttribute)
-            resistivity = Ohmm(atof(resistivityAttribute));
+        if (!resistivityAttribute)
+            throw cRuntimeError("Missing mandatory resistivity attribute of material");
+        Ohmm resistivity = Ohmm(atof(resistivityAttribute));
         // relativePermittivity
-        double relativePermittivity = NaN;
         const char *relativePermittivityAttribute = element->getAttribute("relativePermittivity");
-        if (relativePermittivity)
-            relativePermittivity = atof(relativePermittivityAttribute);
+        if (!relativePermittivityAttribute)
+            throw cRuntimeError("Missing mandatory relativePermittivity attribute of material");
+        double relativePermittivity = atof(relativePermittivityAttribute);
         // relativePermeability
-        double relativePermeability = NaN;
         const char *relativePermeabilityAttribute = element->getAttribute("relativePermeability");
-        if (relativePermeabilityAttribute)
-            relativePermeability = atof(relativePermeabilityAttribute);
+        if (!relativePermeabilityAttribute)
+            throw cRuntimeError("Missing mandatory relativePermeability attribute of material");
+        double relativePermeability = atof(relativePermeabilityAttribute);
         // insert
+        if (idToMaterialMap.find(id) != idToMaterialMap.end())
+            throw cRuntimeError("Material already exists with the same id: '%d'", id);
         Material *material = new Material(name, resistivity, relativePermittivity, relativePermeability);
-        idToMaterials.insert(std::pair<int, const Material *>(id, material));
-        nameToMaterials.insert(std::pair<const std::string, const Material *>(material->getName(), material));
+        materials.push_back(material);
+        idToMaterialMap.insert(std::pair<int, const Material *>(id, material));
+        nameToMaterialMap.insert(std::pair<const std::string, const Material *>(material->getName(), material));
     }
 }
 
 void PhysicalEnvironment::parseObjects(cXMLElement *xml)
 {
     cXMLElementList children = xml->getChildren();
-    // TODO: move parsers to the appropriate classes
     for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         cXMLElement *element = *it;
@@ -324,7 +316,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         else {
             int id = atoi(shapeAttribute);
-            shape = idToShapes[id];
+            shape = idToShapeMap[id];
         }
         if (!shape)
             throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
@@ -357,12 +349,12 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *materialAttribute = element->getAttribute("material");
         if (!materialAttribute)
             throw cRuntimeError("Missing material attribute of object");
-        else if (nameToMaterials.find(materialAttribute) != nameToMaterials.end())
-            material = nameToMaterials[materialAttribute];
+        else if (nameToMaterialMap.find(materialAttribute) != nameToMaterialMap.end())
+            material = nameToMaterialMap[materialAttribute];
         else if (Material::getMaterial(materialAttribute))
             material = Material::getMaterial(materialAttribute);
         else
-            material = idToMaterials[atoi(materialAttribute)];
+            material = idToMaterialMap[atoi(materialAttribute)];
         if (!material)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
         // line width
@@ -375,26 +367,36 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *lineColorAttribute = element->getAttribute("line-color");
         if (lineColorAttribute)
         {
-            cStringTokenizer tokenizer(lineColorAttribute);
-            if (tokenizer.hasMoreTokens())
-                lineColor.red = atoi(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                lineColor.green = atoi(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                lineColor.blue = atoi(tokenizer.nextToken());
+            if (strchr(lineColorAttribute, ' '))
+            {
+                cStringTokenizer tokenizer(lineColorAttribute);
+                if (tokenizer.hasMoreTokens())
+                    lineColor.red = atoi(tokenizer.nextToken());
+                if (tokenizer.hasMoreTokens())
+                    lineColor.green = atoi(tokenizer.nextToken());
+                if (tokenizer.hasMoreTokens())
+                    lineColor.blue = atoi(tokenizer.nextToken());
+            }
+            else
+                lineColor = cFigure::Color::byName(lineColorAttribute);
         }
         // fill color
         cFigure::Color fillColor = cFigure::WHITE;
         const char *fillColorAttribute = element->getAttribute("fill-color");
         if (fillColorAttribute)
         {
-            cStringTokenizer tokenizer(fillColorAttribute);
-            if (tokenizer.hasMoreTokens())
-                fillColor.red = atoi(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                fillColor.green = atoi(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                fillColor.blue = atoi(tokenizer.nextToken());
+            if (strchr(fillColorAttribute, ' '))
+            {
+                cStringTokenizer tokenizer(fillColorAttribute);
+                if (tokenizer.hasMoreTokens())
+                    fillColor.red = atoi(tokenizer.nextToken());
+                if (tokenizer.hasMoreTokens())
+                    fillColor.green = atoi(tokenizer.nextToken());
+                if (tokenizer.hasMoreTokens())
+                    fillColor.blue = atoi(tokenizer.nextToken());
+            }
+            else
+                fillColor = cFigure::Color::byName(fillColorAttribute);
         }
         // opacity
         double opacity = 1;
@@ -406,6 +408,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // insert object
         PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
         objects.push_back(object);
+        if (id != -1)
+            idToObjectMap.insert(std::pair<int, const PhysicalObject *>(id, object));
         if (objectCache)
             objectCache->insertObject(object);
     }
@@ -433,11 +437,11 @@ void PhysicalEnvironment::updateCanvas()
     while (objectsLayer->getNumFigures())
         delete objectsLayer->removeFigure(0);
     // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
-    std::vector<PhysicalObject *> objectsCopy = objects;
+    std::vector<const PhysicalObject *> objectsCopy = objects;
     std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
-    for (std::vector<PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++)
+    for (std::vector<const PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++)
     {
-        PhysicalObject *object = *it;
+        const PhysicalObject *object = *it;
         const Shape3D *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
@@ -498,12 +502,7 @@ void PhysicalEnvironment::updateCanvas()
     }
 }
 
-const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
-{
-    return objects;
-}
-
-void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation)
+void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation)
 {
     const Coord& position = object->getPosition();
     for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
@@ -515,7 +514,7 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
             cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, viewRotation);
             canvasPoints.push_back(canvPoint);
         }
-        cPolygonFigure *figure = new cPolygonFigure(NULL); // TODO: Valgrind found a memory leak here: cFigure: std::vector<cFigure*> children.
+        cPolygonFigure *figure = new cPolygonFigure(NULL);
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());
@@ -530,18 +529,27 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
     }
 }
 
+const PhysicalObject *PhysicalEnvironment::getObjectById(int id) const
+{
+    std::map<int, const PhysicalObject *>::const_iterator it = idToObjectMap.find(id);
+    if (it == idToObjectMap.end())
+        return NULL;
+    else
+        return it->second;
+}
+
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     if (objectCache)
         objectCache->visitObjects(visitor, lineSegment);
     else
-        for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
+        for (std::vector<const PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
             visitor->visit(*it);
 }
 
 void PhysicalEnvironment::handleParameterChange(const char* name)
 {
-    if (name && !strcmp(name,"viewAngle"))
+    if (name && !strcmp(name, "viewAngle"))
     {
         viewAngle = computeViewAngle(par("viewAngle"));
         viewRotation = Rotation(viewAngle);

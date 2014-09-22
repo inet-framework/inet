@@ -17,6 +17,10 @@
 
 package inet.environment.cache;
 
+//
+// An object cache is a data structure that is used by the physical environment
+// to store physical objects.
+//
 moduleinterface IObjectCache
 {
     parameters:
