@@ -1,8 +1,8 @@
 #! /bin/sh
 DIR=`dirname $0`
 
-if [ -f $DIR/inet -o -x $DIR/inet.exe ]; then
-  $DIR/inet -n $DIR/../examples:$DIR $*
+if [ -x $DIR/INET -o -x $DIR/INET.exe ]; then
+  $DIR/INET -n $DIR/../examples:$DIR $*
 else
-  opp_run -l $DIR/inet -n $DIR/../examples:$DIR $*
+  opp_run -l $DIR/INET -n $DIR/../examples:$DIR $*
 fi

@@ -672,8 +672,10 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.power.battery
-                       inet.power.common
+                       inet.power.accumulator
+                       inet.power.base
+                       inet.power.consumer
+                       inet.power.generator
                        inet.power.ideal
                       "
         extraSourceFolders = ""
