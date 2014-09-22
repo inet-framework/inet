@@ -31,6 +31,7 @@ void Ieee80211LayeredEncoder::initialize(int stage)
         dataFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("fecEncoder"));
         signalFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("signalFECEncoder"));
         interleaver = check_and_cast<IInterleaver *>(getSubmodule("interleaver"));
+        signalInterleaver = check_and_cast<IInterleaver *>(getSubmodule("signalInterleaver"));
     }
 }
 
@@ -38,7 +39,7 @@ BitVector Ieee80211LayeredEncoder::signalFieldEncode(const BitVector& signalFiel
 {
     // NOTE: The contents of the SIGNAL field are not scrambled.
     BitVector fecEncodedBits = signalFECEncoder->encode(signalField);
-    BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
+    BitVector interleavedBits = signalInterleaver->interleaving(fecEncodedBits);
     return interleavedBits;
 }
 

@@ -39,6 +39,7 @@ class INET_API Ieee80211LayeredEncoder : public cSimpleModule, public IEncoder
         const IFECEncoder *dataFECEncoder;
         const IFECEncoder *signalFECEncoder;
         const IInterleaver *interleaver;
+        const IInterleaver *signalInterleaver;
 
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
