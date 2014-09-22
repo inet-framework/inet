@@ -58,7 +58,7 @@ int Ieee80211OFDMModulator::getSubcarrierIndex(int ofdmSymbolIndex) const
 {
     // This is the translated version of the M(k) function defined in 18.3.5.10 OFDM modulation: (18-23) equation.
     // We translate it by 26 since its range is [-26,26] and we use subcarrier indices as array indices.
-    if (0 >= ofdmSymbolIndex && ofdmSymbolIndex <= 4)
+    if (ofdmSymbolIndex >= 0 && ofdmSymbolIndex <= 4)
         return ofdmSymbolIndex;
     else if (ofdmSymbolIndex >= 5 && ofdmSymbolIndex <= 17)
         return ofdmSymbolIndex + 1;
