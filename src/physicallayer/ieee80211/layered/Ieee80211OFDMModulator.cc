@@ -87,6 +87,7 @@ void Ieee80211OFDMModulator::modulateSignalField(const BitVector& signalField, s
         int subcarrierIndex = getSubcarrierIndex(i);
         signalFieldSymbol.pushAPSKSymbol(apskSymbol, subcarrierIndex);
     }
+    insertPilotSubcarriers(signalFieldSymbol, 0);
     ofdmSymbols->push_back(signalFieldSymbol);
 }
 
@@ -112,6 +113,7 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
     // Divide the complex number string into groups of 48 complex numbers.
     // Each such group is associated with one OFDM symbol.
     OFDMSymbol ofdmSymbol;
+    int symbolID = 1;
     for (unsigned int i = 0; i < apskSymbols.size(); i++)
     {
         int subcarrierIndex = getSubcarrierIndex(i % OFDM_SYMBOL_SIZE);
@@ -121,8 +123,10 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
         // The 0 subcarrier, associated with center frequency, is omitted and filled with the value 0.
         if (i % OFDM_SYMBOL_SIZE == OFDM_SYMBOL_SIZE - 1)
         {
+            insertPilotSubcarriers(ofdmSymbol, symbolID);
             ofdmSymbols->push_back(ofdmSymbol);
             ofdmSymbol.clearSymbols();
+            symbolID++;
         }
     }
     // TODO: Four subcarriers are inserted as pilots into positions -21, -7, 7, and 21. The total number of
@@ -135,6 +139,14 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
 
     // TODO: Append the OFDM symbols one after another, starting after the SIGNAL symbol describing the
     // RATE and LENGTH fields.
+}
+
+void Ieee80211OFDMModulator::insertPilotSubcarriers(OFDMSymbol& ofdmSymbol, int symbolID) const
+{
+    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 5);
+    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 19);
+    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 33);
+    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(-1,0)), 47);
 }
 
 const ITransmissionSymbolModel *Ieee80211OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
