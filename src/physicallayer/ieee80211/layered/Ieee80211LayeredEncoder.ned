@@ -24,10 +24,10 @@ import inet.physicallayer.layered.LayeredEncoder;
 module Ieee80211LayeredEncoder extends LayeredEncoder
 {
     parameters:
+        fecType = "ConvolutionalCoder";
         string signalFECType = "ConvolutionalCoder";
         serializerType = "Ieee80211Serializer";
         scramblerType = "Ieee80211Scrambler";
-        fecType = "ConvolutionalCoder";
         interleaverType = "Ieee80211Interleaver";
 
         @display("bgb=158,396");
