@@ -34,6 +34,7 @@ class INET_API Ieee80211OFDMModulator : public cSimpleModule, public IModulator
     int preambleSymbolLength;
     const APSKModulationBase *modulationScheme;
     const APSKModulationBase *signalModulationScheme;
+    static const int polarityVector[127];
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
