@@ -672,6 +672,10 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
 
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+
+    virtual void handleNodeCrash();
+
   public:
     virtual State getState() { return static_cast<State>(fsm.getState()); }
     virtual unsigned int getQueueSize() { return transmissionQueueSize(); }

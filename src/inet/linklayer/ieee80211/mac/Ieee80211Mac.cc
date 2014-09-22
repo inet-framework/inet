@@ -2693,6 +2693,32 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     return ret;
 }
 
+bool Ieee80211Mac::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    bool ret = MACProtocolBase::handleNodeStart(doneCallback);
+    handleNodeCrash();
+    return ret;
+}
+
+void Ieee80211Mac::handleNodeCrash()
+{
+    cancelEvent(endSIFS);
+    cancelEvent(endDIFS);
+    cancelEvent(endTimeout);
+    cancelEvent(endReserve);
+    cancelEvent(mediumStateChange);
+    cancelEvent(endTXOP);
+    for (unsigned int i = 0; i < edcCAF.size(); i++) {
+        cancelEvent(endAIFS(i));
+        cancelEvent(endBackoff(i));
+        while (!transmissionQueue(i)->empty()) {
+            Ieee80211Frame *temp = dynamic_cast<Ieee80211Frame *>(transmissionQueue(i)->front());
+            transmissionQueue(i)->pop_front();
+            delete temp;
+        }
+    }
+}
+
 } // namespace ieee80211
 
 } // namespace inet
