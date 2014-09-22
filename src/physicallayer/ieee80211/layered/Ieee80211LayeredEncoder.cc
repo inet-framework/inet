@@ -26,8 +26,8 @@ void Ieee80211LayeredEncoder::initialize(int stage)
     {
         serializer = check_and_cast<ISerializer *>(getSubmodule("serializer"));
         scrambler = check_and_cast<IScrambler *>(getSubmodule("scrambler"));
-        dataFECEncoder = check_and_cast<IForwardErrorCorrection *>(getSubmodule("forwardErrorCorrection"));
-        signalFECEncoder = check_and_cast<IForwardErrorCorrection *>(getSubmodule("signalforwardErrorCorrection"));
+        dataFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("fecEncoder"));
+        signalFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("signalFECEncoder"));
         interleaver = check_and_cast<IInterleaver *>(getSubmodule("interleaver"));
     }
 }

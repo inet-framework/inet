@@ -17,20 +17,22 @@
 
 package inet.physicallayer.ieee80211.layered;
 
+import inet.physicallayer.contract.IFECEncoder;
 import inet.physicallayer.layered.LayeredEncoder;
-import inet.physicallayer.contract.IForwardErrorCorrection;
+
 
 module Ieee80211LayeredEncoder extends LayeredEncoder
 {
     parameters:
-        string signalForwardErrorCorrectionType = "ConvolutionalCoder"; // rename
+        string signalFECType = "ConvolutionalCoder";
         serializerType = "Ieee80211Serializer";
         scramblerType = "Ieee80211Scrambler";
-        forwardErrorCorrectionType = "ConvolutionalCoder"; // rename
+        fecType = "ConvolutionalCoder";
         interleaverType = "Ieee80211Interleaver";
-        
+
+        @display("bgb=158,396");
     submodules:
-        signalForwardErrorCorrection: <signalForwardErrorCorrectionType> like IForwardErrorCorrection if signalForwardErrorCorrectionType != "" {
-            @display("p=72,168");
+        signalFECEncoder: <signalFECType> like IFECEncoder if signalFECType != "" {
+            @display("p=72,328");
         } // TODO
 }

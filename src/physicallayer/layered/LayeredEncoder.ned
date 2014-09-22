@@ -18,7 +18,7 @@
 package inet.physicallayer.layered;
 
 import inet.physicallayer.contract.IEncoder;
-import inet.physicallayer.contract.IForwardErrorCorrection;
+import inet.physicallayer.contract.IFECEncoder;
 import inet.physicallayer.contract.IInterleaver;
 import inet.physicallayer.contract.IScrambler;
 import inet.physicallayer.contract.ISerializer;
@@ -29,7 +29,7 @@ module LayeredEncoder like IEncoder
     parameters:
         string serializerType;
         string scramblerType = default("");
-        string forwardErrorCorrectionType = default("");
+        string fecType = default("");
         string interleaverType = default("");
         @class(LayeredEncoder);
 
@@ -40,7 +40,7 @@ module LayeredEncoder like IEncoder
         scrambler: <scramblerType> like IScrambler if scramblerType != "" {
             @display("p=72,94");
         }
-        forwardErrorCorrection: <forwardErrorCorrectionType> like IForwardErrorCorrection if forwardErrorCorrectionType != "" {
+        fecEncoder: <fecType> like IFECEncoder if fecType != "" {
             @display("p=72,168");
         }
         interleaver: <interleaverType> like IInterleaver if interleaverType != "" {

@@ -20,7 +20,7 @@
 
 #include "IEncoder.h"
 #include "ISerializer.h"
-#include "IForwardErrorCorrection.h"
+#include "IFECEncoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
 #include "SignalPacketModel.h"
@@ -37,7 +37,7 @@ class INET_API LayeredEncoder : public IEncoder, public cSimpleModule
     int headerBitLength;
     const ISerializer *serializer;
     const IScrambler *scrambler;
-    const IForwardErrorCorrection *forwardErrorCorrection;
+    const IFECEncoder *fecEncoder;
     const IInterleaver *interleaver;
 
   protected:

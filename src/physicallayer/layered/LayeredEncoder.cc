@@ -31,7 +31,7 @@ void LayeredEncoder::initialize(int stage)
     {
         serializer = check_and_cast<ISerializer *>(getSubmodule("serializer"));
         scrambler = dynamic_cast<IScrambler *>(getSubmodule("scrambler"));
-        forwardErrorCorrection = dynamic_cast<IForwardErrorCorrection *>(getSubmodule("forwardErrorCorrection"));
+        fecEncoder = dynamic_cast<IFECEncoder *>(getSubmodule("fecEncoder"));
         interleaver = dynamic_cast<IInterleaver *>(getSubmodule("interleaver"));
     }
 }
@@ -44,12 +44,12 @@ const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketMod
     if (scrambler)
         scrambledBits = scrambler->scramble(serializedPacket);
     BitVector fecEncodedBits = scrambledBits;
-    if (forwardErrorCorrection)
-        fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
+    if (fecEncoder)
+        fecEncodedBits = fecEncoder->encode(scrambledBits);
     BitVector interleavedBits = fecEncodedBits;
     if (interleaver)
         interleavedBits = interleaver->interleaving(fecEncodedBits);
-    return new TransmissionBitModel(interleavedBits.getSize(), bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo(), interleaver->getInfo());
+    return new TransmissionBitModel(interleavedBits.getSize(), bitRate, interleavedBits, fecEncoder->getInfo(), scrambler->getInfo(), interleaver->getInfo());
 }
 
 } // namespace physicallayer

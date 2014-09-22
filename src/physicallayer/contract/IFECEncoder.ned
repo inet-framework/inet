@@ -17,7 +17,7 @@
 
 package inet.physicallayer.contract;
 
-moduleinterface IForwardErrorCorrection
+moduleinterface IFECEncoder
 {
 
 }

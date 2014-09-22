@@ -19,7 +19,7 @@
 #define __INET_ISIGNALBITMODEL_H
 
 #include "ICyclicRedundancyCheck.h"
-#include "IForwardErrorCorrection.h"
+#include "IFECEncoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
 
@@ -41,7 +41,7 @@ class INET_API ISignalBitModel : public IPrintableObject
     virtual double getBitRate() const = 0;
 
     virtual const BitVector& getBits() const = 0;
-    virtual const IForwardErrorCorrectionInfo *getForwardErrorCorrectionInfo() const = 0;
+    virtual const IFECInfo *getForwardErrorCorrectionInfo() const = 0;
     virtual const IScramblerInfo *getScramblerInfo() const = 0;
     virtual const IInterleaverInfo *getInterleaverInfo() const = 0;
 };
