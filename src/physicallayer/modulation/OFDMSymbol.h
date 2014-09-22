@@ -36,6 +36,7 @@ class INET_API OFDMSymbol : public ISymbol
         int symbolSize() const { return subcarrierSymbols.size(); }
         void pushAPSKSymbol(const APSKSymbol* apskSymbol, int subcarrierIndex);
         void clearSymbols() { subcarrierSymbols.clear(); }
+        ~OFDMSymbol();
 };
 
 } /* namespace physicallayer */

@@ -27,5 +27,15 @@ void physicallayer::OFDMSymbol::pushAPSKSymbol(const APSKSymbol* apskSymbol, int
     subcarrierSymbols[subcarrierIndex] = apskSymbol;
 }
 
+OFDMSymbol::~OFDMSymbol()
+{
+    // Dynamically created pilot symbols need to be deleted
+    // TODO: Ieee80211 specific
+    delete subcarrierSymbols[5];
+    delete subcarrierSymbols[19];
+    delete subcarrierSymbols[33];
+    delete subcarrierSymbols[47];
+}
+
 } /* namespace physicallayer */
 } /* namespace inet */
