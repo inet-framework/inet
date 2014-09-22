@@ -741,6 +741,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     cMethodCallContextSwitcher contextSwitcher(this);
     TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
     transmissionCacheEntry->frame = radioFrame->dup();
+#if OMNETPP_CANVAS_VERSION  >= 0x20140908
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
         cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
@@ -763,6 +764,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         transmissionCacheEntry->figure = groupFigure;
         updateCanvas();
     }
+#endif
     return radioFrame;
 }
 
@@ -902,6 +904,7 @@ void RadioMedium::updateCanvas()
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
         const TransmissionCacheEntry* transmissionCacheEntry = getTransmissionCacheEntry(transmission);
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
         cFigure *groupFigure = transmissionCacheEntry->figure;
         if (groupFigure) {
             cRingFigure *communicationFigure = (cRingFigure *)groupFigure->getFigure(0);
@@ -965,6 +968,7 @@ void RadioMedium::updateCanvas()
                 communicationFigure->setInnerRy(endRadius);
             }
         }
+#endif
     }
 }
 
