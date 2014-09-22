@@ -30,6 +30,7 @@ class INET_API OFDMSymbol : public ISymbol
         std::vector<const APSKSymbol *> subcarrierSymbols;
 
     public:
+        friend std::ostream& operator<<(std::ostream& out, const OFDMSymbol& symbol);
         OFDMSymbol(const std::vector<const APSKSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
         OFDMSymbol() { subcarrierSymbols.resize(64); }
         const std::vector<const APSKSymbol *>& getSubCarrierSymbols() const { return subcarrierSymbols; }

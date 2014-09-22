@@ -27,6 +27,13 @@ void physicallayer::OFDMSymbol::pushAPSKSymbol(const APSKSymbol* apskSymbol, int
     subcarrierSymbols[subcarrierIndex] = apskSymbol;
 }
 
+std::ostream& operator<<(std::ostream& out, const OFDMSymbol& symbol)
+{
+   out << symbol.subcarrierSymbols[0];
+   for (int i = 1; i < symbol.subcarrierSymbols.size(); i++)
+       out << " " << symbol.subcarrierSymbols[i];
+}
+
 OFDMSymbol::~OFDMSymbol()
 {
     // Dynamically created pilot symbols need to be deleted
