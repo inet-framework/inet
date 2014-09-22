@@ -61,14 +61,14 @@ const ITransmissionBitModel* Ieee80211LayeredEncoder::encode(const ITransmission
     // NOTE: the SERVICE field, which is part of the PLCP header goes to the DATA field.
     // Then we apply different FEC encodings (and later modulations) - not for the whole PLCP header
     // but for the SIGNAL field - then for the DATA field.
-    for (int i = 24; i < serializedPacket.getSize(); i++)
+    for (unsigned int i = 24; i < serializedPacket.getSize(); i++)
         dataField.appendBit(serializedPacket.getBit(i));
     BitVector encodedSignalField = signalFieldEncode(signalField);
     BitVector encodedDataField = dataFieldEncode(dataField);
     BitVector encodedBits;
-    for (int i = 0; i < encodedSignalField.getSize(); i++)
+    for (unsigned int i = 0; i < encodedSignalField.getSize(); i++)
         encodedBits.appendBit(encodedSignalField.getBit(i));
-    for (int i = 0; i < encodedDataField.getSize(); i++)
+    for (unsigned int i = 0; i < encodedDataField.getSize(); i++)
         encodedBits.appendBit(encodedDataField.getBit(i));
     // TODO: bitrate
     return new TransmissionBitModel(encodedBits.getSize(), bitRate, encodedBits, dataFECEncoder->getInfo(), scrambler->getInfo(), interleaver->getInfo());
