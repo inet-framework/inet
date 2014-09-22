@@ -37,7 +37,7 @@ module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string interfaceTableModule;
-        string powerSourceModule;
+        string energySourceModule = default("");
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211Radio");
         string opMode @enum("b","g","a","p") = default("g");
@@ -49,7 +49,7 @@ module Ieee80211Nic like IWirelessNic
         **.bitrate = bitrate;
         @display("i=block/ifcard;bgb=336,357");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.powerSourceModule = default(absPath(powerSourceModule));
+        *.energySourceModule = default(absPath(energySourceModule));
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers

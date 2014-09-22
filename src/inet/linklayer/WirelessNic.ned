@@ -19,19 +19,17 @@ package inet.linklayer;
 
 import inet.linklayer.contract.IMACProtocol;
 import inet.physicallayer.contract.IRadio;
-import inet.power.contract.IPowerConsumer;
-
+import inet.power.contract.IEnergyConsumer;
 
 module WirelessNic like IWirelessNic
 {
     parameters:
         string interfaceTableModule;
-        string powerSourceModule;
+        string energySourceModule;
         string macType;
         string radioType;
-        string powerConsumerType = default("");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.powerSourceModule = default(absPath(powerSourceModule));
+        *.energySourceModule = default(absPath(energySourceModule));
         @display("i=block/ifcard;bgb=250,300");
     gates:
         input upperLayerIn;
@@ -45,10 +43,6 @@ module WirelessNic like IWirelessNic
         radio: <radioType> like IRadio {
             parameters:
                 @display("p=150,200");
-        }
-        powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "" {
-            parameters:
-                @display("p=50,50");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;

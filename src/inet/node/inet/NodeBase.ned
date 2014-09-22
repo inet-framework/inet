@@ -27,8 +27,8 @@ import inet.mobility.contract.IMobility;
 import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
-import inet.power.contract.IPowerAccumulator;
-import inet.power.contract.IPowerGenerator;
+import inet.power.contract.IEnergyStorage;
+import inet.power.contract.IEnergyGenerator;
 
 //
 // Contains the common lower layers (linklayer and networklayer)
@@ -54,13 +54,13 @@ module NodeBase
         string routingTableType = default("IPv4RoutingTable");
         bool IPForward = default(true);               // TODO should we remove these parameters from the routingTable
         bool forwardMulticast = default(false);
-        string accumulatorType = default("");
-        string generatorType = default("");
+        string energyStorageType = default("");
+        string energyGeneratorType = default("");
         routingTable.IPForward = IPForward;
         routingTable.forwardMulticast = forwardMulticast; //      and use the parameters of the node in the C++ code?
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
-        *.powerSourceModule = default(accumulatorType != "" ? absPath(".accumulator") : "");
+        *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
         *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
     gates:
         input radioIn[numRadios] @directIn;
@@ -70,11 +70,11 @@ module NodeBase
         status: NodeStatus if hasStatus {
             @display("p=50,50");
         }
-        accumulator: <accumulatorType> like IPowerAccumulator if accumulatorType != "" {
+        energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
                 @display("p=50,100;i=block/plug;is=s");
         }
-        generator: <generatorType> like IPowerGenerator if generatorType != "" {
+        energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
                 @display("p=50,150;i=block/plug;is=s");
         }

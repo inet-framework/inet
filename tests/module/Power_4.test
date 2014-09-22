@@ -14,7 +14,6 @@ there were no batteries involved at all.
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
-import inet.power.generator.SimplePowerGenerator;
 import inet.common.lifecycle.LifecycleController;
 
 network Test
@@ -42,18 +41,18 @@ cmdenv-express-mode = false
 *.hostDestination.status.initialStatus = "up"
 
 # power
-**.accumulatorType = "SimpleBattery"
-**.powerConsumerType = "StateBasedPowerConsumer"
-**.accumulator.nominalCapacity = 1J
-**.accumulator.nodeShutdownCapacity = 0J
-**.accumulator.nodeStartCapacity = 0.2 * this.nominalCapacity
-*.hostSource.accumulator.initialCapacity = 0J
-*.hostDestination.accumulator.initialCapacity = 0.1J
-*.hostSource.generatorType = "SimplePowerGenerator"
-*.hostSource.generator.powerSinkModule = "hostSource.accumulator"
-*.hostSource.generator.powerGeneration = 10mW
-*.hostSource.generator.sleepInterval = 0s
-*.hostSource.generator.generationInterval = 10s
+**.energyStorageType = "SimpleEnergyStorage"
+**.energyConsumerType = "StateBasedEnergyConsumer"
+**.energyStorage.nominalCapacity = 1J
+**.energyStorage.nodeShutdownCapacity = 0J
+**.energyStorage.nodeStartCapacity = 0.2 * this.nominalCapacity
+*.hostSource.energyStorage.initialCapacity = 0J
+*.hostDestination.energyStorage.initialCapacity = 0.1J
+*.hostSource.energyGeneratorType = "AlternatingEnergyGenerator"
+*.hostSource.energyGenerator.energySinkModule = "hostSource.energyStorage"
+*.hostSource.energyGenerator.powerGeneration = 10mW
+*.hostSource.energyGenerator.sleepInterval = 0s
+*.hostSource.energyGenerator.generationInterval = 10s
 
 # mobility
 **.mobility.constraintAreaMinZ = 0m

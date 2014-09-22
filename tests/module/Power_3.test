@@ -1,19 +1,19 @@
 %description:
 
-Test for battery charging. Battery should not be depleted but should be charged.
+Test for charging, energy storage should not be depleted but should be charged.
 
 %file: test.ned
 
-import inet.power.accumulator.SimpleBattery;
-import inet.power.consumer.SimplePowerConsumer;
-import inet.power.generator.SimplePowerGenerator;
+import inet.power.storage.SimpleEnergyStorage;
+import inet.power.consumer.AlternatingEnergyConsumer;
+import inet.power.generator.AlternatingEnergyGenerator;
 
 network Test
 {
     submodules:
-        battery: SimpleBattery;
-        consumer: SimplePowerConsumer;
-        generator: SimplePowerGenerator;
+        energyStorage: SimpleEnergyStorage;
+        energyConsumer: AlternatingEnergyConsumer;
+        energyGenerator: AlternatingEnergyGenerator;
 }
 
 %inifile: omnetpp.ini
@@ -24,19 +24,19 @@ ned-path = .;../../../../src
 sim-time-limit = 10s
 cmdenv-express-mode = false
 
-**.battery.nominalCapacity = 10 J
-**.battery.initialCapacity = 5 J
-**.consumer.sleepInterval = uniform(10ms, 20ms)
-**.consumer.consumptionInterval = uniform(5ms, 10ms)
-**.consumer.powerConsumption = uniform(1W, 2W)
-**.generator.sleepInterval = uniform(10ms, 20ms)
-**.generator.generationInterval = uniform(5ms, 10ms)
-**.generator.powerGeneration = uniform(2W, 4W)
+**.energyStorage.nominalCapacity = 10 J
+**.energyStorage.initialCapacity = 5 J
+**.energyConsumer.sleepInterval = uniform(10ms, 20ms)
+**.energyConsumer.consumptionInterval = uniform(5ms, 10ms)
+**.energyConsumer.powerConsumption = uniform(1W, 2W)
+**.energyGenerator.sleepInterval = uniform(10ms, 20ms)
+**.energyGenerator.generationInterval = uniform(5ms, 10ms)
+**.energyGenerator.powerGeneration = uniform(2W, 4W)
 
 %contains: stdout
-Battery charged
+Energy storage charged
 %not-contains: stdout
-Battery depleted
+Energy storage depleted
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

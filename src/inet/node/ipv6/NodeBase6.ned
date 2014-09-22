@@ -27,8 +27,8 @@ import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.IPv6NetworkLayer;
 import inet.networklayer.ipv6.IPv6RoutingTable;
-import inet.power.contract.IPowerAccumulator;
-import inet.power.contract.IPowerGenerator;
+import inet.power.contract.IEnergyStorage;
+import inet.power.contract.IEnergyGenerator;
 
 
 //
@@ -50,13 +50,13 @@ module NodeBase6
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
-        string accumulatorType = default("");
-        string generatorType = default("");
+        string energyStorageType = default("");
+        string energyGeneratorType = default("");
         xml routes = default(xml("<routingTable/>"));
         bool IPForward = default(true);
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".routingTable"));
-        *.powerSourceModule = default(accumulatorType != "" ? absPath(".accumulator") : "");
+        *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
         *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
     gates:
         input radioIn[numRadios] @directIn;
@@ -66,11 +66,11 @@ module NodeBase6
         status: NodeStatus if hasStatus {
             @display("p=50,50");
         }
-        accumulator: <accumulatorType> like IPowerAccumulator if accumulatorType != "" {
+        energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
                 @display("p=50,100;i=block/plug;is=s");
         }
-        generator: <generatorType> like IPowerGenerator if generatorType != "" {
+        energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
                 @display("p=50,150;i=block/plug;is=s");
         }

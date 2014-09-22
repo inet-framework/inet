@@ -33,7 +33,6 @@ module WirelessAPWithSink
         @labels(node);
         @display("i=device/accesspoint");
         *.interfaceTableModule = default("");
-        *.powerSourceModule = default("");
     gates:
         input radioIn @directIn;
     submodules:

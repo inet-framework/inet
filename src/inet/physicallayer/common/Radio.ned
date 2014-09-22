@@ -21,7 +21,7 @@ import inet.physicallayer.contract.IRadio;
 import inet.physicallayer.contract.IAntenna;
 import inet.physicallayer.contract.IReceiver;
 import inet.physicallayer.contract.ITransmitter;
-import inet.power.contract.IPowerConsumer;
+import inet.power.contract.IEnergyConsumer;
 
 // switchingTimes parameter should be regarded as a 5x5 matrix:
 //
@@ -46,15 +46,15 @@ module Radio like IRadio
         string antennaType;
         string transmitterType;
         string receiverType;
-        string powerConsumerType = default("");
+        string energyConsumerType = default("");
 
         string radioMediumModule = default("radioMedium");
-        string powerSourceModule = default("");
+        string energySourceModule = default("");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
         bool displayCommunicationRange = default(true);
         bool displayInterferenceRange = default(true);
         
-        *.powerSourceModule = default(absPath(powerSourceModule));
+        *.energySourceModule = default(absPath(energySourceModule));
 
         @class(Radio);
         @display("i=block/wrxtx");
@@ -88,7 +88,7 @@ module Radio like IRadio
             parameters:
                 @display("p=100,250");
         }
-        powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "" {
+        energyConsumer: <energyConsumerType> like IEnergyConsumer if energyConsumerType != "" {
             parameters:
                 @display("p=100,350");
         }
