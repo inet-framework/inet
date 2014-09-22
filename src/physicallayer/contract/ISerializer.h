@@ -19,6 +19,7 @@
 #define __INET_ISERIALIZER_H_
 
 #include "IPrintableObject.h"
+#include "BitVector.h"
 
 namespace inet {
 namespace physicallayer {
