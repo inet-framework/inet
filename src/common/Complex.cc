@@ -66,12 +66,22 @@ Complex Complex::operator*(const double& rhs) const
     return Complex(rhs * this->re, rhs * this->im);
 }
 
+Complex Complex::operator*(const int& rhs) const
+{
+    return Complex(rhs * this->re, rhs * this->im);
+}
+
 Complex Complex::conjugate() const
 {
     return Complex(this->re, -this->im);
 }
 
 Complex operator*(const double& scalar, const Complex& comp)
+{
+    return comp * scalar;
+}
+
+Complex operator*(const int& scalar, const Complex& comp)
 {
     return comp * scalar;
 }
