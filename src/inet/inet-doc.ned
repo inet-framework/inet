@@ -19,7 +19,7 @@
 //
 // <pre>
 // <nohtml>
-// @include ../WHATSNEW
+// @include ../../WHATSNEW
 // </nohtml>
 // </pre>
 //
