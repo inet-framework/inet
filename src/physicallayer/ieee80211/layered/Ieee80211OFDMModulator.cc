@@ -108,7 +108,7 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
         int subcarrierIndex = getSubcarrierIndex(i % OFDM_SYMBOL_SIZE);
         ofdmSymbol.pushAPSKSymbol(apskSymbols.at(i), subcarrierIndex);
         // In each group, the complex numbers are numbered 0 to 47 and mapped hereafter into OFDM
-        // subcarriers numbered –26 to –22, –20 to –8, –6 to –1, 1 to 6, 8 to 20, and 22 to 26.
+        // subcarriers numbered -26 to -22, -20 to -8, -6 to -1, 1 to 6, 8 to 20, and 22 to 26.
         // The 0 subcarrier, associated with center frequency, is omitted and filled with the value 0.
         if (i % OFDM_SYMBOL_SIZE == OFDM_SYMBOL_SIZE - 1)
         {
@@ -116,10 +116,10 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
             ofdmSymbol.clearSymbols();
         }
     }
-    // TODO: Four subcarriers are inserted as pilots into positions –21, –7, 7, and 21. The total number of
+    // TODO: Four subcarriers are inserted as pilots into positions -21, -7, 7, and 21. The total number of
     // the subcarriers is 52 (48 + 4).
 
-    // TODO: For each group of subcarriers –26 to 26, convert the subcarriers to time domain using inverse
+    // TODO: For each group of subcarriers -26 to 26, convert the subcarriers to time domain using inverse
     // Fourier transform. Prepend to the Fourier-transformed waveform a circular extension of itself thus
     // forming a GI, and truncate the resulting periodic waveform to a single OFDM symbol length by
     // applying time domain windowing.
