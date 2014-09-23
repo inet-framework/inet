@@ -9,51 +9,56 @@ networks work inside large buildings, low power wireless sensors communicate
 in industrial environments, batteries operate in various external conditions,
 and so on.
 
-The propagation of communication signals, the movement of communicating agents,
-or battery exhaustion depend on the surrounding physical environment. For
-example, signals can be absorbed by objects, can pass through objects, can be
-refracted by surfaces, can be reflected from surfaces, etc. These effects cannot
-be ignored in high fidelity simulations.
+The propagation of radio signals, the movement of communicating agents, battery
+exhaustion, etc., depend on the surrounding physical environment. For example,
+signals can be absorbed by objects, can pass through objects, can be refracted
+by surfaces, can be reflected from surfaces, battery nominal might depend on
+external temperature, etc. These effects cannot be ignored in high fidelity
+simulations.
 
-The physical environment model is separated from the rest of the communication
-related models. It's main goal is to describe buildings, walls, vegetation,
-terrain, weather and other physical conditions that might have effect on signal
-propagation, movement, batteries, etc. The separation makes the model reusable
-by other simulation models that depend on these circumstances.
+In order to help the modeling process the physical environment model is
+separated from the rest of the simulation models. It's main goal is to describe
+buildings, walls, vegetation, terrain, weather, and other physical conditions
+that might have effects on radio signal propagation, movement, batteries, etc.
+This separation makes the model reusable by all other simulation models that
+depend on these circumstances.
 
-This chapter provides a brief overview of the physical environment model. 
+The following sections provide a brief overview of the components of the
+physical environment model. 
 
 \section{Physical Objects}
 
 The most important aspect of the physical environment is the objects which are
 present in it. For example, simulating an indoor wifi scenario needs to model
-walls, floors, ceilings, doors, windows, furniture, etc. Most of these objects
-have very basic shapes and homogeneous materials. So the physical object model
-has the following properties:
+walls, floors, ceilings, doors, windows, furniture, etc. These objects are
+located in space, most of them have very basic shapes and homogeneous materials.
+In short physical objects have the following properties:
 
 \begin{itemize}
-  \item \ttt{shape}: describes the 3D shape of the object independently of its
-position and orientation
-  \item \ttt{position}: determines where the object is located in the 3D space
+  \item \ttt{shape}: describes the 3 dimensional shape of the object
+independently of its position and orientation
+  \item \ttt{position}: determines where the object is located in the 3
+dimensional space
   \item \ttt{orientation}: determines how the object is rotated relative to its
 default orientation
   \item \ttt{material}: describes various material specific physical properties  
   \item \ttt{graphical properties}: provides parameters for better visualization
 \end{itemize}
 
-The physical objects are also mostly immobile. In the current model they cannot
-change their position or orientation over time.
+The physical objects are also mostly immobile, so in the current model they
+cannot change their position or orientation over time.
 
 Since the shape of the physical objects might be quite diverse, the model is
 designed to be extensible with new shapes. Concave shapes are not yet supported,
-such shapes should be split up into convex parts. The current implementation
-provides the following convex shapes:
+such shapes should be split up into smaller convex parts. The current
+implementation provides the following convex shapes:
 
 \begin{itemize}
   \item \cppclass{Sphere}: specified by a radius 
   \item \cppclass{Cuboid}: specified by a length, a width, and a height
   \item \cppclass{Prism}: specified by a 2 dimensional polygon base and a height
-  \item \cppclass{Polyhedron}: specified by a set of 3 dimensional vertices
+  \item \cppclass{Polyhedron}: specified by the convex hull of a set of 3
+dimensional vertices 
 \end{itemize}
 
 In order to model the physical environment in detail a scenario might contain
@@ -61,9 +66,9 @@ several thousands or even more physical objects. Other simulation models might
 need to query these objects quite often. For example, when the physical layer
 computes obstacle loss for a transmission, it needs to find the obstructing
 physical objects for each receiver. This requires computing the intersection
-between physical objects and the path traveled by the signal. For this purpose,
-the physical environment supports storing physical objects in one of the
-following efficient cache data structures:
+between physical objects and the path traveled by the radio signal. For this
+purpose, the physical environment supports storing physical objects in one of
+the following efficient cache data structures:
 
 \begin{itemize}
   \item \nedtype{GridObjectCache}: organizes objects into a spatial grid with
@@ -73,26 +78,30 @@ with them
 tree leaves contain a configurable number of closely positioned objects
 \end{itemize}
 
-\iffalse TODO: the implementation is either incomplete or unused yet
-\section{Physical Properties}
+The physical environment uses a \nedtype{GridObjectCache} data structure by
+default.
 
-The physical environment also provides certain global physical properties such
-as the following:
+\section{Global Physical Properties}
+
+In order to avoid incorrectly positioned physical objects, to limit propagation
+and reflection of radio signals, to constrain movement of communicating agents,
+to build small and efficient cache data structures, it's necessary to have space
+limits. In addition, maximum capacity, internal resistance, self-discharge, etc.,
+of battery models might depend on the external temperature. For this purpose,
+the  physical environment provides the following global properties:
 
 \begin{itemize}
-  \item \ttt{space limits}: constraints for physical objects, signal propagation
-and movement 
-  \item \ttt{temperature}: might have effects on battery models 
+  \item \ttt{space limits}: global constraints for the 3 dimensional space
+  \item \ttt{temperature}: global parameter for temperature dependent models 
 \end{itemize}
-\fi
 
 \section{Initialization}
 
 In order to easily define thousands of physical objects the model needs to use a
 flexible and concise representation. For this purpose, the physical environment
-provides an XML file format. This file can be used to define reusable shapes,
-reusable materials, and physical objects. The following example demonstrates the
-XML file format:
+uses an XML file format. This file can be used to define physical objects along
+with shapes, materials used by them. The following example demonstrates the
+syntax of this XML file format:
 
 \begin{verbatim}
 <environment>
@@ -126,13 +135,13 @@ For more details on the XML file format please refer to the documentation in the
 
 \section{Visualization}
 
-Understanding the abstract physical environment model from numerical log output
-or debugging other simulation models based on the numerical data structures
-is difficult. Therefore the physical environment supports visualizing the
-physical objects on the graphical user interface. The visualization is done by
-drawing the physical objects on the parent compound module as a separate layer. 
-In order to help distinguish among physical objects they have the following 
-graphical properties:
+Understanding the abstract physical environment model from numerical log output,
+or debugging simulation models based on the numerical data structures is
+difficult. Therefore the physical environment supports visualizing the physical
+objects on the graphical user interface. The visualization is done by drawing
+the physical objects on the parent compound module as a separate layer. In order
+to help to distinguish among physical objects they have the following graphical
+properties:
 
 \begin{itemize}
   \item \ttt{line width}: surface outline 
@@ -152,8 +161,8 @@ the parameter editor of the graphical user interface.
 The projection is also used by other models for their own visualizations. This
 approach makes visualizations well integrated with each other. For example, the
 mobility models position network nodes, the physical layer draws ongoing
-transmissions, the obstacle loss draws intersections, etc. on the canvas
-according to the projection described above. 
+transmissions, the obstacle loss draws intersections between transmissions and
+objects, etc., on the canvas according to the projection described above. 
 
 %%% Local Variables:
 %%% mode: latex
