@@ -21,9 +21,9 @@
 #include "inet/environment/cache/IObjectCache.h"
 #include "inet/environment/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
-#include "inet/common/geometry/Shape3D.h"
-#include "inet/common/geometry/LineSegment.h"
-#include "inet/common/geometry/Rotation.h"
+#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/object/LineSegment.h"
+#include "inet/common/geometry/common/Rotation.h"
 
 namespace inet {
 

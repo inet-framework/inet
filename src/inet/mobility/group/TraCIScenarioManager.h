@@ -30,7 +30,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/common/ModuleAccess.h"
 
 #ifdef WITH_TRACI

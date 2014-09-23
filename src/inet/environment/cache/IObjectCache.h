@@ -20,7 +20,7 @@
 
 #include "inet/common/IVisitor.h"
 #include "inet/environment/PhysicalObject.h"
-#include "inet/common/geometry/LineSegment.h"
+#include "inet/common/geometry/object/LineSegment.h"
 
 namespace inet {
 

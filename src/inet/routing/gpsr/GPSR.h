@@ -21,7 +21,7 @@
 #define __INET_GPSR_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/IL3AddressType.h"

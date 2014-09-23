@@ -17,7 +17,7 @@
 
 #include "inet/common/misc/NetAnimTrace.h"
 
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/common/ModuleAccess.h"
 

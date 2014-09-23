@@ -16,8 +16,8 @@
 //
 
 #include "PolyhedronTest.h"
-#include "inet/common/geometry/polyhedron/PolyhedronPoint.h"
-#include "inet/common/geometry/polyhedron/PolyhedronFace.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
 
 namespace inet {
 

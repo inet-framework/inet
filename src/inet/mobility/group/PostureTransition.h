@@ -47,7 +47,7 @@
 #include <sstream>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
 

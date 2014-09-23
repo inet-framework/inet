@@ -16,13 +16,13 @@
 //
 
 #include "inet/environment/PhysicalEnvironment.h"
-#include "inet/common/geometry/Box.h"
-#include "inet/common/geometry/Cuboid.h"
-#include "inet/common/geometry/Sphere.h"
-#include "inet/common/geometry/Prism.h"
-#include "inet/common/geometry/polyhedron/Polyhedron.h"
+#include "inet/common/geometry/object/Box.h"
+#include "inet/common/geometry/shape/Cuboid.h"
+#include "inet/common/geometry/shape/Sphere.h"
+#include "inet/common/geometry/shape/Prism.h"
+#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
+#include "inet/common/geometry/common/Rotation.h"
 #include "inet/environment/Material.h"
-#include "inet/common/geometry/Rotation.h"
 #include <algorithm>
 
 namespace inet {

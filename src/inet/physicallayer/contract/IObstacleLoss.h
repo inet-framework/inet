@@ -18,7 +18,7 @@
 #ifndef __INET_IOBSTACLELOSS_H
 #define __INET_IOBSTACLELOSS_H
 
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/physicallayer/contract/IPrintableObject.h"
 
 namespace inet {

@@ -19,7 +19,7 @@
 
 #include "inet/common/ResultFilters.h"
 
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {

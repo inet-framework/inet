@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/obstacle/TracingObstacleLoss.h"
-#include "inet/common/geometry/Rotation.h"
+#include "inet/common/geometry/common/Rotation.h"
 
 namespace inet {
 

@@ -27,7 +27,7 @@
 #endif
 
 #include "inet/routing/extras/base/compatibility.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/common/IInterfaceTable.h"
 #include "inet/networklayer/common/L3Address.h"

@@ -19,7 +19,7 @@
 
 cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/common/Coord.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 

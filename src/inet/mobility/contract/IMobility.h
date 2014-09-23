@@ -24,8 +24,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/geometry/Coord.h"
-#include "inet/common/geometry/EulerAngles.h"
+#include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/common/EulerAngles.h"
 
 namespace inet {
 

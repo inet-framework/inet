@@ -19,7 +19,7 @@
 #define __INET_GRIDOBJECTCACHE_H
 
 #include "inet/environment/cache/IObjectCache.h"
-#include "inet/common/geometry/SpatialGrid.h"
+#include "inet/common/geometry/container/SpatialGrid.h"
 #include "inet/environment/PhysicalEnvironment.h"
 #include "inet/environment/PhysicalObject.h"
 #include "inet/common/IVisitor.h"

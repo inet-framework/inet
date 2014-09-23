@@ -18,8 +18,8 @@
 #ifndef __INET_IARRIVAL_H
 #define __INET_IARRIVAL_H
 
-#include "inet/common/geometry/Coord.h"
-#include "inet/common/geometry/EulerAngles.h"
+#include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/physicallayer/contract/IPrintableObject.h"
 
 namespace inet {

@@ -18,8 +18,8 @@
 #ifndef __INET_POLYHEDRONTEST_H
 #define __INET_POLYHEDRONTEST_H
 
-#include "inet/common/geometry/polyhedron/Polyhedron.h"
-#include "inet/common/geometry/Coord.h"
+#include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
+#include "inet/common/geometry/common/Coord.h"
 #include <vector>
 
 namespace inet {
