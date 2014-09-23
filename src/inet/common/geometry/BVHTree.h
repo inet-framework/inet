@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BVHTREE_H_
-#define __INET_BVHTREE_H_
+#ifndef __INET_BVHTREE_H
+#define __INET_BVHTREE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/IVisitor.h"
@@ -32,7 +32,7 @@ namespace inet {
  * Implementation based on this sketch:
  * http://www.cs.utah.edu/~bes/papers/fastRT/paper-node8.html
  */
-class BVHTree
+class INET_API BVHTree
 {
     public:
         class Axis
@@ -101,4 +101,4 @@ class BVHTree
 
 } /* namespace inet */
 
-#endif /* __INET_BVHTREE_H_ */
+#endif // ifndef __INET_BVHTREE_H

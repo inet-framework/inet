@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_QUATERNION_H_
-#define __INET_QUATERNION_H_
+#ifndef __INET_QUATERNION_H
+#define __INET_QUATERNION_H
 
 #include "inet/common/geometry/Coord.h"
 
@@ -25,7 +25,7 @@ namespace inet {
 /*
  * This class represents quaternions as a four dimensional vector space over the real field
  */
-class Quaternion
+class INET_API Quaternion
 {
     protected:
         double realPart;
@@ -44,4 +44,4 @@ class Quaternion
 
 } /* namespace inet */
 
-#endif /* __INET_QUATERNION_H_ */
+#endif // ifndef __INET_QUATERNION_H

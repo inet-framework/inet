@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SPATIALGRID_H_
-#define __INET_SPATIALGRID_H_
+#ifndef __INET_SPATIALGRID_H
+#define __INET_SPATIALGRID_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/geometry/Coord.h"
@@ -33,7 +33,7 @@ namespace inet {
 // NOTE: With minimal effort, it can be extended to work
 // in arbitrary dimension spaces.
 
-class SpatialGrid
+class INET_API SpatialGrid
 {
     public:
       template<typename T>
@@ -125,4 +125,4 @@ class SpatialGrid
 
 } /* namespace inet */
 
-#endif /* __INET_SPATIALGRID_H_ */
+#endif // ifndef __INET_SPATIALGRID_H

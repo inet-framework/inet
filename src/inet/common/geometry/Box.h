@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BOX_H_
-#define __INET_BOX_H_
+#ifndef __INET_BOX_H
+#define __INET_BOX_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/geometry/Coord.h"
 
 namespace inet {
 
-class Box
+class INET_API Box
 {
     public:
         Coord min;
@@ -35,4 +35,4 @@ class Box
 };
 } /* namespace inet */
 
-#endif /* __INET_BOX_H_ */
+#endif // ifndef __INET_BOX_H

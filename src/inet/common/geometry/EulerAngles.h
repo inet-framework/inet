@@ -5,7 +5,7 @@
 
 namespace inet {
 
-class EulerAngles
+class INET_API EulerAngles
 {
   public:
     // Constant with all values set to 0
@@ -52,5 +52,5 @@ inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)
 
 } // namespace inet
 
-#endif /* EULERALNGLES_H_ */
+#endif // ifndef __INET_EULERALNGLES_H
 

@@ -67,5 +67,5 @@ class INET_API QuadTree
 
 } // namespace inet
 
-#endif /* QUADTREE_H_ */
+#endif // ifndef __INET_QUADTREE_H
 
