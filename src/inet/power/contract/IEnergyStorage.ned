@@ -22,7 +22,7 @@ package inet.power.contract;
 // generators, and provide energy for consumers. For example, an electrochemical
 // battery in a mobile phone provides energy for its display, its CPU, and its
 // wireless communication devices. It can also absorb energy produced by a solar
-// panel installed on its display, or by a portable charger plugged in to the
+// panel installed on its display, or by a portable charger plugged into the
 // wall socket. Other energy storage models such as a simple capacitor also exist.
 //
 // @author Levente Meszaros

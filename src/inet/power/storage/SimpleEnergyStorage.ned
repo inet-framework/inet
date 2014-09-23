@@ -21,10 +21,10 @@ import inet.power.base.EnergyStorageBase;
 
 //
 // This energy storage model maintains a residual capacity by integrating the
-// difference between the total generated power and the total consumer power
-// over time. It supports node shutdown when the residual capacity drops below
-// a configured threshold. It also supports node start when the residual capacity
-// raises above another configured threshold.
+// difference between the total absorbed power and the total provided power
+// over time. It can initiate node shutdown when the residual capacity drops
+// below a configured threshold. It can also initiate node start when the
+// residual capacity raises above another configured threshold.
 //
 // This model doesn't have various properties such as self-discharge, memory
 // effect, overcharging, temperature-dependence, etc. that real world batteries
