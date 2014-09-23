@@ -37,7 +37,7 @@ Prism::Prism(double height, const Polygon& base) :
         throw cRuntimeError("A prism has a positive height");
 }
 
-Coord Prism::computeSize() const
+Coord Prism::computeBoundingBoxSize() const
 {
     Coord min;
     Coord max;

@@ -18,7 +18,7 @@
 #ifndef __INET_PRISM_H
 #define __INET_PRISM_H
 
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/object/Polygon.h"
 #include "inet/common/geometry/common/Rotation.h"
 
@@ -27,7 +27,7 @@ namespace inet {
 /**
  * This class represents 3 dimensional prism with a polygon base face.
  */
-class INET_API Prism : public Shape3D
+class INET_API Prism : public ShapeBase
 {
   public:
     typedef std::vector<Polygon> Faces;
@@ -56,7 +56,7 @@ class INET_API Prism : public Shape3D
     const Polygon& getBase() const { return base; }
     void setBase(const Polygon& base);
 
-    virtual Coord computeSize() const;
+    virtual Coord computeBoundingBoxSize() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
     void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
 };

@@ -73,7 +73,7 @@ void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::ve
     {
         const PhysicalObject *phyObj = objects[i];
         Coord pos = phyObj->getPosition();
-        Coord size = phyObj->getShape()->computeSize();
+        Coord size = phyObj->getShape()->computeBoundingBoxSize();
         size /= 2;
         Coord objMaxBounding = pos + size;
         Coord objMinBounding = pos - size;

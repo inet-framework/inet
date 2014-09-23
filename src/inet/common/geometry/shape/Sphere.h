@@ -18,14 +18,14 @@
 #ifndef __INET_SPHERE_H
 #define __INET_SPHERE_H
 
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/ShapeBase.h"
 
 namespace inet {
 
 /**
  * This class represents a 3 dimensional sphere shape.
  */
-class INET_API Sphere : public Shape3D
+class INET_API Sphere : public ShapeBase
 {
   protected:
     double radius;
@@ -36,7 +36,7 @@ class INET_API Sphere : public Shape3D
     const double getRadius() const { return radius; }
     void setRadius(double radius) { this->radius = radius; }
 
-    virtual Coord computeSize() const { return Coord(radius * 2, radius * 2, radius * 2); }
+    virtual Coord computeBoundingBoxSize() const { return Coord(radius * 2, radius * 2, radius * 2); }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 

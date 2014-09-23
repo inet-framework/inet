@@ -21,7 +21,7 @@
 #include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
 #include "inet/common/geometry/shape/polyhedron/PolyhedronEdge.h"
 #include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/Rotation.h"
 
 namespace inet {
@@ -30,7 +30,7 @@ namespace inet {
  * This class represents a convex polyhedron.
  * It takes a 3D point set and builds its convex hull.
  */
-class INET_API Polyhedron : public Shape3D
+class INET_API Polyhedron : public ShapeBase
 {
     public:
         typedef std::vector<PolyhedronPoint *> Points;
@@ -62,7 +62,7 @@ class INET_API Polyhedron : public Shape3D
 
     public:
         Polyhedron(const std::vector<Coord>& points);
-        Coord computeSize() const;
+        Coord computeBoundingBoxSize() const;
         void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
         bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
         const Faces& getFaces() const { return faces; }

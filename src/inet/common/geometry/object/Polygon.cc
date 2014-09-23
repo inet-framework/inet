@@ -26,6 +26,14 @@ Polygon::Polygon(const std::vector<Coord>& points)
     this->points = points;
 }
 
+bool Polygon::isUnspecified() const
+{
+    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++) {
+        if ((*it).isUnspecified())
+            return true;
+    }
+}
+
 Coord Polygon::getNormalUnitVector() const
 {
     Coord normalVec = getNormalVector();

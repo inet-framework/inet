@@ -93,7 +93,7 @@ double TracingObstacleLoss::computeReflectionLoss(const Material *incidentMateri
 double TracingObstacleLoss::computeObjectLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
 {
     double totalLoss = 1;
-    const Shape3D *shape = object->getShape();
+    const ShapeBase *shape = object->getShape();
     const Coord& position = object->getPosition();
     const EulerAngles& orientation = object->getOrientation();
     Rotation rotation(orientation);

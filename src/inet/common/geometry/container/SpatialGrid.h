@@ -25,14 +25,13 @@
 
 namespace inet {
 
-// This class implements a SpatialGrid data structure
-// Spatial means three-dimensional grid, but it can be
-// used with zero-length {x,y,z} sides, in this special
-// cases, it operates in one- or two-dimensional mode.
-
-// NOTE: With minimal effort, it can be extended to work
-// in arbitrary dimension spaces.
-
+/**
+ * This class implements a spatial grid data structure using a 3 dimensional grid.
+ * It can also be used with zero-length {X, Y, Z} sides, and then it operates in
+ * 1 or 2 dimensional mode.
+ *
+ * NOTE: With minimal effort, it can be extended to work in arbitrary dimension spaces.
+ */
 class INET_API SpatialGrid
 {
     public:

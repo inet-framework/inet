@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALOBJECT_H
 #define __INET_PHYSICALOBJECT_H
 
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/environment/Material.h"
 
@@ -52,7 +52,7 @@ class INET_API PhysicalObject : public cNamedObject
      * The shape of the object independently of its position and orientation.
      * The physical object doesn't own its shape.
      */
-    const Shape3D *shape;
+    const ShapeBase *shape;
     /**
      * The material of the object determines its physical properties.
      * The physical object doesn't own its material.
@@ -70,14 +70,14 @@ class INET_API PhysicalObject : public cNamedObject
     //@}
 
   public:
-    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape3D *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags);
+    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags);
 
     virtual int getId() const { return id; }
 
     virtual const Coord& getPosition() const { return position; }
     virtual const EulerAngles& getOrientation() const { return orientation; }
 
-    virtual const Shape3D *getShape() const { return shape; }
+    virtual const ShapeBase *getShape() const { return shape; }
     virtual const Material *getMaterial() const { return material; }
 
     virtual double getLineWidth() const { return lineWidth; }

@@ -18,20 +18,30 @@
 #ifndef __INET_BOX_H
 #define __INET_BOX_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/geometry/base/GeometricObjectBase.h"
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
 
-class INET_API Box
+class INET_API Box : public GeometricObjectBase
 {
     public:
+        static const Box NIL;
+
+    protected:
         Coord min;
         Coord max;
-        Box(const Coord& min, const Coord& max) :
-            min(min), max(max) {}
 
-        static Box calculateBoundingBox(const std::vector<Coord>& points);
+    public:
+        Box(const Coord& min, const Coord& max);
+
+        static Box computeBoundingBox(const std::vector<Coord>& points);
+
+        const Coord& getMin() const { return min; }
+        const Coord& getMax() const { return max; }
+
+        virtual bool isNil() const { return this == &NIL; }
+        virtual bool isUnspecified() const { return min.isUnspecified() || max.isUnspecified(); }
 };
 } /* namespace inet */
 

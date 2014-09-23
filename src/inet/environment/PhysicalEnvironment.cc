@@ -40,7 +40,7 @@ PhysicalEnvironment::PhysicalEnvironment() :
 
 PhysicalEnvironment::~PhysicalEnvironment()
 {
-    for (std::vector<const Shape3D *>::iterator it = shapes.begin(); it != shapes.end(); it++)
+    for (std::vector<const ShapeBase *>::iterator it = shapes.begin(); it != shapes.end(); it++)
         delete *it;
     for (std::vector<const Material *>::iterator it = materials.begin(); it != materials.end(); it++)
         delete *it;
@@ -85,7 +85,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
     for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         cXMLElement *element = *it;
-        Shape3D *shape = NULL;
+        ShapeBase *shape = NULL;
         // id
         const char *idAttribute = element->getAttribute("id");
         int id = -1;
@@ -173,7 +173,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         // insert
         if (idToShapeMap.find(id) != idToShapeMap.end())
             throw cRuntimeError("Shape already exists with the same id: '%d'", id);
-        idToShapeMap.insert(std::pair<int, const Shape3D *>(id, shape));
+        idToShapeMap.insert(std::pair<int, const ShapeBase *>(id, shape));
     }
 }
 
@@ -245,7 +245,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 orientation.gamma = math::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
-        const Shape3D *shape;
+        const ShapeBase *shape;
         const char *shapeAttribute = element->getAttribute("shape");
         if (!shapeAttribute)
             throw cRuntimeError("Missing shape attribute of object");
@@ -284,8 +284,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     point.y = atof(shapeTokenizer.nextToken());
                 points.push_back(point);
             }
-            Box boundingBox = Box::calculateBoundingBox(points);
-            Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
+            Box boundingBox = Box::computeBoundingBox(points);
+            Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
             center.z = height / 2;
             std::vector<Coord> prismPoints;
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
@@ -306,8 +306,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     point.z = atof(shapeTokenizer.nextToken());
                 points.push_back(point);
             }
-            Box boundingBox = Box::calculateBoundingBox(points);
-            Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
+            Box boundingBox = Box::computeBoundingBox(points);
+            Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
             std::vector<Coord> PolyhedronPoints;
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
                 PolyhedronPoints.push_back(*it - center);
@@ -329,9 +329,9 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (!kind)
                 throw cRuntimeError("Missing position kind");
             else if (!strcmp(kind, "min"))
-                position = shape->computeSize() / 2;
+                position = shape->computeBoundingBoxSize() / 2;
             else if (!strcmp(kind, "max"))
-                position = shape->computeSize() / -2;
+                position = shape->computeBoundingBoxSize() / -2;
             else if (!strcmp(kind, "center"))
                 position = Coord::ZERO;
             else
@@ -449,7 +449,7 @@ void PhysicalEnvironment::updateCanvas()
     for (std::vector<const PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++)
     {
         const PhysicalObject *object = *it;
-        const Shape3D *shape = object->getShape();
+        const ShapeBase *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
         const Rotation rotation(orientation);

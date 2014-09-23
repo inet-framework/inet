@@ -18,13 +18,17 @@
 #ifndef __INET_POLYGON_H
 #define __INET_POLYGON_H
 
+#include "inet/common/geometry/base/GeometricObjectBase.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/object/LineSegment.h"
 
 namespace inet {
 
-class INET_API Polygon
+class INET_API Polygon : public GeometricObjectBase
 {
+  public:
+    static const Polygon NIL;
+
   protected:
     std::vector<Coord> points;
     Coord getEdgeOutwardNormalVector(const Coord& edgeP1, const Coord& edgeP2) const;
@@ -34,6 +38,10 @@ class INET_API Polygon
     Polygon(const std::vector<Coord>& points);
 
     const std::vector<Coord>& getPoints() const { return points; }
+
+    virtual bool isNil() const { return this == &NIL; }
+    virtual bool isUnspecified() const;
+
     virtual Coord computeSize() const;
     Coord getNormalUnitVector() const;
     Coord getNormalVector() const;

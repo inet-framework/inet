@@ -65,8 +65,8 @@ class INET_API BVHTree
             AxisComparator(char axis) : axis(axis) {}
             bool operator()(const PhysicalObject *left, const PhysicalObject *right) const
             {
-                Coord leftPos = left->getPosition() + left->getShape()->computeSize() / 2;
-                Coord rightPos = right->getPosition() + right->getShape()->computeSize() / 2;
+                Coord leftPos = left->getPosition() + left->getShape()->computeBoundingBoxSize() / 2;
+                Coord rightPos = right->getPosition() + right->getShape()->computeBoundingBoxSize() / 2;
                 switch (axis)
                 {
                     case 'X': return leftPos.x < rightPos.x;

@@ -359,7 +359,7 @@ void Polyhedron::purgeWrappedFaces()
     }
 }
 
-Coord Polyhedron::computeSize() const
+Coord Polyhedron::computeBoundingBoxSize() const
 {
     Coord min;
     Coord max;

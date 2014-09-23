@@ -19,7 +19,13 @@
 
 namespace inet {
 
-Box inet::Box::calculateBoundingBox(const std::vector<Coord>& points)
+Box::Box(const Coord& min, const Coord& max) :
+    min(min),
+    max(max)
+{
+}
+
+Box inet::Box::computeBoundingBox(const std::vector<Coord>& points)
 {
     Coord min = Coord::NIL;
     Coord max = Coord::NIL;

@@ -21,7 +21,7 @@
 #include "inet/environment/cache/IObjectCache.h"
 #include "inet/environment/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/common/Rotation.h"
 
@@ -64,7 +64,7 @@ class INET_API PhysicalEnvironment : public cModule
     //@{
     EulerAngles viewAngle;
     Rotation viewRotation;
-    std::vector<const Shape3D *> shapes;
+    std::vector<const ShapeBase *> shapes;
     std::vector<const Material *> materials;
     std::vector<const PhysicalObject *> objects;
     //@}
@@ -72,7 +72,7 @@ class INET_API PhysicalEnvironment : public cModule
     /** @name Cache */
     //@{
     IObjectCache *objectCache;
-    std::map<int, const Shape3D *> idToShapeMap;
+    std::map<int, const ShapeBase *> idToShapeMap;
     std::map<int, const Material *> idToMaterialMap;
     std::map<int, const PhysicalObject *> idToObjectMap;
     std::map<const std::string, const Material *> nameToMaterialMap;

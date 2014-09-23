@@ -15,17 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/base/Shape3D.h"
+#include "inet/common/geometry/base/GeometricObjectBase.h"
 
 namespace inet {
-
-Shape3D::Shape3D()
-{
-}
-
-Shape3D::~Shape3D()
-{
-}
 
 } // namespace inet
 

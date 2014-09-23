@@ -15,24 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/environment/PhysicalObject.h"
+#ifndef __INET_GEOMETRICOBJECTBASE_H
+#define __INET_GEOMETRICOBJECTBASE_H
+
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
-PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags) :
-    cNamedObject(name),
-    id(id),
-    position(position),
-    orientation(orientation),
-    shape(shape),
-    material(material),
-    lineWidth(lineWidth),
-    lineColor(lineColor),
-    fillColor(fillColor),
-    opacity(opacity),
-    tags(tags)
+/**
+ * This class represents a 3 dimensional geometric object positioned and oriented
+ * in 3 dimensional space.
+ */
+class INET_API GeometricObjectBase
 {
-}
+  public:
+    GeometricObjectBase() {}
+    virtual ~GeometricObjectBase() {}
+
+    /**
+     * Returns true if this geometric object is the same as the unspecified
+     * singleton instance of this type.
+     */
+    virtual bool isNil() const = 0;
+
+    /**
+     * Returns true if this geometric object is not completely specified.
+     */
+    virtual bool isUnspecified() const = 0;
+};
 
 } // namespace inet
+
+#endif // ifndef __INET_GEOMETRICOBJECTBASE_H
 

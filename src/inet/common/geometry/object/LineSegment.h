@@ -18,6 +18,7 @@
 #ifndef __INET_LINESEGMENT_H
 #define __INET_LINESEGMENT_H
 
+#include "inet/common/geometry/base/GeometricObjectBase.h"
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
@@ -25,7 +26,7 @@ namespace inet {
 /**
  * This class represents a 3 dimensional line segment between two points.
  */
-class INET_API LineSegment
+class INET_API LineSegment : public GeometricObjectBase
 {
   public:
     static const LineSegment NIL;
@@ -42,10 +43,10 @@ class INET_API LineSegment
     void setPoint1(const Coord& point1) { this->point1 = point1; }
     const Coord& getPoint2() const { return point2; }
     void setPoint2(const Coord& point2) { this->point2 = point2; }
-
-    bool isNil() const { return this == &NIL; }
-    bool isUnspecified() const { return point1.isUnspecified() && point2.isUnspecified(); }
     double length() const { return point2.distance(point1); }
+
+    virtual bool isNil() const { return this == &NIL; }
+    virtual bool isUnspecified() const { return point1.isUnspecified() || point2.isUnspecified(); }
 
     bool computeIntersection(const LineSegment &lineSegment, Coord &intersection1, Coord &intersection2);
 };
