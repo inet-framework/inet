@@ -26,23 +26,29 @@
 
 namespace inet {
 
-class GridObjectCache : public IObjectCache, public cSimpleModule
+class GridObjectCache : public IObjectCache, public cModule
 {
-    protected:
-        SpatialGrid *grid;
-        PhysicalEnvironment *physicalEnvironment;
+  protected:
+    /** @name Parameters */
+    //@{
+    PhysicalEnvironment *physicalEnvironment;
+    //@}
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    /** @name Cache */
+    //@{
+    SpatialGrid *grid;
+    //@}
 
-    public:
-        bool insertObject(const PhysicalObject *object);
-        void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
-        void buildCache() {}
-        GridObjectCache();
-        virtual ~GridObjectCache();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+
+  public:
+    GridObjectCache();
+    virtual ~GridObjectCache();
+
+    bool insertObject(const PhysicalObject *object);
+    void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
 };
 
 } // namespace inet

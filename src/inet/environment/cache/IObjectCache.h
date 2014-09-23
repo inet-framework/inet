@@ -24,17 +24,23 @@
 
 namespace inet {
 
+/**
+ * This interface provides abstractions for efficient physical object cache data
+ * structures.
+ */
 class IObjectCache
 {
-    public:
-        virtual bool insertObject(const PhysicalObject *object) = 0;
-        virtual void buildCache() = 0;
+  public:
+    /**
+     * Inserts a new physical object into the cache data structure.
+     */
+    virtual bool insertObject(const PhysicalObject *object) = 0;
 
-        /**
-         * Calls the visitor with at least all physical objects that intersect
-         * with the provided line segment
-         */
-        virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
+    /**
+     * Calls the visitor with at least all physical objects that intersect
+     * with the provided line segment.
+     */
+    virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
 };
 
 } // namespace inet

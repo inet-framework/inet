@@ -23,10 +23,36 @@ namespace inet {
 Define_Module(GridObjectCache);
 
 GridObjectCache::GridObjectCache() :
-        grid(NULL),
-        physicalEnvironment(NULL)
+    physicalEnvironment(NULL),
+    grid(NULL)
 {
+}
 
+GridObjectCache::~GridObjectCache()
+{
+    delete grid;
+}
+
+void GridObjectCache::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        double cellSizeX = par("cellSizeX");
+        double cellSizeY = par("cellSizeY");
+        double cellSizeZ = par("cellSizeZ");
+        const Coord spaceMin = physicalEnvironment->getSpaceMin();
+        const Coord spaceMax = physicalEnvironment->getSpaceMax();
+        const Coord spaceSize = spaceMax - spaceMin;
+        if (isNaN(cellSizeX))
+            cellSizeX = spaceSize.x / par("cellCountX").doubleValue();
+        if (isNaN(cellSizeY))
+            cellSizeY = spaceSize.y / par("cellCountY").doubleValue();
+        if (isNaN(cellSizeZ))
+            cellSizeZ = spaceSize.z / par("cellCountZ").doubleValue();
+        Coord voxelSizes(cellSizeX, cellSizeY, cellSizeZ);
+        grid = new SpatialGrid(voxelSizes, physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax());
+    }
 }
 
 bool GridObjectCache::insertObject(const PhysicalObject *object)
@@ -37,24 +63,10 @@ bool GridObjectCache::insertObject(const PhysicalObject *object)
     return true;
 }
 
-void GridObjectCache::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        Coord voxelSizes(par("cellSizeX"), par("cellSizeY"), par("cellSizeZ"));
-        physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
-        grid = new SpatialGrid(voxelSizes, physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax());
-    }
-}
-
 void GridObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     grid->lineSegmentQuery(lineSegment, visitor);
 }
 
-GridObjectCache::~GridObjectCache()
-{
-    delete grid;
-}
+} // namespace inet
 
-} /* namespace inet */

@@ -26,28 +26,35 @@
 
 namespace inet {
 
-class BVHObjectCache : public IObjectCache, public cSimpleModule
+class BVHObjectCache : public IObjectCache, public cModule
 {
-    protected:
-        BVHTree *bvhTree;
-        PhysicalEnvironment *physicalEnvironment;
-        std::vector<const PhysicalObject *> objects;
-        unsigned int leafCapacity;
-        std::string axisOrder;
+  protected:
+    /** @name Parameters */
+    //@{
+    PhysicalEnvironment *physicalEnvironment;
+    unsigned int leafCapacity;
+    const char *axisOrder;
+    //@}
 
-    protected:
-       virtual int numInitStages() const { return NUM_INIT_STAGES; }
-       virtual void initialize(int stage);
-       virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    /** @name Cache */
+    //@{
+    mutable BVHTree *bvhTree;
+    mutable std::vector<const PhysicalObject *> objects;
+    //@}
 
-    public:
-        BVHObjectCache();
-        virtual ~BVHObjectCache();
-        bool insertObject(const PhysicalObject *object);
-        void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
-        void buildCache();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+
+  public:
+    BVHObjectCache();
+    virtual ~BVHObjectCache();
+
+    bool insertObject(const PhysicalObject *object);
+    void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
 };
 
 } // namespace inet
 
 #endif // ifndef __INET_BVHOBJECTCACHE_H
+
