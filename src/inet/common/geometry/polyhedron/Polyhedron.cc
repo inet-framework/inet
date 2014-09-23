@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/polytope/ConvexPolytope.h"
+#include "inet/common/geometry/polyhedron/Polyhedron.h"
 #include <algorithm>
 
 namespace inet {
@@ -26,14 +26,14 @@ namespace inet {
  * Computational Geometry (Third edition). Springer-Verlag.
  * 11.2 Computing Convex Hulls in 3-Space. Includes a description of the algorithm.
  */
-void ConvexPolytope::buildConvexHull()
+void Polyhedron::buildConvexHull()
 {
     createInitialTetrahedron();
     //std::random_shuffle(points.begin(), points.end());
     initializeConflictGraph();
     for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
     {
-        PolytopePoint *currentPoint = *pit;
+        PolyhedronPoint *currentPoint = *pit;
         if (currentPoint->isSelected())
             continue;
         currentPoint->setToSelected();
@@ -49,12 +49,12 @@ void ConvexPolytope::buildConvexHull()
             Edges horizonEdges = computeHorizonEdges(conflictVector);
             for (Edges::iterator eit = horizonEdges.begin(); eit != horizonEdges.end(); eit++)
             {
-                Edge *horizonEdge = *eit;
+                PolyhedronEdge *horizonEdge = *eit;
                 // Faces incident to horizonEdge in the current convex hull
-                Face *neighborFace = horizonEdge->getJointFace();
-                Face *parentFace = horizonEdge->getParentFace();
+                PolyhedronFace *neighborFace = horizonEdge->getJointFace();
+                PolyhedronFace *parentFace = horizonEdge->getParentFace();
                 // Connect horizonEdge to currentPoint by creating a triangular face newFace
-                Face *newFace = new Face(horizonEdge->getP1(), horizonEdge->getP2(), currentPoint);
+                PolyhedronFace *newFace = new PolyhedronFace(horizonEdge->getP1(), horizonEdge->getP2(), currentPoint);
                 // Coplanar faces have to be merged together since they define a bigger face
                 // Due to these merges the computeIntersection() algorithm will have to visit fewer faces
                 // It is clear that conflict list and outward normals are same as that of neighborFace
@@ -80,34 +80,34 @@ void ConvexPolytope::buildConvexHull()
     purgeWrappedFaces();
 }
 
-bool ConvexPolytope::areCollinear(const PolytopePoint *lineP1, const PolytopePoint *lineP2, const PolytopePoint *point) const
+bool Polyhedron::areCollinear(const PolyhedronPoint *lineP1, const PolyhedronPoint *lineP2, const PolyhedronPoint *point) const
 {
-    PolytopePoint P1P2 = *lineP2 - *lineP1;
-    PolytopePoint P1Point = *point - *lineP1;
+    PolyhedronPoint P1P2 = *lineP2 - *lineP1;
+    PolyhedronPoint P1Point = *point - *lineP1;
     return P1P2 % P1Point == Coord(0,0,0);
 }
 
-bool ConvexPolytope::areCoplanar(const PolytopePoint *p1, const PolytopePoint *p2, const PolytopePoint *p3, const PolytopePoint *p4) const
+bool Polyhedron::areCoplanar(const PolyhedronPoint *p1, const PolyhedronPoint *p2, const PolyhedronPoint *p3, const PolyhedronPoint *p4) const
 {
     // http://mathworld.wolfram.com/Coplanar.html
     // The volume of the tetrahedron they define.
     return (*p3 - *p1) * ((*p2 - *p1) % (*p4 - *p3)) == 0;
 }
 
-void ConvexPolytope::createInitialTetrahedron()
+void Polyhedron::createInitialTetrahedron()
 {
     // Initially, we choose four points that do not lie in a common plane, so that their
     // convex hull is a tetrahedron.
     Points::iterator it = points.begin();
-    PolytopePoint *p1 = *it;
+    PolyhedronPoint *p1 = *it;
     it++;
     p1->setToSelected();
-    PolytopePoint *p2 = *it;
+    PolyhedronPoint *p2 = *it;
     p2->setToSelected();
     Points tetrahedronPoints;
     tetrahedronPoints.push_back(p1);
     tetrahedronPoints.push_back(p2);
-    PolytopePoint *p3 = NULL;
+    PolyhedronPoint *p3 = NULL;
     it++;
     while (it != points.end() && !p3)
     {
@@ -121,7 +121,7 @@ void ConvexPolytope::createInitialTetrahedron()
         throw cRuntimeError("All points lie on the same line");
     p3->setToSelected();
     tetrahedronPoints.push_back(p3);
-    PolytopePoint *p4 = NULL;
+    PolyhedronPoint *p4 = NULL;
     it++;
     while (it != points.end() && !p4)
     {
@@ -138,14 +138,14 @@ void ConvexPolytope::createInitialTetrahedron()
     generateAndAddTetrahedronFaces(tetrahedronPoints);
 }
 
-void ConvexPolytope::generateAndAddTetrahedronFaces(const Points& tetrahedronPoints)
+void Polyhedron::generateAndAddTetrahedronFaces(const Points& tetrahedronPoints)
 {
     // We just make CH({p1, p2, p3, p4}), note that, these points are that we have just selected
     // in crateInitialTetrahedron()
-    Face *face1 = new Face(tetrahedronPoints[0], tetrahedronPoints[1], tetrahedronPoints[2]);
-    Face *face2 = new Face(tetrahedronPoints[0], tetrahedronPoints[1], tetrahedronPoints[3]);
-    Face *face3 = new Face(tetrahedronPoints[0], tetrahedronPoints[2], tetrahedronPoints[3]);
-    Face *face4 = new Face(tetrahedronPoints[1], tetrahedronPoints[2], tetrahedronPoints[3]);
+    PolyhedronFace *face1 = new PolyhedronFace(tetrahedronPoints[0], tetrahedronPoints[1], tetrahedronPoints[2]);
+    PolyhedronFace *face2 = new PolyhedronFace(tetrahedronPoints[0], tetrahedronPoints[1], tetrahedronPoints[3]);
+    PolyhedronFace *face3 = new PolyhedronFace(tetrahedronPoints[0], tetrahedronPoints[2], tetrahedronPoints[3]);
+    PolyhedronFace *face4 = new PolyhedronFace(tetrahedronPoints[1], tetrahedronPoints[2], tetrahedronPoints[3]);
     // Add the faces to the convex hull
     addFace(face1);
     addFace(face2);
@@ -162,22 +162,22 @@ void ConvexPolytope::generateAndAddTetrahedronFaces(const Points& tetrahedronPoi
     face4->setOutwardNormalVector(computeOutwardNormalVector(face4));
 }
 
-void ConvexPolytope::addFace(Face *face)
+void Polyhedron::addFace(PolyhedronFace *face)
 {
     faces.push_back(face);
 }
 
-ConvexPolytope::Edges ConvexPolytope::computeHorizonEdges(const Faces& visibleFaces) const
+Polyhedron::Edges Polyhedron::computeHorizonEdges(const Faces& visibleFaces) const
 {
     Edges horizonEdges;
     for (Faces::const_iterator it = visibleFaces.begin(); it != visibleFaces.end(); it++)
     {
-        Face *visibleFace = *it;
+        PolyhedronFace *visibleFace = *it;
         Edges& edges = visibleFace->getEdges();
         for (Edges::iterator fit = edges.begin(); fit != edges.end(); fit++)
         {
-            Edge *visibleEdge = *fit;
-            Face *jointFace = visibleEdge->getJointFace();
+            PolyhedronEdge *visibleEdge = *fit;
+            PolyhedronFace *jointFace = visibleEdge->getJointFace();
             Faces::const_iterator visibleJointFace = std::find(visibleFaces.begin(), visibleFaces.end(), jointFace);
             // If the jointFace is not visible then we just have found a horizon edge, that is, a boundary edge
             // of the visible region from an arbitrary point.
@@ -189,14 +189,14 @@ ConvexPolytope::Edges ConvexPolytope::computeHorizonEdges(const Faces& visibleFa
     return horizonEdges;
 }
 
-void ConvexPolytope::initializeConflictGraph()
+void Polyhedron::initializeConflictGraph()
 {
     for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
     {
-        PolytopePoint *point = *pit;
+        PolyhedronPoint *point = *pit;
         for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
         {
-            Face *face = *fit;
+            PolyhedronFace *face = *fit;
             // The conflict graph is a bipartite graph with point class and face class
             if (face->isVisibleFrom(point))
             {
@@ -207,18 +207,18 @@ void ConvexPolytope::initializeConflictGraph()
     }
 }
 
-bool ConvexPolytope::areCoplanar(const Face* face1, const Face* face2) const
+bool Polyhedron::areCoplanar(const PolyhedronFace* face1, const PolyhedronFace* face2) const
 {
     Coord faceNormal1 = face1->getNormalVector();
     Coord faceNormal2 = face2->getNormalVector();
     return faceNormal1 % faceNormal2 == Coord(0,0,0);
 }
 
-void ConvexPolytope::mergeFaces(Face *newFace, Face *neighborFace, PolytopePoint *point)
+void Polyhedron::mergeFaces(PolyhedronFace *newFace, PolyhedronFace *neighborFace, PolyhedronPoint *point)
 {
     Edges& edges = neighborFace->getEdges();
     Edges::iterator eit = edges.begin();
-    Edge *edge = *eit;
+    PolyhedronEdge *edge = *eit;
     // TODO: optimize
     while (edge->getJointFace() != newFace)
     {
@@ -230,12 +230,12 @@ void ConvexPolytope::mergeFaces(Face *newFace, Face *neighborFace, PolytopePoint
     // Delete this common edge from the edge vector, but keep its points, next and prev edges to create the merged
     // face
     eit = edges.erase(eit);
-    PolytopePoint *p1 = edge->getP1();
-    PolytopePoint *p2 = edge->getP2();
+    PolyhedronPoint *p1 = edge->getP1();
+    PolyhedronPoint *p2 = edge->getP2();
     // Create the new edges in neighborFace (we extend neighbor face with newFace (which is a triangular face) to
     // keep it simple.
-    Edge *edge1 = new Edge(p1, point, neighborFace);
-    Edge *edge2 = new Edge(point, p2, neighborFace);
+    PolyhedronEdge *edge1 = new PolyhedronEdge(p1, point, neighborFace);
+    PolyhedronEdge *edge2 = new PolyhedronEdge(point, p2, neighborFace);
     // We must keep the order
     edges.insert(eit, edge1);
     eit++;
@@ -245,16 +245,16 @@ void ConvexPolytope::mergeFaces(Face *newFace, Face *neighborFace, PolytopePoint
     delete edge;
 }
 
-void ConvexPolytope::setContlictListForNewFace(Face *newFace, const Face *neighbor1, const Face *neighbor2)
+void Polyhedron::setContlictListForNewFace(PolyhedronFace *newFace, const PolyhedronFace *neighbor1, const PolyhedronFace *neighbor2)
 {
     // Test union of neighbor1's and neighbor2's conflict list
-    std::map<PolytopePoint *, bool> visited;
+    std::map<PolyhedronPoint *, bool> visited;
     const Points& conflict1 = neighbor1->getConflictVector();
     const Points& conflict2 = neighbor2->getConflictVector();
     for (Points::const_iterator pit = conflict1.begin(); pit != conflict1.end(); pit++)
     {
-        PolytopePoint *point = *pit;
-        visited.insert(std::pair<PolytopePoint *, bool>(point, true));
+        PolyhedronPoint *point = *pit;
+        visited.insert(std::pair<PolyhedronPoint *, bool>(point, true));
         if (newFace->isVisibleFrom(*pit))
         {
             newFace->addConflictPoint(point);
@@ -263,7 +263,7 @@ void ConvexPolytope::setContlictListForNewFace(Face *newFace, const Face *neighb
     }
     for (Points::const_iterator pit = conflict2.begin(); pit != conflict2.end(); pit++)
     {
-        PolytopePoint *point = *pit;
+        PolyhedronPoint *point = *pit;
         if (visited.find(point) == visited.end() && newFace->isVisibleFrom(point))
         {
             point->addConflictFace(newFace);
@@ -272,68 +272,68 @@ void ConvexPolytope::setContlictListForNewFace(Face *newFace, const Face *neighb
     }
 }
 
-void ConvexPolytope::cleanConflictGraph(const Faces& conflictVector)
+void Polyhedron::cleanConflictGraph(const Faces& conflictVector)
 {
     for (Faces::const_iterator fit = conflictVector.begin(); fit != conflictVector.end(); fit++)
     {
-        Face *face = *fit;
+        PolyhedronFace *face = *fit;
         Points& pConflict = face->getConflictVector();
         for (Points::iterator pit = pConflict.begin(); pit != pConflict.end(); pit++)
         {
-            PolytopePoint *point = *pit;
+            PolyhedronPoint *point = *pit;
             Faces& currFConflict = point->getConflictVector();
             Faces::iterator fit2 = std::find(currFConflict.begin(), currFConflict.end(), face);
             if (fit2 == currFConflict.end())
-                throw cRuntimeError("Face not found in the point's conflict vector");
+                throw cRuntimeError("PolyhedronFace not found in the point's conflict vector");
             currFConflict.erase(fit2);
         }
     }
 }
 
-ConvexPolytope::ConvexPolytope(const std::vector<Coord>& points)
+Polyhedron::Polyhedron(const std::vector<Coord>& points)
 {
     if (points.size() < 4)
         throw cRuntimeError("We need at least four points");
     for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-        this->points.push_back(new PolytopePoint(*it));
+        this->points.push_back(new PolyhedronPoint(*it));
     buildConvexHull();
 }
 
-void ConvexPolytope::purgeConflictFaces(const Faces& conflictVector)
+void Polyhedron::purgeConflictFaces(const Faces& conflictVector)
 {
     for (Faces::const_iterator fit = conflictVector.begin(); fit != conflictVector.end(); fit++)
     {
-        Face *face = *fit;
+        PolyhedronFace *face = *fit;
         face->setToWrapped();
     }
 }
 
-PolytopePoint ConvexPolytope::computeOutwardNormalVector(const Face *face) const
+PolyhedronPoint Polyhedron::computeOutwardNormalVector(const PolyhedronFace *face) const
 {
     if (faces.size() <= 0)
         throw cRuntimeError("You can't compute the outward normal vector if you have no faces at all");
-    Face *testFace = faces.at(0);
+    PolyhedronFace *testFace = faces.at(0);
     if (face == testFace)
         testFace = faces.at(1);
     Coord testCentroid = testFace->getCentroid();
-    PolytopePoint *facePoint = face->getEdge(0)->getP1();
+    PolyhedronPoint *facePoint = face->getEdge(0)->getP1();
     Coord faceNormal = face->getNormalVector();
     if ((testCentroid - *facePoint) * faceNormal > 0)
         return faceNormal * (-1);
     return faceNormal;
 }
 
-void ConvexPolytope::connectFaces(Face* newFace)
+void Polyhedron::connectFaces(PolyhedronFace* newFace)
 {
     Edges& newEdges = newFace->getEdges();
     for (Edges::iterator eit = newEdges.begin(); eit != newEdges.end(); eit++)
     {
-        Edge *newEdge = *eit;
+        PolyhedronEdge *newEdge = *eit;
         for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
         {
-            Face *currentFace = *fit;
+            PolyhedronFace *currentFace = *fit;
             if (currentFace == newFace || currentFace->isWrapped()) continue;
-            Edge *currEdge = currentFace->findEdge(newEdge);
+            PolyhedronEdge *currEdge = currentFace->findEdge(newEdge);
             if (currEdge)
             {
                 currEdge->setJointFace(newFace);
@@ -343,12 +343,12 @@ void ConvexPolytope::connectFaces(Face* newFace)
     }
 }
 
-void ConvexPolytope::purgeWrappedFaces()
+void Polyhedron::purgeWrappedFaces()
 {
     Faces::iterator fit = faces.begin();
     while (fit != faces.end())
     {
-        Face *face = *fit;
+        PolyhedronFace *face = *fit;
         if (face->isWrapped())
         {
             fit = faces.erase(fit);
@@ -359,7 +359,7 @@ void ConvexPolytope::purgeWrappedFaces()
     }
 }
 
-Coord ConvexPolytope::computeSize() const
+Coord Polyhedron::computeSize() const
 {
     Coord min;
     Coord max;
@@ -372,7 +372,7 @@ Coord ConvexPolytope::computeSize() const
     return max - min;
 }
 
-bool ConvexPolytope::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
+bool Polyhedron::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
     // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
     Coord p0 = lineSegment.getPoint1();
@@ -387,7 +387,7 @@ bool ConvexPolytope::computeIntersection(const LineSegment& lineSegment, Coord& 
     double tL = 1;
     for (Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
     {
-       Face *face = *fit;
+       PolyhedronFace *face = *fit;
        Coord normalVec = face->getOutwardNormalVector();
        Coord centroid = face->getCentroid();
        double N = (centroid - p0) * normalVec;
@@ -434,18 +434,18 @@ bool ConvexPolytope::computeIntersection(const LineSegment& lineSegment, Coord& 
     return true;
 }
 
-void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     for (Faces::const_iterator fit = this->faces.begin(); fit != this->faces.end(); fit++)
     {
-        const Face *face = *fit;
+        const PolyhedronFace *face = *fit;
         if (isVisibleFromView(face, viewRotation, rotation))
         {
             const Edges& edges = face->getEdges();
             std::vector<Coord> points;
             for (Edges::const_iterator eit = edges.begin(); eit != edges.end(); eit++)
             {
-                const Edge *edge = *eit;
+                const PolyhedronEdge *edge = *eit;
                 Coord point = *edge->getP1();
                 points.push_back(point);
             }
@@ -454,14 +454,14 @@ void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces
     }
 }
 
-bool ConvexPolytope::isVisibleFromView(const Face *face, const Rotation& viewRotation, const Rotation& rotation) const
+bool Polyhedron::isVisibleFromView(const PolyhedronFace *face, const Rotation& viewRotation, const Rotation& rotation) const
 {
     Coord zNormal(0,0,1);
     Coord rotatedFaceNormal = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(face->getOutwardNormalVector()));
     return rotatedFaceNormal * zNormal > 0;
 }
 
-ConvexPolytope::~ConvexPolytope()
+Polyhedron::~Polyhedron()
 {
     for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
         delete *pit;

@@ -13,12 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.common.geometry.polytope;
-
-module ConvexPolytopeTest
+module PolyhedronTest
 {
     parameters:
         string points = default("");
         bool convexCombinationTest = default(true);
-        @class(ConvexPolytopeTest);
+        @class(PolyhedronTest);
 }

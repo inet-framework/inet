@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/polytope/PolytopePoint.h"
+#include "inet/common/geometry/polyhedron/PolyhedronPoint.h"
 
 namespace inet {
 
-PolytopePoint::PolytopePoint(const Coord& point)
+PolyhedronPoint::PolyhedronPoint(const Coord& point)
 {
     selected = false;
     x = point.x;
@@ -27,7 +27,7 @@ PolytopePoint::PolytopePoint(const Coord& point)
     z = point.z;
 }
 
-PolytopePoint::PolytopePoint()
+PolyhedronPoint::PolyhedronPoint()
 {
     selected = false;
     x = y = z = 0;

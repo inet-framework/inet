@@ -13,22 +13,22 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-// 
+//
 
-#include "inet/common/geometry/polytope/ConvexPolytopeTest.h"
-#include "inet/common/geometry/polytope/PolytopePoint.h"
-#include "inet/common/geometry/polytope/Face.h"
+#include "PolyhedronTest.h"
+#include "inet/common/geometry/polyhedron/PolyhedronPoint.h"
+#include "inet/common/geometry/polyhedron/PolyhedronFace.h"
 
 namespace inet {
 
-Define_Module(ConvexPolytopeTest);
+Define_Module(PolyhedronTest);
 
-ConvexPolytopeTest::ConvexPolytopeTest()
+PolyhedronTest::PolyhedronTest()
 {
-    polytope = NULL;
+    polyhedron = NULL;
 }
 
-void ConvexPolytopeTest::parsePoints(const char* strPoints)
+void PolyhedronTest::parsePoints(const char* strPoints)
 {
     cStringTokenizer tokenizer(strPoints);
     double x, y, z;
@@ -46,36 +46,36 @@ void ConvexPolytopeTest::parsePoints(const char* strPoints)
     }
 }
 
-void ConvexPolytopeTest::printFaces() const
+void PolyhedronTest::printFaces() const
 {
-    const ConvexPolytope::Faces& faces = polytope->getFaces();
-    for (ConvexPolytope::Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
+    const Polyhedron::Faces& faces = polyhedron->getFaces();
+    for (Polyhedron::Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
     {
         std::cout << "Face with edges: " << endl;
-        ConvexPolytope::Edges edges = (*fit)->getEdges();
-        for (ConvexPolytope::Edges::iterator eit = edges.begin(); eit != edges.end(); eit++)
+        Polyhedron::Edges edges = (*fit)->getEdges();
+        for (Polyhedron::Edges::iterator eit = edges.begin(); eit != edges.end(); eit++)
         {
-            Edge *edge = *eit;
+            PolyhedronEdge *edge = *eit;
             std::cout << "P1 = " << *edge->getP1() << " P2 = " << *edge->getP2() << endl;
         }
     }
 }
 
-void ConvexPolytopeTest::initialize(int stage)
+void PolyhedronTest::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
         const char *strPoints = par("points").stringValue();
         bool testWithConvexCombations = par("convexCombinationTest").boolValue();
         parsePoints(strPoints);
-        polytope = new ConvexPolytope(points);
+        polyhedron = new Polyhedron(points);
         printFaces();
         if (testWithConvexCombations)
             test();
     }
 }
 
-void ConvexPolytopeTest::test() const
+void PolyhedronTest::test() const
 {
     // Let P := {p_1,p_2,...,p_n} be a point set with finite number of elements then conv(P)
     // (donates the convex hull of P) is the minimal convex set containing P, and equivalently
@@ -85,7 +85,7 @@ void ConvexPolytopeTest::test() const
     // If it is not, then the algorithm is incorrect.
     unsigned int numberOfPoints = points.size();
     // We are testing with 1000 random convex combination.
-    const ConvexPolytope::Faces& faces = polytope->getFaces();
+    const Polyhedron::Faces& faces = polyhedron->getFaces();
     for (unsigned int i = 1; i != 1000; i++)
     {
         // Create a convex combination:
@@ -104,10 +104,10 @@ void ConvexPolytopeTest::test() const
         }
         convexCombination += points[numberOfPoints - 1] * lambda;
         std::cout << "Testing with convex combination: " << convexCombination << endl;
-        for (ConvexPolytope::Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
+        for (Polyhedron::Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
         {
-            Face *face = *fit;
-            PolytopePoint testPoint(convexCombination);
+            PolyhedronFace *face = *fit;
+            PolyhedronPoint testPoint(convexCombination);
             // An arbitrary point is an inner point if and only if it can't see any faces.
             if (face->isVisibleFrom(&testPoint))
                 throw cRuntimeError("The algorithm is incorrect!");
@@ -115,9 +115,9 @@ void ConvexPolytopeTest::test() const
     }
 }
 
-ConvexPolytopeTest::~ConvexPolytopeTest()
+PolyhedronTest::~PolyhedronTest()
 {
-    delete polytope;
+    delete polyhedron;
 }
 
 } /* namespace inet */

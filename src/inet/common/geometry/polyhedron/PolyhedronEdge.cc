@@ -13,18 +13,18 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-// 
+//
 
-#include "inet/common/geometry/polytope/Edge.h"
+#include "inet/common/geometry/polyhedron/PolyhedronEdge.h"
 
 namespace inet {
 
-PolytopePoint Edge::getEdgeVector() const
+PolyhedronPoint PolyhedronEdge::getEdgeVector() const
 {
     return *point2 - *point1;
 }
 
-bool Edge::operator ==(const Edge& rhs) const
+bool PolyhedronEdge::operator ==(const PolyhedronEdge& rhs) const
 {
     return (point1 == rhs.point1 && point2 == rhs.point2) ||
            (point1 == rhs.point2 && point2 == rhs.point1);

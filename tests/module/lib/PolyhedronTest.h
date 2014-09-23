@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CONVEXPOLYTOPETEST_H_
-#define __INET_CONVEXPOLYTOPETEST_H_
+#ifndef __INET_POLYHEDRONTEST_H
+#define __INET_POLYHEDRONTEST_H
 
-#include "inet/common/geometry/polytope/ConvexPolytope.h"
+#include "inet/common/geometry/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/Coord.h"
 #include <vector>
 
 namespace inet {
 
 /*
- * This class takes a 3D point set, creates a ConvexPolytope with its point set
+ * This class takes a 3D point set, creates a Polyhedron with its point set
  * and then writes the faces and edges out to the standard output.
  */
-class ConvexPolytopeTest : public cSimpleModule
+class INET_API PolyhedronTest : public cSimpleModule
 {
     protected:
-        ConvexPolytope *polytope;
+        Polyhedron *polyhedron;
         std::vector<Coord> points;
         bool testWithConvexCombations;
 
@@ -44,10 +44,10 @@ class ConvexPolytopeTest : public cSimpleModule
        void printFaces() const;
 
     public:
-        ConvexPolytopeTest();
-        virtual ~ConvexPolytopeTest();
+        PolyhedronTest();
+        virtual ~PolyhedronTest();
 };
 
 } /* namespace inet */
 
-#endif /* __INET_CONVEXPOLYTOPETEST_H_ */
+#endif // ifndef __INET_POLYHEDRONTEST_H

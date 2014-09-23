@@ -15,27 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CONVEXPOLYTOPE_H_
-#define __INET_CONVEXPOLYTOPE_H_
+#ifndef __INET_POLYHEDRON_H
+#define __INET_POLYHEDRON_H
 
-#include "inet/common/geometry/polytope/PolytopePoint.h"
-#include "inet/common/geometry/polytope/Edge.h"
-#include "inet/common/geometry/polytope/Face.h"
+#include "inet/common/geometry/polyhedron/PolyhedronPoint.h"
+#include "inet/common/geometry/polyhedron/PolyhedronEdge.h"
+#include "inet/common/geometry/polyhedron/PolyhedronFace.h"
 #include "inet/common/geometry/Shape3D.h"
 #include "inet/common/geometry/Rotation.h"
 
 namespace inet {
 
 /*
- * This class represents a convex polytope.
+ * This class represents a convex polyhedron.
  * It takes a 3D point set and builds its convex hull.
  */
-class ConvexPolytope : public Shape3D
+class INET_API Polyhedron : public Shape3D
 {
     public:
-        typedef std::vector<PolytopePoint *> Points;
-        typedef std::vector<Face *> Faces;
-        typedef std::vector<Edge *> Edges;
+        typedef std::vector<PolyhedronPoint *> Points;
+        typedef std::vector<PolyhedronFace *> Faces;
+        typedef std::vector<PolyhedronEdge *> Edges;
 
     protected:
         Faces faces;
@@ -44,31 +44,31 @@ class ConvexPolytope : public Shape3D
     protected:
         void purgeWrappedFaces();
         void buildConvexHull();
-        bool areCollinear(const PolytopePoint *lineP1, const PolytopePoint *lineP2, const PolytopePoint *point) const;
-        bool areCoplanar(const PolytopePoint *p1, const PolytopePoint *p2, const PolytopePoint *p3, const PolytopePoint *p4) const;
-        bool areCoplanar(const Face *face1, const Face *face2) const;
-        void mergeFaces(Face *newFace, Face *neighborFace, PolytopePoint *point);
+        bool areCollinear(const PolyhedronPoint *lineP1, const PolyhedronPoint *lineP2, const PolyhedronPoint *point) const;
+        bool areCoplanar(const PolyhedronPoint *p1, const PolyhedronPoint *p2, const PolyhedronPoint *p3, const PolyhedronPoint *p4) const;
+        bool areCoplanar(const PolyhedronFace *face1, const PolyhedronFace *face2) const;
+        void mergeFaces(PolyhedronFace *newFace, PolyhedronFace *neighborFace, PolyhedronPoint *point);
         void createInitialTetrahedron();
         void initializeConflictGraph();
         void cleanConflictGraph(const Faces& conflictVector);
         void purgeConflictFaces(const Faces& conflictVector);
-        void connectFaces(Face *newFace);
-        void setContlictListForNewFace(Face *newFace, const Face *neighbor1, const Face *neighbor2);
+        void connectFaces(PolyhedronFace *newFace);
+        void setContlictListForNewFace(PolyhedronFace *newFace, const PolyhedronFace *neighbor1, const PolyhedronFace *neighbor2);
         void generateAndAddTetrahedronFaces(const Points& tetrahedronPoints);
-        PolytopePoint computeOutwardNormalVector(const Face *face) const;
-        void addFace(Face *face);
+        PolyhedronPoint computeOutwardNormalVector(const PolyhedronFace *face) const;
+        void addFace(PolyhedronFace *face);
         Edges computeHorizonEdges(const Faces& visibleFaces) const;
-        bool isVisibleFromView(const Face *face, const Rotation& viewRotation, const Rotation& rotation) const;
+        bool isVisibleFromView(const PolyhedronFace *face, const Rotation& viewRotation, const Rotation& rotation) const;
 
     public:
-        ConvexPolytope(const std::vector<Coord>& points);
+        Polyhedron(const std::vector<Coord>& points);
         Coord computeSize() const;
         void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
         bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
         const Faces& getFaces() const { return faces; }
-        virtual ~ConvexPolytope();
+        virtual ~Polyhedron();
 };
 
 } /* namespace inet */
 
-#endif /* CONVEXPOLYTOPE_H_ */
+#endif // ifndef __INET_POLYHEDRON_H

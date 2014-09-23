@@ -19,9 +19,8 @@
 #include "inet/common/geometry/Box.h"
 #include "inet/common/geometry/Cuboid.h"
 #include "inet/common/geometry/Sphere.h"
-#include "inet/common/geometry/polytope/Face.h"
 #include "inet/common/geometry/Prism.h"
-#include "inet/common/geometry/polytope/ConvexPolytope.h"
+#include "inet/common/geometry/polyhedron/Polyhedron.h"
 #include "inet/environment/Material.h"
 #include "inet/common/geometry/Rotation.h"
 #include <algorithm>
@@ -147,12 +146,12 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             }
             shape = new Prism(height, Polygon(points));
         }
-        else if (!strcmp(typeAttribute, "polytope"))
+        else if (!strcmp(typeAttribute, "polyhedron"))
         {
             std::vector<Coord> points;
             const char *pointsAttribute = element->getAttribute("points");
             if (!pointsAttribute)
-                throw cRuntimeError("Missing points attribute of polytope");
+                throw cRuntimeError("Missing points attribute of polyhedron");
             else {
                 cStringTokenizer tokenizer(pointsAttribute);
                 while (tokenizer.hasMoreTokens())
@@ -167,7 +166,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                     points.push_back(point);
                 }
             }
-            shape = new ConvexPolytope(points);
+            shape = new Polyhedron(points);
         }
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
@@ -293,7 +292,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 prismPoints.push_back(*it - center);
             shape = new Prism(height, Polygon(prismPoints));
         }
-        else if (!strcmp(shapeType, "polytope"))
+        else if (!strcmp(shapeType, "polyhedron"))
         {
             std::vector<Coord> points;
             while (shapeTokenizer.hasMoreTokens())
@@ -309,10 +308,10 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             }
             Box boundingBox = Box::calculateBoundingBox(points);
             Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
-            std::vector<Coord> polytopePoints;
+            std::vector<Coord> PolyhedronPoints;
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
-                polytopePoints.push_back(*it - center);
-            shape = new ConvexPolytope(polytopePoints);
+                PolyhedronPoints.push_back(*it - center);
+            shape = new Polyhedron(PolyhedronPoints);
         }
         else {
             int id = atoi(shapeAttribute);
@@ -493,12 +492,12 @@ void PhysicalEnvironment::updateCanvas()
             prism->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
-        // polytope
-        const ConvexPolytope *polytope = dynamic_cast<const ConvexPolytope *>(shape);
-        if (polytope)
+        // polyhedron
+        const Polyhedron *polyhedron = dynamic_cast<const Polyhedron *>(shape);
+        if (polyhedron)
         {
             std::vector<std::vector<Coord> > faces;
-            polytope->computeVisibleFaces(faces, rotation, viewRotation);
+            polyhedron->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
         // add name to the end
