@@ -18,6 +18,7 @@
 #ifndef __INET_SNIRRECEIVERBASE_H
 #define __INET_SNIRRECEIVERBASE_H
 
+#include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/base/ReceiverBase.h"
 
 namespace inet {
@@ -49,7 +50,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const;
 
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
-    virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 
   public:
     SNIRReceiverBase() :

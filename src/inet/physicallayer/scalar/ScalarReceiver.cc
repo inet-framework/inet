@@ -18,6 +18,7 @@
 #include "inet/physicallayer/scalar/ScalarReceiver.h"
 #include "inet/physicallayer/scalar/ScalarReception.h"
 #include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/scalar/ScalarSNIR.h"
 #include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
@@ -25,6 +26,11 @@ namespace inet {
 namespace physicallayer {
 
 Define_Module(ScalarReceiver);
+
+ScalarReceiver::ScalarReceiver() :
+    FlatReceiverBase()
+{
+}
 
 void ScalarReceiver::printToStream(std::ostream& stream) const
 {
@@ -86,11 +92,11 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const II
     return new ScalarNoise(noiseStartTime, noiseEndTime, carrierFrequency, bandwidth, powerChanges);
 }
 
-double ScalarReceiver::computeMinSNIR(const IReception *reception, const INoise *noise) const
+const ISNIR *ScalarReceiver::computeSNIR(const IReception *reception, const INoise *noise) const
 {
-    const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
-    return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
+    const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    return new ScalarSNIR(scalarReception, scalarNoise);
 }
 
 } // namespace physicallayer

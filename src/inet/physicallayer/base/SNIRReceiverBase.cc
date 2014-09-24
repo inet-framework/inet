@@ -38,7 +38,8 @@ bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, 
 const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     const INoise *noise = computeNoise(listening, interference);
-    double minSNIR = computeMinSNIR(reception, noise);
+    const ISNIR *snir = computeSNIR(reception, noise);
+    double minSNIR = snir->computeMin();
     delete noise;
     RadioReceptionIndication *indication = new RadioReceptionIndication();
     indication->setMinSNIR(minSNIR);

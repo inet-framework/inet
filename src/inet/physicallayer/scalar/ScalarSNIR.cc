@@ -15,31 +15,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARRECEIVER_H
-#define __INET_SCALARRECEIVER_H
-
-#include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/scalar/ScalarSNIR.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarReceiver : public FlatReceiverBase
+ScalarSNIR::ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise) :
+    reception(reception),
+    noise(noise)
 {
-  protected:
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
+}
 
-  public:
-    ScalarReceiver();
+void ScalarSNIR::printToStream(std::ostream& stream) const
+{
+    stream << "scalar SNIR";
+}
 
-    virtual void printToStream(std::ostream& stream) const;
-};
+double ScalarSNIR::computeMin() const
+{
+    return unit(reception->getPower() / noise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
+}
 
 } // namespace physicallayer
 
 } // namespace inet
-
-#endif // ifndef __INET_SCALARRECEIVER_H
 
