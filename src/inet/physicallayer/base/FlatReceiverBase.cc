@@ -23,15 +23,34 @@
 #include "inet/physicallayer/common/BandListening.h"
 #include "inet/physicallayer/common/ListeningDecision.h"
 #include "inet/physicallayer/common/ReceptionDecision.h"
+#include "inet/physicallayer/common/FlatErrorModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+FlatReceiverBase::FlatReceiverBase() :
+    SNIRReceiverBase(),
+    errorModel(NULL),
+    modulation(NULL),
+    energyDetection(W(sNaN)),
+    sensitivity(W(sNaN)),
+    carrierFrequency(Hz(sNaN)),
+    bandwidth(Hz(sNaN))
+{
+}
+
+FlatReceiverBase::~FlatReceiverBase()
+{
+    delete errorModel;
+    delete modulation;
+}
+
 void FlatReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        errorModel = new FlatErrorModel();
         energyDetection = mW(math::dBm2mW(par("energyDetection")));
         sensitivity = mW(math::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
@@ -88,23 +107,15 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
 }
 
 // TODO: this is not purely functional, see interface comment
-bool FlatReceiverBase::computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const
+bool FlatReceiverBase::computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    double ber = modulation->calculateBER(minSNIR, bandwidth.get(), bitrate);
-    if (ber == 0.0)
-        return false;
-    else {
-        double pErrorless = pow(1.0 - ber, bitLength);
-        return dblrand() > pErrorless;
-    }
+    double packetErrorRate = errorModel->computePacketErrorRate(reception, interference);
+    return packetErrorRate == 0.0 ? false : dblrand() < packetErrorRate;
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const
+bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const
 {
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
-    return SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, indication) &&
-           !computeHasBitError(listening, indication->getMinSNIR(), flatTransmission->getPayloadBitLength(), flatTransmission->getBitrate().get());
+    return SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference, indication) && !computeHasBitError(listening, reception, interference);
 }
 
 const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const

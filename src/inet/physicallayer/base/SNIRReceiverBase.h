@@ -46,7 +46,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      * Returns whether the reception is free of any errors. This function must
      * be purely functional and support optimistic parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const;
 
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
     virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;

@@ -18,8 +18,9 @@
 #ifndef __INET_FLATRECEIVERBASE_H
 #define __INET_FLATRECEIVERBASE_H
 
-#include "inet/physicallayer/base/SNIRReceiverBase.h"
+#include "inet/physicallayer/contract/IErrorModel.h"
 #include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/base/SNIRReceiverBase.h"
 
 namespace inet {
 
@@ -28,6 +29,7 @@ namespace physicallayer {
 class INET_API FlatReceiverBase : public SNIRReceiverBase
 {
   protected:
+    const IErrorModel *errorModel;
     const IModulation *modulation;
     W energyDetection;
     W sensitivity;
@@ -39,21 +41,13 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
 
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const;
 
-    virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
+    virtual bool computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
   public:
-    FlatReceiverBase() :
-        SNIRReceiverBase(),
-        modulation(NULL),
-        energyDetection(W(sNaN)),
-        sensitivity(W(sNaN)),
-        carrierFrequency(Hz(sNaN)),
-        bandwidth(Hz(sNaN))
-    {}
-
-    virtual ~FlatReceiverBase() { delete modulation; }
+    FlatReceiverBase();
+    virtual ~FlatReceiverBase();
 
     virtual void printToStream(std::ostream& stream) const;
 

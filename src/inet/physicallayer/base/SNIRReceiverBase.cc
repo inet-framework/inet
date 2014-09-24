@@ -45,7 +45,7 @@ const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(con
     return indication;
 }
 
-bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const
+bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const
 {
     return indication->getMinSNIR() > snirThreshold;
 }
@@ -55,7 +55,7 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interference) : NULL;
-    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, indication);
+    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference, indication);
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

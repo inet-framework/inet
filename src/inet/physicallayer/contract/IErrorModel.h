@@ -19,6 +19,7 @@
 #define __INET_IERRORMODEL_H
 
 #include "IReception.h"
+#include "IInterference.h"
 
 namespace inet {
 
@@ -29,12 +30,27 @@ namespace physicallayer {
 class INET_API IErrorModel : public IPrintableObject
 {
   public:
-    virtual double computePacketErrorRate(const IReception *reception, double minSNIR) const = 0;
+    virtual double computePacketErrorRate(const IReception *reception, const IInterference *interference) const = 0;
 
-    virtual double computeBitErrorRate(const IReception *reception, double minSNIR) const = 0;
+    virtual double computeBitErrorRate(const IReception *reception, const IInterference *interference) const = 0;
 
-    virtual double computeSymbolErrorRate(const IReception *reception, double minSNIR) const = 0;
+    virtual double computeSymbolErrorRate(const IReception *reception, const IInterference *interference) const = 0;
 };
+
+// TODO: move ILayeredErrorModel after the layered radio is merged in
+//class INET_API ILayeredErrorModel : public IErrorModel
+//{
+//  public:
+//    virtual IReceptionPacketModel *computePacketModel(const IReception *reception, const IInterference *interference) const = 0;
+//
+//    virtual IReceptionBitModel *computeBitModel(const IReception *reception, const IInterference *interference) const = 0;
+//
+//    virtual IReceptionSymbolModel *computeSymbolModel(const IReception *reception, const IInterference *interference) const = 0;
+//
+//    virtual IReceptionSampleModel *computeSampleModel(const IReception *reception, const IInterference *interference) const = 0;
+//
+//    virtual IReceptionAnalogModel *computeAnalogModel(const IReception *reception, const IInterference *interference) const = 0;
+//};
 
 } // namespace physicallayer
 

@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/Ieee80211ScalarReceiver.h"
+#include "inet/physicallayer/base/FlatTransmissionBase.h"
 #include "inet/physicallayer/common/ModulationType.h"
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarReceiver.h"
 #include "inet/physicallayer/ieee80211/BerParseFile.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/physicallayer/ieee80211/errormodel/yans-error-rate-model.h"
 #include "inet/physicallayer/ieee80211/errormodel/nist-error-rate-model.h"
+#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
 
@@ -77,8 +78,12 @@ void Ieee80211ScalarReceiver::initialize(int stage)
     }
 }
 
-bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const
+bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
+    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
+    double minSNIR = computeMinSNIR(reception, computeNoise(listening, interference));
+    int bitLength = flatTransmission->getPayloadBitLength();
+    double bitrate = flatTransmission->getBitrate().get();
     ModulationType modeBody;
     ModulationType modeHeader;
 
