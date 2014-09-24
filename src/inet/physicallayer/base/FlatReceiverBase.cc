@@ -78,9 +78,9 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
            flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime()) >= sensitivity;
 }
 
-const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const INoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
+    const INoise *noise = computeNoise(listening, interference->getInterferingReceptions(), interference->getBackgroundNoise());
     const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     delete noise;

@@ -58,8 +58,9 @@ const IListening *IdealReceiver::createListening(const IRadio *radio, const simt
     return new IdealListening(radio, startTime, endTime, startPosition, endPosition);
 }
 
-const IListeningDecision *IdealReceiver::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const IListeningDecision *IdealReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
+    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
         const IReception *interferingReception = *it;
         IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();

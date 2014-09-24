@@ -597,6 +597,14 @@ const IReception *RadioMedium::computeReception(const IRadio *radio, const ITran
     return attenuation->computeReception(radio, transmission);
 }
 
+const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const
+{
+    interferenceComputationCount++;
+    const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
+    const std::vector<const IReception *> *interferingReceptions = computeInterferingReceptions(listening, transmissions);
+    return new Interference(noise, interferingReceptions);
+}
+
 const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const
 {
     interferenceComputationCount++;
@@ -618,11 +626,9 @@ const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *ra
 const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const
 {
     listeningDecisionComputationCount++;
-    const std::vector<const IReception *> *interferingReceptions = computeInterferingReceptions(listening, transmissions);
-    const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
-    const IListeningDecision *decision = radio->getReceiver()->computeListeningDecision(listening, interferingReceptions, noise);
-    delete noise;
-    delete interferingReceptions;
+    const IInterference *interference = computeInterference(radio, listening, transmissions);
+    const IListeningDecision *decision = radio->getReceiver()->computeListeningDecision(listening, interference);
+    delete interference;
     return decision;
 }
 

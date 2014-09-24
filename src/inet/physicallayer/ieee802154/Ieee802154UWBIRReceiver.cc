@@ -51,7 +51,7 @@ const IListening *Ieee802154UWBIRReceiver::createListening(const IRadio *radio, 
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, cfg.centerFrequency, cfg.bandwidth);
 }
 
-const IListeningDecision *Ieee802154UWBIRReceiver::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const IListeningDecision *Ieee802154UWBIRReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     return new ListeningDecision(listening, true);
 }

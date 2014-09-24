@@ -74,7 +74,7 @@ class INET_API IReceiver : public IPrintableObject
      * state of the receiver. This function must be purely functional and
      * support optimistic parallel computation.
      */
-    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const = 0;
 
     /**
      * Returns whether the transmission can be received successfully or not.
