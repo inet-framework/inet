@@ -61,7 +61,7 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionPossible(const IListening *liste
     return true;
 }
 
-bool Ieee802154UWBIRReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
+bool Ieee802154UWBIRReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     return true;
 }

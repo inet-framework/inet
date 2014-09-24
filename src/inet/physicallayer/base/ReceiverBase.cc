@@ -28,7 +28,7 @@ bool ReceiverBase::computeIsReceptionPossible(const ITransmission *transmission)
     return true;
 }
 
-bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
+bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     if (!computeIsReceptionPossible(listening, reception))
         return false;
@@ -38,6 +38,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
     else {
         const IRadio *radio = reception->getReceiver();
         const IRadioMedium *channel = radio->getMedium();
+        const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
         for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
             const IReception *interferingReception = *it;
             bool isPrecedingReception = interferingReception->getStartTime() < reception->getStartTime() ||

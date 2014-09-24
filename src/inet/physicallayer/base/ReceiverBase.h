@@ -32,7 +32,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
 
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
   public:
     ReceiverBase() {}

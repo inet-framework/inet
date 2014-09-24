@@ -40,12 +40,12 @@ bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, cons
     return power == IdealReception::POWER_RECEIVABLE;
 }
 
-bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
+bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     if (ignoreInterference)
         return computeIsReceptionPossible(listening, reception);
     else
-        return ReceiverBase::computeIsReceptionAttempted(listening, reception, interferingReceptions);
+        return ReceiverBase::computeIsReceptionAttempted(listening, reception, interference);
 }
 
 void IdealReceiver::printToStream(std::ostream& stream) const

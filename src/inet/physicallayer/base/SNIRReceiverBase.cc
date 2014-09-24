@@ -53,7 +53,7 @@ bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
-    bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference->getInterferingReceptions());
+    bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interference->getInterferingReceptions(), interference->getBackgroundNoise()) : NULL;
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, indication);
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);

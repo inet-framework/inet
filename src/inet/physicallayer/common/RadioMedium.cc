@@ -891,7 +891,7 @@ bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission 
     const IReception *reception = getReception(radio, transmission);
     const IListening *listening = getCachedListening(radio, transmission);
     const IInterference *interference = computeInterference(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interference->getInterferingReceptions());
+    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interference);
     delete interference;
     EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << " and results in reception is " << (isReceptionAttempted ? "attempted" : "ignored") << endl;
     if (displayCommunication)

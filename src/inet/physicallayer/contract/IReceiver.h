@@ -95,7 +95,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver. This function must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const = 0;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
 
     /**
      * Returns the result of the reception process specifying whether it was
