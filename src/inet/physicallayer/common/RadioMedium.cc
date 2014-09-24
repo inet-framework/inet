@@ -611,7 +611,7 @@ const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *ra
     receptionDecisionComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
-    const IReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interference->getInterferingReceptions(), interference->getBackgroundNoise());
+    const IReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interference);
     return decision;
 }
 

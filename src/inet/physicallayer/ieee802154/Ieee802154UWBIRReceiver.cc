@@ -66,10 +66,10 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionAttempted(const IListening *list
     return true;
 }
 
-const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     RadioReceptionIndication *indication = new RadioReceptionIndication();
-    std::vector<bool> *bits = decode(reception, interferingReceptions, backgroundNoise);
+    std::vector<bool> *bits = decode(reception, interference->getInterferingReceptions(), interference->getBackgroundNoise());
     int bitLength = bits->size() - 48 - 8;
     bool isReceptionSuccessful = true;
     for (int i = 0; i < bitLength; i++) {

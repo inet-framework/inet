@@ -58,7 +58,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
     {}
 
     virtual double getSNIRThreshold() const { return snirThreshold; }
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 };
 
 } // namespace physicallayer

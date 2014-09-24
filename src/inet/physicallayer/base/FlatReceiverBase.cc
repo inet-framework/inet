@@ -107,12 +107,12 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
            !computeHasBitError(listening, indication->getMinSNIR(), flatTransmission->getPayloadBitLength(), flatTransmission->getBitrate().get());
 }
 
-const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth())
-        return SNIRReceiverBase::computeReceptionDecision(listening, reception, interferingReceptions, backgroundNoise);
+        return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference);
     else
         return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
