@@ -80,7 +80,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const INoise *noise = computeNoise(listening, interference->getInterferingReceptions(), interference->getBackgroundNoise());
+    const INoise *noise = computeNoise(listening, interference);
     const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     delete noise;

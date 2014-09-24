@@ -35,9 +35,9 @@ bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, 
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    const INoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
+    const INoise *noise = computeNoise(listening, interference);
     double minSNIR = computeMinSNIR(reception, noise);
     delete noise;
     RadioReceptionIndication *indication = new RadioReceptionIndication();
@@ -54,7 +54,7 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
 {
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
-    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interference->getInterferingReceptions(), interference->getBackgroundNoise()) : NULL;
+    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interference) : NULL;
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, indication);
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }

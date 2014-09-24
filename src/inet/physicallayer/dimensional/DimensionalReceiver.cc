@@ -36,12 +36,14 @@ void DimensionalReceiver::printToStream(std::ostream& stream) const
            << "bandwidth = " << bandwidth;
 }
 
-const INoise *DimensionalReceiver::computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const
+const INoise *DimensionalReceiver::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     std::vector<ConstMapping *> receptionPowers;
-    const DimensionalNoise *dimensionalBackgroundNoise = check_and_cast<const DimensionalNoise *>(backgroundNoise);
-    receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalBackgroundNoise->getPower()));
-    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++) {
+    const DimensionalNoise *dimensionalBackgroundNoise = dynamic_cast<const DimensionalNoise *>(interference->getBackgroundNoise());
+    if (dimensionalBackgroundNoise)
+        receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalBackgroundNoise->getPower()));
+    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
+    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
         const DimensionalReception *reception = check_and_cast<const DimensionalReception *>(*it);
         receptionPowers.push_back(const_cast<ConstMapping *>(reception->getPower()));
     }

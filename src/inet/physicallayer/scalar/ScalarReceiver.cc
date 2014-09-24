@@ -35,7 +35,7 @@ void ScalarReceiver::printToStream(std::ostream& stream) const
            << "bandwidth = " << bandwidth;
 }
 
-const INoise *ScalarReceiver::computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const
+const INoise *ScalarReceiver::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     Hz carrierFrequency = bandListening->getCarrierFrequency();
@@ -43,7 +43,8 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const st
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
-    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++) {
+    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
+    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
         const ScalarReception *reception = check_and_cast<const ScalarReception *>(*it);
         if (carrierFrequency == reception->getCarrierFrequency() && bandwidth == reception->getBandwidth()) {
             W power = reception->getPower();
@@ -67,10 +68,10 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const st
         else if (areOverlappingBands(carrierFrequency, bandwidth, reception->getCarrierFrequency(), reception->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
-    if (backgroundNoise) {
-        const ScalarNoise *scalarBackgroundNoise = check_and_cast<const ScalarNoise *>(backgroundNoise);
+    const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
+    if (scalarBackgroundNoise) {
         if (carrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && bandwidth == scalarBackgroundNoise->getBandwidth()) {
-            const std::map<simtime_t, W> *backgroundNoisePowerChanges = check_and_cast<const ScalarNoise *>(backgroundNoise)->getPowerChanges();
+            const std::map<simtime_t, W> *backgroundNoisePowerChanges = scalarBackgroundNoise->getPowerChanges();
             for (std::map<simtime_t, W>::const_iterator it = backgroundNoisePowerChanges->begin(); it != backgroundNoisePowerChanges->end(); it++) {
                 std::map<simtime_t, W>::iterator jt = powerChanges->find(it->first);
                 if (jt != powerChanges->end())

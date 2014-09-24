@@ -40,7 +40,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      * This function must be purely functional and support optimistic parallel
      * computation.
      */
-    virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
     /**
      * Returns whether the reception is free of any errors. This function must
@@ -48,7 +48,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      */
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
 
-    virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const = 0;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
     virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;
 
   public:

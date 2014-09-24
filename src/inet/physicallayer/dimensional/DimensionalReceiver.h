@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API DimensionalReceiver : public FlatReceiverBase
 {
   protected:
-    virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
     virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const;
 
   public:
