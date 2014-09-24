@@ -23,6 +23,7 @@
 #include <fstream>
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/IInterference.h"
 #include "inet/physicallayer/contract/IPropagation.h"
 #include "inet/physicallayer/contract/IAttenuation.h"
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
@@ -53,6 +54,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         const IArrival *arrival;
         const IListening *listening;
         const IReception *reception;
+        const IInterference *interference;
         const IReceptionDecision *decision;
 
       public:
@@ -61,6 +63,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
             arrival(NULL),
             listening(NULL),
             reception(NULL),
+            interference(NULL),
             decision(NULL)
         {}
     };
@@ -319,6 +322,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable long receptionComputationCount;
     /**
+     * Total number of interference computations.
+     */
+    mutable long interferenceComputationCount;
+    /**
      * Total number of reception decision computations.
      */
     mutable long receptionDecisionComputationCount;
@@ -334,6 +341,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Total number of radio signal reception cache hits.
      */
     mutable long cacheReceptionHitCount;
+    /**
+     * Total number of radio signal interference cache queries.
+     */
+    mutable long cacheInterferenceGetCount;
+    /**
+     * Total number of radio signal interference cache hits.
+     */
+    mutable long cacheInterferenceHitCount;
     /**
      * Total number of radio signal reception decision cache queries.
      */
@@ -369,6 +384,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) const;
     virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception) const;
     virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission) const;
+
+    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) const;
+    virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission) const;
 
     virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission) const;
     virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision) const;
@@ -434,13 +453,16 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual void removeNonInterferingTransmissions();
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception, const std::vector<const ITransmission *> *transmissions) const;
+
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IListeningDecision *computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
 
     virtual const IReception *getReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
 
     /**

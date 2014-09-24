@@ -17,6 +17,7 @@
 
 #include "inet/physicallayer/common/Radio.h"
 #include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/physicallayer/common/Interference.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/common/NotifierConsts.h"
@@ -63,10 +64,13 @@ RadioMedium::RadioMedium() :
     transmissionCount(0),
     sendCount(0),
     receptionComputationCount(0),
+    interferenceComputationCount(0),
     receptionDecisionComputationCount(0),
     listeningDecisionComputationCount(0),
     cacheReceptionGetCount(0),
     cacheReceptionHitCount(0),
+    cacheInterferenceGetCount(0),
+    cacheInterferenceHitCount(0),
     cacheDecisionGetCount(0),
     cacheDecisionHitCount(0)
 {
@@ -89,6 +93,7 @@ RadioMedium::~RadioMedium()
                 delete cacheEntry.arrival;
                 delete cacheEntry.listening;
                 delete cacheEntry.reception;
+                delete cacheEntry.interference;
                 delete cacheEntry.decision;
             }
             delete receptionCacheEntries;
@@ -167,20 +172,25 @@ void RadioMedium::initialize(int stage)
 void RadioMedium::finish()
 {
     double receptionCacheHitPercentage = 100 * (double)cacheReceptionHitCount / (double)cacheReceptionGetCount;
+    double interferenceCacheHitPercentage = 100 * (double)cacheInterferenceHitCount / (double)cacheInterferenceGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
     EV_INFO << "Radio medium transmission count = " << transmissionCount << endl;
     EV_INFO << "Radio medium radio frame send count = " << sendCount << endl;
     EV_INFO << "Radio medium reception computation count = " << receptionComputationCount << endl;
+    EV_INFO << "Radio medium interference computation count = " << interferenceComputationCount << endl;
     EV_INFO << "Radio medium reception decision computation count = " << receptionDecisionComputationCount << endl;
     EV_INFO << "Radio medium listening decision computation count = " << listeningDecisionComputationCount << endl;
     EV_INFO << "Radio medium reception cache hit = " << receptionCacheHitPercentage << " %" << endl;
+    EV_INFO << "Radio medium interference cache hit = " << interferenceCacheHitPercentage << " %" << endl;
     EV_INFO << "Radio medium reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
     recordScalar("Radio medium transmission count", transmissionCount);
     recordScalar("Radio medium radio frame send count", sendCount);
     recordScalar("Radio medium reception computation count", receptionComputationCount);
+    recordScalar("Radio medium interference computation count", interferenceComputationCount);
     recordScalar("Radio medium reception decision computation count", receptionDecisionComputationCount);
     recordScalar("Radio medium listening decision computation count", listeningDecisionComputationCount);
     recordScalar("Radio medium reception cache hit", receptionCacheHitPercentage, "%");
+    recordScalar("Radio medium interference cache hit", interferenceCacheHitPercentage, "%");
     recordScalar("Radio medium reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
@@ -287,6 +297,26 @@ void RadioMedium::removeCachedReception(const IRadio *radio, const ITransmission
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
     if (cacheEntry)
         cacheEntry->reception = NULL;
+}
+
+const IInterference *RadioMedium::getCachedInterference(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    return cacheEntry ? cacheEntry->interference : NULL;
+}
+
+void RadioMedium::setCachedInterference(const IRadio *radio, const ITransmission *transmission, const IInterference *interference) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->interference = interference;
+}
+
+void RadioMedium::removeCachedInterference(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->interference = NULL;
 }
 
 const IReceptionDecision *RadioMedium::getCachedDecision(const IRadio *radio, const ITransmission *transmission) const
@@ -523,6 +553,7 @@ void RadioMedium::removeNonInterferingTransmissions()
                 delete cacheEntry.arrival;
                 delete cacheEntry.listening;
                 delete cacheEntry.reception;
+                delete cacheEntry.interference;
                 delete cacheEntry.decision;
             }
             delete receptionCacheEntries;
@@ -533,12 +564,6 @@ void RadioMedium::removeNonInterferingTransmissions()
     cache.erase(cache.begin(), cache.begin() + transmissionIndex);
     if (cache.size() > 0)
         scheduleAt(cache[0].interferenceEndTime, removeNonInterferingTransmissionsTimer);
-}
-
-const IReception *RadioMedium::computeReception(const IRadio *radio, const ITransmission *transmission) const
-{
-    receptionComputationCount++;
-    return attenuation->computeReception(radio, transmission);
 }
 
 const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions(const IListening *listening, const std::vector<const ITransmission *> *transmissions) const
@@ -566,15 +591,27 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
     return interferingReceptions;
 }
 
+const IReception *RadioMedium::computeReception(const IRadio *radio, const ITransmission *transmission) const
+{
+    receptionComputationCount++;
+    return attenuation->computeReception(radio, transmission);
+}
+
+const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const
+{
+    interferenceComputationCount++;
+    const IReception *reception = getReception(receiver, transmission);
+    const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
+    const std::vector<const IReception *> *interferingReceptions = computeInterferingReceptions(reception, transmissions);
+    return new Interference(noise, interferingReceptions);
+}
+
 const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const
 {
     receptionDecisionComputationCount++;
     const IReception *reception = getReception(radio, transmission);
-    const std::vector<const IReception *> *interferingReceptions = computeInterferingReceptions(reception, transmissions);
-    const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
-    const IReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interferingReceptions, noise);
-    delete noise;
-    delete interferingReceptions;
+    const IInterference *interference = getInterference(radio, listening, transmission);
+    const IReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interference->getInterferingReceptions(), interference->getBackgroundNoise());
     return decision;
 }
 
@@ -601,6 +638,19 @@ const IReception *RadioMedium::getReception(const IRadio *radio, const ITransmis
         EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << endl;
     }
     return reception;
+}
+
+const IInterference *RadioMedium::getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const
+{
+    cacheInterferenceGetCount++;
+    const IInterference *interference = getCachedInterference(receiver, transmission);
+    if (interference)
+        cacheInterferenceHitCount++;
+    else {
+        interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+        setCachedInterference(receiver, transmission, interference);
+    }
+    return interference;
 }
 
 const IReceptionDecision *RadioMedium::getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
@@ -840,10 +890,9 @@ bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission 
 {
     const IReception *reception = getReception(radio, transmission);
     const IListening *listening = getCachedListening(radio, transmission);
-    // TODO: isn't there a better way for this optimization? see also in ReceiverBase::computeIsReceptionAttempted
-    const std::vector<const IReception *> *interferingReceptions = simTime() == reception->getStartTime() ? NULL : computeInterferingReceptions(reception, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interferingReceptions);
-    delete interferingReceptions;
+    const IInterference *interference = computeInterference(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interference->getInterferingReceptions());
+    delete interference;
     EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << " and results in reception is " << (isReceptionAttempted ? "attempted" : "ignored") << endl;
     if (displayCommunication)
         const_cast<RadioMedium *>(this)->updateCanvas();
