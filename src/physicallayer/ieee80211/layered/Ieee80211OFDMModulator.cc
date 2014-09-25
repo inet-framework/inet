@@ -109,8 +109,8 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
         bitGroup.setBit(i % nBPSC, dataField.getBit(i));
         if (i % nBPSC == nBPSC - 1)
         {
-           const APSKSymbol *apskSymbol = modulationScheme->mapToConstellationDiagram(bitGroup);
-           apskSymbols.push_back(apskSymbol);
+            const APSKSymbol *apskSymbol = modulationScheme->mapToConstellationDiagram(bitGroup);
+            apskSymbols.push_back(apskSymbol);
         }
     }
     // Divide the complex number string into groups of 48 complex numbers.
