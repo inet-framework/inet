@@ -16,6 +16,7 @@
 //
 
 #include "APSKModulationBase.h"
+#include "Complex.h"
 
 namespace inet {
 namespace physicallayer {
@@ -33,6 +34,29 @@ const APSKSymbol *APSKModulationBase::mapToConstellationDiagram(const ShortBitVe
     if (decimalSymbol >= constellationSize)
         throw cRuntimeError("Unknown input: %d", decimalSymbol);
     return &encodingTable[decimalSymbol];
+}
+
+ShortBitVector APSKModulationBase::demapToBitRepresentation(const APSKSymbol* symbol) const
+{
+    // TODO: Complete implementation: http://eprints.soton.ac.uk/354719/1/tvt-hanzo-2272640-proof.pdf
+    double symbolQ = symbol->getReal();
+    double symbolI = symbol->getImaginary();
+    double minDist = DBL_MAX;
+    int nearestNeighborIndex = -1;
+    for (int i = 0; i < constellationSize; i++)
+    {
+        const APSKSymbol *constellationSymbol = &encodingTable[i];
+        double cQ = constellationSymbol->getReal();
+        double cI = constellationSymbol->getImaginary();
+        double dist = (symbolQ - cQ) * (symbolQ - cQ) + (symbolI - cI) * (symbolI - cI);
+        if (dist < minDist)
+        {
+            minDist = dist;
+            nearestNeighborIndex = i;
+        }
+    }
+    ASSERT(nearestNeighborIndex != -1);
+    return ShortBitVector(nearestNeighborIndex);
 }
 
 } /* namespace physicallayer */
