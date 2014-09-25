@@ -139,8 +139,6 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
     // forming a GI, and truncate the resulting periodic waveform to a single OFDM symbol length by
     // applying time domain windowing.
 
-    // TODO: Append the OFDM symbols one after another, starting after the SIGNAL symbol describing the
-    // RATE and LENGTH fields.
 }
 
 void Ieee80211OFDMModulator::insertPilotSubcarriers(OFDMSymbol& ofdmSymbol, int symbolID) const
@@ -156,6 +154,8 @@ const ITransmissionSymbolModel *Ieee80211OFDMModulator::modulate(const ITransmis
     std::vector<ISymbol> *ofdmSymbols = new std::vector<ISymbol>(); // FIXME: Sample model should delete it
     const BitVector *bits = bitModel->getBits();
     BitVector signalField;
+    // Append the OFDM symbols one after another, starting after the SIGNAL symbol describing the
+    // RATE and LENGTH fields.
     for (unsigned int i = 0; i < OFDM_SYMBOL_SIZE; i++)
         signalField.appendBit(bits->getBit(i));
     modulateSignalField(signalField, ofdmSymbols);
