@@ -22,16 +22,23 @@ namespace physicallayer {
 
 void physicallayer::OFDMSymbol::pushAPSKSymbol(const APSKSymbol* apskSymbol, int subcarrierIndex)
 {
-    if (subcarrierIndex >= 52)
+    if (subcarrierIndex >= 53)
         throw cRuntimeError("Out of range with subcarrierIndex = %d", subcarrierIndex);
     subcarrierSymbols[subcarrierIndex] = apskSymbol;
 }
 
 std::ostream& operator<<(std::ostream& out, const OFDMSymbol& symbol)
 {
-   out << symbol.subcarrierSymbols[0];
-   for (int i = 1; i < symbol.subcarrierSymbols.size(); i++)
-       out << " " << symbol.subcarrierSymbols[i];
+    if (symbol.subcarrierSymbols[0])
+        out << *symbol.subcarrierSymbols[0];
+    else
+        out << "UNSET SYMBOL";
+    for (unsigned int i = 1; i < symbol.subcarrierSymbols.size(); i++)
+        if (symbol.subcarrierSymbols[i])
+            out << " " << *symbol.subcarrierSymbols[i];
+        else
+            out << "UNSET SYMBOL";
+    return out;
 }
 
 OFDMSymbol::~OFDMSymbol()
