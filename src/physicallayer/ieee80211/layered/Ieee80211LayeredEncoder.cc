@@ -39,15 +39,20 @@ BitVector Ieee80211LayeredEncoder::signalFieldEncode(const BitVector& signalFiel
 {
     // NOTE: The contents of the SIGNAL field are not scrambled.
     BitVector fecEncodedBits = signalFECEncoder->encode(signalField);
+    EV_DEBUG << "FEC encoded bits of the SIGNAL field are: " << fecEncodedBits << endl;
     BitVector interleavedBits = signalInterleaver->interleaving(fecEncodedBits);
+    EV_DEBUG << "Interleaved bits of the SIGNAL field are: " << interleavedBits << endl;
     return interleavedBits;
 }
 
 BitVector Ieee80211LayeredEncoder::dataFieldEncode(const BitVector& dataField) const
 {
    BitVector scrambledBits = scrambler->scramble(dataField);
+   EV_DEBUG << "Scrambled bits of the DATA field are: " << scrambledBits << endl;
    BitVector fecEncodedBits = dataFECEncoder->encode(scrambledBits);
+   EV_DEBUG << "FEC encoded bits of the DATA field are: " << fecEncodedBits << endl;
    BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
+   EV_DEBUG << "Interleaved bits of the DATA field are: " << interleavedBits << endl;
    return interleavedBits;
 }
 
