@@ -73,7 +73,7 @@ void SimpleEnergyStorage::handleMessage(cMessage *message)
     if (message == timer) {
         setResidualCapacity(targetCapacity);
         scheduleTimer();
-        EV_INFO << "Residual capacity = " << residualCapacity << " (" << (int)round(unit(residualCapacity / nominalCapacity).get() * 100) << "%)" << endl;
+        EV_INFO << "Residual capacity = " << residualCapacity.get() << " (" << (int)round(unit(residualCapacity / nominalCapacity).get() * 100) << "%)" << endl;
     }
     else
         throw cRuntimeError("Unknown message");

@@ -152,14 +152,14 @@ void RadioMedium::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         EV_DEBUG << "Radio medium initialized"
-                 << ", maximum transmission power = " << maxTransmissionPower
-                 << ", minimum interference power = " << minInterferencePower
-                 << ", minimum reception power = " << minReceptionPower
+                 << ", maximum transmission power = " << maxTransmissionPower.get()
+                 << ", minimum interference power = " << minInterferencePower.get()
+                 << ", minimum reception power = " << minReceptionPower.get()
                  << ", maximum antenna gain = " << maxAntennaGain
                  << ", minimum interference time = " << minInterferenceTime << " s"
                  << ", maximum transmission duration = " << maxTransmissionDuration << " s"
-                 << ", maximum communication range = " << maxCommunicationRange
-                 << ", maximum interference range = " << maxInterferenceRange
+                 << ", maximum communication range = " << maxCommunicationRange.get()
+                 << ", maximum interference range = " << maxInterferenceRange.get()
                  << ", " << propagation << ", " << attenuation;
         if (backgroundNoise)
             EV_DEBUG << ", " << backgroundNoise;

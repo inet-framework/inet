@@ -2041,7 +2041,7 @@ double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
     EV_DEBUG << *msg;
     ctrl = dynamic_cast<RadioTransmissionRequest *>(msg->removeControlInfo());
     if (ctrl) {
-        EV_DEBUG << "Per frame2 params bitrate " << ctrl->getBitrate() / 1e6 << endl;
+        EV_DEBUG << "Per frame2 params bitrate " << ctrl->getBitrate().get() / 1e6 << "Mb" << endl;
         duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate().get());
         delete ctrl;
         return duration;
