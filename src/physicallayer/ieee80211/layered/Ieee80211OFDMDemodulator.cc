@@ -75,14 +75,13 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     ShortBitVector rate;
     for (int i = 0; i < 4; i++)
         rate.appendBit(bitRepresentation->getBit(i));
-    ConvolutionalCoder::ConvolutionalCoderInfo *fecInfo = NULL; // TODO: new ConvolutionalCoder::ConvolutionalCoderInfo();
-//    The bits R1–R4 shall be set, dependent on RATE, according to the values in Table 18-6.
-//    fecInfo = getFecInfoFromSignalFieldRate(rate); TODO: IMPLEMENT THIS METHOD!
+    // The bits R1–R4 shall be set, dependent on RATE, according to the values in Table 18-6.
+    const ConvolutionalCoder::ConvolutionalCoderInfo *fecInfo = getFecInfoFromSignalFieldRate(rate);
     ShortBitVector length;
-//    The PLCP LENGTH field shall be an unsigned 12-bit integer that indicates the number of octets in the
-//    PSDU that the MAC is currently requesting the PHY to transmit. This value is used by the PHY to
-//    determine the number of octet transfers that will occur between the MAC and the PHY after receiving a
-//    request to start transmission.
+    // The PLCP LENGTH field shall be an unsigned 12-bit integer that indicates the number of octets in the
+    // PSDU that the MAC is currently requesting the PHY to transmit. This value is used by the PHY to
+    // determine the number of octet transfers that will occur between the MAC and the PHY after receiving a
+    // request to start transmission.
     for (int i = 4; i < 16; i++)
         length.appendBit(bitRepresentation->getBit(i));
     // Note:
