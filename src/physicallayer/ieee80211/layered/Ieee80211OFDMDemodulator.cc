@@ -22,7 +22,6 @@
 #include "QPSKModulation.h"
 #include "APSKSymbol.h"
 #include "SignalBitModel.h"
-#include "ConvolutionalCoder.h"
 
 namespace inet {
 namespace physicallayer {
@@ -96,6 +95,21 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     // TODO: ConvoluationalCoderInfo needs to be factored out from ConvoluationalCoder
     // TODO: Other infos also need to be factored out from their parent classes.
     return new ReceptionBitModel(bitRepresentation->getSize(), 0, bitRepresentation, fecInfo, NULL, NULL, 0, 0);
+}
+
+const ConvolutionalCoder::ConvolutionalCoderInfo* Ieee80211OFDMDemodulator::getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const
+{
+    // Table 18-6—Contents of the SIGNAL field
+    // Table 18-4—Modulation-dependent parameters
+    if (rate == ShortBitVector("1101") || rate == ShortBitVector("0101") || rate == ShortBitVector("1001"))
+        return NULL; // 1/2
+    else if (rate == ShortBitVector("1111") || rate == ShortBitVector("0111") || rate == ShortBitVector("1011") ||
+             rate == ShortBitVector("0111"))
+        return NULL; // 3/4
+    else if (rate == ShortBitVector("0001"))
+        return NULL; // 2/3
+    else
+        throw cRuntimeError("Unknown rate field  = %s", rate.toString().c_str());
 }
 
 const IReceptionBitModel* Ieee80211OFDMDemodulator::demodulate(const IReceptionSymbolModel* symbolModel) const
