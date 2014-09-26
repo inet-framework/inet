@@ -32,19 +32,6 @@ namespace physicallayer {
  * This class implements a feedforward (k/n)-convolutional encoder/decoder.
  * The decoder implements hard-decision Viterbi algorithm with Hamming-distance
  * metric.
- * By default, it supports the following code rates often used by IEEE802.11 PHY:
- *
- *  - k = 1, n = 2 with constraint length 7, generator polynomials: (133)_8 = (1011011)_2,
- *                                                                  (171)_8 = (1111001)_2
- * Higher code rates are achieved by puncturing:
- *
- *  - k = 2, n = 3 with puncturing matrix: |1 1|
- *                                         |1 0|
- *
- *  - k = 3, n = 4 with puncturing matrix: |1 1 0|
- *                                         |1 0 1|
- *
- * We use industry-standard generator polynomials.
  * The encoder and decoder algorithm can handle arbitrary (k/n) code rates
  * and constraint lengths, in this case, you have to define your own transfer
  * function matrix and puncturing matrix.
@@ -56,7 +43,7 @@ namespace physicallayer {
     (MAC) and Physical Layer (PHY) Specifications
     [4]  Puncturing matrices came from http://en.wikipedia.org/wiki/Convolutional_code#Punctured_convolutional_codes
  */
-class ConvolutionalCoder : public cSimpleModule, public IFECEncoder
+class ConvolutionalCoder :  public IFECEncoder
 {
     public:
         typedef std::vector<std::vector<ShortBitVector> > ShortBitVectorMatrix;
@@ -73,34 +60,6 @@ class ConvolutionalCoder : public cSimpleModule, public IFECEncoder
                 TrellisGraphNode() : symbol(0), state(0), prevState(0), comulativeHammingDistance(0), numberOfErrors(0), depth(0) {}
                 TrellisGraphNode(int symbol, int state, int prevState, int hammingDistance, int numberOfErrors, unsigned int depth) :
                     symbol(symbol), state(state), prevState(prevState), comulativeHammingDistance(hammingDistance), numberOfErrors(numberOfErrors), depth(depth) {};
-        };
-
-        class ConvolutionalCoderInfo : public IFECInfo
-        {
-            private:
-                const ConvolutionalCoder *convCoder;
-
-            public:
-                ConvolutionalCoderInfo(const ConvolutionalCoder *convCoder) : convCoder(convCoder) {}
-            /*
-             * Getters for the encoder's/decoder's parameters
-             */
-            unsigned int getMemorySizeSum() const { return convCoder->memorySizeSum; }
-            const std::vector<int>& getConstraintLengthVector() const { return convCoder->constraintLengths; }
-            const ShortBitVectorMatrix& getTransferFunctionMatrix() const { return convCoder->transferFunctionMatrix; }
-            const std::vector<ShortBitVector>& getPuncturingMatrix() const { return convCoder->puncturingMatrix; }
-            int getNumberOfStates() const { return convCoder->numberOfStates; }
-            int getNumberOfOutputSymbols() const { return convCoder->numberOfOutputSymbols; }
-            int getNumberOfInputSymbols() const { return convCoder->numberOfInputSymbols; }
-
-            /*
-             * Getters for the code's state transition table and output table
-             */
-            const int** getStateTransitionTable() const { return (const int**)convCoder->stateTransitions; }
-            const int** getOutputTable() const { return (const int**)convCoder->inputSymbols; }
-
-            /* IPrintable object */
-            void printToStream(std::ostream& stream) const;
         };
 
     protected:
@@ -122,12 +81,9 @@ class ConvolutionalCoder : public cSimpleModule, public IFECEncoder
         int **stateTransitions; // maps a (state, inputSymbol) pair to the corresponding next state
         unsigned char ***hammingDistanceLookupTable; // lookup table for Hamming distances, the three dimensions are: [outputSymbol, outputSymbol, excludedBits]
         std::vector<std::vector<TrellisGraphNode> > trellisGraph; // the decoder's trellis graph
-        const ConvolutionalCoderInfo *info; // this info class holds information related to this encoder
+        const ConvolutionalCode *convolutionalCode; // this info class holds information related to this encoder
 
     protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
         inline bool eXOR(bool alpha, bool beta) const
         {
             return (alpha || beta) && !(alpha && beta);
@@ -173,7 +129,29 @@ class ConvolutionalCoder : public cSimpleModule, public IFECEncoder
     public:
         BitVector encode(const BitVector& informationBits) const;
         BitVector decode(const BitVector& encodedBits) const;
-        const ConvolutionalCoderInfo *getInfo() const { return info; }
+        const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
+
+        /*
+         * Getters for the encoder's/decoder's parameters
+         */
+        unsigned int getMemorySizeSum() const { return memorySizeSum; }
+        const std::vector<int>& getConstraintLengthVector() const { return constraintLengths; }
+        const ShortBitVectorMatrix& getTransferFunctionMatrix() const { return transferFunctionMatrix; }
+        const std::vector<ShortBitVector>& getPuncturingMatrix() const { return puncturingMatrix; }
+        int getNumberOfStates() const { return numberOfStates; }
+        int getNumberOfOutputSymbols() const { return numberOfOutputSymbols; }
+        int getNumberOfInputSymbols() const { return numberOfInputSymbols; }
+
+        /*
+         * Getters for the code's state transition table and output table
+         */
+        const int** getStateTransitionTable() const { return (const int**)stateTransitions; }
+        const int** getOutputTable() const { return (const int**)inputSymbols; }
+
+        /* IPrintable object */
+        void printToStream(std::ostream& stream) const;
+
+        ConvolutionalCoder(const ConvolutionalCode *convolutionalCode);
         ~ConvolutionalCoder();
 };
 

@@ -49,7 +49,7 @@ const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketMod
     BitVector *interleavedBits = new BitVector(fecEncodedBits);
     if (interleaver)
         *interleavedBits = interleaver->interleaving(fecEncodedBits);
-    return new TransmissionBitModel(interleavedBits->getSize(), bitRate, interleavedBits, fecEncoder->getInfo(), scrambler->getInfo(), interleaver->getInfo());
+    return new TransmissionBitModel(interleavedBits->getSize(), bitRate, interleavedBits, fecEncoder->getConvolutionalCode(), scrambler->getInfo(), interleaver->getInfo());
 }
 
 } // namespace physicallayer

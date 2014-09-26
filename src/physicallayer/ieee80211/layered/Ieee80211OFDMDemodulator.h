@@ -23,7 +23,7 @@
 #include "IDemodulator.h"
 #include "APSKModulationBase.h"
 #include "OFDMSymbol.h"
-#include "ConvolutionalCoder.h"
+#include "Ieee80211ConvolutionalCode.h"
 
 namespace inet {
 namespace physicallayer {
@@ -42,7 +42,7 @@ class INET_API Ieee80211OFDMDemodulator : public cSimpleModule, public IDemodula
         BitVector demodulateDataSymbol(const OFDMSymbol *dataSymbol) const;
         BitVector demodulateSignalSymbol(const OFDMSymbol *signalSymbol) const;
         const IReceptionBitModel *createBitModel(const BitVector *bitRepresentation) const;
-        const ConvolutionalCoder::ConvolutionalCoderInfo *getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const;
+        const Ieee80211ConvolutionalCode *getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const;
 
     public:
         virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;

@@ -76,7 +76,7 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     for (int i = 0; i < 4; i++)
         rate.appendBit(bitRepresentation->getBit(i));
     // The bits R1–R4 shall be set, dependent on RATE, according to the values in Table 18-6.
-    const ConvolutionalCoder::ConvolutionalCoderInfo *fecInfo = getFecInfoFromSignalFieldRate(rate);
+    const Ieee80211ConvolutionalCode *fecInfo = getFecInfoFromSignalFieldRate(rate);
     ShortBitVector length;
     // The PLCP LENGTH field shall be an unsigned 12-bit integer that indicates the number of octets in the
     // PSDU that the MAC is currently requesting the PHY to transmit. This value is used by the PHY to
@@ -90,23 +90,23 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     // always uses the permutation equations defined in 18.3.5.7 Data interleaving (so a PHY frame does not
     // contain anything about these procedures), contrarily the FEC decoding may be 1/2 or 3/4, etc. which we
     // can compute from the SIGNAL field) and thus are hard-coded in the Ieee80211LayeredDecoder.
-    // TODO: FecInfo, ber, bitErrorCount, bitRate
+    // TODO: ber, bitErrorCount, bitRate
     // TODO: ConvoluationalCoderInfo needs to be factored out from ConvoluationalCoder
     // TODO: Other infos also need to be factored out from their parent classes.
     return new ReceptionBitModel(bitRepresentation->getSize(), 0, bitRepresentation, fecInfo, NULL, NULL, 0, 0);
 }
 
-const ConvolutionalCoder::ConvolutionalCoderInfo* Ieee80211OFDMDemodulator::getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const
+const Ieee80211ConvolutionalCode* Ieee80211OFDMDemodulator::getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const
 {
     // Table 18-6—Contents of the SIGNAL field
     // Table 18-4—Modulation-dependent parameters
     if (rate == ShortBitVector("1101") || rate == ShortBitVector("0101") || rate == ShortBitVector("1001"))
-        return NULL; // 1/2
+        return new Ieee80211ConvolutionalCode(1, 2);
     else if (rate == ShortBitVector("1111") || rate == ShortBitVector("0111") || rate == ShortBitVector("1011") ||
              rate == ShortBitVector("0111"))
-        return NULL; // 3/4
+        return new Ieee80211ConvolutionalCode(3, 4);
     else if (rate == ShortBitVector("0001"))
-        return NULL; // 2/3
+        return new Ieee80211ConvolutionalCode(2, 3);
     else
         throw cRuntimeError("Unknown rate field  = %s", rate.toString().c_str());
 }

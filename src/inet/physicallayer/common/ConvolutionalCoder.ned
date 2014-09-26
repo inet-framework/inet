@@ -74,5 +74,5 @@ module ConvolutionalCoder like IFECEncoder
         int punctureK = default(1);
         int punctureN = default(2);
         string constraintLengthVector = default("7");
-        @class(ConvolutionalCoder);
+        @class(ConvolutionalCoderModule);
 }

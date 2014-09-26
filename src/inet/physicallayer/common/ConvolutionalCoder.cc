@@ -22,41 +22,6 @@
 namespace inet {
 namespace physicallayer {
 
-Define_Module(ConvolutionalCoder);
-
-void ConvolutionalCoder::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        info = new ConvolutionalCoderInfo(this);
-        const char *strTransferFunctionMatrix = par("transferFunctionMatrix");
-        const char *strPuncturingMatrix = par("puncturingMatrix");
-        const char *strConstraintLengthVector = par("constraintLengthVector");
-        mode = par("mode");
-        if (strcmp(mode, "terminated") && strcmp(mode, "truncated"))
-            throw cRuntimeError("Unknown (= %s ) coding mode", mode);
-        codeRatePuncturingK = par("punctureK");
-        codeRatePuncturingN = par("punctureN");
-        parseVector(strConstraintLengthVector, constraintLengths);
-        std::vector<std::vector<int> > pMatrix;
-        parseMatrix(strPuncturingMatrix, pMatrix);
-        convertToShortBitVectorMatrix(pMatrix, puncturingMatrix);
-        std::vector<std::vector<int> > transferFMatrix;
-        parseMatrix(strTransferFunctionMatrix, transferFMatrix);
-        codeRateParamaterK = transferFMatrix.size();
-        codeRateParamaterN = transferFMatrix.at(0).size();
-        for (unsigned int i = 0; i < codeRateParamaterK; i++)
-            if (transferFMatrix.at(i).size() != codeRateParamaterN)
-                throw cRuntimeError("Transfer function matrix must be a k-by-n matrix of octal numbers");
-        if (transferFMatrix.size() != constraintLengths.size())
-            throw cRuntimeError("Constraint length vector must be a 1-by-k vector of integers");
-        if (puncturingMatrix.size() != codeRateParamaterN)
-            throw cRuntimeError("Puncturing matrix must be a n-by-arbitrary bool matrix");
-        setTransferFunctionMatrix(transferFMatrix);
-        initParameters();
-    }
-}
-
 BitVector ConvolutionalCoder::getPuncturedIndices(unsigned int length) const
 {
     BitVector isPunctured;
@@ -543,9 +508,33 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
     return decodedMsg;
 }
 
-void ConvolutionalCoder::ConvolutionalCoderInfo::printToStream(std::ostream& stream) const
+ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode* convolutionalCode) : convolutionalCode(convolutionalCode)
 {
-    stream << convCoder->codeRatePuncturingK << "/" << convCoder->codeRateParamaterN << " convolutional encoder/decoder";
+    const char *strTransferFunctionMatrix = convolutionalCode->getPuncturingMatrix();
+    const char *strPuncturingMatrix = convolutionalCode->getPuncturingMatrix();
+    const char *strConstraintLengthVector = convolutionalCode->getConstraintLengthVector();
+    mode = convolutionalCode->getMode();
+    if (strcmp(mode, "terminated") && strcmp(mode, "truncated"))
+        throw cRuntimeError("Unknown (= %s ) coding mode", mode);
+    codeRatePuncturingK = convolutionalCode->getCodeRatePuncturingK();
+    codeRatePuncturingN = convolutionalCode->getCodeRatePuncturingN();
+    parseVector(strConstraintLengthVector, constraintLengths);
+    std::vector<std::vector<int> > pMatrix;
+    parseMatrix(strPuncturingMatrix, pMatrix);
+    convertToShortBitVectorMatrix(pMatrix, puncturingMatrix);
+    std::vector<std::vector<int> > transferFMatrix;
+    parseMatrix(strTransferFunctionMatrix, transferFMatrix);
+    codeRateParamaterK = transferFMatrix.size();
+    codeRateParamaterN = transferFMatrix.at(0).size();
+    for (unsigned int i = 0; i < codeRateParamaterK; i++)
+        if (transferFMatrix.at(i).size() != codeRateParamaterN)
+            throw cRuntimeError("Transfer function matrix must be a k-by-n matrix of octal numbers");
+    if (transferFMatrix.size() != constraintLengths.size())
+        throw cRuntimeError("Constraint length vector must be a 1-by-k vector of integers");
+    if (puncturingMatrix.size() != codeRateParamaterN)
+        throw cRuntimeError("Puncturing matrix must be a n-by-arbitrary bool matrix");
+    setTransferFunctionMatrix(transferFMatrix);
+    initParameters();
 }
 
 ConvolutionalCoder::~ConvolutionalCoder()
@@ -568,7 +557,7 @@ ConvolutionalCoder::~ConvolutionalCoder()
     delete[] inputSymbols;
     delete[] decimalToOutputSymbol;
     delete[] decimalToInputSymbol;
-    delete info;
+    delete convolutionalCode;
 }
 
 } /* namespace physicallayer */
