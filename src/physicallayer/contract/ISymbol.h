@@ -23,6 +23,8 @@ namespace physicallayer {
 
 class INET_API ISymbol
 {
+    public:
+        virtual ~ISymbol() {}
 };
 
 } /* namespace physicallayer */
