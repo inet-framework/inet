@@ -41,9 +41,9 @@ class INET_API Ieee80211OFDMModulator : public cSimpleModule, public IModulator
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("The module doesn't handle self messages"); }
     int getSubcarrierIndex(int ofdmSymbolIndex) const;
-    void modulateSignalField(const BitVector& signalField, std::vector<ISymbol> *ofdmSymbols) const;
-    void modulateDataField(const BitVector& dataField, std::vector<ISymbol> *ofdmSymbols) const;
-    void insertPilotSubcarriers(OFDMSymbol &ofdmSymbol, int symbolID) const;
+    void modulateSignalField(const BitVector& signalField, std::vector<const ISymbol*> *ofdmSymbols) const;
+    void modulateDataField(const BitVector& dataField, std::vector<const ISymbol*> *ofdmSymbols) const;
+    void insertPilotSubcarriers(OFDMSymbol *ofdmSymbol, int symbolID) const;
 
   public:
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;

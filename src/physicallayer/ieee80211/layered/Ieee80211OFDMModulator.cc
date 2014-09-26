@@ -76,25 +76,25 @@ int Ieee80211OFDMModulator::getSubcarrierIndex(int ofdmSymbolIndex) const
         throw cRuntimeError("The domain of the M(k) (k = %d) function is [0,47]", ofdmSymbolIndex);
 }
 
-void Ieee80211OFDMModulator::modulateSignalField(const BitVector& signalField, std::vector<ISymbol> *ofdmSymbols) const
+void Ieee80211OFDMModulator::modulateSignalField(const BitVector& signalField, std::vector<const ISymbol*> *ofdmSymbols) const
 {
     // BPSK modulation of the SIGNAL field
     ASSERT(signalField.getSize() == OFDM_SYMBOL_SIZE);
-    OFDMSymbol signalFieldSymbol;
+    OFDMSymbol *signalFieldSymbol = new OFDMSymbol(); // TODO: fix memory leak
     for (unsigned int i = 0; i < signalField.getSize(); i++)
     {
         ShortBitVector bit;
         bit.appendBit(signalField.getBit(i));
         const APSKSymbol *apskSymbol = signalModulationScheme->mapToConstellationDiagram(bit);
         int subcarrierIndex = getSubcarrierIndex(i);
-        signalFieldSymbol.pushAPSKSymbol(apskSymbol, subcarrierIndex);
+        signalFieldSymbol->pushAPSKSymbol(apskSymbol, subcarrierIndex);
     }
     insertPilotSubcarriers(signalFieldSymbol, 0);
     EV_DEBUG << "BPSK modulated SIGNAL field: " << signalFieldSymbol << endl;
     ofdmSymbols->push_back(signalFieldSymbol);
 }
 
-void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::vector<ISymbol> *ofdmSymbols) const
+void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::vector<const ISymbol*> *ofdmSymbols) const
 {
     // Divide the resulting coded and interleaved data string into groups of N_BPSC bits.
     const int nBPSC = modulationScheme->getCodeWordLength();
@@ -115,12 +115,12 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
     }
     // Divide the complex number string into groups of 48 complex numbers.
     // Each such group is associated with one OFDM symbol.
-    OFDMSymbol ofdmSymbol;
+    OFDMSymbol *ofdmSymbol = new OFDMSymbol(); // TODO: fix memory leak
     int symbolID = 1;
     for (unsigned int i = 0; i < apskSymbols.size(); i++)
     {
         int subcarrierIndex = getSubcarrierIndex(i % OFDM_SYMBOL_SIZE);
-        ofdmSymbol.pushAPSKSymbol(apskSymbols.at(i), subcarrierIndex);
+        ofdmSymbol->pushAPSKSymbol(apskSymbols.at(i), subcarrierIndex);
         // In each group, the complex numbers are numbered 0 to 47 and mapped hereafter into OFDM
         // subcarriers numbered -26 to -22, -20 to -8, -6 to -1, 1 to 6, 8 to 20, and 22 to 26.
         // The 0 subcarrier, associated with center frequency, is omitted and filled with the value 0.
@@ -129,7 +129,7 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
             insertPilotSubcarriers(ofdmSymbol, symbolID);
             EV_DEBUG << "Modulated #" << symbolID << " DATA field: " << ofdmSymbol << endl;
             ofdmSymbols->push_back(ofdmSymbol);
-            ofdmSymbol.clearSymbols();
+            ofdmSymbol = new OFDMSymbol();
             symbolID++;
         }
     }
@@ -141,17 +141,17 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
 
 }
 
-void Ieee80211OFDMModulator::insertPilotSubcarriers(OFDMSymbol& ofdmSymbol, int symbolID) const
+void Ieee80211OFDMModulator::insertPilotSubcarriers(OFDMSymbol *ofdmSymbol, int symbolID) const
 {
-    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 5);
-    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 19);
-    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 33);
-    ofdmSymbol.pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(-1,0)), 47);
+    ofdmSymbol->pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 5);
+    ofdmSymbol->pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 19);
+    ofdmSymbol->pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(1,0)), 33);
+    ofdmSymbol->pushAPSKSymbol(new APSKSymbol(polarityVector[symbolID] * Complex(-1,0)), 47);
 }
 
 const ITransmissionSymbolModel *Ieee80211OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
-    std::vector<ISymbol> *ofdmSymbols = new std::vector<ISymbol>(); // FIXME: Sample model should delete it
+    std::vector<const ISymbol*> *ofdmSymbols = new std::vector<const ISymbol*>(); // FIXME: Sample model should delete it
     const BitVector *bits = bitModel->getBits();
     BitVector signalField;
     // Append the OFDM symbols one after another, starting after the SIGNAL symbol describing the
