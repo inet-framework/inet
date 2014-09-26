@@ -34,7 +34,7 @@ class INET_API ISignalSymbolModel : public IPrintableObject
   public:
     virtual int getSymbolLength() const = 0;
     virtual double getSymbolRate() const = 0;
-    virtual const std::vector<ISymbol> *getSymbols() const = 0;
+    virtual const std::vector<const ISymbol*> *getSymbols() const = 0;
     virtual const IModulation *getModulation() const = 0;
 };
 
