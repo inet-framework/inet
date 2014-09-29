@@ -35,6 +35,12 @@ class INET_API ISignalSymbolModel : public IPrintableObject
     virtual int getSymbolLength() const = 0;
     virtual double getSymbolRate() const = 0;
     virtual const std::vector<const ISymbol*> *getSymbols() const = 0;
+    // TODO: At reception side, only the demodulator could detect the demodulation
+    // for DATA field (for the SIGNAL field this is specific and is always BPSK).
+    // The DATA field demodulation scheme could be set according to the rate which
+    // will be in the previously decoded SIGNAL field.
+    // From this it follows that the pulse shaper, which creates the ReceptionSymbolModel,
+    // could not set the current modulation type.
     virtual const IModulation *getModulation() const = 0;
 };
 
