@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 #include "BitVector.h"
 #include "IInterleaver.h"
+#include "Ieee80211Interleaving.h"
 
 namespace inet {
 namespace physicallayer {
@@ -31,33 +32,21 @@ namespace physicallayer {
  * Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.7 Data interleaving
  */
-class Ieee80211Interleaver : public cSimpleModule, public IInterleaver
+class Ieee80211Interleaver : public IInterleaver
 {
-  public:
-    class Ieee80211InterleaverInfo : public IInterleaverInfo
-    {
-        const Ieee80211Interleaver *interleaver;
-        public:
-            Ieee80211InterleaverInfo(const Ieee80211Interleaver *interleaver) : interleaver(interleaver) {}
-            int getNumberOfCodedBitsPerSymbol() const { return interleaver->numberOfCodedBitsPerSymbol; }
-            int getNumberOfCodedBitsPerSubcarrier() const { return interleaver->numberOfCodedBitsPerSubcarrier; }
-            void printToStream(std::ostream& stream) const;
-    };
-
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
     int s;
-    const Ieee80211InterleaverInfo *info;
-
-  protected:
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
+    const IInterleaving *interleaving;
 
   public:
-    BitVector interleaving(const BitVector& bits) const;
-    BitVector deinterleaving(const BitVector& bits) const;
-    const Ieee80211InterleaverInfo *getInfo() const { return info; }
+    BitVector interleave(const BitVector& bits) const;
+    BitVector deinterleave(const BitVector& bits) const;
+    int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
+    int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
+    const IInterleaving *getInterleaving() const { return interleaving; }
+    Ieee80211Interleaver(const Ieee80211Interleaving *interleaving);
     ~Ieee80211Interleaver();
 };
 

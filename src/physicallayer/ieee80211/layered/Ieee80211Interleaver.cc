@@ -20,20 +20,7 @@
 namespace inet {
 namespace physicallayer {
 
-Define_Module(Ieee80211Interleaver);
-
-void Ieee80211Interleaver::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        info = new Ieee80211InterleaverInfo(this);
-        numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
-        numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
-        s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
-    }
-}
-
-BitVector Ieee80211Interleaver::interleaving(const BitVector& deinterleavedBits) const
+BitVector Ieee80211Interleaver::interleave(const BitVector& deinterleavedBits) const
 {
     if (deinterleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("deinterleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
@@ -58,7 +45,7 @@ BitVector Ieee80211Interleaver::interleaving(const BitVector& deinterleavedBits)
     return interleavedBits;
 }
 
-BitVector Ieee80211Interleaver::deinterleaving(const BitVector& interleavedBits) const
+BitVector Ieee80211Interleaver::deinterleave(const BitVector& interleavedBits) const
 {
     if (interleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("interleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
@@ -82,14 +69,16 @@ BitVector Ieee80211Interleaver::deinterleaving(const BitVector& interleavedBits)
     return deinterleavedBits;
 }
 
-void Ieee80211Interleaver::Ieee80211InterleaverInfo::printToStream(std::ostream& stream) const
+Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving* interleaving)
 {
-    stream << "Ieee80211Interleaver"; // TODO: extend this info
+    numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
+    numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();
+    s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
 }
 
 Ieee80211Interleaver::~Ieee80211Interleaver()
 {
-    delete info;
+    delete interleaving;
 }
 
 } /* namespace physicallayer */

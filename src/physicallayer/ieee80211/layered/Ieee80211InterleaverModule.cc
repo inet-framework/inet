@@ -15,32 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IINTERLEAVER_H_
-#define __INET_IINTERLEAVER_H_
-
-#include "IPrintableObject.h"
-#include "BitVector.h"
+#include "Ieee80211InterleaverModule.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API IInterleaving : public IPrintableObject
-{
-    // TODO: what are the common properties?
-    public:
-        virtual ~IInterleaving();
-};
+Define_Module(Ieee80211InterleaverModule);
 
-class INET_API IInterleaver
+void Ieee80211InterleaverModule::initialize(int stage)
 {
-    public:
-        virtual BitVector interleave(const BitVector& bits) const = 0;
-        virtual BitVector deinterleave(const BitVector& bits) const = 0;
-        virtual const IInterleaving *getInterleaving() const = 0;
-        ~IInterleaver();
-};
+    if (stage == INITSTAGE_LOCAL)
+    {
+        int numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
+        int numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
+        Ieee80211Interleaving *interleaving = new Ieee80211Interleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
+        interleaver = new Ieee80211Interleaver(interleaving);
+    }
+}
+
+Ieee80211InterleaverModule::~Ieee80211InterleaverModule()
+{
+    delete interleaver;
+}
 
 } /* namespace physicallayer */
 } /* namespace inet */
-
-#endif /* __INET_IINTERLEAVER_H_ */
