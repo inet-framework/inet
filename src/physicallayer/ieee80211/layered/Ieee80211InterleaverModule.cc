@@ -28,7 +28,7 @@ void Ieee80211InterleaverModule::initialize(int stage)
     {
         int numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
         int numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
-        Ieee80211Interleaving *interleaving = new Ieee80211Interleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
+        const Ieee80211Interleaving *interleaving = new Ieee80211Interleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
         interleaver = new Ieee80211Interleaver(interleaving);
     }
 }

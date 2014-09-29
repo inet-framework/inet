@@ -28,7 +28,7 @@ void Ieee80211ScramblerModule::initialize(int stage)
     {
         ShortBitVector seed(par("seed").stringValue());
         ShortBitVector generatorPolynomial(par("generatorPolynomial").stringValue());
-        Ieee80211Scrambling *scrambling = new Ieee80211Scrambling(seed, generatorPolynomial);
+        const Ieee80211Scrambling *scrambling = new Ieee80211Scrambling(seed, generatorPolynomial);
         scrambler = new Ieee80211Scrambler(scrambling);
     }
 }
