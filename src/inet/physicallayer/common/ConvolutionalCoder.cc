@@ -510,7 +510,7 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
 
 ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode* convolutionalCode) : convolutionalCode(convolutionalCode)
 {
-    const char *strTransferFunctionMatrix = convolutionalCode->getPuncturingMatrix();
+    const char *strTransferFunctionMatrix = convolutionalCode->getTransferFunctionMatrix();
     const char *strPuncturingMatrix = convolutionalCode->getPuncturingMatrix();
     const char *strConstraintLengthVector = convolutionalCode->getConstraintLengthVector();
     mode = convolutionalCode->getMode();
