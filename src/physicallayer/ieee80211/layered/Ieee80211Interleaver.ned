@@ -22,7 +22,7 @@ import inet.physicallayer.contract.IInterleaver;
 module Ieee80211Interleaver like IInterleaver
 {
     parameters:
-        int numberOfCodedBitsPerSymbol = default(192);
-        int numberOfCodedBitsPerSubcarrier = default(4);
-        @class("Ieee80211Interleaver");
+        int numberOfCodedBitsPerSymbol;
+        int numberOfCodedBitsPerSubcarrier;
+        @class("Ieee80211InterleaverModule");
 }
