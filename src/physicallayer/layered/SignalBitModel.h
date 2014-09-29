@@ -33,7 +33,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     const double bitRate;
     const BitVector *bits;
     const IForwardErrorCorrection *forwardErrorCorrection;
-    const IScramblerInfo *scramblerInfo;
+    const IScrambling *scramblerInfo;
     const IInterleaving *interleaverInfo;
 
   public:
@@ -46,7 +46,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
         interleaverInfo(NULL)
     {}
 
-    SignalBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScramblerInfo *scramblerInfo, const IInterleaving *interleaverInfo) :
+    SignalBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo) :
         bitLength(bitLength),
         bitRate(bitRate),
         bits(bits),
@@ -60,7 +60,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     virtual double getBitRate() const { return bitRate; }
     virtual const BitVector* getBits() const { return bits; }
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
-    virtual const IScramblerInfo *getScramblerInfo() const { return scramblerInfo; }
+    virtual const IScrambling *getScramblerInfo() const { return scramblerInfo; }
     virtual const IInterleaving *getInterleaverInfo() const { return interleaverInfo; }
 };
 
@@ -71,7 +71,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
         SignalBitModel()
     {}
 
-    TransmissionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScramblerInfo *scramblerInfo, const IInterleaving *interleaverInfo) :
+    TransmissionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo) :
         SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrection, scramblerInfo, interleaverInfo)
     {}
 };
@@ -89,7 +89,7 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
         bitErrorCount(-1)
     {}
 
-    ReceptionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScramblerInfo *scramblerInfo, const IInterleaving *interleaverInfo, double ber, int bitErrorCount) :
+    ReceptionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo, double ber, int bitErrorCount) :
         SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo, scramblerInfo, interleaverInfo),
         ber(ber),
         bitErrorCount(bitErrorCount)
