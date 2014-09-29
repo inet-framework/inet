@@ -84,10 +84,7 @@ class ConvolutionalCoder :  public IFECEncoder
         const ConvolutionalCode *convolutionalCode; // this info class holds information related to this encoder
 
     protected:
-        inline bool eXOR(bool alpha, bool beta) const
-        {
-            return (alpha || beta) && !(alpha && beta);
-        }
+        inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
         void setTransferFunctionMatrix(std::vector<std::vector<int> >& transferFMatrix);
         ShortBitVector inputSymbolToOutputSymbol(const ShortBitVector& state, const ShortBitVector& inputSymbol) const;
         bool modulo2Adder(const ShortBitVector& shiftRegisters, const ShortBitVector& generatorPolynomial) const;

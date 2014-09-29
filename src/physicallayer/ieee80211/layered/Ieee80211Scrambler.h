@@ -52,10 +52,7 @@ class Ieee80211Scrambler : public cSimpleModule, public IScrambler
     protected:
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
-        inline bool eXOR(bool alpha, bool beta) const
-        {
-            return (alpha || beta) && !(alpha && beta);
-        }
+        inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
         BitVector generateScramblingSequence(const ShortBitVector& generatorPolynomial, const ShortBitVector& seed) const;
 
     public:
