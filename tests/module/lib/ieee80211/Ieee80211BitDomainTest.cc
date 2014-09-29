@@ -47,9 +47,12 @@ void Ieee80211BitDomainTest::initialize(int stage)
         else
             throw cRuntimeError("Unknown (= %s) test type", testType);
         const char *testFile = par("testFile");
-        fileStream = new std::ifstream(testFile);
-        if (!fileStream->is_open())
+        std::ifstream fileStream(testFile);
+        if (!fileStream.is_open())
             throw cRuntimeError("Cannot open the test file: %s", testFile);
+        std::string strInput;
+        fileStream >> strInput;
+        input = BitVector(strInput.c_str());
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -67,83 +70,49 @@ void Ieee80211BitDomainTest::initialize(int stage)
 
 void Ieee80211BitDomainTest::testConvolutionalCoder(unsigned int numberOfRandomErrors) const
 {
-    fileStream->clear();
-    fileStream->seekg(0, std::ios::beg);
     srand(time(NULL));
-    std::string line;
-    while (*fileStream >> line)
+    BitVector encoded;
+    encoded = convCoder->encode(input);
+    int numOfErrors = numberOfRandomErrors;
+    while (numOfErrors--)
     {
-        BitVector input(line.c_str());
-        BitVector encoded;
-        encoded = convCoder->encode(input);
-        int numOfErrors = numberOfRandomErrors;
-        while (numOfErrors--)
-        {
-            int pos = rand() % encoded.getSize();
-            encoded.toggleBit(pos);
-        }
-        BitVector decoded = convCoder->decode(encoded);
-        if (input != decoded)
-            EV_DETAIL << "Convolutional Coder test has failed" << endl;
+        int pos = rand() % encoded.getSize();
+        encoded.toggleBit(pos);
     }
+    BitVector decoded = convCoder->decode(encoded);
+    if (input != decoded)
+        EV_DETAIL << "Convolutional Coder test has failed" << endl;
 }
 
 void Ieee80211BitDomainTest::testScrambler() const
 {
-    fileStream->clear();
-    fileStream->seekg(0, std::ios::beg);
-    std::string line;
-    while (*fileStream >> line)
-    {
-        BitVector input(line.c_str());
-        BitVector scrambledInput = scrambler->scramble(input);
-        if (input != scrambler->descramble(scrambledInput))
-            EV_DETAIL << "Descrambling has failed" << endl;
-    }
+    BitVector scrambledInput = scrambler->scramble(input);
+    if (input != scrambler->descramble(scrambledInput))
+        EV_DETAIL << "Descrambling has failed" << endl;
 }
 
 void Ieee80211BitDomainTest::testInterleaver() const
 {
-    fileStream->clear();
-    fileStream->seekg(0, std::ios::beg);
-    std::string line;
-    while (*fileStream >> line)
-    {
-        BitVector input(line.c_str());
-        BitVector interleavedInput = interleaver->interleave(input);
-        if (interleaver->deinterleave(interleavedInput) != input)
-            EV_DETAIL << "Deinterleaving has failed" << endl;
-    }
+    BitVector interleavedInput = interleaver->interleave(input);
+    if (interleaver->deinterleave(interleavedInput) != input)
+        EV_DETAIL << "Deinterleaving has failed" << endl;
 }
 
 void Ieee80211BitDomainTest::testIeee80211BitDomain() const
 {
-    fileStream->clear();
-    fileStream->seekg(0, std::ios::beg);
-    std::string line;
 //    EV_DETAIL << "The scrambling sequence is: " << scrambler->getScramblingSequcene() << endl;
-    while (*fileStream >> line)
-    {
-        BitVector input(line.c_str());
-        BitVector scrambledInput = scrambler->scramble(input);
-        BitVector bccEncodedInput = convCoder->encode(scrambledInput);
-        BitVector interleavedInput = interleaver->interleave(bccEncodedInput);
-        BitVector deinterleavedInput = interleaver->deinterleave(interleavedInput);
-        if (bccEncodedInput != deinterleavedInput)
-            EV_DETAIL << "Deinterleaving has failed" << endl;
-        BitVector bccDecodedInput = convCoder->decode(deinterleavedInput);
-        if (bccDecodedInput != scrambledInput)
-            EV_DETAIL << "BCC decoding has failed" << endl;
-        BitVector descrambledInput = scrambler->descramble(bccDecodedInput); // Note: scrambling and descrambling are the same operations
-        if (descrambledInput != input)
-            EV_DETAIL << "Descrambling has failed" << endl;
-    }
-}
-
-Ieee80211BitDomainTest::~Ieee80211BitDomainTest()
-{
-    fileStream->close();
-    delete fileStream;
+    BitVector scrambledInput = scrambler->scramble(input);
+    BitVector bccEncodedInput = convCoder->encode(scrambledInput);
+    BitVector interleavedInput = interleaver->interleave(bccEncodedInput);
+    BitVector deinterleavedInput = interleaver->deinterleave(interleavedInput);
+    if (bccEncodedInput != deinterleavedInput)
+        EV_DETAIL << "Deinterleaving has failed" << endl;
+    BitVector bccDecodedInput = convCoder->decode(deinterleavedInput);
+    if (bccDecodedInput != scrambledInput)
+        EV_DETAIL << "BCC decoding has failed" << endl;
+    BitVector descrambledInput = scrambler->descramble(bccDecodedInput); // Note: scrambling and descrambling are the same operations
+    if (descrambledInput != input)
+        EV_DETAIL << "Descrambling has failed" << endl;
 }
 
 } /* namespace inet */

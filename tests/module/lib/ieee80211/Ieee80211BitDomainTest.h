@@ -34,7 +34,7 @@ class INET_API Ieee80211BitDomainTest : public cSimpleModule
         Ieee80211ScramblerModule *scrambler;
         Ieee80211InterleaverModule *interleaver;
         ConvolutionalCoderModule *convCoder;
-        std::ifstream *fileStream;
+        BitVector input;
         const char *testType;
 
     protected:
@@ -45,9 +45,6 @@ class INET_API Ieee80211BitDomainTest : public cSimpleModule
         void testScrambler() const;
         void testInterleaver() const;
         void testIeee80211BitDomain() const;
-
-    public:
-        ~Ieee80211BitDomainTest();
 };
 
 } /* namespace inet */
