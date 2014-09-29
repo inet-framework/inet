@@ -42,5 +42,5 @@ module Ieee80211Scrambler like IScrambler
     parameters:
         string seed;
         string generatorPolynomial;
-        @class(Ieee80211Scrambler);
+        @class(Ieee80211ScramblerModule);
 }

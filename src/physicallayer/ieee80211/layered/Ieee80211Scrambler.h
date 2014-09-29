@@ -20,6 +20,7 @@
 
 #include "INETDefs.h"
 #include "IScrambler.h"
+#include "Ieee80211Scrambling.h"
 #include "BitVector.h"
 #include "ShortBitVector.h"
 
@@ -34,31 +35,22 @@ namespace physicallayer {
  * The details can be found in: Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.5 PLCP DATA scrambler and descrambler
  */
-class Ieee80211Scrambler : public cSimpleModule, public IScrambler
+class Ieee80211Scrambler : public IScrambler
 {
-    public:
-        class Ieee80211ScramblerInfo : public IScramblerInfo
-        {
-            const Ieee80211Scrambler *scrambler;
-            public:
-                Ieee80211ScramblerInfo(const Ieee80211Scrambler *scrambler) : scrambler(scrambler) {}
-                void printToStream(std::ostream& stream) const;
-                const BitVector& getScramblingSequcene() const { return scrambler->scramblingSequence; }
-        };
     protected:
         BitVector scramblingSequence;
-        const Ieee80211ScramblerInfo *info;
+        const Ieee80211Scrambling *scrambling;
 
     protected:
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
         inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
         BitVector generateScramblingSequence(const ShortBitVector& generatorPolynomial, const ShortBitVector& seed) const;
 
     public:
+        Ieee80211Scrambler(const Ieee80211Scrambling *scrambling);
         BitVector scramble(const BitVector& bits) const;
         BitVector descramble(const BitVector& bits) const { return scramble(bits); }
-        const Ieee80211ScramblerInfo *getInfo() const { return info; }
+        const Ieee80211Scrambling *getScrambling() const { return scrambling; }
+        const BitVector& getScramblingSequcene() const { return scramblingSequence; }
         ~Ieee80211Scrambler();
 };
 

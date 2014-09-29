@@ -21,19 +21,6 @@
 namespace inet {
 namespace physicallayer {
 
-Define_Module(Ieee80211Scrambler);
-
-void Ieee80211Scrambler::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        info = new Ieee80211ScramblerInfo(this);
-        ShortBitVector seed(par("seed").stringValue());
-        ShortBitVector generatorPolynomial(par("generatorPolynomial").stringValue());
-        scramblingSequence = generateScramblingSequence(generatorPolynomial, seed);
-    }
-}
-
 BitVector Ieee80211Scrambler::scramble(const BitVector& bits) const
 {
     EV_DETAIL << "Scrambling the following bits: " << bits << endl;
@@ -69,14 +56,16 @@ BitVector Ieee80211Scrambler::generateScramblingSequence(const ShortBitVector& g
     return scramblingSequence;
 }
 
-void Ieee80211Scrambler::Ieee80211ScramblerInfo::printToStream(std::ostream& stream) const
+Ieee80211Scrambler::Ieee80211Scrambler(const Ieee80211Scrambling* scrambling)
 {
-    stream << "Ieee80211Scrambler with scrambling sequence: " << scrambler->scramblingSequence;
+    ShortBitVector generatorPolynomial = scrambling->getGeneratorPolynomial();
+    ShortBitVector seed = scrambling->getSeed();
+    scramblingSequence = generateScramblingSequence(generatorPolynomial, seed);
 }
 
 Ieee80211Scrambler::~Ieee80211Scrambler()
 {
-    delete info;
+    delete scrambling;
 }
 
 } /* namespace physicallayer */

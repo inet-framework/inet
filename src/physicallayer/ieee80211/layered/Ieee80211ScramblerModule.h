@@ -13,33 +13,33 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
+// 
 
-#ifndef __INET_ISCRAMBLER_H_
-#define __INET_ISCRAMBLER_H_
+#ifndef __INET_IEEE80211SCRAMBLERMODULE_H_
+#define __INET_IEEE80211SCRAMBLERMODULE_H_
 
-#include "IPrintableObject.h"
-#include "BitVector.h"
+#include "Ieee80211Scrambler.h"
+#include "Ieee80211Scrambling.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API IScrambling : public IPrintableObject
+class INET_API Ieee80211ScramblerModule : public cSimpleModule
 {
-    // TODO: common properties?
-    public:
-        virtual ~IScrambling() {};
-};
+    protected:
+        const Ieee80211Scrambler *scrambler;
 
-class INET_API IScrambler
-{
+    protected:
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage);
+        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+
     public:
-        virtual BitVector scramble(const BitVector& bits) const = 0;
-        virtual BitVector descramble(const BitVector& bits) const = 0;
-        virtual const IScrambling *getScrambling() const = 0;
+        const Ieee80211Scrambler *getScrambler() const { return scrambler; }
+        virtual ~Ieee80211ScramblerModule();
 };
 
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif /* __INET_ISCRAMBLER_H_ */
+#endif /* __INET_IEEE80211SCRAMBLERMODULE_H_ */

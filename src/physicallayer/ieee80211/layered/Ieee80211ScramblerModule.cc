@@ -13,33 +13,28 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
+// 
 
-#ifndef __INET_ISCRAMBLER_H_
-#define __INET_ISCRAMBLER_H_
-
-#include "IPrintableObject.h"
-#include "BitVector.h"
+#include "Ieee80211ScramblerModule.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API IScrambling : public IPrintableObject
+void Ieee80211ScramblerModule::initialize(int stage)
 {
-    // TODO: common properties?
-    public:
-        virtual ~IScrambling() {};
-};
+    if (stage == INITSTAGE_LOCAL)
+    {
+        ShortBitVector seed(par("seed").stringValue());
+        ShortBitVector generatorPolynomial(par("generatorPolynomial").stringValue());
+        Ieee80211Scrambling *scrambling = new Ieee80211Scrambling(seed, generatorPolynomial);
+        scrambler = new Ieee80211Scrambler(scrambling);
+    }
+}
 
-class INET_API IScrambler
+Ieee80211ScramblerModule::~Ieee80211ScramblerModule()
 {
-    public:
-        virtual BitVector scramble(const BitVector& bits) const = 0;
-        virtual BitVector descramble(const BitVector& bits) const = 0;
-        virtual const IScrambling *getScrambling() const = 0;
-};
+    delete scrambler;
+}
 
 } /* namespace physicallayer */
 } /* namespace inet */
-
-#endif /* __INET_ISCRAMBLER_H_ */

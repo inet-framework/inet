@@ -15,31 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISCRAMBLER_H_
-#define __INET_ISCRAMBLER_H_
+#ifndef __INET_IEEE80211SCRAMBLING_H_
+#define __INET_IEEE80211SCRAMBLING_H_
 
-#include "IPrintableObject.h"
-#include "BitVector.h"
+#include "IScrambler.h"
+#include "ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API IScrambling : public IPrintableObject
+class INET_API Ieee80211Scrambling : public IScrambling
 {
-    // TODO: common properties?
-    public:
-        virtual ~IScrambling() {};
-};
+    protected:
+        ShortBitVector seed;
+        ShortBitVector generatorPolynomial;
 
-class INET_API IScrambler
-{
     public:
-        virtual BitVector scramble(const BitVector& bits) const = 0;
-        virtual BitVector descramble(const BitVector& bits) const = 0;
-        virtual const IScrambling *getScrambling() const = 0;
+        Ieee80211Scrambling(const ShortBitVector& seed, const ShortBitVector& generatorPolynomial) :
+            seed(seed), generatorPolynomial(generatorPolynomial) {}
+        const ShortBitVector& getGeneratorPolynomial() const { return generatorPolynomial; }
+        const ShortBitVector& getSeed() const { return seed; }
+        void printToStream(std::ostream& stream) const { stream << "Ieee80211Scrambler with seed : " << seed << " and with generator polynomial: " << generatorPolynomial; }
 };
 
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif /* __INET_ISCRAMBLER_H_ */
+#endif /* __INET_IEEE80211SCRAMBLING_H_ */
