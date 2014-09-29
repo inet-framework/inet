@@ -40,7 +40,7 @@ BitVector Ieee80211LayeredEncoder::signalFieldEncode(const BitVector& signalFiel
     // NOTE: The contents of the SIGNAL field are not scrambled.
     BitVector fecEncodedBits = signalFECEncoder->encode(signalField);
     EV_DEBUG << "FEC encoded bits of the SIGNAL field are: " << fecEncodedBits << endl;
-    BitVector interleavedBits = signalInterleaver->interleaving(fecEncodedBits);
+    BitVector interleavedBits = signalInterleaver->interleave(fecEncodedBits);
     EV_DEBUG << "Interleaved bits of the SIGNAL field are: " << interleavedBits << endl;
     return interleavedBits;
 }
@@ -51,7 +51,7 @@ BitVector Ieee80211LayeredEncoder::dataFieldEncode(const BitVector& dataField) c
    EV_DEBUG << "Scrambled bits of the DATA field are: " << scrambledBits << endl;
    BitVector fecEncodedBits = dataFECEncoder->encode(scrambledBits);
    EV_DEBUG << "FEC encoded bits of the DATA field are: " << fecEncodedBits << endl;
-   BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
+   BitVector interleavedBits = interleaver->interleave(fecEncodedBits);
    EV_DEBUG << "Interleaved bits of the DATA field are: " << interleavedBits << endl;
    return interleavedBits;
 }
@@ -79,7 +79,7 @@ const ITransmissionBitModel* Ieee80211LayeredEncoder::encode(const ITransmission
     for (unsigned int i = 0; i < encodedDataField.getSize(); i++)
         encodedBits->appendBit(encodedDataField.getBit(i));
     // TODO: bitrate
-    return new TransmissionBitModel(encodedBits->getSize(), bitRate, encodedBits, dataFECEncoder->getConvolutionalCode(), scrambler->getInfo(), interleaver->getInfo());
+    return new TransmissionBitModel(encodedBits->getSize(), bitRate, encodedBits, dataFECEncoder->getConvolutionalCode(), scrambler->getInfo(), interleaver->getInterleaving());
 }
 
 } /* namespace physicallayer */
