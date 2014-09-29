@@ -21,7 +21,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211InterleaverModule : public cSimpleModule
+class INET_API Ieee80211InterleaverModule : public cSimpleModule, public IInterleaver
 {
     protected:
         const Ieee80211Interleaver *interleaver;
@@ -32,7 +32,9 @@ class INET_API Ieee80211InterleaverModule : public cSimpleModule
         virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
 
     public:
-        const Ieee80211Interleaver *getInterleaver() const { return interleaver; }
+        virtual BitVector interleave(const BitVector& bits) const { return interleaver->interleave(bits); }
+        virtual BitVector deinterleave(const BitVector& bits) const { return interleaver->deinterleave(bits); }
+        virtual const IInterleaving *getInterleaving() const { return interleaver->getInterleaving(); }
         virtual ~Ieee80211InterleaverModule();
 };
 

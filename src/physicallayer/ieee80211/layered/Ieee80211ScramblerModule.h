@@ -24,7 +24,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211ScramblerModule : public cSimpleModule
+class INET_API Ieee80211ScramblerModule : public cSimpleModule, public IScrambler
 {
     protected:
         const Ieee80211Scrambler *scrambler;
@@ -35,7 +35,9 @@ class INET_API Ieee80211ScramblerModule : public cSimpleModule
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
 
     public:
-        const Ieee80211Scrambler *getScrambler() const { return scrambler; }
+        virtual BitVector scramble(const BitVector& bits) const { return scrambler->scramble(bits); }
+        virtual BitVector descramble(const BitVector& bits) const { return scrambler->descramble(bits); }
+        virtual const IScrambling *getScrambling() const { return scrambler->getScrambling(); }
         virtual ~Ieee80211ScramblerModule();
 };
 

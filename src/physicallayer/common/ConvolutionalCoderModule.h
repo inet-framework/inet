@@ -23,7 +23,7 @@
 namespace inet {
 namespace physicallayer {
 
-class ConvolutionalCoderModule : public cSimpleModule
+class ConvolutionalCoderModule : public cSimpleModule, public IFECEncoder
 {
     protected:
         ConvolutionalCoder *convolutionalCoder;
@@ -34,7 +34,9 @@ class ConvolutionalCoderModule : public cSimpleModule
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
 
     public:
-        const ConvolutionalCoder *getConvolutionalCoder() const { return convolutionalCoder; }
+        virtual BitVector encode(const BitVector& informationBits) const { return convolutionalCoder->encode(informationBits); }
+        virtual BitVector decode(const BitVector& encodedBits) const { return convolutionalCoder->decode(encodedBits); }
+        virtual const IForwardErrorCorrection *getConvolutionalCode() const {  return convolutionalCoder->getConvolutionalCode(); }
         ~ConvolutionalCoderModule();
 };
 
