@@ -74,8 +74,6 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     // The permutation equations of the interleaving method is fixed but some parameters may vary,
     // those parameters depend on the modulation scheme which we can compute from the SIGNAL field.
     // TODO: ber, bitErrorCount, bitRate
-    // TODO: ConvoluationalCoderInfo needs to be factored out from ConvoluationalCoder
-    // TODO: Other infos also need to be factored out from their parent classes.
     const Ieee80211Interleaving *interleaving = getInterleavingFromModulation();
     return new ReceptionBitModel(bitRepresentation->getSize(), 0, bitRepresentation, fecInfo, NULL, interleaving, 0, 0);
 }
