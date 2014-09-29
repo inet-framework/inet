@@ -29,21 +29,7 @@ namespace physicallayer {
 void Ieee80211OFDMDemodulator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-    {
-        // TODO: It is not obvious now that the modulation scheme should be a parameter.
-        const char *modulationSchemeStr = par("modulationScheme");
-        if (!strcmp("QAM-16", modulationSchemeStr))
-            modulationScheme = &QAM16Modulation::singleton;
-        else if (!strcmp("QAM-64", modulationSchemeStr))
-            modulationScheme = &QAM64Modulation::singleton;
-        else if (!strcmp("QPSK", modulationSchemeStr))
-            modulationScheme = &QPSKModulation::singleton;
-        else if (!strcmp("BPSK", modulationSchemeStr))
-            modulationScheme = &BPSKModulation::singleton;
-        else
-            throw cRuntimeError("Unknown modulation scheme = %s", modulationSchemeStr);
         signalModulationScheme = &BPSKModulation::singleton;
-    }
 }
 
 BitVector Ieee80211OFDMDemodulator::demodulateSignalSymbol(const OFDMSymbol *signalSymbol) const
@@ -53,7 +39,7 @@ BitVector Ieee80211OFDMDemodulator::demodulateSignalSymbol(const OFDMSymbol *sig
 
 BitVector Ieee80211OFDMDemodulator::demodulateDataSymbol(const OFDMSymbol *dataSymbol) const
 {
-    return demodulateField(dataSymbol, modulationScheme);
+    return demodulateField(dataSymbol, dataModulationScheme);
 }
 
 BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymbol, const APSKModulationBase* modulationScheme) const
@@ -72,11 +58,9 @@ BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymb
 
 const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVector *bitRepresentation) const
 {
-    ShortBitVector rate;
-    for (int i = 0; i < 4; i++)
-        rate.appendBit(bitRepresentation->getBit(i));
+    ShortBitVector rate = getRate(bitRepresentation);
     // The bits R1–R4 shall be set, dependent on RATE, according to the values in Table 18-6.
-    const Ieee80211ConvolutionalCode *fecInfo = getFecInfoFromSignalFieldRate(rate);
+    const Ieee80211ConvolutionalCode *fecInfo = getFecFromSignalFieldRate(rate);
     ShortBitVector length;
     // The PLCP LENGTH field shall be an unsigned 12-bit integer that indicates the number of octets in the
     // PSDU that the MAC is currently requesting the PHY to transmit. This value is used by the PHY to
@@ -85,18 +69,18 @@ const IReceptionBitModel* Ieee80211OFDMDemodulator::createBitModel(const BitVect
     for (int i = 4; i < 16; i++)
         length.appendBit(bitRepresentation->getBit(i));
     // Note:
-    // IInterleaverInfo, IScramblerInfo are NULLs, since their infos are IEEE 802.11 specific (that is,
-    // the scrambling method always uses the S(x) = x^7 + x^4 + 1 polynomial and similarly the interleaving
-    // always uses the permutation equations defined in 18.3.5.7 Data interleaving (so a PHY frame does not
-    // contain anything about these procedures), contrarily the FEC decoding may be 1/2 or 3/4, etc. which we
-    // can compute from the SIGNAL field) and thus are hard-coded in the Ieee80211LayeredDecoder.
+    // IScramblerInfo is NULL, since their info is IEEE 802.11 specific (that is,the scrambling
+    // method always uses the S(x) = x^7 + x^4 + 1 polynomial.
+    // The permutation equations of the interleaving method is fixed but some parameters may vary,
+    // those parameters depend on the modulation scheme which we can compute from the SIGNAL field.
     // TODO: ber, bitErrorCount, bitRate
     // TODO: ConvoluationalCoderInfo needs to be factored out from ConvoluationalCoder
     // TODO: Other infos also need to be factored out from their parent classes.
-    return new ReceptionBitModel(bitRepresentation->getSize(), 0, bitRepresentation, fecInfo, NULL, NULL, 0, 0);
+    const Ieee80211Interleaving *interleaving = getInterleavingFromModulation();
+    return new ReceptionBitModel(bitRepresentation->getSize(), 0, bitRepresentation, fecInfo, NULL, interleaving, 0, 0);
 }
 
-const Ieee80211ConvolutionalCode* Ieee80211OFDMDemodulator::getFecInfoFromSignalFieldRate(const ShortBitVector& rate) const
+const Ieee80211ConvolutionalCode* Ieee80211OFDMDemodulator::getFecFromSignalFieldRate(const ShortBitVector& rate) const
 {
     // Table 18-6—Contents of the SIGNAL field
     // Table 18-4—Modulation-dependent parameters
@@ -111,11 +95,47 @@ const Ieee80211ConvolutionalCode* Ieee80211OFDMDemodulator::getFecInfoFromSignal
         throw cRuntimeError("Unknown rate field  = %s", rate.toString().c_str());
 }
 
+const APSKModulationBase* Ieee80211OFDMDemodulator::getModulationFromSignalFieldRate(const ShortBitVector& rate) const
+{
+    // Table 18-6—Contents of the SIGNAL field
+    // Table 18-4—Modulation-dependent parameters
+    if (rate == ShortBitVector("1101") || rate == ShortBitVector("1111"))
+        return &BPSKModulation::singleton;
+    else if (rate == ShortBitVector("0101") || rate == ShortBitVector("0111"))
+        return &QPSKModulation::singleton;
+    else if (rate == ShortBitVector("1001") || rate == ShortBitVector("1011"))
+        return &QAM16Modulation::singleton;
+    else if(rate == ShortBitVector("0001") || rate == ShortBitVector("0011"))
+        return &QAM64Modulation::singleton;
+    else
+        throw cRuntimeError("Unknown rate field = %s", rate.toString().c_str());
+}
+
+ShortBitVector Ieee80211OFDMDemodulator::getRate(const BitVector* signalField) const
+{
+    ShortBitVector rate;
+    for (int i = 0; i < 4; i++)
+        rate.appendBit(signalField->getBit(i));
+    return rate;
+}
+
+void Ieee80211OFDMDemodulator::setDataFieldDemodulation(const BitVector *signalField) const
+{
+    ShortBitVector rate = getRate(signalField);
+    dataModulationScheme = getModulationFromSignalFieldRate(rate);
+}
+
+const Ieee80211Interleaving* Ieee80211OFDMDemodulator::getInterleavingFromModulation() const
+{
+    return new Ieee80211Interleaving(dataModulationScheme->getCodeWordLength() * 48, dataModulationScheme->getCodeWordLength());
+}
+
 const IReceptionBitModel* Ieee80211OFDMDemodulator::demodulate(const IReceptionSymbolModel* symbolModel) const
 {
     const std::vector<const ISymbol*> *symbols = symbolModel->getSymbols();
     const OFDMSymbol *signalSymbol = dynamic_cast<const OFDMSymbol *>(symbols->at(0)); // The first OFDM symbol is the SIGNAL symbol
     BitVector *bitRepresentation = new BitVector(demodulateSignalSymbol(signalSymbol));
+    setDataFieldDemodulation(bitRepresentation);
     for (unsigned int i = 1; i < symbols->size(); i++)
     {
         const OFDMSymbol *dataSymbol = dynamic_cast<const OFDMSymbol *>(symbols->at(i));
