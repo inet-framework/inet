@@ -37,6 +37,7 @@ class INET_API IScrambler
         virtual BitVector scramble(const BitVector& bits) const = 0;
         virtual BitVector descramble(const BitVector& bits) const = 0;
         virtual const IScrambling *getScrambling() const = 0;
+        virtual ~IScrambler() {};
 };
 
 } /* namespace physicallayer */
