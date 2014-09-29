@@ -20,6 +20,7 @@
 
 #include "IEncoder.h"
 #include "ISerializer.h"
+#include "LayeredEncoder.h"
 #include "IFECEncoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
@@ -29,28 +30,22 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211LayeredEncoder : public cSimpleModule, public IEncoder
+class INET_API Ieee80211LayeredEncoder : public LayeredEncoder
 {
     protected:
-        double bitRate;
-        int headerBitLength;
-        const ISerializer *serializer;
-        const IScrambler *scrambler;
-        const IFECEncoder *dataFECEncoder;
         const IFECEncoder *signalFECEncoder;
-        const IInterleaver *interleaver;
         const IInterleaver *signalInterleaver;
+        const IFECEncoder *dataFECEncoder;
 
     protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual BitVector signalFieldEncode(const BitVector& signalField) const;
         virtual BitVector dataFieldEncode(const BitVector& dataField) const;
 
     public:
         virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
-        void printToStream(std::ostream& stream) const { stream << "IEEE80211 Layered Encoder"; } // TODO
+        virtual void printToStream(std::ostream& stream) const { stream << "IEEE80211 Layered Encoder"; } // TODO
 };
 
 } /* namespace physicallayer */

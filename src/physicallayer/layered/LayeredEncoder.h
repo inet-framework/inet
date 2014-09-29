@@ -47,7 +47,7 @@ class INET_API LayeredEncoder : public IEncoder, public cSimpleModule
 
   public:
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
-    void printToStream(std::ostream& stream) const { stream << "Layered Encoder"; } // TODO
+    virtual void printToStream(std::ostream& stream) const { stream << "Layered Encoder"; } // TODO
 };
 
 } // namespace physicallayer
