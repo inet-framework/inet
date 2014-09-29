@@ -20,6 +20,8 @@
 namespace inet {
 namespace physicallayer {
 
+Define_Module(Ieee80211ScramblerModule);
+
 void Ieee80211ScramblerModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
