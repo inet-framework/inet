@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API IForwardErrorCorrection : public IPrintableObject
 {
     public:
-        virtual ~IForwardErrorCorrection();
+        virtual ~IForwardErrorCorrection() {};
 };
 
 class INET_API IFECEncoder

@@ -28,7 +28,7 @@ class INET_API IInterleaving : public IPrintableObject
 {
     // TODO: what are the common properties?
     public:
-        virtual ~IInterleaving();
+        virtual ~IInterleaving() {};
 };
 
 class INET_API IInterleaver
@@ -37,7 +37,7 @@ class INET_API IInterleaver
         virtual BitVector interleave(const BitVector& bits) const = 0;
         virtual BitVector deinterleave(const BitVector& bits) const = 0;
         virtual const IInterleaving *getInterleaving() const = 0;
-        ~IInterleaver();
+        ~IInterleaver() {};
 };
 
 } /* namespace physicallayer */
