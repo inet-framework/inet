@@ -33,16 +33,16 @@ void Ieee80211BitDomainTest::initialize(int stage)
         scrambler = NULL;
         testType = par("testType");
         if (!strcmp(testType,"convCoder"))
-            convCoder = getModuleFromPar<ConvolutionalCoder>(par("convolutionalCoderModule"), this);
+            convCoder = getModuleFromPar<ConvolutionalCoderModule>(par("convolutionalCoderModule"), this);
         else if(!strcmp(testType, "interleaver"))
-            interleaver = getModuleFromPar<Ieee80211Interleaver>(par("interleaverModule"), this);
+            interleaver = getModuleFromPar<Ieee80211InterleaverModule>(par("interleaverModule"), this);
         else if(!strcmp(testType, "scrambler"))
-            scrambler = getModuleFromPar<Ieee80211Scrambler>(par("scramblerModule"), this);
+            scrambler = getModuleFromPar<Ieee80211ScramblerModule>(par("scramblerModule"), this);
         else if (!strcmp(testType, "all"))
         {
-            convCoder = getModuleFromPar<ConvolutionalCoder>(par("convolutionalCoderModule"), this);
-            interleaver = getModuleFromPar<Ieee80211Interleaver>(par("interleaverModule"), this);
-            scrambler = getModuleFromPar<Ieee80211Scrambler>(par("scramblerModule"), this);
+            convCoder = getModuleFromPar<ConvolutionalCoderModule>(par("convolutionalCoderModule"), this);
+            interleaver = getModuleFromPar<Ieee80211InterleaverModule>(par("interleaverModule"), this);
+            scrambler = getModuleFromPar<Ieee80211ScramblerModule>(par("scramblerModule"), this);
         }
         else
             throw cRuntimeError("Unknown (= %s) test type", testType);
@@ -110,8 +110,8 @@ void Ieee80211BitDomainTest::testInterleaver() const
     while (*fileStream >> line)
     {
         BitVector input(line.c_str());
-        BitVector interleavedInput = interleaver->interleaving(input);
-        if (interleaver->deinterleaving(interleavedInput) != input)
+        BitVector interleavedInput = interleaver->interleave(input);
+        if (interleaver->deinterleave(interleavedInput) != input)
             EV_DETAIL << "Deinterleaving has failed" << endl;
     }
 }
@@ -121,15 +121,14 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
     fileStream->clear();
     fileStream->seekg(0, std::ios::beg);
     std::string line;
-    const Ieee80211Scrambler::Ieee80211ScramblerInfo *scramblerInfo = check_and_cast<const Ieee80211Scrambler::Ieee80211ScramblerInfo *>(scrambler->getInfo());
-    EV_DETAIL << "The scrambling sequence is: " << scramblerInfo->getScramblingSequcene() << endl;
+//    EV_DETAIL << "The scrambling sequence is: " << scrambler->getScramblingSequcene() << endl;
     while (*fileStream >> line)
     {
         BitVector input(line.c_str());
         BitVector scrambledInput = scrambler->scramble(input);
         BitVector bccEncodedInput = convCoder->encode(scrambledInput);
-        BitVector interleavedInput = interleaver->interleaving(bccEncodedInput);
-        BitVector deinterleavedInput = interleaver->deinterleaving(interleavedInput);
+        BitVector interleavedInput = interleaver->interleave(bccEncodedInput);
+        BitVector deinterleavedInput = interleaver->deinterleave(interleavedInput);
         if (bccEncodedInput != deinterleavedInput)
             EV_DETAIL << "Deinterleaving has failed" << endl;
         BitVector bccDecodedInput = convCoder->decode(deinterleavedInput);
