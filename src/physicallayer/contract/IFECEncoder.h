@@ -25,10 +25,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IFECInfo : public IPrintableObject
+class INET_API IForwardErrorCorrection : public IPrintableObject
 {
     public:
-        virtual ~IFECInfo();
+        virtual ~IForwardErrorCorrection();
 };
 
 class INET_API IFECEncoder
@@ -36,7 +36,7 @@ class INET_API IFECEncoder
     public:
         virtual BitVector encode(const BitVector& informationBits) const = 0;
         virtual BitVector decode(const BitVector& encodedBits) const = 0;
-        virtual const IFECInfo *getConvolutionalCode() const = 0;
+        virtual const IForwardErrorCorrection *getConvolutionalCode() const = 0;
         virtual ~IFECEncoder();
 };
 

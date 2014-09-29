@@ -23,7 +23,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API ConvolutionalCode : public IFECInfo
+class INET_API ConvolutionalCode : public IForwardErrorCorrection
 {
     protected:
         const char *transferFunctionMatrix;
