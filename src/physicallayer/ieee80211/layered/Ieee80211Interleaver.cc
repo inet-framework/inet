@@ -69,7 +69,7 @@ BitVector Ieee80211Interleaver::deinterleave(const BitVector& interleavedBits) c
     return deinterleavedBits;
 }
 
-Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving* interleaving)
+Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving* interleaving) : interleaving(interleaving)
 {
     numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
     numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();
