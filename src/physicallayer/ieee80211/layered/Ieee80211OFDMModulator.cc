@@ -90,7 +90,7 @@ void Ieee80211OFDMModulator::modulateSignalField(const BitVector& signalField, s
         signalFieldSymbol->pushAPSKSymbol(apskSymbol, subcarrierIndex);
     }
     insertPilotSubcarriers(signalFieldSymbol, 0);
-    EV_DEBUG << "BPSK modulated SIGNAL field: " << signalFieldSymbol << endl;
+    EV_DEBUG << "BPSK modulated SIGNAL field: " << *signalFieldSymbol << endl;
     ofdmSymbols->push_back(signalFieldSymbol);
 }
 
@@ -127,7 +127,7 @@ void Ieee80211OFDMModulator::modulateDataField(const BitVector& dataField, std::
         if (i % OFDM_SYMBOL_SIZE == OFDM_SYMBOL_SIZE - 1)
         {
             insertPilotSubcarriers(ofdmSymbol, symbolID);
-            EV_DEBUG << "Modulated #" << symbolID << " DATA field: " << ofdmSymbol << endl;
+            EV_DEBUG << "Modulated #" << symbolID << " DATA field: " << *ofdmSymbol << endl;
             ofdmSymbols->push_back(ofdmSymbol);
             ofdmSymbol = new OFDMSymbol();
             symbolID++;
