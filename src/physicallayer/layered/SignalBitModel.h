@@ -60,8 +60,8 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     virtual double getBitRate() const { return bitRate; }
     virtual const BitVector* getBits() const { return bits; }
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
-    virtual const IScrambling *getScramblerInfo() const { return scramblerInfo; }
-    virtual const IInterleaving *getInterleaverInfo() const { return interleaverInfo; }
+    virtual const IScrambling *getScrambling() const { return scramblerInfo; }
+    virtual const IInterleaving *getInterleaving() const { return interleaverInfo; }
 };
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel

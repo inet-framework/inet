@@ -42,8 +42,8 @@ class INET_API ISignalBitModel : public IPrintableObject
 
     virtual const BitVector *getBits() const = 0;
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
-    virtual const IScrambling *getScramblerInfo() const = 0;
-    virtual const IInterleaving *getInterleaverInfo() const = 0;
+    virtual const IScrambling *getScrambling() const = 0;
+    virtual const IInterleaving *getInterleaving() const = 0;
 };
 
 class INET_API ITransmissionBitModel : public virtual ISignalBitModel
