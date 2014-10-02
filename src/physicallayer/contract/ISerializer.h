@@ -28,6 +28,8 @@ class ISerializer : public IPrintableObject
 {
     public:
         virtual BitVector serialize(const cPacket *packet) const = 0;
+        virtual cPacket *deserialize(const BitVector& bits) const = 0;
+        virtual ~ISerializer() {};
 };
 
 } /* namespace physicallayer */
