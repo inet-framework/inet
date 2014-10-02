@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALSNIR_H
 #define __INET_DIMENSIONALSNIR_H
 
-#include "inet/physicallayer/contract/ISNIR.h"
+#include "inet/physicallayer/base/SNIRBase.h"
 #include "inet/physicallayer/dimensional/DimensionalReception.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
 
@@ -26,16 +26,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalSNIR : public virtual ISNIR
+class INET_API DimensionalSNIR : public SNIRBase
 {
-  protected:
-    const DimensionalReception *reception;
-    const DimensionalNoise *noise;
-
   public:
     DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
 
     virtual void printToStream(std::ostream& stream) const;
+
     virtual double computeMin() const;
 };
 

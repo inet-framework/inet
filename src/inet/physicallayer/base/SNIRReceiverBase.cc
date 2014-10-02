@@ -22,6 +22,12 @@ namespace inet {
 
 namespace physicallayer {
 
+SNIRReceiverBase::SNIRReceiverBase() :
+    ReceiverBase(),
+    snirThreshold(sNaN)
+{
+}
+
 void SNIRReceiverBase::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
@@ -35,28 +41,25 @@ bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, 
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
-    const INoise *noise = computeNoise(listening, interference);
-    const ISNIR *snir = computeSNIR(reception, noise);
-    double minSNIR = snir->computeMin();
-    delete noise;
     RadioReceptionIndication *indication = new RadioReceptionIndication();
-    indication->setMinSNIR(minSNIR);
+    indication->setMinSNIR(snir->computeMin());
     return indication;
 }
 
-bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const
+bool SNIRReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 {
-    return indication->getMinSNIR() > snirThreshold;
+    return snir->computeMin() > snirThreshold;
 }
 
 const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
+    const ISNIR *snir = computeSNIR(reception, computeNoise(listening, interference));
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
-    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interference) : NULL;
-    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference, indication);
+    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(snir);
+    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : NULL;
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

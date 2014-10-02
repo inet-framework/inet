@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARSNIR_H
 #define __INET_SCALARSNIR_H
 
-#include "inet/physicallayer/contract/ISNIR.h"
+#include "inet/physicallayer/base/SNIRBase.h"
 #include "inet/physicallayer/scalar/ScalarReception.h"
 #include "inet/physicallayer/scalar/ScalarNoise.h"
 
@@ -26,16 +26,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarSNIR : public virtual ISNIR
+class INET_API ScalarSNIR : public SNIRBase
 {
-  protected:
-    const ScalarReception *reception;
-    const ScalarNoise *noise;
-
   public:
     ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
 
     virtual void printToStream(std::ostream& stream) const;
+
     virtual double computeMin() const;
 };
 

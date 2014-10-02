@@ -27,28 +27,27 @@ void FlatErrorModel::printToStream(std::ostream& stream) const
     stream << "Flat error model";
 }
 
-double FlatErrorModel::computePacketErrorRate(const IReception *reception, const IInterference *interference) const
+double FlatErrorModel::computePacketErrorRate(const ISNIR *snir) const
 {
-    double bitErrorRate = computeBitErrorRate(reception, interference);
+    double bitErrorRate = computeBitErrorRate(snir);
     if (bitErrorRate == 0.0)
         return 0.0;
     else {
+        const IReception *reception = snir->getReception();
         const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
         return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
     }
 }
 
-double FlatErrorModel::computeBitErrorRate(const IReception *reception, const IInterference *interference) const
+double FlatErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
+    const IReception *reception = snir->getReception();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
     const IModulation *modulation = flatTransmission->getModulation();
-    // TODO: compute SNIR
-    double minSNIR = 0;
-    throw cRuntimeError("TODO");
-    return modulation->calculateBER(minSNIR, flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
+    return modulation->calculateBER(snir->computeMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
 }
 
-double FlatErrorModel::computeSymbolErrorRate(const IReception *reception, const IInterference *interference) const
+double FlatErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
     throw cRuntimeError("Not implemented");
 }

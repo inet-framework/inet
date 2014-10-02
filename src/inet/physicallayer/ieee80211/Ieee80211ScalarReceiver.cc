@@ -78,11 +78,10 @@ void Ieee80211ScalarReceiver::initialize(int stage)
     }
 }
 
-bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const
+// TODO: extract to Ieee80211ErrorModel
+bool Ieee80211ScalarReceiver::computeHasBitError(const ISNIR *snir) const
 {
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
-    const INoise *noise = computeNoise(listening, interference);
-    const ISNIR *snir = computeSNIR(reception, noise);
+    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
     double minSNIR = snir->computeMin();
     int bitLength = flatTransmission->getPayloadBitLength();
     double bitrate = flatTransmission->getBitrate().get();

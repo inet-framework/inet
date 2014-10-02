@@ -41,24 +41,31 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      * This function must be purely functional and support optimistic parallel
      * computation.
      */
-    virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual const RadioReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
     /**
      * Returns whether the reception is free of any errors. This function must
      * be purely functional and support optimistic parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const;
+    virtual bool computeIsReceptionSuccessful(const ISNIR *snir) const;
 
+    /**
+     * Returns the total noise summing up all the interfering receptions and
+     * noises. This function must be purely functional and support optimistic
+     * parallel computation.
+     */
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
+
+    /**
+     * Returns the signal to noise and interference ratio.
+     */
     virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 
   public:
-    SNIRReceiverBase() :
-        ReceiverBase(),
-        snirThreshold(sNaN)
-    {}
+    SNIRReceiverBase();
 
     virtual double getSNIRThreshold() const { return snirThreshold; }
+
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 };
 

@@ -107,15 +107,15 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
 }
 
 // TODO: this is not purely functional, see interface comment
-bool FlatReceiverBase::computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool FlatReceiverBase::computeHasBitError(const ISNIR *snir) const
 {
-    double packetErrorRate = errorModel->computePacketErrorRate(reception, interference);
+    double packetErrorRate = errorModel->computePacketErrorRate(snir);
     return packetErrorRate == 0.0 ? false : dblrand() < packetErrorRate;
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const
+bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 {
-    return SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference, indication) && !computeHasBitError(listening, reception, interference);
+    return SNIRReceiverBase::computeIsReceptionSuccessful(snir) && !computeHasBitError(snir);
 }
 
 const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const

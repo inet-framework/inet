@@ -22,8 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 ScalarSNIR::ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise) :
-    reception(reception),
-    noise(noise)
+    SNIRBase(reception, noise)
 {
 }
 
@@ -34,7 +33,9 @@ void ScalarSNIR::printToStream(std::ostream& stream) const
 
 double ScalarSNIR::computeMin() const
 {
-    return unit(reception->getPower() / noise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
+    const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
+    const ScalarNoise *scalarNoise= check_and_cast<const ScalarNoise *>(noise);
+    return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
 } // namespace physicallayer

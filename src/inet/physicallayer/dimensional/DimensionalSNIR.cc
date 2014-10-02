@@ -22,8 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise) :
-    reception(reception),
-    noise(noise)
+    SNIRBase(reception, noise)
 {
 }
 

@@ -41,9 +41,9 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
 
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const RadioReceptionIndication *indication) const;
+    virtual bool computeIsReceptionSuccessful(const ISNIR *snir) const;
 
-    virtual bool computeHasBitError(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual bool computeHasBitError(const ISNIR *snir) const;
 
   public:
     FlatReceiverBase();

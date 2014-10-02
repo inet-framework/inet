@@ -18,23 +18,20 @@
 #ifndef __INET_IERRORMODEL_H
 #define __INET_IERRORMODEL_H
 
-#include "IReception.h"
-#include "IInterference.h"
+#include "ISNIR.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-// TODO: revise and use
-// TODO: what kind of SNIR should we use: min, max, average, dimensional, polymorphism?
 class INET_API IErrorModel : public IPrintableObject
 {
   public:
-    virtual double computePacketErrorRate(const IReception *reception, const IInterference *interference) const = 0;
+    virtual double computePacketErrorRate(const ISNIR *snir) const = 0;
 
-    virtual double computeBitErrorRate(const IReception *reception, const IInterference *interference) const = 0;
+    virtual double computeBitErrorRate(const ISNIR *snir) const = 0;
 
-    virtual double computeSymbolErrorRate(const IReception *reception, const IInterference *interference) const = 0;
+    virtual double computeSymbolErrorRate(const ISNIR *snir) const = 0;
 };
 
 // TODO: move ILayeredErrorModel after the layered radio is merged in

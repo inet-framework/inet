@@ -15,29 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISNIR_H
-#define __INET_ISNIR_H
-
-#include "inet/physicallayer/contract/INoise.h"
-#include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/base/SNIRBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ISNIR : public IPrintableObject
+SNIRBase::SNIRBase(const IReception *reception, const INoise *noise) :
+    reception(reception),
+    noise(noise)
 {
-  public:
-    virtual const IReception *getReception() const = 0;
-
-    virtual const INoise *getNoise() const = 0;
-
-    virtual double computeMin() const = 0;
-};
+}
 
 } // namespace physicallayer
 
 } // namespace inet
-
-#endif // ifndef __INET_ISNIR_H
 

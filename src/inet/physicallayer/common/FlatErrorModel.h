@@ -29,11 +29,11 @@ class INET_API FlatErrorModel : public IErrorModel
   public:
     virtual void printToStream(std::ostream& stream) const;
 
-    virtual double computePacketErrorRate(const IReception *reception, const IInterference *interference) const;
+    virtual double computePacketErrorRate(const ISNIR *snir) const;
 
-    virtual double computeBitErrorRate(const IReception *reception, const IInterference *interference) const;
+    virtual double computeBitErrorRate(const ISNIR *snir) const;
 
-    virtual double computeSymbolErrorRate(const IReception *reception, const IInterference *interference) const;
+    virtual double computeSymbolErrorRate(const ISNIR *snir) const;
 };
 
 } // namespace physicallayer
