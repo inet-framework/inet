@@ -50,10 +50,13 @@ BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymb
     BitVector field;
     for (unsigned int i = 0; i < apskSymbols.size(); i++)
     {
-        const APSKSymbol *apskSymbol = apskSymbols.at(i);
-        ShortBitVector bits = signalModulationScheme->demapToBitRepresentation(apskSymbol);
-        for (unsigned int j = 0; j < bits.getSize(); j++)
-            field.appendBit(bits.getBit(j));
+        if (!isPilotOrDcSubcarrier(i))
+        {
+            const APSKSymbol *apskSymbol = apskSymbols.at(i);
+            ShortBitVector bits = signalModulationScheme->demapToBitRepresentation(apskSymbol);
+            for (unsigned int j = 0; j < bits.getSize(); j++)
+                field.appendBit(bits.getBit(j));
+        }
     }
     return field;
 }
@@ -128,6 +131,11 @@ void Ieee80211OFDMDemodulator::setDataFieldDemodulation(const BitVector *signalF
 const Ieee80211Interleaving* Ieee80211OFDMDemodulator::getInterleavingFromModulation() const
 {
     return new Ieee80211Interleaving(dataModulationScheme->getCodeWordLength() * 48, dataModulationScheme->getCodeWordLength());
+}
+
+bool Ieee80211OFDMDemodulator::isPilotOrDcSubcarrier(int i) const
+{
+   return i == 5 || i == 19 || i == 33 || i == 47 || i == 26; // pilots are: 5,19,33,47, 26 (0+26) is a dc subcarrier
 }
 
 const IReceptionBitModel* Ieee80211OFDMDemodulator::demodulate(const IReceptionSymbolModel* symbolModel) const

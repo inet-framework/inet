@@ -48,6 +48,7 @@ class INET_API Ieee80211OFDMDemodulator : public cSimpleModule, public IDemodula
         const Ieee80211Interleaving *getInterleavingFromModulation() const;
         ShortBitVector getRate(const BitVector *signalField) const;
         void setDataFieldDemodulation(const BitVector *signalField) const;
+        bool isPilotOrDcSubcarrier(int i) const;
 
     public:
         virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
