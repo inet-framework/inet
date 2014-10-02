@@ -17,7 +17,7 @@
 
 package inet.physicallayer.contract;
 
-moduleinterface IFECEncoder
+moduleinterface IFECCoder
 {
 
 }

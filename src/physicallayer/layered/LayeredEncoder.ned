@@ -18,7 +18,7 @@
 package inet.physicallayer.layered;
 
 import inet.physicallayer.contract.IEncoder;
-import inet.physicallayer.contract.IFECEncoder;
+import inet.physicallayer.contract.IFECCoder;
 import inet.physicallayer.contract.IInterleaver;
 import inet.physicallayer.contract.IScrambler;
 import inet.physicallayer.contract.ISerializer;
@@ -40,7 +40,7 @@ module LayeredEncoder like IEncoder
         scrambler: <scramblerType> like IScrambler if scramblerType != "" {
             @display("p=72,94");
         }
-        fecEncoder: <fecType> like IFECEncoder if fecType != "" {
+        fecEncoder: <fecType> like IFECCoder if fecType != "" {
             @display("p=72,168");
         }
         interleaver: <interleaverType> like IInterleaver if interleaverType != "" {

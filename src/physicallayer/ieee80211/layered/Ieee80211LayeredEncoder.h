@@ -21,7 +21,7 @@
 #include "IEncoder.h"
 #include "ISerializer.h"
 #include "LayeredEncoder.h"
-#include "IFECEncoder.h"
+#include "IFECCoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
 #include "SignalPacketModel.h"

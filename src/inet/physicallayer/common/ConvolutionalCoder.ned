@@ -17,7 +17,7 @@
 
 package inet.physicallayer.common;
 
-import inet.physicallayer.contract.IFECEncoder;
+import inet.physicallayer.contract.IFECCoder;
 
 
 // Transfer function (octal) matrix
@@ -65,7 +65,7 @@ import inet.physicallayer.contract.IFECEncoder;
 // The encoding process works in accordance with the industry-standards and starts
 // in the all-zeros state.
 //
-module ConvolutionalCoder like IFECEncoder
+module ConvolutionalCoder like IFECCoder
 {
     parameters:
         string transferFunctionMatrix = default("133 171");

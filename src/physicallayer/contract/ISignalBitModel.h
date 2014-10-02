@@ -19,7 +19,7 @@
 #define __INET_ISIGNALBITMODEL_H
 
 #include "ICyclicRedundancyCheck.h"
-#include "IFECEncoder.h"
+#include "IFECCoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
 
