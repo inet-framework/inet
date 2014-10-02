@@ -32,12 +32,12 @@ std::ostream& operator<<(std::ostream& out, const OFDMSymbol& symbol)
     if (symbol.subcarrierSymbols[0])
         out << *symbol.subcarrierSymbols[0];
     else
-        out << "UNSET SYMBOL";
+        out << "UNDEFINED SYMBOL";
     for (unsigned int i = 1; i < symbol.subcarrierSymbols.size(); i++)
         if (symbol.subcarrierSymbols[i])
             out << " " << *symbol.subcarrierSymbols[i];
         else
-            out << "UNSET SYMBOL";
+            out << "UNDEFINED SYMBOL";
     return out;
 }
 
