@@ -23,7 +23,7 @@
 namespace inet {
 namespace physicallayer {
 
-class ConvolutionalCoderModule : public cSimpleModule, public IFECEncoder
+class ConvolutionalCoderModule : public cSimpleModule, public IFECCoder
 {
     protected:
         ConvolutionalCoder *convolutionalCoder;
@@ -36,7 +36,7 @@ class ConvolutionalCoderModule : public cSimpleModule, public IFECEncoder
     public:
         virtual BitVector encode(const BitVector& informationBits) const { return convolutionalCoder->encode(informationBits); }
         virtual BitVector decode(const BitVector& encodedBits) const { return convolutionalCoder->decode(encodedBits); }
-        virtual const IForwardErrorCorrection *getConvolutionalCode() const {  return convolutionalCoder->getConvolutionalCode(); }
+        virtual const ConvolutionalCode *getForwardErrorCorrection() const {  return convolutionalCoder->getForwardErrorCorrection(); }
         ~ConvolutionalCoderModule();
 };
 

@@ -35,7 +35,7 @@ namespace physicallayer {
  * The details can be found in: Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.5 PLCP DATA scrambler and descrambler
  */
-class Ieee80211Scrambler : public IScrambler
+class Ieee80211Scrambler : public ScramblerBase
 {
     protected:
         BitVector scramblingSequence;
@@ -51,7 +51,6 @@ class Ieee80211Scrambler : public IScrambler
         BitVector descramble(const BitVector& bits) const { return scramble(bits); }
         const Ieee80211Scrambling *getScrambling() const { return scrambling; }
         const BitVector& getScramblingSequcene() const { return scramblingSequence; }
-        ~Ieee80211Scrambler();
 };
 
 } /* namespace physicallayer */

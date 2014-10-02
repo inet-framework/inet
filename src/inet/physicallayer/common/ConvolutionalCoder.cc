@@ -508,7 +508,7 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
     return decodedMsg;
 }
 
-ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode* convolutionalCode) : convolutionalCode(convolutionalCode)
+ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode* convolutionalCode) : FecCoderBase(convolutionalCode)
 {
     const char *strTransferFunctionMatrix = convolutionalCode->getTransferFunctionMatrix();
     const char *strPuncturingMatrix = convolutionalCode->getPuncturingMatrix();
@@ -557,7 +557,6 @@ ConvolutionalCoder::~ConvolutionalCoder()
     delete[] inputSymbols;
     delete[] decimalToOutputSymbol;
     delete[] decimalToInputSymbol;
-    delete convolutionalCode;
 }
 
 } /* namespace physicallayer */

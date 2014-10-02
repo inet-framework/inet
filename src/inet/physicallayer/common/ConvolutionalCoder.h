@@ -43,7 +43,7 @@ namespace physicallayer {
     (MAC) and Physical Layer (PHY) Specifications
     [4]  Puncturing matrices came from http://en.wikipedia.org/wiki/Convolutional_code#Punctured_convolutional_codes
  */
-class ConvolutionalCoder :  public IFECEncoder
+class ConvolutionalCoder : public FecCoderBase
 {
     public:
         typedef std::vector<std::vector<ShortBitVector> > ShortBitVectorMatrix;
@@ -81,7 +81,7 @@ class ConvolutionalCoder :  public IFECEncoder
         int **stateTransitions; // maps a (state, inputSymbol) pair to the corresponding next state
         unsigned char ***hammingDistanceLookupTable; // lookup table for Hamming distances, the three dimensions are: [outputSymbol, outputSymbol, excludedBits]
         std::vector<std::vector<TrellisGraphNode> > trellisGraph; // the decoder's trellis graph
-        const ConvolutionalCode *convolutionalCode; // this info class holds information related to this encoder
+        const ConvolutionalCode *forwardErrorCorrection; // this info class holds information related to this encoder
 
     protected:
         inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
@@ -126,7 +126,7 @@ class ConvolutionalCoder :  public IFECEncoder
     public:
         BitVector encode(const BitVector& informationBits) const;
         BitVector decode(const BitVector& encodedBits) const;
-        const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
+        const ConvolutionalCode *getForwardErrorCorrection() const { return forwardErrorCorrection; }
 
         /*
          * Getters for the encoder's/decoder's parameters

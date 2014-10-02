@@ -69,16 +69,11 @@ BitVector Ieee80211Interleaver::deinterleave(const BitVector& interleavedBits) c
     return deinterleavedBits;
 }
 
-Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving* interleaving) : interleaving(interleaving)
+Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving* interleaving) : InterleaverBase(interleaving)
 {
     numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
     numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();
     s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
-}
-
-Ieee80211Interleaver::~Ieee80211Interleaver()
-{
-    delete interleaving;
 }
 
 } /* namespace physicallayer */

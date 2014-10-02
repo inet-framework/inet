@@ -32,22 +32,21 @@ namespace physicallayer {
  * Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.7 Data interleaving
  */
-class Ieee80211Interleaver : public IInterleaver
+class Ieee80211Interleaver : public InterleaverBase
 {
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
     int s;
-    const IInterleaving *interleaving;
+    const Ieee80211Interleaving* interleaving;
 
   public:
     BitVector interleave(const BitVector& bits) const;
     BitVector deinterleave(const BitVector& bits) const;
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-    const IInterleaving *getInterleaving() const { return interleaving; }
+    const Ieee80211Interleaving *getInterleaving() const { return interleaving; }
     Ieee80211Interleaver(const Ieee80211Interleaving *interleaving);
-    ~Ieee80211Interleaver();
 };
 
 } /* namespace physicallayer */

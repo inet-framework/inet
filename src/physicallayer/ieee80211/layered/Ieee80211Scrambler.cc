@@ -56,16 +56,11 @@ BitVector Ieee80211Scrambler::generateScramblingSequence(const ShortBitVector& g
     return scramblingSequence;
 }
 
-Ieee80211Scrambler::Ieee80211Scrambler(const Ieee80211Scrambling* scrambling) : scrambling(scrambling)
+Ieee80211Scrambler::Ieee80211Scrambler(const Ieee80211Scrambling* scrambling) : ScramblerBase(scrambling)
 {
     ShortBitVector generatorPolynomial = scrambling->getGeneratorPolynomial();
     ShortBitVector seed = scrambling->getSeed();
     scramblingSequence = generateScramblingSequence(generatorPolynomial, seed);
-}
-
-Ieee80211Scrambler::~Ieee80211Scrambler()
-{
-    delete scrambling;
 }
 
 } /* namespace physicallayer */
