@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IFORWARDERRORCORRECTION_H
-#define __INET_IFORWARDERRORCORRECTION_H
+#ifndef __INET_IFECCODER_H
+#define __INET_IFECCODER_H
 
 #include "IPrintableObject.h"
 #include "BitVector.h"
@@ -57,4 +57,4 @@ class INET_API FecCoderBase : public IFECCoder
 
 } // namespace inet
 
-#endif // ifndef __INET_IFORWARDERRORCORRECTION_H
+#endif // ifndef __INET_IFECCODER_H
