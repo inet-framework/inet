@@ -48,10 +48,10 @@ class INET_API Ieee80211OFDMDemodulator : public cSimpleModule, public IDemodula
         const Ieee80211Interleaving *getInterleavingFromModulation() const;
         ShortBitVector getRate(const BitVector *signalField) const;
         void setDataFieldDemodulation(const BitVector *signalField) const;
-        int computeCodedBitsPerOFDMSymbol(const Ieee80211ConvolutionalCode *convolutionalCode) const;
 
     public:
         virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
+        void printToStream(std::ostream& stream) const { stream << "TODO"; }
 };
 
 } // namespace physicallayer

@@ -26,6 +26,8 @@
 namespace inet {
 namespace physicallayer {
 
+Define_Module(Ieee80211OFDMDemodulator);
+
 void Ieee80211OFDMDemodulator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
@@ -50,7 +52,7 @@ BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymb
     {
         const APSKSymbol *apskSymbol = apskSymbols.at(i);
         ShortBitVector bits = signalModulationScheme->demapToBitRepresentation(apskSymbol);
-        for (unsigned int j = 0; i < bits.getSize(); j++)
+        for (unsigned int j = 0; j < bits.getSize(); j++)
             field.appendBit(bits.getBit(j));
     }
     return field;
