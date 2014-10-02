@@ -36,11 +36,13 @@ void Ieee80211OFDMDemodulator::initialize(int stage)
 
 BitVector Ieee80211OFDMDemodulator::demodulateSignalSymbol(const OFDMSymbol *signalSymbol) const
 {
+    EV_DEBUG << "Demodulating the following SIGNAL symbols: " << *signalSymbol << endl;
     return demodulateField(signalSymbol, signalModulationScheme);
 }
 
 BitVector Ieee80211OFDMDemodulator::demodulateDataSymbol(const OFDMSymbol *dataSymbol) const
 {
+    EV_DEBUG << "Demodulating the following DATA symbols: " << *dataSymbol << endl;
     return demodulateField(dataSymbol, dataModulationScheme);
 }
 
@@ -58,6 +60,7 @@ BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymb
                 field.appendBit(bits.getBit(j));
         }
     }
+    EV_DEBUG << "The field symbols has been demodulated into the following bit stream: " << field << endl;
     return field;
 }
 
