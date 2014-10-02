@@ -27,12 +27,16 @@ namespace physicallayer {
 class INET_API DummySerializer : public cSimpleModule, public ISerializer
 {
     protected:
-        BitVector dummyOutput;
+        BitVector dummyOutputBits;
+        cPacket *dummyOutputPacket;
 
     public:
-        void setDummyOutput(const BitVector& dummyOutput) { this->dummyOutput = dummyOutput; }
+        void setDummyOutputBits(const BitVector& bits) { this->dummyOutputBits = bits; }
+        void setDummyOutputPacket(const cPacket *packet) { this->dummyOutputPacket = packet->dup(); }
         BitVector serialize(const cPacket *packet) const;
+        cPacket *deserialize(const BitVector& bits) const;
         void printToStream(std::ostream &stream) const { stream << "A very dummy serializer"; }
+        ~DummySerializer() { delete dummyOutputPacket; }
 };
 
 } /* namespace physicallayer */

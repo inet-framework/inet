@@ -24,7 +24,12 @@ Define_Module(DummySerializer);
 
 BitVector DummySerializer::serialize(const cPacket *packet) const
 {
-    return dummyOutput;
+    return dummyOutputBits;
+}
+
+cPacket *DummySerializer::deserialize(const BitVector& bits) const
+{
+    return dummyOutputPacket;
 }
 
 } /* namespace physicallayer */
