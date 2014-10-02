@@ -31,6 +31,7 @@ class INET_API DummySerializer : public cSimpleModule, public ISerializer
         cPacket *dummyOutputPacket;
 
     public:
+        DummySerializer() : dummyOutputPacket(NULL) {};
         void setDummyOutputBits(const BitVector& bits) { this->dummyOutputBits = bits; }
         void setDummyOutputPacket(const cPacket *packet) { this->dummyOutputPacket = packet->dup(); }
         BitVector serialize(const cPacket *packet) const;
