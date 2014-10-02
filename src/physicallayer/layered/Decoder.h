@@ -31,7 +31,7 @@ class INET_API Decoder : public IDecoder
   protected:
     double bitRate;
     int headerBitLength;
-    const IFECEncoder *forwardErrorCorrection;
+    const IFECCoder *forwardErrorCorrection;
 
   public:
     Decoder();

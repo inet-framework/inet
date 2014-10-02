@@ -31,7 +31,7 @@ void LayeredEncoder::initialize(int stage)
     {
         serializer = check_and_cast<ISerializer *>(getSubmodule("serializer"));
         scrambler = dynamic_cast<IScrambler *>(getSubmodule("scrambler"));
-        fecEncoder = dynamic_cast<IFECEncoder *>(getSubmodule("fecEncoder"));
+        fecEncoder = dynamic_cast<IFECCoder *>(getSubmodule("fecEncoder"));
         interleaver = dynamic_cast<IInterleaver *>(getSubmodule("interleaver"));
     }
 }

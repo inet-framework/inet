@@ -31,13 +31,13 @@ class INET_API IForwardErrorCorrection : public IPrintableObject
         virtual ~IForwardErrorCorrection() {};
 };
 
-class INET_API IFECEncoder
+class INET_API IFECCoder
 {
     public:
         virtual BitVector encode(const BitVector& informationBits) const = 0;
         virtual BitVector decode(const BitVector& encodedBits) const = 0;
         virtual const IForwardErrorCorrection *getConvolutionalCode() const = 0;
-        virtual ~IFECEncoder() {};
+        virtual ~IFECCoder() {};
 };
 
 } // namespace physicallayer

@@ -37,7 +37,7 @@ class INET_API LayeredEncoder : public IEncoder, public cSimpleModule
     int headerBitLength;
     const ISerializer *serializer;
     const IScrambler *scrambler;
-    const IFECEncoder *fecEncoder;
+    const IFECCoder *fecEncoder;
     const IInterleaver *interleaver;
 
   protected:
