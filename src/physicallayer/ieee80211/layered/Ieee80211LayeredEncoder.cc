@@ -28,8 +28,8 @@ void Ieee80211LayeredEncoder::initialize(int stage)
     {
         serializer = check_and_cast<ISerializer *>(getSubmodule("serializer"));
         scrambler = check_and_cast<IScrambler *>(getSubmodule("scrambler"));
-        dataFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("fecEncoder"));
-        signalFECEncoder = check_and_cast<IFECEncoder *>(getSubmodule("signalFECEncoder"));
+        dataFECEncoder = check_and_cast<IFECCoder *>(getSubmodule("fecEncoder"));
+        signalFECEncoder = check_and_cast<IFECCoder *>(getSubmodule("signalFECEncoder"));
         interleaver = check_and_cast<IInterleaver *>(getSubmodule("interleaver"));
         signalInterleaver = check_and_cast<IInterleaver *>(getSubmodule("signalInterleaver"));
     }
@@ -79,7 +79,7 @@ const ITransmissionBitModel* Ieee80211LayeredEncoder::encode(const ITransmission
     for (unsigned int i = 0; i < encodedDataField.getSize(); i++)
         encodedBits->appendBit(encodedDataField.getBit(i));
     // TODO: bitrate
-    return new TransmissionBitModel(encodedBits->getSize(), bitRate, encodedBits, dataFECEncoder->getConvolutionalCode(), scrambler->getScrambling(), interleaver->getInterleaving());
+    return new TransmissionBitModel(encodedBits->getSize(), bitRate, encodedBits, dataFECEncoder->getForwardErrorCorrection(), scrambler->getScrambling(), interleaver->getInterleaving());
 }
 
 } /* namespace physicallayer */

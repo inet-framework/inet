@@ -59,7 +59,7 @@ void Ieee80211SymbolDomainTest::parseInput(const char* fileName)
 void Ieee80211SymbolDomainTest::test() const
 {
     TransmissionPacketModel dummyPacket;
-    serializer->setDummyOutput(input);
+    serializer->setDummyOutputBits(input);
     const ITransmissionBitModel *bitModel = ieee80211LayeredEncoder->encode(&dummyPacket);
     ieee80211OFDMModulator->modulate(bitModel);
 }

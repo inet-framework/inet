@@ -33,9 +33,9 @@ namespace physicallayer {
 class INET_API Ieee80211LayeredEncoder : public LayeredEncoder
 {
     protected:
-        const IFECEncoder *signalFECEncoder;
+        const IFECCoder *signalFECEncoder;
         const IInterleaver *signalInterleaver;
-        const IFECEncoder *dataFECEncoder;
+        const IFECCoder *dataFECEncoder;
 
     protected:
         virtual void initialize(int stage);

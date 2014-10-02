@@ -42,7 +42,7 @@ void Ieee80211LayeredDecoder::initialize(int stage)
 const IReceptionPacketModel* Ieee80211LayeredDecoder::decode(const IReceptionBitModel* bitModel) const
 {
     const Ieee80211ConvolutionalCode *fec = dynamic_cast<const Ieee80211ConvolutionalCode *>(bitModel->getForwardErrorCorrection());
-    const Ieee80211Interleaving *deinterleaving = dynamic_cast<const Ieee80211Interleaving *>(bitModel->getInterleaverInfo());
+    const Ieee80211Interleaving *deinterleaving = dynamic_cast<const Ieee80211Interleaving *>(bitModel->getInterleaving());
     ASSERT(fec != NULL);
     ASSERT(deinterleaving != NULL);
     Ieee80211Interleaver deinterleaver(deinterleaving);
