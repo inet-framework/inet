@@ -40,6 +40,19 @@ class INET_API IFECCoder
         virtual ~IFECCoder() {};
 };
 
+class INET_API FecCoderBase : public IFECCoder
+{
+    protected:
+        const IForwardErrorCorrection *forwardErrorCorrection;
+
+    public:
+        FecCoderBase(const IForwardErrorCorrection *convolutionalCode) : forwardErrorCorrection(convolutionalCode) {}
+        virtual BitVector encode(const BitVector& informationBits) const = 0;
+        virtual BitVector decode(const BitVector& encodedBits) const = 0;
+        virtual const IForwardErrorCorrection *getConvolutionalCode() { return forwardErrorCorrection; }
+        virtual ~FecCoderBase() { delete forwardErrorCorrection; }
+};
+
 } // namespace physicallayer
 
 } // namespace inet
