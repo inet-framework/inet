@@ -37,7 +37,7 @@ class INET_API Ieee80211ScramblerModule : public cSimpleModule, public IScramble
     public:
         virtual BitVector scramble(const BitVector& bits) const { return scrambler->scramble(bits); }
         virtual BitVector descramble(const BitVector& bits) const { return scrambler->descramble(bits); }
-        virtual const IScrambling *getScrambling() const { return scrambler->getScrambling(); }
+        virtual const Ieee80211Scrambling *getScrambling() const { return scrambler->getScrambling(); }
         virtual ~Ieee80211ScramblerModule();
 };
 
