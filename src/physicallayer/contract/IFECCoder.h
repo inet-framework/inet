@@ -50,7 +50,6 @@ class INET_API FecCoderBase : public IFECCoder
         virtual BitVector encode(const BitVector& informationBits) const = 0;
         virtual BitVector decode(const BitVector& encodedBits) const = 0;
         virtual const IForwardErrorCorrection *getForwardErrorCorrection() { return forwardErrorCorrection; }
-        virtual ~FecCoderBase() { delete forwardErrorCorrection; }
 };
 
 } // namespace physicallayer

@@ -50,7 +50,6 @@ class INET_API InterleaverBase : public IInterleaver
         virtual BitVector interleave(const BitVector& bits) const = 0;
         virtual BitVector deinterleave(const BitVector& bits) const = 0;
         virtual const IInterleaving *getInterleaving() const { return interleaving; }
-        virtual ~InterleaverBase() { delete interleaving; }
 };
 
 } /* namespace physicallayer */

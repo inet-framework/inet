@@ -50,8 +50,6 @@ class INET_API ScramblerBase : public IScrambler
         virtual BitVector scramble(const BitVector& bits) const = 0;
         virtual BitVector descramble(const BitVector& bits) const = 0;
         virtual const IScrambling *getScrambling() const { return scrambling; }
-        virtual ~ScramblerBase() { delete scrambling; }
-
 };
 
 } /* namespace physicallayer */
