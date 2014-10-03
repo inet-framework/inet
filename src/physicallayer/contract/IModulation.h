@@ -25,7 +25,8 @@ namespace physicallayer {
 
 class INET_API IModulation
 {
-
+    public:
+        virtual ~IModulation() {}
 };
 
 } /* namespace physicallayer */
