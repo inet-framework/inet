@@ -56,7 +56,7 @@ ShortBitVector APSKModulationBase::demapToBitRepresentation(const APSKSymbol* sy
         }
     }
     ASSERT(nearestNeighborIndex != -1);
-    return ShortBitVector(nearestNeighborIndex);
+    return ShortBitVector(nearestNeighborIndex, codeWordLength);
 }
 
 } /* namespace physicallayer */
