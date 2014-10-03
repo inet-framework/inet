@@ -23,5 +23,6 @@ import inet.physicallayer.contract.IDemodulator;
 simple Ieee80211OFDMDemodulator like IDemodulator
 {
     parameters:
+        string demodulationScheme; // QAM-16, QAM-64, BPSK, QPSK
         @class(Ieee80211OFDMDemodulator);
 }

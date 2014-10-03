@@ -24,6 +24,8 @@
 #include "Ieee80211Scrambler.h"
 #include "Ieee80211Interleaving.h"
 #include "ConvolutionalCoder.h"
+#include "Ieee80211ConvolutionalCode.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
@@ -31,6 +33,7 @@ namespace physicallayer {
 class INET_API Ieee80211LayeredDecoder : public LayeredDecoder
 {
     protected:
+        const Ieee80211Scrambling *descrambling;
         const Ieee80211Scrambler *descrambler;
         const ConvolutionalCoder *signalFECDecoder;
         const Ieee80211Interleaver *signalDeinterleaver;
@@ -42,7 +45,11 @@ class INET_API Ieee80211LayeredDecoder : public LayeredDecoder
         virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
         BitVector decodeSignalField(const BitVector& signalField) const;
         BitVector decodeDataField(const BitVector& dataField, const ConvolutionalCoder& fecDecoder, const Ieee80211Interleaver& deinterleaver) const;
-        const IReceptionPacketModel *createPacketModel(const BitVector& decodedBits) const;
+        const IReceptionPacketModel *createPacketModel(const BitVector& decodedBits, const Ieee80211Scrambling *scrambling, const Ieee80211ConvolutionalCode *fec, const Ieee80211Interleaving *interleaving) const;
+        const Ieee80211ConvolutionalCode *getFecFromSignalFieldRate(const ShortBitVector& rate) const;
+        const APSKModulationBase *getModulationFromSignalFieldRate(const ShortBitVector& rate) const;
+        const Ieee80211Interleaving *getInterleavingFromModulation(const IModulation *modulationScheme) const;
+        ShortBitVector getSignalFieldRate(const BitVector& signalField) const;
 
     public:
         const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const;

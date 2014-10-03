@@ -33,7 +33,7 @@ class INET_API Ieee80211OFDMDemodulator : public cSimpleModule, public IDemodula
 {
     protected:
         const APSKModulationBase *signalModulationScheme;
-        mutable const APSKModulationBase *dataModulationScheme;
+        const APSKModulationBase *dataModulationScheme;
 
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -43,11 +43,6 @@ class INET_API Ieee80211OFDMDemodulator : public cSimpleModule, public IDemodula
         BitVector demodulateDataSymbol(const OFDMSymbol *dataSymbol) const;
         BitVector demodulateSignalSymbol(const OFDMSymbol *signalSymbol) const;
         const IReceptionBitModel *createBitModel(const BitVector *bitRepresentation) const;
-        const Ieee80211ConvolutionalCode *getFecFromSignalFieldRate(const ShortBitVector& rate) const;
-        const APSKModulationBase *getModulationFromSignalFieldRate(const ShortBitVector& rate) const;
-        const Ieee80211Interleaving *getInterleavingFromModulation() const;
-        ShortBitVector getRate(const BitVector *signalField) const;
-        void setDataFieldDemodulation(const BitVector *signalField) const;
         bool isPilotOrDcSubcarrier(int i) const;
 
     public:
