@@ -18,24 +18,19 @@
 #include "inet/physicallayer/base/FlatTransmissionBase.h"
 #include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211ScalarReceiver.h"
-#include "inet/physicallayer/ieee80211/BerParseFile.h"
-#include "inet/physicallayer/ieee80211/errormodel/yans-error-rate-model.h"
-#include "inet/physicallayer/ieee80211/errormodel/nist-error-rate-model.h"
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmission.h"
 
 namespace inet {
-
-using namespace ieee80211;
 
 namespace physicallayer {
 
 Define_Module(Ieee80211ScalarReceiver);
 
-Ieee80211ScalarReceiver::~Ieee80211ScalarReceiver()
+Ieee80211ScalarReceiver::Ieee80211ScalarReceiver() :
+    ScalarReceiver(),
+    opMode('\0'),
+    preambleMode((WifiPreamble)-1)
 {
-    delete errorModel;
-    delete parseTable;
 }
 
 void Ieee80211ScalarReceiver::initialize(int stage)
@@ -60,76 +55,13 @@ void Ieee80211ScalarReceiver::initialize(int stage)
             preambleMode = WIFI_PREAMBLE_LONG;
         else
             throw cRuntimeError("Unknown preamble mode");
-        const char *errorModelString = par("errorModel");
-        if (!strcmp("yans", errorModelString))
-            errorModel = new YansErrorRateModel();
-        else if (!strcmp("nist", errorModelString))
-            errorModel = new NistErrorRateModel();
-        else
-            opp_error("Error %s model is not valid", errorModelString);
-        autoHeaderSize = par("autoHeaderSize");
-        parseTable = NULL;
-        const char *fname = par("berTableFile");
-        std::string name(fname);
-        if (!name.empty()) {
-            parseTable = new BerParseFile(opMode);
-            parseTable->parseFile(fname);
-        }
     }
 }
 
-// TODO: extract to Ieee80211ErrorModel
-bool Ieee80211ScalarReceiver::computeHasBitError(const ISNIR *snir) const
+bool Ieee80211ScalarReceiver::computeIsReceptionPossible(const ITransmission *transmission) const
 {
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    double minSNIR = snir->computeMin();
-    int bitLength = flatTransmission->getPayloadBitLength();
-    double bitrate = flatTransmission->getBitrate().get();
-    ModulationType modeBody;
-    ModulationType modeHeader;
-
-    // TODO: use transmission's opMode for error detection
-    WifiPreamble preambleUsed = preambleMode;
-    double headerNoError;
-    uint32_t headerSize;
-    if (opMode == 'b')
-        headerSize = HEADER_WITHOUT_PREAMBLE;
-    else
-        headerSize = 24;
-
-    modeBody = WifiModulationType::getModulationType(opMode, bitrate);
-    modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
-    if (opMode == 'g') {
-        if (autoHeaderSize) {
-            ModulationType modeBodyA = WifiModulationType::getModulationType('a', bitrate);
-            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed)) * modeHeader.getDataRate());
-        }
-    }
-    else if (opMode == 'b' || opMode == 'a' || opMode == 'p') {
-        if (autoHeaderSize)
-            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBody, preambleUsed)) * modeHeader.getDataRate());
-    }
-    else {
-        opp_error("Radio model not supported yet, must be a,b,g or p");
-    }
-
-    headerNoError = errorModel->GetChunkSuccessRate(modeHeader, minSNIR, headerSize);
-    // probability of no bit error in the MPDU
-    double MpduNoError;
-    if (parseTable)
-        MpduNoError = 1 - parseTable->getPer(bitrate, minSNIR, bitLength / 8);
-    else
-        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, minSNIR, bitLength);
-
-    EV << "bit length = " << bitLength << " packet error rate = " << 1 - MpduNoError << " header error rate = " << 1 - headerNoError << endl;
-    if (MpduNoError >= 1 && headerNoError >= 1)
-        return false;
-    if (dblrand() > headerNoError)
-        return true;
-    else if (dblrand() > MpduNoError)
-        return true;
-    else
-        return false;
+    const Ieee80211ScalarTransmission *ieee80211Transmission = check_and_cast<const Ieee80211ScalarTransmission *>(transmission);
+    return ScalarReceiver::computeIsReceptionPossible(transmission) && ieee80211Transmission->getOpMode() == opMode && ieee80211Transmission->getPreambleMode() == preambleMode;
 }
 
 } // namespace physicallayer

@@ -18,21 +18,23 @@
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
 
-#include "inet/physicallayer/ieee80211/errormodel/nist-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/errormodel/Ieee80211NistErrorModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-NistErrorRateModel::NistErrorRateModel()
+Define_Module(Ieee80211NistErrorModel);
+
+Ieee80211NistErrorModel::Ieee80211NistErrorModel()
 {
 }
 
-NistErrorRateModel::~NistErrorRateModel()
+Ieee80211NistErrorModel::~Ieee80211NistErrorModel()
 {
 }
 
-double NistErrorRateModel::GetBpskBer(double snr) const
+double Ieee80211NistErrorModel::GetBpskBer(double snr) const
 {
     double z = sqrt(snr);
     double ber = 0.5 * erfc(z);
@@ -40,7 +42,7 @@ double NistErrorRateModel::GetBpskBer(double snr) const
     return ber;
 }
 
-double NistErrorRateModel::GetQpskBer(double snr) const
+double Ieee80211NistErrorModel::GetQpskBer(double snr) const
 {
     double z = sqrt(snr / 2.0);
     double ber = 0.5 * erfc(z);
@@ -48,7 +50,7 @@ double NistErrorRateModel::GetQpskBer(double snr) const
     return ber;
 }
 
-double NistErrorRateModel::Get16QamBer(double snr) const
+double Ieee80211NistErrorModel::Get16QamBer(double snr) const
 {
     double z = sqrt(snr / (5.0 * 2.0));
     double ber = 0.75 * 0.5 * erfc(z);
@@ -56,7 +58,7 @@ double NistErrorRateModel::Get16QamBer(double snr) const
     return ber;
 }
 
-double NistErrorRateModel::Get64QamBer(double snr) const
+double Ieee80211NistErrorModel::Get64QamBer(double snr) const
 {
     double z = sqrt(snr / (21.0 * 2.0));
     double ber = 7.0 / 12.0 * 0.5 * erfc(z);
@@ -64,7 +66,7 @@ double NistErrorRateModel::Get64QamBer(double snr) const
     return ber;
 }
 
-double NistErrorRateModel::GetFecBpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::GetFecBpskBer(double snr, double nbits, uint32_t bValue) const
 {
     double ber = GetBpskBer(snr);
     if (ber == 0.0) {
@@ -76,7 +78,7 @@ double NistErrorRateModel::GetFecBpskBer(double snr, double nbits, uint32_t bVal
     return pms;
 }
 
-double NistErrorRateModel::GetFecQpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::GetFecQpskBer(double snr, double nbits, uint32_t bValue) const
 {
     double ber = GetQpskBer(snr);
     if (ber == 0.0) {
@@ -88,7 +90,7 @@ double NistErrorRateModel::GetFecQpskBer(double snr, double nbits, uint32_t bVal
     return pms;
 }
 
-double NistErrorRateModel::CalculatePe(double p, uint32_t bValue) const
+double Ieee80211NistErrorModel::CalculatePe(double p, uint32_t bValue) const
 {
     double D = sqrt(4.0 * p * (1.0 - p));
     double pe = 1.0;
@@ -119,7 +121,7 @@ double NistErrorRateModel::CalculatePe(double p, uint32_t bValue) const
     return pe;
 }
 
-double NistErrorRateModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
     double ber = Get16QamBer(snr);
     if (ber == 0.0) {
@@ -131,7 +133,7 @@ double NistErrorRateModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t b
     return pms;
 }
 
-double NistErrorRateModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
     double ber = Get64QamBer(snr);
     if (ber == 0.0) {
@@ -143,7 +145,7 @@ double NistErrorRateModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t b
     return pms;
 }
 
-double NistErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const
+double Ieee80211NistErrorModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const
 {
     if (mode.getModulationClass() == MOD_CLASS_ERP_OFDM || mode.getModulationClass() == MOD_CLASS_OFDM) {
         if (mode.getConstellationSize() == 2) {

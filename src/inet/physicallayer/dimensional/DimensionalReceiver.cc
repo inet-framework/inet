@@ -35,11 +35,8 @@ DimensionalReceiver::DimensionalReceiver() :
 
 void DimensionalReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "dimensional receiver, "
-           << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " << sensitivity << ", "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth;
+    stream << "dimensional receiver, ";
+    FlatReceiverBase::printToStream(stream);
 }
 
 const INoise *DimensionalReceiver::computeNoise(const IListening *listening, const IInterference *interference) const

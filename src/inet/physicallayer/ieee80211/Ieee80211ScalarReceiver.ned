@@ -24,8 +24,8 @@ module Ieee80211ScalarReceiver extends ScalarReceiver
     parameters:
         string opMode @enum("b","g","a","p");
         string preambleMode @enum("long", "short");
-        string errorModel @enum("yans","nist") = default("nist");
-        bool autoHeaderSize = default(false);
-        string berTableFile = default("");
+        errorModelType = default("Ieee80211NistErrorModel");
+        // TODO: remove when opMode is removed from the error model
+        *.opMode = opMode;
         @class(Ieee80211ScalarReceiver);
 }

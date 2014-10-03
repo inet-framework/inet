@@ -64,6 +64,8 @@ class INET_API SNIRReceiverBase : public ReceiverBase
   public:
     SNIRReceiverBase();
 
+    virtual void printToStream(std::ostream& stream) const;
+
     virtual double getSNIRThreshold() const { return snirThreshold; }
 
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;

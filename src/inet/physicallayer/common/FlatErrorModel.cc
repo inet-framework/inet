@@ -22,6 +22,8 @@ namespace inet {
 
 namespace physicallayer {
 
+Define_Module(FlatErrorModel);
+
 void FlatErrorModel::printToStream(std::ostream& stream) const
 {
     stream << "Flat error model";
@@ -49,7 +51,7 @@ double FlatErrorModel::computeBitErrorRate(const ISNIR *snir) const
 
 double FlatErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
-    throw cRuntimeError("Not implemented");
+    return NaN;
 }
 
 } // namespace physicallayer

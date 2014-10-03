@@ -34,11 +34,8 @@ ScalarReceiver::ScalarReceiver() :
 
 void ScalarReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "scalar receiver, "
-           << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " << sensitivity << ", "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth;
+    stream << "scalar receiver, ";
+    FlatReceiverBase::printToStream(stream);
 }
 
 const INoise *ScalarReceiver::computeNoise(const IListening *listening, const IInterference *interference) const

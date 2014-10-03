@@ -17,11 +17,11 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef __INET_YANS_ERROR_RATE_MODEL_H
-#define __INET_YANS_ERROR_RATE_MODEL_H
+#ifndef __INET_YANSERRORRATEMODEL_H
+#define __INET_YANSERRORRATEMODEL_H
 
 #include "inet/linklayer/ieee80211/mac/WifiMode.h"
-#include "inet/physicallayer/ieee80211/errormodel/IIeee80211ErrorModel.h"
+#include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
 
 namespace inet {
@@ -52,11 +52,12 @@ namespace physicallayer {
  *    - More detailed description and validation can be found in
  *      http://www.nsnam.org/~pei/80211b.pdf
  */
-class YansErrorRateModel : public IIeee80211ErrorModel
+class Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
 {
   public:
-    YansErrorRateModel();
+    Ieee80211YansErrorModel();
 
+    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 YANS error model"; }
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
 
   private:
@@ -82,5 +83,5 @@ class YansErrorRateModel : public IIeee80211ErrorModel
 
 } // namespace inet
 
-#endif /* YANS_ERROR_RATE_MODEL_H */
+#endif // ifndef __INET_YANSERRORRATEMODEL_H
 

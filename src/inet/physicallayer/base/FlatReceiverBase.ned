@@ -15,30 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISNIR_H
-#define __INET_ISNIR_H
+package inet.physicallayer.base;
 
-#include "inet/physicallayer/contract/INoise.h"
-#include "inet/physicallayer/contract/IReception.h"
+import inet.physicallayer.contract.IErrorModel;
+import inet.physicallayer.contract.IReceiver;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API ISNIR : public IPrintableObject
+module FlatReceiverBase like IReceiver
 {
-  public:
-    virtual const IReception *getReception() const = 0;
+    parameters:
+        string errorModelType = default("FlatErrorModel");
+        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double snirThreshold @unit(dB);
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
+        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
 
-    virtual const INoise *getNoise() const = 0;
-
-    // TODO: rename to getMin()?
-    virtual double computeMin() const = 0;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_ISNIR_H
-
+    submodules:
+        errorModel: <errorModelType> like IErrorModel;
+}

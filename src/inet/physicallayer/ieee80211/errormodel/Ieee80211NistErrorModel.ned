@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,30 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISNIR_H
-#define __INET_ISNIR_H
+package inet.physicallayer.ieee80211.errormodel;
 
-#include "inet/physicallayer/contract/INoise.h"
-#include "inet/physicallayer/contract/IReception.h"
-
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API ISNIR : public IPrintableObject
+module Ieee80211NistErrorModel extends Ieee80211ErrorModelBase
 {
-  public:
-    virtual const IReception *getReception() const = 0;
-
-    virtual const INoise *getNoise() const = 0;
-
-    // TODO: rename to getMin()?
-    virtual double computeMin() const = 0;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_ISNIR_H
-
+    parameters:
+        @class(Ieee80211NistErrorModel);
+}

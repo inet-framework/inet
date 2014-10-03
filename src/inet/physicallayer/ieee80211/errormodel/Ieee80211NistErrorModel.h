@@ -17,12 +17,11 @@
  *
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
-#ifndef __INET_NIST_ERROR_RATE_MODEL_H
-#define __INET_NIST_ERROR_RATE_MODEL_H
+#ifndef __INET_NISTERRORRATEMODEL_H
+#define __INET_NISTERRORRATEMODEL_H
 
-//#include <stdint.h>
 #include "inet/linklayer/ieee80211/mac/WifiMode.h"
-#include "inet/physicallayer/ieee80211/errormodel/IIeee80211ErrorModel.h"
+#include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
 
 namespace inet {
@@ -37,12 +36,14 @@ namespace physicallayer {
  * http://www.nsnam.org/~pei/80211ofdm.pdf.  For DSSS modulations (802.11b),
  * the model uses the DsssErrorRateModel.
  */
-class NistErrorRateModel : public IIeee80211ErrorModel
+class Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
 {
   public:
 
-    NistErrorRateModel();
-    virtual ~NistErrorRateModel();
+    Ieee80211NistErrorModel();
+    virtual ~Ieee80211NistErrorModel();
+
+    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 NIST error model"; }
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
 
   private:
@@ -65,5 +66,5 @@ class NistErrorRateModel : public IIeee80211ErrorModel
 
 } // namespace inet
 
-#endif /* NIST_ERROR_RATE_MODEL_H */
+#endif // ifndef __INET_NISTERRORRATEMODEL_H
 

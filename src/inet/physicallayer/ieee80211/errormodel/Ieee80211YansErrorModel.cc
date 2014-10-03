@@ -17,22 +17,25 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "inet/physicallayer/ieee80211/errormodel/yans-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/errormodel/Ieee80211YansErrorModel.h"
 #include <math.h>
 
 namespace inet {
 
 namespace physicallayer {
 
-YansErrorRateModel::YansErrorRateModel()
-{}
+Define_Module(Ieee80211YansErrorModel);
 
-double YansErrorRateModel::Log2(double val) const
+Ieee80211YansErrorModel::Ieee80211YansErrorModel()
+{
+}
+
+double Ieee80211YansErrorModel::Log2(double val) const
 {
     return log(val) / log(2.0);
 }
 
-double YansErrorRateModel::GetBpskBer(double snr, uint32_t signalSpread, uint32_t phyRate) const
+double Ieee80211YansErrorModel::GetBpskBer(double snr, uint32_t signalSpread, uint32_t phyRate) const
 {
     double EbNo = snr * signalSpread / phyRate;
     double z = sqrt(EbNo);
@@ -41,7 +44,7 @@ double YansErrorRateModel::GetBpskBer(double snr, uint32_t signalSpread, uint32_
     return ber;
 }
 
-double YansErrorRateModel::GetQamBer(double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const
+double Ieee80211YansErrorModel::GetQamBer(double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const
 {
     double EbNo = snr * signalSpread / phyRate;
     double z = sqrt((1.5 * Log2(m) * EbNo) / (m - 1.0));
@@ -52,7 +55,7 @@ double YansErrorRateModel::GetQamBer(double snr, unsigned int m, uint32_t signal
     return ber;
 }
 
-uint32_t YansErrorRateModel::Factorial(uint32_t k) const
+uint32_t Ieee80211YansErrorModel::Factorial(uint32_t k) const
 {
     uint32_t fact = 1;
     while (k > 0) {
@@ -62,13 +65,13 @@ uint32_t YansErrorRateModel::Factorial(uint32_t k) const
     return fact;
 }
 
-double YansErrorRateModel::Binomial(uint32_t k, double p, uint32_t n) const
+double Ieee80211YansErrorModel::Binomial(uint32_t k, double p, uint32_t n) const
 {
     double retval = Factorial(n) / (Factorial(k) * Factorial(n - k)) * pow(p, (int)k) * pow(1 - p, (int)(n - k));
     return retval;
 }
 
-double YansErrorRateModel::CalculatePdOdd(double ber, unsigned int d) const
+double Ieee80211YansErrorModel::CalculatePdOdd(double ber, unsigned int d) const
 {
     ASSERT((d % 2) == 1);
     unsigned int dstart = (d + 1) / 2;
@@ -81,7 +84,7 @@ double YansErrorRateModel::CalculatePdOdd(double ber, unsigned int d) const
     return pd;
 }
 
-double YansErrorRateModel::CalculatePdEven(double ber, unsigned int d) const
+double Ieee80211YansErrorModel::CalculatePdEven(double ber, unsigned int d) const
 {
     ASSERT((d % 2) == 0);
     unsigned int dstart = d / 2 + 1;
@@ -96,7 +99,7 @@ double YansErrorRateModel::CalculatePdEven(double ber, unsigned int d) const
     return pd;
 }
 
-double YansErrorRateModel::CalculatePd(double ber, unsigned int d) const
+double Ieee80211YansErrorModel::CalculatePd(double ber, unsigned int d) const
 {
     double pd;
     if ((d % 2) == 0) {
@@ -108,7 +111,7 @@ double YansErrorRateModel::CalculatePd(double ber, unsigned int d) const
     return pd;
 }
 
-double YansErrorRateModel::GetFecBpskBer(double snr, double nbits,
+double Ieee80211YansErrorModel::GetFecBpskBer(double snr, double nbits,
         uint32_t signalSpread, uint32_t phyRate,
         uint32_t dFree, uint32_t adFree) const
 {
@@ -123,7 +126,7 @@ double YansErrorRateModel::GetFecBpskBer(double snr, double nbits,
     return pms;
 }
 
-double YansErrorRateModel::GetFecQamBer(double snr, uint32_t nbits,
+double Ieee80211YansErrorModel::GetFecQamBer(double snr, uint32_t nbits,
         uint32_t signalSpread,
         uint32_t phyRate,
         uint32_t m, uint32_t dFree,
@@ -148,7 +151,7 @@ double YansErrorRateModel::GetFecQamBer(double snr, uint32_t nbits,
 //
 // This method return the probability of NO ERROR
 //
-double YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const
+double Ieee80211YansErrorModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const
 {
     if (mode.getModulationClass() == MOD_CLASS_ERP_OFDM ||
         mode.getModulationClass() == MOD_CLASS_OFDM)

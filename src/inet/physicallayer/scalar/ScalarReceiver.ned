@@ -17,22 +17,10 @@
 
 package inet.physicallayer.scalar;
 
-import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.base.FlatReceiverBase;
 
-module ScalarReceiver like IReceiver
+module ScalarReceiver extends FlatReceiverBase
 {
     parameters:
-        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double snirThreshold @unit(dB);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
         @class(ScalarReceiver);
-
-    types:
-        module Dummy {}
-
-    submodules:
-        errorModel: Dummy;
 }

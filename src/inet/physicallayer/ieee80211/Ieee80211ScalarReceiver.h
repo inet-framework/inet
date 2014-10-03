@@ -20,7 +20,6 @@
 
 #include "inet/physicallayer/scalar/ScalarReceiver.h"
 #include "inet/physicallayer/ieee80211/WifiPreambleType.h"
-#include "inet/physicallayer/ieee80211/errormodel/IIeee80211ErrorModel.h"
 #include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {
@@ -32,26 +31,13 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
   protected:
     char opMode;
     WifiPreamble preambleMode;
-    IIeee80211ErrorModel *errorModel;
-    bool autoHeaderSize;
-    BerParseFile *parseTable;
 
   protected:
     virtual void initialize(int stage);
-
-    virtual bool computeHasBitError(const ISNIR *snir) const;
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
 
   public:
-    Ieee80211ScalarReceiver() :
-        ScalarReceiver(),
-        opMode('\0'),
-        preambleMode((WifiPreamble) - 1),
-        errorModel(NULL),
-        autoHeaderSize(false),
-        parseTable(NULL)
-    {}
-
-    virtual ~Ieee80211ScalarReceiver();
+    Ieee80211ScalarReceiver();
 };
 
 } // namespace physicallayer

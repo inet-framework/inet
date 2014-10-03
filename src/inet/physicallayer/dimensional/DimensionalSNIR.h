@@ -28,6 +28,9 @@ namespace physicallayer {
 
 class INET_API DimensionalSNIR : public SNIRBase
 {
+  protected:
+    mutable double minSNIR;
+
   public:
     DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
 

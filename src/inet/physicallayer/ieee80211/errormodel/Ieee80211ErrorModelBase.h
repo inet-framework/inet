@@ -15,24 +15,34 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATERRORMODEL_H
-#define __INET_FLATERRORMODEL_H
+#ifndef __INET_IEEE80211ERRORMODELBASE_H
+#define __INET_IEEE80211ERRORMODELBASE_H
 
 #include "inet/physicallayer/base/ErrorModelBase.h"
+#include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatErrorModel : public ErrorModelBase
+class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 {
+  protected:
+    // TODO: remove opMode from here and also from BerParseFile
+    char opMode;
+    bool autoHeaderSize;
+    BerParseFile *berTableFile;
+
+  protected:
+    virtual void initialize(int stage);
+    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
+
   public:
-    virtual void printToStream(std::ostream& stream) const;
+    Ieee80211ErrorModelBase();
+    virtual ~Ieee80211ErrorModelBase();
 
     virtual double computePacketErrorRate(const ISNIR *snir) const;
-
     virtual double computeBitErrorRate(const ISNIR *snir) const;
-
     virtual double computeSymbolErrorRate(const ISNIR *snir) const;
 };
 
@@ -40,5 +50,5 @@ class INET_API FlatErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATERRORMODEL_H
+#endif // ifndef __INET_IEEE80211ERRORMODELBASE_H
 

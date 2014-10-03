@@ -18,8 +18,8 @@
 #ifndef __INET_FLATRECEIVERBASE_H
 #define __INET_FLATRECEIVERBASE_H
 
-#include "inet/physicallayer/contract/IErrorModel.h"
 #include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/IErrorModel.h"
 #include "inet/physicallayer/base/SNIRReceiverBase.h"
 
 namespace inet {
@@ -29,8 +29,8 @@ namespace physicallayer {
 class INET_API FlatReceiverBase : public SNIRReceiverBase
 {
   protected:
-    const IErrorModel *errorModel;
     const IModulation *modulation;
+    const IErrorModel *errorModel;
     W energyDetection;
     W sensitivity;
     Hz carrierFrequency;
@@ -42,8 +42,6 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
     virtual bool computeIsReceptionSuccessful(const ISNIR *snir) const;
-
-    virtual bool computeHasBitError(const ISNIR *snir) const;
 
   public:
     FlatReceiverBase();

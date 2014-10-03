@@ -35,6 +35,11 @@ void SNIRReceiverBase::initialize(int stage)
         snirThreshold = math::dB2fraction(par("snirThreshold"));
 }
 
+void SNIRReceiverBase::printToStream(std::ostream& stream) const
+{
+    stream << "SNIR threshold = " << snirThreshold;
+}
+
 bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
 {
     return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&

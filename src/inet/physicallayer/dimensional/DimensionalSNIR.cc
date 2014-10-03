@@ -22,7 +22,8 @@ namespace inet {
 namespace physicallayer {
 
 DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise) :
-    SNIRBase(reception, noise)
+    SNIRBase(reception, noise),
+    minSNIR(NaN)
 {
 }
 
@@ -33,26 +34,29 @@ void DimensionalSNIR::printToStream(std::ostream& stream) const
 
 double DimensionalSNIR::computeMin() const
 {
-    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
-    EV_DEBUG << "Reception power begin " << endl;
-    dimensionalReception->getPower()->print(EVSTREAM);
-    EV_DEBUG << "Reception power end" << endl;
-    const ConstMapping *snirMapping = MappingUtils::divide(*dimensionalReception->getPower(), *dimensionalNoise->getPower());
-    const simtime_t startTime = reception->getStartTime();
-    const simtime_t endTime = reception->getEndTime();
-    Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
-    Hz bandwidth = dimensionalReception->getBandwidth();
-    Argument start(DimensionSet::timeFreqDomain);
-    Argument end(DimensionSet::timeFreqDomain);
-    start.setTime(startTime);
-    start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-    end.setTime(endTime);
-    end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    EV_DEBUG << "SNIR begin " << endl;
-    snirMapping->print(EVSTREAM);
-    EV_DEBUG << "SNIR end" << endl;
-    return MappingUtils::findMin(*snirMapping, start, end);
+    if (isNaN(minSNIR)) {
+        const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+        const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+        EV_DEBUG << "Reception power begin " << endl;
+        dimensionalReception->getPower()->print(EVSTREAM);
+        EV_DEBUG << "Reception power end" << endl;
+        const ConstMapping *snirMapping = MappingUtils::divide(*dimensionalReception->getPower(), *dimensionalNoise->getPower());
+        const simtime_t startTime = reception->getStartTime();
+        const simtime_t endTime = reception->getEndTime();
+        Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
+        Hz bandwidth = dimensionalReception->getBandwidth();
+        Argument start(DimensionSet::timeFreqDomain);
+        Argument end(DimensionSet::timeFreqDomain);
+        start.setTime(startTime);
+        start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        end.setTime(endTime);
+        end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+        EV_DEBUG << "SNIR begin " << endl;
+        snirMapping->print(EVSTREAM);
+        EV_DEBUG << "SNIR end" << endl;
+        minSNIR = MappingUtils::findMin(*snirMapping, start, end);
+    }
+    return minSNIR;
 }
 
 } // namespace physicallayer

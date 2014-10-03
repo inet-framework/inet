@@ -17,22 +17,10 @@
 
 package inet.physicallayer.dimensional;
 
-import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.base.FlatReceiverBase;
 
-module DimensionalReceiver like IReceiver
+module DimensionalReceiver extends FlatReceiverBase
 {
     parameters:
-        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        double snirThreshold @unit(dB);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
         @class(DimensionalReceiver);
-
-    types:
-        module Dummy {}
-
-    submodules:
-        errorModel: Dummy;
 }

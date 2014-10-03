@@ -15,30 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ISNIR_H
-#define __INET_ISNIR_H
+package inet.physicallayer.base;
 
-#include "inet/physicallayer/contract/INoise.h"
-#include "inet/physicallayer/contract/IReception.h"
+import inet.physicallayer.contract.IErrorModel;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API ISNIR : public IPrintableObject
+module ErrorModelBase like IErrorModel
 {
-  public:
-    virtual const IReception *getReception() const = 0;
-
-    virtual const INoise *getNoise() const = 0;
-
-    // TODO: rename to getMin()?
-    virtual double computeMin() const = 0;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_ISNIR_H
-
+}

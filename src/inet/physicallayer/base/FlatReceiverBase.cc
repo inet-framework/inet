@@ -31,8 +31,8 @@ namespace physicallayer {
 
 FlatReceiverBase::FlatReceiverBase() :
     SNIRReceiverBase(),
-    errorModel(NULL),
     modulation(NULL),
+    errorModel(NULL),
     energyDetection(W(sNaN)),
     sensitivity(W(sNaN)),
     carrierFrequency(Hz(sNaN)),
@@ -50,7 +50,7 @@ void FlatReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        errorModel = new FlatErrorModel();
+        errorModel = dynamic_cast<IErrorModel *>(getSubmodule("errorModel"));
         energyDetection = mW(math::dBm2mW(par("energyDetection")));
         sensitivity = mW(math::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
@@ -71,9 +71,13 @@ void FlatReceiverBase::initialize(int stage)
 
 void FlatReceiverBase::printToStream(std::ostream& stream) const
 {
-    stream << "Flat receiver, "
+    stream << "modulation = {" << modulation << "}, "
+           << "error model = {" << errorModel << "}, "
            << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " << sensitivity;
+           << "sensitivity = " << sensitivity << ", "
+           << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth << ", ";
+    SNIRReceiverBase::printToStream(stream);
 }
 
 const IListening *FlatReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
@@ -106,16 +110,21 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     return new ListeningDecision(listening, maxPower >= energyDetection);
 }
 
-// TODO: this is not purely functional, see interface comment
-bool FlatReceiverBase::computeHasBitError(const ISNIR *snir) const
-{
-    double packetErrorRate = errorModel->computePacketErrorRate(snir);
-    return packetErrorRate == 0.0 ? false : dblrand() < packetErrorRate;
-}
-
 bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 {
-    return SNIRReceiverBase::computeIsReceptionSuccessful(snir) && !computeHasBitError(snir);
+    if (!SNIRReceiverBase::computeIsReceptionSuccessful(snir))
+        return false;
+    else if (!errorModel)
+        return true;
+    else {
+        double packetErrorRate = errorModel->computePacketErrorRate(snir);
+        if (packetErrorRate == 0.0)
+            return true;
+        else if (packetErrorRate == 1.0)
+            return false;
+        else
+            return dblrand() > packetErrorRate;
+    }
 }
 
 const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
