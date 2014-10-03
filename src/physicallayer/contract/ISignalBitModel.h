@@ -47,19 +47,19 @@ class INET_API ISignalBitModel : public IPrintableObject
 
 class INET_API ITransmissionBitModel : public virtual ISignalBitModel
 {
-    public:
-        /*
-         *
-         */
-        virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
-        /*
-         *
-         */
-        virtual const IScrambling *getScrambling() const = 0;
-        /*
-         *
-         */
-        virtual const IInterleaving *getInterleaving() const = 0;
+  public:
+    /*
+     *
+     */
+    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
+    /*
+     *
+     */
+    virtual const IScrambling *getScrambling() const = 0;
+    /*
+     *
+     */
+    virtual const IInterleaving *getInterleaving() const = 0;
 };
 
 class INET_API IReceptionBitModel : public virtual ISignalBitModel

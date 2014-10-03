@@ -54,10 +54,11 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel
 {
-    protected:
-        const IForwardErrorCorrection *forwardErrorCorrection;
-        const IScrambling *scrambling;
-        const IInterleaving *interleaving;
+  protected:
+    const IForwardErrorCorrection *forwardErrorCorrection;
+    const IScrambling *scrambling;
+    const IInterleaving *interleaving;
+
   public:
     TransmissionBitModel() :
         SignalBitModel()
@@ -69,6 +70,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
         scrambling(scramblerInfo),
         interleaving(interleaverInfo)
     {}
+
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
     virtual const IScrambling *getScrambling() const { return scrambling; }
     virtual const IInterleaving *getInterleaving() const { return interleaving; }
@@ -95,13 +97,13 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
         ber(ber),
         bitErrorCount(bitErrorCount)
     {}
+
     virtual double getBER() const { return ber; }
     virtual int getBitErrorCount() const { return bitErrorCount; }
     const IModulation *getModulation() const { return modulation; }
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
 #endif // ifndef __INET_SIGNALBITMODEL_H

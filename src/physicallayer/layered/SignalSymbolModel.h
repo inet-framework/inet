@@ -46,13 +46,15 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
 {
-    protected:
-        const IModulation *modulation;
+  protected:
+    const IModulation *modulation;
+
   public:
     TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation) :
         SignalSymbolModel(symbolLength, symbolRate, symbols),
         modulation(modulation)
     {}
+
     virtual const IModulation *getModulation() const { return modulation; }
 };
 
@@ -74,7 +76,6 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
 };
 
 } // namespace physicallayer
-
 } // namespace inet
 
-#endif // ifndef __INET_SIGNALSYMBOLMODEL_H
+#endif /* ifndef __INET_SIGNALSYMBOLMODEL_H */
