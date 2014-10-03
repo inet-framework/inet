@@ -55,7 +55,7 @@ BitVector Ieee80211OFDMDemodulator::demodulateField(const OFDMSymbol *signalSymb
         if (!isPilotOrDcSubcarrier(i))
         {
             const APSKSymbol *apskSymbol = apskSymbols.at(i);
-            ShortBitVector bits = signalModulationScheme->demapToBitRepresentation(apskSymbol);
+            ShortBitVector bits = modulationScheme->demapToBitRepresentation(apskSymbol);
             for (unsigned int j = 0; j < bits.getSize(); j++)
                 field.appendBit(bits.getBit(j));
         }
