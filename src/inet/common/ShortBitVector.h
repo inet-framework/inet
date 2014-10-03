@@ -27,7 +27,7 @@ namespace inet {
 /*
  *  It is the optimized version of the BitVector class and it only allows to store 32 bits.
  */
-class ShortBitVector
+class INET_API ShortBitVector
 {
     public:
         static const ShortBitVector UNDEF;

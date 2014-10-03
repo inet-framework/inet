@@ -24,7 +24,7 @@ namespace inet {
 
 #define UINT8_LENGTH 8
 
-class BitVector
+class INET_API BitVector
 {
     public:
         static const BitVector UNDEF;
