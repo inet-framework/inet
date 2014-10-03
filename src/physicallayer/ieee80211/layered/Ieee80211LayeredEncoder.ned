@@ -17,9 +17,10 @@
 
 package inet.physicallayer.ieee80211.layered;
 
-import inet.physicallayer.contract.IFECEncoder;
+import inet.physicallayer.contract.IFECCoder;
 import inet.physicallayer.contract.IInterleaver;
 import inet.physicallayer.layered.LayeredEncoder;
+
 
 // Note: this is not a general Ieee80211Encoder; it works in 36Mb/s mode.
 module Ieee80211LayeredEncoder extends LayeredEncoder
@@ -35,7 +36,7 @@ module Ieee80211LayeredEncoder extends LayeredEncoder
         @class(Ieee80211LayeredEncoder);
 
     submodules:
-        signalFECEncoder: <signalFECType> like IFECEncoder if signalFECType != "" {
+        signalFECEncoder: <signalFECType> like IFECCoder if signalFECType != "" {
             @display("p=186,168");
         }
         signalInterleaver: <signalInterleaverType> like IInterleaver if signalInterleaverType != "" {
