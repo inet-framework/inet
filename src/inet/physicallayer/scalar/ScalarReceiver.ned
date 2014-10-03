@@ -29,4 +29,10 @@ module ScalarReceiver like IReceiver
         double bandwidth @unit(Hz);
         string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
         @class(ScalarReceiver);
+
+    types:
+        module Dummy {}
+
+    submodules:
+        errorModel: Dummy;
 }

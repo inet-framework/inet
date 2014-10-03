@@ -23,4 +23,10 @@ module Ieee802154UWBIRReceiver like IReceiver
 {
     parameters:
         @class(Ieee802154UWBIRReceiver);
+
+    types:
+        module Dummy {}
+
+    submodules:
+        errorModel: Dummy;
 }
