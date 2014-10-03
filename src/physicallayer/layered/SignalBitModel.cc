@@ -23,7 +23,7 @@ namespace physicallayer {
 
 void SignalBitModel::printToStream(std::ostream &stream) const
 {
-    stream << forwardErrorCorrection << ", bit length = " << bitLength;
+    stream << ", bit length = " << bitLength;
 }
 
 } // namespace physicallayer

@@ -22,6 +22,7 @@
 #include "IFECCoder.h"
 #include "IScrambler.h"
 #include "IInterleaver.h"
+#include "IModulation.h"
 
 namespace inet {
 
@@ -41,13 +42,24 @@ class INET_API ISignalBitModel : public IPrintableObject
     virtual double getBitRate() const = 0;
 
     virtual const BitVector *getBits() const = 0;
-    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
-    virtual const IScrambling *getScrambling() const = 0;
-    virtual const IInterleaving *getInterleaving() const = 0;
+
 };
 
 class INET_API ITransmissionBitModel : public virtual ISignalBitModel
 {
+    public:
+        /*
+         *
+         */
+        virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
+        /*
+         *
+         */
+        virtual const IScrambling *getScrambling() const = 0;
+        /*
+         *
+         */
+        virtual const IInterleaving *getInterleaving() const = 0;
 };
 
 class INET_API IReceptionBitModel : public virtual ISignalBitModel
@@ -62,6 +74,10 @@ class INET_API IReceptionBitModel : public virtual ISignalBitModel
      * Returns the actual number of erroneous bits.
      */
     virtual int getBitErrorCount() const = 0;
+    /*
+     *
+     */
+    virtual const IModulation *getModulation() const = 0;
 };
 
 } // namespace physicallayer

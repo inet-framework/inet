@@ -19,6 +19,9 @@
 #define __INET_ISIGNALPACKETMODEL_H
 
 #include "IPrintableObject.h"
+#include "IFECCoder.h"
+#include "IScrambler.h"
+#include "IInterleaver.h"
 
 namespace inet {
 
@@ -41,6 +44,19 @@ class INET_API ITransmissionPacketModel : public virtual ISignalPacketModel
 class INET_API IReceptionPacketModel : public virtual ISignalPacketModel
 {
   public:
+
+    /*
+     *
+     */
+    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const = 0;
+    /*
+     *
+     */
+    virtual const IScrambling *getScrambling() const = 0;
+    /*
+     *
+     */
+    virtual const IInterleaving *getInterleaving() const = 0;
     /**
      * Returns the packet error rate (probability).
      */

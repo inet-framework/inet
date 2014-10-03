@@ -30,29 +30,30 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
     const int symbolLength;
     const double symbolRate;
     const std::vector<const ISymbol*> *symbols;
-    const IModulation *modulation;
 
   public:
-    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation) :
+    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols) :
         symbolLength(symbolLength),
         symbolRate(symbolRate),
-        symbols(symbols),
-        modulation(modulation)
+        symbols(symbols)
     {}
 
     virtual void printToStream(std::ostream &stream) const;
     virtual int getSymbolLength() const { return symbolLength; }
     virtual double getSymbolRate() const { return symbolRate; }
-    virtual const IModulation *getModulation() const { return modulation; }
     virtual const std::vector<const ISymbol*> *getSymbols() const { return symbols; }
 };
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
 {
+    protected:
+        const IModulation *modulation;
   public:
     TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation) :
-        SignalSymbolModel(symbolLength, symbolRate, symbols, modulation)
+        SignalSymbolModel(symbolLength, symbolRate, symbols),
+        modulation(modulation)
     {}
+    virtual const IModulation *getModulation() const { return modulation; }
 };
 
 class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual IReceptionSymbolModel
@@ -62,8 +63,8 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
     const double symbolErrorCount;
 
   public:
-    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, const IModulation *modulation, double ser, double symbolErrorCount) :
-        SignalSymbolModel(symbolLength, symbolRate, symbols, modulation),
+    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<const ISymbol*> *symbols, double ser, double symbolErrorCount) :
+        SignalSymbolModel(symbolLength, symbolRate, symbols),
         ser(ser),
         symbolErrorCount(symbolErrorCount)
     {}

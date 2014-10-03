@@ -58,18 +58,27 @@ class INET_API TransmissionPacketModel : public SignalPacketModel, public virtua
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
 {
   protected:
+      const IForwardErrorCorrection *forwardErrorCorrection;
+      const IScrambling *scrambling;
+      const IInterleaving *interleaving;
     const double per;
     const bool packetErrorless;
 
   public:
     ReceptionPacketModel() :
         SignalPacketModel(),
+        forwardErrorCorrection(NULL),
+        scrambling(NULL),
+        interleaving(NULL),
         per(sNaN),
         packetErrorless(false)
     {}
 
-    ReceptionPacketModel(const cPacket *packet, double per, bool packetErrorless) :
+    ReceptionPacketModel(const cPacket *packet, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving, double per, bool packetErrorless) :
         SignalPacketModel(packet),
+        forwardErrorCorrection(forwardErrorCorrection),
+        scrambling(scrambling),
+        interleaving(interleaving),
         per(per),
         packetErrorless(packetErrorless)
     {}
@@ -77,6 +86,9 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
     virtual double getPER() const { return per; }
 
     virtual bool isPacketErrorless() const { return packetErrorless; }
+    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
+    virtual const IScrambling *getScrambling() const { return scrambling; }
+    virtual const IInterleaving *getInterleaving() const { return interleaving; }
 };
 
 } // namespace physicallayer

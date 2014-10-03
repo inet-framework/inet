@@ -23,7 +23,7 @@ namespace physicallayer {
 
 void SignalSymbolModel::printToStream(std::ostream &stream) const
 {
-    stream << modulation;
+//    stream << modulation;
 }
 
 } // namespace physicallayer

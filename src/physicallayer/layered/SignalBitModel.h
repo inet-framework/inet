@@ -29,73 +29,75 @@ namespace physicallayer {
 class INET_API SignalBitModel : public virtual ISignalBitModel
 {
   protected:
+    const BitVector *bits;
     const int bitLength;
     const double bitRate;
-    const BitVector *bits;
-    const IForwardErrorCorrection *forwardErrorCorrection;
-    const IScrambling *scramblerInfo;
-    const IInterleaving *interleaverInfo;
 
   public:
     SignalBitModel() :
-        bitLength(-1),
-        bitRate(sNaN),
         bits(&BitVector::UNDEF),
-        forwardErrorCorrection(NULL),
-        scramblerInfo(NULL),
-        interleaverInfo(NULL)
+        bitLength(-1),
+        bitRate(sNaN)
     {}
 
-    SignalBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo) :
-        bitLength(bitLength),
-        bitRate(bitRate),
+    SignalBitModel(int bitLength, double bitRate, const BitVector *bits) :
         bits(bits),
-        forwardErrorCorrection(forwardErrorCorrectionInfo),
-        scramblerInfo(scramblerInfo),
-        interleaverInfo(interleaverInfo)
+        bitLength(bitLength),
+        bitRate(bitRate)
     {}
 
     virtual void printToStream(std::ostream &stream) const;
     virtual int getBitLength() const { return bitLength; }
     virtual double getBitRate() const { return bitRate; }
     virtual const BitVector* getBits() const { return bits; }
-    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
-    virtual const IScrambling *getScrambling() const { return scramblerInfo; }
-    virtual const IInterleaving *getInterleaving() const { return interleaverInfo; }
 };
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel
 {
+    protected:
+        const IForwardErrorCorrection *forwardErrorCorrection;
+        const IScrambling *scrambling;
+        const IInterleaving *interleaving;
   public:
     TransmissionBitModel() :
         SignalBitModel()
     {}
 
     TransmissionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo) :
-        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrection, scramblerInfo, interleaverInfo)
+        SignalBitModel(bitLength, bitRate, bits),
+        forwardErrorCorrection(forwardErrorCorrection),
+        scrambling(scramblerInfo),
+        interleaving(interleaverInfo)
     {}
+    virtual const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
+    virtual const IScrambling *getScrambling() const { return scrambling; }
+    virtual const IInterleaving *getInterleaving() const { return interleaving; }
 };
 
 class INET_API ReceptionBitModel : public SignalBitModel, public virtual IReceptionBitModel
 {
   protected:
+    const IModulation *modulation;
     const double ber;
     const int bitErrorCount;
 
   public:
     ReceptionBitModel() :
         SignalBitModel(),
+        modulation(NULL),
         ber(sNaN),
         bitErrorCount(-1)
     {}
 
-    ReceptionBitModel(int bitLength, double bitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrectionInfo, const IScrambling *scramblerInfo, const IInterleaving *interleaverInfo, double ber, int bitErrorCount) :
-        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo, scramblerInfo, interleaverInfo),
+    ReceptionBitModel(int bitLength, double bitRate, const BitVector *bits, const IModulation *modulation, double ber, int bitErrorCount) :
+        SignalBitModel(bitLength, bitRate, bits),
+        modulation(modulation),
         ber(ber),
         bitErrorCount(bitErrorCount)
     {}
     virtual double getBER() const { return ber; }
     virtual int getBitErrorCount() const { return bitErrorCount; }
+    const IModulation *getModulation() const { return modulation; }
 };
 
 } // namespace physicallayer
