@@ -50,6 +50,8 @@ class INET_API Ieee80211LayeredDecoder : public LayeredDecoder
         const APSKModulationBase *getModulationFromSignalFieldRate(const ShortBitVector& rate) const;
         const Ieee80211Interleaving *getInterleavingFromModulation(const IModulation *modulationScheme) const;
         ShortBitVector getSignalFieldRate(const BitVector& signalField) const;
+        unsigned int getSignalFieldLength(const BitVector& signalField) const;
+        unsigned int calculatePadding(unsigned int dataFieldLengthInBits, const IModulation *modulationScheme, const Ieee80211ConvolutionalCode *fec) const;
 
     public:
         const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const;
