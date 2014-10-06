@@ -213,7 +213,7 @@ void ConvolutionalCoder::initParameters()
 
 BitVector ConvolutionalCoder::encode(const BitVector& informationBits) const
 {
-    EV_DETAIL << "Encoding the following bits: " << informationBits << endl;
+    EV_DEBUG << "Encoding the following bits: " << informationBits << endl;
     if (informationBits.getSize() % codeRateParamaterK)
         throw cRuntimeError("Length of informationBits must be a multiple of codeRateParamaterK = %d", codeRateParamaterK);
     BitVector encodedInformationBits;
@@ -230,7 +230,7 @@ BitVector ConvolutionalCoder::encode(const BitVector& informationBits) const
             encodedInformationBits.appendBit(encodedSymbol.getBit(j));
     }
     BitVector puncturedEncodedInformationBits = puncturing(encodedInformationBits);
-    EV_DETAIL << "The encoded bits are: " << puncturedEncodedInformationBits << endl;
+    EV_DEBUG << "The encoded bits are: " << puncturedEncodedInformationBits << endl;
     return puncturedEncodedInformationBits;
 }
 
@@ -472,7 +472,7 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
             trellisGraph[i][j] = TrellisGraphNode(-1, -1, -1, INT32_MAX, 0, 0);
     }
     trellisGraph[0][0].state = 0;
-    EV_DETAIL << "Decoding the following bits: " << depuncturedEncodedBits << endl;
+    EV_DEBUG << "Decoding the following bits: " << depuncturedEncodedBits << endl;
     ShortBitVector countsOnHammingDistance;
     countsOnHammingDistance.appendBit(true, codeRateParamaterN);
     ShortBitVector nextOutputSymbol = giveNextOutputSymbol(depuncturedEncodedBits, 0, isPunctured, countsOnHammingDistance);
@@ -504,7 +504,7 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
         return std::make_pair<BitVector, bool>(BitVector::UNDEF, false);
     }
     BitVector decodedMsg = traversePath(bestNode, trellisGraph);
-    EV_DETAIL << "Recovered message: " << decodedMsg << endl
+    EV_DEBUG << "Recovered message: " << decodedMsg << endl
     << " Number of errors: " << bestNode.numberOfErrors
     << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
     << " End state: " << bestNode.state << endl;

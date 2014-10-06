@@ -23,7 +23,7 @@ namespace physicallayer {
 
 BitVector Ieee80211Scrambler::scramble(const BitVector& bits) const
 {
-    EV_DETAIL << "Scrambling the following bits: " << bits << endl;
+    EV_DEBUG << "Scrambling the following bits: " << bits << endl;
     BitVector scrambledBits;
     int sequenceLength = scramblingSequence.getSize();
     for (unsigned int i = 0; i < bits.getSize(); i++)
@@ -32,7 +32,7 @@ BitVector Ieee80211Scrambler::scramble(const BitVector& bits) const
         bool scrambledBit = eXOR(bits.getBit(i), scramblingSequence.getBit(scramblingIndex));
         scrambledBits.appendBit(scrambledBit);
     }
-    EV_DETAIL << "The scrambled bits are: " << scrambledBits << endl;
+    EV_DEBUG << "The scrambled bits are: " << scrambledBits << endl;
     return scrambledBits;
 }
 
