@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ENCODER_H
-#define __INET_ENCODER_H
+#ifndef __INET_LAYEREDENCODER_H
+#define __INET_LAYEREDENCODER_H
 
 #include "IEncoder.h"
 #include "ISerializer.h"
@@ -54,4 +54,4 @@ class INET_API LayeredEncoder : public IEncoder, public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_ENCODER_H
+#endif // ifndef __INET_LAYEREDENCODER_H
