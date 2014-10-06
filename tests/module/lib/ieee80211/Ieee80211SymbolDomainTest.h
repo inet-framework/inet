@@ -21,6 +21,8 @@
 #include "INETDefs.h"
 #include "Ieee80211LayeredEncoder.h"
 #include "Ieee80211OFDMModulator.h"
+#include "Ieee80211OFDMDemodulator.h"
+#include "Ieee80211LayeredDecoder.h"
 #include "DummySerializer.h"
 
 using namespace inet::physicallayer;
@@ -32,6 +34,8 @@ class INET_API Ieee80211SymbolDomainTest : public cSimpleModule
     protected:
         Ieee80211LayeredEncoder *ieee80211LayeredEncoder;
         Ieee80211OFDMModulator *ieee80211OFDMModulator;
+        Ieee80211OFDMDemodulator *ieee80211OFDMDemodulator;
+        Ieee80211LayeredDecoder *ieee80211LayeredDecoder;
         DummySerializer *serializer;
         BitVector input;
 

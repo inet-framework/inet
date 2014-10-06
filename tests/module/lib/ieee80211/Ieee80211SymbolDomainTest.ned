@@ -20,6 +20,8 @@ simple Ieee80211SymbolDomainTest
     parameters:
         string testFile;
         string serializerModule;
+        string ieee80211LayeredDecoderModule;
         string ieee80211LayeredEncoderModule;
         string ieee80211OFDMModulatorModule;
+        string ieee80211OFDMDemodulatorModule;
 }

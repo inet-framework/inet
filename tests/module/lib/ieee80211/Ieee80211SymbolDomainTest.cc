@@ -29,6 +29,8 @@ void Ieee80211SymbolDomainTest::initialize(int stage)
     {
         ieee80211LayeredEncoder = getModuleFromPar<Ieee80211LayeredEncoder>(par("ieee80211LayeredEncoderModule"), this);
         ieee80211OFDMModulator = getModuleFromPar<Ieee80211OFDMModulator>(par("ieee80211OFDMModulatorModule"), this);
+        ieee80211OFDMDemodulator = getModuleFromPar<Ieee80211OFDMDemodulator>(par("ieee80211OFDMDemodulatorModule"), this);
+        ieee80211LayeredDecoder = getModuleFromPar<Ieee80211LayeredDecoder>(par("ieee80211LayeredDecoderModule"), this);
         serializer = getModuleFromPar<DummySerializer>(par("serializerModule"), this);
         parseInput(par("testFile").stringValue());
     }
@@ -58,10 +60,17 @@ void Ieee80211SymbolDomainTest::parseInput(const char* fileName)
 
 void Ieee80211SymbolDomainTest::test() const
 {
-    TransmissionPacketModel dummyPacket;
+    TransmissionPacketModel packetModel;
     serializer->setDummyOutputBits(input);
-    const ITransmissionBitModel *bitModel = ieee80211LayeredEncoder->encode(&dummyPacket);
-    ieee80211OFDMModulator->modulate(bitModel);
+    const ITransmissionBitModel *bitModel = ieee80211LayeredEncoder->encode(&packetModel);
+    const ITransmissionSymbolModel *transmissionSymbolModel = ieee80211OFDMModulator->modulate(bitModel);
+    ReceptionSymbolModel receptionSymbolModel(0, 0, transmissionSymbolModel->getSymbols(), 0, 0);
+    const IReceptionBitModel *receptionBitModel = ieee80211OFDMDemodulator->demodulate(&receptionSymbolModel);
+    const IReceptionPacketModel *receptionPacketModel = ieee80211LayeredDecoder->decode(receptionBitModel);
+    delete bitModel;
+    delete transmissionSymbolModel;
+    delete receptionBitModel;
+    delete receptionPacketModel;
 }
 
 } /* namespace inet */
