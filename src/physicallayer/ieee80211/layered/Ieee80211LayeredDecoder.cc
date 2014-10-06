@@ -130,14 +130,21 @@ const Ieee80211Interleaving* Ieee80211LayeredDecoder::getInterleavingFromModulat
 BitVector Ieee80211LayeredDecoder::decodeSignalField(const BitVector& signalField) const
 {
     BitVector deinterleavedSignalField = signalDeinterleaver->deinterleave(signalField);
-    return signalFECDecoder->decode(deinterleavedSignalField);
+    std::pair<BitVector, bool> fecDecodedSignalField = signalFECDecoder->decode(deinterleavedSignalField);
+    bool isDecodedSuccessfully = fecDecodedSignalField.second;
+    if (!isDecodedSuccessfully)
+        throw cRuntimeError("FEC error"); // TODO: implement correct error handling
+    return fecDecodedSignalField.first;
 }
 
 BitVector Ieee80211LayeredDecoder::decodeDataField(const BitVector& dataField, const ConvolutionalCoder& fecDecoder, const Ieee80211Interleaver& deinterleaver) const
 {
     BitVector deinterleavedDataField = deinterleaver.deinterleave(dataField);
-    BitVector fecDecodedDataField = fecDecoder.decode(deinterleavedDataField);
-    return descrambler->descramble(fecDecodedDataField);
+    std::pair<BitVector, bool> fecDecodedDataField = fecDecoder.decode(deinterleavedDataField);
+    bool isDecodedSuccessfully = fecDecodedDataField.second;
+    if (!isDecodedSuccessfully)
+        throw cRuntimeError("FEC error"); // TODO: implement correct error handling
+    return descrambler->descramble(fecDecodedDataField.first);
 }
 
 const IReceptionPacketModel* Ieee80211LayeredDecoder::createPacketModel(const BitVector& decodedBits, const Ieee80211Scrambling *scrambling, const Ieee80211ConvolutionalCode *fec, const Ieee80211Interleaving *interleaving) const

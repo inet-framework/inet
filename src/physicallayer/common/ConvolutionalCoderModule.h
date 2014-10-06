@@ -35,7 +35,7 @@ class ConvolutionalCoderModule : public cSimpleModule, public IFECCoder
 
     public:
         virtual BitVector encode(const BitVector& informationBits) const { return convolutionalCoder->encode(informationBits); }
-        virtual BitVector decode(const BitVector& encodedBits) const { return convolutionalCoder->decode(encodedBits); }
+        virtual std::pair<BitVector, bool> decode(const BitVector& encodedBits) const { return convolutionalCoder->decode(encodedBits); }
         virtual const ConvolutionalCode *getForwardErrorCorrection() const {  return convolutionalCoder->getForwardErrorCorrection(); }
         ~ConvolutionalCoderModule();
 };

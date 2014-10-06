@@ -448,7 +448,7 @@ BitVector ConvolutionalCoder::traversePath(const TrellisGraphNode& bestNode, Tre
     return decodedBits;
 }
 
-BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
+std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBits) const
 {
     BitVector isPunctured;
     BitVector depuncturedEncodedBits = depuncturing(encodedBits, isPunctured);
@@ -499,13 +499,16 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
         }
     }
     if (!isTruncatedMode && bestNode.symbol == -1)
-        throw cRuntimeError("None of the paths in the trellis graph lead to the all-zeros state");
+    {
+        EV_DEBUG << "None of the paths in the trellis graph lead to the all-zeros state" << endl;
+        return std::make_pair<BitVector, bool>(BitVector::UNDEF, false);
+    }
     BitVector decodedMsg = traversePath(bestNode, trellisGraph);
     EV_DETAIL << "Recovered message: " << decodedMsg << endl
     << " Number of errors: " << bestNode.numberOfErrors
     << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
     << " End state: " << bestNode.state << endl;
-    return decodedMsg;
+    return std::make_pair<BitVector, bool>(decodedMsg, true);
 }
 
 ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode* convolutionalCode) : FecCoderBase(convolutionalCode)

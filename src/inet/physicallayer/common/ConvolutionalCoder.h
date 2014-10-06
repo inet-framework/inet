@@ -125,7 +125,7 @@ class ConvolutionalCoder : public FecCoderBase
 
     public:
         BitVector encode(const BitVector& informationBits) const;
-        BitVector decode(const BitVector& encodedBits) const;
+        std::pair<BitVector, bool> decode(const BitVector& encodedBits) const;
         const ConvolutionalCode *getForwardErrorCorrection() const { return forwardErrorCorrection; }
 
         /*

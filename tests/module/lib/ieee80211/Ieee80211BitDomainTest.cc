@@ -79,7 +79,7 @@ void Ieee80211BitDomainTest::testConvolutionalCoder(unsigned int numberOfRandomE
         int pos = rand() % encoded.getSize();
         encoded.toggleBit(pos);
     }
-    BitVector decoded = convCoder->decode(encoded);
+    BitVector decoded = convCoder->decode(encoded).first;
     if (input != decoded)
         EV_DETAIL << "Convolutional Coder test has failed" << endl;
 }
@@ -107,7 +107,7 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
     BitVector deinterleavedInput = interleaver->deinterleave(interleavedInput);
     if (bccEncodedInput != deinterleavedInput)
         EV_DETAIL << "Deinterleaving has failed" << endl;
-    BitVector bccDecodedInput = convCoder->decode(deinterleavedInput);
+    BitVector bccDecodedInput = convCoder->decode(deinterleavedInput).first;
     if (bccDecodedInput != scrambledInput)
         EV_DETAIL << "BCC decoding has failed" << endl;
     BitVector descrambledInput = scrambler->descramble(bccDecodedInput); // Note: scrambling and descrambling are the same operations
