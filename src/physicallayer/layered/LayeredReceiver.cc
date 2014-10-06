@@ -37,18 +37,28 @@ void LayeredReceiver::initialize(int stage)
         demodulator = check_and_cast<IDemodulator *>(getSubmodule("demodulator"));
         pulseFilter = check_and_cast<IPulseFilter *>(getSubmodule("pulseFilter"));
         analogDigitalConverter = check_and_cast<IAnalogDigitalConverter *>(getSubmodule("analogDigitalConverter"));
+
+        energyDetection = mW(math::dBm2mW(par("energyDetection")));
+        sensitivity = mW(math::dBm2mW(par("sensitivity")));
+        carrierFrequency = Hz(par("carrierFrequency"));
+        bandwidth = Hz(par("bandwidth"));
     }
 }
 
-const IListening *LayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
-{
-    throw cRuntimeError("Not yet implemented");
-}
 
-const IListeningDecision *LayeredReceiver::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
-{
-    throw cRuntimeError("Not yet implemented");
-}
+//const IListening *LayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+//{
+//    return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
+//}
+//
+//const IListeningDecision *LayeredReceiver::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+//{
+//    const INoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
+//    const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
+//    W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
+//    delete noise;
+//    return new ListeningDecision(listening, maxPower >= energyDetection);
+//}
 
 const IReceptionDecision *LayeredReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {

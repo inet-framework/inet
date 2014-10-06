@@ -22,13 +22,13 @@
 #include "IDemodulator.h"
 #include "IPulseFilter.h"
 #include "IAnalogDigitalConverter.h"
-#include "ReceiverBase.h"
+#include "ScalarReceiver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API LayeredReceiver : public ReceiverBase
+class INET_API LayeredReceiver : public ScalarReceiver
 {
   protected:
     const IDecoder *decoder;
@@ -42,8 +42,8 @@ class INET_API LayeredReceiver : public ReceiverBase
   public:
     LayeredReceiver();
 
-    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
-    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+//    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
+//    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
     virtual const IDecoder *getDecoder() const { return decoder; }

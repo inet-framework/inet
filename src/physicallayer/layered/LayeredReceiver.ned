@@ -30,9 +30,13 @@ module LayeredReceiver like IReceiver
         string demodulatorType;
         string shaperFilterType;
         string analogDigitalConverterType;
+        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
         @class(LayeredReceiver);
 
-    submodules:
+        submodules:
         decoder: <decoderType> like IDecoder {
             @display("p=100,50");
         }
