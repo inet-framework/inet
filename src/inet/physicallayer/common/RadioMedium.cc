@@ -813,8 +813,8 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         communicationFigure->setLineOpacity(0.5);
         groupFigure->addFigure(communicationFigure);
         cLabelFigure *nameFigure = new cLabelFigure();
-        nameFigure->setLocation(position);
         nameFigure->setTags("ongoing_transmission packet_name label");
+        nameFigure->setPosition(position);
         nameFigure->setText(macFrame->getName());
         nameFigure->setColor(color);
         groupFigure->addFigure(nameFigure);

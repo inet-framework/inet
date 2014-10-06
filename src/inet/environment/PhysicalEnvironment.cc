@@ -378,7 +378,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     lineColor.blue = atoi(tokenizer.nextToken());
             }
             else
-                lineColor = cFigure::Color::byName(lineColorAttribute);
+                lineColor = cFigure::Color(lineColorAttribute);
         }
         // fill color
         cFigure::Color fillColor = cFigure::WHITE;
@@ -396,7 +396,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     fillColor.blue = atoi(tokenizer.nextToken());
             }
             else
-                fillColor = cFigure::Color::byName(fillColorAttribute);
+                fillColor = cFigure::Color(fillColorAttribute);
         }
         // opacity
         double opacity = 1;
@@ -498,8 +498,8 @@ void PhysicalEnvironment::updateCanvas()
         if (name)
         {
             cLabelFigure *nameFigure = new cLabelFigure(NULL);
-            nameFigure->setLocation(computeCanvasPoint(position));
             nameFigure->setTags("physical_object object_name label");
+            nameFigure->setPosition(computeCanvasPoint(position));
             nameFigure->setText(name);
             objectsLayer->addFigure(nameFigure);
         }
