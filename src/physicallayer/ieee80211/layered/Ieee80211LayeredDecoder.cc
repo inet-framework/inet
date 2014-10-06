@@ -50,7 +50,7 @@ void Ieee80211LayeredDecoder::initialize(int stage)
         descrambling = new Ieee80211Scrambling("1011101", "0001001");
         descrambler = new Ieee80211Scrambler(descrambling);
         signalFECDecoder = new ConvolutionalCoder(new Ieee80211ConvolutionalCode(1,2));
-        signalDeinterleaver = new Ieee80211Interleaver(new Ieee80211Interleaving(BPSKModulation::singleton.getCodeWordLength() * 48, BPSKModulation::singleton.getCodeWordLength()));
+        signalDeinterleaver = new Ieee80211Interleaver(new Ieee80211Interleaving(BPSKModulation::singleton.getCodeWordLength() * ENCODED_SIGNAL_FIELD_LENGTH, BPSKModulation::singleton.getCodeWordLength()));
     }
 }
 
@@ -123,7 +123,7 @@ const Ieee80211Interleaving* Ieee80211LayeredDecoder::getInterleavingFromModulat
 {
     const IAPSKModulation *dataModulationScheme = dynamic_cast<const IAPSKModulation*>(modulationScheme);
     ASSERT(dataModulationScheme != NULL);
-    return new Ieee80211Interleaving(dataModulationScheme->getCodeWordLength() * 48, dataModulationScheme->getCodeWordLength()); // FIXME: memory leak
+    return new Ieee80211Interleaving(dataModulationScheme->getCodeWordLength() * ENCODED_SIGNAL_FIELD_LENGTH, dataModulationScheme->getCodeWordLength()); // FIXME: memory leak
 }
 
 BitVector Ieee80211LayeredDecoder::decodeSignalField(const BitVector& signalField) const
@@ -168,7 +168,7 @@ unsigned int Ieee80211LayeredDecoder::calculatePadding(unsigned int dataFieldLen
 {
     const IAPSKModulation *dataModulationScheme = dynamic_cast<const IAPSKModulation*>(modulationScheme);
     ASSERT(dataModulationScheme != NULL);
-    unsigned int codedBitsPerOFDMSymbol = dataModulationScheme->getCodeWordLength() * 48;
+    unsigned int codedBitsPerOFDMSymbol = dataModulationScheme->getCodeWordLength() * ENCODED_SIGNAL_FIELD_LENGTH;
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol * fec->getCodeRatePuncturingK() / fec->getCodeRatePuncturingN();
     if (dataFieldLengthInBits / SYMBOLS_PER_DATA_FIELD > dataBitsPerOFDMSymbol)
     {
