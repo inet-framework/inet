@@ -17,10 +17,18 @@
 
 package inet.physicallayer.ieee80211.layered;
 
+import inet.physicallayer.contract.ISerializer;
 import inet.physicallayer.layered.LayeredDecoder;
+
 
 module Ieee80211LayeredDecoder extends LayeredDecoder
 {
     parameters:
+        string deserializerType;
         @class(Ieee80211LayeredDecoder);
+
+    submodules:
+        deserializer: <deserializerType> like ISerializer if deserializerType != "" {
+            @display("p=186,168");
+        }
 }

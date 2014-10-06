@@ -47,7 +47,7 @@ void Ieee80211LayeredDecoder::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         // TODO: maybe they should be modules
-        deserializer = new DummySerializer();
+        deserializer = check_and_cast<DummySerializer *>(getSubmodule("deserializer")); // FIXME
         descrambling = new Ieee80211Scrambling("1011101", "0001001");
         descrambler = new Ieee80211Scrambler(descrambling);
         signalFECDecoder = new ConvolutionalCoder(new Ieee80211ConvolutionalCode(1,2));
@@ -185,7 +185,6 @@ Ieee80211LayeredDecoder::~Ieee80211LayeredDecoder()
     delete signalDeinterleaver;
     delete descrambler;
     delete signalFECDecoder;
-    delete deserializer;
 }
 
 } /* namespace physicallayer */
