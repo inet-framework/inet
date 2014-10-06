@@ -91,6 +91,7 @@ void MovingMobilityBase::updateVisualRepresentation()
         if (movementTrail->getNumFigures() == 0 || (dx * dx + dy * dy) > 100) {
             cLineFigure *movementLine = new cLineFigure();
             std::cout << startPosition.x << ", " << startPosition.y << " -> " << endPosition.x << ", " << endPosition.y << endl;
+            movementLine->setTags("movement_trail recent_history");
             movementLine->setStart(startPosition);
             movementLine->setEnd(endPosition);
             movementLine->setLineColor(cFigure::BLACK);

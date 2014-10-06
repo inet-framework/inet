@@ -803,6 +803,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
         cGroupFigure *groupFigure = new cGroupFigure();
         cRingFigure *communicationFigure = new cRingFigure();
+        communicationFigure->setTags("ongoing_transmission");
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFilled(true);
         communicationFigure->setFillColor(color);
@@ -813,6 +814,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         groupFigure->addFigure(communicationFigure);
         cLabelFigure *nameFigure = new cLabelFigure();
         nameFigure->setLocation(position);
+        nameFigure->setTags("ongoing_transmission packet_name label");
         nameFigure->setText(macFrame->getName());
         nameFigure->setColor(color);
         groupFigure->addFigure(nameFigure);
@@ -844,6 +846,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     delete listening;
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
         cLineFigure *communicationFigure = new cLineFigure();
+        communicationFigure->setTags("successful_reception recent_history");
         cFigure::Point start = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
         cFigure::Point end = PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition());
         communicationFigure->setStart(start);

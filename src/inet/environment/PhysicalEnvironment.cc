@@ -471,7 +471,10 @@ void PhysicalEnvironment::updateCanvas()
             figure->setLineOpacity(object->getOpacity());
             figure->setFillOpacity(object->getOpacity());
 #endif
-            figure->setTags(object->getTags());
+            std::string tags("physical_object ");
+            if (object->getTags())
+                tags += object->getTags();
+            figure->setTags(tags.c_str());
             objectsLayer->addFigure(figure);
         }
         // prism
@@ -496,6 +499,7 @@ void PhysicalEnvironment::updateCanvas()
         {
             cTextFigure *nameFigure = new cTextFigure(NULL);
             nameFigure->setLocation(computeCanvasPoint(position));
+            nameFigure->setTags("physical_object object_name label");
             nameFigure->setText(name);
             objectsLayer->addFigure(nameFigure);
         }
@@ -524,7 +528,10 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
         figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
 #endif
-        figure->setTags(object->getTags());
+        std::string tags("physical_object ");
+        if (object->getTags())
+            tags += object->getTags();
+        figure->setTags(tags.c_str());
         objectsLayer->addFigure(figure);
     }
 }
