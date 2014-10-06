@@ -37,7 +37,7 @@ std::ostream& operator<<(std::ostream& out, const OFDMSymbol& symbol)
         if (symbol.subcarrierSymbols[i])
             out << " " << *symbol.subcarrierSymbols[i];
         else
-            out << "UNDEFINED SYMBOL";
+            out << " UNDEFINED SYMBOL";
     return out;
 }
 
