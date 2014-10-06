@@ -497,7 +497,7 @@ void PhysicalEnvironment::updateCanvas()
         const char *name = object->getName();
         if (name)
         {
-            cTextFigure *nameFigure = new cTextFigure(NULL);
+            cLabelFigure *nameFigure = new cLabelFigure(NULL);
             nameFigure->setLocation(computeCanvasPoint(position));
             nameFigure->setTags("physical_object object_name label");
             nameFigure->setText(name);
