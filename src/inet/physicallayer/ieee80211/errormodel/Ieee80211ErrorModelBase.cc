@@ -103,20 +103,11 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
 
     EV << "bit length = " << bitLength << " packet error rate = " << 1 - mpduNoError << " header error rate = " << 1 - headerNoError << endl;
 
-// TODO: use this code instead of the other, changes fingerprints!
-//    if (headerNoError >= 1)
-//        headerNoError = 1;
-//    if (MpduNoError >= 1)
-//        MpduNoError = 1;
-//    return 1 - headerNoError * MpduNoError;
-    if (mpduNoError >= 1 && headerNoError >= 1)
-        return 0.0;
-    if (dblrand() > headerNoError)
-        return 1.0;
-    else if (dblrand() > mpduNoError)
-        return 1.0;
-    else
-        return 0.0;
+    if (headerNoError >= 1)
+        headerNoError = 1;
+    if (mpduNoError >= 1)
+        mpduNoError = 1;
+    return 1 - headerNoError * mpduNoError;
 }
 
 double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir) const
