@@ -675,6 +675,8 @@ const IReceptionDecision *RadioMedium::getReceptionDecision(const IRadio *radio,
 
 void RadioMedium::addRadio(const IRadio *radio)
 {
+    if (radios.size() == 0)
+        baseRadioId = radio->getId();
     radios.push_back(radio);
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
@@ -706,6 +708,8 @@ void RadioMedium::removeRadio(const IRadio *radio)
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
+    if (transmissions.size() == 0)
+        baseTransmissionId = transmission->getId();
     transmissionCount++;
     transmissions.push_back(transmission);
     simtime_t maxArrivalEndTime = simTime();
