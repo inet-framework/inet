@@ -31,12 +31,15 @@ class INET_API ScalarSNIR : public SNIRBase
   protected:
     mutable double minSNIR;
 
+  protected:
+    virtual double computeMin() const;
+
   public:
     ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
 
     virtual void printToStream(std::ostream& stream) const;
 
-    virtual double computeMin() const;
+    virtual double getMin() const;
 };
 
 } // namespace physicallayer

@@ -91,7 +91,7 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     }
     else
         throw cRuntimeError("Radio model not supported yet, must be a,b,g or p");
-    double minSNIR = snir->computeMin();
+    double minSNIR = snir->getMin();
     double headerNoError = GetChunkSuccessRate(modeHeader, minSNIR, headerSize);
 
     // probability of no bit error in the MPDU

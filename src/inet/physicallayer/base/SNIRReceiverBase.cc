@@ -49,13 +49,13 @@ bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, 
 const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     RadioReceptionIndication *indication = new RadioReceptionIndication();
-    indication->setMinSNIR(snir->computeMin());
+    indication->setMinSNIR(snir->getMin());
     return indication;
 }
 
 bool SNIRReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 {
-    return snir->computeMin() > snirThreshold;
+    return snir->getMin() > snirThreshold;
 }
 
 const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const

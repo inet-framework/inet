@@ -34,11 +34,15 @@ void ScalarSNIR::printToStream(std::ostream& stream) const
 
 double ScalarSNIR::computeMin() const
 {
-    if (isNaN(minSNIR)) {
-        const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
-        const ScalarNoise *scalarNoise= check_and_cast<const ScalarNoise *>(noise);
-        return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
-    }
+    const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
+    const ScalarNoise *scalarNoise= check_and_cast<const ScalarNoise *>(noise);
+    return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
+}
+
+double ScalarSNIR::getMin() const
+{
+    if (isNaN(minSNIR))
+        minSNIR = computeMin();
     return minSNIR;
 }
 

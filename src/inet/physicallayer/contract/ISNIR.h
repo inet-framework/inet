@@ -32,8 +32,7 @@ class INET_API ISNIR : public IPrintableObject
 
     virtual const INoise *getNoise() const = 0;
 
-    // TODO: rename to getMin()?
-    virtual double computeMin() const = 0;
+    virtual double getMin() const = 0;
 };
 
 } // namespace physicallayer
