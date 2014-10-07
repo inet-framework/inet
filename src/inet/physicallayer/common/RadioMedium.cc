@@ -174,24 +174,24 @@ void RadioMedium::finish()
     double receptionCacheHitPercentage = 100 * (double)cacheReceptionHitCount / (double)cacheReceptionGetCount;
     double interferenceCacheHitPercentage = 100 * (double)cacheInterferenceHitCount / (double)cacheInterferenceGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
-    EV_INFO << "Radio medium transmission count = " << transmissionCount << endl;
-    EV_INFO << "Radio medium radio frame send count = " << sendCount << endl;
-    EV_INFO << "Radio medium reception computation count = " << receptionComputationCount << endl;
-    EV_INFO << "Radio medium interference computation count = " << interferenceComputationCount << endl;
-    EV_INFO << "Radio medium reception decision computation count = " << receptionDecisionComputationCount << endl;
-    EV_INFO << "Radio medium listening decision computation count = " << listeningDecisionComputationCount << endl;
-    EV_INFO << "Radio medium reception cache hit = " << receptionCacheHitPercentage << " %" << endl;
-    EV_INFO << "Radio medium interference cache hit = " << interferenceCacheHitPercentage << " %" << endl;
-    EV_INFO << "Radio medium reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
-    recordScalar("Radio medium transmission count", transmissionCount);
-    recordScalar("Radio medium radio frame send count", sendCount);
-    recordScalar("Radio medium reception computation count", receptionComputationCount);
-    recordScalar("Radio medium interference computation count", interferenceComputationCount);
-    recordScalar("Radio medium reception decision computation count", receptionDecisionComputationCount);
-    recordScalar("Radio medium listening decision computation count", listeningDecisionComputationCount);
-    recordScalar("Radio medium reception cache hit", receptionCacheHitPercentage, "%");
-    recordScalar("Radio medium interference cache hit", interferenceCacheHitPercentage, "%");
-    recordScalar("Radio medium reception decision cache hit", decisionCacheHitPercentage, "%");
+    EV_INFO << "Transmission count = " << transmissionCount << endl;
+    EV_INFO << "Radio frame send count = " << sendCount << endl;
+    EV_INFO << "Reception computation count = " << receptionComputationCount << endl;
+    EV_INFO << "Interference computation count = " << interferenceComputationCount << endl;
+    EV_INFO << "Reception decision computation count = " << receptionDecisionComputationCount << endl;
+    EV_INFO << "Listening decision computation count = " << listeningDecisionComputationCount << endl;
+    EV_INFO << "Reception cache hit = " << receptionCacheHitPercentage << " %" << endl;
+    EV_INFO << "Interference cache hit = " << interferenceCacheHitPercentage << " %" << endl;
+    EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
+    recordScalar("transmission count", transmissionCount);
+    recordScalar("radio frame send count", sendCount);
+    recordScalar("reception computation count", receptionComputationCount);
+    recordScalar("interference computation count", interferenceComputationCount);
+    recordScalar("reception decision computation count", receptionDecisionComputationCount);
+    recordScalar("listening decision computation count", listeningDecisionComputationCount);
+    recordScalar("reception cache hit", receptionCacheHitPercentage, "%");
+    recordScalar("interference cache hit", interferenceCacheHitPercentage, "%");
+    recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
 void RadioMedium::handleMessage(cMessage *message)

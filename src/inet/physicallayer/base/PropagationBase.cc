@@ -35,7 +35,7 @@ void PropagationBase::initialize(int stage)
 void PropagationBase::finish()
 {
     EV_INFO << "Radio signal arrival computation count = " << arrivalComputationCount << endl;
-    recordScalar("Radio signal arrival computation count", arrivalComputationCount);
+    recordScalar("Arrival computation count", arrivalComputationCount);
 }
 
 } // namespace physicallayer
