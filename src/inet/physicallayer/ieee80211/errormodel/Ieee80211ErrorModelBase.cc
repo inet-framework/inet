@@ -92,22 +92,22 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     else
         throw cRuntimeError("Radio model not supported yet, must be a,b,g or p");
     double minSNIR = snir->getMin();
-    double headerNoError = GetChunkSuccessRate(modeHeader, minSNIR, headerSize);
+    double headerSuccessRate = GetChunkSuccessRate(modeHeader, minSNIR, headerSize);
 
     // probability of no bit error in the MPDU
-    double mpduNoError;
+    double payloadSuccessRate;
     if (berTableFile)
-        mpduNoError = 1 - berTableFile->getPer(bitrate, minSNIR, bitLength / 8);
+        payloadSuccessRate = 1 - berTableFile->getPer(bitrate, minSNIR, bitLength / 8);
     else
-        mpduNoError = GetChunkSuccessRate(modeBody, minSNIR, bitLength);
+        payloadSuccessRate = GetChunkSuccessRate(modeBody, minSNIR, bitLength);
 
-    EV << "bit length = " << bitLength << " packet error rate = " << 1 - mpduNoError << " header error rate = " << 1 - headerNoError << endl;
+    EV << "bit length = " << bitLength << " packet error rate = " << 1 - payloadSuccessRate << " header error rate = " << 1 - headerSuccessRate << endl;
 
-    if (headerNoError >= 1)
-        headerNoError = 1;
-    if (mpduNoError >= 1)
-        mpduNoError = 1;
-    return 1 - headerNoError * mpduNoError;
+    if (headerSuccessRate >= 1)
+        headerSuccessRate = 1;
+    if (payloadSuccessRate >= 1)
+        payloadSuccessRate = 1;
+    return 1 - headerSuccessRate * payloadSuccessRate;
 }
 
 double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir) const
