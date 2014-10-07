@@ -24,7 +24,7 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #endif // ifdef WITH_ETHERNET
 
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Radio.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 
@@ -69,7 +69,7 @@ void Ieee80211MgmtAP::initialize(int stage)
         //TBD fill in supportedRates
 
         // subscribe for notifications
-        getParentModule()->getSubmodule("radio")->subscribe(IRadio::radioChannelChangedSignal, this);
+        getParentModule()->getSubmodule("radio")->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -115,7 +115,7 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
 void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioChannelChangedSignal) {
+    if (signalID == Ieee80211Radio::radioChannelChangedSignal) {
         EV << "updating channel number\n";
         channelNumber = value;
     }

@@ -29,6 +29,8 @@ namespace physicallayer {
 
 Define_Module(Ieee80211Radio);
 
+simsignal_t Ieee80211Radio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
+
 Ieee80211Radio::Ieee80211Radio() :
     Radio(),
     channelNumber(-1)

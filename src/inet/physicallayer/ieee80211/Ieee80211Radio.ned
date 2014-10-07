@@ -39,4 +39,6 @@ module Ieee80211Radio extends ScalarRadio
         *.opMode = opMode;
         *.preambleMode = preambleMode;
         @class(Ieee80211Radio);
+        @signal[radioChannelChanged](type=long);
+        @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
 }

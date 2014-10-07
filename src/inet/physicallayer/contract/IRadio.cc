@@ -27,7 +27,6 @@ simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioMo
 simsignal_t IRadio::listeningChangedSignal = cComponent::registerSignal("listeningChanged");
 simsignal_t IRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");
 simsignal_t IRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
-simsignal_t IRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 cEnum *IRadio::radioModeEnum = NULL;
 cEnum *IRadio::receptionStateEnum = NULL;

@@ -63,12 +63,10 @@ module Radio like IRadio
         @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);
         @signal[transmissionStateChanged](type=long);
-        @signal[radioChannelChanged](type=long);
 
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[radioMedium](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
 
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);

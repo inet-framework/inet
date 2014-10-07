@@ -26,6 +26,13 @@ namespace physicallayer {
 
 class INET_API Ieee80211Radio : public Radio
 {
+  public:
+    /**
+     * This signal is emitted every time the radio channel changes.
+     * The signal value is the new radio channel.
+     */
+    static simsignal_t radioChannelChangedSignal;
+
   protected:
     int channelNumber;
 

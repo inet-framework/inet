@@ -72,12 +72,6 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
     static simsignal_t transmissionStateChangedSignal;
 
     /**
-     * This signal is emitted every time the radio medium changes.
-     * The signal value is the new radio medium.
-     */
-    static simsignal_t radioChannelChangedSignal;
-
-    /**
      * This enumeration specifies the requested operational mode of the radio.
      * NOTE: Some parts of the code base may be sensitive to the order of the
      * enum items because they may be used as an array index.
