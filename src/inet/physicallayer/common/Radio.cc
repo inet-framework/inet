@@ -26,6 +26,11 @@ namespace physicallayer {
 
 Define_Module(Radio);
 
+simsignal_t Radio::minSNIRSignal = cComponent::registerSignal("minSNIR");
+simsignal_t Radio::packetErrorRateSignal = cComponent::registerSignal("packetErrorRate");
+simsignal_t Radio::bitErrorRateSignal = cComponent::registerSignal("bitErrorRate");
+simsignal_t Radio::symbolErrorRateSignal = cComponent::registerSignal("symbolErrorRate");
+
 Radio::Radio() :
     id(nextId++),
     antenna(NULL),
@@ -313,6 +318,14 @@ void Radio::endReception(cMessage *message)
     if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer) {
         cPacket *macFrame = medium->receivePacket(this, radioFrame);
         EV << "Sending up " << macFrame << ".\n";
+        const RadioReceptionIndication *indication = check_and_cast<const RadioReceptionIndication *>(macFrame->getControlInfo());
+        emit(minSNIRSignal, indication->getMinSNIR());
+        if (!isNaN(indication->getPacketErrorRate()))
+            emit(packetErrorRateSignal, indication->getPacketErrorRate());
+        if (!isNaN(indication->getBitErrorRate()))
+            emit(bitErrorRateSignal, indication->getBitErrorRate());
+        if (!isNaN(indication->getSymbolErrorRate()))
+            emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
         send(macFrame, upperLayerOut);
         endReceptionTimer = NULL;
     }

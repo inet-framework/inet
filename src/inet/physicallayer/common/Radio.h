@@ -34,6 +34,12 @@ namespace physicallayer {
 // TODO: support capturing a stronger transmission
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
+  public:
+    static simsignal_t minSNIRSignal;
+    static simsignal_t packetErrorRateSignal;
+    static simsignal_t bitErrorRateSignal;
+    static simsignal_t symbolErrorRateSignal;
+
   protected:
     /**
      * An identifier which is globally unique for the whole lifetime of the
