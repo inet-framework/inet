@@ -24,13 +24,13 @@ module FlatReceiverBase like IReceiver
 {
     parameters:
         string errorModelType = default("FlatErrorModel");
+        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
         double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         double snirThreshold @unit(dB);
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
 
     submodules:
-        errorModel: <errorModelType> like IErrorModel;
+        errorModel: <errorModelType> like IErrorModel if errorModelType != "";
 }
