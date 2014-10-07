@@ -127,6 +127,15 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
     }
 }
 
+const RadioReceptionIndication *FlatReceiverBase::computeReceptionIndication(const ISNIR *snir) const
+{
+    RadioReceptionIndication *indication = const_cast<RadioReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
+//    indication->setPacketErrorRate(errorModel->computePacketErrorRate(snir));
+//    indication->setBitErrorRate(errorModel->computeBitErrorRate(snir));
+//    indication->setSymbolErrorRate(errorModel->computeSymbolErrorRate(snir));
+    return indication;
+}
+
 const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
