@@ -378,7 +378,11 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     lineColor.blue = atoi(tokenizer.nextToken());
             }
             else
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
                 lineColor = cFigure::Color(lineColorAttribute);
+#else
+                lineColor = cFigure::Color::byName(lineColorAttribute);
+#endif
         }
         // fill color
         cFigure::Color fillColor = cFigure::WHITE;
@@ -396,7 +400,11 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     fillColor.blue = atoi(tokenizer.nextToken());
             }
             else
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
                 fillColor = cFigure::Color(fillColorAttribute);
+#else
+                fillColor = cFigure::Color::byName(fillColorAttribute);
+#endif
         }
         // opacity
         double opacity = 1;
@@ -459,7 +467,7 @@ void PhysicalEnvironment::updateCanvas()
         if (sphere)
         {
             double radius = sphere->getRadius();
-            cOvalFigure *figure = new cOvalFigure(NULL);
+            cOvalFigure *figure = new cOvalFigure();
             figure->setFilled(true);
             cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), viewRotation);
             cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), viewRotation);
@@ -467,7 +475,7 @@ void PhysicalEnvironment::updateCanvas()
             figure->setLineWidth(object->getLineWidth());
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-#if OMNETPP_CANVAS_VERSION>=0x20140908
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
             figure->setLineOpacity(object->getOpacity());
             figure->setFillOpacity(object->getOpacity());
 #endif
@@ -497,9 +505,14 @@ void PhysicalEnvironment::updateCanvas()
         const char *name = object->getName();
         if (name)
         {
-            cLabelFigure *nameFigure = new cLabelFigure(NULL);
-            nameFigure->setTags("physical_object object_name label");
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+            cLabelFigure *nameFigure = new cLabelFigure();
             nameFigure->setPosition(computeCanvasPoint(position));
+#else
+            cTextFigure *nameFigure = new cTextFigure();
+            nameFigure->setLocation(computeCanvasPoint(position));
+#endif
+            nameFigure->setTags("physical_object object_name label");
             nameFigure->setText(name);
             objectsLayer->addFigure(nameFigure);
         }
@@ -518,13 +531,13 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
             cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, viewRotation);
             canvasPoints.push_back(canvPoint);
         }
-        cPolygonFigure *figure = new cPolygonFigure(NULL);
+        cPolygonFigure *figure = new cPolygonFigure();
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());
         figure->setLineColor(object->getLineColor());
         figure->setFillColor(object->getFillColor());
-#if OMNETPP_CANVAS_VERSION>=0x20140908
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
         figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
 #endif
