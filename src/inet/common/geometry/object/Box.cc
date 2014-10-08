@@ -19,6 +19,8 @@
 
 namespace inet {
 
+const Box Box::NIL = Box(Coord::NIL, Coord::NIL);
+
 Box::Box(const Coord& min, const Coord& max) :
     min(min),
     max(max)

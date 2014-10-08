@@ -19,6 +19,8 @@
 
 namespace inet {
 
+const Polygon Polygon::NIL = Polygon();
+
 Polygon::Polygon(const std::vector<Coord>& points)
 {
     if (points.size() < 3)
@@ -32,6 +34,7 @@ bool Polygon::isUnspecified() const
         if ((*it).isUnspecified())
             return true;
     }
+    return false;
 }
 
 Coord Polygon::getNormalUnitVector() const

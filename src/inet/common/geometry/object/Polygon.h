@@ -31,6 +31,8 @@ class INET_API Polygon : public GeometricObjectBase
 
   protected:
     std::vector<Coord> points;
+
+  protected:
     Coord getEdgeOutwardNormalVector(const Coord& edgeP1, const Coord& edgeP2) const;
 
   public:
