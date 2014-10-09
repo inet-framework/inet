@@ -20,6 +20,7 @@
 
 #include "inet/physicallayer/contract/IReception.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "ISignalPacketModel.h"
 
 namespace inet {
 
@@ -30,7 +31,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IReceptionDecision : public IPrintableObject
+class INET_API IReceptionDecision : public IPrintableObject // TODO: revise name
 {
   public:
     /**
@@ -77,6 +78,19 @@ class INET_API IReceptionDecision : public IPrintableObject
      * Returns whether the reception was completely successful or not.
      */
     virtual bool isReceptionSuccessful() const = 0;
+
+    /*
+     * Returns the packet model of the transmission or NULL if packet
+     * domain is not modeled in the actual radio architecture.
+     */
+    virtual const ISignalPacketModel *getPacketModel() const = 0;
+
+    /*
+     * If packet domain is present it returns the MAC frame contained
+     * in the packet model, if not, it returns the MAC frame referenced
+     * by the transmission.
+     */
+    virtual const cPacket *getMacFrame() const = 0;
 };
 
 } // namespace physicallayer
