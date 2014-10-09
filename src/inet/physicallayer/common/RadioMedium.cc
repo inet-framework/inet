@@ -753,7 +753,8 @@ void RadioMedium::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
             EV_WARN << "We can't use the NeighborCache for radio " << radio->getId() << ": range is NaN" << endl;
             sendToAllRadios(radio, frame);
         }
-        neighborCache->sendToNeighbors(radio, frame, range);
+        else
+            neighborCache->sendToNeighbors(radio, frame, range);
     }
     else
         sendToAllRadios(radio, frame);
