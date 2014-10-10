@@ -25,9 +25,9 @@ void FlatTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-//        headerBitLength = par("headerBitLength");
-//        carrierFrequency = Hz(par("carrierFrequency"));
-//        bandwidth = Hz(par("bandwidth"));
+        headerBitLength = par("headerBitLength");
+        carrierFrequency = Hz(par("carrierFrequency"));
+        bandwidth = Hz(par("bandwidth"));
 //        const char *modulationName = par("modulation");
 //        if (strcmp(modulationName, "NULL") == 0); // TODO:
 ////            modulation = new NullModulation();
@@ -39,8 +39,8 @@ void FlatTransmitterBase::initialize(int stage)
 //            modulator = new OFDMModulator("TODO");
 //        else
 //            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
-//        bitrate = bps(par("bitrate"));
-//        power = W(par("power"));
+        bitrate = bps(par("bitrate"));
+        power = W(par("power"));
         // TODO: modulator will be a module
     }
 }
