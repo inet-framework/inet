@@ -45,8 +45,8 @@ double FlatErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     const IReception *reception = snir->getReception();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
-    const IModulation *modulation = flatTransmission->getModulation();
-    return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
+    const IModulator *modulator = flatTransmission->getModulator();
+    return modulator->calculateBER(snir->getMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
 }
 
 double FlatErrorModel::computeSymbolErrorRate(const ISNIR *snir) const

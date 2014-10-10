@@ -31,7 +31,7 @@ namespace physicallayer {
 
 FlatReceiverBase::FlatReceiverBase() :
     SNIRReceiverBase(),
-    modulation(NULL),
+    modulator(NULL),
     errorModel(NULL),
     energyDetection(W(sNaN)),
     sensitivity(W(sNaN)),
@@ -43,7 +43,6 @@ FlatReceiverBase::FlatReceiverBase() :
 FlatReceiverBase::~FlatReceiverBase()
 {
     delete errorModel;
-    delete modulation;
 }
 
 void FlatReceiverBase::initialize(int stage)
@@ -61,7 +60,7 @@ void FlatReceiverBase::initialize(int stage)
 
 void FlatReceiverBase::printToStream(std::ostream& stream) const
 {
-    stream << "modulation = {" << modulation << "}, "
+    stream << "modulation = {" << "todo" << "}, "
            << "error model = {" << errorModel << "}, "
            << "energyDetection = " << energyDetection << ", "
            << "sensitivity = " << sensitivity << ", "

@@ -16,7 +16,6 @@
 //
 
 #include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "OFDMModulator.h"
 
 namespace inet {
 
@@ -26,22 +25,22 @@ void FlatTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        headerBitLength = par("headerBitLength");
-        carrierFrequency = Hz(par("carrierFrequency"));
-        bandwidth = Hz(par("bandwidth"));
-        const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL") == 0); // TODO:
-//            modulation = new NullModulation();
-        else if (strcmp(modulationName, "BPSK") == 0)
-            modulator = new OFDMModulator("BPSK");
-        else if (strcmp(modulationName, "16-QAM") == 0)
-            modulator = new OFDMModulator("16-QAM");
-        else if (strcmp(modulationName, "256-QAM") == 0) // TODO:
-            modulator = new OFDMModulator("TODO");
-        else
-            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
-        bitrate = bps(par("bitrate"));
-        power = W(par("power"));
+//        headerBitLength = par("headerBitLength");
+//        carrierFrequency = Hz(par("carrierFrequency"));
+//        bandwidth = Hz(par("bandwidth"));
+//        const char *modulationName = par("modulation");
+//        if (strcmp(modulationName, "NULL") == 0); // TODO:
+////            modulation = new NullModulation();
+//        else if (strcmp(modulationName, "BPSK") == 0)
+//            modulator = new OFDMModulator("BPSK");
+//        else if (strcmp(modulationName, "16-QAM") == 0)
+//            modulator = new OFDMModulator("16-QAM");
+//        else if (strcmp(modulationName, "256-QAM") == 0) // TODO:
+//            modulator = new OFDMModulator("TODO");
+//        else
+//            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
+//        bitrate = bps(par("bitrate"));
+//        power = W(par("power"));
         // TODO: modulator will be a module
     }
 }

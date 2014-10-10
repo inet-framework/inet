@@ -18,12 +18,12 @@
 #ifndef __INET_IEEE80211SYMBOLMODELTEST_H_
 #define __INET_IEEE80211SYMBOLMODELTEST_H_
 
-#include "INETDefs.h"
-#include "Ieee80211LayeredEncoder.h"
-#include "Ieee80211OFDMModulator.h"
-#include "Ieee80211OFDMDemodulator.h"
-#include "Ieee80211LayeredDecoder.h"
-#include "DummySerializer.h"
+#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211LayeredEncoder.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMModulator.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDemodulator.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211LayeredDecoder.h"
+#include "inet/physicallayer/common/DummySerializer.h"
 
 using namespace inet::physicallayer;
 

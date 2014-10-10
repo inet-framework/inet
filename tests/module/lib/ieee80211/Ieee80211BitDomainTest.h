@@ -18,11 +18,11 @@
 #ifndef __INET_IEEE80211BITDOMAINTEST_H_
 #define __INET_IEEE80211BITDOMAINTEST_H_
 
-#include "ConvolutionalCoderModule.h"
-#include "Ieee80211InterleaverModule.h"
-#include "Ieee80211ScramblerModule.h"
-#include "INETDefs.h"
-#include "ModuleAccess.h"
+#include "inet/physicallayer/common/ConvolutionalCoderModule.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211InterleaverModule.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211ScramblerModule.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
 
 using namespace inet::physicallayer;
 

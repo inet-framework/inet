@@ -16,7 +16,7 @@
 //
 
 #include "Ieee80211SymbolDomainTest.h"
-#include "ModuleAccess.h"
+#include "inet/common/ModuleAccess.h"
 #include <fstream>
 
 namespace inet {

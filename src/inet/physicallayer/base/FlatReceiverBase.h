@@ -19,7 +19,7 @@
 #define __INET_FLATRECEIVERBASE_H
 
 #include "inet/physicallayer/base/SNIRReceiverBase.h"
-#include "IModulator.h"
+#include "inet/physicallayer/contract/IModulator.h"
 #include "inet/physicallayer/contract/IErrorModel.h"
 
 namespace inet {

@@ -21,7 +21,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
-#include "IFECEncoder.h"
+#include "inet/physicallayer/contract/IFECCoder.h"
+#include "inet/physicallayer/common/ConvolutionalCode.h"
 #include <vector>
 #include <queue>
 

@@ -18,14 +18,15 @@
 #ifndef __INET_MODULATION_H
 #define __INET_MODULATION_H
 
-#include "inet/physicallayer/contract/IModulationScheme.h"
-#include "Complex.h"
+#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/common/Complex.h"
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Modulation : public IModulationScheme
+class INET_API Modulation : public IModulation
 {
   protected:
     const Complex *encodingTable;

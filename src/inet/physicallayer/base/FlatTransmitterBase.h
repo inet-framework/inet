@@ -19,7 +19,7 @@
 #define __INET_FLATTRANSMITTERBASE_H
 
 #include "inet/physicallayer/base/TransmitterBase.h"
-#include "IModulator.h"
+#include "inet/physicallayer/contract/IModulator.h"
 
 namespace inet {
 
