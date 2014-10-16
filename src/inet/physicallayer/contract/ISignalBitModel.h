@@ -18,7 +18,6 @@
 #ifndef __INET_ISIGNALBITMODEL_H
 #define __INET_ISIGNALBITMODEL_H
 
-#include "inet/physicallayer/contract/ICyclicRedundancyCheck.h"
 #include "inet/physicallayer/contract/IFECCoder.h"
 #include "inet/physicallayer/contract/IScrambler.h"
 #include "inet/physicallayer/contract/IInterleaver.h"
