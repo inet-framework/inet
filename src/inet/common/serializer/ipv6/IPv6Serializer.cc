@@ -22,9 +22,7 @@
 
 #include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/ipv6/headers/ip6.h"
-
-#include "IPv6Serializer.h"
-#include "ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 
 #ifdef WITH_UDP
 #include "inet/common/serializer/udp/UDPSerializer.h"
@@ -55,6 +53,9 @@
 namespace inet {
 
 namespace serializer {
+
+using namespace tcp;
+using namespace sctp;
 
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {

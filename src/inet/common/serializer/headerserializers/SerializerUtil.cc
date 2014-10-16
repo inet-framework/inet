@@ -13,7 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <SerializerUtil.h>
+#include "inet/common/serializer/headerserializers/SerializerUtil.h"
+#include <netinet/in.h>
+
+namespace inet {
+namespace serializer {
 
 void setOneByte(const uint8_t value, unsigned char *buf, unsigned int offset)
 {
@@ -103,3 +107,6 @@ uint16_t swapByteOrder16(uint16_t v){
 uint32_t swapByteOrder32(uint32_t v){
   return ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | ((v & 0xFF000000) >> 24);
 }
+
+} // namespace serializer
+} // namespace inet

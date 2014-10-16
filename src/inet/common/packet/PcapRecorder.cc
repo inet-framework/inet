@@ -24,14 +24,14 @@
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
-#include "PcapRecorder.h"
-#include "pcap.h"
+#include "inet/common/packet/PcapRecorder.h"
+#include "inet/common/serializer/pcap.h"
 
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
-#include "EtherFrame.h"
-#include "Ieee80211Frame_m.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 

@@ -13,7 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <EthernetCRC.h>
+#include "inet/common/serializer/headerserializers/EthernetCRC.h"
+
+namespace inet {
+namespace serializer {
 
 uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize)
 {
@@ -26,3 +29,5 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize)
     return crc ^ ~0U;
 }
 
+} // namespace serializer
+} // namespace inet

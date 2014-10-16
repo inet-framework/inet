@@ -1,8 +1,11 @@
 #ifndef __TEST__TCPQUEUETESTER_FUNCTIONS
 
-#include "TCPMsgBasedRcvQueue.h"
-#include "TCPMsgBasedSendQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPMsgBasedRcvQueue.h"
+#include "inet/transportlayer/tcp/queues/TCPMsgBasedSendQueue.h"
 #include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
+
+using namespace inet;
+using namespace tcp;
 
 // TCPMsgBasedSendQueue:
 

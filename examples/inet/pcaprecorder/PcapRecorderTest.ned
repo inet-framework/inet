@@ -19,16 +19,17 @@
 package inet.examples.inet.pcaprecorder;
 
 
-import inet.util.NetAnimTrace;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
-import inet.util.PcapParser;
-import inet.base.Sink;
-import inet.util.PcapRecorder;
+import inet.common.misc.NetAnimTrace;
+import inet.common.packet.PcapRecorder;
+import inet.common.queue.Sink;
+import inet.common.serializer.PcapParser;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.ipv6.StandardHost6;
+import inet.node.wireless.AccessPoint;
+import ned.DatarateChannel;
 
 
 network PcapRecorderTest

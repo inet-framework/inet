@@ -22,15 +22,16 @@
 #define __INET_PCAPDUMP_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
-
-#include "EtherFrame.h"
-#include "Ieee80211Frame_m.h"
 
 // Foreign declarations:
 class IPv4Datagram;
 class IPv6Datagram;
+
+using namespace ieee80211;
 
 /**
  * Dumps packets into a PCAP file; see the "pcap-savefile" man page or

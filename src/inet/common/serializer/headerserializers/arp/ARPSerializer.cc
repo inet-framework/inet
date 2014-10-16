@@ -13,20 +13,23 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <arp/ARPSerializer.h>
+#include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-#include "headers/ethernet.h"
-#include "headers/arp.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/headerserializers/headers/ethernet.h"
+#include "inet/common/serializer/headerserializers/arp/headers/arp.h"
 };
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
+
+namespace inet {
+namespace serializer {
 
 using namespace INETFw;
 
@@ -66,3 +69,6 @@ void ARPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ARPPac
     pkt->setSrcIPAddress(IPv4Address(ntohl(arphdr->ar_spa)));
     pkt->setDestIPAddress(IPv4Address(ntohl(arphdr->ar_tpa)));
 }
+
+} // namespace serializer
+} // namespace inet

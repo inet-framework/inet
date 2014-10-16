@@ -15,18 +15,21 @@
 
 #include <errno.h>
 
-#include "PcapParser.h"
+#include "inet/common/serializer/PcapParser.h"
 
-#include <SerializerUtil.h>
+#include "inet/common/serializer/headerserializers/SerializerUtil.h"
 
-#include <EthernetSerializer.h>
-#include <Ieee80211Serializer.h>
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
+
+namespace inet {
+namespace serializer {
 
 Define_Module(PcapParser);
 
+using namespace serializer;
 
 simsignal_t PcapParser::packetSentSignal = registerSignal("packetSent");
-
 PcapParser::PcapParser()
 {
     pcapFile = NULL;
@@ -125,3 +128,6 @@ void PcapParser::readRecord()
         }
     }
 }
+
+} // namespace serializer
+} // namespace inet

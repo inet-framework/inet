@@ -16,7 +16,10 @@
 #ifndef ETHERNETCRC_H_
 #define ETHERNETCRC_H_
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
+
+namespace inet {
+namespace serializer {
 
 static uint32_t crc32_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -65,5 +68,8 @@ static uint32_t crc32_tab[] = {
 };
 
 uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize);
+
+} // namespace serializer
+} // namespace inet
 
 #endif /* ETHERNETCRC_H_ */

@@ -22,12 +22,12 @@
 #include <errno.h>
 
 #include "inet/common/packet/PcapDump.h"
+#include "inet/common/serializer/pcap.h"
 
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "pcap.h"
 
-#include "EthernetSerializer.h"
-#include "Ieee80211Serializer.h"
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UDPPacket_m.h"
@@ -108,11 +108,10 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     fwrite(&ph, sizeof(ph), 1, dumpfile);
     fwrite(&hdr, sizeof(uint32), 1, dumpfile);
     fwrite(buf, ph.incl_len - sizeof(uint32), 1, dumpfile);
-#else // ifdef WITH_IPv4
+#else
     throw cRuntimeError("Cannot write frame: INET compiled without IPv4 feature");
-#endif // ifdef WITH_IPv4
+#endif
 }
-
 
 void PcapDump::writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPacket)
 {
@@ -138,9 +137,6 @@ void PcapDump::writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPack
         fwrite(&ph, sizeof(ph), 1, dumpfile);
         fwrite(buf, ph.incl_len, 1, dumpfile);
     }
-#else // ifdef WITH_IPv6
-    throw cRuntimeError("Cannot write frame: INET compiled without IPv6 feature");
-#endif // ifdef WITH_IPv6
 }
 
 void PcapDump::writeIeee80211Frame(simtime_t stime, Ieee80211Frame *ieee80211Packet)

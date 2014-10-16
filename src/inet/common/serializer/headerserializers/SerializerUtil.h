@@ -16,7 +16,10 @@
 #ifndef SERIALIZERUTIL_H_
 #define SERIALIZERUTIL_H_
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
+
+namespace inet {
+namespace serializer {
 
 void setOneByte(const uint8_t value, unsigned char *buf, unsigned int offset = 0);
 void setTwoByte(const uint16_t value, unsigned char *buf, unsigned int offset = 0);
@@ -32,5 +35,8 @@ bool getBit(unsigned int bitOffset, const unsigned char *buf, unsigned int offse
 
 uint16_t swapByteOrder16(uint16_t v);
 uint32_t swapByteOrder32(uint32_t v);
+
+} // namespace serializer
+} // namespace inet
 
 #endif /* SERIALIZERUTIL_H_ */

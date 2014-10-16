@@ -16,14 +16,18 @@
 #ifndef IEEE80211SERIALIZER_H_
 #define IEEE80211SERIALIZER_H_
 
-#include "Ieee80211Frame_m.h"
-#include "Address.h"
-
-#include "headers/defs.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/serializer/headers/defs.h"
 
 /**
  * Converts between Ieee802.11Frame and binary (network byte order)  Ieee802.11 header.
  */
+
+namespace inet {
+
+namespace serializer {
+
+using namespace ieee80211;
 
 class Ieee80211Serializer
 {
@@ -40,5 +44,9 @@ class Ieee80211Serializer
          */
         cPacket* parse(const unsigned char *buf, unsigned int bufsize);
 };
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif /* IEEE80211SERIALIZER_H_ */

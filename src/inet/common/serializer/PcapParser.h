@@ -17,9 +17,12 @@
 #define __INET_PCAPPARSER_H_
 
 #include <omnetpp.h>
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "pcap.h"
+#include "inet/common/serializer/pcap.h"
+
+namespace inet {
+namespace serializer {
 
 class PcapParser : public cSimpleModule
 {
@@ -44,5 +47,8 @@ class PcapParser : public cSimpleModule
         virtual void readRecord();
 
 };
+
+} // namespace serializer
+} // namespace inet
 
 #endif

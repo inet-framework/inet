@@ -4,10 +4,10 @@ Test serializing frames
 %includes:
 #include <stdio.h>
 #include <iostream>
-#include "pcap.h"
-#include "SerializerUtil.h"
-#include "EthernetSerializer.h"
-#include "Ieee80211Serializer.h"
+#include "inet/common/serializer/pcap.h"
+#include "inet/common/serializer/headerserializers/SerializerUtil.h"
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
 %global:
 static void printobject(cObject* object)

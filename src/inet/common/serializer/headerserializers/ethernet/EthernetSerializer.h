@@ -16,11 +16,12 @@
 #ifndef ETHERNETSERIALIZER_H_
 #define ETHERNETSERIALIZER_H_
 
-#include "EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/common/serializer/headers/defs.h"
 
-#include "Address.h"
+namespace inet {
 
-#include "headers/defs.h"
+namespace serializer {
 
 /**
  * Converts between EtherFrame and binary (network byte order) Ethernet header.
@@ -41,5 +42,9 @@ class EthernetSerializer
          */
         cPacket* parse(const unsigned char *buf, unsigned int bufsize);
 };
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif /* ETHERNETSERIALIZER_H_ */

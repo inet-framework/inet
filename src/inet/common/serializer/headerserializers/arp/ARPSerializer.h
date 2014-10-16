@@ -16,11 +16,12 @@
 #ifndef ARPSERIALIZER_H_
 #define ARPSERIALIZER_H_
 
-#include "ARPPacket_m.h"
-#include "Address.h"
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/common/serializer/headers/defs.h"
 
-#include "headers/defs.h"
+namespace inet {
 
+namespace serializer {
 /**
  * Converts between ARPPacket and binary (network byte order)  ARP header.
  */
@@ -40,5 +41,8 @@ class ARPSerializer
          */
         void parse(const unsigned char *buf, unsigned int bufsize, ARPPacket *pkt);
 };
+
+} // namespace serializer
+} // namespace inet
 
 #endif /* ARPSERIALIZER_H_ */

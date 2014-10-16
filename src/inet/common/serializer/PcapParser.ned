@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.util;
+package inet.common.serializer;
 
 //
 // TODO auto-generated module
@@ -22,7 +22,7 @@ simple PcapParser
 {
     parameters:
         string pcapFile = default(""); // the PCAP file
-        
+
         @signal[packetSent];
     gates:
         output packageOut;

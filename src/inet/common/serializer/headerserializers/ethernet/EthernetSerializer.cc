@@ -13,14 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <ethernet/EthernetSerializer.h>
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
-#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"
-#include "headers/ethernet.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/in.h"
+#include "inet/common/serializer/headers/in_systm.h"
+#include "inet/common/serializer/headerserializers/headers/ethernet.h"
+#include "inet/common/serializer/headerserializers/arp/headers/arp.h"
 };
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
@@ -28,16 +29,20 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #endif
 
 #ifdef WITH_IPv4
-#include "IPv4Serializer.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #endif
 
 #ifdef WITH_IPv6
-#include "IPv6Serializer.h"
+#include "inet/common/serializer/ipv6/IPv6Serializer.h"
 #endif
 
-#include "ARPSerializer.h"
+#include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 
-#include "EthernetCRC.h"
+#include "inet/common/serializer/headerserializers/EthernetCRC.h"
+
+namespace inet {
+
+namespace serializer {
 
 using namespace INETFw;
 
@@ -130,5 +135,7 @@ cPacket* EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsiz
     return pkt;
 }
 
+} // namespace serializer
+} // namespace inet
 
 
