@@ -25,43 +25,50 @@ import inet.physicallayer.contract.IPropagation;
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 import inet.physicallayer.contract.IRadioMedium;
 
+//
+// The medium model describes the shared physical medium where communication
+// takes place. It keeps track of radios, noise sources, ongoing transmissions,
+// background noise, and other ongoing noises. The medium computes when, where
+// and how transmissions and noises arrive at receivers. It also efficiently
+// provides the set of interfering transmissions and noises for the receivers.
+//
 module RadioMedium like IRadioMedium
 {
     parameters:
         // submodule type parameters
-        string propagationType;
-        string pathLossType;
-        string obstacleLossType = default("");
-        string attenuationType;
-        string backgroundNoiseType = default("");
-        string neighborCacheType = default("");
+        string propagationType;                   // NED type of the propagation model
+        string pathLossType;                      // NED type of the path loss model
+        string obstacleLossType = default("");    // NED type of the obstacle loss model
+        string attenuationType;                   // TODO: obsolete?
+        string backgroundNoiseType = default(""); // NED type of the background noise model
+        string neighborCacheType = default("");   // NED type of the neighbor cache model
 
         // channel limit parameters
-        double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
-        double maxSpeed @unit(mps) = default(0mps/0);
+        double carrierFrequency @unit(Hz) = default(0Hz/0);       // TODO: rename to maxRangeCarrierFrequency
+        double maxSpeed @unit(mps) = default(0mps/0);             // maxium speed on the medium, NaN means medium computes using mobility models
         double maxTransmissionPower @unit(W) = default(0W/0);
         double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
-        double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
-        double maxAntennaGain @unit(dB) = default(0dB);
-        double minInterferenceTime @unit(s) = default(1ps);
-        double maxTransmissionDuration @unit(s) = default(10ms);
-        double maxCommunicationRange @unit(m) = default(0m/0);
-        double maxInterferenceRange @unit(m) = default(0m/0);
+        double minReceptionPower @unit(dBm) = default(0dBm/0);    // TODO: @unit(W) + dBm/dBW <--> W
+        double maxAntennaGain @unit(dB) = default(0dB);           // maximum antenna gain on the medium, NaN means medium computes using antenna models
+        double minInterferenceTime @unit(s) = default(1ps);       // minimum time interval to consider two overlapping signals interfering
+        double maxTransmissionDuration @unit(s) = default(10ms);  // maximum duration of a transmission on the medium
+        double maxCommunicationRange @unit(m) = default(0m/0);    // maximum communication range on the medium, NaN means medium computes using transmitter and receiver models
+        double maxInterferenceRange @unit(m) = default(0m/0);     // maximum interference range on the medium, NaN means medium computes using transmitter and receiver models
 
         // filter parameters that control when radio frames are sent to receiver radios
-        string rangeFilter = default(""); // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
-        bool radioModeFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode 
-        bool listeningFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
+        bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode 
+        bool listeningFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
         bool macAddressFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it the destination mac address differs 
 
         // logging parameters
-        bool recordCommunicationLog = default(false);
+        bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception
 
         // graphics parameters
-        bool displayCommunication = default(false);
-        bool drawCommunication2D = default(false);
-        bool leaveCommunicationTrail = default(false);
-        double updateCanvasInterval @unit(s) = default(0s);
+        bool displayCommunication = default(false);         // when enabled the radio medium displays the ongoing transmissions
+        bool drawCommunication2D = default(false);          // when enabled the raido medium displays the ongoing transmissions as 2 dimensional rings instead of 3 dimensional spheres 
+        bool leaveCommunicationTrail = default(false);      // when enabled the radio medium displays recent successful receptions as straight blue lines from the transmission to the reception
+        double updateCanvasInterval @unit(s) = default(0s); // the time interval between canvas updates when there are ongoing transmissions 
 
         @class(RadioMedium);
         @display("i=misc/sun");

@@ -17,9 +17,6 @@
 
 package inet.physicallayer.contract;
 
-//
-// This module interface provides an abstraction for the interface of different radio mediums.
-//
 moduleinterface IRadioMedium
 {
     parameters:

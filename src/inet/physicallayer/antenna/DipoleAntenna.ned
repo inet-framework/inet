@@ -22,6 +22,6 @@ import inet.physicallayer.contract.IAntenna;
 module DipoleAntenna like IAntenna
 {
     parameters:
-        double length @unit(m);
+        double length @unit(m); // the length of the dipole antenna
         @class(DipoleAntenna);
 }

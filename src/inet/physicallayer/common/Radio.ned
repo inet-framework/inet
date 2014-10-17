@@ -23,6 +23,11 @@ import inet.physicallayer.contract.IReceiver;
 import inet.physicallayer.contract.ITransmitter;
 import inet.power.contract.IEnergyConsumer;
 
+//
+// The radio model describes the physical device that is capable of transmitting
+// and receiving signals on the medium. It contains an antenna model, a
+// transmitter model, a receiver model, and an energy consumer model.
+//
 // switchingTimes parameter should be regarded as a 5x5 matrix:
 //
 //               OFF SLEEP RECEIVER TRANSMITTER TRANSCEIVER
@@ -43,18 +48,19 @@ import inet.power.contract.IEnergyConsumer;
 module Radio like IRadio
 {
     parameters:
-        string antennaType;
-        string transmitterType;
-        string receiverType;
-        string energyConsumerType = default("");
+        string antennaType;                      // NED type of the antenna model
+        string transmitterType;                  // NED type of the transmitter model
+        string receiverType;                     // NED type of the receiver model
+        string energyConsumerType = default(""); // NED type of the energy consumer model
 
-        string radioMediumModule = default("radioMedium");
-        string energySourceModule = default("");
-        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
-        bool displayCommunicationRange = default(true);
-        bool displayInterferenceRange = default(true);
+        string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
+        string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
+        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
+
+        bool displayCommunicationRange = default(true); // if true communication range is displayed as a blue circle around the node
+        bool displayInterferenceRange = default(true);  // if true interference range is displayed as a gray circle around the node
         
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.energySourceModule = default(absPath(energySourceModule)); 
 
         @class(Radio);
         @display("i=block/wrxtx");

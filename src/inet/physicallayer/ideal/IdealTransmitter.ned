@@ -22,9 +22,9 @@ import inet.physicallayer.contract.ITransmitter;
 module IdealTransmitter like ITransmitter
 {
     parameters:
-        double bitrate @unit(bps);
-        double maxCommunicationRange @unit(m);
-        double maxInterferenceRange @unit(m) = default(maxCommunicationRange);
-        double maxDetectionRange @unit(m) = default(maxInterferenceRange);
+        double bitrate @unit(bps); // the bitrate of the transmitter is used to compute the duration of the transmission
+        double maxCommunicationRange @unit(m);                                 // the maximum range where the reception of transmissions produced by this transmitter is possible
+        double maxInterferenceRange @unit(m) = default(maxCommunicationRange); // the maximum range where transmissions produced by this transmitter interferes with other transmissions
+        double maxDetectionRange @unit(m) = default(maxInterferenceRange);     // the maximum range where transmissions produced by this transmitter can be detected at all
         @class(IdealTransmitter);
 }

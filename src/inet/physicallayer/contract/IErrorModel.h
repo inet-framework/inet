@@ -34,21 +34,6 @@ class INET_API IErrorModel : public IPrintableObject
     virtual double computeSymbolErrorRate(const ISNIR *snir) const = 0;
 };
 
-// TODO: move ILayeredErrorModel after the layered radio is merged in
-//class INET_API ILayeredErrorModel : public IErrorModel
-//{
-//  public:
-//    virtual IReceptionPacketModel *computePacketModel(const ISNIR *snir) const = 0;
-//
-//    virtual IReceptionBitModel *computeBitModel(const ISNIR *snir) const = 0;
-//
-//    virtual IReceptionSymbolModel *computeSymbolModel(const ISNIR *snir) const = 0;
-//
-//    virtual IReceptionSampleModel *computeSampleModel(const ISNIR *snir) const = 0;
-//
-//    virtual IReceptionAnalogModel *computeAnalogModel(const ISNIR *snir) const = 0;
-//};
-
 } // namespace physicallayer
 
 } // namespace inet

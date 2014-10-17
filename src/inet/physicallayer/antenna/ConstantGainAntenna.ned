@@ -22,6 +22,6 @@ import inet.physicallayer.contract.IAntenna;
 module ConstantGainAntenna like IAntenna
 {
     parameters:
-        double gain @unit(dB);
+        double gain @unit(dB); // antenna gain in any direction
         @class(ConstantGainAntenna);
 }
