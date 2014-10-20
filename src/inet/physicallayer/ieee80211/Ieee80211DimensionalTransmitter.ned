@@ -17,15 +17,13 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.scalar.ScalarRadioMedium;
+import inet.physicallayer.dimensional.DimensionalTransmitter;
 
-// TODO: rename to Ieee80211ScalarRadioMedium
-module Ieee80211RadioMedium extends ScalarRadioMedium
+module Ieee80211DimensionalTransmitter extends DimensionalTransmitter
 {
     parameters:
-        // TODO: move to addRadio, query radios for these parameters
-        carrierFrequency = default(2.4GHz);
-        minReceptionPower = default(-85dBm);
-        minInterferencePower = default(-110dBm);
-        backgroundNoise.power = default(-110dBm);
+        int channelNumber;
+        string opMode @enum("b","g","a","p");
+        string preambleMode @enum("long", "short");
+        @class(Ieee80211DimensionalTransmitter);
 }

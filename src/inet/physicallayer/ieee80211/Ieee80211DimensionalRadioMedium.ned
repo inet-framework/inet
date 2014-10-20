@@ -17,10 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.scalar.ScalarRadioMedium;
+import inet.physicallayer.dimensional.DimensionalRadioMedium;
 
-// TODO: rename to Ieee80211ScalarRadioMedium
-module Ieee80211RadioMedium extends ScalarRadioMedium
+module Ieee80211DimensionalRadioMedium extends DimensionalRadioMedium
 {
     parameters:
         // TODO: move to addRadio, query radios for these parameters
