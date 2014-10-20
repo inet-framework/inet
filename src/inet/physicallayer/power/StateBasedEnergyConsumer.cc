@@ -101,6 +101,7 @@ W StateBasedEnergyConsumer::getPowerConsumption() const
         if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             powerConsumption += transmitterIdlePowerConsumption;
         else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING)
+            // TODO: add transmission power?
             powerConsumption += transmitterTransmittingPowerConsumption;
         else if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED)
             throw cRuntimeError("Unknown radio transmission state");
