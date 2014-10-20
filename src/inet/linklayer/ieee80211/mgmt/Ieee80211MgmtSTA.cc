@@ -23,7 +23,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/Radio80211aControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/Ieee80211aControlInfo_m.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {

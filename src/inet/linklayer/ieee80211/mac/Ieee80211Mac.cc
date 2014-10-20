@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/networklayer/common/IInterfaceTable.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/Radio80211aControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/Ieee80211aControlInfo_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211eClassifier.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 #include "inet/common/INETUtils.h"
