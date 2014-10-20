@@ -155,7 +155,8 @@ The energy consumer model is optional and it's only used when the simulation of
 energy consumption is necessary.
 
 The radio model has an operational mode that is called the radio mode. The radio
-mode is externally controlled usually by the MAC model. Changing the radio mode
+mode is externally controlled usually by the MAC model. In transceiver mode, the
+radio can simultaneously transmit and receive a signal. Changing the radio mode
 may optionally take a non-zero amount of time. The supported radio modes are the
 following:
 
@@ -369,6 +370,26 @@ how transmissions and noises arrive at receivers. It also efficiently provides
 the set of interfering transmissions and noises for the receivers. It doesn't
 send or handle messages on its own, it rather acts as a mediator between radios.
 
+The medium model provides a couple of parameters to optimize for performance.
+For example, the filter parameters control how the model determines the set of
+affected radios when a new transmission enters the medium. The medium model
+maintains the following global limits among the registered radios to support
+various optimizations:
+
+\begin{itemize}
+  \item maximum speed
+  \item maximum antenna gain
+  \item maximum transmission power
+  \item minimum interference power
+  \item minimum reception power
+  \item minimum interference time
+  \item maximum transmission duration
+  \item maximum detection range
+  \item maximum interference range
+  \item maximum communication range
+  \item minimum and maximum mobility constraints
+\end{itemize}
+
 The medium module utilizes multiple submodules to further split its task. This
 design makes it extensible and customizable. The following sections describe
 the parts of the medium.
@@ -380,7 +401,7 @@ transmitter might move during the transmission interval, and the receiver might
 also move during both the propagation time and the reception interval. The
 effect of these movements becomes more and more important as the propagation
 speed and the speed of the radios gets closer to each other. This is especially
-true for  acoustic communication because the propagation speed of the signal is
+true for acoustic communication because the propagation speed of the signal is
 much smaller. In general, it's difficult to accurately compute the signal
 arrival, but it's usually not really necessary, some kind of approximation
 suffices.
@@ -640,17 +661,22 @@ components.
 \caption{Signal processing data flow}
 \end{figure}
 
-The process starts in the transmitter radio when a MAC packet arrives from the
-higher layer. The transmitter model creates a data structure that describes the
-transmitted signal based on the received MAC packet and the attached
-transmission request. The resulting data structure is immutable, it's not going
-to be changed in any later processing step.
+The transmission process starts in the transmitter radio when it receives a MAC
+packet from the higher layer. The radio must be in transmitter or transceiver
+mode before receiving a MAC packet, otherwise it throws an exception. At first
+the transmitter model creates a data structure that describes the transmitted
+signal based on the received MAC packet and the attached transmission request.
+The resulting data structure is immutable, it's not going to be changed in any
+later processing step.
 
 Thereafter the propagation model computes the arrival space-time coordinates for
-all receivers. In the next step the neighbor cache model determines the set of
-affected receivers. Using the result the medium model sends a separate message
-with the shared transmission data structure to all affected receivers. There's
-no need to send a message to all radios on the channel, because the computation
+all receivers. In the next step the medium model determines the set of affected
+receivers. Which radio constitutes affected depends on a number of factors such
+as the maximum communication range of the transmitter, the radio mode of the
+receiver, the listening mode of the receiver, or potentially the MAC address of
+the receiver. Using the result the medium model sends a separate message with
+the shared transmission data structure to all affected receivers. There's no
+need to send a message to all radios on the channel, because the computation
 of interfering signals is independent of this step.
 
 Thereafter the attenuation model computes the reception for the receiver using
@@ -661,17 +687,27 @@ any later processing step.
 
 Thereafter the medium model computes the interference for the reception by
 collecting all interfering receptions and noises. Another signal is considered
-interfering if it owerlaps both in time and frequency domains. The background
-noise model also computes a noise signal that is added to the interference.
+interfering if it owerlaps both in time and frequency domains with respect to 
+the minimum interference parameters. The background noise model also computes a 
+noise signal that is added to the interference.
+
+The reception process starts in the receiver radio when it receives a message
+from the transmitter radio. The radio must be in receiver or transceiver mode
+before the message arrives, otherwise it ignores the message. At first the
+receiver model determines is whether the reception is actually attempted or not.
+This decision depends on the reception power, whether there's another ongoing
+reception process, and capturing is enabled or not.
 
 Thereafter the receiver model computes the signal to noise and interference
 ratio from the reception and the interference. Using the result, the bitrate,
 and the modulation scheme the error model computes the necessary error rates.
 Alternatively the error model might compute the erroneous bits, or symbols by
-altering the corresponding data of the original transmission. Next the receiver
-decodes the MAC packet by either simply copying the original, or actually
-decoding from the lowest represented domain in the reception. Finally, it
-attaches the physical layer indication to the MAC packet before send it up.
+altering the corresponding data of the original transmission. 
+
+Thereafter the receiver determines the received MAC packet by either simply
+reusing the original, or actually decoding from the lowest represented domain
+in the reception. Finally, it attaches the physical layer indication to the MAC
+packet, and sends it up to the higher layer.
 
 The following sections describe the data structures that are created during
 signal processing.
@@ -679,43 +715,57 @@ signal processing.
 \subsection{Transmission Request}
 
 This data structure contains parameters that control how the transmitter
-produces the transmission. It is attached as a control info object to the MAC
-packet sent down from the MAC module to the radio.
+produces the transmission. For example, it might override the default
+transmission power, ot the default bitrate of the transmitter. It is attached as
+a control info object to the MAC packet sent down from the MAC module to the
+radio.
 
 \subsection{Transmission}
 
-This data structure describes the transmission of a radio signal. For example,
-it specifies the start/end time, start/end antenna position, start/end antenna
-orientation of the transmitter.
+This data structure describes the transmission of a signal. It specifies the
+start/end time, start/end antenna position, start/end antenna orientation of the
+transmitter. In other words, it describes when, where and how the signal
+started/ended to interact with the medium. The transmitter model creates one
+transmission instance per MAC packet.
 
 \subsection{Arrival}
 
-This data structure contains information about the space and time coordinates of
-a transmission arriving at a particular receiver. For example, it specifies the 
-start/end time, start/end antenna position, start/end antenna orientation of the
-receiver. 
+This data structure decscirbes the space and time coordinates of a transmission
+arriving at a particular receiver. It specifies the start/end time, start/end
+antenna position, start/end antenna orientation of the receiver. The propagation
+model creates one arrival instance per transmission per receiver.
 
 \subsection{Listening}
 
 This data structure describes the way the receiver radio is listening on the
-medium. For example, a narrowband listening specifies a carrier frequency and a
-bandwidth.
+medium. The physical layer ignores certain transmissions either during computing
+the interference or even the complete reception of such transmissions. For
+example, a narrowband listening specifies a carrier frequency and a bandwidth. 
 
 \subsection{Reception}
 
-This data structure describes the reception of a radio signal by a particular
-receiver. It contains at least the start/end time, start/end antenna position,
-start/end antenna orientation of the receiver.
+This data structure describes the reception of a signal by a particular receiver.
+It specifies at least the start/end time, start/end antenna position, start/end
+antenna orientation of the receiver. The attenuation model creates one reception
+instance per transmission per receiver.
+
+\subsection{Noise}
+
+This data structure describes a meaningless signal or a meaningless composition
+of multiple signals. All models contain at least the start/end time, and
+start/end position.
 
 \subsection{Interference}
 
 This data structure describes the interfering signals and noises that affect a
-particular reception.
+particular reception. It also specifies the total noise that is the composition
+of all interference.
 
 \subsection{SNIR}
 
 This data structure describes the signal to noise and interference ratio of a
-particular reception.
+particular reception. It also specifies the minimum signal to noise and
+interference ratio.
 
 \subsection{Reception Decision}
 
@@ -725,8 +775,10 @@ or not, is attempted or not, and is successful or not.
 \subsection{Reception Indication}
 
 This data structure describes the physical layer indications such as RSSI, SNIR,
-PER, BER, SER. It is attached as a control info object to the MAC packet sent up
-from the radio to the MAC module.
+PER, BER, SER. These physical properties are optional and may be omitted if the
+receiver is configured to do so or if it doesn't support providing the data. The
+reception indication is attached as a control info object to the MAC packet sent
+up from the radio to the MAC module. 
 
 \section{Visualization}
 
@@ -752,6 +804,24 @@ intersections are also displayed as straight lines from the start of the
 intersection to the end of it.
 
 \iffalse
+TODO: 
+
+ - exploit multiple CPUs and the highly parallel GPU to increase performance
+ - provide performance vs. accuracy tradeoff configuration options
+   (e.g. range filter, radio mode filter, listening mode filter, MAC address filter)
+ - support different level of details (see details below)
+ - support different transmitters and receivers (scale from flat to layered models)
+ - support different radio signal models (scale from range based to accurate emulation models)
+ - support different propagation models (scale from immediate to accurate models)
+ - support different attenuation models (scale from free space to trace based models)
+ - support different antenna models (scale from isotropic to directional models)
+ - support different power consumption models (scale from mode based to signal based models)
+ - provide concurrent transmitter and receiver mode (transceiver mode)
+ - provide burst mode (back to back) transmissions
+ - provide synchronization/preamble detection
+ - provide capture during reception (switching to another transmission)
+ - provide finite time radio mode switching
+
 TODO: scalar vs dimensional
 TODO: flat vs layered
 TODO: Generic, IEEE 802.11, IEEE 802.15.4
