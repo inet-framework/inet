@@ -17,8 +17,9 @@
 
 #include "inet/linklayer/ieee80211/mac/WifiMode.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/physicallayer/base/FlatTransmissionBase.h"
 #include "inet/physicallayer/common/ModulationType.h"
-#include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 
 namespace inet {
@@ -66,9 +67,11 @@ void Ieee80211ErrorModelBase::initialize(int stage)
 
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
 {
-    const Ieee80211ScalarTransmission *ieee80211Transmission = check_and_cast<const Ieee80211ScalarTransmission *>(snir->getReception()->getTransmission());
-    int bitLength = ieee80211Transmission->getPayloadBitLength();
-    double bitrate = ieee80211Transmission->getBitrate().get();
+    const ITransmission *transmission = snir->getReception()->getTransmission();
+    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
+    const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
+    int bitLength = flatTransmission->getPayloadBitLength();
+    double bitrate = flatTransmission->getBitrate().get();
     WifiPreamble preambleUsed = ieee80211Transmission->getPreambleMode();
     char opMode = ieee80211Transmission->getOpMode();
 
