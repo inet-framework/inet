@@ -609,43 +609,12 @@ use this representation to simulate crosstalk, where one channel interferes with
 another. In order to make it work the frequency spectrum of the signal has to
 follow the real spectrum more precisely at both ends of the band.
 
-\subsection{Flat Representation}
-
-The flat representation uses a single object to simulatenously describe all
-domains of the transmission or the reception.
-
-TODO: representation
-
-\subsection{Layered Representation}
-
-The layered representation uses one object to describe each domain of the
-transmission or the reception. This data structure is extensible with
-alternative implementations for each domain.
-
-TODO: representation
-
-\iffalse
-TODO: layered
-\subsubsection{Packet Domain}
-
-TODO: layered
-
-\subsubsection{Bit Domain}
-
-TODO: layered
-
-\subsubsection{Symbol Domain}
-
-TODO: layered
-
-\subsubsection{Sample Domain}
-
-TODO: layered
-
-\subsubsection{Analog Domain}
-
-TODO: layered
-\fi
+The flat signal representation uses a single object to simulatenously describe
+all domains of the transmission or the reception. In contrast, the layered
+signal representation uses one object to describe every domain seperately. The
+advantage of the latter is that it's extensible with alternative implementations
+for each domain. The disadvantage is that it needs more allocation and resource
+management.
 
 \section{Signal Processing}
 
@@ -712,7 +681,7 @@ packet, and sends it up to the higher layer.
 The following sections describe the data structures that are created during
 signal processing.
 
-\subsection{Transmission Request}
+\subsubsection{Transmission Request}
 
 This data structure contains parameters that control how the transmitter
 produces the transmission. For example, it might override the default
@@ -720,7 +689,7 @@ transmission power, ot the default bitrate of the transmitter. It is attached as
 a control info object to the MAC packet sent down from the MAC module to the
 radio.
 
-\subsection{Transmission}
+\subsubsection{Transmission}
 
 This data structure describes the transmission of a signal. It specifies the
 start/end time, start/end antenna position, start/end antenna orientation of the
@@ -728,51 +697,51 @@ transmitter. In other words, it describes when, where and how the signal
 started/ended to interact with the medium. The transmitter model creates one
 transmission instance per MAC packet.
 
-\subsection{Arrival}
+\subsubsection{Arrival}
 
 This data structure decscirbes the space and time coordinates of a transmission
 arriving at a particular receiver. It specifies the start/end time, start/end
 antenna position, start/end antenna orientation of the receiver. The propagation
 model creates one arrival instance per transmission per receiver.
 
-\subsection{Listening}
+\subsubsection{Listening}
 
 This data structure describes the way the receiver radio is listening on the
 medium. The physical layer ignores certain transmissions either during computing
 the interference or even the complete reception of such transmissions. For
 example, a narrowband listening specifies a carrier frequency and a bandwidth. 
 
-\subsection{Reception}
+\subsubsection{Reception}
 
 This data structure describes the reception of a signal by a particular receiver.
 It specifies at least the start/end time, start/end antenna position, start/end
 antenna orientation of the receiver. The attenuation model creates one reception
 instance per transmission per receiver.
 
-\subsection{Noise}
+\subsubsection{Noise}
 
 This data structure describes a meaningless signal or a meaningless composition
 of multiple signals. All models contain at least the start/end time, and
 start/end position.
 
-\subsection{Interference}
+\subsubsection{Interference}
 
 This data structure describes the interfering signals and noises that affect a
 particular reception. It also specifies the total noise that is the composition
 of all interference.
 
-\subsection{SNIR}
+\subsubsection{SNIR}
 
 This data structure describes the signal to noise and interference ratio of a
 particular reception. It also specifies the minimum signal to noise and
 interference ratio.
 
-\subsection{Reception Decision}
+\subsubsection{Reception Decision}
 
 This data structure describes whether if the reception of a signal is possible
 or not, is attempted or not, and is successful or not.
 
-\subsection{Reception Indication}
+\subsubsection{Reception Indication}
 
 This data structure describes the physical layer indications such as RSSI, SNIR,
 PER, BER, SER. These physical properties are optional and may be omitted if the
