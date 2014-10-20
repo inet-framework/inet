@@ -19,29 +19,16 @@
 #define __INET_IEEE80211DIMENSIONALTRANSMISSION_H
 
 #include "inet/physicallayer/dimensional/DimensionalTransmission.h"
-#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
-#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211DimensionalTransmission : public DimensionalTransmission
+class INET_API Ieee80211DimensionalTransmission : public DimensionalTransmission, public Ieee80211TransmissionBase
 {
-  protected:
-    const char opMode;
-    const WifiPreamble preambleMode;
-
   public:
-    Ieee80211DimensionalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power, char opMode, WifiPreamble preambleMode) :
-        DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate, power),
-        opMode(opMode),
-        preambleMode(preambleMode)
-    {}
-
-    virtual char getOpMode() const { return opMode; }
-
-    virtual WifiPreamble getPreambleMode() const { return preambleMode; }
+    Ieee80211DimensionalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power, char opMode, WifiPreamble preambleMode);
 };
 
 } // namespace physicallayer
