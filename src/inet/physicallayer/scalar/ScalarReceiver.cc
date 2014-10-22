@@ -86,6 +86,13 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const II
         else if (areOverlappingBands(carrierFrequency, bandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
+    EV_DEBUG << "Noise power begin " << endl;
+    W noise = W(0);
+    for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++) {
+        noise += it->second;
+        EV << "Noise at " << it->first << " = " << noise << endl;
+    }
+    EV_DEBUG << "Noise power end" << endl;
     return new ScalarNoise(noiseStartTime, noiseEndTime, carrierFrequency, bandwidth, powerChanges);
 }
 

@@ -23,13 +23,20 @@ namespace physicallayer {
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
-    Argument start(DimensionSet::timeFreqDomain);
-    Argument end(DimensionSet::timeFreqDomain);
-    start.setTime(startTime);
-    start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-    end.setTime(endTime);
-    end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    return W(MappingUtils::findMax(*power));    // TODO: W(MappingUtils::findMax(*power), start, end));
+    const DimensionSet& dimensions = power->getDimensionSet();
+    Argument start(dimensions);
+    Argument end(dimensions);
+    if (dimensions.hasDimension(Dimension::time)) {
+        start.setTime(startTime);
+        end.setTime(endTime);
+    }
+    if (dimensions.hasDimension(Dimension::frequency)) {
+        start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+    }
+    W maxPower = W(MappingUtils::findMax(*power, start, end));
+    EV_DEBUG << "Computing maximum noise power: start = " << start << ", end = " << end << " -> " << maxPower << endl;
+    return maxPower;
 }
 
 } // namespace physicallayer

@@ -29,7 +29,7 @@ DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const Di
 
 void DimensionalSNIR::printToStream(std::ostream& stream) const
 {
-    stream << "scalar SNIR";
+    stream << "dimensional SNIR";
 }
 
 double DimensionalSNIR::computeMin() const
@@ -39,21 +39,31 @@ double DimensionalSNIR::computeMin() const
     EV_DEBUG << "Reception power begin " << endl;
     dimensionalReception->getPower()->print(EVSTREAM);
     EV_DEBUG << "Reception power end" << endl;
-    const ConstMapping *snirMapping = MappingUtils::divide(*dimensionalReception->getPower(), *dimensionalNoise->getPower());
+    const ConstMapping *noisePower = dimensionalNoise->getPower();
+    const ConstMapping *receptionPower = dimensionalReception->getPower();
+    const ConstMapping *snirMapping = MappingUtils::divide(*receptionPower, *noisePower);
     const simtime_t startTime = reception->getStartTime();
     const simtime_t endTime = reception->getEndTime();
     Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
     Hz bandwidth = dimensionalReception->getBandwidth();
-    Argument start(DimensionSet::timeFreqDomain);
-    Argument end(DimensionSet::timeFreqDomain);
-    start.setTime(startTime);
-    start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-    end.setTime(endTime);
-    end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+    const DimensionSet& dimensions = receptionPower->getDimensionSet();
+    Argument startArgument(dimensions);
+    Argument endArgument(dimensions);
+    if (dimensions.hasDimension(Dimension::time)) {
+        startArgument.setTime(startTime);
+        // NOTE: to exclude the moment where the reception power starts to be 0 again
+        endArgument.setTime(MappingUtils::pre(endTime));
+    }
+    if (dimensions.hasDimension(Dimension::frequency)) {
+        startArgument.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        endArgument.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+    }
     EV_DEBUG << "SNIR begin " << endl;
     snirMapping->print(EVSTREAM);
     EV_DEBUG << "SNIR end" << endl;
-    return MappingUtils::findMin(*snirMapping, start, end);
+    double minSNIR = MappingUtils::findMin(*snirMapping, startArgument, endArgument);
+    EV_DEBUG << "Computing minimum SNIR: start = " << startArgument << ", end = " << endArgument << " -> minimum SNIR = " << minSNIR << endl;
+    return minSNIR;
 }
 
 double DimensionalSNIR::getMin() const

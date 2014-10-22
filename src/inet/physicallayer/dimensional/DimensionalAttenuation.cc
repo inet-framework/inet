@@ -56,16 +56,23 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     ConstMappingIterator *it = transmissionPower->createConstIterator();
     Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, transmissionPower->getDimensionSet(), Mapping::LINEAR);
     while (true) {
-        const Argument& position = it->getPosition();
         Hz carrierFrequency = transmissionPower->getDimensionSet().hasDimension(Dimension::frequency) ? Hz(position.getArgValue(Dimension::frequency)) : dimensionalTransmission->getCarrierFrequency();
+        const Argument& elementTransmissionPosition = it->getPosition();
         double pathLoss = channel->getPathLoss()->computePathLoss(propagationSpeed, carrierFrequency, distance);
         double obstacleLoss = channel->getObstacleLoss() ? channel->getObstacleLoss()->computeObstacleLoss(carrierFrequency, transmission->getStartPosition(), receptionStartPosition) : 1;
         W elementTransmissionPower = W(it->getValue());
         W elementReceptionPower = elementTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
-        Argument receptionPosition = position;
-        double alpha = (position.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
-        receptionPosition.setTime(receptionStartTime + alpha * (receptionEndTime - receptionStartTime).dbl());
-        receptionPower->setValue(receptionPosition, elementReceptionPower.get());
+        Argument elementReceptionPosition = elementTransmissionPosition;
+        if (elementTransmissionPosition.getTime() == transmissionStartTime)
+            elementReceptionPosition.setTime(receptionStartTime);
+        else if (elementTransmissionPosition.getTime() == transmissionEndTime)
+            elementReceptionPosition.setTime(receptionEndTime);
+        else {
+            double alpha = (elementTransmissionPosition.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
+            simtime_t elementReceptionTime = (1 - alpha) * receptionStartTime.dbl() + alpha * receptionEndTime.dbl();
+            elementReceptionPosition.setTime(elementReceptionTime);
+        }
+        receptionPower->setValue(elementReceptionPosition, elementReceptionPower.get());
         if (it->hasNext())
             it->next();
         else

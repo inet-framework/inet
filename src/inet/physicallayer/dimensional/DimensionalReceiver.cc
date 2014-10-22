@@ -41,20 +41,29 @@ void DimensionalReceiver::printToStream(std::ostream& stream) const
 
 const INoise *DimensionalReceiver::computeNoise(const IListening *listening, const IInterference *interference) const
 {
-    std::vector<ConstMapping *> receptionPowers;
-    const DimensionalNoise *dimensionalBackgroundNoise = dynamic_cast<const DimensionalNoise *>(interference->getBackgroundNoise());
-    if (dimensionalBackgroundNoise)
-        receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalBackgroundNoise->getPower()));
-    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-        const DimensionalReception *reception = check_and_cast<const DimensionalReception *>(*it);
-        receptionPowers.push_back(const_cast<ConstMapping *>(reception->getPower()));
-    }
-    const simtime_t startTime = listening->getStartTime();
-    const simtime_t endTime = listening->getEndTime();
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     Hz carrierFrequency = bandListening->getCarrierFrequency();
     Hz bandwidth = bandListening->getBandwidth();
+    std::vector<ConstMapping *> receptionPowers;
+    const DimensionalNoise *dimensionalBackgroundNoise = dynamic_cast<const DimensionalNoise *>(interference->getBackgroundNoise());
+    if (dimensionalBackgroundNoise) {
+        const ConstMapping *backgroundNoisePower = dimensionalBackgroundNoise->getPower();
+        if (backgroundNoisePower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalBackgroundNoise->getCarrierFrequency() && bandwidth == dimensionalBackgroundNoise->getBandwidth()))
+            receptionPowers.push_back(const_cast<ConstMapping *>(backgroundNoisePower));
+    }
+    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
+    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
+        const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(*it);
+        const ConstMapping *receptionPower = dimensionalReception->getPower();
+        if (receptionPower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalReception->getCarrierFrequency() && bandwidth == dimensionalReception->getBandwidth())) {
+            receptionPowers.push_back(const_cast<ConstMapping *>(receptionPower));
+            EV_DEBUG << "Interference power begin " << endl;
+            dimensionalReception->getPower()->print(EVSTREAM);
+            EV_DEBUG << "Interference power end" << endl;
+        }
+    }
+    const simtime_t startTime = listening->getStartTime();
+    const simtime_t endTime = listening->getEndTime();
     ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(receptionPowers[0]->getDimensionSet(), startTime, endTime, carrierFrequency, bandwidth, W(0));
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_DEBUG << "Noise power begin " << endl;

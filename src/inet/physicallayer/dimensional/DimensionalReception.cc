@@ -23,13 +23,21 @@ namespace physicallayer {
 
 W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
-    Argument start(DimensionSet::timeFreqDomain);
-    Argument end(DimensionSet::timeFreqDomain);
-    start.setTime(startTime);
-    start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-    end.setTime(endTime);
-    end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    return W(MappingUtils::findMin(*power, start, end));
+    const DimensionSet& dimensions = power->getDimensionSet();
+    Argument startArgument(dimensions);
+    Argument endArgument(dimensions);
+    if (dimensions.hasDimension(Dimension::time)) {
+        startArgument.setTime(startTime);
+        // NOTE: to exclude the moment where the reception power starts to be 0 again
+        endArgument.setTime(MappingUtils::pre(endTime));
+    }
+    if (dimensions.hasDimension(Dimension::frequency)) {
+        startArgument.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        endArgument.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+    }
+    W minPower = W(MappingUtils::findMin(*power, startArgument, endArgument));
+    EV_DEBUG << "Computing minimum reception power: start = " << startArgument << ", end = " << endArgument << " -> minimum reception power = " << minPower << endl;
+    return minPower;
 }
 
 } // namespace physicallayer

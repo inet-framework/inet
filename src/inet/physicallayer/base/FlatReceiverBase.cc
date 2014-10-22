@@ -97,8 +97,16 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
-    return bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth() &&
-           flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime()) >= sensitivity;
+    if (bandListening->getCarrierFrequency() != flatReception->getCarrierFrequency() || bandListening->getBandwidth() != flatReception->getBandwidth()) {
+        EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+        return false;
+    }
+    else {
+        W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime());
+        bool isReceptionPossible = minReceptionPower >= sensitivity;
+        EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        return isReceptionPossible;
+    }
 }
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
@@ -107,7 +115,9 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     delete noise;
-    return new ListeningDecision(listening, maxPower >= energyDetection);
+    bool isListeningPossible = maxPower >= energyDetection;
+    EV_DEBUG << "Computing listening possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
+    return new ListeningDecision(listening, isListeningPossible);
 }
 
 bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const

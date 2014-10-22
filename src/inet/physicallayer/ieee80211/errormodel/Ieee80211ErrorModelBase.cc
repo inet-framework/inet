@@ -104,7 +104,7 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     else
         payloadSuccessRate = GetChunkSuccessRate(modeBody, minSNIR, bitLength);
 
-    EV << "bit length = " << bitLength << " packet error rate = " << 1 - payloadSuccessRate << " header error rate = " << 1 - headerSuccessRate << endl;
+    EV_DEBUG << "min SNIR = " << minSNIR << ", bit length = " << bitLength << ", header error rate = " << 1 - headerSuccessRate << ", payload error rate = " << 1 - payloadSuccessRate << endl;
 
     if (headerSuccessRate >= 1)
         headerSuccessRate = 1;
