@@ -19,9 +19,8 @@
 
 #include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
 
-#include "headers/defs.h"    // for endian macros
 #include <sim_interface.h>    // NSC header
-#include "headers/tcphdr.h"
+#include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"

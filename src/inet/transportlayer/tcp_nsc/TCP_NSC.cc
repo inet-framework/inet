@@ -19,8 +19,6 @@
 
 #include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
 
-#include "headers/defs.h"    // for endian macros
-
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif // ifdef WITH_IPv4
@@ -34,7 +32,7 @@
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
-#include "headers/tcphdr.h"
+#include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
