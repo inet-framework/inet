@@ -51,3 +51,5 @@ ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
   endif
 endif
 
+# disable anoying "... hides overloaded virtual function" warning
+CFLAGS += -Wno-overloaded-virtual
