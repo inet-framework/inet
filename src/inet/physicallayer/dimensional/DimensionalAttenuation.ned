@@ -22,5 +22,7 @@ import inet.physicallayer.contract.IAttenuation;
 module DimensionalAttenuation like IAttenuation
 {
     parameters:
+        bool attenuateWithCarrierFrequency = default(true);
+        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @class(DimensionalAttenuation);
 }

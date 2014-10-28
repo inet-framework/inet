@@ -19,7 +19,6 @@
 #include "inet/physicallayer/dimensional/DimensionalReception.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/dimensional/DimensionalSNIR.h"
-#include "inet/physicallayer/dimensional/DimensionalUtils.h"
 #include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
@@ -62,9 +61,7 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
             EV_DEBUG << "Interference power end" << endl;
         }
     }
-    const simtime_t startTime = listening->getStartTime();
-    const simtime_t endTime = listening->getEndTime();
-    ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(receptionPowers[0]->getDimensionSet(), startTime, endTime, carrierFrequency, bandwidth, W(0));
+    ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, receptionPowers[0]->getDimensionSet(), Mapping::STEPS);
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_DEBUG << "Noise power begin " << endl;
     noisePower->print(EVSTREAM);

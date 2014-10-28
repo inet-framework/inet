@@ -35,11 +35,7 @@ class INET_API Ieee80211DimensionalTransmitter : public DimensionalTransmitter
     virtual void initialize(int stage);
 
   public:
-    Ieee80211DimensionalTransmitter() :
-        DimensionalTransmitter(),
-        opMode('\0'),
-        preambleMode((WifiPreamble) - 1)
-    {}
+    Ieee80211DimensionalTransmitter();
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };

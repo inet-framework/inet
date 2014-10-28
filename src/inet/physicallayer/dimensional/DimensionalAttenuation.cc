@@ -26,6 +26,20 @@ namespace physicallayer {
 
 Define_Module(DimensionalAttenuation);
 
+void DimensionalAttenuation::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        attenuateWithCarrierFrequency = par("attenuateWithCarrierFrequency");
+        const char *interpolationModeString = par("interpolationMode");
+        if (!strcmp("linear", interpolationModeString))
+            interpolationMode = Mapping::LINEAR;
+        else if (!strcmp("sample-hold", interpolationModeString))
+            interpolationMode = Mapping::STEPS;
+        else
+            throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
+    }
+}
+
 const IReception *DimensionalAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
@@ -53,28 +67,37 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     EV_DEBUG << "Transmission power begin " << endl;
     transmissionPower->print(EVSTREAM);
     EV_DEBUG << "Transmission power end" << endl;
+    const DimensionSet& dimensions = transmissionPower->getDimensionSet();
+    bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
+    bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
     ConstMappingIterator *it = transmissionPower->createConstIterator();
-    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, transmissionPower->getDimensionSet(), Mapping::LINEAR);
+    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, transmissionPower->getDimensionSet(), interpolationMode);
     while (true) {
-        Hz carrierFrequency = transmissionPower->getDimensionSet().hasDimension(Dimension::frequency) ? Hz(position.getArgValue(Dimension::frequency)) : dimensionalTransmission->getCarrierFrequency();
         const Argument& elementTransmissionPosition = it->getPosition();
+        Hz carrierFrequency = attenuateWithCarrierFrequency || !hasFrequencyDimension ? dimensionalTransmission->getCarrierFrequency() : Hz(elementTransmissionPosition.getArgValue(Dimension::frequency));
         double pathLoss = channel->getPathLoss()->computePathLoss(propagationSpeed, carrierFrequency, distance);
         double obstacleLoss = channel->getObstacleLoss() ? channel->getObstacleLoss()->computeObstacleLoss(carrierFrequency, transmission->getStartPosition(), receptionStartPosition) : 1;
         W elementTransmissionPower = W(it->getValue());
         W elementReceptionPower = elementTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
         Argument elementReceptionPosition = elementTransmissionPosition;
-        if (elementTransmissionPosition.getTime() == transmissionStartTime)
-            elementReceptionPosition.setTime(receptionStartTime);
-        else if (elementTransmissionPosition.getTime() == transmissionEndTime)
-            elementReceptionPosition.setTime(receptionEndTime);
-        else {
-            double alpha = (elementTransmissionPosition.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
-            simtime_t elementReceptionTime = (1 - alpha) * receptionStartTime.dbl() + alpha * receptionEndTime.dbl();
-            elementReceptionPosition.setTime(elementReceptionTime);
+        if (hasTimeDimension) {
+            if (elementTransmissionPosition.getTime() == transmissionStartTime)
+                elementReceptionPosition.setTime(receptionStartTime);
+            else if (elementTransmissionPosition.getTime() == transmissionEndTime)
+                elementReceptionPosition.setTime(receptionEndTime);
+            else {
+                double alpha = (elementTransmissionPosition.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
+                simtime_t elementReceptionTime = (1 - alpha) * receptionStartTime.dbl() + alpha * receptionEndTime.dbl();
+                elementReceptionPosition.setTime(elementReceptionTime);
+            }
         }
         receptionPower->setValue(elementReceptionPosition, elementReceptionPower.get());
-        if (it->hasNext())
+        if (it->hasNext()) {
             it->next();
+            // KLUDGE: to skip pre positions (see iterator)
+            if (interpolationMode == Mapping::STEPS)
+                it->next();
+        }
         else
             break;
     }

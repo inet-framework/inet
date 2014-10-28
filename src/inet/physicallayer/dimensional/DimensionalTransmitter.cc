@@ -17,7 +17,6 @@
 
 #include "inet/physicallayer/dimensional/DimensionalTransmitter.h"
 #include "inet/physicallayer/dimensional/DimensionalTransmission.h"
-#include "inet/physicallayer/dimensional/DimensionalUtils.h"
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/mobility/contract/IMobility.h"
 
@@ -27,13 +26,19 @@ namespace physicallayer {
 
 Define_Module(DimensionalTransmitter);
 
+DimensionalTransmitter::DimensionalTransmitter() :
+    FlatTransmitterBase(),
+    interpolationMode((Mapping::InterpolationMethod)-1)
+{
+}
+
 void DimensionalTransmitter::initialize(int stage)
 {
     FlatTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
+        // TODO: factor parsing?
         const char *dimensionsString = par("dimensions");
-        // TODO: move parsing?
         cStringTokenizer tokenizer(dimensionsString);
         while (tokenizer.hasMoreTokens()) {
             const char *dimensionString = tokenizer.nextToken();
@@ -44,6 +49,15 @@ void DimensionalTransmitter::initialize(int stage)
             else
                 throw cRuntimeError("Unknown dimension");
         }
+        const char *interpolationModeString = par("interpolationMode");
+        if (!strcmp("linear", interpolationModeString))
+            interpolationMode = Mapping::LINEAR;
+        else if (!strcmp("sample-hold", interpolationModeString))
+            interpolationMode = Mapping::STEPS;
+        else
+            throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
+        const char *timeGains = par("timeGains");
+        const char *freqencyGains = par("frequencyGains");
     }
 }
 
@@ -56,6 +70,96 @@ void DimensionalTransmitter::printToStream(std::ostream& stream) const
            << "bandwidth = " << bandwidth;
 }
 
+ConstMapping *DimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
+{
+    if (interpolationMode == Mapping::STEPS) {
+        Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
+        Argument position(dimensions);
+        bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
+        bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
+        if (hasTimeDimension && hasFrequencyDimension) {
+            // 1.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, 0);
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, 0);
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+            // 2.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+            // 3.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+        }
+        else if (hasTimeDimension) {
+            position.setTime(0);
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+        }
+        else if (hasFrequencyDimension) {
+            position.setArgValue(Dimension::frequency, 0);
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+            powerMapping->setValue(position, power.get());
+            position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown dimensions");
+        return powerMapping;
+    }
+    else if (interpolationMode == Mapping::LINEAR) {
+        const simtime_t leadInTime = 1E-10;
+        const simtime_t leadOutTime = 1E-10;
+        Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::LINEAR);
+        Argument position(dimensions);
+        if (dimensions.hasDimension(Dimension::frequency))
+            position.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        if (startTime > leadInTime) {
+            position.setTime(startTime - leadInTime);
+            powerMapping->setValue(position, 0);
+        }
+        position.setTime(startTime);
+        powerMapping->setValue(position, power.get());
+        position.setTime(endTime);
+        powerMapping->setValue(position, power.get());
+        position.setTime(endTime + leadOutTime);
+        powerMapping->setValue(position, 0);
+        if (dimensions.hasDimension(Dimension::frequency))
+        {
+            position.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+            if (startTime > leadInTime) {
+                position.setTime(startTime - leadInTime);
+                powerMapping->setValue(position, 0);
+            }
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime + leadOutTime);
+            powerMapping->setValue(position, 0);
+        }
+        return powerMapping;
+    }
+    else
+        throw cRuntimeError("Unknown interpolation mode");
+}
+
 const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     const simtime_t duration = macFrame->getBitLength() / bitrate.get();
@@ -65,7 +169,7 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(dimensions, startTime, endTime, carrierFrequency, bandwidth, power);
+    const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
 }
 

@@ -17,7 +17,6 @@
 
 #include "inet/physicallayer/dimensional/DimensionalBackgroundNoise.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
-#include "inet/physicallayer/dimensional/DimensionalUtils.h"
 #include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
@@ -27,6 +26,7 @@ namespace physicallayer {
 Define_Module(DimensionalBackgroundNoise);
 
 DimensionalBackgroundNoise::DimensionalBackgroundNoise() :
+    interpolationMode((Mapping::InterpolationMethod)-1),
     power(W(sNaN))
 {}
 
@@ -34,8 +34,8 @@ void DimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        // TODO: factor parsing?
         const char *dimensionsString = par("dimensions");
-        // TODO: move parsing?
         cStringTokenizer tokenizer(dimensionsString);
         while (tokenizer.hasMoreTokens()) {
             const char *dimensionString = tokenizer.nextToken();
@@ -46,6 +46,13 @@ void DimensionalBackgroundNoise::initialize(int stage)
             else
                 throw cRuntimeError("Unknown dimension");
         }
+        const char *interpolationModeString = par("interpolationMode");
+        if (!strcmp("linear", interpolationModeString))
+            interpolationMode = Mapping::LINEAR;
+        else if (!strcmp("sample-hold", interpolationModeString))
+            interpolationMode = Mapping::STEPS;
+        else
+            throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
         power = mW(math::dBm2mW(par("power")));
     }
 }
@@ -57,7 +64,58 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
     const simtime_t endTime = listening->getEndTime();
     Hz carrierFrequency = bandListening->getCarrierFrequency();
     Hz bandwidth = bandListening->getBandwidth();
-    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(dimensions, startTime, endTime, carrierFrequency, bandwidth, power);
+    Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
+    Argument position(dimensions);
+    bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
+    bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
+    if (interpolationMode == Mapping::STEPS) {
+        if (hasTimeDimension && hasFrequencyDimension) {
+            // 1.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, 0);
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, 0);
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+            // 2.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+            // 3.
+            position.setTime(0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+        }
+        else if (hasTimeDimension) {
+            position.setTime(0);
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            powerMapping->setValue(position, power.get());
+            position.setTime(endTime);
+            powerMapping->setValue(position, 0);
+        }
+        else if (hasFrequencyDimension) {
+            position.setArgValue(Dimension::frequency, 0);
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+            powerMapping->setValue(position, power.get());
+            position.setArgValue(Dimension::frequency, (carrierFrequency + bandwidth / 2).get());
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown dimensions");
+    }
+    else
+        throw cRuntimeError("Unknown interpolation mode");
     return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerMapping);
 }
 

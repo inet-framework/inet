@@ -29,6 +29,7 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
 {
   protected:
     DimensionSet dimensions;
+    Mapping::InterpolationMethod interpolationMode;
     W power;
 
   protected:

@@ -29,14 +29,17 @@ class INET_API DimensionalTransmitter : public FlatTransmitterBase
 {
   protected:
     DimensionSet dimensions;
+    Mapping::InterpolationMethod interpolationMode;
+    std::map<const simtime_t, double> timeGains;
+    std::map<double, double> frequencyGains;
 
   protected:
     virtual void initialize(int stage);
 
+    ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
+
   public:
-    DimensionalTransmitter() :
-        FlatTransmitterBase()
-    {}
+    DimensionalTransmitter();
 
     virtual void printToStream(std::ostream& stream) const;
 

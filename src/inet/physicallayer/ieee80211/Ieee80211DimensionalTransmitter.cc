@@ -19,7 +19,6 @@
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
 #include "inet/physicallayer/common/ModulationType.h"
-#include "inet/physicallayer/dimensional/DimensionalUtils.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmitter.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"
 #include "inet/linklayer/ieee80211/mac/WifiMode.h"
@@ -32,6 +31,13 @@ using namespace ieee80211;
 namespace physicallayer {
 
 Define_Module(Ieee80211DimensionalTransmitter);
+
+Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
+    DimensionalTransmitter(),
+    opMode('\0'),
+    preambleMode((WifiPreamble) - 1)
+{
+}
 
 void Ieee80211DimensionalTransmitter::initialize(int stage)
 {
@@ -72,7 +78,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(dimensions, startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
+    const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
     return new Ieee80211DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, powerMapping, opMode, preambleMode);
 }
 

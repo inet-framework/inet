@@ -28,6 +28,9 @@ module DimensionalTransmitter like ITransmitter
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
         string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
-        string dimensions = default("time frequency");
+        string dimensions = default("time");
+        string timeGains = default("0% 0 10ps 1 -10ps 1 100% 0"); // sequence of time and gain pairs, time in [%] or [s], negative time measures from the end, gain in [dB] or [0..1]
+        string frequencyGains = default("0% 0 10% -3dB 45% 0dB 90% -3dB 100% 0"); // sequence of frequency and gain pairs, frequency in [%] or [Hz], negative frequency measures from the end, gain in [dB] or [0..1] 
+        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @class(DimensionalTransmitter);
 }

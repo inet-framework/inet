@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,25 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALUTILS_H
-#define __INET_DIMENSIONALUTILS_H
+package inet.physicallayer.ieee80211;
 
-#include "inet/physicallayer/base/PhysicalLayerDefs.h"
-#include "inet/physicallayer/mapping/MappingUtils.h"
+import inet.physicallayer.scalar.ScalarRadioMedium;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API DimensionalUtils
+module Ieee80211ScalarRadioMedium extends ScalarRadioMedium
 {
-  public:
-    static ConstMapping *createFlatMapping(const DimensionSet& dimensions, const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power);
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_DIMENSIONALUTILS_H
-
+    parameters:
+        // TODO: move to addRadio, query radios for these parameters
+        carrierFrequency = default(2.4GHz);
+        minReceptionPower = default(-85dBm);
+        minInterferencePower = default(-110dBm);
+        backgroundNoise.power = default(-110dBm);
+}
