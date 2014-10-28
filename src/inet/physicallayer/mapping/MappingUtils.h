@@ -212,6 +212,7 @@ class TimeMappingIterator : public MappingIterator
         valueIt.jumpTo(pos.getTime());
         position.setTime(pos.getTime());
         nextPosition.setTime(valueIt.getNextPosition());
+        updateNextPos();
     }
 
     /**
@@ -231,6 +232,7 @@ class TimeMappingIterator : public MappingIterator
         valueIt.iterateTo(pos.getTime());
         position.setTime(pos.getTime());
         nextPosition.setTime(valueIt.getNextPosition());
+        updateNextPos();
     }
 
     /**
