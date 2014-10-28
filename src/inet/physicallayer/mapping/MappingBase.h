@@ -1160,10 +1160,10 @@ class INET_API ConstMapping
         if (!bIs2Dim && !bOnlyDimFound) {
             if (!bOnlyDimFound && pOnlyDim != NULL) {
                 out << "map contains no " << pOnlyDim->getName() << " dimension!" << endl;
+                return out;
             }
             else
                 out << "domain - min=" << min << " max=" << max << endl;
-            return out;
         }
         if (bOnlyDimFound && otherPositions.empty()) {
             out << "Defines no own key entries for " << pOnlyDim->getName() << " dimension! That does NOT mean it doesn't define any attenuation." << endl;
