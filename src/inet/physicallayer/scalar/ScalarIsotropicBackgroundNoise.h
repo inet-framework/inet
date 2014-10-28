@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARBACKGROUNDNOISE_H
-#define __INET_SCALARBACKGROUNDNOISE_H
+#ifndef __INET_ScalarIsotropicBackgroundNoise_H
+#define __INET_ScalarIsotropicBackgroundNoise_H
 
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
 
@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
+class INET_API ScalarIsotropicBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
     W power;
@@ -33,7 +33,7 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
     virtual void initialize(int stage);
 
   public:
-    ScalarBackgroundNoise() :
+    ScalarIsotropicBackgroundNoise() :
         power(W(sNaN))
     {}
 
@@ -48,5 +48,5 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARBACKGROUNDNOISE_H
+#endif // ifndef __INET_ScalarIsotropicBackgroundNoise_H
 

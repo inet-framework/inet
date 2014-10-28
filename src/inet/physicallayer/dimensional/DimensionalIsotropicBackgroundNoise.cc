@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalBackgroundNoise.h"
+#include "inet/physicallayer/dimensional/DimensionalIsotropicBackgroundNoise.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/common/BandListening.h"
 
@@ -23,14 +23,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalBackgroundNoise);
+Define_Module(DimensionalIsotropicBackgroundNoise);
 
-DimensionalBackgroundNoise::DimensionalBackgroundNoise() :
+DimensionalIsotropicBackgroundNoise::DimensionalIsotropicBackgroundNoise() :
     interpolationMode((Mapping::InterpolationMethod)-1),
     power(W(sNaN))
 {}
 
-void DimensionalBackgroundNoise::initialize(int stage)
+void DimensionalIsotropicBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -57,7 +57,7 @@ void DimensionalBackgroundNoise::initialize(int stage)
     }
 }
 
-const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listening) const
+const INoise *DimensionalIsotropicBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const simtime_t startTime = listening->getStartTime();

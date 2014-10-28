@@ -25,5 +25,5 @@ module ScalarRadioMedium extends RadioMedium
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
         attenuationType = default("ScalarAttenuation");
-        backgroundNoiseType = default("ScalarBackgroundNoise");
+        backgroundNoiseType = default("ScalarIsotropicBackgroundNoise");
 }

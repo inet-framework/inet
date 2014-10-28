@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/scalar/ScalarBackgroundNoise.h"
+#include "inet/physicallayer/scalar/ScalarIsotropicBackgroundNoise.h"
 #include "inet/physicallayer/scalar/ScalarNoise.h"
 #include "inet/physicallayer/common/BandListening.h"
 
@@ -23,9 +23,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ScalarBackgroundNoise);
+Define_Module(ScalarIsotropicBackgroundNoise);
 
-void ScalarBackgroundNoise::initialize(int stage)
+void ScalarIsotropicBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -33,7 +33,7 @@ void ScalarBackgroundNoise::initialize(int stage)
     }
 }
 
-const INoise *ScalarBackgroundNoise::computeNoise(const IListening *listening) const
+const INoise *ScalarIsotropicBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     simtime_t startTime = listening->getStartTime();

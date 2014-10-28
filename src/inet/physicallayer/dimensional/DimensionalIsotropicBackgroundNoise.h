@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H
-#define __INET_DIMENSIONALBACKGROUNDNOISE_H
+#ifndef __INET_DimensionalIsotropicBackgroundNoise_H
+#define __INET_DimensionalIsotropicBackgroundNoise_H
 
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNoise
+class INET_API DimensionalIsotropicBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
     DimensionSet dimensions;
@@ -36,7 +36,7 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
     virtual void initialize(int stage);
 
   public:
-    DimensionalBackgroundNoise();
+    DimensionalIsotropicBackgroundNoise();
 
   public:
     virtual void printToStream(std::ostream& stream) const { stream << "dimensional background noise"; }
@@ -47,5 +47,5 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H
+#endif // ifndef __INET_DimensionalIsotropicBackgroundNoise_H
 

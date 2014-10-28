@@ -19,9 +19,9 @@ package inet.physicallayer.scalar;
 
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 
-module ScalarBackgroundNoise like IRadioBackgroundNoise
+module ScalarIsotropicBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
         double power @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
-        @class(ScalarBackgroundNoise);
+        @class(ScalarIsotropicBackgroundNoise);
 }

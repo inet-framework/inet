@@ -25,5 +25,5 @@ module DimensionalRadioMedium extends RadioMedium
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
         attenuationType = default("DimensionalAttenuation");
-        backgroundNoiseType = default("DimensionalBackgroundNoise");
+        backgroundNoiseType = default("DimensionalIsotropicBackgroundNoise");
 }
