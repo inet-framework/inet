@@ -27,7 +27,7 @@
 #include <omnetpp.h>
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
-#include "mobility/models/TraCIMobility.h"
+#include "mobility/single/TraCIMobility.h"
 
 /**
  * FIXME
@@ -39,25 +39,24 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
-        int numInitStages() const {return std::max(cSimpleModule::numInitStages(), 2);}
-        void initialize(int stage);
-        void finish();
+        virtual int numInitStages() const { return 4; }
+        virtual void initialize(int stage);
+        virtual void finish();
 
     protected:
         // module parameters
-        bool debug;
         int testNumber;
 
         TraCIMobility* traci;
         std::set<std::string> visitedEdges; /**< set of edges this vehicle visited */
         bool hasStopped; /**< true if at some point in time this vehicle travelled at negligible speed */
-        simsignal_t mobilityStateChangedSignal;
+        static simsignal_t mobilityStateChangedSignal;
 
     protected:
         void handleSelfMsg(cMessage* msg);
         void handleLowerMsg(cMessage* msg);
-        void handleMessage(cMessage* msg);
-        void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void handleMessage(cMessage* msg);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
         void handlePositionUpdate();
 };

@@ -39,8 +39,8 @@ simple VoIPStreamReceiver like IUDPApp
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;
-        @signal[rcvdPk](type=VoIPPacket);
-        @signal[dropPk](type=VoIPPacket);
+        @signal[rcvdPk](type=cPacket); // expected type=VoIPStreamPacket
+        @signal[dropPk](type=cPacket);
         @signal[lostSamples](type=long);
         @signal[lostPackets](type=long);
         @signal[packetHasVoice](type=long);  // 1=yes, 0=no

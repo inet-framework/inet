@@ -1,9 +1,21 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-03-14  Irene Rungeler
+
+	sctp: added SCTP NAT support
+
+2014-03-13  Thomas Dreibholz
+
+	SCTP: CMT (Concurrent Multipath Transfer)
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-29  Irene Ruengeler
 
-	sctp: Added the packet drop feature (draft-stewart-sctp-pktdrprep-15.txt), 
-	the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
+	sctp: Added the packet drop feature (draft-stewart-sctp-pktdrprep-15.txt),
+	the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately)
 	and several alternatives to send fast retransmissions.
 
 2013-07-17  Irene Ruengeler
@@ -16,7 +28,7 @@
 
 2013-07-03  Irene Ruengeler
 
-	Implementation of Partial Reliability SCTP (RFC 3758) 
+	Implementation of Partial Reliability SCTP (RFC 3758)
 
 2013-05-02  Zoltan Bojthe
 

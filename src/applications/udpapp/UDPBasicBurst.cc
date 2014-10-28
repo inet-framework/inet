@@ -47,10 +47,10 @@ Define_Module(UDPBasicBurst);
 
 int UDPBasicBurst::counter;
 
-simsignal_t UDPBasicBurst::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::outOfOrderPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::dropPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicBurst::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDPBasicBurst::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
+simsignal_t UDPBasicBurst::dropPkSignal = registerSignal("dropPk");
 
 UDPBasicBurst::UDPBasicBurst()
 {
@@ -68,7 +68,7 @@ UDPBasicBurst::~UDPBasicBurst()
 
 void UDPBasicBurst::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == 0)
     {
@@ -108,11 +108,6 @@ void UDPBasicBurst::initialize(int stage)
         destPort = par("destPort");
 
         timerNext = new cMessage("UDPBasicBurstTimer");
-
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
-        outOfOrderPkSignal = registerSignal("outOfOrderPk");
-        dropPkSignal = registerSignal("dropPk");
     }
 }
 
@@ -350,10 +345,10 @@ void UDPBasicBurst::finish()
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
     recordScalar("Total deleted", numDeleted);
-    AppBase::finish();
+    ApplicationBase::finish();
 }
 
-bool UDPBasicBurst::startApp(IDoneCallback *doneCallback)
+bool UDPBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
 
@@ -366,7 +361,7 @@ bool UDPBasicBurst::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicBurst::stopApp(IDoneCallback *doneCallback)
+bool UDPBasicBurst::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     if (timerNext)
         cancelEvent(timerNext);
@@ -375,11 +370,10 @@ bool UDPBasicBurst::stopApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicBurst::crashApp(IDoneCallback *doneCallback)
+void UDPBasicBurst::handleNodeCrash()
 {
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    return true;
 }
 

@@ -29,6 +29,8 @@ Define_Module(RTPApplication)
 
 void RTPApplication::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage == 0)
@@ -61,16 +63,14 @@ void RTPApplication::initialize(int stage)
         ssrc = 0;
         isActiveSession = false;
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
-    {
+
         // the ip address to connect to (unicast or multicast)
         _destinationAddress = IPvXAddressResolver().resolve(par("destinationAddress").stringValue()).get4();
 

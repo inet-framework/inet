@@ -23,6 +23,7 @@
 
 #include "ManetRoutingBase.h"
 #include "UDPPacket.h"
+#include "IPSocket.h"
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
@@ -40,15 +41,13 @@
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 
-simsignal_t ManetRoutingBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t ManetRoutingBase::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+
 ManetRoutingBase::GlobalRouteMap *ManetRoutingBase::globalRouteMap = NULL;
 bool ManetRoutingBase::createInternalStore = false;
 
 ManetRoutingBase::ManetRoutingBase()
 {
-#ifdef WITH_80211MESH
-    locator = NULL;
-#endif
     isRegistered = false;
     regPosition = false;
     mac_layer_ = false;
@@ -249,20 +248,6 @@ void ManetRoutingBase::registerRoutingModule()
     nb->subscribe(this,NF_L2_AP_DISASSOCIATED);
     nb->subscribe(this,NF_L2_AP_ASSOCIATED);
 
-#ifdef WITH_80211MESH
-    locator = LocatorModuleAccess().getIfExists();
-    if (locator)
-    {
-        InterfaceEntry *ie = getInterfaceWlanByAddress();
-        if (locator->getIpAddress().isUnspecified() && ie->ipv4Data())
-            locator->setIpAddress(ie->ipv4Data()->getIPAddress());
-        if (locator->getMacAddress().isUnspecified())
-            locator->setMacAddress(ie->getMacAddress());
-        nb->subscribe(this,NF_LOCATOR_ASSOC);
-        nb->subscribe(this,NF_LOCATOR_DISASSOC);
-    }
-#endif
-
     if (par("PublicRoutingTables").boolValue())
     {
         setInternalStore(true);
@@ -289,7 +274,12 @@ void ManetRoutingBase::registerRoutingModule()
             it->second.push_back(data);
         }
     }
+
+    initHook(this);
+
  //   WATCH_MAP(*routesVector);
+    IPSocket socket(gate("to_ip"));
+    socket.registerProtocol(IP_PROT_MANET);
 }
 
 ManetRoutingBase::~ManetRoutingBase()
@@ -378,17 +368,10 @@ void ManetRoutingBase::registerPosition()
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
     regPosition = true;
-    mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-    cModule *mod;
-    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule()) {
-            cProperties *properties = mod->getProperties();
-            if (properties && properties->getAsBool("node"))
-                break;
-    }
-    if (mod)
-        mod->subscribe(mobilityStateChangedSignal, this);
-    else
-        getParentModule()->subscribe(mobilityStateChangedSignal, this);
+    cModule *mod = findContainingNode(getParentModule());
+    if (!mod)
+        mod = getParentModule();
+    mod->subscribe(mobilityStateChangedSignal, this);
 }
 
 void ManetRoutingBase::processLinkBreak(const cObject *details) {return;}
@@ -442,7 +425,7 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAdd
     UDPPacket *udpPacket = new UDPPacket(msg->getName());
     udpPacket->setByteLength(UDP_HDR_LEN);
     udpPacket->encapsulate(msg);
-    //IPvXAddress srcAddr = interfaceWlanptr->ipv4Data()->getIPAddress();
+    //Address srcAddr = interfaceWlanptr->ipv4Data()->getIPAddress();
 
     if (ttl==0)
     {
@@ -602,27 +585,6 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         }
     }
 
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress) && del_entry)
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress,list);
-        for (unsigned int i = 0; i<list.size(); i++)
-        {
-            for (int i=inet_rt->getNumRoutes(); i>0; --i)
-            {
-                IPv4Route *e = inet_rt->getRoute(i-1);
-                if (list[i] == e->getDestination())
-                {
-                    if (!inet_rt->deleteRoute(e))
-                        opp_error("Aodv omnet_chg_rte can't delete route entry");
-                    else
-                        break;
-                }
-            }
-        }
-    }
-#endif
     if (del_entry)
         return;
 
@@ -634,7 +596,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceWlanByAddress(iface);
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+    IPv4Route::SourceType sourceType = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
 
     if (found)
     {
@@ -643,7 +605,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
                 && oldentry->getInterface() == ie
-                && oldentry->getSource() == routeSource)
+                && oldentry->getSourceType() == sourceType)
             return;
         inet_rt->deleteRoute(oldentry);
     }
@@ -664,43 +626,8 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
 
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
-    entry->setSource(routeSource);
+    entry->setSourceType(sourceType);
     inet_rt->addRoute(entry);
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress))
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress,list);
-        for (unsigned int i = 0; i<list.size(); i++)
-        {
-            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
-            if (e && e->getDestination() == list[i])
-            {
-                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
-                    continue;
-            }
-
-            IPv4Route *entry = new IPv4Route();
-
-            /// Destination
-            entry->setDestination(list[i]);
-            /// Route mask
-            entry->setNetmask(netmask);
-            /// Next hop
-            entry->setGateway(gateway);
-            /// Metric ("cost" to reach the destination)
-            entry->setMetric(hops);
-            /// Interface name and pointer
-
-            entry->setInterface(ie);
-
-            /// Source of route, MANUAL by reading a file,
-            /// routing protocol name otherwise
-            entry->setSource(routeSource);
-            inet_rt->addRoute(entry);
-        }
-    }
-#endif
 }
 
 // This methods use the nic index to identify the output nic.
@@ -742,27 +669,6 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         }
     }
 
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress) && del_entry)
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress, list);
-        for (unsigned int i = 0; i < list.size(); i++)
-        {
-            for (int i = inet_rt->getNumRoutes(); i > 0; --i)
-            {
-                IPv4Route *e = inet_rt->getRoute(i - 1);
-                if (list[i] == e->getDestination())
-                {
-                    if (!inet_rt->deleteRoute(e))
-                        opp_error("Aodv omnet_chg_rte can't delete route entry");
-                    else
-                        break;
-                }
-            }
-        }
-    }
-#endif
     if (del_entry)
         return;
 
@@ -772,7 +678,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceEntry(index);
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+    IPv4Route::SourceType sourceType = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
 
     if (found)
     {
@@ -781,7 +687,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
                 && oldentry->getInterface() == ie
-                && oldentry->getSource() == routeSource)
+                && oldentry->getSourceType() == sourceType)
             return;
         inet_rt->deleteRoute(oldentry);
     }
@@ -804,47 +710,12 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
     /// routing protocol name otherwise
 
     if (useManetLabelRouting)
-        entry->setSource(IPv4Route::MANET);
+        entry->setSourceType(IPv4Route::MANET);
     else
-        entry->setSource(IPv4Route::MANET2);
+        entry->setSourceType(IPv4Route::MANET2);
 
         inet_rt->addRoute(entry);
 
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress))
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress, list);
-        for (unsigned int i = 0; i < list.size(); i++)
-        {
-            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
-            if (e && e->getDestination() == list[i])
-            {
-                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
-                    continue;
-            }
-
-            e = new IPv4Route();
-
-            /// Destination
-            e->setDestination(list[i]);
-            /// Route mask
-            e->setNetmask(netmask);
-            /// Next hop
-            e->setGateway(gateway);
-            /// Metric ("cost" to reach the destination)
-            e->setMetric(hops);
-            /// Interface name and pointer
-
-            e->setInterface(ie);
-
-            /// Source of route, MANUAL by reading a file,
-            /// routing protocol name otherwise
-            e->setSource(entry->getSource());
-            inet_rt->addRoute(e);
-        }
-    }
-#endif
 }
 
 
@@ -896,7 +767,7 @@ void ManetRoutingBase::omnet_clean_rte()
 }
 
 //
-// generic receiveChangeNotification, the protocols must implemet processLinkBreak and processPromiscuous only
+// generic receiveChangeNotification, the protocols must implement processLinkBreak and processPromiscuous only
 //
 void ManetRoutingBase::receiveChangeNotification(int category, const cObject *details)
 {
@@ -949,7 +820,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
         {
             ManetAddress addr;
             if (!mac_layer_ && arp)
-                addr = ManetAddress(arp->getInverseAddressResolution(infoSta->getStaAddress()));
+                addr = ManetAddress(arp->getIPv4AddressFor(infoSta->getStaAddress()));
             else
                 addr = ManetAddress(infoSta->getStaAddress());
             // sanity check
@@ -970,12 +841,6 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
             }
         }
     }
-#ifdef WITH_80211MESH
-    else if(category == NF_LOCATOR_ASSOC)
-        processLocatorAssoc(details);
-    else if(category == NF_LOCATOR_DISASSOC)
-        processLocatorDisAssoc(details);
-#endif
 }
 
 void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
@@ -1190,27 +1055,6 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
         }
     }
 
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress) && del_entry)
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress, list);
-        for (unsigned int i = 0; i < list.size(); i++)
-        {
-            for (int i = inet_rt->getNumRoutes(); i > 0; --i)
-            {
-                IPv4Route *e = inet_rt->getRoute(i - 1);
-                if (list[i] == e->getDestination())
-                {
-                    if (!inet_rt->deleteRoute(e))
-                        opp_error("Aodv omnet_chg_rte can't delete route entry");
-                    else
-                        break;
-                }
-            }
-        }
-    }
-#endif
     if (del_entry)
         return true;
 
@@ -1227,7 +1071,7 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
                 && oldentry->getInterface() == ie
-                && oldentry->getSource() == IPv4Route::MANUAL)
+                && oldentry->getSourceType() == IPv4Route::MANUAL)
             return true;
         inet_rt->deleteRoute(oldentry);
     }
@@ -1248,48 +1092,12 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
 
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
-    entry->setSource(routeSource);
+    IPv4Route::SourceType sourceType = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+    entry->setSourceType(sourceType);
 
     inet_rt->addRoute(entry);
 
-#ifdef WITH_80211MESH
-    if (locator && locator->isApIp(desAddress))
-    {
-        std::vector<IPv4Address> list;
-        locator->getApListIp(desAddress, list);
-        for (unsigned int i = 0; i < list.size(); i++)
-        {
-            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
-            if (e && e->getDestination() == list[i])
-            {
-                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
-                    continue;
-            }
-
-            e = new IPv4Route();
-
-            /// Destination
-            e->setDestination(list[i]);
-            /// Route mask
-            e->setNetmask(netmask);
-            /// Next hop
-            e->setGateway(gateway);
-            /// Metric ("cost" to reach the destination)
-            e->setMetric(hops);
-            /// Interface name and pointer
-
-            e->setInterface(ie);
-
-            /// Source of route, MANUAL by reading a file,
-            /// routing protocol name otherwise
-            e->setSource(entry->getSource());
-            inet_rt->addRoute(e);
-        }
-    }
-#endif
     return true;
-
 }
 
 bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName, const int &hops, const ManetAddress &mask)
@@ -1523,58 +1331,18 @@ bool ManetRoutingBase::addressIsForUs(const ManetAddress &addr) const
 
 bool ManetRoutingBase::getAp(const ManetAddress &destination, ManetAddress& accesPointAddr) const
 {
-#ifdef WITH_80211MESH
-    if (locator == NULL)
-        return false;
-    if (isInMacLayer())
-    {
-        MACAddress macAddr = locator->getLocatorMacToMac(destination.getMAC());
-        if (macAddr.isUnspecified())
-            return false;
-        accesPointAddr = ManetAddress(macAddr);
-    }
-    else
-    {
-        IPv4Address ipAddr = locator->getLocatorIpToIp(destination.getIPv4());
-        if (ipAddr.isUnspecified())
-            return false;
-        accesPointAddr = ManetAddress(ipAddr);
-    }
-    return true;
-#else
     return false;
-#endif
 }
 
 void ManetRoutingBase::getApList(const MACAddress & dest,std::vector<MACAddress>& list)
 {
     list.clear();
-#ifdef WITH_80211MESH
-    if (locator)
-    {
-        MACAddress ap = locator->getLocatorMacToMac(dest);
-        if (!ap.isUnspecified())
-            locator->getApList(ap,list);
-        else
-            locator->getApList(dest,list);
-    }
-#endif
     list.push_back(dest);
 }
 
 void ManetRoutingBase::getApListIp(const IPv4Address &dest,std::vector<IPv4Address>& list)
 {
     list.clear();
-#ifdef WITH_80211MESH
-    if (locator)
-    {
-        IPv4Address ap = locator->getLocatorIpToIp(dest);
-        if (!ap.isUnspecified())
-            locator->getApListIp(ap,list);
-        else
-            locator->getApListIp(dest,list);
-    }
-#endif
     list.push_back(dest);
 }
 
@@ -1604,16 +1372,7 @@ void ManetRoutingBase::getListRelatedAp(const ManetAddress & add, std::vector<Ma
 
 bool ManetRoutingBase::isAp() const
 {
-#ifdef WITH_80211MESH
-    if (!locator)
-        return false;
-    if (mac_layer_)
-        return locator->isThisAp();
-    else
-        return locator->isThisApIp();
-#else
     return false;
-#endif
 }
 
 
@@ -1706,6 +1465,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const ManetAddress &src, const ManetAd
             }
         }
     }
+    throw cRuntimeError("model error");
 }
 
 

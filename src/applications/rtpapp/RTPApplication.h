@@ -30,7 +30,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 {
     public:
         /**
-         * Constructor, with activity() stack size.
+         * Constructor.
          */
         RTPApplication() : cSimpleModule() {}
 
@@ -41,11 +41,11 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
          * Reads the OMNeT++ parameters.
          */
         virtual void initialize(int stage);
-        virtual int numInitStages() const {return 4;}
+        virtual int numInitStages() const { return 4; }
 
         /**
          * RTPApplication uses activity for message handling.
-         * The behaviour is controlled by omnet parameters.
+         * The behavior is controlled by omnet parameters.
          */
         virtual void handleMessage(cMessage* msg);
 

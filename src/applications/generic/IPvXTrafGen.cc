@@ -22,13 +22,15 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "IPvXAddressResolver.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
 
 Define_Module(IPvXTrafGen);
 
-simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t IPvXTrafGen::sentPkSignal = registerSignal("sentPk");
 
 IPvXTrafGen::IPvXTrafGen()
 {
@@ -45,31 +47,46 @@ IPvXTrafGen::~IPvXTrafGen()
 
 void IPvXTrafGen::initialize(int stage)
 {
-    IPvXTrafSink::initialize(stage);
+    cSimpleModule::initialize(stage);
+
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 0)
+    {
+        protocol = par("protocol");
+        numPackets = par("numPackets");
+        startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
 
-    sentPkSignal = registerSignal("sentPk");
+        packetLengthPar = &par("packetLength");
+        sendIntervalPar = &par("sendInterval");
 
-    protocol = par("protocol");
-    numPackets = par("numPackets");
-    startTime = par("startTime");
-    stopTime = par("stopTime");
-    if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-        error("Invalid startTime/stopTime parameters");
+        numSent = 0;
+        numReceived = 0;
+        WATCH(numSent);
+        WATCH(numReceived);
+    }
+    else if (stage == 3)
+    {
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(protocol);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(protocol);
 
-    packetLengthPar = &par("packetLength");
-    sendIntervalPar = &par("sendInterval");
+        timer = new cMessage("sendTimer");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-    numSent = 0;
-    WATCH(numSent);
+        if (isNodeUp())
+            startApp();
+    }
+}
 
-    timer = new cMessage("sendTimer");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-    if (isNodeUp() && isEnabled())
+void IPvXTrafGen::startApp()
+{
+    if (isEnabled())
         scheduleNextPacket(-1);
 }
 
@@ -117,8 +134,8 @@ bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage,
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
-            scheduleNextPacket(-1);
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            startApp();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
@@ -205,3 +222,40 @@ void IPvXTrafGen::sendPacket()
     send(payload, gate);
     numSent++;
 }
+
+void IPvXTrafGen::printPacket(cPacket *msg)
+{
+    IPvXAddress src, dest;
+    int protocol = -1;
+
+    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
+    {
+        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
+    }
+    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
+    {
+        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
+    }
+
+    EV << msg << endl;
+    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+
+    if (protocol != -1)
+        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+}
+
+void IPvXTrafGen::processPacket(cPacket *msg)
+{
+    emit(rcvdPkSignal, msg);
+    EV << "Received packet: ";
+    printPacket(msg);
+    delete msg;
+    numReceived++;
+}
+

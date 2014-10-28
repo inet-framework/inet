@@ -93,7 +93,6 @@ class INET_API xMIPv6 : public cSimpleModule
     cOutVector statVectorHoTtoMN, statVectorCoTtoMN;
     cOutVector statVectorHoTfromCN, statVectorCoTfromCN;
 
-
     /** NB is used for MIH signalling */
     NotificationBoard* nb; // 14.01.08 - CB
 
@@ -193,7 +192,7 @@ class INET_API xMIPv6 : public cSimpleModule
 
   protected:
     /************************Miscellaneous Stuff***************************/
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

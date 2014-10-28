@@ -54,7 +54,7 @@ packet IPv6Datagram
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
-    int transportProtocol enum(IPProtocolId);
+    int transportProtocol @enum(IPProtocolId);
 
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }

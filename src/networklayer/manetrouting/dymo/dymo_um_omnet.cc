@@ -67,11 +67,15 @@ int DYMOUM::totalRrepAckRec = 0;
 int DYMOUM::totalRerrSend = 0;
 int DYMOUM::totalRerrRec = 0;
 #endif
+
 std::map<ManetAddress,u_int32_t *> DYMOUM::mapSeqNum;
+
 
 void DYMOUM::initialize(int stage)
 {
-    if (stage==4)
+    ManetRoutingBase::initialize(stage);
+
+    if (stage == 4)
     {
 
 #ifndef DYMO_UM_GLOBAL_STATISTISTIC
@@ -99,8 +103,6 @@ void DYMOUM::initialize(int stage)
         /* From debug.c */
         /* Note: log_nmsgs was never used anywhere */
 
-        debug = 0;
-
         gateWayAddress = new IPv4Address("0.0.0.0");
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));
@@ -113,6 +115,7 @@ void DYMOUM::initialize(int stage)
         /* Search the 80211 interface */
 
         registerRoutingModule();
+
         NS_DEV_NR = getWlanInterfaceIndexByAddress();
         NS_IFINDEX = getWlanInterfaceIndexByAddress();
 
@@ -901,15 +904,16 @@ struct dev_info NS_CLASS dev_nr(int n)
 
 int NS_CLASS ifindex2devindex(unsigned int ifindex)
 {
-  int i;
+    int i;
 
-  for (i = 0; i < this_host.nif; i++)
-    if (dev_indices[i] == ifindex)
-      return i;
+    for (i = 0; i < this_host.nif; i++)
+        if (dev_indices[i] == ifindex)
+            return i;
 
-  return -1;
+    return -1;
 }
 */
+
 void DYMOUM::processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;

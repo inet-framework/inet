@@ -17,7 +17,7 @@
 
 #include "EtherLLC.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "ModuleAccess.h"
@@ -25,28 +25,24 @@
 
 Define_Module(EtherLLC);
 
-simsignal_t EtherLLC::dsapSignal = SIMSIGNAL_NULL;
-simsignal_t EtherLLC::encapPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherLLC::decapPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherLLC::passedUpPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = SIMSIGNAL_NULL;
-simsignal_t EtherLLC::pauseSentSignal = SIMSIGNAL_NULL;
+simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");
+simsignal_t EtherLLC::encapPkSignal = registerSignal("encapPk");
+simsignal_t EtherLLC::decapPkSignal = registerSignal("decapPk");
+simsignal_t EtherLLC::passedUpPkSignal = registerSignal("passedUpPk");
+simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
+simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
+
 
 void EtherLLC::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         seqNum = 0;
         WATCH(seqNum);
 
         dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
-
-        dsapSignal = registerSignal("dsap");
-        encapPkSignal = registerSignal("encapPk");
-        decapPkSignal = registerSignal("decapPk");
-        passedUpPkSignal = registerSignal("passedUpPk");
-        droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
-        pauseSentSignal = registerSignal("pauseSent");
 
         WATCH(dsapsRegistered);
         WATCH(totalFromHigherLayer);
@@ -201,9 +197,9 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     emit(decapPkSignal, higherlayermsg);
 
     // pass up to higher layer
-    send(higherlayermsg, "upperLayerOut", port);
     totalPassedUp++;
     emit(passedUpPkSignal, higherlayermsg);
+    send(higherlayermsg, "upperLayerOut", port);
     delete frame;
 }
 

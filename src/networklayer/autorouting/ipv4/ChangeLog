@@ -1,3 +1,28 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-23  Zoltan Bojthe
+
+	backported IPv4NetworkConfigurator/IPv4NodeConfigurator
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: backported get/setSource(), get/setProtocolData()
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2013-12-18  Zoltan Bojthe
+
+	OMNeT++/OMNEST version 4.3 required
+
+	removed WeightedTopology - already implemented in cTopology removed
+	OPP_Global::getModuleByPath(this, path) - uses
+	cModule::getModuleByPath(path)
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-25  Tamas Borbely

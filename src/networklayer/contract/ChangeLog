@@ -1,3 +1,19 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-16  Zoltan Bojthe
+
+	backport: backported RIP
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-16  Zoltan Bojthe
+
+	bugfix for IPv4Address::doPacking() (by Ingmar Baumgart)
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Tamas Borbely

@@ -1,0 +1,51 @@
+#
+# These fingerprints depends on FFMpeg library versions.
+#    libavcodec:    54.35.0
+#    libavformat:   54.20.4
+#    libavresample: 1.0.1
+#    libavutil:     52.3.0
+#
+# workingdir,                                args,                         simtimelimit,  fingerprint
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     57ec-100d
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     9f09-7fc0
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     e159-c2e4
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 3,        60s,     178c-9236
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 4,        60s,     5a0b-705f
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 5,        60s,     22ce-a9be
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 6,        60s,     e340-921f
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 7,        60s,     245f-c0f3
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 8,        60s,     5b39-f3af
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 9,        60s,     7f3d-f774
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 0,   60s,     7a53-a86d
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 1,   60s,     6a16-361f
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 2,   60s,     6e48-f9df
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 3,   60s,     6063-43fa
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 4,   60s,     4702-f3b0
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 5,   60s,     8960-4bd7
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 6,   60s,     3e0c-dbdb
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 7,   60s,     191b-89a6
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 8,   60s,     4a79-eb0b
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_aLaw -r 9,   60s,     494d-b8dc
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 0,  60s,     a37c-5e9a
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 1,  60s,     9fab-75f3
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 2,  60s,     3923-7ac8
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 3,  60s,     6442-e21e
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 4,  60s,     e704-217d
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 5,  60s,     6a92-0699
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 6,  60s,     3053-a2c2
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 7,  60s,     8ec2-ba7b
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 8,  60s,     197c-f9db
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g711_muLaw -r 9,  60s,     ea5e-8c58
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 0,   60s,     dbec-231e
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 1,   60s,     82d7-abd0
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 2,   60s,     3e64-91a9
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 3,   60s,     b2f7-d6ca
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 4,   60s,     c4ca-be2a
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 5,   60s,     3b58-039f
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 6,   60s,     5777-8dcc
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 7,   60s,     4a15-39e0
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 8,   60s,     125c-9bca
+/examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     4483-72db
+
+/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     3995-1083
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     cedf-8bd8

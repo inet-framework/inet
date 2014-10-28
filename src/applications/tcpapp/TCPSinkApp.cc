@@ -14,6 +14,7 @@
 
 #include "TCPSinkApp.h"
 
+#include "IPvXAddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "TCPSocket.h"
@@ -21,34 +22,32 @@
 
 Define_Module(TCPSinkApp);
 
-simsignal_t TCPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSinkApp::rcvdPkSignal = registerSignal("rcvdPk");
 
 void TCPSinkApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
-        const char *localAddress = par("localAddress");
-        int localPort = par("localPort");
-
         bytesRcvd = 0;
         WATCH(bytesRcvd);
-        rcvdPkSignal = registerSignal("rcvdPk");
-
-        //TODO should use IPvXAddressResolver in stage 3
-        TCPSocket socket;
-        socket.setOutputGate(gate("tcpOut"));
-        socket.readDataTransferModePar(*this);
-        socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
-        socket.listen();
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
+        TCPSocket socket;
+        socket.setOutputGate(gate("tcpOut"));
+        socket.readDataTransferModePar(*this);
+        socket.bind(localAddress[0] ? IPvXAddressResolver().resolve(localAddress) : IPvXAddress(), localPort);
+        socket.listen();
     }
 }
 

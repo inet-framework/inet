@@ -1,3 +1,34 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-03-18  Irene Rungeler
+
+	sctp: added SCTP/IPv6 support 
+
+2014-03-14  Irene Rungeler
+
+	sctp: added SCTP NAT support
+
+2014-03-13  Rudolf Hornig
+
+	SCTP: CMT (Concurrent Multipath Transfer) for SCTP by Thomas Dreibholz
+
+2014-01-24  Zoltan Bojthe
+
+	backport: fix access-after-send of msg objects (it's illegal)
+
+	- OrdinalBasedDuplicator: fixed order of emit(packet) / send(packet)
+	- SCTP: sctpmsg was used after send
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-08-08  Irene Ruengeler

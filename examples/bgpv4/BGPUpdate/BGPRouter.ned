@@ -101,11 +101,11 @@ module BGPRouter
         snifferOut.out --> { @display("m=s"); } --> tcp.appIn++;
         snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut++;
 
-        tcp.ipOut --> { @display("m=s"); } --> networkLayer.tcpIn;
-        tcp.ipIn <-- { @display("m=s"); } <-- networkLayer.tcpOut;
+        tcp.ipOut --> { @display("m=s"); } --> networkLayer.transportIn++;
+        tcp.ipIn <-- { @display("m=s"); } <-- networkLayer.transportOut++;
 
-        ospf.ipOut --> { @display("m=s"); } --> networkLayer.ospfIn;
-        ospf.ipIn <-- { @display("m=s"); } <-- networkLayer.ospfOut;
+        ospf.ipOut --> { @display("m=s"); } --> networkLayer.transportIn++;
+        ospf.ipIn <-- { @display("m=s"); } <-- networkLayer.transportOut++;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {

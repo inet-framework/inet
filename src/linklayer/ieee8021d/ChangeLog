@@ -1,0 +1,49 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-05-05  Rudolf Hornig
+
+	Ieee802.1d: Added missing INET_API macros
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-10-30  Benmartin92
+
+	STP: added switch-related STP/RSTP config parameters.
+
+2013-10-28  Benmartin92
+
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+
+2013-10-24  Benmartin92
+
+	EtherSwitch: EtherSwitch now supports Spanning Tree algorithm.
+
+	ISpanningTree: moduleinterface added to supports different versions of
+	Spanning Tree protocols.
+
+	SpanningTree: module renamed to "STP", this abbreviation refer to the
+	protocol described in IEEE 802.1D-1998.
+	STPTester and IEEE8021DInterfaceData moved to ieee8021d folder.
+
+2013-10-17  Benmartin92
+
+	IEEE8021DRelay: module added. This relay module is intended to work with
+	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
+
+2013-11-07 Benjamin Seregi
+
+	STP: added IEEE 802.1D-1998 implementation of Spanning Tree Protocol.
+	The source code is based on ANSA (https://github.com/kvetak/ANSA)
+	implementation.
+
+	RSTP: added IEEE 802.1D-2004 implementation of Spanning Tree Protocol.
+	The source code is based on Juan Luis Garrote Molinero's implementation
+	from INETMANET
+
+	IEEE8021DInterfaceData: InterfaceEntry is extended with IEEE8021DInterfaceData.
+	It is created to contain additional port interface information of an
+	EtherSwitch (e.g. is the port forwarding or not?).
+
+2013-01-15  Zoltan Bojthe
+
+	added vlan code from inetmanet - 2996f0d703dc47b54d6262ae18b60f7a9e3e9757

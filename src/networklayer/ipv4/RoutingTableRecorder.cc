@@ -36,12 +36,13 @@ Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENA
 // (INotifiable::receiveChangeNotification() doesn't have NotificationBoard* as arg).
 class RoutingTableRecorderListener : public INotifiable
 {
-private:
+  private:
     NotificationBoard *nb;
     RoutingTableRecorder *recorder;
-public:
-    RoutingTableRecorderListener(RoutingTableRecorder *recorder, NotificationBoard *nb) {this->recorder = recorder; this->nb = nb;}
-    virtual void receiveChangeNotification(int category, const cObject *details) {recorder->receiveChangeNotification(nb, category, details);}
+
+  public:
+    RoutingTableRecorderListener(RoutingTableRecorder *recorder, NotificationBoard *nb) :  nb(nb), recorder(recorder) {}
+    virtual void receiveChangeNotification(int category, const cObject *details) { recorder->receiveChangeNotification(nb, category, details); }
 };
 
 RoutingTableRecorder::RoutingTableRecorder()
@@ -55,8 +56,13 @@ RoutingTableRecorder::~RoutingTableRecorder()
 
 void RoutingTableRecorder::initialize(int stage)
 {
-    if (par("enabled").boolValue())
-        hookListeners();
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
+        if (par("enabled").boolValue())
+            hookListeners();
+    }
 }
 
 void RoutingTableRecorder::handleMessage(cMessage *)
@@ -67,7 +73,12 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 void RoutingTableRecorder::hookListeners()
 {
     // hook existing notification boards (we won't cover dynamically created hosts/routers, but oh well)
+
+#if OMNETPP_VERSION < 0x0500
     for (int id = 0; id < simulation.getLastModuleId(); id++)
+#else
+    for (int id = 0; id < simulation.getLastComponentId(); id++)
+#endif
     {
         NotificationBoard *nb = dynamic_cast<NotificationBoard *>(simulation.getModule(id));
         if (nb)
@@ -106,8 +117,10 @@ void RoutingTableRecorder::receiveChangeNotification(NotificationBoard *nb, int 
     cModule *host = nb->getParentModule();
     if (category==NF_IPv4_ROUTE_ADDED || category==NF_IPv4_ROUTE_DELETED || category==NF_IPv4_ROUTE_CHANGED)
         recordRouteChange(host, check_and_cast<const IPv4Route *>(details), category);
-    else
+    else if (category==NF_INTERFACE_CREATED || category==NF_INTERFACE_DELETED)
         recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(details), category);
+    else if (category==NF_INTERFACE_CONFIG_CHANGED || category==NF_INTERFACE_IPv4CONFIG_CHANGED)
+        recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(details)->getInterfaceEntry(), category);
 }
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category)

@@ -1,3 +1,16 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-15  Levente Meszaros

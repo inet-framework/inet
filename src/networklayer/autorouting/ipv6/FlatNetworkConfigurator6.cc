@@ -29,8 +29,11 @@
 
 Define_Module(FlatNetworkConfigurator6);
 
+
 void FlatNetworkConfigurator6::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // FIXME refactor: make routers[] array? (std::vector<cTopology::Node*>)
     // FIXME: spare common beginning for all stages?
 
@@ -84,7 +87,11 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
         // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.getNode(i)->getModule();
         IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(mod);
-        RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(mod);
+        RoutingTable6 *rt = IPvXAddressResolver().findRoutingTable6Of(mod);
+
+        // skip non-IPv6 nodes
+        if (!rt)
+            continue;
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
@@ -137,8 +144,12 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
         if (!isIPNode(node))
             continue;
 
-        RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(node->getModule());
+        RoutingTable6 *rt = IPvXAddressResolver().findRoutingTable6Of(node->getModule());
         IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(node->getModule());
+
+        // skip non-IPv6 nodes
+        if (!rt)
+            continue;
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
@@ -161,6 +172,9 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
     }
 }
 
+// XXX !isRouter nodes are not used as source/destination of routes
+//     but can be internal nodes of the generated shortest paths.
+//     the same problem with non-ipv6 nodes
 void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 {
     int numIPNodes = 0;
@@ -179,8 +193,12 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 */
 
         numIPNodes++; // FIXME split into num hosts, num routers
-        RoutingTable6 *destRt = IPvXAddressResolver().routingTable6Of(destNode->getModule());
+        RoutingTable6 *destRt = IPvXAddressResolver().findRoutingTable6Of(destNode->getModule());
         IInterfaceTable *destIft = IPvXAddressResolver().interfaceTableOf(destNode->getModule());
+
+        // skip non-IPv6 nodes
+        if (!destRt)
+            continue;
 
         // don't add routes towards hosts
         if (!destRt->par("isRouter").boolValue())
@@ -217,8 +235,12 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             if (atNode->getNumPaths() == 0)
                 continue;       // not connected
 
-            RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(atNode->getModule());
+            RoutingTable6 *rt = IPvXAddressResolver().findRoutingTable6Of(atNode->getModule());
             IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(atNode->getModule());
+
+            // skip non-IPv6 nodes
+            if (!destRt)
+                continue;
 
             // skip hosts' routing tables
             if (!rt->par("isRouter").boolValue())

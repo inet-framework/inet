@@ -22,7 +22,9 @@
 
 #include <vector>
 #include <map>
+
 #include "INETDefs.h"
+
 #include "DHCPMessage_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
@@ -57,11 +59,12 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         IPv4Address gateway;
         IPv4Address ipAddressStart;
 
-        InterfaceEntry* ie; // interface to serve DHCP requests on
-        NotificationBoard* nb;
+        InterfaceEntry *ie; // interface to serve DHCP requests on
+        NotificationBoard *nb;
         UDPSocket socket;
         simtime_t startTime; // application start time
-        cMessage * startTimer; // self message to start DHCP server
+        cMessage *startTimer; // self message to start DHCP server
+
     protected:
         virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
@@ -110,6 +113,7 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         virtual void receiveChangeNotification(int category, const cPolymorphic *details);
         virtual void startApp();
         virtual void stopApp();
+
     public:
         DHCPServer();
         virtual ~DHCPServer();

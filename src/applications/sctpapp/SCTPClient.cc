@@ -36,34 +36,73 @@
 
 Define_Module(SCTPClient);
 
-simsignal_t SCTPClient::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::echoedPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::sentPkSignal = registerSignal("sentPk");
+simsignal_t SCTPClient::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t SCTPClient::echoedPkSignal = registerSignal("echoedPk");
+
+
+SCTPClient::SCTPClient()
+{
+    timeMsg = NULL;
+    stopTimer = NULL;
+    primaryChangeTimer = NULL;
+}
+
+SCTPClient::~SCTPClient()
+{
+    cancelAndDelete(timeMsg);
+    cancelAndDelete(stopTimer);
+    cancelAndDelete(primaryChangeTimer);
+}
 
 void SCTPClient::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     sctpEV3 << "initialize SCTP Client stage "<< stage << endl;
     if (stage == 0)
     {
         numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = echoedBytesSent = bytesRcvd = 0;
+
+        echo = par("echo").boolValue();
+        ordered = par("ordered").boolValue();
+        finishEndsSimulation = (bool)par("finishEndsSimulation");
+
+        numRequestsToSend = 0;
+        numPacketsToReceive = 0;
+        queueSize = par("queueSize");
+        WATCH(numRequestsToSend);
+        recordScalar("ums", (uint32) par("requestLength"));
+
+        timeMsg = new cMessage("CliAppTimer");
+        timeMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt((simtime_t)par("startTime"), timeMsg);
+
+        sendAllowed = true;
+        bufferSize = 0;
+        timer = false;
+        stopTimer = NULL;
+        primaryChangeTimer = NULL;
+
         WATCH(numSessions);
         WATCH(numBroken);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
-
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
-        echoedPkSignal = registerSignal("echoedPk");
+    }
+    else if (stage == 3)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
-        echo = par("echo").boolValue();
-        ordered = par("ordered").boolValue();
-        finishEndsSimulation = (bool)par("finishEndsSimulation");
 
         if (addresses.size() == 0)
             socket.bind(port);
@@ -74,17 +113,6 @@ void SCTPClient::initialize(int stage)
         socket.setOutputGate(gate("sctpOut"));
         setStatusString("waiting");
 
-        timeMsg = new cMessage("CliAppTimer");
-        numRequestsToSend = 0;
-        numPacketsToReceive = 0;
-        queueSize = par("queueSize");
-        WATCH(numRequestsToSend);
-        recordScalar("ums", (uint32) par("requestLength"));
-        timeMsg->setKind(MSGKIND_CONNECT);
-        scheduleAt((simtime_t)par("startTime"), timeMsg);
-        sendAllowed = true;
-        bufferSize = 0;
-
         simtime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO)
         {
@@ -92,11 +120,6 @@ void SCTPClient::initialize(int stage)
             stopTimer->setKind(MSGKIND_STOP);
             scheduleAt((simtime_t)par("stopTime"), stopTimer);
             timer = true;
-        }
-        else
-        {
-            timer = false;
-            stopTimer = NULL;
         }
 
         simtime_t primaryTime = par("primaryTime");
@@ -106,18 +129,6 @@ void SCTPClient::initialize(int stage)
             primaryChangeTimer->setKind(MSGKIND_PRIMARY);
             scheduleAt(primaryTime, primaryChangeTimer);
         }
-        else
-        {
-            primaryChangeTimer = NULL;
-        }
-    }
-    else if (stage == 1)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
 }
 
@@ -144,8 +155,14 @@ void SCTPClient::connect()
     EV << "issuing OPEN command\n";
     setStatusString("connecting");
     EV << "connect to address " << connectAddress << "\n";
-	bool streamReset = par("streamReset");
-	socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    bool streamReset = par("streamReset");
+    IPvXAddress destination;
+    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        socket.connect(destination, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    }
 
     if (!streamReset)
         streamReset = false;
@@ -679,24 +696,6 @@ void SCTPClient::addressAddedArrived(int32 assocId, IPvXAddress remoteAddr)
 
 void SCTPClient::finish()
 {
-    if (timeMsg->isScheduled())
-        cancelEvent(timeMsg);
-
-    delete timeMsg;
-
-    if (stopTimer)
-    {
-        cancelEvent(stopTimer);
-        delete stopTimer;
-    }
-
-    if (primaryChangeTimer)
-    {
-        cancelEvent(primaryChangeTimer);
-        delete primaryChangeTimer;
-        primaryChangeTimer = NULL;
-    }
-
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";

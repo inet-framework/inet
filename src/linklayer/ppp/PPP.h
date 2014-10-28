@@ -75,7 +75,7 @@ class INET_API PPP : public MACBase, public cListener
     virtual void refreshOutGateConnection(bool connected);
 
     // cListener function
-    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     // MACBase functions
     virtual InterfaceEntry *createInterfaceEntry();
@@ -88,7 +88,7 @@ class INET_API PPP : public MACBase, public cListener
     virtual ~PPP();
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };

@@ -93,7 +93,7 @@ std::string TCPBaseAlgStateVariables::detailedInfo() const
 }
 
 TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
-  state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
+        state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = NULL;
     cwndVector = ssthreshVector = rttVector = srttVector = rttvarVector = rtoVector = numRtosVector = NULL;

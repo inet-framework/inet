@@ -1,10 +1,14 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-19  Zoltan Bojthe
 
 	- Ieee80211MgmtAP: fixed the undisposed object problem
 	- Ieee80211Mgmt*: added lifecycle support
-	- Ieee80211MgmtAP: schedule timer at initialize stage 1 
+	- Ieee80211MgmtAP: schedule timer at initialize stage 1
 
 2013-06-11  Zoltan Bojthe
 

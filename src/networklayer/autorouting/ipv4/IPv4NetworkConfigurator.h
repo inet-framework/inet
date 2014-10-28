@@ -85,6 +85,9 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
                 int mtu;
                 double metric;
                 bool configure;              // false means the IP address of the interface will not be modified
+                bool addStaticRoute;         // add-static-route attribute
+                bool addDefaultRoute;        // add-default-route attribute
+                bool addSubnetRoute;         // add-subnet-route attribute
                 uint32 address;              // the bits
                 uint32 addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
                 uint32 netmask;              // the bits
@@ -119,6 +122,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
         class IPv4Topology : public Topology {
             public:
                 std::vector<LinkInfo *> linkInfos; // all links in the network
+                std::map<InterfaceEntry *, InterfaceInfo *> interfaceInfos; // all interfaces in the network
 
             public:
                 virtual ~IPv4Topology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
@@ -205,7 +209,6 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
         /**
          * Computes the IPv4 network configuration for all nodes in the network.
          * The result of the computation is only stored in the network configurator.
-         *
          */
         virtual void computeConfiguration();
 
@@ -306,7 +309,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
         virtual bool isBridgeNode(Node *node);
         virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
         virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
-        virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+        virtual InterfaceInfo *createInterfaceInfo(IPv4Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
         virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
         virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
         virtual const char *getMandatoryAttribute(cXMLElement *element, const char *attr);
@@ -340,23 +343,8 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
         bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
     public:
-        // TODO: find a better way to reuse and override IPvXAddressResolver functionality
-        bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry *ie, bool netmask)
-        {
-            // TODO: replace linear search
-            for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
-                LinkInfo *linkInfo = topology.linkInfos[i];
-                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
-                    InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                    if (interfaceInfo->interfaceEntry == ie) {
-                        if (interfaceInfo->configure)
-                            ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
-                        return interfaceInfo->configure;
-                    }
-                }
-            }
-            return false;
-        }
+        // address resolver interface
+        bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry * interfaceEntry, bool netmask);
 };
 
 #endif

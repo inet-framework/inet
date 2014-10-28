@@ -71,15 +71,15 @@ network LifecycleTest
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*

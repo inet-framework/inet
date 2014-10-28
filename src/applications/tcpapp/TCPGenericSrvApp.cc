@@ -14,6 +14,7 @@
 
 #include "TCPGenericSrvApp.h"
 
+#include "IPvXAddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "TCPSocket.h"
@@ -23,37 +24,37 @@
 
 Define_Module(TCPGenericSrvApp);
 
-simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericSrvApp::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPGenericSrvApp::sentPkSignal = registerSignal("sentPk");
+
 
 void TCPGenericSrvApp::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
-        int localPort = par("localPort");
         delay = par("replyDelay");
         maxMsgDelay = 0;
 
         //statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
 
         WATCH(msgsRcvd);
         WATCH(msgsSent);
         WATCH(bytesRcvd);
         WATCH(bytesSent);
-
-        //TODO should use IPvXAddressResolver in stage 3
+    }
+    else if (stage == 3)
+    {
         const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        socket.bind(localAddress[0] ? IPvXAddressResolver().resolve(localAddress) : IPvXAddress(), localPort);
         socket.listen();
-    }
-    else if (stage == 1)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

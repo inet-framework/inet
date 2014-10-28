@@ -84,10 +84,14 @@ void OLSR_ETX_LinkQualityTimer::expire()
 /********** OLSR_ETX class **********/
 ///
 ///
+
 void
 OLSR_ETX::initialize(int stage)
 {
-    if (stage==4)
+    //TODO this function is a modified copy of OLSR::initialize(int stage)
+    ManetRoutingBase::initialize(stage);
+
+    if (stage == 4)
     {
         if (isInMacLayer())
             OlsrAddressSize::ADDR_SIZE = 6;
@@ -156,6 +160,7 @@ OLSR_ETX::initialize(int stage)
         ansn_ = OLSR_MAX_SEQ_NUM;
 
         registerRoutingModule();
+
         ra_addr_ = getAddress();
 
         timerMessage = new cMessage();
@@ -197,7 +202,6 @@ OLSR_ETX::initialize(int stage)
             linkLayerFeeback();
         }
         scheduleNextEvent();
-
     }
 }
 
@@ -220,7 +224,6 @@ OLSR_ETX::initialize(int stage)
 void
 OLSR_ETX::recv_olsr(cMessage* msg)
 {
-
     OLSR_pkt* op;
     nsaddr_t src_addr;
     int index;
@@ -334,7 +337,6 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         break;
     }
     delete op;
-
 }
 
 ///

@@ -105,155 +105,158 @@ Batman::~Batman()
     hna_chg_list.clear();
 }
 
-
 void Batman::initialize(int stage)
 {
-    if (stage!=4)
-        return;
+    ManetRoutingBase::initialize(stage);
 
-    int32_t download_speed = 0, upload_speed = 0;
-    found_ifs = 0;
+    if (stage == 4)
+    {
+        found_ifs = 0;
 
-    registerRoutingModule();
-    //createTimerQueue();
-
-    debug_level = par("debugLevel");
-    if (debug_level > debug_level_max) {
+        debug_level = par("debugLevel");
+        if (debug_level > debug_level_max) {
             opp_error( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
-    }
-    purge_timeout = par("purgeTimeout");
-    if (purge_timeout <= SIMTIME_ZERO)
-        throw cRuntimeError("Invalid 'purgeTimeout' parameter");
-
-    originator_interval = par("originatorInterval");
-
-    if (originator_interval < 0.001)
-        throw cRuntimeError("Invalid 'originatorInterval' parameter");
-
-    const char *preferedGateWay = par("preferedGateWay");
-    pref_gateway =  ManetAddress(IPvXAddressResolver().resolve(preferedGateWay, IPvXAddressResolver::ADDR_IPv4));
-
-    routing_class = par("routingClass");
-    if (routing_class < 0)
-        throw cRuntimeError("Invalid 'routingClass' parameter");
-
-/*
-    IPv4Address vis = par("visualizationServer");
-
-    if (!vis.isUnspecified())
-    {
-        vis_server = vis.getInt();
-    }
-*/
-    aggregation_enabled = par("aggregationEnable").boolValue();
-    disable_client_nat = 1;
-
-    download_speed = par("GWClass_download_speed");
-    upload_speed = par("GWClass_upload_speed");
-    MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
-
-    if ((download_speed > 0) && (upload_speed == 0))
-        upload_speed = download_speed / 5;
-
-    if (download_speed > 0) {
-        gateway_class = get_gw_class(download_speed, upload_speed);
-        get_gw_speeds(gateway_class, &download_speed, &upload_speed);
-    }
-
-    if ((gateway_class != 0) && (routing_class != 0)) {
-        opp_error("Error - routing class can't be set while gateway class is in use !\n");
-    }
-
-    if ((gateway_class != 0) && (!pref_gateway.isUnspecified())) {
-        opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
-    }
-
-    /* use routing class 1 if none specified */
-    if ((routing_class == 0) && (!pref_gateway.isUnspecified()))
-        routing_class = DEFAULT_ROUTING_CLASS;
-
-    //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
-    //    opp_error("");
-
-    for (int i = 0; i<getNumWlanInterfaces(); i++) {
-        InterfaceEntry *iEntry = getWlanInterfaceEntry(i);
-
-        BatmanIf *batman_if;
-        batman_if = new BatmanIf();
-        batman_if->dev = iEntry;
-        batman_if->if_num = found_ifs;
-        batman_if->seqno = 1;
-
-        batman_if->wifi_if = true;
-        batman_if->if_active = true;
-        if (isInMacLayer())
-        {
-            batman_if->address = ManetAddress(iEntry->getMacAddress());
-            batman_if->broad = ManetAddress(MACAddress::BROADCAST_ADDRESS);
         }
-        else
+        purge_timeout = par("purgeTimeout");
+        if (purge_timeout <= SIMTIME_ZERO)
+            throw cRuntimeError("Invalid 'purgeTimeout' parameter");
+
+        originator_interval = par("originatorInterval");
+
+        if (originator_interval < 0.001)
+            throw cRuntimeError("Invalid 'originatorInterval' parameter");
+
+        routing_class = par("routingClass");
+        if (routing_class < 0)
+            throw cRuntimeError("Invalid 'routingClass' parameter");
+
+        aggregation_enabled = par("aggregationEnable").boolValue();
+        disable_client_nat = 1;
+
+        MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
+
+        int32_t download_speed = 0, upload_speed = 0;
+
+        registerRoutingModule();
+        //createTimerQueue();
+
+        const char *preferedGateWay = par("preferedGateWay");
+        pref_gateway =  ManetAddress(IPvXAddressResolver().resolve(preferedGateWay, IPvXAddressResolver::ADDR_IPv4));
+
+        /*
+        IPv4Address vis = par("visualizationServer");
+
+        if (!vis.isUnspecified())
         {
-            batman_if->address = ManetAddress(iEntry->ipv4Data()->getIPAddress());
-            batman_if->broad = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+            vis_server = vis.getInt();
+        }
+        */
+
+        download_speed = par("GWClass_download_speed");
+        upload_speed = par("GWClass_upload_speed");
+
+        if ((download_speed > 0) && (upload_speed == 0))
+            upload_speed = download_speed / 5;
+
+        if (download_speed > 0) {
+            gateway_class = get_gw_class(download_speed, upload_speed);
+            get_gw_speeds(gateway_class, &download_speed, &upload_speed);
         }
 
-        batman_if->if_rp_filter_old = -1;
-        batman_if->if_send_redirects_old = -1;
-        if_list.push_back(batman_if);
-        if (batman_if->if_num > 0)
-            hna_local_task_add_ip(batman_if->address, 32, ROUTE_ADD);  // XXX why is it sending an HNA record at all? HNA should be sent only for networks
-        found_ifs++;
-    }
-    log_facility_active = 1;
+        if ((gateway_class != 0) && (routing_class != 0)) {
+            opp_error("Error - routing class can't be set while gateway class is in use !\n");
+        }
 
-    // parse announcedNetworks parameter
-    const char *announcedNetworks = par("announcedNetworks");
-    cStringTokenizer tokenizer(announcedNetworks);
-    const char *token;
-    while ((token = tokenizer.nextToken()) != NULL)
-    {
-        std::vector<std::string> addrPair = cStringTokenizer(token, "/").asVector();
-        if (addrPair.size() != 2)
-            throw cRuntimeError("invalid 'announcedNetworks' parameter content: '%s'", token);
+        if ((gateway_class != 0) && (!pref_gateway.isUnspecified())) {
+            opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
+        }
 
-        IPv4Address addr = IPvXAddressResolver().resolve(addrPair[0].c_str()).get4();
-        IPv4Address mask = IPvXAddressResolver().resolve(addrPair[1].c_str(), IPvXAddressResolver::ADDR_MASK).get4();
-        addr.doAnd(mask);
+        /* use routing class 1 if none specified */
+        if ((routing_class == 0) && (!pref_gateway.isUnspecified()))
+            routing_class = DEFAULT_ROUTING_CLASS;
 
-        // add to HNA:
-        hna_local_task_add_ip(ManetAddress(addr), mask.getNetmaskLength(), ROUTE_ADD);
-    }
+        //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
+        //    opp_error("");
 
+        for (int i = 0; i<getNumWlanInterfaces(); i++)
+        {
+            InterfaceEntry *iEntry = getWlanInterfaceEntry(i);
 
-    /* add rule for hna networks */
-    //add_del_rule(0, 0, BATMAN_RT_TABLE_NETWORKS, BATMAN_RT_PRIO_UNREACH - 1, 0, RULE_TYPE_DST, RULE_ADD);
+            BatmanIf *batman_if;
+            batman_if = new BatmanIf();
+            batman_if->dev = iEntry;
+            batman_if->if_num = found_ifs;
+            batman_if->seqno = 1;
+
+            batman_if->wifi_if = true;
+            batman_if->if_active = true;
+            if (isInMacLayer())
+            {
+                batman_if->address = ManetAddress(iEntry->getMacAddress());
+                batman_if->broad = ManetAddress(MACAddress::BROADCAST_ADDRESS);
+            }
+            else
+            {
+                batman_if->address = ManetAddress(iEntry->ipv4Data()->getIPAddress());
+                batman_if->broad = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+            }
+
+            batman_if->if_rp_filter_old = -1;
+            batman_if->if_send_redirects_old = -1;
+            if_list.push_back(batman_if);
+            if (batman_if->if_num > 0)
+                hna_local_task_add_ip(batman_if->address, 32, ROUTE_ADD);  // XXX why is it sending an HNA record at all? HNA should be sent only for networks
+            found_ifs++;
+        }
+        log_facility_active = 1;
+
+        // parse announcedNetworks parameter
+        const char *announcedNetworks = par("announcedNetworks");
+        cStringTokenizer tokenizer(announcedNetworks);
+        const char *token;
+        while ((token = tokenizer.nextToken()) != NULL)
+        {
+            std::vector<std::string> addrPair = cStringTokenizer(token, "/").asVector();
+            if (addrPair.size() != 2)
+                throw cRuntimeError("invalid 'announcedNetworks' parameter content: '%s'", token);
+
+            IPv4Address addr = IPvXAddressResolver().resolve(addrPair[0].c_str()).get4();
+            IPv4Address mask = IPvXAddressResolver().resolve(addrPair[1].c_str(), IPvXAddressResolver::ADDR_MASK).get4();
+            addr.doAnd(mask);
+
+            // add to HNA:
+            hna_local_task_add_ip(ManetAddress(addr), mask.getNetmaskLength(), ROUTE_ADD);
+        }
+
+        /* add rule for hna networks */
+        //add_del_rule(0, 0, BATMAN_RT_TABLE_NETWORKS, BATMAN_RT_PRIO_UNREACH - 1, 0, RULE_TYPE_DST, RULE_ADD);
 
         /* add unreachable routing table entry */
-    //add_del_route(0, 0, 0, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_UNREACHABLE, ROUTE_ADD);
+        //add_del_route(0, 0, 0, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_UNREACHABLE, ROUTE_ADD);
 
-    if (routing_class > 0) {
-        if (add_del_interface_rules(RULE_ADD) < 0) {
-            opp_error("BATMAN Interface error");
+        if (routing_class > 0) {
+            if (add_del_interface_rules(RULE_ADD) < 0) {
+                opp_error("BATMAN Interface error");
+            }
         }
+
+        //if (gateway_class != 0)
+        //    init_interface_gw();
+
+        for (unsigned int i = 0; i < if_list.size(); i++)
+        {
+            BatmanIf *batman_if = if_list[i];
+            schedule_own_packet(batman_if);
+        }
+
+        timer = new cMessage();
+        WATCH_PTRMAP(origMap);
+
+        simtime_t curr_time = simTime();
+        simtime_t select_timeout = forw_list[0]->send_time > curr_time ? forw_list[0]->send_time : curr_time+10;
+        scheduleAt(select_timeout, timer);
     }
-
-    //if (gateway_class != 0)
-    //    init_interface_gw();
-
-    for (unsigned int i = 0; i < if_list.size(); i++)
-    {
-        BatmanIf *batman_if = if_list[i];
-        schedule_own_packet(batman_if);
-    }
-
-    timer = new cMessage();
-    WATCH_PTRMAP(origMap);
-
-    simtime_t curr_time = simTime();
-    simtime_t select_timeout = forw_list[0]->send_time > curr_time ? forw_list[0]->send_time : curr_time+10;
-    scheduleAt(select_timeout, timer);
 }
-
 
 void Batman::handleMessage(cMessage *msg)
 {

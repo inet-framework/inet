@@ -54,6 +54,8 @@ simple Radio like IRadio
         double nak_m = default(1);
         // RiceModel
         double K @unit("dB") = default(8dB);
+        //SUIModel
+        string terrain = default("TerrainB");
 
         // battery module parameters (if any of them is negative, the battery module is disabled)
         double usage_radio_idle @unit(mA) = default(-1mA); // disable battery registration

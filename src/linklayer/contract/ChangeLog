@@ -1,3 +1,23 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-03-11  Zoltan Bojthe
+
+	MACAddress: omnet++ 4.x compatibility
+
+2013-05-23  Levente Mészáros
+
+	backport: MACAddress: Fixed that interfaces were assigned different MAC
+	addresses when multiple runs were executed.
+
+	Added a cSimulationLifetimeListener to reset the MACAddress counter
+	before initialize is called.
+
+2014-01-24  Zoltan Bojthe
+
+	msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Tamas Borbely

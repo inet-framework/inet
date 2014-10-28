@@ -35,14 +35,27 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+Register_Abstract_Class(InterfaceEntryChangeDetails);
+Register_Abstract_Class(InterfaceEntry);
 
-void InterfaceProtocolData::changed(int category)
+void InterfaceProtocolData::changed(int category, int fieldId)
 {
     // notify the containing InterfaceEntry that something changed
     if (ownerp)
-        ownerp->changed(category);
+        ownerp->changed(category, fieldId);
 }
 
+std::string InterfaceEntryChangeDetails::info() const
+{
+    return ie->info();
+}
+
+std::string InterfaceEntryChangeDetails::detailedInfo() const
+{
+    std::stringstream out;
+    out << ie->detailedInfo() << " changed field: " << field << "\n";
+    return out.str();
+}
 
 InterfaceEntry::InterfaceEntry(cModule* ifmod)
 {
@@ -67,6 +80,7 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
     ipv6data = NULL;
     isisdata = NULL;
     trilldata = NULL;
+    ieee8021ddata = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -107,6 +121,8 @@ std::string InterfaceEntry::info() const
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
+    if (ieee8021ddata)
+            out << " " << ((InterfaceProtocolData *)ieee8021ddata)->info(); // Khmm...
     return out.str();
 }
 
@@ -133,17 +149,18 @@ std::string InterfaceEntry::detailedInfo() const
     out << "\n";
 #ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ipv4data->info() << "\n";
+        out << " " << ipv4data->detailedInfo() << "\n";
 #endif
 #ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ipv6data->info() << "\n";
+        out << " " << ipv6data->detailedInfo() << "\n";
 #endif
     if (isisdata)
-        out << " " << ((InterfaceProtocolData *)isisdata)->info() << "\n"; // Khmm...
+        out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)
-        out << " " << ((InterfaceProtocolData *)trilldata)->info() << "\n"; // Khmm...
-
+        out << " " << ((InterfaceProtocolData *)trilldata)->detailedInfo() << "\n"; // Khmm...
+    if (ieee8021ddata)
+        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->detailedInfo() << "\n"; // Khmm...
     return out.str();
 }
 std::string InterfaceEntry::getFullPath() const
@@ -151,10 +168,13 @@ std::string InterfaceEntry::getFullPath() const
     return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
 }
 
-void InterfaceEntry::changed(int category)
+void InterfaceEntry::changed(int category, int fieldId)
 {
     if (ownerp)
-        ownerp->interfaceChanged(this, category);
+    {
+        InterfaceEntryChangeDetails details(this, fieldId);
+        ownerp->interfaceChanged(category, &details);
+    }
 }
 
 void InterfaceEntry::resetInterface()
@@ -181,6 +201,9 @@ void InterfaceEntry::resetInterface()
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
         delete (InterfaceProtocolData *)trilldata;
     trilldata = NULL;
+    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this)
+        delete (InterfaceProtocolData *)ieee8021ddata;
+    ieee8021ddata = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
@@ -190,7 +213,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
         delete ipv4data;
     ipv4data = p;
     p->ownerp = this;
-    configChanged();
+    configChanged(F_IPV4_DATA);
 #else
     throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
 #endif
@@ -203,7 +226,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
         delete ipv6data;
     ipv6data = p;
     p->ownerp = this;
-    configChanged();
+    configChanged(F_IPV6_DATA);
 #else
     throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
 #endif
@@ -215,7 +238,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
         delete (InterfaceProtocolData *)trilldata; // Khmm...
     trilldata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(F_TRILL_DATA);
 }
 
 void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
@@ -224,7 +247,16 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(F_ISIS_DATA);
+}
+
+void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
+{
+    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)ieee8021ddata; // Khmm...
+    ieee8021ddata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged(F_IEEE8021D_DATA);
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
@@ -248,5 +280,13 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
         return estimateCostProcessArray[position];
     }
     return NULL;
+}
+
+void InterfaceEntry::joinMulticastGroup(const IPv4Address& address) const
+{
+#ifdef WITH_IPv4
+    if (ipv4data)
+        ipv4data->joinMulticastGroup(address);
+#endif
 }
 

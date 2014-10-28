@@ -189,7 +189,7 @@ void SCTPAssociation::sendAsconfAck(const uint32 serialNumber)
     SCTPAsconfAckChunk* asconfAckChunk = new SCTPAsconfAckChunk("ASCONF_ACK");
     asconfAckChunk->setChunkType(ASCONF_ACK);
     asconfAckChunk->setSerialNumber(serialNumber);
-    asconfAckChunk->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    asconfAckChunk->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
     if (state->auth && state->peerAuth) {
         SCTPAuthenticationChunk* authChunk = createAuthChunk();
         sctpAsconfAck->addChunk(authChunk);
@@ -227,7 +227,7 @@ SCTPAuthenticationChunk* SCTPAssociation::createAuthChunk()
 
 bool SCTPAssociation::compareRandom()
 {
-    int32 i, sizeKeyVector, sizePeerKeyVector, size;
+    int32 i, sizeKeyVector, sizePeerKeyVector, size = 0;
 
     sizeKeyVector = sizeof(state->keyVector);
     sizePeerKeyVector = sizeof(state->peerKeyVector);
@@ -247,6 +247,8 @@ bool SCTPAssociation::compareRandom()
                     return true;
             }
         }
+    } else {
+        return false;
     }
     for (i=size-1; i>0; i--) {
         if (state->keyVector[i]<state->peerKeyVector[i])

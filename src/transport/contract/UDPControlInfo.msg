@@ -114,6 +114,7 @@ class UDPSendCommand extends UDPControlInfo
 {
     IPvXAddress destAddr; // destination IPv4 or IPv6 address
     int destPort = -1;     // destination port
+    IPvXAddress srcAddr;       // source address
     int interfaceId = -1; // interface on which the packet must be sent (see ~InterfaceTable)
 }
 

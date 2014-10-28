@@ -21,12 +21,14 @@
 
 Define_Module(TCPEchoApp);
 
-simsignal_t TCPEchoApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPEchoApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
+
 
 void TCPEchoApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         delay = par("echoDelay");
@@ -36,15 +38,12 @@ void TCPEchoApp::initialize(int stage)
         WATCH(bytesRcvd);
         WATCH(bytesSent);
 
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
-
         socket.setOutputGate(gate("tcpOut"));
         socket.readDataTransferModePar(*this);
 
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         if (isNodeUp())
             startListening();

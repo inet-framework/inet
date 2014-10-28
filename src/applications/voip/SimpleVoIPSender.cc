@@ -42,16 +42,10 @@ void SimpleVoIPSender::initialize(int stage)
 {
     EV << "VoIP Sender initialize: stage " << stage << endl;
 
+    cSimpleModule::initialize(stage);
+
     // avoid multiple initializations
-    if (stage == 1)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
+    if (stage == 0)
     {
         talkspurtDuration = 0;
         silenceDuration = 0;
@@ -66,6 +60,15 @@ void SimpleVoIPSender::initialize(int stage)
         selfSender = new cMessage("selfSender");
         localPort = par("localPort");
         destPort = par("destPort");
+    }
+    else if (stage == 3)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
         destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
 
         socket.setOutputGate(gate("udpOut"));

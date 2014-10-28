@@ -1,0 +1,54 @@
+PERL=C:\omnetpp-4.1\msys\bin\perl.exe
+INKSCAPE="C:\Program Files\inkscape\inkscape.exe"
+DOT=$(TOOLS_DIR)\Graphviz\bin\dot.exe
+
+CWD=$(OMNETPP_ROOT)\doc\src\manual  # because Inkscape is broken and needs full paths
+
+TITLE=User Manual
+
+# --- generating pdf ---
+
+TEXCHAPTERS = \
+         ch-introduction.tex
+
+ALLTEX = inet-manual.tex title.tex $(TEXCHAPTERS)
+HTMCHAPTERS = $(TEXCHAPTERS:.tex=.htm)
+
+# must list all SVGs because nmake is broken and has no wildcard functionality
+SVGPICS = 
+
+DOTPICS = 
+
+PDFPICS = $(SVGPICS:.svg=.pdf) $(DOTPICS:.dot=.pdf)
+
+default: pdf
+
+pdf: $(ALLTEX) $(DOTPICS:.dot=.svg) $(PDFPICS) figures/*.png 
+	-mkdir tmp
+	pdflatex -aux-directory=tmp inet-manual.tex
+	makeindex tmp/inet-manual
+	pdflatex -aux-directory=tmp inet-manual.tex
+	pdflatex -aux-directory=tmp inet-manual.tex
+
+.svg.pdf:
+	$(INKSCAPE) $(CWD)\$< -A $(CWD)\$@
+
+.dot.svg:
+	$(DOT) -Tsvg $< >$@
+
+# --- generating html ---
+
+.SUFFIXES: .tex .htm .svg .dot
+
+.svg.png:
+	$(INKSCAPE) $< -e $@
+
+.dot.png:
+	$(DOT) -Tpng $< >$@
+
+clean:
+	-del inet-manual.dvi inet-manual.pdf *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.htm inet-manual.tmp inet-manual.html
+	-del /q figures\*.pdf
+	-cd figures && for %%I in (*.svg) do del %%~nI.png
+	-cd figures && for %%I in (*.dot) do del %%~nI.svg
+

@@ -1,0 +1,36 @@
+IEEE 802.1d examples
+====================
+
+These examples show the STP/RSTP capability of the Ethernet switch.
+
+STP and RSTP are network protocols that ensure a loop-free topology for any 
+bridged Ethernet local area network. The basic function of STP/RSTP is 
+to prevent bridge loops and the broadcast radiation that results from them.
+The protocols achieve this goal by disabling certain links to turn the 
+topology in to a tree. The time needed by STP to make the topology 
+loop-free is nearly 50s, while RSTP only needs 6s.
+
+The example network contains a network with several loops in it.
+After the STP/RSTP has done its job, the spanning tree and the root switch
+highlighted with light blue.
+
+Switch1RootByMAC
+----------------
+The example shows without any configuration how Switch1 chosen to be the root, because it has the lowest MAC address.
+Also you can check how the shortest path will be chosen. Switch2 will route his traffic through Switch4 instead of Switch7,
+because it has shorter path to the root.
+
+Switch3RootByPriority
+---------------------
+Now Switch3 will be the root because it has the lowest priority number.
+
+
+Switch7to4BySrcPriority
+-----------------------
+Switch7 will route his traffic through Switch4 instead of Switch3. They have the same long path, but Switch4 has better priority.
+
+
+LargeNet
+--------
+This example shows, how traffic runs through the network.
+Also Switch4 disappears at 60s and reappears at 120s, so you can check how the tree will rebuild itself.

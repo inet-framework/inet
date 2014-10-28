@@ -96,7 +96,7 @@ class IPv4RecordRouteOption
 //
 class IPv4TimestampOption
 {
-    int flag enum(TimestampFlag);
+    int flag @enum(TimestampFlag);
     short overflow;
     short nextAddressPtr;
 
@@ -139,7 +139,7 @@ packet IPv4Datagram
     IPv4Address srcAddress;
     IPv4Address destAddress;
 
-    int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
+    int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
     short timeToLive;
     int identification;
     bool moreFragments;
@@ -149,7 +149,7 @@ packet IPv4Datagram
     abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS
 
-    int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
+    int optionCode @enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
                                                          //#FIXME also: the RFC says that more than one IPv4-Option is allowed
     IPv4RecordRouteOption recordRoute;
     IPv4TimestampOption timestampOption;

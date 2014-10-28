@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "InterfaceTable.h"
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
@@ -49,6 +50,7 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 
 InterfaceTable::InterfaceTable()
 {
+    host = NULL;
     nb = NULL;
     tmpNumInterfaces = -1;
     tmpInterfaceList = NULL;
@@ -63,14 +65,19 @@ InterfaceTable::~InterfaceTable()
 
 void InterfaceTable::initialize(int stage)
 {
-    if (stage==0)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
     {
+        // get a pointer to the host module
+        host = getContainingNode(this);
+        WATCH_PTRVECTOR(idToInterface);
+
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
-        WATCH_PTRVECTOR(idToInterface);
         updateDisplayString();
     }
 }
@@ -101,7 +108,89 @@ void InterfaceTable::receiveChangeNotification(int category, const cObject *deta
 
 cModule *InterfaceTable::getHostModule()
 {
-    return findContainingNode(this);
+    if (!host)
+        host = getContainingNode(this);
+    return host;
+}
+
+bool InterfaceTable::isLocalAddress(const IPvXAddress& address) const
+{
+    return findInterfaceByAddress(address) != NULL;
+}
+
+InterfaceEntry *InterfaceTable::findInterfaceByAddress(const IPvXAddress& address) const
+{
+    if (!address.isUnspecified())
+    {
+        for (int i = 0; i < (int)idToInterface.size(); i++)
+        {
+            InterfaceEntry *ie = idToInterface[i];
+            if (ie)
+            {
+#ifdef WITH_IPv4
+                if (!address.isIPv6())
+                {
+                    if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.get4())
+                        return ie;
+                }
+#endif
+
+#ifdef WITH_IPv6
+                if (address.isIPv6())
+                {
+                    if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.get6()))
+                        return ie;
+                }
+#endif
+            }
+        }
+    }
+    return NULL;
+}
+
+bool InterfaceTable::isNeighborAddress(const IPvXAddress &address) const
+{
+    if (address.isUnspecified())
+        return false;
+
+#ifdef WITH_IPv4
+    if (!address.isIPv6())
+    {
+        for (int i = 0; i < (int)idToInterface.size(); i++)
+        {
+            InterfaceEntry *ie = idToInterface[i];
+            if (ie && ie->ipv4Data())
+            {
+                IPv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
+                IPv4Address netmask = ie->ipv4Data()->getNetmask();
+                if (IPv4Address::maskedAddrAreEqual(address.get4(), ipv4Addr, netmask))
+                    return address != ipv4Addr;
+            }
+        }
+        return false;
+    }
+#endif
+#ifdef WITH_IPv6
+    if (address.isIPv6())
+    {
+        for (int i = 0; i < (int)idToInterface.size(); i++)
+        {
+            InterfaceEntry *ie = idToInterface[i];
+            if (ie && ie->ipv6Data())
+            {
+                IPv6InterfaceData *ipv6Data = ie->ipv6Data();
+                for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++)
+                {
+                    const IPv6InterfaceData::AdvPrefix &advPrefix = ipv6Data->getAdvPrefix(j);
+                    if (address.get6().matches(advPrefix.prefix, advPrefix.prefixLength))
+                        return address != advPrefix.prefix;
+                }
+            }
+        }
+        return false;
+    }
+#endif
+    throw cRuntimeError("Unknown address type");
 }
 
 int InterfaceTable::getNumInterfaces()
@@ -144,6 +233,11 @@ InterfaceEntry *InterfaceTable::getInterfaceById(int id)
 {
     id -= INTERFACEIDS_START;
     return (id<0 || id>=(int)idToInterface.size()) ? NULL : idToInterface[id];
+}
+
+int InterfaceTable::getBiggestInterfaceId()
+{
+    return INTERFACEIDS_START + idToInterface.size() - 1;
 }
 
 void InterfaceTable::addInterface(InterfaceEntry *entry)
@@ -246,12 +340,14 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = NULL;
 }
 
-void InterfaceTable::interfaceChanged(InterfaceEntry *entry, int category)
+void InterfaceTable::interfaceChanged(int category, const InterfaceEntryChangeDetails *details)
 {
-    nb->fireChangeNotification(category, entry);
+    Enter_Method_Silent();
+
+    nb->fireChangeNotification(category, details);
 
     if (ev.isGUI() && par("displayAddresses").boolValue())
-        updateLinkDisplayString(entry);
+        updateLinkDisplayString(details->getInterfaceEntry());
 }
 
 void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)

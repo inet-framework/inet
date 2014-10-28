@@ -54,6 +54,9 @@ class INET_API IdealWirelessMac : public WirelessMacBase, public cListener
     RadioState::State radioState;
     int outStandingRequests;
     simtime_t lastTransmitStartTime;
+    cPacket *lastSentPk;
+    simtime_t ackTimeout;
+    cMessage *ackTimeoutMsg;
 
   protected:
     /** implements MacBase functions */
@@ -68,6 +71,7 @@ class INET_API IdealWirelessMac : public WirelessMacBase, public cListener
     virtual IdealWirelessFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(IdealWirelessFrame *frame);
     virtual void initializeMACAddress();
+    virtual void acked(IdealWirelessFrame *frame);   // called by other IdealMac module, when receiving a packet with my moduleID
 
     // get MSG from queue
     virtual void getNextMsgFromHL();

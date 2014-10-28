@@ -53,10 +53,10 @@ simple PPP
 
         @signal[txState](type=long);    // 1:transmit, 0:idle
         @signal[rxPkOk](type=PPPFrame);
-        @signal[dropPkIfaceDown](type=PPPFrame);  //TODO currently both upper and lower; todo separate them 
-        @signal[dropPkBitError](type=PPPFrame);
+        @signal[dropPkIfaceDown](type=cPacket);  //TODO currently both upper and lower; todo separate them
+        @signal[dropPkBitError](type=cPacket);
         @signal[packetSentToLower](type=PPPFrame);
-        @signal[packetReceivedFromLower](type=PPPFrame);
+        @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);

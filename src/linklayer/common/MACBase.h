@@ -33,6 +33,7 @@ class InterfaceEntry;
 class INET_API MACBase : public cSimpleModule, public ILifecycle, public INotifiable
 {
     protected:
+        cModule *hostModule;
         NotificationBoard *nb;
         bool isOperational;  // for use in handleMessage()
         InterfaceEntry *interfaceEntry;  // NULL if no InterfaceTable or node is down

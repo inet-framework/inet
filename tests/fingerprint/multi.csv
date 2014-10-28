@@ -1,0 +1,5 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   100s,            7acc-a54b
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            100s,            9da2-2359
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   100s,            d657-4fff
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            100s,            d553-0a79

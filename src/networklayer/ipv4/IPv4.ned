@@ -32,38 +32,40 @@ package inet.networklayer.ipv4;
 // an ~IPv4ControlInfo to the packet, with the source and destination IPv4 address,
 // etc. of the IPv4 datagram in which the packet arrived.
 //
-// ~IPv4 can serve several higher-layer protocols. When delivering packets
-// to them, the output gate is determined from the Protocol field in the
-// IPv4 header. The protocol-to-gateindex mapping must be given in the
-// protocolMapping string parameter, in the following format:
-// <pre>
-// protocolnumber:gateindex, protocolnumber:gateindex, ...
-// </pre>
-//
-// The recommended setting is:
-// - TCP (6) : 0
-// - UDP (17) : 1
-// - ICMP (1) : 2
-// - IGMP (2) : 3
-// - RSVP (46) : 4
-//
-// That is, <tt>protocolMapping="6:0,17:1,1:2,2:3,46:4"</tt>
+// ~IPv4 can serve several higher-layer protocols. The higher layer protocols should
+// send one or more RegisterProtocol message (a simple ~cMessage with
+// ~IPRegisterProtocolCommand controlinfo and kind=IP_C_REGISTER_PROTOCOL)
+// to IPv4 module, for fill up the protocol-to-gateindex map.
+// When delivering packets to them, the output gate is determined from the Protocol
+// field in the IPv4 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //
-// The routing table is stored in the module ~RoutingTable. When a datagram
-// needs to be routed, ~IPv4 queries ~RoutingTable for the output interface
+// The routing table is stored in the module ~IPv4RoutingTable. When a datagram
+// needs to be routed, ~IPv4 queries ~IPv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~RoutingTable.
-// No message exchange with ~RoutingTable takes place.
+// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~IPv4RoutingTable.
+// No message exchange with ~IPv4RoutingTable takes place.
 //
 // A routed datagram will be sent to the queueOut gate, with an
-// ~IPv4RoutingDecision control info object attached which contains
-// next hop address and interface number. queueOut is expected to be
-// connected to ~ARP.
+// ~IPv4Controlinfo  object attached. queueOut is expected to be
+// connected to ~INIC modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
-// and manipulate the route table by calling ~RoutingTable's methods in C++.
+// and manipulate the route table by calling ~IPv4RoutingTable's methods in C++.
+//
+// <b>Working with ARP</b>
+//
+// IPv4 module subscribe to completedARPResolution and failedARPResolution signals on ARP module.
+// The ARP module accessed via arpOut gate, should not insert any module between IPv4 and ARP.
+// Before IPv4 module send down a packet to lower layer, ask MACAddress of next hop from ARP via
+// method call. If MACAddress unspecified, then start address resolution via ARP method call and
+// insert packet to a queue specified by next hop addr.
+// When received a completedARPResolution, then send packets from queue of next hop addr.
+// When received a failedARPResolution, then drop packets from queue of next hop addr.
+// When IPv4 module received an ARP packet from Lower Layer on some queueIn gate,
+// then send out this packet on arpOut gate. When received a packet on arpIn gate,
+// then send out this packet on the specified queueOut gate.
 //
 // <b>Performance model, QoS</b>
 //
@@ -77,23 +79,26 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~RoutingTable, ~IPv4ControlInfo, ~IPv4RoutingDecision, ~ARP
+// @see ~IPv4RoutingTable, ~IPv4ControlInfo, ~ARP, ~IPSocket
 //
 // @author Andras Varga
 //
 simple IPv4
 {
     parameters:
+        string routingTableModule;
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
-        string protocolMapping;
         double fragmentTimeout @unit("s") = default(60s);
         bool forceBroadcast = default(false);
+        bool useProxyARP = default(true);
         @display("i=block/routing");
     gates:
         input transportIn[] @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
         output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
-        input queueIn[] @labels(IPv4Datagram);
-        output queueOut @labels(IPv4Datagram);
+        input arpIn @labels(ARPPacket+Ieee802Ctrl);
+        output arpOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);
+        input queueIn[] @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
+        output queueOut[] @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
 }

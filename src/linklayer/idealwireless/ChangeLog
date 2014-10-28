@@ -1,3 +1,12 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-05-09  Zoltan Bojthe
+
+	IdealWireless: added support for link break detection by using the 
+	NF_LINK_BREAK signal.
+
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-29  Zoltan Bojthe

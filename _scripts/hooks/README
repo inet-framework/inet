@@ -1,0 +1,34 @@
+INET Git Hooks
+==============
+
+What are Git Hooks?
+===================
+
+Git hooks are scripts that Git executes before or after events such as: commit, push, and receive.
+Git hooks are a built-in feature - no need to download anything. Git hooks are run locally.
+
+Hooks in the INET repo
+======================
+
+pre-commit:
+-----------
+
+Pre-commit hooks run before committing. This kind of hooks can force coding conventions out by
+aborting the commit or make automatic corrections in staged source files.
+
+Our script checks staged files with only few extensions defined in the allowedExtensions list
+and does the following:
+
+	- trims trailing whitespaces,
+	- replaces tabs with four spaces.
+
+Note that, these changes are silently made before committing and are made not only on the diffs
+but on the whole file.
+
+How to use our hooks?
+=====================
+
+Git hooks are in the repository's .git/hooks folder. We distribute our custom scripts in
+_scripts/hooks so if you would like to add our hooks to your own repository you can run
+_scripts/init_gitrepo which creates a symlink or just simply copy our scripts to the
+.git/hooks folder.

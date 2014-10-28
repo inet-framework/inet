@@ -41,6 +41,7 @@ simple IdealWirelessMac
         int mtu @unit("B") = default(4470B);
         int headerLength @unit("B");        // IdealWirelessFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
+        double ackTimeout @unit("s") = default(100ms);
         @display("i=block/rxtx");
 
         @signal[packetSentToLower](type=IdealWirelessFrame);

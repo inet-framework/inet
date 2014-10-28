@@ -1,0 +1,141 @@
+%description:
+This example tests the AODV's lifecycle capability. When intermediateNodeA shuts down at 12.3s
+sender gets a link break signal and then discovers a new route to the receiver node.
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.base.LifecycleController;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.nodes.aodv.AODVRouter;
+import inet.world.radio.IdealChannelModel;
+import inet.world.scenario.ScenarioManager;
+
+
+network AODVTest
+{
+    parameters:
+        @display("bgb=961,662");
+    submodules:
+        channelControl: IdealChannelModel {
+            parameters:
+                @display("p=50,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                addDefaultRoutes = false;
+                addStaticRoutes = false;
+                addSubnetRoutes = false;
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                @display("p=50,100");
+        }
+
+        routingTableRecorder: RoutingTableRecorder {
+            parameters:
+                @display("p=50,150");
+        }
+        lifecycleController: LifecycleController {
+            parameters:
+                @display("p=50,200");
+        }
+        scenarioManager: ScenarioManager {
+            parameters:
+                script = default(xml("<scenario/>"));
+                @display("p=50,250");
+        }
+        sender: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=284,51");
+        }
+        intermediateNodeA: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=203,206");
+        }
+        intermediateNodeB: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=386,206");
+        }
+        receiver: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=284,378");
+        }
+    connections allowunconnected:
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = AODVTest
+record-eventlog = true
+sim-time-limit = 100s
+num-rngs = 3
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.mobility.rng-0 = 1
+**.wlan[*].mac.rng-0 = 2
+**.aodv.useHelloMessages = false
+*.sender.aodv.jitter = 1ms
+*.receiver.aodv.jitter = 2ms
+*.intermediateNodeA.aodv.jitter = 3ms
+*.intermediateNodeB.aodv.jitter = 4ms
+# mobility
+**.mobilityType = "StationaryMobility"
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 600m
+**.mobility.constraintAreaMaxY = 600m
+
+# ping app (host[0] pinged by others)
+**.sender.numPingApps = 1
+**.sender.pingApp[0].startTime = uniform(1s,5s)
+**.sender.pingApp[0].printPing = true
+**.sender.pingApp[0].destAddr = "receiver(ipv4)"
+
+# nic settings
+**.wlan[*].typename = "IdealWirelessNic"
+**.wlan[*].radio.transmissionRange = 240m
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.headerLength = 20B
+
+**.hasStatus = true
+*.scenarioManager.script = xmldoc("scenario.xml")
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="12.3">
+        <tell module="lifecycleController" target="intermediateNodeA" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.rt
+\+R \d+  3\.1964\d+  8  145\.236\.0\.2  145\.236\.0\.1  255\.255\.255\.255  145\.236\.0\.1
+\+R \d+  3\.1964\d+  9  145\.236\.0\.3  145\.236\.0\.1  255\.255\.255\.255  145\.236\.0\.1
+\+R \d+  3\.1995\d+  7  145\.236\.0\.1  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+\+R \d+  3\.1995\d+  9  145\.236\.0\.3  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+\+R \d+  3\.1995\d+  10  145\.236\.0\.4  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+\+R \d+  3\.1995\d+  10  145\.236\.0\.4  145\.236\.0\.1  255\.255\.255\.255  145\.236\.0\.2
+\+R \d+  3\.2001\d+  8  145\.236\.0\.2  145\.236\.0\.4  255\.255\.255\.255  145\.236\.0\.4
+\+R \d+  3\.2005\d+  8  145\.236\.0\.2  145\.236\.0\.3  255\.255\.255\.255  145\.236\.0\.3
+\+R \d+  3\.2005\d+  7  145\.236\.0\.1  145\.236\.0\.3  255\.255\.255\.255  145\.236\.0\.3
+\+R \d+  3\.2005\d+  10  145\.236\.0\.4  145\.236\.0\.3  255\.255\.255\.255  145\.236\.0\.3
+\+R \d+  3\.2036\d+  7  145\.236\.0\.1  145\.236\.0\.4  255\.255\.255\.255  145\.236\.0\.2
+\-R \d+  12\.3  8  145\.236\.0\.2  145\.236\.0\.1  255\.255\.255\.255  145\.236\.0\.1
+\-R \d+  12\.3  8  145\.236\.0\.2  145\.236\.0\.3  255\.255\.255\.255  145\.236\.0\.3
+\-R \d+  12\.3  8  145\.236\.0\.2  145\.236\.0\.4  255\.255\.255\.255  145\.236\.0\.4
+\-R \d+  12\.3  8  145\.236\.0\.2  145\.236\.0\.0  255\.255\.0\.0  <unspec>
+\-R \d+  12\.3  8  145\.236\.0\.2  127\.0\.0\.0  255\.0\.0\.0  <unspec>
+\*R \d+  14\.2005\d+  10  145\.236\.0\.4  145\.236\.0\.1  255\.255\.255\.255  145\.236\.0\.3
+\+R \d+  14\.2011\d+  9  145\.236\.0\.3  145\.236\.0\.4  255\.255\.255\.255  145\.236\.0\.4
+\*R \d+  14\.2056\d+  7  145\.236\.0\.1  145\.236\.0\.4  255\.255\.255\.255  145\.236\.0\.3
+\-R \d+  21\.1995\d+  9  145\.236\.0\.3  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+\-R \d+  28\.2952\d+  7  145\.236\.0\.1  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+\-R \d+  30\.1960\d+  10  145\.236\.0\.4  145\.236\.0\.2  255\.255\.255\.255  145\.236\.0\.2
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

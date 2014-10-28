@@ -32,8 +32,8 @@
 
 Define_Module(Loopback);
 
-simsignal_t Loopback::packetSentToUpperSignal = SIMSIGNAL_NULL;
-simsignal_t Loopback::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
+simsignal_t Loopback::packetSentToUpperSignal = registerSignal("packetSentToUpper");
+simsignal_t Loopback::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 Loopback::Loopback()
 {
@@ -53,9 +53,6 @@ void Loopback::initialize(int stage)
         numSent = numRcvdOK = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
-
-        packetSentToUpperSignal = registerSignal("packetSentToUpper");
-        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
         // register our interface entry in IInterfaceTable
         registerInterface();

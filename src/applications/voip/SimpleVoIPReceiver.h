@@ -83,12 +83,12 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     simtime_t playoutDelay;
     simtime_t mosSpareTime; // spare time before calculating MOS (after calculated playout time of last packet)
 
-    simsignal_t packetLossRateSignal;
-    simsignal_t packetDelaySignal;
-    simsignal_t playoutDelaySignal;
-    simsignal_t playoutLossRateSignal;
-    simsignal_t mosSignal;
-    simsignal_t taildropLossRateSignal;
+    static simsignal_t packetLossRateSignal;
+    static simsignal_t packetDelaySignal;
+    static simsignal_t playoutDelaySignal;
+    static simsignal_t playoutLossRateSignal;
+    static simsignal_t mosSignal;
+    static simsignal_t taildropLossRateSignal;
 
     double eModel(double delay, double loss);
     void evaluateTalkspurt(bool finish);
@@ -102,7 +102,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     void initialize(int stage);
     void handleMessage(cMessage *msg);
     virtual void finish();

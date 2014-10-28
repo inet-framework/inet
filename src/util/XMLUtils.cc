@@ -246,8 +246,6 @@ const char *getRequiredAttribute(const cXMLElement& node, const char *attr)
     return s;
 }
 
-
-
 const char* getAttributeStrValue(const cXMLElement *ptr, const char *name, const char *def)
 {
     const char *value = ptr->getAttribute(name);

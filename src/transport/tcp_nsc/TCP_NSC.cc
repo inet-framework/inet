@@ -25,11 +25,13 @@
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
 #endif
-#include "IPv4ControlInfo.h"
 
 #ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
 #endif
+
+#include "IPSocket.h"
+#include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
 #include "headers/tcp.h"
@@ -213,45 +215,50 @@ IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 
 void TCP_NSC::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     tcpEV << this << ": initialize stage " << stage << endl;
 
-  if (stage == 0)
-  {
-    const char *q;
-    q = par("sendQueueClass");
+    if (stage == 0)
+    {
+        const char *q;
+        q = par("sendQueueClass");
 
-    if (*q != '\0')
-        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+        if (*q != '\0')
+            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
-    q = par("receiveQueueClass");
+        q = par("receiveQueueClass");
 
-    if (*q != '\0')
-        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+        if (*q != '\0')
+            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-    WATCH_MAP(tcpAppConnMapM);
+        WATCH_MAP(tcpAppConnMapM);
 
-    cModule *netw = simulation.getSystemModule();
-    testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
-    logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
-  }
-  else if (stage == 1)
-  {
-    bool isOperational;
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    if (!isOperational)
-        throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        cModule *netw = simulation.getSystemModule();
+        testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
+        logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
-    const char* stackName = this->par(stackNameParamNameS).stringValue();
+        // load the stack
+        const char* stackName = this->par(stackNameParamNameS).stringValue();
+        int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+        loadStack(stackName, bufferSize);
+        pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
+        pStackM->add_default_gateway(localInnerGwS.str().c_str());
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
 
-    int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
-
-    loadStack(stackName, bufferSize);
-    pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
-    pStackM->add_default_gateway(localInnerGwS.str().c_str());
-
-    isAliveM = true;
-  }
+        isAliveM = true;
+    }
 }
 
 TCP_NSC::~TCP_NSC()

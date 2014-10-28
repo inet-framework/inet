@@ -87,6 +87,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
   protected:
     IInterfaceTable *interfaceTable;
     NotificationBoard *nb;
+    InterfaceEntry *myIface;
 
     // number of channels in ChannelControl -- used if we're told to scan "all" channels
     int numChannels;
@@ -105,9 +106,12 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
     AssociatedAPInfo assocAP;
 
+  public:
+    Ieee80211MgmtSTA() : interfaceTable(NULL), nb(NULL), myIface(NULL), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(NULL) {}
+
   protected:
-    virtual int numInitStages() const {return 2;}
-    virtual void initialize(int);
+    virtual int numInitStages() const { return 2; }
+    virtual void initialize(int stage);
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg);

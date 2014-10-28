@@ -32,6 +32,7 @@
 #include "ProtocolMap.h"
 #include "ControlManetRouting_m.h"
 #include "IPv4ControlInfo.h"
+#include "ManetNetfilterHook.h"
 #else
 #include "Blackboard.h"
 #include "LinkBreak.h"
@@ -183,7 +184,7 @@ static inline char *print_pkt(char *p, int len)
 class DSRUU:public cSimpleModule, public ImNotifiable
 {
 #else
-class DSRUU:public cSimpleModule, public INotifiable
+class DSRUU:public cSimpleModule, public INotifiable, public ManetNetfilterHook
 {
 #endif
   public:
@@ -193,7 +194,6 @@ class DSRUU:public cSimpleModule, public INotifiable
     static int lifo_token;
 
   private:
-    bool is_init;
     struct in_addr myaddr_;
     MACAddress macaddr_;
     int interfaceId;
@@ -293,7 +293,7 @@ class DSRUU:public cSimpleModule, public INotifiable
     DSRUU();
     ~DSRUU();
 
-    int numInitStages() const  {return 5;}
+    int numInitStages() const { return 5; }
     void initialize(int stage);
 
     struct iphdr * dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,

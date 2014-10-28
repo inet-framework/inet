@@ -1,3 +1,10 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+    
+    * modified the example to work correctly without a "configurator" node.
+    
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------

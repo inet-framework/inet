@@ -1,3 +1,22 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+
+	fingerprints of MoBAN mobility are changed
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-16  Zoltan Bojthe
+
+	make StandardHost6 more similar to StandardHost by adding hasTcp, hasUdp
+	and hasSctp parameters (by Ingmar Baumgart)
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-05  Zoltan Bojthe

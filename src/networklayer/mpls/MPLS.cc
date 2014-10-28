@@ -34,31 +34,20 @@
 
 Define_Module(MPLS);
 
+
 void MPLS::initialize(int stage)
 {
-    if (stage!=3) // interfaceTable must be initialized
-        return;
+    cSimpleModule::initialize(stage);
 
-    lt = LIBTableAccess().get();
-    ift = InterfaceTableAccess().get();
-
-    pct = check_and_cast<IClassifier*>(getParentModule()->getSubmodule(par("classifier")));
-
-    /*
-     * we now send plain IPv4Datagrams instead of packets with label=-1
-     * and we thus do not need this extra configuration
-     *
-    labelIf.resize(ift->getNumInterfaces());
-    cStringTokenizer tokenizer(par("peers"));
-    const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
+    if (stage == 0)
     {
-        ASSERT(ift->getInterfaceByName(token));
-        int n = ift->getInterfaceByName(token)->outputPort();
-        ASSERT(n >= 0 && n < labelIf.size());
-        labelIf[n] = true;
+        // interfaceTable must be initialized
+
+        lt = LIBTableAccess().get();
+        ift = InterfaceTableAccess().get();
+
+        pct = check_and_cast<IClassifier*>(getParentModule()->getSubmodule(par("classifier")));
     }
-    */
 }
 
 void MPLS::handleMessage(cMessage * msg)

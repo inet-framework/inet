@@ -197,6 +197,7 @@ message SCTPSackChunk extends SCTPChunk
     uint32 nrGapStart[];
     uint32 nrGapStop[];
     uint32 msg_rwnd;
+    uint8  dacPacketsRcvd = 0;
     bool   nrSubtractRGaps = false;
 }
 
@@ -360,4 +361,15 @@ message SCTPSimpleErrorCauseParameter extends SCTPParameter
 message SCTPSuccessIndication extends SCTPParameter
 {
     uint32 responseCorrelationId;
+}
+
+message NatMessage extends cPacket
+{
+    bool        multi;
+    uint16      peer1;
+    IPvXAddress     peer1Addresses[];
+    uint32      portPeer1;
+    uint16      peer2;
+    IPvXAddress     peer2Addresses[];
+    uint32      portPeer2;
 }

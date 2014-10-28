@@ -18,11 +18,13 @@
 //
 
 #include <algorithm>
+
+#include "DHCPServer.h"
+
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
-#include "DHCPServer.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "NotificationBoard.h"
@@ -49,7 +51,7 @@ void DHCPServer::initialize(int stage)
         startTimer = new cMessage("Start DHCP server",START_DHCP);
         startTime = par("startTime");
     }
-    if (stage == 1)
+    else if (stage == 3)
     {
         numSent = 0;
         numReceived = 0;
@@ -67,17 +69,13 @@ void DHCPServer::initialize(int stage)
         clientPort = 68; // client
         serverPort = 67; // server
 
+        cModule *host = getContainingNode(this);
         nb = check_and_cast<NotificationBoard*>(getModuleByPath(par("notificationBoardPath")));
         nb->subscribe(this, NF_INTERFACE_DELETED);
 
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        if (isOperational)
-            ie = chooseInterface();
-    }
-    if (stage == 3)
-    {
         if (isOperational)
             startApp();
     }
@@ -101,7 +99,11 @@ void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *det
     if (category == NF_INTERFACE_DELETED)
     {
         if (isOperational)
-            throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
+        {
+            const InterfaceEntry *nie = check_and_cast<const InterfaceEntry*>(details);
+            if (ie == nie)
+                throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
+        }
     }
     else
         throw cRuntimeError("Unaccepted notification category: %d", category);
@@ -486,7 +488,9 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPServer::startApp()

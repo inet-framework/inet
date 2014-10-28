@@ -1,0 +1,125 @@
+%description:
+This example tests a single route request with one intermediate node
+between the sender and the receiver.
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.base.LifecycleController;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.nodes.aodv.AODVRouter;
+import inet.world.radio.ChannelControl;
+import inet.world.scenario.ScenarioManager;
+
+network AODVTest
+{
+    parameters:
+        @display("bgb=525,437");
+    submodules:
+        channelControl: ChannelControl {
+            parameters:
+                @display("p=50,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                addDefaultRoutes = false;
+                addStaticRoutes = false;
+                addSubnetRoutes = false;
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                @display("p=50,100");
+        }
+        routingTableRecorder: RoutingTableRecorder {
+            parameters:
+                @display("p=50,150");
+        }
+        lifecycleController: LifecycleController {
+            parameters:
+                @display("p=50,200");
+        }
+        scenarioManager: ScenarioManager {
+            parameters:
+                script = default(xml("<scenario/>"));
+                @display("p=50,250");
+        }
+        sender: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=270,51");
+        }
+        intermediateNode: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=270,214");
+        }
+        receiver: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070;p=270,377");
+        }
+    connections allowunconnected:
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = AODVTest
+record-eventlog = true
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+
+num-rngs = 3
+**.mobility.rng-0 = 1
+**.wlan[*].mac.rng-0 = 2
+**.aodv.useHelloMessages = false
+sim-time-limit = 100s
+
+# channel physical parameters
+*.radioChannel.carrierFrequency = 2.4GHz
+*.radioChannel.pMax = 2.0mW
+*.radioChannel.sat = -110dBm
+*.radioChannel.alpha = 2
+
+# mobility
+**.mobilityType = "StationaryMobility"
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 600m
+**.mobility.constraintAreaMaxY = 600m
+
+# ping app (host[0] pinged by others)
+**.sender.numPingApps = 1
+**.sender.pingApp[0].startTime = uniform(1s,5s)
+**.sender.pingApp[0].printPing = true
+**.sender.pingApp[0].destAddr = "receiver(ipv4)"
+
+# nic settings
+**.wlan[*].bitrate = 2Mbps
+
+**.wlan[*].mgmt.frameCapacity = 10
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.maxQueueSize = 14
+**.wlan[*].mac.rtsThresholdBytes = 3000B
+**.wlan[*].mac.retryLimit = 7
+**.wlan[*].mac.cwMinData = 7
+**.wlan[*].mac.cwMinMulticast = 31
+
+**.wlan[*].radio.transmitterPower = 2mW
+**.wlan[*].radio.thermalNoise = -110dBm
+**.wlan[*].radio.sensitivity = -85dBm
+**.wlan[*].radio.pathLossAlpha = 2
+**.wlan[*].radio.snirThreshold = 4dB
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.rt
+.*
+\+R \d+  3\.1989\d+  8  145\.236\.0\.2  145\.236\.0\.1  255.255.255.255  145\.236\.0\.1
+\+R \d+  3\.2032\d+  7  145\.236\.0\.1  145\.236\.0\.2  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.2  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.1  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2053\d+  8  145\.236\.0\.2  145\.236\.0\.3  255.255.255.255  145\.236\.0\.3
+\+R \d+  3\.2116\d+  7  145\.236\.0\.1  145\.236\.0\.3  255.255.255.255  145\.236\.0\.2
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

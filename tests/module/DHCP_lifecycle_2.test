@@ -73,19 +73,21 @@ network LifecycleTest
 
 %contains-regex: stdout
 .*
-LifecycleTest.server shutting down
+LifecycleTest.server shut down
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
+.*
+LifecycleTest.server started
 .*
 Sending DHCPDISCOVER.
 .*

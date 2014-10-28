@@ -24,7 +24,7 @@
 #include "RoutingTableAccess.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
-#include "opp_utils.h"   // for OPP_Global::getModuleByPath()
+
 
 Define_Module(IPv4NodeConfigurator);
 
@@ -38,21 +38,22 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
 
 void IPv4NodeConfigurator::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
+        cModule *node = getContainingNode(this);
+        if (!node)
+            throw cRuntimeError("The container @node module not found");
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable = InterfaceTableAccess().get();
         routingTable = RoutingTableAccess().get();
 
         if (!networkConfiguratorPath[0])
             networkConfigurator = NULL;
         else {
-#if OMNETPP_VERSION < 0x0403
-            cModule *module = OPP_Global::getModuleByPath(this, networkConfiguratorPath);  // compatibility
-#else
             cModule *module = getModuleByPath(networkConfiguratorPath);
-#endif
             if (!module)
                 throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
             networkConfigurator = check_and_cast<IPv4NetworkConfigurator *>(module);
@@ -80,9 +81,9 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
             configureNode();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
-        /*nothing to do*/;
+    { /*nothing to do*/; }
     else if (dynamic_cast<NodeCrashOperation *>(operation))
-        /*nothing to do*/;
+    { /*nothing to do*/; }
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
@@ -124,5 +125,6 @@ void IPv4NodeConfigurator::configureNode()
     ASSERT(networkConfigurator);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
-    networkConfigurator->configureRoutingTable(routingTable);
+    if (par("configureRoutingTable").boolValue())
+        networkConfigurator->configureRoutingTable(routingTable);
 }

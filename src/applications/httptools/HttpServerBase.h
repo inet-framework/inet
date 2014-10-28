@@ -40,12 +40,6 @@
 #define MSGKIND_NEXT_MESSAGE  1
 #define MSGKIND_SCRIPT_EVENT  2
 
-// Log level definitions
-#define LL_NONE 0
-#define LL_INFO 1
-#define LL_DEBUG 2
-
-
 /**
  * Web server base class.
  *
@@ -113,7 +107,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-        virtual int numInitStages() const { return 2; }
+        virtual int numInitStages() const { return 4; }
 
         /** Report final statistics */
         virtual void finish();

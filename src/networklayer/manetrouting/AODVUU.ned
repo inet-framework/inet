@@ -42,7 +42,6 @@ simple AODVUU extends BaseRouting like IManetRouting
         bool expanding_ring_search = default(true);  // use expanding ring search (section 6.4)
         bool local_repair = default(true);    // allow the routes to be locally repaired if a node detects link failure (section 6.12)
         bool rreq_gratuitous = default(true); // force gratuitous flag on all RREQs (section 6.6.3)
-        bool debug = default(false);          // dump debug messages to file (non RFC parameter)
         int rt_log_interval @unit(ms) = default(0ms);     // periodically log routing table to routing table logfile, value is the interval in msecs (0 = off)
         int unidir_hack = default(0);         // detect and avoid unidirectional links (boolean) (section 6.8)
         int receive_n_hellos = default(1);    // receive N HELLOs before treating as neighbor (non RFC parameter)

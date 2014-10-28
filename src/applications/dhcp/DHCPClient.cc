@@ -20,11 +20,11 @@
 #include "DHCPClient.h"
 
 #include "InterfaceTableAccess.h"
-#include "RoutingTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
+#include "RoutingTableAccess.h"
 
 Define_Module(DHCPClient);
 
@@ -61,13 +61,11 @@ void DHCPClient::initialize(int stage)
         startTimer = new cMessage("Starting DHCP",START_DHCP);
         startTime = par("startTime");
     }
-    if (stage == 1)
+    else if (stage == 3)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    }
-    else if (stage == 3)
-    {
+
         numSent = 0;
         numReceived = 0;
         xid = 0;
@@ -378,7 +376,7 @@ void DHCPClient::bindLease()
         route->setNetmask(IPv4Address());
         route->setGateway(lease->gateway);
         route->setInterface(ie);
-        route->setSource(IPv4Route::MANUAL);
+        route->setSourceType(IPv4Route::MANUAL);
         irt->addRoute(route);
     }
 
@@ -442,9 +440,8 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
     switch (clientState)
     {
         case INIT:
-        {
             EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in INIT state. In this state, client does not wait for any message at all, dropping." << endl;
-        }
+            break;
         case SELECTING:
             if (messageType == DHCPOFFER)
             {
@@ -547,13 +544,13 @@ void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *det
     // host associated. link is up. change the state to init.
     if (category == NF_L2_ASSOCIATED)
     {
-        InterfaceEntry * ie = NULL;
+        InterfaceEntry *associatedIE = NULL;
         if (details)
         {
             cPolymorphic *detailsAux = const_cast<cPolymorphic*>(details);
-            ie = dynamic_cast<InterfaceEntry*>(detailsAux);
+            associatedIE = dynamic_cast<InterfaceEntry*>(detailsAux);
         }
-        if (ie && this->ie == ie)
+        if (associatedIE && ie == associatedIE)
         {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             initClient();
@@ -714,7 +711,9 @@ void DHCPClient::scheduleTimerT2()
 void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPClient::openSocket()

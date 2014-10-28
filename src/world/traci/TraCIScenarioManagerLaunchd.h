@@ -46,14 +46,12 @@
 class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 {
     public:
-
         virtual ~TraCIScenarioManagerLaunchd();
         virtual int numInitStages() const { return std::max(TraCIScenarioManager::numInitStages(), 2); }
         virtual void initialize(int stage);
         virtual void finish();
 
     protected:
-
         cXMLElement* launchConfig; /**< launch configuration to send to sumo-launchd */
         int seed; /**< seed value to set in launch configuration, if missing (-1: current run number) */
 

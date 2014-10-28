@@ -34,6 +34,7 @@ simple IdealRadio like IRadio
         double transmissionRange @unit("m");    // max. distance from sender where reception is possible
         bool drawCoverage = default(true);      // draw the coverage area in Tkenv
         @display("i=block/wrxtx");
+        @signal[radioState](type=long);
     gates:
         input upperLayerIn; // from higher layer protocol (MAC)
         output upperLayerOut; // to higher layer protocol (MAC)

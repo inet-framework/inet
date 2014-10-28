@@ -20,12 +20,14 @@
 #include <string.h>
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #endif
+
 
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+
     if (stage == 0)
     {
         isConnectedToHL = gate("upperLayerOut")->getPathEndGate()->isConnected();

@@ -71,7 +71,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     MultiFieldClassifier() {}
 
   protected:
-    virtual int numInitStages() const  {return 4;}
+    virtual int numInitStages() const { return 4; }
 
     virtual void initialize(int stage);
 

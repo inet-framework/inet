@@ -78,8 +78,8 @@ module Car
                 @display("p=304,461;q=queue");
         }
     connections allowunconnected:
-        udp.ipOut --> networkLayer.udpIn;
-        udp.ipIn <-- networkLayer.udpOut;
+        udp.ipOut --> networkLayer.transportIn++;
+        udp.ipIn <-- networkLayer.transportOut++;
 
         wlan.upperLayerOut --> networkLayer.ifIn[0];
         wlan.upperLayerIn <-- networkLayer.ifOut[0];

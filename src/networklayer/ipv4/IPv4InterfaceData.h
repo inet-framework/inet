@@ -54,6 +54,8 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
   public:
     typedef std::vector<IPv4Address> IPv4AddressVector;
 
+    // field ids for change notifications
+    enum {F_IP_ADDRESS, F_NETMASK, F_METRIC, F_MULTICAST_TTL_THRESHOLD, F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS};
 
   protected:
     struct HostMulticastData
@@ -84,7 +86,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     NotificationBoard *nb; // cached pointer
 
   protected:
-    void changed1() {changed(NF_INTERFACE_IPv4CONFIG_CHANGED);}
+    void changed1(int fieldId) {changed(NF_INTERFACE_IPv4CONFIG_CHANGED, fieldId);}
     HostMulticastData *getHostData() { if (!hostData) hostData = new HostMulticastData(); return hostData; }
     const HostMulticastData *getHostData() const { return const_cast<IPv4InterfaceData*>(this)->getHostData(); }
     RouterMulticastData *getRouterData() { if (!routerData) routerData = new RouterMulticastData(); return routerData; }
@@ -116,10 +118,10 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
     /** @name Setters */
     //@{
-    virtual void setIPAddress(IPv4Address a) {inetAddr = a; changed1();}
-    virtual void setNetmask(IPv4Address m) {netmask = m; changed1();}
-    virtual void setMetric(int m) {metric = m; changed1();}
-    virtual void setMulticastTtlThreshold(int threshold) {getRouterData()->multicastTtlThreshold=threshold; changed1();}
+    virtual void setIPAddress(IPv4Address a) {inetAddr = a; changed1(F_IP_ADDRESS);}
+    virtual void setNetmask(IPv4Address m) {netmask = m; changed1(F_NETMASK);}
+    virtual void setMetric(int m) {metric = m; changed1(F_METRIC);}
+    virtual void setMulticastTtlThreshold(int threshold) {getRouterData()->multicastTtlThreshold=threshold; changed1(F_MULTICAST_TTL_THRESHOLD);}
     virtual void joinMulticastGroup(const IPv4Address& multicastAddress);
     virtual void leaveMulticastGroup(const IPv4Address& multicastAddress);
     virtual void addMulticastListener(const IPv4Address &multicastAddress);

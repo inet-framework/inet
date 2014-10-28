@@ -36,6 +36,7 @@ class IPv4InterfaceData;
 class IPv6InterfaceData;
 class TRILLInterfaceData;
 class ISISInterfaceData;
+class Ieee8021dInterfaceData;
 
 class INET_API MacEstimateCostProcess
 {
@@ -60,7 +61,7 @@ class INET_API InterfaceProtocolData : public cObject
 
   protected:
     // fires notification with the given category, and the interface entry as details
-    virtual void changed(int category);
+    virtual void changed(int category, int fieldId);
 
   public:
     InterfaceProtocolData() {ownerp = NULL;}
@@ -69,6 +70,18 @@ class INET_API InterfaceProtocolData : public cObject
      * Returns the InterfaceEntry that contains this data object, or NULL
      */
     InterfaceEntry *getInterfaceEntry() const {return ownerp;}
+};
+
+class INET_API InterfaceEntryChangeDetails : public cObject
+{
+        InterfaceEntry *ie;
+        int field;
+    public:
+        InterfaceEntryChangeDetails(InterfaceEntry *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
+        InterfaceEntry *getInterfaceEntry() const { return ie; }
+        int getFieldId() const { return field; }
+        virtual std::string info() const;
+        virtual std::string detailedInfo() const;
 };
 
 
@@ -104,6 +117,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     ISISInterfaceData *isisdata; ///< ISIS-specific interface info
     TRILLInterfaceData *trilldata; ///< TRILL-specific interface info
+    Ieee8021dInterfaceData * ieee8021ddata;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -111,11 +125,19 @@ class INET_API InterfaceEntry : public cNamedObject
     InterfaceEntry(const InterfaceEntry& obj);
     InterfaceEntry& operator=(const InterfaceEntry& obj);
 
+  public:
+    // field ids for change notifications
+    enum {F_CARRIER, F_STATE,
+          F_NAME, F_NODE_IN_GATEID, F_NODE_OUT_GATEID, F_NETW_GATEIDX,
+          F_LOOPBACK, F_BROADCAST, F_MULTICAST, F_POINTTOPOINT,
+          F_DATARATE, F_MTU, F_MACADDRESS, F_TOKEN,
+          F_IPV4_DATA, F_IPV6_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA};
+
   protected:
     // change notifications
-    virtual void configChanged() {changed(NF_INTERFACE_CONFIG_CHANGED);}
-    virtual void stateChanged() {changed(NF_INTERFACE_STATE_CHANGED);}
-    virtual void changed(int category);
+    virtual void configChanged(int fieldId) {changed(NF_INTERFACE_CONFIG_CHANGED, fieldId);}
+    virtual void stateChanged(int fieldId) {changed(NF_INTERFACE_STATE_CHANGED, fieldId);}
+    virtual void changed(int category, int fieldId);
 
   public:
     // internal: to be invoked from InterfaceTable only!
@@ -164,20 +186,20 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name Field setters */
     //@{
-    virtual void setName(const char *s)  {cNamedObject::setName(s); configChanged();}
-    virtual void setNetworkLayerGateIndex(int i) {nwLayerGateIndex = i; configChanged();}
-    virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
-    virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
-    virtual void setMtu(int m)           {mtu = m; configChanged();}
-    virtual void setState(State s)       {state = s; stateChanged();}
-    virtual void setCarrier(bool b)      {carrier = b; stateChanged();}
-    virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}
-    virtual void setMulticast(bool b)    {multicast = b; configChanged();}
-    virtual void setPointToPoint(bool b) {pointToPoint = b; configChanged();}
-    virtual void setLoopback(bool b)     {loopback = b; configChanged();}
-    virtual void setDatarate(double d)   {datarate = d; configChanged();}
-    virtual void setMACAddress(const MACAddress& addr) {macAddr = addr; configChanged();}
-    virtual void setInterfaceToken(const InterfaceToken& t) {token = t; configChanged();}
+    virtual void setName(const char *s)  {cNamedObject::setName(s); configChanged(F_NAME);}
+    virtual void setNetworkLayerGateIndex(int i) {if (nwLayerGateIndex!=i) {nwLayerGateIndex = i; configChanged(F_NETW_GATEIDX);}}
+    virtual void setNodeOutputGateId(int i) {if (nodeOutputGateId!=i) {nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID);}}
+    virtual void setNodeInputGateId(int i)  {if (nodeInputGateId!=i) {nodeInputGateId = i; configChanged(F_NODE_IN_GATEID);}}
+    virtual void setMtu(int m)           {if (mtu!=m) {mtu = m; configChanged(F_MTU);}}
+    virtual void setState(State s)       {if (state!=s) {state = s; stateChanged(F_STATE);}}
+    virtual void setCarrier(bool b)      {if (carrier!=b) {carrier = b; stateChanged(F_CARRIER);}}
+    virtual void setBroadcast(bool b)    {if (broadcast!=b) {broadcast = b; configChanged(F_BROADCAST);}}
+    virtual void setMulticast(bool b)    {if (multicast!=b) {multicast = b; configChanged(F_MULTICAST);}}
+    virtual void setPointToPoint(bool b) {if (pointToPoint!=b) {pointToPoint = b; configChanged(F_POINTTOPOINT);}}
+    virtual void setLoopback(bool b)     {if (loopback!=b) {loopback = b; configChanged(F_LOOPBACK);}}
+    virtual void setDatarate(double d)   {if (datarate!=d) {datarate = d; configChanged(F_DATARATE);}}
+    virtual void setMACAddress(const MACAddress& addr) {if (macAddr!=addr) {macAddr = addr; configChanged(F_MACADDRESS);}}
+    virtual void setInterfaceToken(const InterfaceToken& t) {token = t; configChanged(F_TOKEN);}
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
@@ -186,7 +208,10 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
     TRILLInterfaceData *trillData() const {return trilldata;}
     ISISInterfaceData *isisData() const {return isisdata;}
+    Ieee8021dInterfaceData *ieee8021dData() const {return ieee8021ddata;}
     //@}
+
+    virtual void joinMulticastGroup(const IPv4Address & address) const;
 
     /** @name Installing protocol-specific interface data */
     //@{
@@ -194,6 +219,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setIPv6Data(IPv6InterfaceData *p);
     virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
     virtual void setISISInterfaceData(ISISInterfaceData *p);
+    virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
     //@}
 
     /** @name access to the cost process estimation  */

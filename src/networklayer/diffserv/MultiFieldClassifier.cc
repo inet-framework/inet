@@ -128,18 +128,19 @@ bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
 
 Define_Module(MultiFieldClassifier);
 
-simsignal_t MultiFieldClassifier::pkClassSignal = SIMSIGNAL_NULL;
+simsignal_t MultiFieldClassifier::pkClassSignal = registerSignal("pkClass");
+
 
 void MultiFieldClassifier::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numOutGates = gateSize("outs");
 
         numRcvd = 0;
         WATCH(numRcvd);
-
-        pkClassSignal = registerSignal("pkClass");
     }
     else if (stage == 3)
     {

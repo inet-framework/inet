@@ -23,6 +23,7 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -53,11 +54,11 @@
 
 Define_Module(UDP);
 
-simsignal_t UDP::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::passedUpPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::droppedPkWrongPortSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::droppedPkBadChecksumSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t UDP::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDP::passedUpPkSignal = registerSignal("passedUpPk");
+simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
+simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
 static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {
@@ -116,6 +117,8 @@ UDP::~UDP()
 
 void UDP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         WATCH_PTRMAP(socketsByIdMap);
@@ -133,16 +136,16 @@ void UDP::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
-        passedUpPkSignal = registerSignal("passedUpPk");
-        droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
-        droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
         isOperational = false;
     }
     else if (stage == 1)
     {
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_UDP);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(IP_PROT_UDP);
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }
@@ -261,13 +264,14 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destAddr.isUnspecified() || destPort == -1)
         error("send: missing destination address or port when sending over unconnected port");
 
+    const IPvXAddress& srcAddr = ctrl->getSrcAddr().isUnspecified() ? sd->localAddr : ctrl->getSrcAddr();
     int interfaceId = ctrl->getInterfaceId();
     if (interfaceId == -1 && destAddr.isMulticast())
     {
         std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
         interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
     }
-    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
+    sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
 
     delete ctrl; // cannot be deleted earlier, due to destAddr
 }

@@ -81,6 +81,14 @@ cModule *findContainingNode(cModule *from)
     return NULL;
 }
 
+cModule *getContainingNode(cModule *from)
+{
+    cModule *curmod = findContainingNode(from);
+    if (!curmod)
+        throw cRuntimeError("getContainingNode(): node module not found (it should have a property named node)");
+    return curmod;
+}
+
 cModule *findModuleUnderContainingNode(cModule *from)
 {
     cModule *prevmod = NULL;
@@ -92,3 +100,4 @@ cModule *findModuleUnderContainingNode(cModule *from)
     }
     return NULL;
 }
+

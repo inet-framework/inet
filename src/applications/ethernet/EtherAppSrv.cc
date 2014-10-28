@@ -28,26 +28,28 @@
 
 Define_Module(EtherAppSrv);
 
-simsignal_t EtherAppSrv::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppSrv::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");
+simsignal_t EtherAppSrv::rcvdPkSignal = registerSignal("rcvdPk");
+
 
 void EtherAppSrv::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         localSAP = par("localSAP");
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
 
         WATCH(packetsSent);
         WATCH(packetsReceived);
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
         if (isNodeUp())
             startApp();
     }

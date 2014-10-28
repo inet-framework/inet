@@ -28,8 +28,8 @@
 
 Define_Module(UDPVideoStreamSvr);
 
-simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = SIMSIGNAL_NULL;
-simsignal_t UDPVideoStreamSvr::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = registerSignal("reqStreamBytes");
+simsignal_t UDPVideoStreamSvr::sentPkSignal = registerSignal("sentPk");
 
 inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d)
 {
@@ -50,7 +50,8 @@ UDPVideoStreamSvr::~UDPVideoStreamSvr()
 
 void UDPVideoStreamSvr::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
+
     if (stage == 0)
     {
         sendInterval = &par("sendInterval");
@@ -61,8 +62,6 @@ void UDPVideoStreamSvr::initialize(int stage)
         // statistics
         numStreams = 0;
         numPkSent = 0;
-        reqStreamBytesSignal = registerSignal("reqStreamBytes");
-        sentPkSignal = registerSignal("sentPk");
 
         WATCH_MAP(streams);
     }
@@ -161,7 +160,7 @@ void UDPVideoStreamSvr::clearStreams()
     streams.clear();
 }
 
-bool UDPVideoStreamSvr::startApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamSvr::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
@@ -169,16 +168,15 @@ bool UDPVideoStreamSvr::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPVideoStreamSvr::stopApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamSvr::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     clearStreams();
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-bool UDPVideoStreamSvr::crashApp(IDoneCallback *doneCallback)
+void UDPVideoStreamSvr::handleNodeCrash()
 {
     clearStreams();
-    return true;
 }
 

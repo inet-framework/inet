@@ -33,9 +33,12 @@
 
 Define_Module(SCTPServer);
 
+
 void SCTPServer::initialize(int stage)
 {
     sctpEV3 << "initialize SCTP Server stage " << stage << endl;
+
+    cSimpleModule::initialize(stage);
 
     if (stage == 0)
     {
@@ -48,18 +51,7 @@ void SCTPServer::initialize(int stage)
 
         // parameters
         finishEndsSimulation = (bool)par("finishEndsSimulation");
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32 port = par("localPort");
-        echo = par("echo");
-        delay = par("echoDelay");
-        delayFirstRead = par("delayFirstRead");
-        cPar *delT = &par("readingInterval");
-        if (delT->isNumeric() && (double)*delT==0)
-            readInt = false;
-        else
-            readInt = true;
-        int32 messagesToPush = par("messagesToPush");
+
         inboundStreams = par("inboundStreams");
         outboundStreams = par("outboundStreams");
         ordered = (bool)par("ordered");
@@ -73,6 +65,24 @@ void SCTPServer::initialize(int stage)
         delayFirstReadTimer = new cMessage("delayFirstReadTimer");
         firstData = true;
 
+        echo = par("echo");
+        delay = par("echoDelay");
+        delayFirstRead = par("delayFirstRead");
+        cPar *delT = &par("readingInterval");
+        if (delT->isNumeric() && (double)*delT==0)
+            readInt = false;
+        else
+            readInt = true;
+        schedule = false;
+        shutdownReceived = false;
+    }
+    else if (stage == 3)
+    {
+        const char *addressesString = par("localAddress");
+        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        int32 port = par("localPort");
+        int32 messagesToPush = par("messagesToPush");
+
         socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));
         socket->setInboundStreams(inboundStreams);
@@ -83,22 +93,15 @@ void SCTPServer::initialize(int stage)
         else
             socket->bindx(addresses, port);
 
-        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient").longValue(), messagesToPush);
+        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue(), messagesToPush);
         sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
-        schedule = false;
-        shutdownReceived = false;
-        uint32 streamNum = 0;
         cStringTokenizer tokenizer(par("streamPriorities").stringValue());
-        while (tokenizer.hasMoreTokens())
+        for (uint32 streamNum = 0; tokenizer.hasMoreTokens(); streamNum++)
         {
             const char *token = tokenizer.nextToken();
             socket->setStreamPriority(streamNum, (uint32) atoi(token));
-
-            streamNum++;
         }
-    }
-    else if (stage == 1)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -189,7 +192,7 @@ cPacket* SCTPServer::makeAbortNotification(SCTPCommand* msg)
 
 void SCTPServer::handleMessage(cMessage *msg)
 {
-    int32 id;
+    int32 id = 0;
     cPacket* cmsg;
 
     if (msg->isSelfMessage())

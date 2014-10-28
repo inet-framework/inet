@@ -21,6 +21,8 @@
 
 #include "IPv6.h"
 
+#include "IPSocket.h"
+
 #include "InterfaceTableAccess.h"
 #include "RoutingTable6Access.h"
 #include "ICMPv6Access.h"
@@ -47,6 +49,7 @@
 
 Define_Module(IPv6);
 
+
 void IPv6::initialize(int stage)
 {
     if (stage == 0)
@@ -57,10 +60,7 @@ void IPv6::initialize(int stage)
         rt = RoutingTable6Access().get();
         nd = IPv6NeighbourDiscoveryAccess().get();
         icmp = ICMPv6Access().get();
-
         tunneling = IPv6TunnelingAccess().get();
-
-        mapping.parseProtocolMapping(par("protocolMapping"));
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -93,6 +93,18 @@ void IPv6::updateDisplayString()
     if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
     if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
     getDisplayString().setTagArg("t", 0, buf);
+}
+
+void IPv6::handleMessage(cMessage *msg)
+{
+    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    {
+        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->removeControlInfo());
+        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        delete msg;
+    }
+    else
+        QueueBase::handleMessage(msg);
 }
 
 void IPv6::endService(cPacket *msg)
@@ -226,7 +238,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
         routeMulticastPacket(datagram, destIE, NULL, true);
 }
 
-void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL)
+void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, bool fromHL)
 {
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
@@ -333,7 +345,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
          if (datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
                  && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
          {
-              EV << "Using HoA instead of CoA... dropping datagram" << endl;
+             EV << "Using HoA instead of CoA... dropping datagram" << endl;
              delete datagram;
              numDropped++;
              return;
@@ -360,7 +372,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     fragmentAndSend(datagram, ie, macAddr, fromHL);
 }
 
-void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE, bool fromHL)
+void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
 {
     const IPv6Address& destAddr = datagram->getDestAddress();
 
@@ -550,7 +562,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
               ICMP Parameter Problem, Code 1, message to the sender of the packet*/
             EV << "No MIPv6 support on this node!\n";
             IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo*>(packet->removeControlInfo());
-            icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, 1);
+            icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
 
             //delete packet; // 13.9.07 - CB, update 21.9.07 - CB
         }
@@ -567,22 +579,24 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     }
     else
     {
-        int gateindex = mapping.getOutputGateForProtocol(protocol);
+        int gateindex = mapping.findOutputGateForProtocol(protocol);
+        // check if the transportOut port are connected, otherwise discard the packet
+        if (gateindex >= 0)
+        {
+            cGate* outGate = gate("transportOut", gateindex);
+            if (outGate->isPathOK())
+            {
+                EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
+                //TODO: Indication of forward progress
+                send(packet, outGate);
+                return;
+            }
+        }
 
-        // 21.9.07 - CB
-        cGate* outGate = gate("transportOut", gateindex);
-        if (!outGate->isConnected())
-        {
-            // TODO send ICMP Destination Unreacheable error
-            EV << "Transport layer gate not connected - dropping packet!\n";
-            delete packet;
-        }
-        else
-        {
-            EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
-            //TODO: Indication of forward progress
-            send(packet, outGate);
-        }
+        // TODO send ICMP Destination Unreacheable error
+        EV << "Transport layer gate not connected - dropping packet!\n";
+        IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo*>(packet->removeControlInfo());
+        icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
     }
 }
 
@@ -684,7 +698,7 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     return datagram;
 }
 
-void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
+void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
 {
     // hop counter check
     if (datagram->getHopLimit() <= 0)
@@ -773,7 +787,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
     delete datagram;
 }
 
-void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)
+void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
     // if link layer uses MAC addresses (basically, not PPP), add control info
     if (!macAddr.isUnspecified())
@@ -785,7 +799,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     }
 
     // send datagram to link layer
-    send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
+    send(datagram, "queueOut", destIE->getNetworkLayerGateIndex());
 }
 
 bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,

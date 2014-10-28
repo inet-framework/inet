@@ -29,6 +29,8 @@ cmdenv-express-mode = false
 
 **.sender[*].trafGen.destAddresses = "recip"
 
+**.recip.trafGen.protocol = 17
+
 **.router.ppp[*].frameCapacity = 300
 **.router.ppp[*].bitCapacity = 0
 
@@ -61,8 +63,8 @@ module TrafGenHost extends NodeBase
         }
     connections allowunconnected:
         // transport connections
-        networkLayer.udpOut --> trafGen.ipIn;
-        networkLayer.udpIn <-- trafGen.ipOut;
+        networkLayer.transportOut++ --> trafGen.ipIn;
+        networkLayer.transportIn++ <-- trafGen.ipOut;
 }
 
 network Test

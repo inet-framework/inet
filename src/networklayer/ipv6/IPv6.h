@@ -68,7 +68,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
     {
       public:
         IPv6Datagram* datagram;
-        InterfaceEntry* ie;
+        const InterfaceEntry* ie;
         MACAddress macAddr;
         bool fromHL;
     };
@@ -103,18 +103,18 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool fromHL);
+    virtual void routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE, bool fromHL);
+    virtual void routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL);
 
     /**
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
      */
-    virtual void fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress &nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress &nextHopAddr, bool fromHL);
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
@@ -129,7 +129,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
     /**
      * Last hoplimit check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr);
+    virtual void sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr);
 
   public:
     IPv6() {}
@@ -142,6 +142,11 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
     virtual int numInitStages() const { return 2; }
 
     /**
+     * Handle message
+     */
+    virtual void handleMessage(cMessage *msg);
+
+    /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
@@ -151,6 +156,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
 
     /**
      * Determines the correct interface for the specified destination address.
+     * The nextHop and interfaceId are output parameter.
      */
     bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
             IPv6Datagram* datagram, bool fromHL);

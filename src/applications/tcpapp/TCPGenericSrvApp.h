@@ -20,9 +20,9 @@
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
- * request messages. Clients are usually subclassed from TCPGenericCliAppBase.
+ * request messages. Clients are usually subclassed from TCPAppBase.
  *
- * @see GenericAppMsg, TCPGenericCliAppBase
+ * @see GenericAppMsg, TCPAppBase
  */
 class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
 {
@@ -49,7 +49,7 @@ class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const { return 4; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };

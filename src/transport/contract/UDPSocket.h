@@ -59,6 +59,13 @@ class UDPDataIndication;
  */
 class INET_API UDPSocket
 {
+  public:
+    struct SendOptions
+    {
+        IPvXAddress srcAddr;      // source address of the IP datagram
+        int outInterfaceId;   // outgoing interface of the datagram
+        SendOptions() : outInterfaceId(-1) {}
+    };
   protected:
     int sockId;
     cGate *gateToUdp;
@@ -184,14 +191,9 @@ class INET_API UDPSocket
 
     /**
      * Sends a data packet to the given address and port.
+     * Additional options can be passed in a SendOptions struct.
      */
-    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort);
-
-    /**
-     * Sends a data packet to the given address and port using the provided
-     * interface.
-     */
-    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort, int outInterface);
+    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort, const SendOptions *options = NULL);
 
     /**
      * Sends a data packet to the address and port specified previously

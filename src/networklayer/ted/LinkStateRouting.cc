@@ -17,6 +17,7 @@
 #include "INETDefs.h"
 
 #include "LinkStateRouting.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
@@ -40,8 +41,10 @@ LinkStateRouting::~LinkStateRouting()
 
 void LinkStateRouting::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait until routerId gets assigned in stage 3
-    if (stage==4)
+    if (stage == 4)
     {
         tedmod = TEDAccess().get();
 
@@ -66,6 +69,9 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
+
+        IPSocket socket(gate("ipOut"));
+        socket.registerProtocol(IP_PROT_OSPF);
     }
 }
 

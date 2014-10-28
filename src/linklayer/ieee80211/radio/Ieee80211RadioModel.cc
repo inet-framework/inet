@@ -129,7 +129,7 @@ double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
 }
 
 
-bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+PhyIndication Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -151,17 +151,17 @@ bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList&
     {
         // if snir is too low for the packet to be recognized
         EV << "COLLISION! Packet got lost. Noise only\n";
-        return false;
+        return COLLISION;
     }
     else if (isPacketOK(snirMin, frame->getBitLength(), airframe->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
-        return true;
+        return FRAMEOK;
     }
     else
     {
         EV << "Packet has BIT ERRORS! It is lost!\n";
-        return false;
+        return BITERROR;
     }
 }
 
@@ -229,6 +229,7 @@ double Ieee80211RadioModel::getTestFrameError(double snirMin, double bitrate)
 
 bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
+    double berHeader, berMPDU;
     ModulationType modeBody;
     ModulationType modeHeader;
 
@@ -268,7 +269,7 @@ bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     else
         MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, lengthMPDU);
 
-    EV << "lengthMPDU: " << lengthMPDU << " PER: " << 1-MpduNoError << endl;
+    EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" lengthMPDU: "<<lengthMPDU<<" PER: "<<1-MpduNoError<<endl;
     if (MpduNoError>=1 && headerNoError>=1)
         return true;
     double rand = dblrand();

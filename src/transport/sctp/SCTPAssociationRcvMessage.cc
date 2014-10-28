@@ -228,6 +228,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
                 SCTPDataChunk* dataChunk;
                 dataChunk = check_and_cast<SCTPDataChunk*>(header);
                 if ((dataChunk->getByteLength()- 16) > 0) {
+                    dacPacketsRcvd++;
                     const SCTPEventCode event = processDataArrived(dataChunk);
                     if (event == SCTP_E_DELIVERED) {
                         if ((state->streamReset) &&
@@ -914,6 +915,10 @@ void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
                                                 const SCTPPathVariables* sackPath,
                                                 const int                    type)
 {
+    if( (state->allowCMT) && (state->cmtSmartReneging) &&
+        (sackPath != chunk->ackedOnPath) ) {
+        return;
+    }
     sctpEV3 << "TSN " << chunk->tsn << " has been reneged (type "
               << type << ")" << endl;
     unackChunk(chunk);
@@ -928,7 +933,43 @@ void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
     }
 }
 
+// SACK processing code iterates over all TSNs in the RTX queue.
+// Calls cucProcessGapReports() for each TSN, setting isAcked=TRUE
+// for chunks being acked, isAcked=FALSE otherwise.
+inline void SCTPAssociation::cucProcessGapReports(const SCTPDataVariables* chunk,
+                                                  SCTPPathVariables*       path,
+                                                  const bool               isAcked)
+{
+   // We only care for newly acked chunks.
+   // Therefore, the previous state must be "unacked".
+   if(chunkHasBeenAcked(chunk) == false) {
+      // For CUCv2, it has to be checked whether it is the first transmission.
+      // Otherwise, the behaviour will be like CUCv1 -> decreasing PseudoCumAck on T3 RTX!
+      if((path->findPseudoCumAck == true) &&
+         ( (chunk->numberOfRetransmissions == 0) ||
+            (state->cmtCUCVariant == SCTPStateVariables::CUCV_PseudoCumAck)) ) {
+         path->pseudoCumAck     = chunk->tsn;
+         path->findPseudoCumAck = false;
+      }
+      if((isAcked) &&   /* Not acked before and acked now => ack for the first time */
+         (path->pseudoCumAck == chunk->tsn)) {
+         path->newPseudoCumAck  = true;
+         path->findPseudoCumAck = true;
+      }
 
+      // CUCv2
+      if((path->findRTXPseudoCumAck == true) &&
+         (chunk->numberOfRetransmissions > 0) ) {
+         path->rtxPseudoCumAck     = chunk->tsn;
+         path->findRTXPseudoCumAck = false;
+      }
+      if((isAcked) &&   /* Not acked before and acked now => ack for the first time */
+         (path->rtxPseudoCumAck == chunk->tsn)) {
+         path->newRTXPseudoCumAck  = true;
+         path->findRTXPseudoCumAck = true;
+      }
+   }
+}
 
 
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
@@ -1000,10 +1041,16 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables* myPath = piter->second;
         sctpEV3 << "Path " << myPath->remoteAddress << ":\t"
-                  << "outstanding="          << path->outstandingBytes << "\t"
-                  << "T3scheduled="          << path->T3_RtxTimer->getArrivalTime() << " "
-                  << (path->T3_RtxTimer->isScheduled() ? "[ok]" : "[NOT SCHEDULED]") << "\t"
-                  << endl;
+                << "outstanding="          << path->outstandingBytes << "\t"
+                << "T3scheduled="          << path->T3_RtxTimer->getArrivalTime() << " "
+                << (path->T3_RtxTimer->isScheduled() ? "[ok]" : "[NOT SCHEDULED]") << "\t"
+                << "findPseudoCumAck="    << ((myPath->findPseudoCumAck == true) ? "true" : "false")    << "\t"
+                << "pseudoCumAck="        << myPath->pseudoCumAck    << "\t"
+                << "newPseudoCumAck="     << ((myPath->newPseudoCumAck == true) ? "true" : "false")     << "\t"
+                << "findRTXPseudoCumAck=" << ((myPath->findRTXPseudoCumAck == true) ? "true" : "false") << "\t"
+                << "rtxPseudoCumAck="     << myPath->rtxPseudoCumAck << "\t"
+                << "newRTXPseudoCumAck="  << ((myPath->newRTXPseudoCumAck == true) ? "true" : "false")  << "\t"
+                << endl;
     }
 
     sctpEV3 << "Before processSackArrived for path " << path->remoteAddress
@@ -1043,6 +1090,13 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         myPath->gapUnackedChunksInLastSACK = 0;
         myPath->newlyAckedBytes = 0;
         myPath->newCumAck = false;   // Check whether CumAck affects this path
+        // for all destinations, set newPseudoCumAck to FALSE.
+        myPath->newPseudoCumAck                 = false;
+        myPath->newRTXPseudoCumAck              = false;   // CUCv2
+        myPath->sawNewAck                       = false;
+        myPath->lowestNewAckInSack              = 0;
+        myPath->highestNewAckInSack             = 0;
+        myPath->newOldestChunkSendTime          = simTime() + 9999.99;   // initialize to more than simTime()
         if (myPath == path) {
             myPath->lastAckTime = simTime();
         }
@@ -1083,10 +1137,62 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
             state->advancedPeerAckPoint = tsna;
             state->ackPointAdvanced = true;
         }
+        // ====== Slow Path RTT Calculation ===================================
+        if( (state->allowCMT == true) &&
+            (state->cmtSlowPathRTTUpdate == true) &&
+            (path->waitingForRTTCalculaton == true) &&
+            ((path->tsnForRTTCalculation == tsna) ||
+             (tsnLt(path->tsnForRTTCalculation, tsna))) ) {
+            // Got update from CumAck -> no need for Slow Path RTT calculation
+            path->waitingForRTTCalculaton = false;
+        }
     }
     else if (tsnLt(tsna, state->lastTsnAck)) {
         sctpEV3 << "Stale CumAck (" << tsna << " < " << state->lastTsnAck << ")"
                   << endl;
+        // ====== Slow Path RTT Calculation ===================================
+        if( (state->allowCMT == true) &&
+            (state->cmtSlowPathRTTUpdate == true) &&
+            (path->waitingForRTTCalculaton == true) ) {
+            // Slow Path Update
+            // Look for a CumAck or GapAck of the remembered chunk on this path.
+            // If it has been found, we can compute the RTT of this path.
+
+            // ====== Look for matching CumAck first ===========================
+            bool renewRTT = false;
+            if( (tsnLt(path->tsnForRTTCalculation, tsna)) ||
+                (path->tsnForRTTCalculation == tsna) ) {
+                renewRTT = true;
+            }
+            // ====== Look for matching GapAck =================================
+            else if( (numGaps > 0) &&
+                     ((path->tsnForRTTCalculation == sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps - 1)) ||
+                      (tsnLt(path->tsnForRTTCalculation, sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps - 1)))) ) {
+                for (int32 key = 0;key < numGaps; key++) {
+                    const uint32 lo = sackGapList.getGapStart(SCTPGapList::GT_Any, key);
+                    const uint32 hi = sackGapList.getGapStop(SCTPGapList::GT_Any, key);
+                    if( (path->tsnForRTTCalculation == lo) ||
+                        (path->tsnForRTTCalculation == hi) ||
+                        ( tsnLt(lo, path->tsnForRTTCalculation) &&
+                          tsnLt(path->tsnForRTTCalculation, hi) ) ) {
+                        renewRTT = true;
+                        break;
+                    }
+                }
+            }
+
+            if(renewRTT) {
+                rttEstimation = simTime() - path->txTimeForRTTCalculation;
+                path->waitingForRTTCalculaton = false;
+                pmRttMeasurement(path, rttEstimation);
+
+                sctpEV3 << simTime() << ": SlowPathRTTUpdate from stale SACK - rtt="
+                        << rttEstimation << " from TSN "
+                        << path->tsnForRTTCalculation
+                        << " on path " << path->remoteAddress
+                        << " => RTO=" << path->pathRto << endl;
+            }
+        }
         return SCTP_E_IGNORE;
     }
 
@@ -1157,27 +1263,60 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
         // ====== Looking for changes in the gap reports ======================
         sctpEV3 << "Looking for changes in gap reports" << endl;
+        // Get Pseudo CumAck for paths
+        uint32 lo1 = tsna;
+        uint32 tsnCheck = tsna + 1;   // Just to make sure that no TSN is misssed
         for (int32 key = 0; key < numGaps; key++) {
             const uint32 lo = sackGapList.getGapStart(SCTPGapList::GT_Any, key);
             const uint32 hi = sackGapList.getGapStop(SCTPGapList::GT_Any, key);
 
-
+            // ====== Iterate over TSNs *not* listed in gap reports ============
+            for (uint32 pos = lo1+1; pos <= lo-1;pos++) {
+                assert(tsnCheck == pos);   tsnCheck++;
+                SCTPDataVariables* myChunk = retransmissionQ->getChunk(pos);
+                if(myChunk) {
+                    SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
+                    assert(myChunkLastPath != NULL);
+                    // T.D. 22.11.09: CUCv2 - chunk is *not* acked
+                    cucProcessGapReports(myChunk, myChunkLastPath, false);
+                }
+            }
+            lo1 = sackGapList.getGapStop(SCTPGapList::GT_Any, key);
             // ====== Iterate over TSNs in gap reports =========================
             sctpEV3 << "Examine TSNs between " << lo << " and " << hi << endl;
             for (uint32 pos = lo; pos <= hi; pos++) {
-            	bool chunkFirstTime = true;
+                bool chunkFirstTime = true;
+                assert(tsnCheck == pos);   tsnCheck++;
                 SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk) == false) {
                         SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
                         assert(myChunkLastPath != NULL);
-                        // T.D. 02.02.2010: This chunk has been acked newly.
-                        //                        Let's process this new acknowledgement!
+                        // CUCv2 - chunk is acked
+                        cucProcessGapReports(myChunk, myChunkLastPath, true);
+                        // This chunk has been acked newly.
+                        // Let's process this new acknowledgement!
                         handleChunkReportedAsAcked(highestNewAck, rttEstimation, myChunk,
                                 path /* i.e. the SACK path for RTT measurement! */,
                                 sackGapList.tsnIsNonRevokable(myChunk->tsn));
                     }
                     else {
+                        // Slow Path RTT Calculation
+                        if( (path->tsnForRTTCalculation == myChunk->tsn) &&
+                            (path->waitingForRTTCalculaton == true) &&
+                            (state->allowCMT == true) &&
+                            (state->cmtSlowPathRTTUpdate == true) &&
+                            (myChunk->getLastDestinationPath() == path) ) {
+                            const simtime_t rttEstimation = simTime() - path->txTimeForRTTCalculation;
+                            path->waitingForRTTCalculaton = false;
+                            pmRttMeasurement(path, rttEstimation);
+
+                            sctpEV3 << simTime() << ": SlowPathRTTUpdate from gap report - rtt="
+                                    << rttEstimation << " from TSN "
+                                    << path->tsnForRTTCalculation
+                                    << " on path " << path->remoteAddress
+                                    << " => RTO=" << path->pathRto << endl;
+                        }
                     }
                 }
 
@@ -1307,14 +1446,31 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         SCTPPathVariables* myPath = piter->second;
         const IPvXAddress& myPathId = myPath->remoteAddress;
 
-
+        if(myPath->newPseudoCumAck) {
+            myPath->vectorPathPseudoCumAck->record(myPath->pseudoCumAck);
+        }
+        if(myPath->newRTXPseudoCumAck) {
+            myPath->vectorPathRTXPseudoCumAck->record(myPath->rtxPseudoCumAck);
+        }
         if (myPath->newlyAckedBytes > 0) {
-            // T.D. 07.10.2009: Only call ccUpdateBytesAcked() when there are
-            //                        acked bytes on this path!
-            const bool advanceWindow = myPath->newCumAck;
-
+            // Only call ccUpdateBytesAcked() when there are
+            // acked bytes on this path!
+            bool advanceWindow = myPath->newPseudoCumAck || myPath->newRTXPseudoCumAck;
+            if(state->allowCMT == true) {
+                if(state->cmtCUCVariant == SCTPStateVariables::CUCV_PseudoCumAckV2) {
+                    advanceWindow = myPath->newPseudoCumAck || myPath->newRTXPseudoCumAck;
+                }
+                else if(state->cmtCUCVariant == SCTPStateVariables::CUCV_PseudoCumAck) {
+                    advanceWindow = myPath->newPseudoCumAck;
+                }
+                else if(state->cmtCUCVariant == SCTPStateVariables::CUCV_Normal) {
+                    advanceWindow = myPath->newCumAck;
+                }
+            }
             sctpEV3 << simTime() << ":\tCC " << myPath->newlyAckedBytes
                     << " newly acked on path " << myPathId << ";"
+                    << "\tpath->newPseudoCumAck="    << ((myPath->newPseudoCumAck == true) ? "true" : "false")
+                    << "\tpath->newRTXPseudoCumAck=" << ((myPath->newRTXPseudoCumAck == true) ? "true" : "false")
                     << "\tdropFilledGap=" << ((dropFilledGap == true) ? "true" : "false")
                     << "\t->\tadvanceWindow=" << advanceWindow << endl;
 
@@ -1334,19 +1490,63 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     // #### Path Management                                               ####
     // #######################################################################
 
+    if ((state->allowCMT == true) &&
+        (state->cmtSmartT3Reset == true) ) {
+        // ====== Find oldest unacked chunk on each path ======================
+        for(SCTPQueue::PayloadQueue::const_iterator iterator = retransmissionQ->payloadQueue.begin();
+            iterator != retransmissionQ->payloadQueue.end(); ++iterator) {
+            const SCTPDataVariables* myChunk         = iterator->second;
+            SCTPPathVariables*       myChunkLastPath = myChunk->getLastDestinationPath();
+            if(!chunkHasBeenAcked(myChunk)) {
+                if(myChunkLastPath->newOldestChunkSendTime > myChunk->sendTime) {
+                    sctpEV3 << "TSN " << myChunk->tsn << " is new oldest on path "
+                            << myChunkLastPath->remoteAddress << ", rel send time is "
+                            << simTime() - myChunk->sendTime << " ago" << endl;
+                    myChunkLastPath->newOldestChunkSendTime = myChunk->sendTime;
+                    myChunkLastPath->oldestChunkTSN         = myChunk->tsn;
+                }
+            }
+        }
+    }
+
     // ====== Need to stop or restart T3 timer? ==============================
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables* myPath = piter->second;
         const IPvXAddress& myPathId = myPath->remoteAddress;
 
+        // ====== Smart T3 Reset ===============================================
+        bool updatedOldestChunkSendTime = false;
+        if ((state->allowCMT == true) &&
+            (state->cmtSmartT3Reset == true) ) {
+            // ====== Has oldest chunk send time been updated? =================
+            if(myPath->newOldestChunkSendTime > simTime()) {
+                myPath->newOldestChunkSendTime = myPath->oldestChunkSendTime;
+                // newOldestChunkSendTime > simTime => no old chunk found:
+                // Set newOldestChunkSendTime to oldestChunkSendTime
+            }
+            else if(myPath->newOldestChunkSendTime != myPath->oldestChunkSendTime) {
+                // Update oldestChunkSendTime.
+                myPath->oldestChunkSendTime = myPath->newOldestChunkSendTime;
+                updatedOldestChunkSendTime  = true;
+            }
+            assert(myPath->oldestChunkSendTime <= simTime());
+        }
         if (myPath->outstandingBytes == 0) {
             // T.D. 07.01.2010: Only stop T3 timer when there is nothing more to send on this path!
             if (qCounter.roomTransQ.find(myPath->remoteAddress)->second == 0) {
                 // Stop T3 timer, if there are no more outstanding bytes.
                 stopTimer(myPath->T3_RtxTimer);
+                myPath->oldestChunkSendTime = SIMTIME_ZERO;
             }
         }
-        else if (myPath->newCumAck) {
+        else if (myPath->newCumAck) {   // Only care for CumAcks here!
+            // NOTE: Due to the existence of retransmissions *before* PseudoCumAck for CUCv2,
+            //       it is *not* possible to check PseudoCumAck here!
+            //       This would miss retransmissions -> chunks would never be retransmitted!
+            stopTimer(myPath->T3_RtxTimer);
+            startTimer(myPath->T3_RtxTimer, myPath->pathRto);
+        }
+        else if(updatedOldestChunkSendTime) {   // Smart T3 Reset
             stopTimer(myPath->T3_RtxTimer);
             startTimer(myPath->T3_RtxTimer, myPath->pathRto);
         }
@@ -1379,6 +1579,41 @@ void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highes
                                                                  const bool         sackIsNonRevokable)
 {
     SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
+    // SFR algorithm
+    if(state->allowCMT == true) {
+        sctpEV3 << "TSN " << myChunk->tsn << " on path " << myChunkLastPath->remoteAddress << ":\t"
+                << "findPseudoCumAck="    << ((myChunkLastPath->findPseudoCumAck == true) ? "true" : "false")    << "\t"
+                << "pseudoCumAck="        << myChunkLastPath->pseudoCumAck    << "\t"
+                << "newPseudoCumAck="     << ((myChunkLastPath->newPseudoCumAck == true) ? "true" : "false")     << "\t"
+                << "findRTXPseudoCumAck=" << ((myChunkLastPath->findRTXPseudoCumAck == true) ? "true" : "false") << "\t"
+                << "rtxPseudoCumAck="     << myChunkLastPath->rtxPseudoCumAck << "\t"
+                << "newRTXPseudoCumAck="  << ((myChunkLastPath->newRTXPseudoCumAck == true) ? "true" : "false")  << "\t"
+                << endl;
+
+        // This chunk has not been acked before -> new ack on its myChunkLastPath.
+        if(myChunkLastPath->sawNewAck == false) {
+            sctpEV3 << "TSN " << myChunk->tsn << " on path " << myChunkLastPath->remoteAddress << ":\t"
+                    << "Saw new ack -> setting highestNewAckInSack!" << endl;
+            myChunkLastPath->sawNewAck           = true;
+        }
+
+        // Smart Fast RTX
+        // If chunk has already been transmitted on another path, do not consider it
+        // for fast RTX handling!
+        if( (!myChunk->hasBeenTimerBasedRtxed) ||
+            (state->cmtSmartFastRTX == false) ) {
+
+             if(myChunkLastPath->lowestNewAckInSack == 0) {
+                 myChunkLastPath->lowestNewAckInSack  = myChunk->tsn;   // The lowest TSN acked
+             }
+             if(myChunkLastPath->highestNewAckInSack == 0) {
+                 myChunkLastPath->highestNewAckInSack = myChunk->tsn;   // The highest TSN acked so far
+             }
+             else if(tsnLt(myChunkLastPath->highestNewAckInSack, myChunk->tsn)) {
+                 myChunkLastPath->highestNewAckInSack = myChunk->tsn;   // The highest TSN acked so far
+             }
+        }
+    }
     if ( (myChunk->numberOfTransmissions == 1) &&
           (myChunk->hasBeenMoved == false) &&
           (myChunk->hasBeenReneged == false) ) {
@@ -1389,6 +1624,18 @@ void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highes
             }
             sctpEV3 << simTime()          << " processSackArrived: computed rtt time diff == "
                       << timeDifference << " for TSN "<< myChunk->tsn << endl;
+        } else {
+            if( (state->allowCMT == true) &&
+                (state->cmtSlowPathRTTUpdate == true) &&
+                (myChunkLastPath->waitingForRTTCalculaton == false) ) {
+                // numberOfTransmissions==1, hasBeenReneged==false
+                // T.D. 25.02.2010: Slow Path Update
+                // Remember this chunk's TSN and send time in order to update the
+                // path's RTT using a stale SACK on its own path.
+                myChunkLastPath->tsnForRTTCalculation    = myChunk->tsn;
+                myChunkLastPath->txTimeForRTTCalculation = myChunk->sendTime;
+                myChunkLastPath->waitingForRTTCalculaton = true;
+            }
         }
     }
     if ( (myChunk->hasBeenAbandoned == false) &&
@@ -1425,10 +1672,10 @@ void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highes
 }
 
 
-void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sackChunk,
-                                                                    const uint32                 highestNewAck,
-                                                                    SCTPDataVariables*       myChunk,
-                                                                    SCTPPathVariables* sackPath)
+void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk* sackChunk,
+                                                    const uint32        highestNewAck,
+                                                    SCTPDataVariables*  myChunk,
+                                                    SCTPPathVariables*  sackPath)
 {
     SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
     sctpEV3 << "TSN " << myChunk->tsn << " is missing in gap reports (last "
@@ -1436,7 +1683,67 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
     if (!chunkHasBeenAcked(myChunk)) {
         sctpEV3 << "has not been acked, highestNewAck=" << highestNewAck
                   << " countsAsOutstanding=" << myChunk->countsAsOutstanding << endl;
-        const uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
+
+        // ===== Check whether a Fast Retransmission is necessary =============
+        // Non-CMT behaviour: check for highest TSN
+        uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
+
+        // Split Fast Retransmission (SFR) algorithm for CMT
+        if((state->allowCMT == true) && (state->cmtUseSFR == true)) {
+            chunkReportedAsMissing = 0;   // Default: do not assume chunk as missing.
+
+            // If there has been another chunk with highest TSN acked on this path,
+            // the current one is missing.
+            if( (myChunkLastPath->sawNewAck) &&
+                (tsnGt(myChunkLastPath->highestNewAckInSack, myChunk->tsn)) ) {
+                if(state->cmtUseDAC == false) {
+                    chunkReportedAsMissing = 1;
+                } else {
+                    // ------ DAC algorithm at sender side -----------
+                    // Is there a newly acked TSN on another path?
+                    bool sawNewAckOnlyOnThisPath = true;
+                    for(SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+                        const SCTPPathVariables* otherPath = piter->second;
+                        if( (otherPath != myChunkLastPath) && (otherPath->sawNewAck) ) {
+                            sawNewAckOnlyOnThisPath = false;
+                            break;
+                        }
+                    }
+                    if(sawNewAckOnlyOnThisPath == true) {
+                        // All newly acked TSNs were sent on the same path
+                        sctpEV3 << "SplitFastRTX + DAC: all on same path:   "
+                                << "TSN="                  << myChunk->tsn
+                                << " lowestNewAckInSack="  << myChunkLastPath->lowestNewAckInSack
+                                << " highestNewAckInSack=" << myChunkLastPath->highestNewAckInSack
+                                << " (on path "            << myChunkLastPath->remoteAddress << ")" << endl;
+                        // Are there newly acked TSNs ta, tb, so that ta < myChunk->tsn < tb?
+                        // myChunkLastPath->highestNewAckInSack is highest newly acked TSN on the current path
+                        //   -> since all TSNs were on this path, this value can be used as tb
+                        // lowestNewAckInSack is the lowest newly acked TSN of this SACK
+                        //   -> since all TSNs were on the same path, this value can be used as ta
+                        if( tsnLt(myChunkLastPath->lowestNewAckInSack, myChunk->tsn) &&
+                            tsnLt(myChunk->tsn, myChunkLastPath->highestNewAckInSack) ) {
+                            sctpEV3 << "   => conservative increment of 1" << endl;
+                            chunkReportedAsMissing = 1;
+                        } else if(tsnGt(myChunkLastPath->lowestNewAckInSack, myChunk->tsn)) {   // All newly acked TSNs are larger than myChunk->tsn
+                           sctpEV3 << "   => reported increment of dacPacketsRcvd=" << (unsigned int)sackChunk->getDacPacketsRcvd() << endl;
+                           chunkReportedAsMissing = sackChunk->getDacPacketsRcvd();
+                        }
+                    } else {
+                        // Mixed SACKS: newly acked TSNs were sent to multiple paths
+                        sctpEV3 << "SplitFastRTX + DAC: mixed acks, increment is 1" << endl;
+                        chunkReportedAsMissing = 1;
+                    }
+                }
+            } // else: There is no need to increment the missing count.
+
+            sctpEV3 << "SplitFastRTX: chunkReportedAsMissing="
+                    << chunkReportedAsMissing << ", "
+                    << "sawNewAck="           << myChunkLastPath->sawNewAck           << ", "
+                    << "lowestNewAckInSack="  << myChunkLastPath->lowestNewAckInSack
+                    << "highestNewAckInSack=" << myChunkLastPath->highestNewAckInSack << ", "
+                    << "TSN="           << myChunk->tsn                               << endl;
+        }
         if (chunkReportedAsMissing > 0) {
             myChunk->gapReports += chunkReportedAsMissing;
             myChunkLastPath->gapUnackedChunksInLastSACK++;
@@ -1446,7 +1753,12 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
                 switch (state->rtxMethod) {
                     case 0: // Only one Fast RTX after 3 Gap reports
                         fastRtx = ((myChunk->hasBeenFastRetransmitted == false) &&
-                                   ((myChunk->numberOfRetransmissions == 0)));
+                                   ((myChunk->numberOfRetransmissions == 0) ||
+                                     ((myChunk->hasBeenMoved) &&
+                                      (myChunk->countsAsOutstanding) &&
+                                      (state->movedChunkFastRTXFactor > 0) &&
+                                      ((simTime() - myChunk->sendTime) > state->movedChunkFastRTXFactor * myChunkLastPath->srtt))
+                                   ));
                         break;
                     case 1: // Just 1 Fast RTX per RTT
                         fastRtx = ((myChunk->hasBeenFastRetransmitted == false) &&
@@ -1461,7 +1773,10 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
                         break;
                 }
                 if (fastRtx) {
-
+                    if(myChunk->hasBeenMoved) {
+                        sctpEV3 << simTime() << ": MovedFastRTX for TSN " << myChunk->tsn << endl;
+                    }
+                    myChunk->hasBeenMoved = false;   // Just trigger *one* fast RTX ...
                     // ====== Add chunk to transmission queue ========
                     if (transmissionQ->getChunk(myChunk->tsn) == NULL) {
                         if (!chunkMustBeAbandoned(myChunk, sackPath)) {
@@ -1540,10 +1855,13 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables* chunk,
 
     if ( (chunk->hasBeenCountedAsNewlyAcked == false) &&
          (chunk->hasBeenAcked == false) ) {
+        if ((state->cmtMovedChunksReduceCwnd == false) ||
+            (chunk->hasBeenMoved == false)) {
             chunk->hasBeenCountedAsNewlyAcked = true;
             // The chunk has not been acked before.
             // Therefore, its size may *once* be counted as newly acked.
             lastPath->newlyAckedBytes += chunk->booksize;
+        }
     }
 
     assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
@@ -1559,6 +1877,21 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables* chunk,
     }
     if ( (assocStat) && (fairTimer)) {
         assocStat->fairAckedBytes += chunk->len/8;
+    }
+
+    if( (state->allowCMT == true)                    &&
+        (state->cmtSlowPathRTTUpdate == true)        &&
+        (lastPath->waitingForRTTCalculaton == false) &&
+        (lastPath != sackPath)                       &&
+        (chunk->numberOfTransmissions == 1)          &&
+        (chunk->hasBeenMoved == false)               &&
+        (chunk->hasBeenReneged == false) ) {
+        // Slow Path Update
+        // Remember this chunk's TSN and send time in order to update the
+        // path's RTT using a stale SACK on its own path.
+        lastPath->tsnForRTTCalculation    = chunk->tsn;
+        lastPath->txTimeForRTTCalculation = chunk->sendTime;
+        lastPath->waitingForRTTCalculaton = true;
     }
 
     // ====== RTT calculation ================================================
@@ -1606,10 +1939,13 @@ void SCTPAssociation::renegablyAckChunk(SCTPDataVariables* chunk,
 
     if ( (chunk->hasBeenCountedAsNewlyAcked == false) &&
             (chunk->hasBeenAcked == false) ) {
-           chunk->hasBeenCountedAsNewlyAcked = true;
-           // The chunk has not been acked before.
-           // Therefore, its size may *once* be counted as newly acked.
-           chunk->getLastDestinationPath()->newlyAckedBytes += chunk->booksize;
+        if ((state->cmtMovedChunksReduceCwnd == false) ||
+            (chunk->hasBeenMoved == false)) {
+            chunk->hasBeenCountedAsNewlyAcked = true;
+            // The chunk has not been acked before.
+            // Therefore, its size may *once* be counted as newly acked.
+            chunk->getLastDestinationPath()->newlyAckedBytes += chunk->booksize;
+        }
     }
 
     // ====== Acknowledge chunk =============================================
@@ -1691,8 +2027,14 @@ void SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
 
             if (!chunkHasBeenAcked(chunk)) {
                 SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
-                // T.D. 05.12.09: CumAck affects lastPath -> reset its T3 timer later.
+                // CumAck affects lastPath -> reset its T3 timer later.
                 lastPath->newCumAck = true;
+                // CumAck of SACK has acknowledged this chunk. Handle Pseudo CumAck.
+                lastPath->findPseudoCumAck    = true;
+                lastPath->newPseudoCumAck     = true;
+                // T.D. 22.11.09: CUCv2
+                lastPath->findRTXPseudoCumAck = true;
+                lastPath->newRTXPseudoCumAck  = true;
             }
 
             nonRenegablyAckChunk(chunk, sackPath, rttEstimation, assocStat);
@@ -1725,7 +2067,7 @@ SCTPEventCode SCTPAssociation::processForwardTsnArrived(SCTPForwardTsnChunk* fwC
             /* Uncomment the folloing to drop gap-acknowledged messages
              * between two abandonend messages rather then delivering them.
              */
-          
+
             if (rStream->getOrderedQ()->getQueueSize() > 0)
                 rStream->setExpectedStreamSeqNum(rStream->getOrderedQ()->getFirstSsnInQueue(fwChunk->getSid(i)));
             else if (rStream->getExpectedStreamSeqNum() <= fwChunk->getSsn(i))
@@ -1829,7 +2171,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
         state->ackState = sackFrequency;
 
         if (tsnGt(tsn, state->gapList.getHighestTSNReceived())) {
-            sctpEV3 << "DROP: " <<  (int)tsn << " high=" << (int)state->gapList.getHighestTSNReceived() 
+            sctpEV3 << "DROP: " <<  (int)tsn << " high=" << (int)state->gapList.getHighestTSNReceived()
                 << " Q=" << (int)state->queuedReceivedBytes << " Rwnd=" << (int)state->localRwnd << endl;
             if ((!state->pktDropSent) && (sctpMain->pktdrop) && (state->peerPktDrop)) {
                 sctpEV3 << "Receive buffer full (case 1): sendPacketDrop" << endl;
@@ -2319,12 +2661,12 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
         }
         sctpAsconfAck->addChunk(asconfAckChunk);
         sendToIP(sctpAsconfAck, remoteAddr);
-		if (StartAddIP->isScheduled()) {
-			stopTimer(StartAddIP);
-			state->corrIdNum = state->asconfSn;
-			const char* type = (const char *)sctpMain->par("addIpType");
-			sendAsconf(type, false);
-		}
+        if (StartAddIP->isScheduled()) {
+            stopTimer(StartAddIP);
+            state->corrIdNum = state->asconfSn;
+            const char* type = (const char *)sctpMain->par("addIpType");
+            sendAsconf(type, false);
+        }
     }
     return SCTP_E_IGNORE;
 }
@@ -2434,7 +2776,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk* ascon
                             }
                         }
                     }
-                    if (errorFound==true) 
+                    if (errorFound==true)
                     {
                         delete delParam;
                         break;
@@ -2559,6 +2901,18 @@ void SCTPAssociation::processErrorArrived(SCTPErrorChunk* errorChunk)
         parameterType = param->getParameterType();
         switch (parameterType)
         {
+            case MISSING_NAT_ENTRY:
+            {
+                if ((bool)sctpMain->par("addIP"))
+                {
+                    if (StartAddIP->isScheduled())
+                        stopTimer(StartAddIP);
+                    state->corrIdNum = state->asconfSn;
+                    const char* type = (const char *)sctpMain->par("addIpType");
+                    sendAsconf(type, true);
+                }
+                break;
+            }
             case UNSUPPORTED_HMAC:
             {
                 sendAbort();
@@ -2798,10 +3152,18 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 {
     sctpEV3 << "Processing retransmission timeout ..." << endl;
 
+    // Stop blocking!
+    if(path->BlockingTimer) {
+        stopTimer(path->BlockingTimer);
+    }
+    path->blockingTimeout = -1.0;
+
     // ====== Increase the RTO (by doubling it) ==============================
     path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
     path->statisticsPathRTO->record(path->pathRto);
-    sctpEV3 << "Schedule T3 based retransmission for path "<< path->remoteAddress << endl;
+    sctpEV3 << "Schedule T3 based retransmission for path "<< path->remoteAddress
+            << " oldest chunk sent " << simTime() - path->oldestChunkSendTime << " ago"
+            << " (TSN " << path->oldestChunkTSN << ")" << endl;
     if (SCTP::testing) {
         sctpEV3 << "Unacked chunks in Retransmission Queue:" << endl;
         for (SCTPQueue::PayloadQueue::const_iterator iterator = retransmissionQ->payloadQueue.begin();
@@ -2812,6 +3174,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
                 sctpEV3 << " - " << myChunk->tsn
                         << "\tsent=now-" << simTime() - myChunk->sendTime
                         << "\tlast=" << myChunkLastPath->remoteAddress
+                        << "\tmoved=" << ((myChunk->hasBeenMoved == true) ? "YES!" : "no")
                         << "\tnumTX=" << myChunk->numberOfTransmissions
                         << "\tnumRTX=" << myChunk->numberOfRetransmissions
                         << "\tfastRTX=" << ((myChunk->hasBeenFastRetransmitted == true) ? "YES!" : "no")
@@ -2919,6 +3282,14 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
 }
 
+
+void SCTPAssociation::process_TIMEOUT_BLOCKING(SCTPPathVariables* path)
+{
+    std::cout << "TIMEOUT_BLOCKING on " << path->remoteAddress
+              << " cwnd=" << path->cwnd << endl;
+    path->blockingTimeout = -1.0;
+    sendOnAllPaths(path);
+}
 
 void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
                                                          SCTPPathVariables* newPath)

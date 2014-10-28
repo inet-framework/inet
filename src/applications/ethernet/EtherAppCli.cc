@@ -28,8 +28,8 @@
 
 Define_Module(EtherAppCli);
 
-simsignal_t EtherAppCli::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppCli::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
+simsignal_t EtherAppCli::rcvdPkSignal = registerSignal("rcvdPk");
 
 EtherAppCli::EtherAppCli()
 {
@@ -47,9 +47,9 @@ EtherAppCli::~EtherAppCli()
 
 void EtherAppCli::initialize(int stage)
 {
-    // we can only initialize in the 2nd stage (stage==1), because
-    // assignment of "auto" MAC addresses takes place in stage 0
-    if (stage == 1)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
     {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
@@ -63,8 +63,6 @@ void EtherAppCli::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
@@ -72,9 +70,12 @@ void EtherAppCli::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
-
+    }
+    else if (stage == 3)
+    {
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
+
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
         if (isNodeUp() && isGenerator())

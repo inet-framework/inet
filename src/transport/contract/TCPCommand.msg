@@ -37,6 +37,7 @@ enum TcpCommandCode
     TCP_C_CLOSE = 5;         // "I have no more data to send"
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
+    TCP_C_QUEUE_BYTES_LIMIT = 8; // set send queue limit (in bytes)
 }
 
 
@@ -57,6 +58,7 @@ enum TcpStatusInd
     TCP_I_CONNECTION_RESET = 7;  // connection reset
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry ~TCPStatusInfo)
+    TCP_I_SEND_MSG = 10;         // send queue abated, send more messages
 }
 
 
@@ -94,7 +96,7 @@ class TCPCommand
 //
 class TCPErrorInfo extends TCPCommand
 {
-    int errorCode enum(TCPErrorCode);
+    int errorCode @enum(TCPErrorCode);
     string messageText;
 }
 
@@ -152,7 +154,7 @@ class TCPOpenCommand extends TCPCommand
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
-    int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts. See ~TCPDataTransferMode.
+    int dataTransferMode @enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts. See ~TCPDataTransferMode.
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 

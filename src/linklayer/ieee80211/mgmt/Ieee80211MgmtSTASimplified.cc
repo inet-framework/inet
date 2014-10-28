@@ -26,6 +26,7 @@ Define_Module(Ieee80211MgmtSTASimplified);
 void Ieee80211MgmtSTASimplified::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+
     if (stage==0)
     {
         accessPointAddress.setAddress(par("accessPointAddress").stringValue());

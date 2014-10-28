@@ -25,6 +25,9 @@
 #include "RoutingTable6Access.h"
 #endif /* WITH_xMIPv6 */
 
+
+Register_Abstract_Class(IPv6MulticastGroupInfo);
+
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
 std::string IPv6InterfaceData::HostMulticastData::info()
@@ -49,7 +52,6 @@ std::string IPv6InterfaceData::HostMulticastData::info()
 
 std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
 {
-
     std::stringstream out;
     out << "Joined Groups:";
     for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
@@ -191,9 +193,9 @@ std::string IPv6InterfaceData::info() const
         os << "R-Flag = " << (a.advRtrAddr ? "1 " : "0 ");
 #endif /* WITH_xMIPv6 */
 
-        if (a.advValidLifetime==0)
+        if (a.advValidLifetime == SIMTIME_ZERO)
            os  << "lifetime:inf";
-        else if (a.advValidLifetime>0)
+        else if (a.advValidLifetime > SIMTIME_ZERO)
            os  << "expires:" << a.advValidLifetime;
         else
            os  << "lifetime:+" << (-1 * a.advValidLifetime);
@@ -269,9 +271,8 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
     // FIXME else a.addrType = ???;
 #endif /* WITH_xMIPv6 */
 
-    changed1();
-
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
@@ -345,7 +346,6 @@ void IPv6InterfaceData::permanentlyAssign(const IPv6Address& addr)
     int k = findAddress(addr);
     ASSERT(k!=-1);
     addresses[k].tentative = false;
-    changed1();
     choosePreferredAddress();
 }
 
@@ -354,7 +354,6 @@ void IPv6InterfaceData::tentativelyAssign(int i)
 {
     ASSERT(i>=0 && i<(int)addresses.size());
     addresses[i].tentative = true;
-    changed1();
     choosePreferredAddress();
 }
 #endif /* WITH_xMIPv6 */
@@ -372,8 +371,8 @@ void IPv6InterfaceData::removeAddress(const IPv6Address& address)
     int k = findAddress(address);
     ASSERT(k!=-1);
     addresses.erase(addresses.begin()+k);
-    changed1();
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
@@ -393,7 +392,7 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
         return a.addrType == CoA; // HoA is better than CoA, 24.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    return (a.expiryTime==0 && b.expiryTime!=0) || a.expiryTime>b.expiryTime;  // longer expiry time is better
+    return (a.expiryTime==SIMTIME_ZERO && b.expiryTime!=SIMTIME_ZERO) || a.expiryTime>b.expiryTime;  // longer expiry time is better
 }
 
 void IPv6InterfaceData::choosePreferredAddress()
@@ -405,7 +404,7 @@ void IPv6InterfaceData::choosePreferredAddress()
     {
         preferredAddr = IPv6Address();
         if (!oldPreferredAddr.isUnspecified())
-            changed1();
+            changed1(F_IP_ADDRESS);
         return;
     }
 
@@ -416,17 +415,25 @@ void IPv6InterfaceData::choosePreferredAddress()
 
     // sort addresses by scope and expiry time, then pick the first one
     std::sort(addresses.begin(), addresses.end(), addrLess);
-    preferredAddr = addresses[0].address;
-    preferredAddrExpiryTime = addresses[0].expiryTime;
-
-    if (preferredAddr != oldPreferredAddr)
-        changed1();
+    // choose first unicast address
+    for (int i = 0; i < (int)addresses.size(); ++i)
+    {
+        if (addresses[i].address.isUnicast())
+        {
+            preferredAddr = addresses[i].address;
+            preferredAddrExpiryTime = addresses[i].expiryTime;
+            if (preferredAddr != oldPreferredAddr)
+                changed1(F_IP_ADDRESS);
+            return;
+        }
+    }
+    preferredAddr = IPv6Address::UNSPECIFIED_ADDRESS;
+    changed1(F_IP_ADDRESS);
 }
 
 void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
 {
     rtrVars.advPrefixList.push_back(advPrefix);
-    changed1();
 }
 
 const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::getAdvPrefix(int i) const
@@ -441,14 +448,12 @@ void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
     ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
     ASSERT(rtrVars.advPrefixList[i].prefixLength == advPrefix.prefixLength);
     rtrVars.advPrefixList[i] = advPrefix;
-    changed1();
 }
 
 void IPv6InterfaceData::removeAdvPrefix(int i)
 {
     ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin()+i);
-    changed1();
 }
 
 simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
@@ -489,7 +494,7 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
     refCounts.push_back(1);
 
 
-    changed1();
+    changed1(F_MULTICAST_ADDRESSES);
 
     if(!nb)
         nb = NotificationBoardAccess().get();
@@ -513,7 +518,7 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
                 multicastGroups.erase(multicastGroups.begin()+i);
                 refCounts.erase(refCounts.begin()+i);
 
-                changed1();
+                changed1(F_MULTICAST_ADDRESSES);
 
                 if (!nb)
                     nb = NotificationBoardAccess().get();
@@ -538,7 +543,7 @@ void IPv6InterfaceData::addMulticastListener(const IPv6Address &multicastAddress
     if (!hasMulticastListener(multicastAddress))
     {
         getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
-        changed1();
+        changed1(F_MULTICAST_LISTENERS);
     }
 }
 
@@ -554,7 +559,7 @@ void IPv6InterfaceData::removeMulticastListener(const IPv6Address &multicastAddr
     if (i != n)
     {
         multicastGroups.erase(multicastGroups.begin() + i);
-        changed1();
+        changed1(F_MULTICAST_LISTENERS);
     }
 }
 
@@ -620,8 +625,6 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
         }
     }
 
-    changed1();
-
     // pick new address as we've removed the old one
     choosePreferredAddress();
 
@@ -641,8 +644,6 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
     homeInfo.HoA = hoa;
     homeInfo.homeAgentAddr = ha;
     homeInfo.prefix = prefix;
-
-    changed1();
 
     // check if we already have a HoA on this interface
     // if not, then we create one

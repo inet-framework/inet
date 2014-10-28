@@ -1,3 +1,43 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-24  Zoltan Bojthe
+
+	Moved compatibility definitions to Compat.cc & .h
+
+2014-01-15  Zoltan Bojthe
+
+	backported xDymo
+
+2014-01-29  Zoltan Bojthe
+
+	omnet5 related fixes: getLastModuleId() --> getLastComponentId()
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-12-18  Zoltan Bojthe
+
+	OMNeT++/OMNEST version 4.3 required
+
+	removed WeightedTopology - already implemented in cTopology removed
+	OPP_Global::getModuleByPath(this, path) - uses
+	cModule::getModuleByPath(path)
+
+2013-11-25  Andras Varga
+
+	FSMA: compatibility with OMNeT++ 5.0 head
+
+2013-09-27  Andras Varga
+
+	INETDefs.h: backwards compatibility EV macros for OMNeT++ 5.0
+
+2014-01-22  Levente Meszaros
+
+	Added OperationalBase class.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Tamas Borbely

@@ -127,5 +127,3 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
 };
 
 #endif
-
-

@@ -26,6 +26,7 @@
 #include "InterfaceEntry.h"
 #include "NotificationBoard.h"
 #include "ILifecycle.h"
+#include "IPvXAddress.h"
 
 /**
  * Represents the interface table. This object has one instance per host
@@ -67,6 +68,7 @@
 class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected INotifiable, public ILifecycle
 {
   protected:
+    cModule *host; // cached pointer
     NotificationBoard *nb; // cached pointer
 
     // primary storage for interfaces: vector indexed by id; may contain NULLs;
@@ -89,7 +91,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void discoverConnectingGates(InterfaceEntry *entry);
 
     // called from InterfaceEntry
-    virtual void interfaceChanged(InterfaceEntry *entry, int category);
+    virtual void interfaceChanged(int category, const InterfaceEntryChangeDetails *details);
 
     // internal
     virtual void invalidateTmpInterfaceList();
@@ -102,7 +104,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual std::string getFullPath() const {return cSimpleModule::getFullPath();}
 
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
 
     /**
@@ -121,6 +123,22 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * Returns the host or router this interface table lives in.
      */
     virtual cModule *getHostModule();
+
+    /**
+     * Checks if the address is a local one, i.e. one of the host's.
+     */
+    virtual bool isLocalAddress(const IPvXAddress& address) const;
+
+    /**
+     * Checks if the address is on the network of one of the interfaces,
+     * but not local.
+     */
+    virtual bool isNeighborAddress(const IPvXAddress &address) const;
+
+    /**
+     * Returns an interface given by its address. Returns NULL if not found.
+     */
+    virtual InterfaceEntry *findInterfaceByAddress(const IPvXAddress& address) const;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used
@@ -159,6 +177,11 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * interface (This allows detecting stale IDs without raising an error.)
      */
     virtual InterfaceEntry *getInterfaceById(int id);
+
+    /**
+     * Returns the biggest interface Id.
+     */
+    virtual int getBiggestInterfaceId();
 
     /**
      * Returns an interface given by its getNodeOutputGateId().

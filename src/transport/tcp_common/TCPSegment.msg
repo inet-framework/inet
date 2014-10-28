@@ -109,7 +109,7 @@ class Sack
 // Header Options (optional):
 class TCPOption
 {
-    unsigned short kind enum(TCPOptionNumbers) = TCPOPTION_END_OF_OPTION_LIST;  // option kind
+    unsigned short kind @enum(TCPOptionNumbers) = TCPOPTION_END_OF_OPTION_LIST;  // option kind
     unsigned short length = 1;                          // option length
     unsigned int values[];                              // option value(s)
 }

@@ -25,14 +25,15 @@
 
 #include "INETEndians.h"
 
+extern "C" {
+#include <libavutil/audioconvert.h>
+}
+
 
 void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits)
 {
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-    AVStream *st = av_new_stream(oc, 1);
-#else
     AVStream *st = avformat_new_stream(oc, NULL);
-#endif
+
     if (!st)
         throw cRuntimeError("Could not alloc stream\n");
 
@@ -43,7 +44,7 @@ void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short i
     /* put sample parameters */
     c->bit_rate = sampleRate * sampleBits;
     c->sample_rate = sampleRate;
-    c->sample_fmt = SAMPLE_FMT_S16;  //FIXME hack!
+    c->sample_fmt = AV_SAMPLE_FMT_S16;  //FIXME hack!
     c->channels = 1;
     audio_st = st;
 }
@@ -79,15 +80,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     if (fmt->audio_codec != CODEC_ID_NONE)
         addAudioStream(fmt->audio_codec, sampleRate, sampleBits);
 
-    // set the output parameters (must be done even if no parameters).
-    if (av_set_parameters(oc, NULL) < 0)
-        throw cRuntimeError("Invalid output format parameters");
-
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-    dump_format(oc, 0, resultFile, 1);
-#else
     av_dump_format(oc, 0, resultFile, 1);
-#endif
 
     /* now that all the parameters are set, we can open the audio and
        video codecs and allocate the necessary encode buffers */
@@ -101,31 +94,19 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
             throw cRuntimeError("Codec %d not found", c->codec_id);
 
         /* open it */
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-        if (avcodec_open(c, avcodec) < 0)
-#else
         if (avcodec_open2(c, avcodec, NULL) < 0)
-#endif
             throw cRuntimeError("Could not open codec %d", c->codec_id);
     }
 
     /* open the output file, if needed */
     if (!(fmt->flags & AVFMT_NOFILE))
     {
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-        if (url_fopen(&oc->pb, resultFile, URL_WRONLY) < 0)
-#else
-        if (avio_open(&oc->pb, resultFile, URL_WRONLY) < 0)
-#endif
+        if (avio_open(&oc->pb, resultFile, AVIO_FLAG_WRITE) < 0)
             throw cRuntimeError("Could not open '%s'", resultFile);
     }
 
     // write the stream header
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-    av_write_header(oc);
-#else
     avformat_write_header(oc, NULL);
-#endif
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
@@ -133,27 +114,36 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     ASSERT(opened);
 
     AVCodecContext *c = audio_st->codec;
-    uint8_t outbuf[pktBytes + FF_MIN_BUFFER_SIZE];
-    AVPacket pkt;
+    short int bytesPerInSample = av_get_bytes_per_sample(c->sample_fmt);
+    int samples = pktBytes / bytesPerInSample;
 
+    AVPacket pkt;
     av_init_packet(&pkt);
 
-    short int bitsPerInSample = av_get_bits_per_sample_format(c->sample_fmt);
-    short int bitsPerOutSample = av_get_bits_per_sample(c->codec->id);
-    // FFMPEG doc bug:
-    // When codec is pcm or g726, the return value is count of output bytes,
-    // and read (buf_size/(av_get_bits_per_sample(avctx->codec->id)/8)) samples from input buffer
-    int samples = pktBytes * 8 / bitsPerInSample;
-    int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
-    pkt.size = avcodec_encode_audio(c, outbuf, buf_size, (short int*)decBuf);
-    if (c->coded_frame->pts != (int64_t)AV_NOPTS_VALUE)
-        pkt.pts = av_rescale_q(c->coded_frame->pts, c->time_base, audio_st->time_base);
-    pkt.flags |= AV_PKT_FLAG_KEY;
-    pkt.stream_index = audio_st->index;
-    pkt.data = outbuf;
+    pkt.data = NULL;
+    pkt.size = 0;
+    AVFrame *frame = avcodec_alloc_frame();
+
+    frame->nb_samples = samples;
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+    frame->channel_layout = AV_CH_LAYOUT_MONO;
+    frame->sample_rate = c->sample_rate;
+#endif
+
+    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, c->sample_fmt,
+            (const uint8_t*)(decBuf), pktBytes, 1);
+    if (ret < 0)
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
+
+    // The bitsPerOutSample is not 0 when codec is PCM.
+    int gotPacket;
+    ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
+    if(ret < 0 || gotPacket != 1)
+        throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
 
     // write the compressed frame into the media file
-    int ret = av_interleaved_write_frame(oc, &pkt);
+    ret = av_interleaved_write_frame(oc, &pkt);
     if (ret != 0)
         throw cRuntimeError("Error while writing audio frame: %d", ret);
 }
@@ -185,11 +175,7 @@ bool AudioOutFile::close()
     if (!(oc->oformat->flags & AVFMT_NOFILE))
     {
         /* close the output file */
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-        url_fclose(oc->pb);
-#else
         avio_close(oc->pb);
-#endif
     }
 
     /* free the stream */

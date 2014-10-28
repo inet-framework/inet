@@ -27,8 +27,8 @@
 
 Define_Module(UDPBasicApp);
 
-simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDPBasicApp::rcvdPkSignal = registerSignal("rcvdPk");
 
 UDPBasicApp::UDPBasicApp()
 {
@@ -42,18 +42,14 @@ UDPBasicApp::~UDPBasicApp()
 
 void UDPBasicApp::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
     if (stage == 0)
     {
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
 
         localPort = par("localPort");
         destPort = par("destPort");
@@ -69,7 +65,7 @@ void UDPBasicApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
-    AppBase::finish();
+    ApplicationBase::finish();
 }
 
 void UDPBasicApp::setSocketOptions()
@@ -104,6 +100,16 @@ void UDPBasicApp::setSocketOptions()
 IPvXAddress UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
+    if (destAddresses[k].isIPv6() && destAddresses[k].get6().isLinkLocal()) // KLUDGE for IPv6
+    {
+        const char *destAddrs = par("destAddresses");
+        cStringTokenizer tokenizer(destAddrs);
+        const char *token;
+
+        for (int i = 0; i <= k; ++i)
+            token = tokenizer.nextToken();
+        destAddresses[k] = IPvXAddressResolver().resolve(token);
+    }
     return destAddresses[k];
 }
 
@@ -219,7 +225,7 @@ void UDPBasicApp::processPacket(cPacket *pk)
     numReceived++;
 }
 
-bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
+bool UDPBasicApp::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
@@ -230,7 +236,7 @@ bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
+bool UDPBasicApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     if (selfMsg)
         cancelEvent(selfMsg);
@@ -238,10 +244,9 @@ bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicApp::crashApp(IDoneCallback *doneCallback)
+void UDPBasicApp::handleNodeCrash()
 {
     if (selfMsg)
         cancelEvent(selfMsg);
-    return true;
 }
 

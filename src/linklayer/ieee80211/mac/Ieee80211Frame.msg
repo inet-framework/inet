@@ -75,7 +75,7 @@ enum Ieee80211FrameType
 packet Ieee80211Frame
 {
     byteLength = LENGTH_ACK / 8;
-    short type enum(Ieee80211FrameType); // type and subtype
+    short type @enum(Ieee80211FrameType); // type and subtype
     bool toDS;
     bool fromDS;
     bool retry;
@@ -83,7 +83,7 @@ packet Ieee80211Frame
     simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
     MACAddress receiverAddress; // aka address1
-    simtime_t MACArrive;
+    simtime_t MACArrive;    // FIXME remove it, technical data, used inside of MAC module
 }
 
 //
@@ -156,7 +156,7 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {
     byteLength = LENGTH_DATAHDR / 8 + SNAP_HEADER_BYTES;
-    int etherType enum (EtherType);
+    int etherType @enum(EtherType);
 }
 
 //
@@ -165,5 +165,5 @@ packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
 {
     short Category;
-    //short action enum(WirelessNetworkManagementAction); // action
+    //short action @enum(WirelessNetworkManagementAction); // action
 }

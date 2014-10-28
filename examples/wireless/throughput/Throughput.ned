@@ -19,11 +19,11 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.world.radio.ChannelControl;
-import inet.mobility.models.StationaryMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+import inet.base.NotificationBoard;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.static.StationaryMobility;
+import inet.world.radio.ChannelControl;
 
 
 module ThroughputClient

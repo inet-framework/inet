@@ -31,11 +31,11 @@ using std::cout;
 
 Define_Module(PingApp);
 
-simsignal_t PingApp::rttSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::numLostSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::rttSignal = registerSignal("rtt");
+simsignal_t PingApp::numLostSignal = registerSignal("numLost");
+simsignal_t PingApp::outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+simsignal_t PingApp::pingTxSeqSignal = registerSignal("pingTxSeq");
+simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
 PingApp::PingApp()
 {
@@ -77,11 +77,6 @@ void PingApp::initialize(int stage)
 
         // statistics
         rttStat.setName("pingRTT");
-        rttSignal = registerSignal("rtt");
-        numLostSignal = registerSignal("numLost");
-        outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
-        pingTxSeqSignal = registerSignal("pingTxSeq");
-        pingRxSeqSignal = registerSignal("pingRxSeq");
         sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
         WATCH(lossCount);
         WATCH(outOfOrderArrivalCount);
@@ -89,11 +84,11 @@ void PingApp::initialize(int stage)
 
         // references
         timer = new cMessage("sendPing");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         // startup
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         if (isEnabled() && isNodeUp())
             startSendingPingRequests();
     }
@@ -111,7 +106,8 @@ void PingApp::handleMessage(cMessage *msg)
     if (msg == timer)
     {
         sendPingRequest();
-        scheduleNextPingRequest(simTime());
+        if (isEnabled())
+            scheduleNextPingRequest(simTime());
     }
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));
@@ -213,10 +209,10 @@ void PingApp::sendPingRequest()
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
 
-    sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
     sentCount++;
+    sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
 void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit)

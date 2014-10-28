@@ -1,3 +1,28 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-14  Zoltan Bojthe
+
+	backport: MANET protocols backport (uses ipv4::netfilter)
+
+2013-12-02  Zoltan Bojthe
+
+	ICMPv4: sendErrorMessage(): better check for multicast/broadcast dest
+	address -- fingerprints changed
+
+	We must not sent ICMP error in reply to any bcast/mcast packet, but
+	network-directed bcasts (e.g. 10.0.0.255) were checked for.
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------

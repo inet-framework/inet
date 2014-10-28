@@ -186,7 +186,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    virtual int numInitStages() const  {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

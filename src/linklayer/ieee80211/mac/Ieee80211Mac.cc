@@ -220,7 +220,6 @@ void Ieee80211Mac::initialize(int stage)
         ST = par("slotTime"); //added by sorin
         if (ST==-1)
             ST = 20e-6; //20us
-        EV<<" slotTime="<<ST*1e6<<"us DIFS="<< getDIFS()*1e6<<"us";
 
         basicBitrate = par("basicBitrate");
         bitrate = par("bitrate");
@@ -246,13 +245,27 @@ void Ieee80211Mac::initialize(int stage)
             Ieee80211Descriptor::getIdx(opMode, basicBitrate);
 
         controlBitRate = par("controlBitrate").doubleValue();
-        EV<<" basicBitrate="<<basicBitrate/1e6<<"M";
-        EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
+        EV<<" slotTime = "<<getSlotTime()*1e6<<"us DIFS = "<< getDIFS()*1e6<<"us";
+
+        if (controlBitRate == -1)
+        {
+            int basicBitrateIdx = Ieee80211Descriptor::getMaxIdx(opMode);
+            controlBitRate = Ieee80211Descriptor::getDescriptor(basicBitrateIdx).bitrate;
+            controlFrameModulationType = Ieee80211Descriptor::getDescriptor(basicBitrateIdx).modulationType;
+        }
+        else
+        {
+            int basicBitrateIdx = Ieee80211Descriptor::getIdx(opMode, controlBitRate);
+            controlFrameModulationType = Ieee80211Descriptor::getDescriptor(basicBitrateIdx).modulationType;
+        }
+
 
         // configure AutoBit Rate
         configureAutoBitRate();
         //end auto rate code
-        EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
+        EV<<" basicBitrate="<<basicBitrate/1e6<<"Mb ";
+        EV<<" bitrate="<<bitrate/1e6<<"Mb IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
+
 
         const char *addressString = par("address");
         address = isInterfaceRegistered();
@@ -740,8 +753,8 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     {
         double rtsTime = 0;
         if (rtsThreshold*8<cinfo->getTestFrameSize())
-             rtsTime=  computeFrameDuration(LENGTH_CTS, basicBitrate) +computeFrameDuration(LENGTH_RTS, basicBitrate);
-        double frameDuration = cinfo->getTestFrameDuration() + computeFrameDuration(LENGTH_ACK, basicBitrate)+rtsTime;
+             rtsTime=  controlFrameTxTime(LENGTH_CTS) + controlFrameTxTime(LENGTH_RTS);
+        double frameDuration = cinfo->getTestFrameDuration() + controlFrameTxTime(LENGTH_ACK)+rtsTime;
         cinfo->setTestFrameDuration(frameDuration);
     }
     nb->fireChangeNotification(NF_LINK_FULL_PROMISCUOUS, msg);
@@ -876,6 +889,14 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             cancelEvent(endBackoff(numCategories()-1));
         }
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
+        return;
+    }
+
+    // Special case, is  endTimeout ACK and the radio state  is RECV, the system must wait until end reception (9.3.2.8 ACK procedure)
+    if (msg == endTimeout && radioState == RadioState::RECV && useModulationParameters && fsm.getState() == WAITACK)
+    {
+        EV << "Re-schedule WAITACK timeout \n";
+        scheduleAt(simTime() + controlFrameTxTime(LENGTH_ACK), endTimeout);
         return;
     }
 
@@ -1508,31 +1529,7 @@ simtime_t Ieee80211Mac::getAIFS(int AccessCategory)
 simtime_t Ieee80211Mac::getEIFS()
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    if (PHY_HEADER_LENGTH<0)
-    {
-        if ((opMode=='b') || (opMode=='g'))
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 1E+6 + getHeaderTime(1E+6);
-        else if (opMode=='a')
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 6E+6 + getHeaderTime(6E+6);
-        else if (opMode=='p')
-             return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 6E+6 + getHeaderTime(3E+6);
-    }
-    else
-    {
-        // FIXME: check how PHY_HEADER_LENGTH is handled. Is that given in bytes or secs ???
-        // what is the real unit? The use seems to be incosistent betwen b and g modes.
-        if (opMode=='b')
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
-        else if (opMode=='g')
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 1E+6 + PHY_HEADER_LENGTH;
-        else if (opMode=='a')
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 6E+6 + PHY_HEADER_LENGTH;
-        else if (opMode=='p')
-            return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 3E+6 + PHY_HEADER_LENGTH;
-    }
-    // if arrive here there is an error
-    opp_error("mode not supported");
-    return 0;
+    return getSIFS() + getDIFS() + controlFrameTxTime(LENGTH_ACK);
 }
 
 simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
@@ -1659,14 +1656,14 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
         {
             ModulationType modType;
             modType = WifiModulationType::getModulationType(opMode, bitRate);
-            WifiModulationType::getSlotDuration(modType,wifiPreambleType);
-            tim = computeFrameDuration(frameToSend) +SIMTIME_DBL(
-                 WifiModulationType::getSlotDuration(modType,wifiPreambleType) +
-                 WifiModulationType::getSifsTime(modType,wifiPreambleType) +
-                 WifiModulationType::get_aPHY_RX_START_Delay (modType,wifiPreambleType));
+            double duration = computeFrameDuration(frameToSend);
+            double slot = SIMTIME_DBL(WifiModulationType::getSlotDuration(modType,wifiPreambleType));
+            double sifs =  SIMTIME_DBL(WifiModulationType::getSifsTime(modType,wifiPreambleType));
+            double PHY_RX_START = SIMTIME_DBL(WifiModulationType::get_aPHY_RX_START_Delay (modType,wifiPreambleType));
+            tim = duration + slot + sifs + PHY_RX_START;
         }
         else
-            tim = computeFrameDuration(frameToSend) +SIMTIME_DBL( getSIFS()) + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2;
+            tim = computeFrameDuration(frameToSend) + SIMTIME_DBL( getSlotTime()) +SIMTIME_DBL( getSIFS()) + controlFrameTxTime(LENGTH_ACK) + MAX_PROPAGATION_DELAY * 2;
         EV<<" time out="<<tim*1e6<<"us"<<endl;
         scheduleAt(simTime() + tim, endTimeout);
     }
@@ -1692,8 +1689,8 @@ void Ieee80211Mac::scheduleCTSTimeoutPeriod()
     if (!endTimeout->isScheduled())
     {
         EV << "scheduling CTS timeout period\n";
-        scheduleAt(simTime() + computeFrameDuration(LENGTH_RTS, basicBitrate) + getSIFS()
-                   + computeFrameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+        scheduleAt(simTime() + controlFrameTxTime(LENGTH_RTS) + getSIFS()
+                   + controlFrameTxTime(LENGTH_CTS) + MAX_PROPAGATION_DELAY * 2, endTimeout);
     }
 }
 
@@ -1794,7 +1791,7 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     numAckSend++;
-    sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
+    sendDown(setControlBitrate(buildACKFrame(frameToACK)));
 }
 
 void Ieee80211Mac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -1821,7 +1818,7 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
         for (frame=transmissionQueue()->begin(); frame != transmissionQueue()->end(); ++frame)
         {
             count++;
-            t = computeFrameDuration(*frame) + 2 * getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate);
+            t = computeFrameDuration(*frame) + 2 * getSIFS() + controlFrameTxTime(LENGTH_ACK);
             EV << "t is " << t << endl;
             if (TXOP()>time+t)
             {
@@ -1845,7 +1842,7 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending RTS frame\n";
-    sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
+    sendDown(setControlBitrate(buildRTSFrame(frameToSend)));
 }
 
 void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -1867,7 +1864,7 @@ void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV << "sending CTS frame\n";
-    sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
+    sendDown(setControlBitrate(buildCTSFrame(rtsFrame)));
 }
 
 /****************************************************************
@@ -1905,15 +1902,15 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
                 if (bitRate == 0)
                     bitRate = bitrate;
             }
-            frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate)
+            frame->setDuration(3 * getSIFS() + 2 * controlFrameTxTime(LENGTH_ACK)
                                + computeFrameDuration(size,bitRate));
         }
         else
-            frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate));
+            frame->setDuration(getSIFS() + controlFrameTxTime(LENGTH_ACK));
     }
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate) + computeFrameDuration(frameToSend));
+        frame->setDuration(3 * getSIFS() + 2 * controlFrameTxTime(LENGTH_ACK) + computeFrameDuration(frameToSend));
 
     return frame;
 }
@@ -1926,7 +1923,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(frameToACK->getDuration() - getSIFS() - controlFrameTxTime(LENGTH_ACK));
 
     return frame;
 }
@@ -1936,9 +1933,9 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) +
+    frame->setDuration(3 * getSIFS() + controlFrameTxTime(LENGTH_CTS) +
                        computeFrameDuration(frameToSend) +
-                       computeFrameDuration(LENGTH_ACK, basicBitrate));
+                       controlFrameTxTime(LENGTH_ACK));
 
     return frame;
 }
@@ -1947,7 +1944,7 @@ Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS() - computeFrameDuration(LENGTH_CTS, basicBitrate));
+    frame->setDuration(rtsFrame->getDuration() - getSIFS() - controlFrameTxTime(LENGTH_CTS));
 
     return frame;
 }
@@ -1975,6 +1972,15 @@ Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
     ASSERT(frame->getControlInfo()==NULL);
     PhyControlInfo *ctrl = new PhyControlInfo();
     ctrl->setBitrate(basicBitrate);
+    frame->setControlInfo(ctrl);
+    return frame;
+}
+
+Ieee80211Frame *Ieee80211Mac::setControlBitrate(Ieee80211Frame *frame)
+{
+    ASSERT(frame->getControlInfo()==NULL);
+    PhyControlInfo *ctrl = new PhyControlInfo();
+    ctrl->setBitrate(controlBitRate);
     frame->setControlInfo(ctrl);
     return frame;
 }
@@ -2175,23 +2181,12 @@ double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 {
     double duration;
+    ModulationType modType;
+    modType = WifiModulationType::getModulationType(opMode, bitrate);
     if (PHY_HEADER_LENGTH<0)
-    {
-        ModulationType modType;
-        modType = WifiModulationType::getModulationType(opMode, bitrate);
         duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(bits, modType, wifiPreambleType));
-    }
     else
-    {
-        // FIXME: check how PHY_HEADER_LENGTH is handled. Is that given in bytes or secs ???
-        // what is the real unit? The use seems to be incosistent betwen b and g/a/p modes.
-        if ((opMode=='g') || (opMode=='a') || (opMode=='p'))
-            duration = 4*ceil((16+bits+6)/(bitrate/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
-        else if (opMode=='b')
-            duration = bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
-        else
-            opp_error("Opmode not supported");
-    }
+        duration = SIMTIME_DBL(WifiModulationType::getPayloadDuration(bits, modType)) + PHY_HEADER_LENGTH;
 
     EV<<" duration="<<duration*1e6<<"us("<<bits<<"bits "<<bitrate/1e6<<"Mbps)"<<endl;
     return duration;
@@ -2831,3 +2826,14 @@ bool Ieee80211Mac::isBackoffPending()
     return false;
 }
 
+double Ieee80211Mac::controlFrameTxTime(int bits)
+{
+     double duration;
+     if (PHY_HEADER_LENGTH<0)
+         duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(bits, controlFrameModulationType, wifiPreambleType));
+     else
+         duration = SIMTIME_DBL(WifiModulationType::getPayloadDuration(bits, controlFrameModulationType))+PHY_HEADER_LENGTH;
+
+     EV<<" duration="<<duration*1e6<<"us("<<bits<<"bits "<<controlFrameModulationType.getPhyRate()/1e6<<"Mbps)"<<endl;
+     return duration;
+}

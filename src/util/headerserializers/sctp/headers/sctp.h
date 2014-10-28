@@ -34,6 +34,8 @@
 #define T_FLAG        0x04
 #define B_FLAG        0x02
 #define M_FLAG        0x01
+#define NAT_M_FLAG    0x02
+#define NAT_T_FLAG    0x01
 
 
 #define CRC32C(c,d) (c=(c>>8)^crc_c[(c^(d))&0xFF])
@@ -381,7 +383,8 @@ struct forward_tsn_supported_parameter {
 struct supported_address_types_parameter {
     uint16_t type;
     uint16_t length;
-    uint16_t address_type;
+    uint16_t address_type_1;
+    uint16_t address_type_2;
 } __PACKED__;
 
 
@@ -406,7 +409,10 @@ struct heartbeat_info {
     union {
         uint8_t info[];
         struct {
-            uint32_t addr;
+            union {
+                struct init_ipv4_address_parameter v4addr;
+                struct init_ipv6_address_parameter v6addr;
+            } addr;
             uint32_t time;
         } addr_and_time;
     } heartbeat_info_union;

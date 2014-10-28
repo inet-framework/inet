@@ -19,15 +19,16 @@
 
 #include "EtherEncap.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "IInterfaceTable.h"
+#include "Ieee802Ctrl_m.h"
 
 
 Define_Module(EtherEncap);
 
-simsignal_t EtherEncap::encapPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherEncap::decapPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherEncap::pauseSentSignal = SIMSIGNAL_NULL;
+simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
+simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
+simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
 void EtherEncap::initialize()
 {
@@ -36,10 +37,6 @@ void EtherEncap::initialize()
 
     totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
     useSNAP = par("useSNAP").boolValue();
-
-    encapPkSignal = registerSignal("encapPk");
-    decapPkSignal = registerSignal("decapPk");
-    pauseSentSignal = registerSignal("pauseSent");
 
     WATCH(totalFromHigherLayer);
     WATCH(totalFromMAC);

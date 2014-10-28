@@ -50,7 +50,6 @@ simple HttpServerDirectEvilA like IHttpDirectApp
         string hostName = default("");                    // The domain name of the server
         int port = default(80);                           // The listening port number
         int httpProtocol = default(11);                   // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        int logLevel = default(0);                        // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
         string logFile = default("");                     // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition = default("");              // The site script file. Blank to disable.
         double activationTime @unit(s) = default(0s);     // The initial activation delay. Zero to disable.

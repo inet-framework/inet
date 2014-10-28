@@ -38,5 +38,5 @@ packet ControlManetRouting
 {
     ManetAddress srcAddress;
     ManetAddress destAddress;
-    int optionCode enum(ManetControlType) = MANET_ROUTE_NO_OPTION;
+    int optionCode @enum(ManetControlType) = MANET_ROUTE_NO_OPTION;
 }

@@ -1,9 +1,13 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-04  Zoltan Bojthe
 
 	- stopTime checks changed: send packet when simTime() <= stopTime
-      (some apps tested "simTime() < stopTime", another apps tested "simTime()<= stopTime")
+	  (some apps tested "simTime() < stopTime", another apps tested "simTime()<= stopTime")
 
 2013-05-02  Zoltan Bojthe
 
@@ -14,7 +18,7 @@
 2013-04-25  Levente Meszaros
 
 	- Added ILifecycle to the rest of applications.
-      (All application must either support lifecycle operations properly or
+	  (All application must either support lifecycle operations properly or
 	   throw an error when executing any lifecycle operations.)
 
 2013-04-23  Levente Meszaros

@@ -1,3 +1,40 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+
+	fingerprints of MoBAN mobility are changed
+
+2014-01-21  Zoltan Bojthe
+
+	backport: Mobility: Replaced getParentNode with the more inentional
+	getContainingNode.
+
+2013-04-12  Levente Mészáros
+
+	backport: Logging: Refactored mobility logging to be more consistent and
+	less redundant.
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-10-24  Rudolf Hornig
+
+	mobility: added missing INET_API macros.
+
+2014-01-22  Levente Meszaros
+
+	Split models directory into multiple directories:
+	 contract - specifies the interface of mobility models
+	 common - shared files among mobility models that are not complete mobility models
+	 static - mobility models that actually don't move
+	 single - single mobility models controlling only one moving object
+	 group - group mobility models controlling multiple interlinked moving objects
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------

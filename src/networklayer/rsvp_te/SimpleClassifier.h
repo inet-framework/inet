@@ -62,7 +62,7 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const  {return 5;}
+    virtual int numInitStages() const { return 5; }
     virtual void handleMessage(cMessage *msg);
 
     // IScriptable implementation

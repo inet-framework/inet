@@ -54,10 +54,10 @@ class INET_API HttpServerDirectEvilB : public HttpServerDirect
         int badLow;
         int badHigh;
     protected:
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual std::string generateBody();
 };
 
 #endif /* HttpServerDirectEvilB */
-
 

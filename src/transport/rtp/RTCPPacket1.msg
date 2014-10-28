@@ -35,7 +35,7 @@ packet RTCPPacket
     int8 version = 2;
     bool padding = 0;
     short count = 0;
-    short packetType enum(RTCPPacketType) = RTCP_PT_UNDEF;
+    short packetType @enum(RTCPPacketType) = RTCP_PT_UNDEF;
     abstract int rtcpLength;
 }
 

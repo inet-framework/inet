@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,15 +22,20 @@ package inet.networklayer.arp;
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
 //
-// Expects ~IPv4RoutingDecision control info objects to be attached to packets
-// coming from higher layers. ARP packets are represented by the ~ARPPacket
-// class. Datagrams to be sent and incoming ARP packets are expected to
-// on gate ipIn.
+// ARP packets are represented by the ~ARPPacket class.
+//
+// Communication Between ARP and IPv4 modules:
+// IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
+// of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
+// uses the ARP::startAddressResolution() method.
+// ARP emit a completedARPResolution signal, when added/modified an entry in ARP table.
+// ARP emit a failedARPResolution signal when an ARP request failed (ARP request sent
+// retryCount times and retryTimeout elapsed).
 //
 // ARP resolution is used over <i>broadcast</i> interfaces only,
 // that is, over interfaces that have the <tt>isBroadcast()</tt> flag set in
 // <tt>InterfaceEntry</tt> (see ~InterfaceTable). Since routing files
-// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~RoutingTable)
+// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~IPv4RoutingTable)
 // may modify the default interface configuration, you must take care that
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.
@@ -37,17 +43,24 @@ package inet.networklayer.arp;
 simple ARP
 {
     parameters:
+        string routingTableModule;
         double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an IPv4 address
         int retryCount = default(3);   // number of times ARP will attempt to resolve an IPv4 address
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
-        bool proxyARP = default(true);        // sets proxy ARP mode (replying to ARP requests for the addresses for which a routing table entry exists)
+        bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
         bool globalARP = default(false);
         @display("i=block/layer");
+        @signal[sentReq](type=long);
+        @signal[sentReply](type=long);
+        @signal[initiatedARPResolution](type=IARPCache::Notification);
+        @signal[completedARPResolution](type=IARPCache::Notification);
+        @signal[failedARPResolution](type=IARPCache::Notification);
         @statistic[sentReq](title="ARP request sent";record=count,vector);
-        @statistic[sentReplies](title="ARP replies sent";record=count,vector);
-        @statistic[initiatedResolution](title="ARP initiated resolutions";record=count,vector);
-        @statistic[failedResolution](title="ARP failed resolutions";record=count,vector);
+        @statistic[sentReply](title="ARP replies sent";record=count,vector);
+        @statistic[initiatedARPResolution](title="ARP initiated resolutions";record=count);
+        @statistic[completedARPResolution](title="ARP completed resolutions";record=count);
+        @statistic[failedARPResolution](title="ARP failed resolutions";record=count);
     gates:
-        input ipIn @labels(ARPPacket,IPv4Datagram);
-        output nicOut[] @labels(ARPPacket);
+        input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
+        output netwOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
 }

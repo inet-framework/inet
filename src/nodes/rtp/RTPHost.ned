@@ -22,7 +22,6 @@ module RTPHost extends StandardHost
         string fileName;
         int payloadType;
         hasUdp = true;
-        // network information
         @display("i=device/pc2");
 
     submodules:

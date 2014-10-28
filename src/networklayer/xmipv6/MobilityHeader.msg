@@ -50,7 +50,7 @@ enum MobilityHeaderType
 
 packet MobilityHeader // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
 {
-    int mobilityHeaderType enum(MobilityHeaderType);
+    int mobilityHeaderType @enum(MobilityHeaderType);
 }
 
 
@@ -95,7 +95,7 @@ enum BAStatus
 
 packet BindingAcknowledgement extends MobilityHeader
 {
-    int status enum(BAStatus);
+    int status @enum(BAStatus);
     unsigned int sequenceNumber;
     unsigned int lifetime;
     bool keyManagementFlag = false;//K-Flag (Key Management Flag)
@@ -118,7 +118,7 @@ enum BEStatus
 
 packet BindingError extends MobilityHeader
 {
-    int status enum(BEStatus);
+    int status @enum(BEStatus);
     IPv6Address homeAddress;
     //Mobility Options not defined
 

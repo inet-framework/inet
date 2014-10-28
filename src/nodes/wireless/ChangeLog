@@ -1,3 +1,17 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+
+	fingerprints of MoBAN mobility are changed
+
+2013-12-13  Zoltan Bojthe
+
+	use MACRelayUnit instead of MACRelayUnitNP/MACRelayUnitPP
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-26  Zoltan Bojthe
@@ -16,7 +30,7 @@
 
 2013-03-21  Levente Meszaros
 
-	AccessPoint: added InterfaceTable unconditionally; also added 
+	AccessPoint: added InterfaceTable unconditionally; also added
 	NotificationBoard, required by InterfaceTable.
 
 2013-01-30  ------ inet-2.1.0 released ------

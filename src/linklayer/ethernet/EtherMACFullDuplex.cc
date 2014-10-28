@@ -18,7 +18,7 @@
 
 #include "EtherMACFullDuplex.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"

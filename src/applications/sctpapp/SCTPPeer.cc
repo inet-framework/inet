@@ -38,9 +38,9 @@
 
 Define_Module(SCTPPeer);
 
-simsignal_t SCTPPeer::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPPeer::echoedPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPPeer::sentPkSignal = registerSignal("sentPk");
+simsignal_t SCTPPeer::echoedPkSignal = registerSignal("echoedPk");
+simsignal_t SCTPPeer::rcvdPkSignal = registerSignal("rcvdPk");
 
 SCTPPeer::SCTPPeer()
 {
@@ -72,6 +72,8 @@ SCTPPeer::~SCTPPeer()
 
 void SCTPPeer::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
@@ -80,11 +82,9 @@ void SCTPPeer::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(numRequestsToSend);
-
-        sentPkSignal = registerSignal("sentPk");
-        echoedPkSignal = registerSignal("echoedPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
-
+    }
+    else if (stage == 3)
+    {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
@@ -115,7 +115,7 @@ void SCTPPeer::initialize(int stage)
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
 
-        if ((simtime_t)par("startTime")>0)
+        if ((simtime_t)par("startTime") > SIMTIME_ZERO)     //FIXME is invalid the startTime == 0 ????
         {
             connectTimer = new cMessage("ConnectTimer");
             connectTimer->setKind(MSGKIND_CONNECT);
@@ -124,9 +124,7 @@ void SCTPPeer::initialize(int stage)
         schedule = false;
         shutdownReceived = false;
         sendAllowed = true;
-    }
-    else if (stage == 1)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -191,7 +189,13 @@ void SCTPPeer::connect()
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    IPvXAddress destination;
+    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        clientSocket.connect(destination, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    }
 
     if (!streamReset)
         streamReset = false;

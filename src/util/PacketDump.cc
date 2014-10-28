@@ -38,6 +38,7 @@
 #endif
 
 #ifdef WITH_IPv4
+#include "ARPPacket_m.h"
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
 #endif
@@ -388,6 +389,11 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         dumpIPv4(l2r, "", (IPv4Datagram *)msg, "");
     }
     else
+    if (dynamic_cast<ARPPacket *>(msg))
+    {
+        dumpARP(l2r, "", (ARPPacket *)msg, "");
+    }
+    else
 #endif
 #ifdef WITH_SCTP
     if (dynamic_cast<SCTPMessage *>(msg))
@@ -418,6 +424,12 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
             if (dynamic_cast<IPv4Datagram *>(msg))
             {
                 dumpIPv4(l2r, "", (IPv4Datagram *)msg);
+                break;
+            }
+            else
+            if (dynamic_cast<ARPPacket *>(msg))
+            {
+                dumpARP(l2r, "", (ARPPacket *)msg, "");
                 break;
             }
 #endif
@@ -488,6 +500,17 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPPacket* udppkt,
         out << "# " << comment;
 
     out << endl;
+}
+
+void PacketDump::dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment)
+{
+#ifdef WITH_IPv4
+    std::ostream& out = *outp;
+    char buf[30];
+    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    out << buf << " src: " << dgram->getSrcIPAddress() << ", " << dgram->getSrcMACAddress()
+            << "; dest: " << dgram->getDestIPAddress() << ", " << dgram->getDestMACAddress() << endl;
+#endif
 }
 
 void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment)

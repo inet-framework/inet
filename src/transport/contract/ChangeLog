@@ -1,3 +1,24 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-03-14  Irene Rungeler
+
+	sctp: added SCTP NAT support
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2013-05-10  Tamás Borbély
+
+	backport: UDP: add option to specify the source address of the sent
+	datagram
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-25  Tamas Borbely

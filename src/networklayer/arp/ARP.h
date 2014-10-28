@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 Andras Varga
+ * Copyright (C) 2014 OpenSim Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -22,10 +23,11 @@
 
 #include "INETDefs.h"
 
+#include "IARPCache.h"
+#include "ILifecycle.h"
+#include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ModuleAccess.h"
-#include "IPv4Address.h"
-#include "ILifecycle.h"
 #include "NotificationBoard.h"
 
 // Forward declarations:
@@ -37,7 +39,7 @@ class IRoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
+class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public INotifiable
 {
   public:
     struct ARPCacheEntry;
@@ -46,17 +48,16 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
 
     // IPv4Address -> MACAddress table
     // TBD should we key it on (IPv4Address, InterfaceEntry*)?
-    struct ARPCacheEntry
+    class ARPCacheEntry
     {
+      public:
         ARP *owner;     // owner ARP module of this cache entry
-        InterfaceEntry *ie; // NIC to send the packet to
+        const InterfaceEntry *ie; // NIC to send the packet to
         bool pending; // true if resolution is pending
         MACAddress macAddress;  // MAC address
         simtime_t lastUpdate;  // entries should time out after cacheTimeout
         int numRetries; // if pending==true: 0 after first ARP request, 1 after second, etc.
         cMessage *timer;  // if pending==true: request timeout msg
-        MsgPtrVector pendingPackets;  // if pending==true: ptrs to packets waiting for resolution
-                                      // (packets are owned by pendingQueue)
         ARPCache::iterator myIter;  // iterator pointing to this entry
     };
 
@@ -64,8 +65,10 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
     simtime_t retryTimeout;
     int retryCount;
     simtime_t cacheTimeout;
-    bool doProxyARP;
+    bool respondToProxyARP;
     bool globalARP;
+
+    bool isUp;
 
     long numResolutions;
     long numFailedResolutions;
@@ -74,30 +77,34 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
 
     static simsignal_t sentReqSignal;
     static simsignal_t sentReplySignal;
-    static simsignal_t failedResolutionSignal;
-    static simsignal_t initiatedResolutionSignal;
+    static simsignal_t initiatedARPResolutionSignal;
+    static simsignal_t completedARPResolutionSignal;
+    static simsignal_t failedARPResolutionSignal;
 
-    bool isUp;
     ARPCache arpCache;
     static ARPCache globalArpCache;
     static int globalArpCacheRefCnt;
 
-    cQueue pendingQueue; // outbound packets waiting for ARP resolution
-    int nicOutBaseGateId;  // id of the nicOut[0] gate
+    cGate *netwOutGate;
 
     IInterfaceTable *ift;
-    IRoutingTable *rt;  // for Proxy ARP
-    NotificationBoard *nb;
+    IRoutingTable *rt;  // for answering ProxyARP requests
+
     // Maps an IP multicast address to an Ethernet multicast address.
     MACAddress mapMulticastAddress(IPv4Address addr);
 
   public:
     ARP();
     virtual ~ARP();
-    int numInitStages() const {return 5;}
-    const MACAddress getDirectAddressResolution(const IPv4Address &) const;
-    const IPv4Address getInverseAddressResolution(const MACAddress &) const;
-    void setChangeAddress(const IPv4Address &);
+    virtual int numInitStages() const { return 5; }
+
+    /// IARPCache implementation  @{
+    virtual void startAddressResolution(const IPv4Address& addr, const InterfaceEntry *ie);
+    virtual IPv4Address getIPv4AddressFor(const MACAddress& addr) const;
+    virtual MACAddress getMACAddressFor(const IPv4Address& addr) const;
+    /// @}
+
+    // INotifiable
     virtual void receiveChangeNotification(int category, const cObject *details);
 
   protected:
@@ -112,11 +119,10 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
     virtual void start();
     virtual void flush();
 
-    virtual void processOutboundPacket(cMessage *msg);
-    virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
+    virtual void sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 
     virtual void initiateARPResolution(ARPCacheEntry *entry);
-    virtual void sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress);
+    virtual void sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
     virtual bool addressRecognized(IPv4Address destAddr, InterfaceEntry *ie);
     virtual void processARPPacket(ARPPacket *arp);
@@ -124,7 +130,6 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
 
     virtual void dumpARPPacket(ARPPacket *arp);
     virtual void updateDisplayString();
-
 };
 
 class INET_API ArpAccess : public ModuleAccess<ARP>

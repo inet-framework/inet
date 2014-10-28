@@ -32,13 +32,15 @@
 
 Define_Module(HttpController);
 
+
 void HttpController::initialize(int stage)
 {
-    EV_DEBUG << "Initializing stage " << stage << endl;
-    if (stage==0)
-    {
-        ll = par("logLevel");
+    cSimpleModule::initialize(stage);
 
+    EV_DEBUG << "Initializing stage " << stage << endl;
+
+    if (stage == 0)
+    {
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
         cXMLElement *rootelement = par("config").xmlValue();
@@ -61,7 +63,7 @@ void HttpController::initialize(int stage)
         pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
         // Two stages are required to finalize the initialization of the random object for the site selection
         // once the final number of web sites is known.
@@ -85,14 +87,14 @@ void HttpController::initialize(int stage)
 
 void HttpController::finish()
 {
-    EV_SUMMARY << "Invoking finish on the controller. Total lookups " << totalLookups << endl;
+    EV_INFO << "Invoking finish on the controller. Total lookups " << totalLookups << endl;
 
     WebServerEntry *en;
     std::map<std::string,WebServerEntry*>::const_iterator iter;
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
     {
         en = (*iter).second;
-        EV_SUMMARY << "Server " << (*iter).first << ": Access count " << en->accessCount << endl;
+        EV_INFO << "Server " << (*iter).first << ": Access count " << en->accessCount << endl;
     }
 
     // Clean up the server references

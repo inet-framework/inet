@@ -25,7 +25,7 @@
 #include "UDPSocket.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
-#include "mobility/models/TraCIMobility.h"
+#include "mobility/single/TraCIMobility.h"
 
 /**
  * Small IVC Demo
@@ -39,18 +39,15 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     protected:
-        virtual int numInitStages() const {
-            return std::max(4, cSimpleModule::numInitStages());
-        }
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 
     protected:
-        bool debug;
         TraCIMobility* traci;
         bool sentMessage;
         UDPSocket socket;
-        simsignal_t mobilityStateChangedSignal;
+        static simsignal_t mobilityStateChangedSignal;
 
     protected:
         void setupLowerLayer();

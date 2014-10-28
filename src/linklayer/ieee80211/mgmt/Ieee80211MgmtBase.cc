@@ -23,7 +23,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = registerSignal("dataQueueLen");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
@@ -33,13 +33,12 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 
 void Ieee80211MgmtBase::initialize(int stage)
 {
-    if (stage==0)
+    if (stage == 0)
     {
         PassiveQueueBase::initialize();
 
         dataQueue.setName("wlanDataQueue");
         mgmtQueue.setName("wlanMgmtQueue");
-        dataQueueLenSignal = registerSignal("dataQueueLen");
         emit(dataQueueLenSignal, dataQueue.length());
 
         numDataFramesReceived = 0;
@@ -52,7 +51,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         // configuration
         frameCapacity = par("frameCapacity");
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

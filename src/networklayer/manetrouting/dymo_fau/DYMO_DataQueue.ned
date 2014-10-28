@@ -24,7 +24,6 @@ package inet.networklayer.manetrouting.dymo_fau;
 simple DYMO_DataQueue
 {
     parameters:
-        bool debug = default(false); // be verbose
         double BUFFER_SIZE_PACKETS = default(50); // maximum queue size in packets, -1 for no limit
         double BUFFER_SIZE_BYTES @unit("B") = default(75000B); // maximum queue size in bytes, -1 for no limit
     gates:

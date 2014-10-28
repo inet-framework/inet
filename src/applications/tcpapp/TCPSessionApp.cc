@@ -15,114 +15,143 @@
 #include "TCPSessionApp.h"
 
 #include "ByteArrayMessage.h"
-#include "GenericAppMsg_m.h"
 #include "IPvXAddressResolver.h"
 #include "ModuleAccess.h"
-#include "NodeStatus.h"
+#include "NodeOperations.h"
 
 
 Define_Module(TCPSessionApp);
 
-simsignal_t TCPSessionApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPSessionApp::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPSessionApp::recvIndicationsSignal = SIMSIGNAL_NULL;
 
-void TCPSessionApp::parseScript(const char *script)
+#define MSGKIND_CONNECT  1
+#define MSGKIND_SEND     2
+#define MSGKIND_CLOSE    3
+
+
+TCPSessionApp::TCPSessionApp()
 {
-    const char *s = script;
+    timeoutMsg = NULL;
+}
 
-    while (*s)
+TCPSessionApp::~TCPSessionApp()
+{
+    cancelAndDelete(timeoutMsg);
+}
+
+void TCPSessionApp::initialize(int stage)
+{
+    TCPAppBase::initialize(stage);
+    if (stage == 0)
     {
-        Command cmd;
+        activeOpen = par("active");
+        tOpen = par("tOpen");
+        tSend = par("tSend");
+        tClose = par("tClose");
+        sendBytes = par("sendBytes");
+        commandIndex = 0;
 
-        // parse time
-        while (isspace(*s))
-            s++;
+        socket.readDataTransferModePar(*this);
 
-        if (!*s || *s == ';')
-            break;
+        const char *script = par("sendScript");
+        parseScript(script);
 
-        const char *s0 = s;
-        cmd.tSend = strtod(s, &const_cast<char *&>(s));
+        if (sendBytes > 0 && commands.size() > 0)
+            throw cRuntimeError("Cannot use both sendScript and tSend+sendBytes");
+        if (sendBytes > 0)
+            commands.push_back(Command(tSend, sendBytes));
+        if (commands.size() == 0)
+            throw cRuntimeError("sendScript is empty");
+    }
+    else if (stage == 3)
+    {
+        timeoutMsg = new cMessage("timer");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
-        if (s == s0)
-            throw cRuntimeError("Syntax error in script: simulation time expected");
-
-        // parse number of bytes
-        while (isspace(*s))
-            s++;
-
-        if (!isdigit(*s))
-            throw cRuntimeError("Syntax error in script: number of bytes expected");
-
-        cmd.numBytes = atoi(s);
-
-        while (isdigit(*s))
-            s++;
-
-        // add command
-        commands.push_back(cmd);
-
-        // skip delimiter
-        while (isspace(*s))
-            s++;
-
-        if (!*s)
-            break;
-
-        if (*s!=';')
-            throw cRuntimeError("Syntax error in script: separator ';' missing");
-
-        s++;
-
-        while (isspace(*s))
-            s++;
+        if (isNodeUp()) {
+            timeoutMsg->setKind(MSGKIND_CONNECT);
+            scheduleAt(tOpen, timeoutMsg);
+        }
     }
 }
 
-void TCPSessionApp::count(cMessage *msg)
+bool TCPSessionApp::isNodeUp()
 {
-    if (msg->isPacket())
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation))
     {
-        if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
-        {
-            packetsRcvd++;
-            cPacket *packet = PK(msg);
-            bytesRcvd += packet->getByteLength();
-            emit(rcvdPkSignal, packet);
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            if (simTime() <= tOpen) {
+                timeoutMsg->setKind(MSGKIND_CONNECT);
+                scheduleAt(tOpen, timeoutMsg);
+            }
         }
-        else
-        {
-            EV << "TCPSessionApp received unknown message (kind:" << msg->getKind()
-               << ", name:" << msg->getName() << ")\n";
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            cancelEvent(timeoutMsg);
+            if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
+                close();
+            // TODO: wait until socket is closed
         }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelEvent(timeoutMsg);
     }
     else
-    {
-        indicationsRcvd++;
-        emit(recvIndicationsSignal, msg);
-    }
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
-void TCPSessionApp::waitUntil(simtime_t t)
+void TCPSessionApp::handleTimer(cMessage *msg)
 {
-    if (simTime()>=t)
-        return;
-
-    cMessage *timeoutMsg = new cMessage("timeout");
-    scheduleAt(t, timeoutMsg);
-    cMessage *msg = NULL;
-
-    while ((msg = receive()) != timeoutMsg)
+    switch (msg->getKind())
     {
-        count(msg);
-        socket.processMessage(msg);
-    }
+        case MSGKIND_CONNECT:
+            EV << "opening connection\n";
+            if (activeOpen)
+                connect(); // sending will be scheduled from socketEstablished()
+            else
+                ;//TODO
+            break;
 
-    delete timeoutMsg;
+        case MSGKIND_SEND:
+           sendData();
+           break;
+
+        case MSGKIND_CLOSE:
+           close();
+           break;
+
+        default:
+            throw cRuntimeError("Invalid timer msg: kind=%d", msg->getKind());
+    }
 }
 
-cPacket* TCPSessionApp::genDataMsg(long sendBytes)
+void TCPSessionApp::sendData()
+{
+    EV << "sending data\n";
+    long numBytes = commands[commandIndex].numBytes;
+    sendPacket(createDataPacket(numBytes));
+
+    if (++commandIndex < (int)commands.size()) {
+        simtime_t tSend = commands[commandIndex].tSend;
+        scheduleAt(std::max(tSend, simTime()), timeoutMsg);
+    }
+    else {
+        timeoutMsg->setKind(MSGKIND_CLOSE);
+        scheduleAt(std::max(tClose, simTime()), timeoutMsg);
+    }
+}
+
+cPacket *TCPSessionApp::createDataPacket(long sendBytes)
 {
     switch (socket.getDataTransferMode())
     {
@@ -153,116 +182,81 @@ cPacket* TCPSessionApp::genDataMsg(long sendBytes)
     }
 }
 
-void TCPSessionApp::activity()
+void TCPSessionApp::socketEstablished(int connId, void *ptr)
 {
+    TCPAppBase::socketEstablished(connId, ptr);
+
+    ASSERT(commandIndex==0);
+    timeoutMsg->setKind(MSGKIND_SEND);
+    simtime_t tSend = commands[commandIndex].tSend;
+    scheduleAt(std::max(tSend, simTime()), timeoutMsg);
+}
+
+void TCPSessionApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+{
+    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
+}
+
+void TCPSessionApp::socketClosed(int connId, void *ptr)
+{
+    TCPAppBase::socketClosed(connId, ptr);
+    cancelEvent(timeoutMsg);
+}
+
+void TCPSessionApp::socketFailure(int connId, void *ptr, int code)
+{
+    TCPAppBase::socketFailure(connId, ptr, code);
+    cancelEvent(timeoutMsg);
+}
+
+void TCPSessionApp::parseScript(const char *script)
+{
+    const char *s = script;
+
+    while (*s)
     {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
+        // parse time
+        while (isspace(*s))
+            s++;
 
-    packetsRcvd = indicationsRcvd = 0;
-    bytesRcvd = bytesSent = 0;
-    WATCH(packetsRcvd);
-    WATCH(bytesRcvd);
-    WATCH(indicationsRcvd);
+        if (!*s || *s == ';')
+            break;
 
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    recvIndicationsSignal = registerSignal("recvIndications");
+        const char *s0 = s;
+        simtime_t tSend = strtod(s, &const_cast<char *&>(s));
 
-    // parameters
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
-    const char *connectAddress = par("connectAddress");
-    int connectPort = par("connectPort");
+        if (s == s0)
+            throw cRuntimeError("Syntax error in script: simulation time expected");
 
-    bool active = par("active");
-    simtime_t tOpen = par("tOpen");
-    simtime_t tSend = par("tSend");
-    long sendBytes = par("sendBytes");
-    simtime_t tClose = par("tClose");
+        // parse number of bytes
+        while (isspace(*s))
+            s++;
 
-    const char *script = par("sendScript");
-    parseScript(script);
+        if (!isdigit(*s))
+            throw cRuntimeError("Syntax error in script: number of bytes expected");
 
-    if (sendBytes > 0 && commands.size() > 0)
-        throw cRuntimeError("Cannot use both sendScript and tSend+sendBytes");
+        long numBytes = strtol(s, NULL, 10);
 
-    socket.setOutputGate(gate("tcpOut"));
+        while (isdigit(*s))
+            s++;
 
-    // open
-    waitUntil(tOpen);
+        // add command
+        commands.push_back(Command(tSend, numBytes));
 
-    socket.readDataTransferModePar(*this);
-    socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        // skip delimiter
+        while (isspace(*s))
+            s++;
 
-    EV << "issuing OPEN command\n";
+        if (!*s)
+            break;
 
-    if (ev.isGUI())
-        getDisplayString().setTagArg("t", 0, active ? "connecting" : "listening");
+        if (*s!=';')
+            throw cRuntimeError("Syntax error in script: separator ';' missing");
 
-    if (active)
-        socket.connect(IPvXAddressResolver().resolve(connectAddress), connectPort);
-    else
-        socket.listenOnce();
+        s++;
 
-    // wait until connection gets established
-    while (socket.getState() != TCPSocket::CONNECTED)
-    {
-        socket.processMessage(receive());
-
-        if (socket.getState() == TCPSocket::SOCKERROR)
-            return;
-    }
-
-    EV << "connection established, starting sending\n";
-    if (ev.isGUI())
-        getDisplayString().setTagArg("t", 0, "connected");
-
-    // send
-    if (sendBytes > 0)
-    {
-        waitUntil(tSend);
-        EV << "sending " << sendBytes << " bytes\n";
-        cPacket *msg = genDataMsg(sendBytes);
-        bytesSent += sendBytes;
-        emit(sentPkSignal, msg);
-        socket.send(msg);
-    }
-
-    for (CommandVector::iterator i = commands.begin(); i != commands.end(); ++i)
-    {
-        waitUntil(i->tSend);
-        EV << "sending " << i->numBytes << " bytes\n";
-        cPacket *msg = genDataMsg(i->numBytes);
-        bytesSent += i->numBytes;
-        emit(sentPkSignal, msg);
-        socket.send(msg);
-    }
-
-    // close
-    if (tClose >= 0)
-    {
-        waitUntil(tClose);
-        EV << "issuing CLOSE command\n";
-
-        if (ev.isGUI())
-            getDisplayString().setTagArg("t", 0, "closing");
-
-        socket.close();
-    }
-
-    // wait until peer closes too and all data arrive
-    for (;;)
-    {
-        cMessage *msg = receive();
-        count(msg);
-        socket.processMessage(msg);
-        if (ev.isGUI())
-            getDisplayString().setTagArg("t", 0, TCPSocket::stateName(socket.getState()));
+        while (isspace(*s))
+            s++;
     }
 }
 

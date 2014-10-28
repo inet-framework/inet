@@ -178,7 +178,11 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
     clear();
 
     // Loop through all modules and find those that satisfy the criteria
+#if OMNETPP_VERSION < 0x500
     for (int modId=0; modId<=simulation.getLastModuleId(); modId++)
+#else
+    for (int modId=0; modId<=simulation.getLastComponentId(); modId++)
+#endif
     {
         cModule *module = simulation.getModule(modId);
         if (module && predicate(module, data)) {

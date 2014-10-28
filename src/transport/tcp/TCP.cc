@@ -18,6 +18,7 @@
 
 #include "TCP.h"
 
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "LifecycleOperation.h"
@@ -76,34 +77,40 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize(int stage)
 {
-  if (stage == 0)
-  {
-    const char *q;
-    q = par("sendQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+    cSimpleModule::initialize(stage);
 
-    q = par("receiveQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+    if (stage == 0)
+    {
+        const char *q;
+        q = par("sendQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
-    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    WATCH(lastEphemeralPort);
+        q = par("receiveQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-    WATCH_PTRMAP(tcpConnMap);
-    WATCH_PTRMAP(tcpAppConnMap);
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+        WATCH(lastEphemeralPort);
 
-    recordStatistics = par("recordStats");
+        WATCH_PTRMAP(tcpConnMap);
+        WATCH_PTRMAP(tcpAppConnMap);
 
-    cModule *netw = simulation.getSystemModule();
-    testing = netw->hasPar("testing") && netw->par("testing").boolValue();
-    logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
-  }
-  else if (stage == 1)
-  {
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-  }
+        recordStatistics = par("recordStats");
+
+        cModule *netw = simulation.getSystemModule();
+        testing = netw->hasPar("testing") && netw->par("testing").boolValue();
+        logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
+    }
 }
 
 TCP::~TCP()

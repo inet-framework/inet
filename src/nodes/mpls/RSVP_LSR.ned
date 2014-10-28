@@ -111,11 +111,11 @@ module RSVP_LSR
             @display("p=50,345");
         }
     connections allowunconnected:
-        linkStateRouting.ipOut --> networkLayer.ospfIn;
-        linkStateRouting.ipIn <-- networkLayer.ospfOut;
+        linkStateRouting.ipOut --> networkLayer.transportIn++;
+        linkStateRouting.ipIn <-- networkLayer.transportOut++;
 
-        rsvp.ipOut --> networkLayer.rsvpIn;
-        rsvp.ipIn <-- networkLayer.rsvpOut;
+        rsvp.ipOut --> networkLayer.transportIn++;
+        rsvp.ipIn <-- networkLayer.transportOut++;
 
         lo0.upperLayerOut --> networkLayer.ifIn[0];
         networkLayer.ifOut[0] --> lo0.upperLayerIn;

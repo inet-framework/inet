@@ -26,6 +26,7 @@
 class InterfaceEntry;
 class IRoutingTable;
 
+
 /**
  * IPv4 unicast route in IRoutingTable.
  *
@@ -35,7 +36,7 @@ class INET_API IPv4Route : public cObject
 {
   public:
     /** Specifies where the route comes from */
-    enum RouteSource
+    enum SourceType
     {
         MANUAL,       ///< manually added static route
         IFACENETMASK, ///< comes from an interface's netmask
@@ -45,6 +46,8 @@ class INET_API IPv4Route : public cObject
         ZEBRA,        ///< managed by the Quagga/Zebra based model
         MANET,        ///< managed by manet, search exact address
         MANET2,       ///< managed by manet, search approximate address
+        DYMO,         ///< managed by xDymo
+        AODV,         ///< managed by
     };
 
     /** Cisco like administrative distances */
@@ -73,9 +76,11 @@ class INET_API IPv4Route : public cObject
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteSource source;   ///< manual, routing prot, etc.
+    SourceType sourceType;   ///< manual, routing prot, etc.
     unsigned int adminDist; ///< Cisco like administrative distance
     int metric;           ///< Metric ("cost" to reach the destination)
+    cObject *source;   ///< Object identifying the source
+    cObject *protocolData; ///< Routing Protocol specific data
 
   public:
     // field codes for changed()
@@ -91,9 +96,9 @@ class INET_API IPv4Route : public cObject
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), adminDist(dUnknown),
-                  metric(0) {}
-    virtual ~IPv4Route() {}
+    IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
+                  metric(0), source(NULL), protocolData(NULL) {}
+    virtual ~IPv4Route();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
@@ -112,7 +117,7 @@ class INET_API IPv4Route : public cObject
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
-    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setAdminDist(unsigned int _adminDist)  { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
@@ -132,13 +137,21 @@ class INET_API IPv4Route : public cObject
     const char *getInterfaceName() const;
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
+    SourceType getSourceType() const {return sourceType;}
 
     /** Route source specific preference value */
     unsigned int getAdminDist() const  { return adminDist; }
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
+
+    void setSource(cObject *_source) { if (source != _source) {source = _source; changed(F_SOURCE);}}
+    cObject *getSource() const { return source; }
+
+    cObject *getProtocolData() const { return protocolData; }
+    void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
+
+    static const char *sourceTypeName(SourceType sourceType);
 };
 
 /**
@@ -196,7 +209,7 @@ class INET_API IPv4MulticastRoute : public cObject
     typedef std::vector<OutInterface*> OutInterfaceVector;
 
     /** Specifies where the route comes from */
-    enum RouteSource
+    enum SourceType
     {
         MANUAL,       ///< manually added static route
         DVMRP,        ///< managed by DVMRP router
@@ -211,7 +224,8 @@ class INET_API IPv4MulticastRoute : public cObject
     IPv4Address group;             ///< Multicast group, if unspecified then matches any
     InInterface *inInterface;      ///< In interface (upstream)
     OutInterfaceVector outInterfaces; ///< Out interfaces (downstream)
-    RouteSource source;            ///< manual, routing prot, etc.
+    SourceType sourceType;            ///< manual, routing prot, etc.
+    cObject *source;               ///< Object identifying the source
     int metric;                    ///< Metric ("cost" to reach the source)
 
   public:
@@ -227,7 +241,7 @@ class INET_API IPv4MulticastRoute : public cObject
     IPv4MulticastRoute& operator=(const IPv4MulticastRoute& obj);
 
   public:
-    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), source(MANUAL), metric(0) {}
+    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), sourceType(MANUAL), metric(0) {}
     virtual ~IPv4MulticastRoute();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -251,9 +265,9 @@ class INET_API IPv4MulticastRoute : public cObject
     virtual void setInInterface(InInterface *_inInterface);
     virtual void clearOutInterfaces();
     virtual void addOutInterface(OutInterface *outInterface);
-    virtual bool removeOutInterface(InterfaceEntry *ie);
+    virtual bool removeOutInterface(const InterfaceEntry *ie);
     virtual void removeOutInterface(unsigned int i);
-    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Source address prefix to match */
@@ -275,10 +289,13 @@ class INET_API IPv4MulticastRoute : public cObject
     OutInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
+    SourceType getSourceType() const {return sourceType;}
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
+
+    void setSource(cObject *_source) { source = _source; }
+    cObject *getSource() const { return source; }
 };
 #endif // __INET_IPv4ROUTE_H
 

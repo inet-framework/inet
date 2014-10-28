@@ -1,3 +1,11 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-03  Alfonso Ariza Quintana

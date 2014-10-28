@@ -115,7 +115,6 @@ class INET_API AnnotationManager : public cSimpleModule
     typedef std::list<Annotation*> Annotations;
     typedef std::list<Group*> Groups;
 
-    bool debug; /**< whether to emit debug messages */
     cXMLElement* annotationsXml; /**< annotations to add at startup */
 
     Annotations annotations;

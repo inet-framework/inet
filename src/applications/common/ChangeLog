@@ -1,0 +1,7 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-22  Levente Meszaros
+
+	Renamed AppBase to ApplicationBase and moved to common.

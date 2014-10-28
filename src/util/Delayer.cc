@@ -22,17 +22,13 @@
 
 Define_Module(Delayer);
 
-simsignal_t Delayer::rcvdPkSignal;
-simsignal_t Delayer::sentPkSignal;
-simsignal_t Delayer::delaySignal;
+simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t Delayer::sentPkSignal = registerSignal("sentPk");
+simsignal_t Delayer::delaySignal = registerSignal("delay");
 
 void Delayer::initialize()
 {
     delayPar = &par("delay");
-    //statistics
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    delaySignal = registerSignal("delay");
 }
 
 void Delayer::handleMessage(cMessage *msg)

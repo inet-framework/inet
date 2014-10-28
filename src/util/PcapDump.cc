@@ -35,6 +35,11 @@
 #include "IPv4Serializer.h"
 #endif
 
+#ifdef WITH_IPv6
+#include "IPv6Datagram.h"
+#include "IPv6Serializer.h"
+#endif
+
 
 #define MAXBUFLENGTH 65536
 
@@ -119,6 +124,35 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     fwrite(buf, ph.incl_len - sizeof(uint32), 1, dumpfile);
 #else
     throw cRuntimeError("Cannot write frame: INET compiled without IPv4 feature");
+#endif
+}
+
+void PcapDump::writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket)
+{
+    if (!dumpfile)
+        throw cRuntimeError("Cannot write frame: pcap output file is not open");
+
+#ifdef WITH_IPv6
+    uint8 buf[MAXBUFLENGTH];
+    memset((void*)&buf, 0, sizeof(buf));
+
+    struct pcaprec_hdr ph;
+    ph.ts_sec = (int32)stime.dbl();
+    ph.ts_usec = (uint32)((stime.dbl() - ph.ts_sec) * 1000000);
+     // Write Ethernet header
+    uint32 hdr = 2; //AF_INET
+
+    int32 serialized_ip = IPv6Serializer().serialize(ipPacket, buf, sizeof(buf));
+    if (serialized_ip > 0) {
+        ph.orig_len = serialized_ip + sizeof(uint32);
+
+        ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
+        fwrite(&ph, sizeof(ph), 1, dumpfile);
+        fwrite(&hdr, sizeof(uint32), 1, dumpfile);
+        fwrite(buf, ph.incl_len - sizeof(uint32), 1, dumpfile);
+    }
+#else
+    throw cRuntimeError("Cannot write frame: INET compiled without IPv6 feature");
 #endif
 }
 

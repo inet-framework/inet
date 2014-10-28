@@ -22,9 +22,10 @@ import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
-import inet.mobility.IMobility;
+import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.RoutingTable6;
+import inet.util.PcapRecorder;
 
 
 //
@@ -43,6 +44,7 @@ module NodeBase6
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
+        int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default("StationaryMobility");
         xml routingTable = default(xml("<routingTable/>"));
         bool IPForward = default(true);
@@ -79,6 +81,10 @@ module NodeBase6
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=53,287;is=s");
+        }
+
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=53,338,r,10");
         }
 
         lo0: LoopbackInterface {

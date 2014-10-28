@@ -48,6 +48,7 @@ enum SAPCode
     SAP_NOVELL_IPX = 0xE0;
     SAP_LAN_MANAGER = 0xF4;
     SAP_CLNS = 0xFE;
+    SAP_STP = 0x42;
 }
 
 
@@ -74,8 +75,9 @@ class Ieee802Ctrl
 {
     MACAddress src;  // src MAC address (can be left empty when sending)
     MACAddress dest; // dest MAC address
-    int etherType enum (EtherType);   // used with ~EthernetIIFrame
-    int interfaceId; // incoming or outgoing interface (not needed everywhere) 
+    int etherType @enum(EtherType);   // used with ~EthernetIIFrame
+    int interfaceId; // incoming or outgoing interface (not needed everywhere)
+    int switchPort = -1; // swich port index (only in swiches)
     int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE

@@ -46,6 +46,8 @@ double getAttributeDoubleValue(const cXMLElement *ptr, const char *name);
 double getAttributeDoubleValue(const cXMLElement *ptr, const char *name, double def);
 
 const char *getRequiredAttribute(const cXMLElement& node, const char *attr);
+bool getAttributeBoolValue(const cXMLElement *node, const char *attrName, bool defVal);
+bool getAttributeBoolValue(const cXMLElement *node, const char *attrName);
 
 bool parseBool(const char *text);
 

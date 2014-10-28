@@ -53,7 +53,6 @@ simple HttpServerEvilA like ITCPApp
         string hostName;        // The domain name of the server
         int port;               // The listening port number
         int httpProtocol;       // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
-        int logLevel;           // The log level: 2: Debug, 1: Info; 0: Errors and warnings only
         string logFile;         // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition;  // The site script file. Blank to disable.
         xml config;             // The XML configuration file for random sites

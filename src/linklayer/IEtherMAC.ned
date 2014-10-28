@@ -29,7 +29,7 @@ package inet.linklayer;
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
 // - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
-//   or ~MACRelayUnitPP (in a switch)
+//   or ~IMACRelayUnit (in a switch)
 //
 // The module does not perform encapsulation or decapsulation of frames --
 // this is done by higher layers (~EtherLLC or ~EtherEncap).
@@ -61,8 +61,8 @@ moduleinterface IEtherMAC
         int mtu @unit("B");
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~IMACRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~IMACRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

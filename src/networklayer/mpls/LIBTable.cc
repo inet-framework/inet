@@ -20,23 +20,24 @@
 
 Define_Module(LIBTable);
 
+
 void LIBTable::initialize(int stage)
 {
-    if (stage==0)
-        maxLabel = 0;
+    cSimpleModule::initialize(stage);
 
-    // we have to wait until routerId gets assigned in stage 3
-    if (stage==4)
+    if (stage == 0)
+    {
+        maxLabel = 0;
+        WATCH_VECTOR(lib);
+    }
+    else if (stage == 4)
     {
         RoutingTableAccess routingTableAccess;
         IRoutingTable *rt = routingTableAccess.get();
         routerId = rt->getRouterId();
 
         // read configuration
-
         readTableFromXML(par("config").xmlValue());
-
-        WATCH_VECTOR(lib);
     }
 }
 

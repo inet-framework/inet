@@ -36,7 +36,7 @@ class INET_API RoutingTableRecorder : public cSimpleModule
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
   protected:
-    virtual int numInitStages() const  {return 1;}
+    virtual int numInitStages() const { return 1; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *);
     virtual void hookListeners();

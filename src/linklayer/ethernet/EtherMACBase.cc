@@ -18,7 +18,7 @@
 
 #include "EtherMACBase.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
@@ -121,21 +121,20 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     }
 };
 
-simsignal_t EtherMACBase::txPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkOkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::txPausePkUnitsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPausePkUnitsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkFromHLSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkNotForUsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkBitErrorSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::txPkSignal = registerSignal("txPk");
+simsignal_t EtherMACBase::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
+simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
+simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
+simsignal_t EtherMACBase::dropPkBitErrorSignal = registerSignal("dropPkBitError");
+simsignal_t EtherMACBase::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
+simsignal_t EtherMACBase::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
-simsignal_t EtherMACBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
-
+simsignal_t EtherMACBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
+simsignal_t EtherMACBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+simsignal_t EtherMACBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
+simsignal_t EtherMACBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 EtherMACBase::EtherMACBase()
 {
@@ -160,6 +159,8 @@ EtherMACBase::~EtherMACBase()
 
 void EtherMACBase::initialize(int stage)
 {
+    connectionColoring = par("connectionColoring");
+
     MACBase::initialize(stage);
 
     if (stage == 0)
@@ -173,12 +174,7 @@ void EtherMACBase::initialize(int stage)
         initializeFlags();
 
         initializeMACAddress();
-        initializeQueueModule();
         initializeStatistics();
-
-        registerInterface(); // needs MAC address
-
-        readChannelParameters(true);
 
         lastTxFinishTime = -1.0; // not equals with current simtime.
 
@@ -198,6 +194,11 @@ void EtherMACBase::initialize(int stage)
         WATCH(pauseUnitsRequested);
 
         subscribe(POST_MODEL_CHANGE, this);
+
+        // INITSTAGE_LINK_LAYER
+        registerInterface(); // needs MAC address
+        initializeQueueModule();
+        readChannelParameters(true);
     }
 }
 
@@ -292,20 +293,6 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
 
-    txPkSignal = registerSignal("txPk");
-    rxPkOkSignal = registerSignal("rxPkOk");
-    txPausePkUnitsSignal = registerSignal("txPausePkUnits");
-    rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-    rxPkFromHLSignal = registerSignal("rxPkFromHL");
-    dropPkBitErrorSignal = registerSignal("dropPkBitError");
-    dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
-    dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
-    dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
-
-    packetSentToLowerSignal = registerSignal("packetSentToLower");
-    packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-    packetSentToUpperSignal = registerSignal("packetSentToUpper");
-    packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 }
 
 InterfaceEntry *EtherMACBase::createInterfaceEntry()
@@ -360,11 +347,12 @@ bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage
     return MACBase::handleOperationStage(operation, stage, doneCallback);
 }
 
-void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)
+void EtherMACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 
-    ASSERT(signalId == POST_MODEL_CHANGE);
+    if (signalID != POST_MODEL_CHANGE)
+        return;
 
     if (dynamic_cast<cPostPathCreateNotification *>(obj))
     {
@@ -503,12 +491,6 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     return true;
 }
 
-template<class T>
-T check_and_cast_nullable(cObject *p)
-{
-    return p ? check_and_cast<T>(p) : NULL;
-}
-
 void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     // When the connected channels change at runtime, we'll receive
@@ -532,7 +514,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
     bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
 
     if (errorWhenAsymmetric && (rxDisabled != txDisabled))
-        throw cRuntimeError("The input/output channels states differ (%s / %)", rxDisabled?"off":"on", txDisabled?"off":"on");
+        throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled?"off":"on", txDisabled?"off":"on");
 
     if (txDisabled)
         connected = false;
@@ -560,7 +542,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
     channelsDiffer = dataratesDiffer || (rxDisabled != txDisabled);
 
     if (errorWhenAsymmetric && dataratesDiffer)
-        throw cRuntimeError("The input/output datarates differ (%g / %g bps)", rxRate, txRate);
+        throw cRuntimeError("The input/output datarates differ (rx=%g bps vs tx=%g bps)", rxRate, txRate);
 
     if (connected)
     {
@@ -710,7 +692,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     else
         color = "";
 
-    if (ev.isGUI())
+    if (ev.isGUI() && connectionColoring)
     {
         if (connected)
         {

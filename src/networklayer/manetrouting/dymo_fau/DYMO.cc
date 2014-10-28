@@ -27,6 +27,7 @@
 #include "UDPPacket.h"
 #include "ModuleAccess.h"
 #include "IPv4.h"
+#include "ControlManetRouting_m.h"
 
 Define_Module( DYMO );
 
@@ -52,11 +53,11 @@ DYMO::DYMO()
     DYMO_INTERFACES = NULL;
 }
 
-void DYMO::initialize(int aStage)
+void DYMO::initialize(int stage)
 {
-    cSimpleModule::initialize(aStage);
+    ManetRoutingBase::initialize(stage);
 
-    if (4 == aStage)
+    if (stage == 4)
     {
         ownSeqNumLossTimeout = new DYMO_Timer(this, "OwnSeqNumLossTimeout");
         WATCH_PTR(ownSeqNumLossTimeout);
@@ -127,6 +128,7 @@ void DYMO::initialize(int aStage)
         WATCH_PTR(queuedDataPackets);
 
         registerRoutingModule();
+
         // setSendToICMP(true);
         myAddr = getAddress().getIPv4().getInt();   //FIXME
         linkLayerFeeback();

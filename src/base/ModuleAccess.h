@@ -57,6 +57,12 @@ INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 INET_API cModule *findContainingNode(cModule *from);
 
 /**
+ * Find the node containing the given module.
+ * throws error if no containing node.
+ */
+INET_API cModule *getContainingNode(cModule *from);
+
+/**
  * Find the ancestor module under the node containing the given module.
  * Returns NULL, if no such node found.
  */

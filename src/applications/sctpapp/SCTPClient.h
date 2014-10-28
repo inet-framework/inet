@@ -72,6 +72,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void sendRequest(bool last = true);
 
     public:
+        SCTPClient();
+        virtual ~SCTPClient();
         struct pathStatus
         {
             bool active;
@@ -86,6 +88,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
+        virtual int numInitStages() const { return 4; }
+
         /**
          * Initialization.
          */

@@ -1,0 +1,34 @@
+#! /usr/bin/env python
+# This script replaces header guards in all header files in current directory and 
+# subdirectories with the format: __INET_[FILENAME]_H.
+#
+
+import re
+import string
+import fnmatch
+import os
+
+# configuration parameters
+rootPath = '.'
+fileType = '*.h'
+
+def getUpperCaseFilename(filename) :
+	return filename[:-2].upper()	
+
+for root, dirs, files in os.walk(rootPath):
+	for filename in fnmatch.filter(files,fileType):
+		f = open(os.path.join(root,filename),'r')
+		headerFile = f.read()
+		pattern = "#ifndef .*_H.*\n#define.*"
+		m = re.search(pattern,headerFile)
+		if not m:
+			print filename
+		else:
+			symbol = "__INET_" + getUpperCaseFilename(filename) + "_H"
+			replacement = "#ifndef " + symbol + "\n#define " + symbol
+			newHeader = re.sub(pattern,replacement,headerFile)
+			if headerFile != newHeader:
+				f2 = open(os.path.join(root,filename),'w')
+				f2.write(newHeader)
+				f2.close()
+		f.close()

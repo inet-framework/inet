@@ -24,8 +24,8 @@
 
 Define_Module(NetAnimTrace);
 
-simsignal_t NetAnimTrace::messageSentSignal = SIMSIGNAL_NULL;
-simsignal_t NetAnimTrace::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t NetAnimTrace::messageSentSignal = registerSignal("messageSent");
+simsignal_t NetAnimTrace::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 // TODO: after release of OMNeT++ 4.1 final, update this code to similar class in omnetpp/contrib/util
 
@@ -41,8 +41,6 @@ void NetAnimTrace::initialize()
 
     dump();
 
-    messageSentSignal = registerSignal("messageSent");
-    mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
     simulation.getSystemModule()->subscribe(POST_MODEL_CHANGE, this);
     simulation.getSystemModule()->subscribe(messageSentSignal, this);
     simulation.getSystemModule()->subscribe(mobilityStateChangedSignal, this);

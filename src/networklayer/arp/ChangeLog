@@ -1,3 +1,25 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-17  Zoltan Bojthe
+
+	backport: InterfaceEntry: add field id to change notifications
+
+2014-01-14  Zoltan Bojthe
+
+	ARP: removed unused pendingQueue;
+
+2014-01-13  Zoltan Bojthe
+
+	backport: backported ARP, IPv4
+
+	TMP3
+
+2014-01-14  Zoltan Bojthe
+
+	backport: copied IPv4 and ARP codes from integration branch
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-03  Alfonso Ariza

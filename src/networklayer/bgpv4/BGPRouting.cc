@@ -39,16 +39,17 @@ BGPRouting::~BGPRouting(void)
 
 void BGPRouting::initialize(int stage)
 {
-    if (stage == 1)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 4)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage==4) // we must wait until RoutingTable is completely initialized
-    {
+
+        // we must wait until RoutingTable is completely initialized
         _rt = RoutingTableAccess().get();
         _inft = InterfaceTableAccess().get();
 
@@ -329,7 +330,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
 
     //Don't add the route if it exists in IPv4 routing table except if the msg come from IGP session
     int indexIP = isInRoutingTable(_rt, entry->getDestination());
-    if (indexIP != -1 && _rt->getRoute(indexIP)->getSource() != IPv4Route::BGP )
+    if (indexIP != -1 && _rt->getRoute(indexIP)->getSourceType() != IPv4Route::BGP )
     {
         if (_BGPSessions[sessionIndex]->getType() != BGP::IGP )
         {
@@ -342,7 +343,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
             newEntry->setNetmask(_rt->getRoute(indexIP)->getNetmask());
             newEntry->setGateway(_rt->getRoute(indexIP)->getGateway());
             newEntry->setInterface(_rt->getRoute(indexIP)->getInterface());
-            newEntry->setSource(IPv4Route::BGP);
+            newEntry->setSourceType(IPv4Route::BGP);
             _rt->deleteRoute(_rt->getRoute(indexIP));
             _rt->addRoute(newEntry);
         }
@@ -837,7 +838,7 @@ bool BGPRouting::ospfExist(IRoutingTable* rtTable)
 {
     for (int i=0; i<rtTable->getNumRoutes(); i++)
     {
-        if (rtTable->getRoute(i)->getSource() == IPv4Route::OSPF)
+        if (rtTable->getRoute(i)->getSourceType() == IPv4Route::OSPF)
         {
             return true;
         }

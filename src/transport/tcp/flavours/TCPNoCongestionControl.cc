@@ -21,7 +21,7 @@
 Register_Class(TCPNoCongestionControl);
 
 TCPNoCongestionControl::TCPNoCongestionControl() : TCPBaseAlg(),
-  state((TCPNoCongestionControlStateVariables *&)TCPAlgorithm::state)
+        state((TCPNoCongestionControlStateVariables *&)TCPAlgorithm::state)
 {
 }
 

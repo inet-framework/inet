@@ -15,18 +15,29 @@
 
 #include "DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
 #include "DSDV_2.h"
+#include "IPSocket.h"
 
 #define NOforwardHello
+
 Define_Module(DSDV_2);
+
 
 void DSDV_2::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //reads from omnetpp.ini
-    if (stage==4)
+    if (stage == 0)
     {
         sequencenumber = 0;
         ift = NULL;
         rt = NULL;
+    }
+    else if (stage == 4)
+    {
+        IPSocket socket(gate("to_ip"));
+        socket.registerProtocol(IP_PROT_MANET);
+
         ift = InterfaceTableAccess().get();
         /* Search the 80211 interface */
         int  num_80211 = 0;
@@ -79,7 +90,6 @@ void DSDV_2::initialize(int stage)
         forwardList = new list<forwardHello*>;
         event = new cMessage("event");
         scheduleAt( uniform(0, par("MaxVariance_DSDV").doubleValue(), par("RNGseed_DSDV").doubleValue()), event);
-
     }
 }
 
@@ -356,7 +366,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setNetmask(netmask);
                     e->setGateway(next);
                     e->setInterface(interface80211ptr);
-                    e->setSource(IPv4Route::MANET);
+                    e->setSourceType(IPv4Route::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);
                     e->setExpiryTime(simTime()+routeLifetime);

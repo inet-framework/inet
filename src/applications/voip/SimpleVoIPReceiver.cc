@@ -24,6 +24,13 @@
 
 Define_Module(SimpleVoIPReceiver);
 
+simsignal_t SimpleVoIPReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
+simsignal_t SimpleVoIPReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
+simsignal_t SimpleVoIPReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
+simsignal_t SimpleVoIPReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
+simsignal_t SimpleVoIPReceiver::mosSignal = registerSignal("VoIPMosSignal");
+simsignal_t SimpleVoIPReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+
 void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
 {
     status = ACTIVE;
@@ -63,15 +70,9 @@ SimpleVoIPReceiver::~SimpleVoIPReceiver()
 
 void SimpleVoIPReceiver::initialize(int stage)
 {
-    if (stage == 1)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
     {
         emodel_Ie = par("emodel_Ie");
         emodel_Bpl = par("emodel_Bpl");
@@ -82,6 +83,16 @@ void SimpleVoIPReceiver::initialize(int stage)
         playoutDelay = par("playoutDelay");
         mosSpareTime = par("mosSpareTime");
 
+        currentTalkspurt.talkspurtID = -1;
+    }
+    else if (stage == 3)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
         int port = par("localPort");
         EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
         if (port != -1) {
@@ -89,15 +100,7 @@ void SimpleVoIPReceiver::initialize(int stage)
             socket.bind(port);
         }
 
-        currentTalkspurt.talkspurtID = -1;
         selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
-
-        packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-        packetDelaySignal = registerSignal("VoIPPacketDelay");
-        playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-        playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-        mosSignal = registerSignal("VoIPMosSignal");
-        taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
     }
 }
 

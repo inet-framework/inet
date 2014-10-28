@@ -25,6 +25,35 @@
 #include "InterfaceEntry.h"
 #include "IRoutingTable.h"
 
+#ifdef WITH_AODV
+#include "AODVRouteData.h"
+#endif
+
+Register_Class(IPv4Route);
+Register_Class(IPv4MulticastRoute);
+
+
+const char *IPv4Route::sourceTypeName(SourceType sourceType)
+{
+    switch (sourceType)
+    {
+        case MANUAL:               return "MANUAL";
+        case IFACENETMASK:         return "IFACENETMASK";
+        case RIP:                  return "RIP";
+        case OSPF:                 return "OSPF";
+        case BGP:                  return "BGP";
+        case ZEBRA:                return "ZEBRA";
+        case MANET:                return "MANET";
+        case MANET2:               return "MANET2";
+        case DYMO:                 return "DYMO";
+        case AODV:                 return "AODV";
+        default:                   return "???";
+    }
+}
+
+IPv4Route::~IPv4Route()
+{
+}
 
 std::string IPv4Route::info() const
 {
@@ -34,31 +63,20 @@ std::string IPv4Route::info() const
     out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "metric:" << metric << " ";
-    if (interfacePtr)
-    {
-        out << "if:" << interfacePtr->getName();
-        if (interfacePtr->ipv4Data())
-            out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
-    }
-    else
-    {
-        out << "if:*";
-    }
+    out << "if:"; if (!interfacePtr) out << "*"; else out << interfacePtr->getName();
+    if (interfacePtr && interfacePtr->ipv4Data())
+        out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
     out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
+    out << " " << sourceTypeName(sourceType);
 
-    switch (source)
+#ifdef WITH_AODV
+    if (dynamic_cast<AODVRouteData*>(protocolData))
     {
-        case MANUAL:       out << " MANUAL"; break;
-        case IFACENETMASK: out << " IFACENETMASK"; break;
-        case RIP:          out << " RIP"; break;
-        case OSPF:         out << " OSPF"; break;
-        case BGP:          out << " BGP"; break;
-        case ZEBRA:        out << " ZEBRA"; break;
-        case MANET:        out << " MANET"; break;
-        default:           out << " ???"; break;
+        AODVRouteData * data = (AODVRouteData*) protocolData;
+        out << data;
     }
-
+#endif
     return out.str();
 }
 
@@ -70,7 +88,7 @@ std::string IPv4Route::detailedInfo() const
 bool IPv4Route::equals(const IPv4Route& route) const
 {
     return rt == route.rt && dest == route.dest && netmask == route.netmask && gateway == route.gateway &&
-           interfacePtr == route.interfacePtr && source == route.source && metric == route.metric;
+           interfacePtr == route.interfacePtr && sourceType == route.sourceType && metric == route.metric;
 }
 
 const char *IPv4Route::getInterfaceName() const
@@ -109,7 +127,7 @@ std::string IPv4MulticastRoute::info() const
         out << outInterfaces[i]->getInterface()->getName();
     }
 
-    switch (source)
+    switch (sourceType)
     {
         case MANUAL:       out << " MANUAL"; break;
         case DVMRP:        out << " DVRMP"; break;
@@ -169,7 +187,7 @@ void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     }
 }
 
-bool IPv4MulticastRoute::removeOutInterface(InterfaceEntry *ie)
+bool IPv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
 {
     for (OutInterfaceVector::iterator it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
     {

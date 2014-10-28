@@ -1,3 +1,34 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-01-17  Zoltan Bojthe
+
+	ethernet: added EtherFrame.h
+
+2013-11-29  Levente Mészáros
+
+	Ieee80211: send interface ID in notifications
+
+2013-11-15  Rudolf Hornig
+
+	802.11mac: fixed missing default bitrate values. Changed the default
+	bitrate to 1Mbps according to spec.
+
+	Fingerprints updated.
+
+2013-11-13  Rudolf Hornig
+
+	Ieee802.11: fix for controlBitrate parameter.
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-29  Zoltan Bojthe
@@ -74,7 +105,6 @@
 
 	TODO maybe introduce a check_and_const_cast<> macro as shortcut for
 	const_cast<T*>(check_and_cast<const T*>(p)) ?
-
 
 2013-02-20  Andras Varga
 

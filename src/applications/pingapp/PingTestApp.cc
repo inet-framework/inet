@@ -41,11 +41,11 @@ using std::cout;
 
 Define_Module(PingTestApp);
 
-simsignal_t PingTestApp::rttSignal = SIMSIGNAL_NULL;
-simsignal_t PingTestApp::numLostSignal = SIMSIGNAL_NULL;
-simsignal_t PingTestApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
-simsignal_t PingTestApp::pingTxSeqSignal = SIMSIGNAL_NULL;
-simsignal_t PingTestApp::pingRxSeqSignal = SIMSIGNAL_NULL;
+simsignal_t PingTestApp::rttSignal = registerSignal("rtt");
+simsignal_t PingTestApp::numLostSignal = registerSignal("numLost");
+simsignal_t PingTestApp::outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+simsignal_t PingTestApp::pingTxSeqSignal = registerSignal("pingTxSeq");
+simsignal_t PingTestApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
 
 void PingTestApp::initialize(int stage)
@@ -75,11 +75,6 @@ void PingTestApp::initialize(int stage)
 
         // statistics
         rttStat.setName("pingRTT");
-        rttSignal = registerSignal("rtt");
-        numLostSignal = registerSignal("numLost");
-        outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
-        pingTxSeqSignal = registerSignal("pingTxSeq");
-        pingRxSeqSignal = registerSignal("pingRxSeq");
 
         lossCount = outOfOrderArrivalCount = numPongs = 0;
         WATCH(lossCount);
@@ -93,7 +88,7 @@ void PingTestApp::initialize(int stage)
             scheduleAt(startTime, msg);
         }
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -161,7 +156,11 @@ std::vector<IPvXAddress> PingTestApp::getAllAddresses()
 {
     std::vector<IPvXAddress> result;
 
+#if OMNETPP_VERSION < 0x500
     for (int i=0; i<=simulation.getLastModuleId(); i++)
+#else
+    for (int i=0; i<=simulation.getLastComponentId(); i++)
+#endif
     {
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(simulation.getModule(i));
         if (ift)
@@ -212,9 +211,9 @@ void PingTestApp::sendPing()
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PINGTEST_HISTORY_SIZE] = simTime();
 
-    sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
+    sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
 void PingTestApp::scheduleNextPing(cMessage *timer)

@@ -1,3 +1,105 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2013-12-18  Zoltan Bojthe
+
+	MACAddressTable: changed default value of agingTime parameter -
+	fingerprints changed
+
+2013-12-17  Benmartin92
+
+	MACAddressTable: bugfixes (memory leak and wrong behavior) in flush() and
+	updateTableWithAddress() - flush() erased wrong ports (j <--> cur). -
+	updateTableWithAddress() missed to set addressTable to VLAN ID 0 (after
+	clearTable()).
+
+2013-12-13  Zoltan Bojthe
+
+	uses MACRelayUnit instead of MACRelayUnitNP/MACRelayUnitPP
+
+2013-12-05  Benmartin92
+
+	Ieee8021DRelay: added interface autoselection.
+
+2013-12-04  Benmartin92
+
+	STP/RSTP/Relays: MAC table module access changed to work with
+	IMACAddressTable.
+
+2013-12-04  Benmartin92
+
+	IMACAddressTable: added class and moduleinterface for MAC tables.
+
+2013-11-21  ProZsolt
+
+	EtherMAC: transmission coloring
+
+	With a new parameter you can turn on/off transmission coloring
+
+2013-11-07  Benmartin92
+
+	Relay: folder name Relay -> relay - added isStpAware: if the switch is
+	STP/RSTP unaware then all its ports are forwarding (and learning) -
+	IEEE8021DRelay implements IMACRelayUnit interface - added STPGate to each
+	IMACRelayUnit implementations
+
+2013-10-31  Benmartin92
+
+	IEEE8021DRelay: EthernetIIFrame --> EtherFrame.
+
+2013-10-28  Benmartin92
+
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+
+2013-10-17  Benmartin92
+
+	IEEE8021DRelay: module added. This relay module is intended to work with
+	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
+
+2013-09-18  Benmartin92
+
+	Switch:
+
+	MACAddressTable:
+
+	- MACAddressTable now has removeAgedEntriesIfNeeded() for efficient MAC
+	 table purge.
+	- Added clearTable() for lifecycle.
+
+	MACRelayUnit: Added a simplified MACRelayUnit. It was necessary because
+	MAC address table management has been separated from MACRelayUnitBase
+	module.
+
+	IMACRelayUnit: This moduleinterface changed to work with MACRelayUnit.
+	There are no need for MAC address table configuration parameters anymore.
+
+	EtherSwitch: Added MACAddressTable.
+
+	Examples: ethernet/lans/largeNet example changed to work with the new
+	RelayUnit.
+
+	MACAddressTableAccess: MACAddressTable access name changed to macTable.
+	Switch: predefined address table support added to MACAddressTable.
+	Switch: MAC address comparator added to AddressTable.
+
+2013-09-12  Benmartin92
+
+	Switch: MACAddressTable changes:
+
+	- Now it uses std::map for efficient Address Table search and access
+	- Some major renaming: registerMAC -> updateTableWithAddress,
+	 resolveMAC -> getPortForAddress, etc.
+	- Some parts of code are based on MACRelayUnitBase.
+	- resolveMAC/getPortForAddress: outputPorts removed from parameters
+	 as it is not needed because getPortForAddress always returns a
+	 single port.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-29  Zoltan Bojthe
@@ -7,7 +109,7 @@
 
 2013-07-26  Zoltan Bojthe
 
-	EtherMACBase: bugfix: now it has two init stages because isNodeUp() uses another 
+	EtherMACBase: bugfix: now it has two init stages because isNodeUp() uses another
 	module that must be accessed in stage 1 or later only.
 
 2013-06-27  Zoltan Bojthe
@@ -53,7 +155,7 @@
 
 	Section 4.2.3.2.1, full duplex operation:
 	       After the last bit of a transmitted frame, (that is, when transmitting
-	       changes from true to false), the MAC continues to defer for a proper 
+	       changes from true to false), the MAC continues to defer for a proper
 	       interPacket-Gap (see 4.2.3.2.2) And further on (4.2.3.2.2):
 	       This is intended to provide interpacket recovery time for other CSMA/CD
 	       sublayers and for the physical medium."
