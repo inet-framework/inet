@@ -305,9 +305,9 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             088b-bc3c
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             90cb-14d6
 
-/examples/neighborcache/,            -f omnetpp.ini -c WithoutCache -r 0,           100s,            b076-0843
-/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeCache -r 0,          100s,            d848-33ec
-/examples/neighborcache/,            -f omnetpp.ini -c NeighborListCache -r 0,      100s,            2ba8-984c
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutCache -r 0,           100s,            13da-c2b6
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeCache -r 0,          100s,            ee04-9b54
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListCache -r 0,      100s,            ee04-9b54
 /examples/neighborcache/,            -f omnetpp.ini -c GridCache -r 0,              100s,            cd8a-9c10
 
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            a1d1-1101
