@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2012 Opensim Ltd.
 // Author: Tamas Borbely
+// Copyright (C) 2013 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -32,8 +33,11 @@ class REDDropper : public AlgorithmicDropperBase
     double *minths;
     double *maxths;
     double *maxps;
+    double *pkrates;
+    double *count;
 
     double avg;
+    simtime_t q_time;
 
   public:
     REDDropper() : wq(0), minths(NULL), maxths(NULL), maxps(NULL), avg(0.0) {}
@@ -41,6 +45,7 @@ class REDDropper : public AlgorithmicDropperBase
     virtual ~REDDropper();
     virtual void initialize();
     virtual bool shouldDrop(cPacket *packet);
+    virtual void sendOut(cPacket *packet);
 };
 
 #endif

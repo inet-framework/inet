@@ -54,6 +54,7 @@ simple REDDropper
         string minths = default("5");  // minimum thresholds for avg queue length (one number for each gate, last one repeated if needed)
         string maxths = default("50");  // maximum thresholds for avg queue length (=buffer capacity) (one number for each gate, last one repeated if needed)
         string maxps = default("0.02");  // maximum value for pbs (one number for each gate, last one repeated if needed)
+        string pkrates = default("150");  // average packet rate for calculations when queue is empty
         @display("i=block/downarrow");
 
     gates:
