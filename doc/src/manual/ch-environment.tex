@@ -11,12 +11,12 @@ offices, low-power wireless sensors must tolerate noisy industrial
 environments, batteries need to remain operational under various external
 conditions, and so on.
 
-The propagation of radio signals, the movement of communicating agents, battery
-exhaustion, etc., depend on the surrounding physical environment. For example,
-signals can be absorbed by objects, can pass through objects, can be refracted
-by surfaces, can be reflected from surfaces, battery nominal capacity might depend on
-external temperature, etc. These effects cannot be ignored in high-fidelity
-simulations.
+The propagation of radio signals, the movement of communicating agents,
+battery exhaustion, etc., depend on the surrounding physical environment.
+For example, signals can be absorbed by objects, can pass through objects,
+can be refracted by surfaces, can be reflected from surfaces, or battery
+nominal capacity might depend on external temperature. These effects cannot
+be ignored in high-fidelity simulations.
 
 In order to help the modeling process, the model of the physical
 environment is separated from the rest of the simulation models. The main
@@ -29,16 +29,43 @@ models that depend on these circumstances.
 The following sections provide a brief overview of the physical environment
 model.
 
+\section{The Physical Environment Model}
+
+The physical environment is represented in an INET simulation by a
+\nedtype{PhysicalEnvironment} module. This module normally has one instance
+in the network, and acts as a database that other parts of the simulation
+can query at runtime.
+
+\section{Global Physical Properties}
+
+The physical environment model stores the following global
+properties:
+
+\begin{itemize}
+  \item \textit{space limits}: global bounds for the 3-dimensional space
+  \item \textit{temperature}: global parameter for temperature-dependent models
+\end{itemize}
+
+Space limits are useful for limiting the propagation and reflection of
+radio signals, to constrain movement of communicating agents, and for
+detecting incorrectly positioned physical objects.
+
+Temperature can be useful for modeling batteries, as it affects the
+maximum capacity, internal resistance, self-discharge and other properties
+of real-life electrochemical energy storage devices.
+
 \section{Physical Objects}
 
 The most important aspect of the physical environment is the objects which
-are present in it, as they are obstructing radio signals. For example,
-simulating an indoor Wifi scenario needs to model walls, floors, ceilings,
-doors, windows, furniture, etc. These objects are located in space, have
-shapes and materials. The INET physical layer infrastructure supports basic
-shapes and homogeneous materials, which simplifies description and still
-allows for a reasonable approximation of reality. Physical objects in INET
-have the following properties:
+are present in it. For example, simulating an indoor Wifi scenario may need
+to model walls, floors, ceilings, doors, windows, furniture, and similar
+objects, because they all affect signal propagation.
+
+Objects are located in space, and have shapes and materials. The INET
+physical layer infrastructure supports basic shapes and homogeneous
+materials, which simplifies description and still allows for a reasonable
+approximation of reality. Physical objects in INET have the following
+properties:
 
 \begin{itemize}
   \item \textit{shape}: describes the 3-dimensional shape of the object,
@@ -59,12 +86,71 @@ supported, such shapes can be represented by splitting them up into smaller,
 convex parts. The current implementation provides the following shapes:
 
 \begin{itemize}
-  \item \cppclass{Sphere}: specified by a radius
-  \item \cppclass{Cuboid}: specified by a length, a width, and a height
-  \item \cppclass{Prism}: specified by a 2-dimensional polygon base and a height
-  \item \cppclass{Polyhedron}: specified by the convex hull of a set of
+  \item \textit{sphere}: specified by a radius
+  \item \textit{cuboid}: specified by a length, a width, and a height
+  \item \textit{prism}: specified by a 2-dimensional polygon base and a height
+  \item \textit{polyhedron}: specified by the convex hull of a set of
     3-dimensional vertices
 \end{itemize}
+
+\section{Visualization}
+
+The \nedtype{PhysicalEnvironment} module is capable is visualizing the objects on the
+user interface. Rendering makes use of the following graphical object properties:
+
+\begin{itemize}
+  \item \textit{line width}: affects surface outline
+  \item \textit{line color}: affects surface outline
+  \item \textit{fill color}: affects surface fill
+  \item \textit{opacity}: affects surface outline and fill
+  \item \textit{tags}: allows filtering objects on the graphical user interface
+\end{itemize}
+
+The projection of 3D objects to the 2D canvas can be parameterized with an
+arbitrary view angle. The default view angle is the Z axis (i.e. top view).
+The view angle can also be changed during runtime, by changing the
+appropriate module parameter.
+
+The projection mechanism can be accessed by other models (e.g. mobility
+models) for their own visualizations.
+
+\section{Specifying Physical Objects}
+
+Physical objects are defined for the \nedtype{PhysicalEnvironment} module
+in an XML document. The document format allows one to define physical objects
+together with their properties, and one can also define shapes and materials
+that are shared (i.e. referenced) by several objects.
+
+The following example shows some shapes, materials and objects defined in XML:
+
+\begin{verbatim}
+<environment>
+  <!-- shapes and materials -->
+  <shape id="1" type="sphere" radius="10"/>
+  <shape id="2" type="cuboid" size="20 30 40"/>
+  <shape id="3" type="prism" height="100"
+         points="0 0 100 0 100 100 0 100"/>
+  <shape id="4" type="polyhedron"
+         points="0 0 0 100 0 0 100 100 0 0 100 0 ..."/>
+  <material id="1" resistivity="100"
+         relativePermittivity="4.5" relativePermeability="1"/>
+
+  <!-- an object that uses a previously defined shape and material -->
+  <object position="min 100 200 0" orientation="45 -30 0"
+          shape="1" material="1"
+          line-color="0 0 0" fill-color="112 128 144" opacity="0.5"/>
+
+  <!-- an object defined with an in-line shape -->
+  <object position="min 100 200 0" orientation="45 -30 0"
+          shape="cuboid 20 30 40" material="concrete"
+          line-color="0 0 0" fill-color="112 128 144" tags="Building"/>
+</environment>
+\end{verbatim}
+
+For more details, please refer to the documentation of the
+\nedtype{PhysicalEnvironment} module.
+
+\section{Data Structure}
 
 In order to model the physical environment in detail, a scenario might contain
 several thousands or even more physical objects. Simulation models might
@@ -87,88 +173,7 @@ following:
     storing finite-sized objects.)
 \end{itemize}
 
-The physical environment uses \nedtype{GridObjectCache} by default.
-
-\section{Global Physical Properties}
-
-The INET physical environment infrastructure stores the following global
-properties:
-
-\begin{itemize}
-  \item \textit{space limits}: global bounds for the 3-dimensional space
-  \item \textit{ambient temperature}: global parameter for temperature-dependent models
-\end{itemize}
-
-Space limits are useful for limiting the propagation and reflection of
-radio signals, to constrain movement of communicating agents, and for
-detecting positioned physical objects.
-
-Ambient temperature can be useful for modeling batteries, as it affects the
-maximum capacity, internal resistance, self-discharge and other properties
-of real-life electrochemical energy storage devices.
-
-\section{Initialization}
-
-In order to easily define thousands of physical objects the model needs to use a
-flexible and concise representation. For this purpose, the physical environment
-uses an XML file format. This file can be used to define physical objects along
-with shapes, materials used by them. The following example demonstrates the
-syntax of this XML file format:
-
-\begin{verbatim}
-<environment>
-  <!-- shapes and materials -->
-  <shape id="1" type="sphere" radius="10"/>
-  <shape id="2" type="cuboid" size="20 30 40"/>
-  <shape id="3" type="prism" height="100"
-         points="0 0 100 0 100 100 0 100"/>
-  <shape id="4" type="polyhedron"
-         points="0 0 0 100 0 0 100 100 0 0 100 0 ..."/>
-  <material id="1" resistivity="100"
-            relativePermittivity="4.5" relativePermeability="1"/>
-  <!-- objects that use previously defined shapes and materials -->
-  <object position="min 100 200 0" orientation="45 -30 0"
-          shape="1" material="1"
-          line-color="0 0 0" fill-color="112 128 144" opacity="0.5"/>
-  <object position="min 100 200 0" orientation="45 -30 0"
-          shape="cuboid 20 30 40" material="concrete"
-          line-color="0 0 0" fill-color="112 128 144" tags="Building"/>
-</environment>
-\end{verbatim}
-
-For more details on the XML file format, please refer to the documentation in the
-\nedtype{PhysicalEnvironment} NED file.
-
-\section{Visualization}
-
-Understanding the abstract physical environment model from numerical log output,
-or debugging simulation models based on the numerical data structures is
-difficult. Therefore the physical environment supports visualizing the physical
-objects on the graphical user interface. The visualization is done by drawing
-the physical objects on the parent compound module as a separate layer. In order
-to help to distinguish among physical objects they have the following graphical
-properties:
-
-\begin{itemize}
-  \item \textit{line width}: surface outline
-  \item \textit{line color}: surface outline
-  \item \textit{fill color}: surface filling
-  \item \textit{opacity}: surface outline and filling
-  \item \textit{tags}: allows filtering objects on the graphical user interface
-\end{itemize}
-
-Although the physical objects are really modeled in 3 dimensions, the
-visualization is only 2 dimensional. The projection which converts physical
-objects to 2 dimensional shapes can be parameterized with an arbitrary view
-angle. The default view angle is the Z axis, in which case the layer shows the
-physical objects from above. The view angle can be changed during runtime using
-the parameter editor of the graphical user interface.
-
-The projection is also used by other models for their own visualizations. This
-approach makes visualizations well integrated with each other. For example, the
-mobility models position network nodes, the physical layer draws ongoing
-transmissions, the obstacle loss draws intersections between transmissions and
-objects, etc., on the canvas according to the projection described above.
+The physical environment model uses \nedtype{GridObjectCache} by default.
 
 %%% Local Variables:
 %%% mode: latex
