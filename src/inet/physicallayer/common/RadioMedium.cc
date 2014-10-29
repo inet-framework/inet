@@ -196,8 +196,11 @@ void RadioMedium::finish()
 
 void RadioMedium::handleMessage(cMessage *message)
 {
-    if (message == removeNonInterferingTransmissionsTimer)
+    if (message == removeNonInterferingTransmissionsTimer) {
         removeNonInterferingTransmissions();
+        if (displayCommunication)
+            updateCanvas();
+    }
     else if (message == updateCanvasTimer) {
         updateCanvas();
         scheduleUpdateCanvasTimer();
@@ -801,24 +804,34 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     cMethodCallContextSwitcher contextSwitcher(this);
     TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
     transmissionCacheEntry->frame = radioFrame->dup();
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+//#if OMNETPP_CANVAS_VERSION >= 0x20140908
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
         cGroupFigure *groupFigure = new cGroupFigure();
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+        cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
         cRingFigure *communicationFigure = new cRingFigure();
+#else
+        cFigure::Color color(64 + rand() % 64, 64 + rand() % 64, 64 + rand() % 64);
+        cOvalFigure *communicationFigure = new cOvalFigure();
+#endif
         communicationFigure->setTags("ongoing_transmission");
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFilled(true);
         communicationFigure->setFillColor(color);
-        communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineWidth(1);
         communicationFigure->setLineColor(cFigure::BLACK);
-        communicationFigure->setLineOpacity(0.5);
         groupFigure->addFigure(communicationFigure);
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+        communicationFigure->setFillOpacity(0.5);
+        communicationFigure->setLineOpacity(0.5);
         cLabelFigure *nameFigure = new cLabelFigure();
-        nameFigure->setTags("ongoing_transmission packet_name label");
         nameFigure->setPosition(position);
+#else
+        cTextFigure *nameFigure = new cTextFigure();
+        nameFigure->setLocation(position);
+#endif
+        nameFigure->setTags("ongoing_transmission packet_name label");
         nameFigure->setText(macFrame->getName());
         nameFigure->setColor(color);
         groupFigure->addFigure(nameFigure);
@@ -826,7 +839,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         transmissionCacheEntry->figure = groupFigure;
         updateCanvas();
     }
-#endif
+//#endif
     return radioFrame;
 }
 
@@ -966,10 +979,13 @@ void RadioMedium::updateCanvas()
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
         const TransmissionCacheEntry* transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
         cFigure *groupFigure = transmissionCacheEntry->figure;
         if (groupFigure) {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
             cRingFigure *communicationFigure = (cRingFigure *)groupFigure->getFigure(0);
+#else
+            cOvalFigure *communicationFigure = (cOvalFigure *)groupFigure->getFigure(0);
+#endif
             const Coord transmissionStart = transmission->getStartPosition();
             double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
             double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
@@ -979,6 +995,7 @@ void RadioMedium::updateCanvas()
                 startRadius = 10000;
             if (endRadius > 10000)
                 endRadius = 10000;
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
             if (drawCommunication2D) {
                 // determine the rotated 2D canvas points of the four corners of flat 3D circle's bounding box
                 // it defines a 2D rotated parallelogram that needs to be filled with an oval
@@ -1023,14 +1040,18 @@ void RadioMedium::updateCanvas()
 //                communcationTrail->addFigure(f);
             }
             else {
+#else
+            {
+#endif
                 // a sphere looks like a circle from any view angle
                 cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
                 communicationFigure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
                 communicationFigure->setInnerRx(endRadius);
                 communicationFigure->setInnerRy(endRadius);
+#endif
             }
         }
-#endif
     }
 }
 
