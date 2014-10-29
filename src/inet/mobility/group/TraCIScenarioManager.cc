@@ -18,6 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+#ifdef WITH_TRACI
+
 #include <fstream>
 #include <vector>
 #include <algorithm>
@@ -37,8 +39,6 @@
 #include "inet/mobility/group/TraCIScenarioManager.h"
 #include "inet/mobility/group/TraCIConstants.h"
 #include "inet/mobility/group/TraCIMobility.h"
-
-#ifdef WITH_TRACI
 
 namespace inet {
 
@@ -1350,7 +1350,7 @@ template<> std::string TraCIScenarioManager::TraCIBuffer::read()
     return std::string(obuf, length);
 }
 
-#endif    // WITH_TRACI
-
 } // namespace inet
+
+#endif    // WITH_TRACI
 

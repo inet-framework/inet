@@ -327,7 +327,7 @@ double TraCIMobility::calculateCO2emission(double v, double a) const
     return alpha + beta * v * 3.6 + delta * v * v * v * (3.6 * 3.6 * 3.6) + zeta * a * v;
 }
 
-#endif // ifdef WITH_TRACI
-
 } // namespace inet
+
+#endif // ifdef WITH_TRACI
 

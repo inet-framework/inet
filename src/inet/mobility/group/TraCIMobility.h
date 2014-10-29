@@ -237,9 +237,9 @@ class INET_API TraCIMobility : public MobilityBase
     double calculateCO2emission(double v, double a) const;
 };
 
-#endif // ifdef WITH_TRACI
-
 } // namespace inet
+
+#endif // ifdef WITH_TRACI
 
 #endif // ifndef __INET_TRACIMOBILITY_H
 
