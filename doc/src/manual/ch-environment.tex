@@ -3,97 +3,109 @@
 
 \section{Overview}
 
-Today's wireless communication networks are heavily affected by their physical
-environment. Mobile networks operate in densely built urban areas, wireless
-networks work inside large buildings, low power wireless sensors communicate
-in industrial environments, batteries operate in various external conditions,
-and so on.
+Wireless networks are heavily affected by the physical environment, and the
+requirements for today's ubiquitous wireless communication devices are
+increasingly demanding. Cellular networks serve densely populated urban
+areas, wireless LANs need to be able to cover large buildings with several
+offices, low-power wireless sensors must tolerate noisy industrial
+environments, batteries need to remain operational under various external
+conditions, and so on.
 
 The propagation of radio signals, the movement of communicating agents, battery
 exhaustion, etc., depend on the surrounding physical environment. For example,
 signals can be absorbed by objects, can pass through objects, can be refracted
-by surfaces, can be reflected from surfaces, battery nominal might depend on
-external temperature, etc. These effects cannot be ignored in high fidelity
+by surfaces, can be reflected from surfaces, battery nominal capacity might depend on
+external temperature, etc. These effects cannot be ignored in high-fidelity
 simulations.
 
-In order to help the modeling process the physical environment model is
-separated from the rest of the simulation models. It's main goal is to describe
-buildings, walls, vegetation, terrain, weather, and other physical conditions
-that might have effects on radio signal propagation, movement, batteries, etc.
-This separation makes the model reusable by all other simulation models that
-depend on these circumstances.
+In order to help the modeling process, the model of the physical
+environment is separated from the rest of the simulation models. The main
+goal of the physical environment model is to describe buildings, walls,
+vegetation, terrain, weather, and other physical objects and conditions
+that might have effects on radio signal propagation, movement, batteries,
+etc. This separation makes the model reusable by all other simulation
+models that depend on these circumstances.
 
 The following sections provide a brief overview of the physical environment
 model.
 
 \section{Physical Objects}
 
-The most important aspect of the physical environment is the objects which are
-present in it. For example, simulating an indoor Wifi scenario needs to model
-walls, floors, ceilings, doors, windows, furniture, etc. These objects are
-located in space, most of them have very basic shapes and homogeneous materials.
-In short physical objects have the following properties:
+The most important aspect of the physical environment is the objects which
+are present in it, as they are obstructing radio signals. For example,
+simulating an indoor Wifi scenario needs to model walls, floors, ceilings,
+doors, windows, furniture, etc. These objects are located in space, have
+shapes and materials. The INET physical layer infrastructure supports basic
+shapes and homogeneous materials, which simplifies description and still
+allows for a reasonable approximation of reality. Physical objects in INET
+have the following properties:
 
 \begin{itemize}
-  \item \ttt{shape}: describes the 3 dimensional shape of the object
-independently of its position and orientation
-  \item \ttt{position}: determines where the object is located in the 3
-dimensional space
-  \item \ttt{orientation}: determines how the object is rotated relative to its
-default orientation
-  \item \ttt{material}: describes various material specific physical properties  
-  \item \ttt{graphical properties}: provides parameters for better visualization
+  \item \textit{shape}: describes the 3-dimensional shape of the object,
+    independent of its position and orientation
+  \item \textit{position}: determines where the object is located in the 3-dimensional space
+  \item \textit{orientation}: determines how the object is rotated relative to its
+    default orientation
+  \item \textit{material}: describes material-specific physical properties
+  \item \textit{graphical properties}: provides parameters for better visualization
 \end{itemize}
 
-The physical objects are also mostly immobile, so in the current model they
-cannot change their position or orientation over time.
+Physical objects in INET are stationary, they cannot change their position
+or orientation over time.
 
-Since the shape of the physical objects might be quite diverse, the model is
-designed to be extensible with new shapes. Concave shapes are not yet supported,
-such shapes should be split up into smaller convex parts. The current
-implementation provides the following convex shapes:
+Since the shape of the physical objects might be quite diverse, the model
+is designed to be extensible with new shapes. Concave shapes are not yet
+supported, such shapes can be represented by splitting them up into smaller,
+convex parts. The current implementation provides the following shapes:
 
 \begin{itemize}
-  \item \cppclass{Sphere}: specified by a radius 
+  \item \cppclass{Sphere}: specified by a radius
   \item \cppclass{Cuboid}: specified by a length, a width, and a height
-  \item \cppclass{Prism}: specified by a 2 dimensional polygon base and a height
-  \item \cppclass{Polyhedron}: specified by the convex hull of a set of 3
-dimensional vertices 
+  \item \cppclass{Prism}: specified by a 2-dimensional polygon base and a height
+  \item \cppclass{Polyhedron}: specified by the convex hull of a set of
+    3-dimensional vertices
 \end{itemize}
 
-In order to model the physical environment in detail a scenario might contain
-several thousands or even more physical objects. Other simulation models might
+In order to model the physical environment in detail, a scenario might contain
+several thousands or even more physical objects. Simulation models might
 need to query these objects quite often. For example, when the physical layer
 computes obstacle loss for a transmission, it needs to find the obstructing
 physical objects for each receiver. This requires computing the intersection
-between physical objects and the path traveled by the radio signal. For this
-purpose, the physical environment supports storing physical objects in one of
-the following efficient cache data structures:
+between physical objects and the path traveled by the radio signal.
+
+To speed up the computation of intersections, INET stores physical objects
+in a highly efficient data structure, which currently can be one of the
+following:
 
 \begin{itemize}
-  \item \nedtype{GridObjectCache}: organizes objects into a spatial grid with
-a configurable constant cell size, cells contain those objects that intersect
-with them
-  \item \nedtype{BVHObjectCache}: organizes objects into a tree data structure,
-tree leaves contain a configurable number of closely positioned objects
+  \item \nedtype{GridObjectCache}: organizes objects into a 3D spatial grid with
+    a configurable constant cell size, where cells contain the objects that
+    intersect with them
+  \item \nedtype{BVHObjectCache}: organizes objects into a 3D tree, where
+    leaves contain a configurable number of closely positioned objects.
+    (This data structure is similar to quadtree and octree, but is designed for
+    storing finite-sized objects.)
 \end{itemize}
 
-The physical environment uses a \nedtype{GridObjectCache} data structure by
-default.
+The physical environment uses \nedtype{GridObjectCache} by default.
 
 \section{Global Physical Properties}
 
-In order to avoid incorrectly positioned physical objects, to limit propagation
-and reflection of radio signals, to constrain movement of communicating agents,
-to build small and efficient cache data structures, it's necessary to have space
-limits. In addition, maximum capacity, internal resistance, self-discharge, etc.,
-of battery models might depend on the external temperature. For this purpose,
-the  physical environment provides the following global properties:
+The INET physical environment infrastructure stores the following global
+properties:
 
 \begin{itemize}
-  \item \ttt{space limits}: global constraints for the 3 dimensional space
-  \item \ttt{temperature}: global parameter for temperature dependent models 
+  \item \textit{space limits}: global bounds for the 3-dimensional space
+  \item \textit{ambient temperature}: global parameter for temperature-dependent models
 \end{itemize}
+
+Space limits are useful for limiting the propagation and reflection of
+radio signals, to constrain movement of communicating agents, and for
+detecting positioned physical objects.
+
+Ambient temperature can be useful for modeling batteries, as it affects the
+maximum capacity, internal resistance, self-discharge and other properties
+of real-life electrochemical energy storage devices.
 
 \section{Initialization}
 
@@ -105,32 +117,26 @@ syntax of this XML file format:
 
 \begin{verbatim}
 <environment>
-  <!-- defines a sphere shape -->
+  <!-- shapes and materials -->
   <shape id="1" type="sphere" radius="10"/>
-  <!-- defines a cuboid shape -->
   <shape id="2" type="cuboid" size="20 30 40"/>
-  <!-- defines a prism (e.g. a cube) shape -->
   <shape id="3" type="prism" height="100"
          points="0 0 100 0 100 100 0 100"/>
-  <!-- defines a polyhedron (e.g. a cube) shape -->
   <shape id="4" type="polyhedron"
          points="0 0 0 100 0 0 100 100 0 0 100 0 ..."/>
-  <!-- defines a material -->
   <material id="1" resistivity="100"
             relativePermittivity="4.5" relativePermeability="1"/>
-  <!-- defines an object using the previously defined shapes and materials -->
+  <!-- objects that use previously defined shapes and materials -->
   <object position="min 100 200 0" orientation="45 -30 0"
           shape="1" material="1"
           line-color="0 0 0" fill-color="112 128 144" opacity="0.5"/>
-  <!-- defines another object similar to the previous one
-       using an inline shape and a predefined material -->
   <object position="min 100 200 0" orientation="45 -30 0"
           shape="cuboid 20 30 40" material="concrete"
           line-color="0 0 0" fill-color="112 128 144" tags="Building"/>
-</environment>          
+</environment>
 \end{verbatim}
 
-For more details on the XML file format please refer to the documentation in the
+For more details on the XML file format, please refer to the documentation in the
 \nedtype{PhysicalEnvironment} NED file.
 
 \section{Visualization}
@@ -144,11 +150,11 @@ to help to distinguish among physical objects they have the following graphical
 properties:
 
 \begin{itemize}
-  \item \ttt{line width}: surface outline 
-  \item \ttt{line color}: surface outline
-  \item \ttt{fill color}: surface filling 
-  \item \ttt{opacity}: surface outline and filling
-  \item \ttt{tags}: allows filtering objects on the graphical user interface
+  \item \textit{line width}: surface outline
+  \item \textit{line color}: surface outline
+  \item \textit{fill color}: surface filling
+  \item \textit{opacity}: surface outline and filling
+  \item \textit{tags}: allows filtering objects on the graphical user interface
 \end{itemize}
 
 Although the physical objects are really modeled in 3 dimensions, the
@@ -162,7 +168,7 @@ The projection is also used by other models for their own visualizations. This
 approach makes visualizations well integrated with each other. For example, the
 mobility models position network nodes, the physical layer draws ongoing
 transmissions, the obstacle loss draws intersections between transmissions and
-objects, etc., on the canvas according to the projection described above. 
+objects, etc., on the canvas according to the projection described above.
 
 %%% Local Variables:
 %%% mode: latex
