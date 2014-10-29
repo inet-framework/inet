@@ -54,12 +54,11 @@ Packets are dropped for the following reasons:
 
 With INET simulations, it is often useful to be able to visualize network
 traffic. INET provides several visualizers for this task, operating at various
-levels of the network stack.
+levels of the network stack. One of such visualizers is \nedtype{TransportRouteVisualizer}
+that provides graphical feedback about transport layer traffic.
 
-Transport path activity can be visualized by including a
-\nedtype{TransportRouteVisualizer} module in the simulation. \nedtype{TransportRouteVisualizer}
-that can provide graphical feedback about transport traffic, i.e. traffic that passes
-through the transport layers of two endpoints. Adding an \nedtype{IntegratedVisualizer} is
+\nedtype{TransportRouteVisualizer} visualizes traffic that passes through the 
+transport layers of two endpoints. Adding an \nedtype{IntegratedVisualizer} is
 also an option, because it also contains a \nedtype{TransportRouteVisualizer}. Transport
 path activity visualization is disabled by default, it can be enabled by setting
 the visualizer's \fpar{displayRoutes} parameter to true.
@@ -82,12 +81,7 @@ parameters.
 \subsection{Visualizing Network Path Activity}
 \label{sec:visualization:network-path-activity}
 
-With INET simulations, it is often useful to be able to visualize network
-traffic. INET offers several visualizers for this task, operating at various
-levels of the network stack. In this showcase, we examine \nedtype{NetworkRouteVisualizer}
-that can provide graphical feedback about network layer level traffic.
-
-Network path activity can be visualized by including a \nedtype{NetworkRouteVisualizer}
+Network layer traffic can be visualized by including a \nedtype{NetworkRouteVisualizer}
 module in the simulation. Adding an \nedtype{IntegratedVisualizer} module is also an
 option, because it also contains a \nedtype{NetworkRouteVisualizer} module. Network path
 activity visualization is disabled by default, it can be enabled by setting the
@@ -114,14 +108,9 @@ parameters.
 \subsection{Visualizing Data Link Activity}
 \label{sec:visualization:data-link-activity}
 
-With INET simulations, it is often useful to be able to visualize network
-traffic. INET offers several visualizers for this task, operating at various
-levels of the network stack. In this showcase, we examine \nedtype{DataLinkVisualizer}
-that can provide graphical feedback about data link level traffic.
-
-Data link activity can be visualized by including a \nedtype{DataLinkVisualizer} module in
-the simulation. Adding an \nedtype{IntegratedVisualizer} module is also an option, because
-it also contains a \nedtype{DataLinkVisualizer} module. Data link visualization is
+Data link activity (layer 2 traffic) can be visualized by adding a \nedtype{DataLinkVisualizer} 
+module to the simulation. Adding an \nedtype{IntegratedVisualizer} module is also an option,
+because it includes a \nedtype{DataLinkVisualizer} module. Data link visualization is
 disabled by default, it can be enabled by setting the visualizer's displayLinks
 parameter to true.
 
@@ -146,12 +135,6 @@ with the visualizer's \fpar{packetFilter}, \fpar{interfaceFilter}, and
 
 \subsection{Visualizing Physical Link Activity}
 \label{sec:visualization:physical-link-activity}
-
-With INET simulations, it is often useful to be able to visualize network
-traffic. For this task, there are several visualizers in INET, operating at
-various levels of the network stack. In this showcase, we demonstrate working of
-\nedtype{PhysicalLinkVisualizer} that can provide graphical feedback about physical layer
-traffic.
 
 Physical link activity can be visualized by including a \nedtype{PhysicalLinkVisualizer}
 module in the simulation. Adding an \nedtype{IntegratedVisualizer} module is also an
@@ -315,8 +298,8 @@ connections open at a node, thus there can be multiple icons. Icons have the
 same color at both ends of the connection. In addition to colors, letter codes
 (A, B, AA, …) may also be displayed to help in identifying connections. Note
 that this visualizer does not display the paths the packets take. If you are
-interested in that, take a look at \nedtype{TransportRouteVisualizer}, covered in the
-Visualizing Transport Path Activity showcase.
+interested in that, take a look at \nedtype{TransportRouteVisualizer}, covered in
+section \ref{sec:visualization:transport-path-activity}.
 
 The visualization is turned off by default, it can be turned on by setting the
 \fpar{displayTransportConnections} parameter of the visualizer to true.
@@ -398,7 +381,6 @@ The visualizer has several important features:
 These features are disabled by default; they can be enabled by setting the
 visualizer's \fpar{displayMovementTrails}, \fpar{displayVelocities} and
 \fpar{displayOrientations} parameters to true.
-
 
 
 %%% Local Variables:

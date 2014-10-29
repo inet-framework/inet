@@ -38,7 +38,7 @@ There are several node models that can be used in an Ethernet network:
 \nedtype{EtherSwitch} models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and repeaters that
 work in the physical layer, the switches operate in the data link layer and
-route data frames between the connected subnets.
+relay frames between the connected subnets.
 
 In modern Ethernet LANs, each node is connected to the switch directly by full
 duplex lines, so no collisions are possible. In this case, the CSMA/CD is not
@@ -188,14 +188,11 @@ Ethernet frames. They should be connected to \nedtype{IEtherMac} modules.
 
 The relay unit holds a table for the destination address -> output port mapping
 in a \nedtype{MacAddressTable} module.  When the relay unit receives a data frame, it
-updates the table with the source address->input port. The table can also be
-pre-loaded from a text file while initializing the relay unit.
+updates the table with the source address->input port.
 
 If the destination address is not found in the table, the frame is broadcast.
-The frame is not sent to the same subnet it was received from, because the
-target already received the original frame. The only exception if the frame
-arrived through a radio channel, in this case the target can be out of range.
-The port range 0..\fpar{numWirelessPorts}-1 are reserved for wireless connections.
+The frame is not sent to the same port it was received from, because then the
+target should already have received the original frame.
 
 A simple scheme for sending PAUSE frames is built in (although
 users will probably change it). When the buffer level goes

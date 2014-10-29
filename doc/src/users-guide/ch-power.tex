@@ -8,19 +8,19 @@ Modeling power consumption becomes more and more important with the increasing
 number of embedded devices and the upcoming Internet of Things. Mobile personal
 medical devices, large scale wireless environment monitoring devices, electric
 vehicles, solar panels, low-power wireless sensors, etc. require paying special
-attention to power consumption. The high fidelity simulation of power
-consumption allows designing power sensitive routing protocols, MAC protocols,
+attention to power consumption. High-fidelity simulation of power
+consumption allows for designing power sensitive routing protocols, MAC protocols,
 physical layers, etc. which in turn results in more energy efficient devices.
 
-In order to help the modeling process the power model is separated from other
-simulation models. This separation makes the model extensible and it also allows
-easy experimentation with alternative implementations. In a nutshell the power
+In order to facilitate the modeling process, the power model is separated from other
+simulation models. This separation makes the model extensible, and also allows for
+easy experimentation with alternative implementations. In a nutshell, the power
 model consists of the following components:
 
 \begin{itemize}
   \item energy consumption models
-  \item energy generation models
-  \item temporary energy storage models
+  \item energy source and energy generation models
+  \item energy storage and buffering models
 \end{itemize}
 
 The power model elements fall into two categories, abbreviated with \ttt{Ep}
