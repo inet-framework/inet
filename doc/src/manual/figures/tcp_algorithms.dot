@@ -2,7 +2,7 @@ digraph g {
   fontsize=10; size="7,5"; rankdir="BT"
   node[ shape = "rectangle" ]
 
-  TCPAlgorithm [ label=<<I>TCPAlgorithm</I>> ]
+  TCPAlgorithm [ label="TCPAlgorithm" ]
 
   DumbTCP -> TCPAlgorithm [ arrowhead="empty" ]
   TCPBaseAlg -> TCPAlgorithm [ arrowhead="empty" ]

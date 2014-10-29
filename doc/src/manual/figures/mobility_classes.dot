@@ -2,7 +2,7 @@ digraph g {
   fontsize=12; size="7,5"; rankdir="BT"
   node[ shape = "rectangle" ]
 
-  IMobility [ label=<<I>IMobility</I>> ]
+  IMobility [ label="IMobility" ]
 
   MobilityBase -> IMobility [ arrowhead="empty" ]
   MovingMobilityBase -> MobilityBase
