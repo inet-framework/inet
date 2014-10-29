@@ -1,23 +1,25 @@
-PERL=C:\omnetpp-4.1\msys\bin\perl.exe
+PERL=perl.exe
 INKSCAPE="C:\Program Files\inkscape\inkscape.exe"
-DOT=$(TOOLS_DIR)\Graphviz\bin\dot.exe
+DOT="E:\OMNEST-4.4\msys\bin\dot.exe"
 
-CWD=$(OMNETPP_ROOT)\doc\src\manual  # because Inkscape is broken and needs full paths
-
-TITLE=User Manual
+CWD="C:\home\INET\inet\doc\src\manual"  # because Inkscape is broken and needs full paths
 
 # --- generating pdf ---
 
 TEXCHAPTERS = \
-         ch-introduction.tex
+	ch-introduction.tex
 
 ALLTEX = inet-manual.tex title.tex $(TEXCHAPTERS)
 HTMCHAPTERS = $(TEXCHAPTERS:.tex=.htm)
 
 # must list all SVGs because nmake is broken and has no wildcard functionality
-SVGPICS = 
+SVGPICS =
 
-DOTPICS = 
+DOTPICS = \
+	figures\EtherMACFullDuplex_txstates.dot \
+	figures\EtherMAC_txstates.dot \
+	figures\mobility_classes.dot \
+	figures\tcp_algorithms.dot
 
 PDFPICS = $(SVGPICS:.svg=.pdf) $(DOTPICS:.dot=.pdf)
 

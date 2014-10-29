@@ -5,8 +5,6 @@ INKSCAPE=inkscape
 DOT=dot
 TEMPLATE=omnetpp
 
-TITLE=User Manual
-
 # --- generating pdf ---
 
 # FIXME
