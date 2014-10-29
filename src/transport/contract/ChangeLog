@@ -1,3 +1,5 @@
+2014-10-29  ------ inet-2.5.0 released ------
+
 2014-10-29  Thomas Dreibholz
 
 	tcp: added sendCommand API to the TCP socket
