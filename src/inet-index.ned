@@ -35,7 +35,6 @@
 // Introductory material:
 //  - <a href="inet-architecture.html">INET Framework architecture</a>
 //  - <a href="../inet-manual-draft.pdf">INET Framework Manual (draft) (pdf)</a>
-//  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //
 // A few useful starting points for browsing the documentation:
 //  - example networks: ~BulkTransfer, ~MulticastNetwork,

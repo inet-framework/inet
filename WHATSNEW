@@ -1,8 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
-INET 2.5.0 (Oct 29, 20149)
---------------------------
+INET 2.5.0 (Oct 29, 2014)
+-------------------------
 
    - made the codebase compile in C++11 mode. (required by OMNeT++ 4.6)
    - added netperfmeter application by Thomas Dreibholz
