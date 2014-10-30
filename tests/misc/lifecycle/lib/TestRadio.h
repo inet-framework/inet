@@ -21,7 +21,7 @@
 #define __INET_TESTRADIO_H_
 
 #include "INETDefs.h"
-#include "Lifecycle.h"
+#include "ILifecycle.h"
 
 class INET_API TestRadio : public cSimpleModule, public ILifecycle {
   private:
@@ -35,7 +35,7 @@ class INET_API TestRadio : public cSimpleModule, public ILifecycle {
 
   public:
     TestRadio() { }
-    virtual bool initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);

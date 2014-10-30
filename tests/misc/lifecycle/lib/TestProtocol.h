@@ -21,7 +21,7 @@
 #define __INET_TESTPROTOCOL_H_
 
 #include "INETDefs.h"
-#include "Lifecycle.h"
+#include "ILifecycle.h"
 
 class INET_API TestProtocol : public cSimpleModule, public ILifecycle {
   private:
@@ -34,7 +34,7 @@ class INET_API TestProtocol : public cSimpleModule, public ILifecycle {
 
   public:
     TestProtocol() { }
-    virtual bool initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);

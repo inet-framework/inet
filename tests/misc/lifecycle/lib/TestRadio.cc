@@ -22,7 +22,7 @@
 
 Define_Module(TestRadio);
 
-bool TestRadio::initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TestRadio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {

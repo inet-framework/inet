@@ -22,7 +22,7 @@
 
 Define_Module(TestMobility);
 
-bool TestMobility::initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {
