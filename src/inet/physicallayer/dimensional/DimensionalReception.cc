@@ -32,8 +32,8 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
         endArgument.setTime(MappingUtils::pre(endTime));
     }
     if (dimensions.hasDimension(Dimension::frequency)) {
-        startArgument.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-        endArgument.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
     }
     W minPower = W(MappingUtils::findMin(*power, startArgument, endArgument));
     EV_DEBUG << "Computing minimum reception power: start = " << startArgument << ", end = " << endArgument << " -> minimum reception power = " << minPower << endl;

@@ -55,8 +55,8 @@ double DimensionalSNIR::computeMin() const
         endArgument.setTime(MappingUtils::pre(endTime));
     }
     if (dimensions.hasDimension(Dimension::frequency)) {
-        startArgument.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
-        endArgument.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
     }
     EV_DEBUG << "SNIR begin " << endl;
     snirMapping->print(EVSTREAM);

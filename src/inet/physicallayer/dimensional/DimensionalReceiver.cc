@@ -61,7 +61,10 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
             EV_DEBUG << "Interference power end" << endl;
         }
     }
-    ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, receptionPowers[0]->getDimensionSet(), Mapping::STEPS);
+    DimensionSet dimensions = receptionPowers[0]->getDimensionSet();
+    if (!dimensions.hasDimension(Dimension::time))
+        dimensions.addDimension(Dimension::time);
+    ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_DEBUG << "Noise power begin " << endl;
     noisePower->print(EVSTREAM);

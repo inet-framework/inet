@@ -22,8 +22,8 @@ import inet.physicallayer.contract.IRadioBackgroundNoise;
 module DimensionalIsotropicBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
-        string dimensions = default("time");
+        double power @unit(dBm); // noise power
+        string dimensions = default("time"); // dimensions of noise power: time and/or frequency
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
-        double power @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         @class(DimensionalIsotropicBackgroundNoise);
 }

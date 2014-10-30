@@ -71,7 +71,7 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     bool hasTimeDimension = dimensions.hasDimension(Dimension::time);
     bool hasFrequencyDimension = dimensions.hasDimension(Dimension::frequency);
     ConstMappingIterator *it = transmissionPower->createConstIterator();
-    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, transmissionPower->getDimensionSet(), interpolationMode);
+    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
     while (true) {
         const Argument& elementTransmissionPosition = it->getPosition();
         Hz carrierFrequency = attenuateWithCarrierFrequency || !hasFrequencyDimension ? dimensionalTransmission->getCarrierFrequency() : Hz(elementTransmissionPosition.getArgValue(Dimension::frequency));
@@ -92,12 +92,8 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
             }
         }
         receptionPower->setValue(elementReceptionPosition, elementReceptionPower.get());
-        if (it->hasNext()) {
+        if (it->hasNext())
             it->next();
-            // KLUDGE: to skip pre positions (see iterator)
-            if (interpolationMode == Mapping::STEPS)
-                it->next();
-        }
         else
             break;
     }
