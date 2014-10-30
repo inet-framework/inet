@@ -433,6 +433,320 @@ class TimeMapping : public Mapping
 };
 
 /**
+ * @brief Provides an implementation of the MappingIterator-
+ * Interface which is able to iterate over FrequencyMappings.
+ *
+ * @author Karl Wessel
+ * @ingroup mapping
+ */
+template<template<typename> class Interpolator>
+class FrequencyMappingIterator : public MappingIterator
+{
+  protected:
+    /** @brief The templated InterpolateableMap the underlying Mapping uses std::map as storage type.*/
+    typedef InterpolateableMap<Interpolator<std::map<argument_value_t, argument_value_t> > >
+        interpolator_map_type;
+    typedef typename interpolator_map_type::interpolator_type interpolator_type;
+    typedef typename interpolator_map_type::mapped_type mapped_type;
+    typedef typename interpolator_map_type::iterator_intpl iterator;
+    typedef typename interpolator_map_type::const_iterator_intpl const_iterator;
+
+    /** @brief Stores the current position iterator inside the Mapping.*/
+    iterator valueIt;
+
+    /** @brief Stores the current position of the iterator.*/
+    Argument position;
+
+    /** @brief Stores the next position a call of "next()" would jump to.*/
+    Argument nextPosition;
+
+    /**
+     * @brief Stores if this mapping represents a step function.
+     *
+     * Assures that the steps are considered when iterating the mapping
+     * by adding a second key-entry as short as possible before every
+     * key entry set by the user. The additional key-entry defines the
+     * value the mapping has just before the key entry the user added.
+     */
+    bool isStepMapping;
+
+    bool atPreStep;
+
+  protected:
+    void updateNextPos()
+    {
+        argument_value_t value = valueIt.getNextPosition();
+        if (isStepMapping && !atPreStep) {
+            value = nexttoward(value, 0);
+        }
+        nextPosition.setArgValue(Dimension::frequency, value);
+    }
+
+  public:
+
+    /**
+     * @brief Initializes the Iterator to use the passed InterpolateableMapIterator.
+     */
+    FrequencyMappingIterator(const iterator& it)
+        : MappingIterator()
+        , valueIt(it)
+        , position()
+        , nextPosition()
+        , isStepMapping(it.getInterpolator().isStepping())
+        , atPreStep(false)
+    {
+        interpolator_type UsedInterpolator;
+
+        isStepMapping = UsedInterpolator.isStepping();
+        position.setArgValue(Dimension::frequency, valueIt.getPosition());
+        updateNextPos();
+    }
+
+    FrequencyMappingIterator(const FrequencyMappingIterator<Interpolator>& o)
+        : MappingIterator(o)
+        , valueIt(o.valueIt)
+        , position(o.position)
+        , nextPosition(o.nextPosition)
+        , isStepMapping(o.isStepMapping)
+        , atPreStep(o.atPreStep)
+    {}
+
+    virtual ~FrequencyMappingIterator() {}
+
+    /**
+     * @brief Lets the iterator point to the passed position.
+     *
+     * The passed new position can be at arbitrary places.
+     *
+     * This method has logarithmic complexity.
+     */
+    void jumpTo(const Argument& pos)
+    {
+        atPreStep = false;
+        valueIt.jumpTo(pos.getArgValue(Dimension::frequency));
+        position.setArgValue(Dimension::frequency, pos.getArgValue(Dimension::frequency));
+        nextPosition.setArgValue(Dimension::frequency, valueIt.getNextPosition());
+        updateNextPos();
+    }
+
+    /**
+     * @brief Iterates to the specified position. This method
+     * should be used if the new position is near the current position.
+     *
+     * The passed position should compared bigger than the current position.
+     *
+     * This method has linear complexity over the number of key-entries
+     * between the current position and the passed position. So if the
+     * passed position is near the current position the complexity is
+     * nearly constant.
+     */
+    void iterateTo(const Argument& pos)
+    {
+        atPreStep = false;
+        valueIt.iterateTo(pos.getArgValue(Dimension::frequency));
+        position.setArgValue(Dimension::frequency, pos.getArgValue(Dimension::frequency));
+        nextPosition.setArgValue(Dimension::frequency, valueIt.getNextPosition());
+        updateNextPos();
+    }
+
+    /**
+     * @brief Iterates to the next position of the function.
+     *
+     * The next position is the next bigger key entry of the
+     * InterpoalteableMap.
+     *
+     * This method has constant complexity.
+     */
+    virtual void next()
+    {
+        if (isStepMapping && !atPreStep) {
+            valueIt.iterateTo(nextPosition.getArgValue(Dimension::frequency));
+            atPreStep = true;
+        }
+        else {
+            valueIt.next();
+            atPreStep = false;
+        }
+        position.setArgValue(Dimension::frequency, valueIt.getPosition());
+        updateNextPos();
+    }
+
+    /**
+     * @brief Returns true if the current position of the iterator
+     * is in range of the function.
+     *
+     * This method should be used as end-condition when iterating
+     * over the function with the "next()" method.
+     *
+     * THis method has constant complexity.
+     */
+    virtual bool inRange() const
+    {
+        return valueIt.inRange();
+    }
+
+    /**
+     * @brief Returns the current position of the iterator.
+     *
+     * This method has constant complexity.
+     */
+    virtual const Argument& getPosition() const
+    {
+        return position;
+    }
+
+    /**
+     * @brief Returns the next position a call to "next()" would jump to.
+     *
+     * This method has constant complexity.
+     */
+    virtual const Argument& getNextPosition() const
+    {
+        return nextPosition;
+    }
+
+    /**
+     * @brief Returns the value of the function at the current
+     * position.
+     *
+     * This method has constant complexity.
+     */
+    virtual mapped_type getValue() const
+    {
+        return *valueIt.getValue();
+    }
+
+    /**
+     * @brief Lets the iterator point to the begin of the mapping.
+     *
+     * The beginning of the mapping is the smallest key entry in the
+     * InterpolateableMap.
+     *
+     * Constant complexity.
+     */
+    virtual void jumpToBegin()
+    {
+        valueIt.jumpToBegin();
+        position.setArgValue(Dimension::frequency, valueIt.getPosition());
+    }
+
+    /**
+     * @brief Returns true if the iterator has a next value
+     * inside its range a call to "next()" can jump to.
+     *
+     * Constant complexity.
+     */
+    virtual bool hasNext() const
+    {
+        return valueIt.hasNext();
+    }
+
+    /**
+     * @brief Changes the value of the function at the current
+     * position.
+     *
+     * This method has constant complexity.
+     */
+    virtual void setValue(argument_value_cref_t value)
+    {
+        valueIt.setValue(value);
+    }
+};
+
+/**
+ * @brief Implements the Mapping-interface with an InterpolateableMap from
+ * double to double between which values can be interpolated to represent
+ * a Mapping with only frequency as domain.
+ *
+ * @author Karl Wessel
+ * @ingroup mapping
+ */
+template<template<typename> class Interpolator>
+class FrequencyMapping : public Mapping
+{
+  protected:
+    /** @brief The templated InterpolateableMap the underlying Mapping uses std::map as storage type.*/
+    typedef InterpolateableMap<Interpolator<std::map<argument_value_t, argument_value_t> > >
+        interpolator_map_type;
+    typedef typename interpolator_map_type::interpolator_type interpolator_type;
+    typedef typename interpolator_map_type::mapped_type mapped_type;
+    typedef typename interpolator_map_type::mapped_cref_type mapped_cref_type;
+    typedef typename interpolator_map_type::iterator_intpl iterator;
+    typedef typename interpolator_map_type::const_iterator_intpl const_iterator;
+
+    /** @brief Stores the key-entries defining the function.*/
+    interpolator_map_type entries;
+
+  public:
+
+    /**
+     * @brief Initializes the Mapping with the passed Interpolation method.
+     */
+    FrequencyMapping() :
+        Mapping(DimensionSet::freqDomain), entries() {}
+    FrequencyMapping(const FrequencyMapping<Interpolator>& o) :
+        Mapping(o), entries(o.entries) {}
+
+    /**
+     * @brief Initializes the Mapping with the passed Interpolation method.
+     */
+    FrequencyMapping(mapped_cref_type outOfRangeVal) :
+        Mapping(DimensionSet::freqDomain), entries(outOfRangeVal) {}
+
+    virtual ~FrequencyMapping() {}
+    /**
+     * @brief returns a deep copy of this mapping instance.
+     */
+    virtual Mapping *clone() const { return new FrequencyMapping<Interpolator>(*this); }
+
+    /**
+     * @brief Returns the value of this Function at the position specified
+     * by the passed Argument.
+     *
+     * This method has logarithmic complexity.
+     */
+    virtual argument_value_t getValue(const Argument& pos) const
+    {
+        return *entries.getIntplValue(pos.getArgValue(Dimension::frequency));
+    }
+
+    /**
+     * @brief Changes the value of the function at the specified
+     * position.
+     *
+     * This method has logarithmic complexity.
+     */
+    virtual void setValue(const Argument& pos, argument_value_cref_t value)
+    {
+        entries[pos.getArgValue(Dimension::frequency)] = value;
+    }
+
+    /**
+     * @brief Returns a pointer of a new Iterator which is able to iterate
+     * over the function and can change the value the iterator points to.
+     *
+     * Note: The caller of this method has to delete the returned Iterator
+     * pointer if it isn't used anymore.
+     */
+    virtual MappingIterator *createIterator()
+    {
+        return new FrequencyMappingIterator<Interpolator>(entries.beginIntpl());
+    }
+
+    /**
+     * @brief Returns a pointer of a new Iterator which is able to iterate
+     * over the function and can change the value the iterator points to.
+     *
+     * Note: The caller of this method has to delete the returned Iterator
+     * pointer if it isn't used anymore.
+     */
+    virtual MappingIterator *createIterator(const Argument& pos)
+    {
+        return new FrequencyMappingIterator<Interpolator>(entries.findIntpl(pos.getArgValue(Dimension::frequency)));
+    }
+};
+
+/**
  * @brief Helper-class for the MultiDimMapping which provides an Iterator
  * which linear interpolates between two other Mapping iterators. Or in
  * other words, it provides an Iterator for an linear interpolated Mapping.
@@ -1999,7 +2313,7 @@ class INET_API MappingUtils
         itRes = result->createIterator(itF1->getPosition());
 
         while (itF1->inRange() || itF2->inRange()) {
-            assert(itF1->getPosition().isSamePosition(itF2->getPosition()));
+//            assert(itF1->getPosition().isSamePosition(itF2->getPosition()));
 
             Mapping::argument_value_cref_t prod = op(itF1->getValue(), itF2->getValue());
             //result->setValue(itF1->getPosition(), prod);

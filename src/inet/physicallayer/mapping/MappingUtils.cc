@@ -98,78 +98,76 @@ bool MappingUtils::iterateToNext(ConstMappingIterator *it1, ConstMappingIterator
 
 Mapping *MappingUtils::createMapping(const DimensionSet& domain, Mapping::InterpolationMethod intpl)
 {
-    assert(domain.hasDimension(Dimension::time));
-
     if (domain.size() == 1) {
-        switch (intpl) {
-            case Mapping::LINEAR:
-                return new TimeMapping<Linear>();
-                break;
-
-            case Mapping::NEAREST:
-                return new TimeMapping<Nearest>();
-                break;
-
-            case Mapping::STEPS:
-                return new TimeMapping<NextSmaller>();
-                break;
+        if (domain.hasDimension(Dimension::time)) {
+            switch (intpl) {
+                case Mapping::LINEAR:
+                    return new TimeMapping<Linear>();
+                case Mapping::NEAREST:
+                    return new TimeMapping<Nearest>();
+                case Mapping::STEPS:
+                    return new TimeMapping<NextSmaller>();
+            }
         }
-        return 0;
+        else if (domain.hasDimension(Dimension::frequency)) {
+            switch (intpl) {
+                case Mapping::LINEAR:
+                    return new FrequencyMapping<Linear>();
+                case Mapping::NEAREST:
+                    return new FrequencyMapping<Nearest>();
+                case Mapping::STEPS:
+                    return new FrequencyMapping<NextSmaller>();
+            }
+        }
     }
     else {
         switch (intpl) {
             case Mapping::LINEAR:
                 return new MultiDimMapping<Linear>(domain);
-                break;
-
             case Mapping::NEAREST:
                 return new MultiDimMapping<Nearest>(domain);
-                break;
-
             case Mapping::STEPS:
                 return new MultiDimMapping<NextSmaller>(domain);
-                break;
         }
-        return 0;
     }
+    throw cRuntimeError("Cannot create mapping");
 }
 
 Mapping *MappingUtils::createMapping(Mapping::argument_value_cref_t outOfRangeVal, const DimensionSet& domain, Mapping::InterpolationMethod intpl)
 {
-    assert(domain.hasDimension(Dimension::time));
-
     if (domain.size() == 1) {
-        switch (intpl) {
-            case Mapping::LINEAR:
-                return new TimeMapping<Linear>(outOfRangeVal);
-                break;
-
-            case Mapping::NEAREST:
-                return new TimeMapping<Nearest>(outOfRangeVal);
-                break;
-
-            case Mapping::STEPS:
-                return new TimeMapping<NextSmaller>(outOfRangeVal);
-                break;
+        if (domain.hasDimension(Dimension::time)) {
+            switch (intpl) {
+                case Mapping::LINEAR:
+                    return new TimeMapping<Linear>(outOfRangeVal);
+                case Mapping::NEAREST:
+                    return new TimeMapping<Nearest>(outOfRangeVal);
+                case Mapping::STEPS:
+                    return new TimeMapping<NextSmaller>(outOfRangeVal);
+            }
         }
-        return 0;
+        else if (domain.hasDimension(Dimension::frequency)) {
+            switch (intpl) {
+                case Mapping::LINEAR:
+                    return new FrequencyMapping<Linear>(outOfRangeVal);
+                case Mapping::NEAREST:
+                    return new FrequencyMapping<Nearest>(outOfRangeVal);
+                case Mapping::STEPS:
+                    return new FrequencyMapping<NextSmaller>(outOfRangeVal);
+            }
+        }
     }
     else {
         switch (intpl) {
             case Mapping::LINEAR:
                 return new MultiDimMapping<Linear>(domain, outOfRangeVal);
-                break;
-
             case Mapping::NEAREST:
                 return new MultiDimMapping<Nearest>(domain, outOfRangeVal);
-                break;
-
             case Mapping::STEPS:
                 return new MultiDimMapping<NextSmaller>(domain, outOfRangeVal);
-                break;
         }
-        return 0;
     }
+    throw cRuntimeError("Cannot create mapping");
 }
 
 Mapping *MappingUtils::multiply(const ConstMapping& f1, const ConstMapping& f2)
