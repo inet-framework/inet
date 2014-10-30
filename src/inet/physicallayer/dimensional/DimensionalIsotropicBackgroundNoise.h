@@ -39,7 +39,7 @@ class INET_API DimensionalIsotropicBackgroundNoise : public cModule, public IBac
     DimensionalIsotropicBackgroundNoise();
 
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "dimensional background noise"; }
+    virtual void printToStream(std::ostream& stream) const;
     virtual const INoise *computeNoise(const IListening *listening) const;
 };
 

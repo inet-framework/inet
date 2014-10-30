@@ -21,6 +21,20 @@ namespace inet {
 
 namespace physicallayer {
 
+FlatNoiseBase::FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
+    NoiseBase(startTime, endTime),
+    carrierFrequency(carrierFrequency),
+    bandwidth(bandwidth)
+{
+}
+
+void FlatNoiseBase::printToStream(std::ostream& stream) const
+{
+    stream << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth << ", ";
+    NoiseBase::printToStream(stream);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

@@ -26,7 +26,8 @@ Define_Module(ConstantTimePropagation);
 
 ConstantTimePropagation::ConstantTimePropagation() :
     PropagationBase()
-{}
+{
+}
 
 void ConstantTimePropagation::initialize(int stage)
 {
@@ -47,7 +48,9 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
 
 void ConstantTimePropagation::printToStream(std::ostream& stream) const
 {
-    stream << "constant time radio signal propagation, propagation time = " << propagationTime << " theoretical propagation speed = " << propagationSpeed;
+    stream << "ConstantTimePropagation, "
+           << "propagationTime = " << propagationTime;
+    PropagationBase::printToStream(stream);
 }
 
 } // namespace physicallayer

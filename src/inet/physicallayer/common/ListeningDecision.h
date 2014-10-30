@@ -31,10 +31,7 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
     const bool isListeningPossible_;
 
   public:
-    ListeningDecision(const IListening *listening, bool isListeningPossible_) :
-        listening(listening),
-        isListeningPossible_(isListeningPossible_)
-    {}
+    ListeningDecision(const IListening *listening, bool isListeningPossible_);
 
     virtual void printToStream(std::ostream& stream) const;
 

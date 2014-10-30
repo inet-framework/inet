@@ -33,9 +33,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
     virtual void initialize(int stage);
 
   public:
-    AntennaBase() :
-        mobility(NULL)
-    {}
+    AntennaBase();
 
     virtual IMobility *getMobility() const { return mobility; }
 };

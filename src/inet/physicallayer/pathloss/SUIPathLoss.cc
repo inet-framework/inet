@@ -72,9 +72,9 @@ void SUIPathLoss::initialize(int stage)
 
 void SUIPathLoss::printToStream(std::ostream& stream) const
 {
-    stream << "SUI path loss, "
-           << "transmitter antenna high = " << ht << ", "
-           << "receiver antenna high = " << hr;
+    stream << "SUIPathLoss, "
+           << "ht = " << ht << ", "
+           << "hr = " << hr;
 }
 
 double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

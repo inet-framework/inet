@@ -39,16 +39,7 @@ class INET_API ReceptionBase : public virtual IReception
     const EulerAngles endOrientation;
 
   public:
-    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
-        receiver(receiver),
-        transmission(transmission),
-        startTime(startTime),
-        endTime(endTime),
-        startPosition(startPosition),
-        endPosition(endPosition),
-        startOrientation(startOrientation),
-        endOrientation(endOrientation)
-    {}
+    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
     virtual void printToStream(std::ostream& stream) const;
 

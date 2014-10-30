@@ -35,9 +35,7 @@ class INET_API IdealReceiver : public ReceiverBase
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
   public:
-    IdealReceiver() :
-        ignoreInterference(false)
-    {}
+    IdealReceiver();
 
     virtual void printToStream(std::ostream& stream) const;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;

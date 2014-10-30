@@ -35,7 +35,9 @@ Interference::~Interference()
 
 void Interference::printToStream(std::ostream& stream) const
 {
-    stream << "interference, noise = " << backgroundNoise << ", interferingReceptions = " << interferingReceptions;
+    stream << "Interference, "
+           << "backgroundNoise = { " << backgroundNoise << " }, "
+           << "interferingReceptions = { " << interferingReceptions << " }";
 }
 
 } // namespace physicallayer

@@ -30,13 +30,10 @@ class INET_API ScalarNoise : public FlatNoiseBase
     const std::map<simtime_t, W> *powerChanges;
 
   public:
-    ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
-        FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
-        powerChanges(powerChanges)
-    {}
-
+    ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges);
     virtual ~ScalarNoise() { delete powerChanges; }
-    virtual void printToStream(std::ostream& stream) const { stream << "scalar noise"; }
+
+    virtual void printToStream(std::ostream& stream) const;
     virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };

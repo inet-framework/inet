@@ -27,6 +27,7 @@ namespace physicallayer {
 class INET_API InterpolatingAntenna : public AntennaBase
 {
   protected:
+    double minGain;
     double maxGain;
     std::map<double, double> elevationGainMap;
     std::map<double, double> headingGainMap;
@@ -40,7 +41,8 @@ class INET_API InterpolatingAntenna : public AntennaBase
   public:
     InterpolatingAntenna();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "interpolating antenna"; }
+    virtual void printToStream(std::ostream& stream) const;
+    virtual double getMinGain() const { return minGain; }
     virtual double getMaxGain() const { return maxGain; }
     virtual double computeGain(const EulerAngles direction) const;
 };

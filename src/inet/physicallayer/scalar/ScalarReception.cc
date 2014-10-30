@@ -21,10 +21,17 @@ namespace inet {
 
 namespace physicallayer {
 
+ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
+    FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
+    power(power)
+{
+}
+
 void ScalarReception::printToStream(std::ostream& stream) const
 {
-    ReceptionBase::printToStream(stream);
-    stream << ", power = " << power << ", carrier frequency = " << carrierFrequency << ", bandwidth = " << bandwidth;
+    stream << "ScalarReception, "
+           << "power = " << power << ", ";
+    FlatReceptionBase::printToStream(stream);
 }
 
 } // namespace physicallayer

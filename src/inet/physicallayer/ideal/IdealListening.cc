@@ -21,6 +21,11 @@ namespace inet {
 
 namespace physicallayer {
 
+IdealListening::IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+    ListeningBase(radio, startTime, endTime, startPosition, endPosition)
+{
+}
+
 } // namespace physicallayer
 
 } // namespace inet

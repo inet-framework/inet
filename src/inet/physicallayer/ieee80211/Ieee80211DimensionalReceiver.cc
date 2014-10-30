@@ -30,7 +30,8 @@ Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
     DimensionalReceiver(),
     opMode('\0'),
     preambleMode((WifiPreamble) - 1)
-{}
+{
+}
 
 void Ieee80211DimensionalReceiver::initialize(int stage)
 {

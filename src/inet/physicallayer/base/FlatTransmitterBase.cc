@@ -22,6 +22,16 @@ namespace inet {
 
 namespace physicallayer {
 
+FlatTransmitterBase::FlatTransmitterBase() :
+    modulation(NULL),
+    headerBitLength(-1),
+    carrierFrequency(Hz(sNaN)),
+    bandwidth(Hz(sNaN)),
+    bitrate(sNaN),
+    power(W(sNaN))
+{
+}
+
 void FlatTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
@@ -43,6 +53,16 @@ void FlatTransmitterBase::initialize(int stage)
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
     }
+}
+
+void FlatTransmitterBase::printToStream(std::ostream& stream) const
+{
+    stream << "modulation = { " << modulation << " }, "
+           << "headerBitLength = " << headerBitLength << ", "
+           << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth << ", "
+           << "bitrate = " << bitrate << ", "
+           << "power = " << power;
 }
 
 } // namespace physicallayer

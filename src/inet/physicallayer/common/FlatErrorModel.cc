@@ -26,7 +26,7 @@ Define_Module(FlatErrorModel);
 
 void FlatErrorModel::printToStream(std::ostream& stream) const
 {
-    stream << "Flat error model";
+    stream << "FlatErrorModel";
 }
 
 double FlatErrorModel::computePacketErrorRate(const ISNIR *snir) const

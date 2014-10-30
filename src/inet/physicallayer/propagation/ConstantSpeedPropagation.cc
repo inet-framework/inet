@@ -27,7 +27,8 @@ Define_Module(ConstantSpeedPropagation);
 ConstantSpeedPropagation::ConstantSpeedPropagation() :
     PropagationBase(),
     mobilityApproximationCount(0)
-{}
+{
+}
 
 const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
 {
@@ -52,9 +53,9 @@ const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t tim
 
 void ConstantSpeedPropagation::printToStream(std::ostream& stream) const
 {
-    stream << "constant speed propagation"
-           << ", theoretical propagation speed = " << propagationSpeed
-           << ", mobility approximation count = " << mobilityApproximationCount;
+    stream << "ConstantSpeedPropagation, "
+           << "mobilityApproximationCount = " << mobilityApproximationCount << ", ";
+    PropagationBase::printToStream(stream);
 }
 
 const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const

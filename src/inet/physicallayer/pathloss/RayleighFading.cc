@@ -25,9 +25,9 @@ Define_Module(RayleighFading);
 
 void RayleighFading::printToStream(std::ostream& stream) const
 {
-    stream << "Rayleigh fading, "
+    stream << "RayleighFading, "
            << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss;
+           << "systemLoss = " << systemLoss;
 }
 
 double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

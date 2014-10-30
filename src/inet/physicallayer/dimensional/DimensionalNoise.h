@@ -32,13 +32,10 @@ class INET_API DimensionalNoise : public FlatNoiseBase
     const ConstMapping *power;
 
   public:
-    DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-        FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
-        power(power)
-    {}
-
+    DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power);
     virtual ~DimensionalNoise() { delete power; }
-    virtual void printToStream(std::ostream& stream) const { stream << "dimensional noise"; }
+
+    virtual void printToStream(std::ostream& stream) const;
     virtual const ConstMapping *getPower() const { return power; }
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };

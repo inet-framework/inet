@@ -28,12 +28,12 @@ void BreakpointPathLoss::initialize(int stage)
 
 void BreakpointPathLoss::printToStream(std::ostream& stream) const
 {
-    stream << "breakpoint path loss,"
-           << " L01 = " << l01
-           << " L02 = " << l02
-           << " alpha1 = " << alpha1
-           << " alpha2 = " << alpha2
-           << " breakpointDistance = " << breakpointDistance;
+    stream << "BreakpointPathLoss, "
+           << "L01 = " << l01 << ", "
+           << "L02 = " << l02 << ", "
+           << "alpha1 = " << alpha1 << ", "
+           << "alpha2 = " << alpha2 << ", "
+           << "breakpointDistance = " << breakpointDistance;
 }
 
 double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

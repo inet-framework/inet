@@ -33,14 +33,10 @@ class INET_API ScalarIsotropicBackgroundNoise : public cModule, public IBackgrou
     virtual void initialize(int stage);
 
   public:
-    ScalarIsotropicBackgroundNoise() :
-        power(W(sNaN))
-    {}
+    ScalarIsotropicBackgroundNoise();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "scalar background noise"; }
-
+    virtual void printToStream(std::ostream& stream) const;
     virtual W getPower() const { return power; }
-
     virtual const INoise *computeNoise(const IListening *listening) const;
 };
 

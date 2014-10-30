@@ -22,6 +22,11 @@ namespace inet {
 
 namespace physicallayer {
 
+AntennaBase::AntennaBase() :
+    mobility(NULL)
+{
+}
+
 void AntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)

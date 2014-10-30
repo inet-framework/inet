@@ -36,7 +36,6 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
     ConstantSpeedPropagation();
 
     virtual void printToStream(std::ostream& stream) const;
-
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
 };
 

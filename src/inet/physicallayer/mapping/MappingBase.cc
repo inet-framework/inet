@@ -87,7 +87,8 @@ Dimension::DimensionIdType Dimension::getDimensionID(const Dimension::DimensionN
 
 Dimension::Dimension(const Dimension::DimensionNameType& name)
     : id(getDimensionID(name))
-{}
+{
+}
 
 //--DimensionSet implementation ----------------------
 const DimensionSet DimensionSet::timeDomain(Dimension::time);
@@ -98,7 +99,8 @@ const DimensionSet DimensionSet::timeFreqDomain(Dimension::time, Dimension::freq
 
 Argument::Argument(simtime_t_cref timeVal) :
     time(timeVal), values()
-{}
+{
+}
 
 Argument::Argument(const DimensionSet& dims, simtime_t_cref timeVal) :
     time(timeVal), values()

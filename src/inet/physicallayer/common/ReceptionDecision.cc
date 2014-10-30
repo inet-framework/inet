@@ -21,11 +21,25 @@ namespace inet {
 
 namespace physicallayer {
 
+ReceptionDecision::ReceptionDecision(const IReception *reception, const RadioReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
+    reception(reception),
+    indication(indication),
+    isSynchronizationPossible_(false),
+    isSynchronizationAttempted_(false),
+    isSynchronizationSuccessful_(false),
+    isReceptionPossible_(isReceptionPossible),
+    isReceptionAttempted_(isReceptionAttempted),
+    isReceptionSuccessful_(isReceptionSuccessful)
+{
+}
+
 void ReceptionDecision::printToStream(std::ostream& stream) const
 {
-    stream << "reception decision, " << (isReceptionPossible_ ? "possible" : "impossible");
-    stream << ", " << (isReceptionSuccessful_ ? "successful" : "unsuccessful");
-    stream << ", indication = " << indication;
+    stream << "ReceptionDecision, "
+           << (isReceptionPossible_ ? "possible" : "impossible") << ", "
+           << (isReceptionAttempted_ ? "attempted" : "ignored") << ", "
+           << (isReceptionSuccessful_ ? "successful" : "unsuccessful") << ", "
+           << "indication = { " << indication << " }";
 }
 
 } // namespace physicallayer

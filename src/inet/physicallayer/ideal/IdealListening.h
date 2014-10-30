@@ -27,9 +27,9 @@ namespace physicallayer {
 class INET_API IdealListening : public ListeningBase
 {
   public:
-    IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
-        ListeningBase(radio, startTime, endTime, startPosition, endPosition)
-    {}
+    IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
+
+    virtual void printToStream(std::ostream& stream) const { stream << "IdealListening"; }
 };
 
 } // namespace physicallayer

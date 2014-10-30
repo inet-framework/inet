@@ -26,14 +26,15 @@ namespace physicallayer {
 
 Define_Module(ScalarTransmitter);
 
+ScalarTransmitter::ScalarTransmitter() :
+    FlatTransmitterBase()
+{
+}
+
 void ScalarTransmitter::printToStream(std::ostream& stream) const
 {
-    stream << "scalar transmitter, "
-           << "headerBitLength = " << headerBitLength << ", "
-           << "bitrate = " << bitrate << ", "
-           << "power = " << power << ", "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth;
+    stream << "ScalarTransmitter, ";
+    FlatTransmitterBase::printToStream(stream);
 }
 
 const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

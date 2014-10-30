@@ -21,6 +21,30 @@ namespace inet {
 
 namespace physicallayer {
 
+Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+    startPropagationTime(startPropagationTime),
+    endPropagationTime(endPropagationTime),
+    startTime(startTime),
+    endTime(endTime),
+    startPosition(startPosition),
+    endPosition(endPosition),
+    startOrientation(startOrientation),
+    endOrientation(endOrientation)
+{
+}
+
+void Arrival::printToStream(std::ostream& stream) const
+{
+    stream << "startPropagationTime = " << startPropagationTime << ", "
+           << "endPropagationTime = " << endPropagationTime << ", "
+           << "startTime = " << startTime << ", "
+           << "endTime = " << endTime << ", "
+           << "startPosition = " << startPosition << ", "
+           << "endPosition = " << endPosition << ", "
+           << "startOrientation = " << startOrientation << ", "
+           << "endOrientation = " << endOrientation;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

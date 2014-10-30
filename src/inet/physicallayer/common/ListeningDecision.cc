@@ -21,9 +21,17 @@ namespace inet {
 
 namespace physicallayer {
 
+ListeningDecision::ListeningDecision(const IListening *listening, bool isListeningPossible_) :
+    listening(listening),
+    isListeningPossible_(isListeningPossible_)
+{
+}
+
 void ListeningDecision::printToStream(std::ostream& stream) const
 {
-    stream << "listening decision, " << (isListeningPossible_ ? "possible" : "impossible");
+    stream << "ListeningDecision, "
+           << "listening = { " << listening << " }, "
+           << (isListeningPossible_ ? "possible" : "impossible");
 }
 
 } // namespace physicallayer

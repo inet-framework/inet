@@ -25,7 +25,8 @@ Define_Module(DipoleAntenna);
 
 DipoleAntenna::DipoleAntenna() :
     AntennaBase()
-{}
+{
+}
 
 void DipoleAntenna::initialize(int stage)
 {
@@ -38,6 +39,11 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
 {
     double q = sin(direction.beta - M_PI_2);
     return 1.5 * q * q;
+}
+
+void DipoleAntenna::printToStream(std::ostream& stream) const
+{
+    stream << "DipoleAntenna, length = " << length;
 }
 
 } // namespace physicallayer

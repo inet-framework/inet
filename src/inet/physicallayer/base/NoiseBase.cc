@@ -21,6 +21,18 @@ namespace inet {
 
 namespace physicallayer {
 
+NoiseBase::NoiseBase(simtime_t startTime, simtime_t endTime) :
+    startTime(startTime),
+    endTime(endTime)
+{
+}
+
+void NoiseBase::printToStream(std::ostream& stream) const
+{
+    stream << "startTime = " << startTime << ", "
+           << "endTime = " << endTime;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

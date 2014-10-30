@@ -25,12 +25,23 @@ namespace physicallayer {
 
 Define_Module(ScalarIsotropicBackgroundNoise);
 
+ScalarIsotropicBackgroundNoise::ScalarIsotropicBackgroundNoise() :
+    power(W(sNaN))
+{
+}
+
 void ScalarIsotropicBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         power = mW(math::dBm2mW(par("power")));
     }
+}
+
+void ScalarIsotropicBackgroundNoise::printToStream(std::ostream& stream) const
+{
+    stream << "ScalarIsotropicBackgroundNoise, "
+           << "power = " << power;
 }
 
 const INoise *ScalarIsotropicBackgroundNoise::computeNoise(const IListening *listening) const

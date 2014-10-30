@@ -71,8 +71,8 @@ void FlatReceiverBase::initialize(int stage)
 
 void FlatReceiverBase::printToStream(std::ostream& stream) const
 {
-    stream << "modulation = {" << modulation << "}, "
-           << "error model = {" << errorModel << "}, "
+    stream << "modulation = { " << modulation << " }, "
+           << "errorModel = { " << errorModel << " }, "
            << "energyDetection = " << energyDetection << ", "
            << "sensitivity = " << sensitivity << ", "
            << "carrierFrequency = " << carrierFrequency << ", "

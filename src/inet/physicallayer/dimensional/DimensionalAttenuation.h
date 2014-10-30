@@ -35,7 +35,7 @@ class INET_API DimensionalAttenuation : public AttenuationBase
     virtual void initialize(int stage);
 
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "dimensional attenuation"; }
+    virtual void printToStream(std::ostream& stream) const;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
 };
 

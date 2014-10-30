@@ -57,7 +57,7 @@ class Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
   public:
     Ieee80211YansErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 YANS error model"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211YansErrorModel"; }
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
 
   private:

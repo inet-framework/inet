@@ -28,7 +28,7 @@ class INET_API IdealAttenuation : public cModule, public IAttenuation
 {
   public:
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void printToStream(std::ostream& stream) const { stream << "ideal attenuation"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "IdealAttenuation"; }
 };
 
 } // namespace physicallayer

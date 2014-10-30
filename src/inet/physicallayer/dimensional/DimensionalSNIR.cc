@@ -29,7 +29,9 @@ DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const Di
 
 void DimensionalSNIR::printToStream(std::ostream& stream) const
 {
-    stream << "dimensional SNIR";
+    stream << "DimensionalSNIR, "
+           << "minSNIR = " << minSNIR << ", ";
+    SNIRBase::printToStream(stream);
 }
 
 double DimensionalSNIR::computeMin() const

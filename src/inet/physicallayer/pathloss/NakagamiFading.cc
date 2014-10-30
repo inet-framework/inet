@@ -38,10 +38,10 @@ void NakagamiFading::initialize(int stage)
 
 void NakagamiFading::printToStream(std::ostream& stream) const
 {
-    stream << "Nakagami fading, "
+    stream << "NakagamiFading, "
            << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss << ", "
-           << "shape factor = " << shapeFactor;
+           << "systemLoss = " << systemLoss << ", "
+           << "shapeFactor = " << shapeFactor;
 }
 
 double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

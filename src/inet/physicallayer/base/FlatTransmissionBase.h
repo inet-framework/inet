@@ -36,16 +36,9 @@ class INET_API FlatTransmissionBase : public TransmissionBase
     const bps bitrate;
 
   public:
-    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
-        TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-        modulation(modulation),
-        headerBitLength(headerBitLength),
-        payloadBitLength(payloadBitLength),
-        carrierFrequency(carrierFrequency),
-        bandwidth(bandwidth),
-        bitrate(bitrate)
-    {}
+    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual const IModulation *getModulation() const { return modulation; }
     virtual int getHeaderBitLength() const { return headerBitLength; }
     virtual int getPayloadBitLength() const { return payloadBitLength; }

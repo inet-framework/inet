@@ -39,9 +39,9 @@ void FreeSpacePathLoss::initialize(int stage)
 
 void FreeSpacePathLoss::printToStream(std::ostream& stream) const
 {
-    stream << "free space path loss, "
+    stream << "FreeSpacePathLoss, "
            << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss;
+           << "systemLoss = " << systemLoss;
 }
 
 double FreeSpacePathLoss::computeFreeSpacePathLoss(m waveLength, m distance, double alpha, double systemLoss) const

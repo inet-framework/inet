@@ -21,9 +21,22 @@ namespace inet {
 
 namespace physicallayer {
 
+ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+    receiver(receiver),
+    startTime(startTime),
+    endTime(endTime),
+    startPosition(startPosition),
+    endPosition(endPosition)
+{
+}
+
 void ListeningBase::printToStream(std::ostream& stream) const
 {
-    stream << "listening";
+    stream << "receiver = { " << receiver << " }, "
+           << "startTime = " << startTime << ", "
+           << "endTime = " << endTime << ", "
+           << "startPosition = " << startPosition << ", "
+           << "endPosition = " << endPosition;
 }
 
 } // namespace physicallayer

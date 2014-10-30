@@ -58,7 +58,7 @@ void TracingObstacleLoss::finish()
 
 void TracingObstacleLoss::printToStream(std::ostream& stream) const
 {
-    stream << "tracing obstacle loss";
+    stream << "TracingObstacleLoss";
 }
 
 double TracingObstacleLoss::computeDielectricLoss(const Material *material, Hz frequency, m distance) const

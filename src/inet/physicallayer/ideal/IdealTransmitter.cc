@@ -25,6 +25,14 @@ namespace physicallayer {
 
 Define_Module(IdealTransmitter);
 
+IdealTransmitter::IdealTransmitter() :
+    bitrate(sNaN),
+    maxCommunicationRange(sNaN),
+    maxInterferenceRange(sNaN),
+    maxDetectionRange(sNaN)
+{
+}
+
 void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -37,7 +45,8 @@ void IdealTransmitter::initialize(int stage)
 
 void IdealTransmitter::printToStream(std::ostream& stream) const
 {
-    stream << "ideal transmitter, bitrate = " << bitrate << ", "
+    stream << "IdealTransmitter, "
+           << "bitrate = " << bitrate << ", "
            << "maxCommunicationRange = " << maxCommunicationRange << ", "
            << "maxInterferenceRange = " << maxInterferenceRange << ", "
            << "maxDetectionRange = " << maxDetectionRange;

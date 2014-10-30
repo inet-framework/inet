@@ -22,10 +22,14 @@ namespace inet {
 namespace physicallayer {
 
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping) :
-    MultiDimMappingIterator<Linear>(mapping) {}
+    MultiDimMappingIterator<Linear>(mapping)
+{
+}
 
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping, const Argument& pos) :
-    MultiDimMappingIterator<Linear>(mapping, pos) {}
+    MultiDimMappingIterator<Linear>(mapping, pos)
+{
+}
 
 const Argument::mapped_type MappingUtils::cMinNotFound = std::numeric_limits<Argument::mapped_type>::infinity();
 const Argument::mapped_type MappingUtils::cMaxNotFound = -std::numeric_limits<Argument::mapped_type>::infinity();

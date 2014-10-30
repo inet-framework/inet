@@ -40,6 +40,13 @@ void DimensionalAttenuation::initialize(int stage)
     }
 }
 
+void DimensionalAttenuation::printToStream(std::ostream& stream) const
+{
+    stream << "DimensionalAttenuation, "
+           << "attenuateWithCarrierFrequency = " << attenuateWithCarrierFrequency << ", "
+           << "interpolationMode = " << interpolationMode;
+}
+
 const IReception *DimensionalAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();

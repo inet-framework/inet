@@ -36,12 +36,7 @@ class INET_API IdealTransmitter : public TransmitterBase
     virtual void initialize(int stage);
 
   public:
-    IdealTransmitter() :
-        bitrate(sNaN),
-        maxCommunicationRange(sNaN),
-        maxInterferenceRange(sNaN),
-        maxDetectionRange(sNaN)
-    {}
+    IdealTransmitter();
 
     virtual void printToStream(std::ostream& stream) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;

@@ -35,8 +35,8 @@ class INET_API SNIRBase : public virtual ISNIR
   public:
     SNIRBase(const IReception *reception, const INoise *noise);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual const IReception *getReception() const { return reception; }
-
     virtual const INoise *getNoise() const { return noise; }
 };
 

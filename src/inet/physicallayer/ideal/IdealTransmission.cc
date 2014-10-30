@@ -21,6 +21,23 @@ namespace inet {
 
 namespace physicallayer {
 
+IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+    TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+    maxCommunicationRange(maxCommunicationRange),
+    maxInterferenceRange(maxInterferenceRange),
+    maxDetectionRange(maxDetectionRange)
+{
+}
+
+void IdealTransmission::printToStream(std::ostream& stream) const
+{
+    stream << "IdealTransmission, "
+           << "maxCommunicationRange = " << maxCommunicationRange << ", "
+           << "maxInterferenceRange = " << maxInterferenceRange << ", "
+           << "maxDetectionRange = " << maxDetectionRange << ", ";
+    TransmissionBase::printToStream(stream);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

@@ -31,11 +31,7 @@ class INET_API BandListening : public ListeningBase
     const Hz bandwidth;
 
   public:
-    BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
-        ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-        carrierFrequency(carrierFrequency),
-        bandwidth(bandwidth)
-    {}
+    BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth);
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }

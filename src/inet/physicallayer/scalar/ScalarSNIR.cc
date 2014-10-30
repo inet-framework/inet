@@ -29,7 +29,8 @@ ScalarSNIR::ScalarSNIR(const ScalarReception *reception, const ScalarNoise *nois
 
 void ScalarSNIR::printToStream(std::ostream& stream) const
 {
-    stream << "scalar SNIR";
+    stream << "ScalarSNIR, "
+           << "minSNIR = " << minSNIR;
 }
 
 double ScalarSNIR::computeMin() const

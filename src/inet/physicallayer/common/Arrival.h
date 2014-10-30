@@ -37,18 +37,9 @@ class INET_API Arrival : public virtual IArrival
     const EulerAngles endOrientation;
 
   public:
-    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
-        startPropagationTime(startPropagationTime),
-        endPropagationTime(endPropagationTime),
-        startTime(startTime),
-        endTime(endTime),
-        startPosition(startPosition),
-        endPosition(endPosition),
-        startOrientation(startOrientation),
-        endOrientation(endOrientation)
-    {}
+    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
-    virtual void printToStream(std::ostream& stream) const {}
+    virtual void printToStream(std::ostream& stream) const;
 
     virtual const simtime_t getStartPropagationTime() const { return startPropagationTime; }
     virtual const simtime_t getEndPropagationTime() const { return endPropagationTime; }

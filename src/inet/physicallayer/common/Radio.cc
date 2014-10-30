@@ -48,7 +48,8 @@ Radio::Radio() :
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
     endSwitchTimer(NULL)
-{}
+{
+}
 
 Radio::~Radio()
 {

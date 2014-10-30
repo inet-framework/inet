@@ -25,7 +25,8 @@ Define_Module(InterpolatingAntenna);
 
 InterpolatingAntenna::InterpolatingAntenna() :
     AntennaBase(),
-    maxGain(0)
+    minGain(NaN),
+    maxGain(NaN)
 {
 }
 
@@ -37,6 +38,11 @@ void InterpolatingAntenna::initialize(int stage)
         parseMap(headingGainMap, par("headingGains"));
         parseMap(bankGainMap, par("bankGains"));
     }
+}
+
+void InterpolatingAntenna::printToStream(std::ostream& stream) const
+{
+    stream << "InterpolatingAntenna, maxGain = " << maxGain;
 }
 
 void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const char *text)
@@ -53,11 +59,17 @@ void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const cha
     gainMap.insert(std::pair<double, double>(0, math::dB2fraction(atof(firstGain))));
     gainMap.insert(std::pair<double, double>(2 * M_PI, math::dB2fraction(atof(firstGain))));
     while (tokenizer.hasMoreTokens()) {
-        const char *angle = tokenizer.nextToken();
-        const char *gain = tokenizer.nextToken();
-        if (!angle || !gain)
+        const char *angleString = tokenizer.nextToken();
+        const char *gainString = tokenizer.nextToken();
+        if (!angleString || !gainString)
             throw cRuntimeError("Insufficient number of values");
-        gainMap.insert(std::pair<double, double>(atof(angle) * M_PI / 180, math::dB2fraction(atof(gain))));
+        double angle = atof(angleString) * M_PI / 180;
+        double gain = math::dB2fraction(atof(gainString));
+        if (isNaN(minGain) || gain < minGain)
+            minGain = gain;
+        if (isNaN(maxGain) || gain > maxGain)
+            maxGain = gain;
+        gainMap.insert(std::pair<double, double>(angle, gain));
     }
 }
 
@@ -85,9 +97,9 @@ double InterpolatingAntenna::computeGain(const std::map<double, double>& gainMap
 
 double InterpolatingAntenna::computeGain(EulerAngles direction) const
 {
-    return computeGain(headingGainMap, direction.alpha)
-           * computeGain(elevationGainMap, direction.beta)
-           * computeGain(bankGainMap, direction.gamma);
+    return computeGain(headingGainMap, direction.alpha) *
+           computeGain(elevationGainMap, direction.beta) *
+           computeGain(bankGainMap, direction.gamma);
 }
 
 } // namespace physicallayer

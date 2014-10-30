@@ -40,11 +40,11 @@ void TwoRayGroundReflection::initialize(int stage)
 
 void TwoRayGroundReflection::printToStream(std::ostream& stream) const
 {
-    stream << "two ray ground reflection, "
+    stream << "TwoRayGroundReflection, "
            << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss << ", "
-           << "transmitter antenna high = " << ht << ", "
-           << "receiver antenna high = " << hr;
+           << "systemLoss = " << systemLoss << ", "
+           << "ht = " << ht << ", "
+           << "hr = " << hr;
 }
 
 double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

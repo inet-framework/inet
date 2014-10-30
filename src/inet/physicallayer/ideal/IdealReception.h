@@ -38,11 +38,9 @@ class INET_API IdealReception : public ReceptionBase
     const Power power;
 
   public:
-    IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
-        ReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-        power(power)
-    {}
+    IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual Power getPower() const { return power; }
 };
 

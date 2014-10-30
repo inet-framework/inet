@@ -34,7 +34,7 @@ DimensionalReceiver::DimensionalReceiver() :
 
 void DimensionalReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "dimensional receiver, ";
+    stream << "DimensionalReceiver, ";
     FlatReceiverBase::printToStream(stream);
 }
 

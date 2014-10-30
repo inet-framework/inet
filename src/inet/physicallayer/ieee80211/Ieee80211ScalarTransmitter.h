@@ -35,11 +35,7 @@ class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
     virtual void initialize(int stage);
 
   public:
-    Ieee80211ScalarTransmitter() :
-        ScalarTransmitter(),
-        opMode('\0'),
-        preambleMode((WifiPreamble) - 1)
-    {}
+    Ieee80211ScalarTransmitter();
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };

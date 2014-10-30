@@ -34,13 +34,7 @@ class INET_API ListeningBase : public IListening
     const Coord endPosition;
 
   public:
-    ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
-        receiver(receiver),
-        startTime(startTime),
-        endTime(endTime),
-        startPosition(startPosition),
-        endPosition(endPosition)
-    {}
+    ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
 
     virtual void printToStream(std::ostream& stream) const;
 

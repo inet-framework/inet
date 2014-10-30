@@ -21,6 +21,17 @@ namespace inet {
 
 namespace physicallayer {
 
+RadioFrame::RadioFrame(const ITransmission *transmission) :
+    transmission(transmission)
+{
+}
+
+RadioFrame::RadioFrame(const RadioFrame& other) :
+    cPacket(other),
+    transmission(other.transmission)
+{
+}
+
 void RadioFrame::printToStream(std::ostream& stream) const
 {
     stream << (cPacket *)this;

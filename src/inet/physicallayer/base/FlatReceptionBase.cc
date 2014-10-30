@@ -21,6 +21,20 @@ namespace inet {
 
 namespace physicallayer {
 
+FlatReceptionBase::FlatReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
+    ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+    carrierFrequency(carrierFrequency),
+    bandwidth(bandwidth)
+{
+}
+
+void FlatReceptionBase::printToStream(std::ostream& stream) const
+{
+    stream << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth;
+    ReceptionBase::printToStream(stream);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

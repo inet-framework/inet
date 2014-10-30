@@ -147,24 +147,11 @@ void RadioMedium::initialize(int stage)
         }
         updateCanvasInterval = par("updateCanvasInterval");
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER)
         updateLimits();
-    }
     else if (stage == INITSTAGE_LAST) {
-        EV_DEBUG << "Radio medium initialized"
-                 << ", maximum transmission power = " << maxTransmissionPower.get()
-                 << ", minimum interference power = " << minInterferencePower.get()
-                 << ", minimum reception power = " << minReceptionPower.get()
-                 << ", maximum antenna gain = " << maxAntennaGain
-                 << ", minimum interference time = " << minInterferenceTime << " s"
-                 << ", maximum transmission duration = " << maxTransmissionDuration << " s"
-                 << ", maximum communication range = " << maxCommunicationRange.get()
-                 << ", maximum interference range = " << maxInterferenceRange.get()
-                 << ", " << propagation << ", " << attenuation;
-        if (backgroundNoise)
-            EV_DEBUG << ", " << backgroundNoise;
-        else
-            EV_DEBUG << ", no background noise";
+        EV_DEBUG << "Initialized ";
+        printToStream(EVSTREAM);
         EV_DEBUG << endl;
     }
 }
@@ -192,6 +179,30 @@ void RadioMedium::finish()
     recordScalar("reception cache hit", receptionCacheHitPercentage, "%");
     recordScalar("interference cache hit", interferenceCacheHitPercentage, "%");
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
+}
+
+void RadioMedium::printToStream(std::ostream& stream) const
+{
+    stream << "RadioMedium, "
+           << "maxTransmissionPower = " << maxTransmissionPower << ", "
+           << "minInterferencePower = " << minInterferencePower << ", "
+           << "minReceptionPower = " << minReceptionPower << ", "
+           << "maxAntennaGain = " << maxAntennaGain << ", "
+           << "minInterferenceTime = " << minInterferenceTime << ", "
+           << "maxTransmissionDuration = " << maxTransmissionDuration << ", "
+           << "maxCommunicationRange = " << maxCommunicationRange << ", "
+           << "maxInterferenceRange = " << maxInterferenceRange << ", "
+           << "propagation = { " << propagation << " }, "
+           << "attenuation = { " << attenuation << " }, "
+           << "pathLoss = { " << pathLoss << " }, ";
+    if (obstacleLoss)
+        stream << "obstacleLoss = { " << obstacleLoss << " }, ";
+    else
+        stream << "obstacleLoss = NULL, ";
+    if (backgroundNoise)
+        stream << "backgroundNoise = { " << backgroundNoise << " }";
+    else
+        stream << "backgroundNoise = NULL";
 }
 
 void RadioMedium::handleMessage(cMessage *message)

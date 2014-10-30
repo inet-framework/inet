@@ -483,7 +483,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "Radio medium"; }
+    virtual void printToStream(std::ostream& stream) const;
 
     virtual W getMinInterferencePower() const { return minInterferencePower; }
     virtual W getMinReceptionPower() const { return minReceptionPower; }

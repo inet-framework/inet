@@ -29,7 +29,7 @@ class INET_API IsotropicAntenna : public AntennaBase
   public:
     IsotropicAntenna();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "isotropic antenna"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "IsotropicAntenna"; }
     virtual double getMaxGain() const { return 1; }
     virtual double computeGain(const EulerAngles direction) const { return 1; }
 };

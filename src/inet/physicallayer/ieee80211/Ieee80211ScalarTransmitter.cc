@@ -32,6 +32,13 @@ namespace physicallayer {
 
 Define_Module(Ieee80211ScalarTransmitter);
 
+Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
+    ScalarTransmitter(),
+    opMode('\0'),
+    preambleMode((WifiPreamble) - 1)
+{
+}
+
 void Ieee80211ScalarTransmitter::initialize(int stage)
 {
     ScalarTransmitter::initialize(stage);

@@ -31,11 +31,9 @@ class INET_API NoiseBase : public INoise
     const simtime_t endTime;
 
   public:
-    NoiseBase(simtime_t startTime, simtime_t endTime) :
-        startTime(startTime),
-        endTime(endTime)
-    {}
+    NoiseBase(simtime_t startTime, simtime_t endTime);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual const simtime_t getStartTime() const { return startTime; }
     virtual const simtime_t getEndTime() const { return endTime; }
 };

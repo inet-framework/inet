@@ -21,9 +21,29 @@ namespace inet {
 
 namespace physicallayer {
 
+TransmissionBase::TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+    id(nextId++),
+    transmitter(transmitter),
+    macFrame(macFrame),
+    startTime(startTime),
+    endTime(endTime),
+    startPosition(startPosition),
+    endPosition(endPosition),
+    startOrientation(startOrientation),
+    endOrientation(endOrientation)
+{
+}
+
 void TransmissionBase::printToStream(std::ostream& stream) const
 {
-    stream << "transmission, id = " << id << ", transmitter id = " << transmitter->getId();
+    stream << "id = " << id << ", "
+           << "transmitter id = " << transmitter->getId() << ", "
+           << "startTime = " << startTime << ", "
+           << "endTime = " << endTime << ", "
+           << "startPosition = " << startPosition << ", "
+           << "endPosition = " << endPosition << ", "
+           << "startOrientation = " << startOrientation << ", "
+           << "endOrientation = " << endOrientation;
 }
 
 } // namespace physicallayer

@@ -21,6 +21,28 @@ namespace inet {
 
 namespace physicallayer {
 
+FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
+    TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+    modulation(modulation),
+    headerBitLength(headerBitLength),
+    payloadBitLength(payloadBitLength),
+    carrierFrequency(carrierFrequency),
+    bandwidth(bandwidth),
+    bitrate(bitrate)
+{
+}
+
+void FlatTransmissionBase::printToStream(std::ostream& stream) const
+{
+    stream << "modulation = { " << modulation << " }, "
+           << "headerBitLength = " << headerBitLength << ", "
+           << "payloadBitLength = " << payloadBitLength << ", "
+           << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth << ", "
+           << "bitrate = " << bitrate;
+    TransmissionBase::printToStream(stream);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

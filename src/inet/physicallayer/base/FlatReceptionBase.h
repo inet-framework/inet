@@ -31,12 +31,9 @@ class INET_API FlatReceptionBase : public ReceptionBase
     const Hz bandwidth;
 
   public:
-    FlatReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
-        ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-        carrierFrequency(carrierFrequency),
-        bandwidth(bandwidth)
-    {}
+    FlatReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;

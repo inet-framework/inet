@@ -21,6 +21,13 @@ namespace inet {
 
 namespace physicallayer {
 
+BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
+    ListeningBase(radio, startTime, endTime, startPosition, endPosition),
+    carrierFrequency(carrierFrequency),
+    bandwidth(bandwidth)
+{
+}
+
 } // namespace physicallayer
 
 } // namespace inet

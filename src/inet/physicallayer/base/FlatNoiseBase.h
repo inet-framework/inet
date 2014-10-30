@@ -31,15 +31,11 @@ class INET_API FlatNoiseBase : public NoiseBase
     const Hz bandwidth;
 
   public:
-    FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
-        NoiseBase(startTime, endTime),
-        carrierFrequency(carrierFrequency),
-        bandwidth(bandwidth)
-    {}
+    FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth);
 
+    virtual void printToStream(std::ostream& stream) const;
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
-
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
 

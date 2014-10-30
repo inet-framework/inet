@@ -38,7 +38,7 @@ void RicianFading::initialize(int stage)
 
 void RicianFading::printToStream(std::ostream& stream) const
 {
-    stream << "Rician fading, "
+    stream << "RicianFading, "
            << "alpha = " << alpha << ", "
            << "system loss = " << systemLoss << ", "
            << "k = " << k;

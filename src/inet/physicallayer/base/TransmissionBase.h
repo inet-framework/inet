@@ -39,17 +39,7 @@ class INET_API TransmissionBase : public virtual ITransmission
     const EulerAngles endOrientation;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
-        id(nextId++),
-        transmitter(transmitter),
-        macFrame(macFrame),
-        startTime(startTime),
-        endTime(endTime),
-        startPosition(startPosition),
-        endPosition(endPosition),
-        startOrientation(startOrientation),
-        endOrientation(endOrientation)
-    {}
+    TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
     virtual int getId() const { return id; }
 

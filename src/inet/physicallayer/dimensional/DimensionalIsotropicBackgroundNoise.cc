@@ -28,7 +28,8 @@ Define_Module(DimensionalIsotropicBackgroundNoise);
 DimensionalIsotropicBackgroundNoise::DimensionalIsotropicBackgroundNoise() :
     interpolationMode((Mapping::InterpolationMethod)-1),
     power(W(sNaN))
-{}
+{
+}
 
 void DimensionalIsotropicBackgroundNoise::initialize(int stage)
 {
@@ -55,6 +56,14 @@ void DimensionalIsotropicBackgroundNoise::initialize(int stage)
             throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
         power = mW(math::dBm2mW(par("power")));
     }
+}
+
+void DimensionalIsotropicBackgroundNoise::printToStream(std::ostream& stream) const
+{
+    stream << "DimensionalIsotropicBackgroundNoise, "
+           // TODO: << "dimensions = { " << dimensions << " }, "
+           << "interpolationMode = " << interpolationMode << ", "
+           << "power = " << power;
 }
 
 const INoise *DimensionalIsotropicBackgroundNoise::computeNoise(const IListening *listening) const

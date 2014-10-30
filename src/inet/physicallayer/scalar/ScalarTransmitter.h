@@ -27,12 +27,9 @@ namespace physicallayer {
 class INET_API ScalarTransmitter : public FlatTransmitterBase
 {
   public:
-    ScalarTransmitter() :
-        FlatTransmitterBase()
-    {}
+    ScalarTransmitter();
 
     virtual void printToStream(std::ostream& stream) const;
-
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
 

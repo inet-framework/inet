@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API ScalarAttenuation : public AttenuationBase
 {
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "scalar attenuation"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "ScalarAttenuation"; }
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
 };
 

@@ -117,11 +117,12 @@ void DimensionalTransmitter::initialize(int stage)
 
 void DimensionalTransmitter::printToStream(std::ostream& stream) const
 {
-    stream << "dimensional transmitter, "
-           << "bitrate = " << bitrate << ", "
-           << "power = " << power << ", "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth;
+    stream << "DimensionalTransmitter, "
+           // TODO: << "dimensions = { " << dimensions << " } , "
+           << "interpolationMode = " << interpolationMode << ", ";
+           // TODO: << "timeGains = { " << timeGains << " }, "
+           // TODO: << "frequencyGains = { " << frequencyGains << " }, ";
+    FlatTransmitterBase::printToStream(stream);
 }
 
 ConstMapping *DimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const

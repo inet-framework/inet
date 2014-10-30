@@ -61,12 +61,12 @@ void UWBIRStochasticPathLoss::initialize(int stage)
 
 void UWBIRStochasticPathLoss::printToStream(std::ostream& stream) const
 {
-    stream << "UWBIR stochastic path loss"
-           << "PL0 = " << PL0
-           << "muGamma = " << muGamma
-           << "muSigma = " << muSigma
-           << "sigmaGamma = " << sigmaGamma
-           << "sigmaSigma = " << sigmaSigma
+    stream << "UWBIRStochasticPathLoss, "
+           << "PL0 = " << PL0 << ", "
+           << "muGamma = " << muGamma << ", "
+           << "muSigma = " << muSigma << ", "
+           << "sigmaGamma = " << sigmaGamma << ", "
+           << "sigmaSigma = " << sigmaSigma << ", "
            << "shadowing = " << shadowing;
 }
 

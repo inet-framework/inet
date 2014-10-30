@@ -34,7 +34,7 @@ ScalarReceiver::ScalarReceiver() :
 
 void ScalarReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "scalar receiver, ";
+    stream << "ScalarReceiver, ";
     FlatReceiverBase::printToStream(stream);
 }
 

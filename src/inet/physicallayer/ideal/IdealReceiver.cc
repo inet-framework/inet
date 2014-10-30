@@ -27,6 +27,11 @@ namespace physicallayer {
 
 Define_Module(IdealReceiver);
 
+IdealReceiver::IdealReceiver() :
+    ignoreInterference(false)
+{
+}
+
 void IdealReceiver::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -50,7 +55,8 @@ bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, con
 
 void IdealReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "ideal receiver, " << (ignoreInterference ? "ignore interference" : "compute interference");
+    stream << "IdealReceiver, "
+           << (ignoreInterference ? "ignoring interference" : "considering interference");
 }
 
 const IListening *IdealReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

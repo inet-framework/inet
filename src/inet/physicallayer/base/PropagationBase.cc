@@ -24,12 +24,18 @@ namespace physicallayer {
 PropagationBase::PropagationBase() :
     propagationSpeed(mps(sNaN)),
     arrivalComputationCount(0)
-{}
+{
+}
 
 void PropagationBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         propagationSpeed = mps(par("propagationSpeed"));
+}
+
+void PropagationBase::printToStream(std::ostream& stream) const
+{
+    stream << "propagationSpeed = " << propagationSpeed;
 }
 
 void PropagationBase::finish()

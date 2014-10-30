@@ -39,14 +39,9 @@ class INET_API FlatTransmitterBase : public TransmitterBase
     virtual void initialize(int stage);
 
   public:
-    FlatTransmitterBase() :
-        modulation(NULL),
-        headerBitLength(-1),
-        carrierFrequency(Hz(sNaN)),
-        bandwidth(Hz(sNaN)),
-        bitrate(sNaN),
-        power(W(sNaN))
-    {}
+    FlatTransmitterBase();
+
+    virtual void printToStream(std::ostream& stream) const;
 
     virtual W getMaxPower() const { return power; }
     virtual const IModulation *getModulation() const { return modulation; }

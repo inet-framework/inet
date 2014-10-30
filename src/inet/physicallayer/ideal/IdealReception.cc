@@ -21,6 +21,19 @@ namespace inet {
 
 namespace physicallayer {
 
+IdealReception::IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
+    ReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+    power(power)
+{
+}
+
+void IdealReception::printToStream(std::ostream& stream) const
+{
+    stream << "IdealReception, "
+           << "power = " << power << ", ";
+    ReceptionBase::printToStream(stream);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

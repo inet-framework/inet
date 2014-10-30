@@ -38,9 +38,9 @@ void LogNormalShadowing::initialize(int stage)
 
 void LogNormalShadowing::printToStream(std::ostream& stream) const
 {
-    stream << "log normal shadowing, "
+    stream << "LogNormalShadowing, "
            << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss << ", "
+           << "systemLoss = " << systemLoss << ", "
            << "sigma = " << sigma;
 }
 
