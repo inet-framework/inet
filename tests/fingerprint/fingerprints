@@ -264,7 +264,10 @@ class FingerprintTestCase(SimulationTestCase):
         wdname = re.sub('[\W]+', '_', wdname);
         resultdir = os.path.abspath(".") + "/results/" + self.csvFile + "/" + wdname;
         if not os.path.exists(resultdir):
-            os.makedirs(resultdir)
+            try:
+                os.makedirs(resultdir)
+            except OSError:
+                pass
         command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
