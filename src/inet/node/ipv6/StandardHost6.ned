@@ -22,6 +22,7 @@ import inet.applications.IPingApp;
 import inet.applications.ISCTPApp;
 import inet.applications.ITCPApp;
 import inet.applications.IUDPApp;
+import inet.node.inet.NodeBase;
 import inet.transportlayer.ISCTP;
 import inet.transportlayer.ITCP;
 import inet.transportlayer.IUDP;
@@ -31,7 +32,7 @@ import inet.transportlayer.IUDP;
 // IPv6 host with TCP, SCTP and UDP layers and applications.
 // see ~StandardHost for configuration.
 //
-module StandardHost6 extends NodeBase6
+module StandardHost6 extends NodeBase
 {
     parameters:
         @display("i=device/pc2");
@@ -46,6 +47,10 @@ module StandardHost6 extends NodeBase6
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
         IPForward = default(false);  // disable routing by default
+        xml routes = default(xml("<routingTable/>"));
+        networkLayerType = "IPv6NetworkLayer";
+        routingTableType = "IPv6RoutingTable";
+        routingTable.routes = routes;
     submodules:
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:

@@ -17,15 +17,22 @@
 
 package inet.node.ipv6;
 
+import inet.node.inet.NodeBase;
+
+
 //
 // IPv6 router.
 //
 // see ~Router for configuration options
 //
-module Router6 extends NodeBase6
+module Router6 extends NodeBase
 {
     parameters:
         @display("i=abstract/router");
         IPForward = true;
+        xml routes = default(xml("<routingTable/>"));
+        networkLayerType = "IPv6NetworkLayer";
+        routingTableType = "IPv6RoutingTable";
+        routingTable.routes = routes;
 }
 
