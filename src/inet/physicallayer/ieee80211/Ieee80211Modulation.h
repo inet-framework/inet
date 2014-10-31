@@ -30,14 +30,14 @@ namespace physicallayer {
 /**
  * See IEEE Std 802.11-2007 section 18.2.2.
  */
-enum WifiPreamble {
-    WIFI_PREAMBLE_LONG,
-    WIFI_PREAMBLE_SHORT,
-    WIFI_PREAMBLE_HT_MF,
-    WIFI_PREAMBLE_HT_GF
+enum Ieee80211PreambleMode {
+    IEEE80211_PREAMBLE_LONG,
+    IEEE80211_PREAMBLE_SHORT,
+    IEEE80211_PREAMBLE_HT_MF,
+    IEEE80211_PREAMBLE_HT_GF
 };
 
-class WifiModulationType
+class Ieee80211Modulation
 {
   public:
     static ModulationType GetDsssRate1Mbps();
@@ -77,15 +77,15 @@ class WifiModulationType
     static ModulationType GetOfdmRate12MbpsBW5MHz();
     static ModulationType GetOfdmRate13_5MbpsBW5MHz();
 
-    static simtime_t getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble);
-    static simtime_t getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble);
-    static simtime_t getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble);
+    static simtime_t getPlcpHeaderDuration(ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static simtime_t getPlcpPreambleDuration(ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static simtime_t getPreambleAndHeader(ModulationType payloadMode, Ieee80211PreambleMode preamble);
     static simtime_t getPayloadDuration(uint64_t size, ModulationType payloadMode);
-    static simtime_t calculateTxDuration(uint64_t size, ModulationType payloadMode, WifiPreamble preamble);
-    static simtime_t getSlotDuration(ModulationType payloadMode, WifiPreamble preamble);
-    static simtime_t getSifsTime(ModulationType payloadMode, WifiPreamble preamble);
-    static simtime_t get_aPHY_RX_START_Delay(ModulationType payloadMode, WifiPreamble preamble);
-    static ModulationType getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble);
+    static simtime_t calculateTxDuration(uint64_t size, ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static simtime_t getSlotDuration(ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static simtime_t getSifsTime(ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static simtime_t get_aPHY_RX_START_Delay(ModulationType payloadMode, Ieee80211PreambleMode preamble);
+    static ModulationType getPlcpHeaderMode(ModulationType payloadMode, Ieee80211PreambleMode preamble);
 };
 
 } // namespace physicallayer

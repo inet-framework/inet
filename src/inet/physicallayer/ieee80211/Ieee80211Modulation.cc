@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-ModulationType WifiModulationType::GetDsssRate1Mbps()
+ModulationType Ieee80211Modulation::GetDsssRate1Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_DSSS);
@@ -36,7 +36,7 @@ ModulationType WifiModulationType::GetDsssRate1Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetDsssRate2Mbps()
+ModulationType Ieee80211Modulation::GetDsssRate2Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_DSSS);
@@ -51,7 +51,7 @@ ModulationType WifiModulationType::GetDsssRate2Mbps()
 /**
  * Clause 18 rates (HR/DSSS)
  */
-ModulationType WifiModulationType::GetDsssRate5_5Mbps()
+ModulationType Ieee80211Modulation::GetDsssRate5_5Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_DSSS);
@@ -63,7 +63,7 @@ ModulationType WifiModulationType::GetDsssRate5_5Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetDsssRate11Mbps()
+ModulationType Ieee80211Modulation::GetDsssRate11Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_DSSS);
@@ -78,7 +78,7 @@ ModulationType WifiModulationType::GetDsssRate11Mbps()
 /**
  * Clause 19.5 rates (ERP-OFDM)
  */
-ModulationType WifiModulationType::GetErpOfdmRate6Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate6Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -90,7 +90,7 @@ ModulationType WifiModulationType::GetErpOfdmRate6Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate9Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate9Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -102,7 +102,7 @@ ModulationType WifiModulationType::GetErpOfdmRate9Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate12Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate12Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -114,7 +114,7 @@ ModulationType WifiModulationType::GetErpOfdmRate12Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate18Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate18Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -126,7 +126,7 @@ ModulationType WifiModulationType::GetErpOfdmRate18Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate24Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate24Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -138,7 +138,7 @@ ModulationType WifiModulationType::GetErpOfdmRate24Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate36Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate36Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -150,7 +150,7 @@ ModulationType WifiModulationType::GetErpOfdmRate36Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate48Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate48Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -162,7 +162,7 @@ ModulationType WifiModulationType::GetErpOfdmRate48Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetErpOfdmRate54Mbps()
+ModulationType Ieee80211Modulation::GetErpOfdmRate54Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_ERP_OFDM);
@@ -177,7 +177,7 @@ ModulationType WifiModulationType::GetErpOfdmRate54Mbps()
 /**
  * Clause 17 rates (OFDM)
  */
-ModulationType WifiModulationType::GetOfdmRate6Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate6Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -189,7 +189,7 @@ ModulationType WifiModulationType::GetOfdmRate6Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate9Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate9Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -201,7 +201,7 @@ ModulationType WifiModulationType::GetOfdmRate9Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate12Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate12Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -213,7 +213,7 @@ ModulationType WifiModulationType::GetOfdmRate12Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate18Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate18Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -225,7 +225,7 @@ ModulationType WifiModulationType::GetOfdmRate18Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate24Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate24Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -237,7 +237,7 @@ ModulationType WifiModulationType::GetOfdmRate24Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate36Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate36Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -249,7 +249,7 @@ ModulationType WifiModulationType::GetOfdmRate36Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate48Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate48Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -261,7 +261,7 @@ ModulationType WifiModulationType::GetOfdmRate48Mbps()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate54Mbps()
+ModulationType Ieee80211Modulation::GetOfdmRate54Mbps()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -274,7 +274,7 @@ ModulationType WifiModulationType::GetOfdmRate54Mbps()
 }
 
 /* 10 MHz channel rates */
-ModulationType WifiModulationType::GetOfdmRate3MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate3MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -286,7 +286,7 @@ ModulationType WifiModulationType::GetOfdmRate3MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate4_5MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate4_5MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -298,7 +298,7 @@ ModulationType WifiModulationType::GetOfdmRate4_5MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate6MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate6MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -310,7 +310,7 @@ ModulationType WifiModulationType::GetOfdmRate6MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate9MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate9MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -322,7 +322,7 @@ ModulationType WifiModulationType::GetOfdmRate9MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate12MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate12MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -334,7 +334,7 @@ ModulationType WifiModulationType::GetOfdmRate12MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate18MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate18MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -346,7 +346,7 @@ ModulationType WifiModulationType::GetOfdmRate18MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate24MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate24MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -358,7 +358,7 @@ ModulationType WifiModulationType::GetOfdmRate24MbpsBW10MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate27MbpsBW10MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate27MbpsBW10MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -371,7 +371,7 @@ ModulationType WifiModulationType::GetOfdmRate27MbpsBW10MHz()
 }
 
 /* 5 MHz channel rates */
-ModulationType WifiModulationType::GetOfdmRate1_5MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate1_5MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -383,7 +383,7 @@ ModulationType WifiModulationType::GetOfdmRate1_5MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate2_25MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate2_25MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -395,7 +395,7 @@ ModulationType WifiModulationType::GetOfdmRate2_25MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate3MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate3MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -407,7 +407,7 @@ ModulationType WifiModulationType::GetOfdmRate3MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate4_5MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate4_5MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -419,7 +419,7 @@ ModulationType WifiModulationType::GetOfdmRate4_5MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate6MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate6MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -431,7 +431,7 @@ ModulationType WifiModulationType::GetOfdmRate6MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate9MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate9MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -443,7 +443,7 @@ ModulationType WifiModulationType::GetOfdmRate9MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate12MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate12MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -455,7 +455,7 @@ ModulationType WifiModulationType::GetOfdmRate12MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
+ModulationType Ieee80211Modulation::GetOfdmRate13_5MbpsBW5MHz()
 {
     ModulationType mode;
     mode.setModulationClass(MOD_CLASS_OFDM);
@@ -467,7 +467,7 @@ ModulationType WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
     return mode;
 }
 
-simtime_t WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::getPlcpHeaderDuration(ModulationType payloadMode, Ieee80211PreambleMode preamble)
 {
     switch (payloadMode.getModulationClass()) {
         case MOD_CLASS_OFDM: {
@@ -497,11 +497,11 @@ simtime_t WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, 
             return 16.0 / 1000000.0;
 
         case MOD_CLASS_DSSS:
-            if (preamble == WIFI_PREAMBLE_SHORT) {
+            if (preamble == IEEE80211_PREAMBLE_SHORT) {
                 // IEEE Std 802.11-2007, section 18.2.2.2 and figure 18-2
                 return 24.0 / 1000000.0;
             }
-            else {    // WIFI_PREAMBLE_LONG
+            else {    // IEEE80211_PREAMBLE_LONG
                       // IEEE Std 802.11-2007, sections 18.2.2.1 and figure 18-1
                 return 48.0 / 1000000.0;
             }
@@ -512,7 +512,7 @@ simtime_t WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, 
     }
 }
 
-simtime_t WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::getPlcpPreambleDuration(ModulationType payloadMode, Ieee80211PreambleMode preamble)
 {
     switch (payloadMode.getModulationClass()) {
         case MOD_CLASS_OFDM: {
@@ -540,11 +540,11 @@ simtime_t WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode
             return 4.0 / 1000000.0;
 
         case MOD_CLASS_DSSS:
-            if (preamble == WIFI_PREAMBLE_SHORT) {
+            if (preamble == IEEE80211_PREAMBLE_SHORT) {
                 // IEEE Std 802.11-2007, section 18.2.2.2 and figure 18-2
                 return 72.0 / 1000000.0;
             }
-            else {    // WIFI_PREAMBLE_LONG
+            else {    // IEEE80211_PREAMBLE_LONG
                       // IEEE Std 802.11-2007, sections 18.2.2.1 and figure 18-1
                 return 144.0 / 1000000.0;
             }
@@ -558,7 +558,7 @@ simtime_t WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode
 //
 // Compute the Payload duration in function of the modulation type
 //
-simtime_t WifiModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode)
+simtime_t Ieee80211Modulation::getPayloadDuration(uint64_t size, ModulationType payloadMode)
 {
     simtime_t val;
     switch (payloadMode.getModulationClass()) {
@@ -614,12 +614,12 @@ simtime_t WifiModulationType::getPayloadDuration(uint64_t size, ModulationType p
 //
 // Return the physical header duration, useful for the mac
 //
-simtime_t WifiModulationType::getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::getPreambleAndHeader(ModulationType payloadMode, Ieee80211PreambleMode preamble)
 {
     return getPlcpPreambleDuration(payloadMode, preamble) + getPlcpHeaderDuration(payloadMode, preamble);
 }
 
-simtime_t WifiModulationType::calculateTxDuration(uint64_t size, ModulationType payloadMode, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::calculateTxDuration(uint64_t size, ModulationType payloadMode, Ieee80211PreambleMode preamble)
 {
     simtime_t duration = getPlcpPreambleDuration(payloadMode, preamble)
         + getPlcpHeaderDuration(payloadMode, preamble)
@@ -627,38 +627,38 @@ simtime_t WifiModulationType::calculateTxDuration(uint64_t size, ModulationType 
     return duration;
 }
 
-ModulationType WifiModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble)
+ModulationType Ieee80211Modulation::getPlcpHeaderMode(ModulationType payloadMode, Ieee80211PreambleMode preamble)
 {
     switch (payloadMode.getModulationClass()) {
         case MOD_CLASS_OFDM: {
             switch (payloadMode.getBandwidth()) {
                 case 5000000:
-                    return WifiModulationType::GetOfdmRate1_5MbpsBW5MHz();
+                    return Ieee80211Modulation::GetOfdmRate1_5MbpsBW5MHz();
 
                 case 10000000:
-                    return WifiModulationType::GetOfdmRate3MbpsBW10MHz();
+                    return Ieee80211Modulation::GetOfdmRate3MbpsBW10MHz();
 
                 default:
                     // IEEE Std 802.11-2007, 17.3.2
                     // actually this is only the first part of the PlcpHeader,
                     // because the last 16 bits of the PlcpHeader are using the
                     // same mode of the payload
-                    return WifiModulationType::GetOfdmRate6Mbps();
+                    return Ieee80211Modulation::GetOfdmRate6Mbps();
             }
             break;
         }
 
         case MOD_CLASS_ERP_OFDM:
-            return WifiModulationType::GetErpOfdmRate6Mbps();
+            return Ieee80211Modulation::GetErpOfdmRate6Mbps();
 
         case MOD_CLASS_DSSS:
-            if (preamble == WIFI_PREAMBLE_LONG) {
+            if (preamble == IEEE80211_PREAMBLE_LONG) {
                 // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
-                return WifiModulationType::GetDsssRate1Mbps();
+                return Ieee80211Modulation::GetDsssRate1Mbps();
             }
-            else {    //  WIFI_PREAMBLE_SHORT
+            else {    // IEEE80211_PREAMBLE_SHORT
                       // IEEE Std 802.11-2007, section 18.2.2.2
-                return WifiModulationType::GetDsssRate2Mbps();
+                return Ieee80211Modulation::GetDsssRate2Mbps();
             }
 
         default:
@@ -667,7 +667,7 @@ ModulationType WifiModulationType::getPlcpHeaderMode(ModulationType payloadMode,
     }
 }
 
-simtime_t WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::getSlotDuration(ModulationType modType, Ieee80211PreambleMode preamble)
 {
     switch (modType.getModulationClass()) {
         case MOD_CLASS_OFDM: {
@@ -689,11 +689,11 @@ simtime_t WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamb
         }
 
         case MOD_CLASS_ERP_OFDM:
-            if (preamble == WIFI_PREAMBLE_LONG) {
+            if (preamble == IEEE80211_PREAMBLE_LONG) {
                 // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
                 return 20.0 / 1000000.0;
             }
-            else {    //  WIFI_PREAMBLE_SHORT
+            else {    // IEEE80211_PREAMBLE_SHORT
                       // IEEE Std 802.11-2007, section 18.2.2.2
                 return 9.0 / 1000000.0;
             }
@@ -707,7 +707,7 @@ simtime_t WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamb
     }
 }
 
-simtime_t WifiModulationType::getSifsTime(ModulationType modType, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::getSifsTime(ModulationType modType, Ieee80211PreambleMode preamble)
 {
     switch (modType.getModulationClass()) {
         case MOD_CLASS_OFDM: {
@@ -741,7 +741,7 @@ simtime_t WifiModulationType::getSifsTime(ModulationType modType, WifiPreamble p
     }
 }
 
-simtime_t WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble preamble)
+simtime_t Ieee80211Modulation::get_aPHY_RX_START_Delay(ModulationType modType, Ieee80211PreambleMode preamble)
 {
     switch (modType.getModulationClass()) {
         case MOD_CLASS_OFDM: {
@@ -766,11 +766,11 @@ simtime_t WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, Wi
             return 24.0 / 1000000.0;
 
         case MOD_CLASS_DSSS:
-            if (preamble == WIFI_PREAMBLE_LONG) {
+            if (preamble == IEEE80211_PREAMBLE_LONG) {
                 // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
                 return 192.0 / 1000000.0;
             }
-            else {    //  WIFI_PREAMBLE_SHORT
+            else {    // IEEE80211_PREAMBLE_SHORT
                       // IEEE Std 802.11-2007, section 18.2.2.2
                 return 96.0 / 1000000.0;
             }

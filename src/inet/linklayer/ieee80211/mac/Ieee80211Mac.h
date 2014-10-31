@@ -92,7 +92,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
         RATE_CR,    // Constant Rate
     } rateControlMode;
 
-    WifiPreamble wifiPreambleType;
+    Ieee80211PreambleMode wifiPreambleType;
     ModulationType recFrameModulationType;
     bool validRecMode;
     bool useModulationParameters;

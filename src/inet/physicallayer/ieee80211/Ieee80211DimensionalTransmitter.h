@@ -29,7 +29,7 @@ class INET_API Ieee80211DimensionalTransmitter : public DimensionalTransmitter
 {
   protected:
     char opMode;
-    WifiPreamble preambleMode;
+    Ieee80211PreambleMode preambleMode;
 
   protected:
     virtual void initialize(int stage);

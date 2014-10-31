@@ -36,7 +36,7 @@ Define_Module(Ieee80211DimensionalTransmitter);
 Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
     DimensionalTransmitter(),
     opMode('\0'),
-    preambleMode((WifiPreamble) - 1)
+    preambleMode((Ieee80211PreambleMode) - 1)
 {
 }
 
@@ -57,9 +57,9 @@ void Ieee80211DimensionalTransmitter::initialize(int stage)
             opMode = 'g';
         const char *preambleModeString = par("preambleMode");
         if (!strcmp("short", preambleModeString))
-            preambleMode = WIFI_PREAMBLE_SHORT;
+            preambleMode = IEEE80211_PREAMBLE_SHORT;
         else if (!strcmp("long", preambleModeString))
-            preambleMode = WIFI_PREAMBLE_LONG;
+            preambleMode = IEEE80211_PREAMBLE_LONG;
         else
             throw cRuntimeError("Unknown preamble mode");
         carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
@@ -72,7 +72,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     ModulationType modulationType = Ieee80211Descriptor::getModulationType(opMode, transmissionBitrate.get());
-    const simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
+    const simtime_t duration = SIMTIME_DBL(Ieee80211Modulation::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();

@@ -29,7 +29,7 @@ Define_Module(Ieee80211DimensionalReceiver);
 Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
     DimensionalReceiver(),
     opMode('\0'),
-    preambleMode((WifiPreamble) - 1)
+    preambleMode((Ieee80211PreambleMode) - 1)
 {
 }
 
@@ -50,9 +50,9 @@ void Ieee80211DimensionalReceiver::initialize(int stage)
             opMode = 'g';
         const char *preambleModeString = par("preambleMode");
         if (!strcmp("short", preambleModeString))
-            preambleMode = WIFI_PREAMBLE_SHORT;
+            preambleMode = IEEE80211_PREAMBLE_SHORT;
         else if (!strcmp("long", preambleModeString))
-            preambleMode = WIFI_PREAMBLE_LONG;
+            preambleMode = IEEE80211_PREAMBLE_LONG;
         else
             throw cRuntimeError("Unknown preamble mode");
     }

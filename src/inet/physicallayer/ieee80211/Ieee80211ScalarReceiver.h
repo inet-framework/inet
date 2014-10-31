@@ -30,7 +30,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 {
   protected:
     char opMode;
-    WifiPreamble preambleMode;
+    Ieee80211PreambleMode preambleMode;
 
   protected:
     virtual void initialize(int stage);

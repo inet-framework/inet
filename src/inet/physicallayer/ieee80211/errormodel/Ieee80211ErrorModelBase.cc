@@ -73,7 +73,7 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
     int bitLength = flatTransmission->getPayloadBitLength();
     double bitrate = flatTransmission->getBitrate().get();
-    WifiPreamble preambleUsed = ieee80211Transmission->getPreambleMode();
+    Ieee80211PreambleMode preambleUsed = ieee80211Transmission->getPreambleMode();
     char opMode = ieee80211Transmission->getOpMode();
 
     uint32_t headerSize;
@@ -82,16 +82,16 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     else
         headerSize = 24;
     ModulationType modeBody = Ieee80211Descriptor::getModulationType(opMode, bitrate);
-    ModulationType modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
+    ModulationType modeHeader = Ieee80211Modulation::getPlcpHeaderMode(modeBody, preambleUsed);
     if (opMode == 'g') {
         if (autoHeaderSize) {
             ModulationType modeBodyA = Ieee80211Descriptor::getModulationType('a', bitrate);
-            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed)) * modeHeader.getDataRate());
+            headerSize = ceil(SIMTIME_DBL(Ieee80211Modulation::getPlcpHeaderDuration(modeBodyA, preambleUsed)) * modeHeader.getDataRate());
         }
     }
     else if (opMode == 'b' || opMode == 'a' || opMode == 'p') {
         if (autoHeaderSize)
-            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBody, preambleUsed)) * modeHeader.getDataRate());
+            headerSize = ceil(SIMTIME_DBL(Ieee80211Modulation::getPlcpHeaderDuration(modeBody, preambleUsed)) * modeHeader.getDataRate());
     }
     else
         throw cRuntimeError("Radio model not supported yet, must be a,b,g or p");

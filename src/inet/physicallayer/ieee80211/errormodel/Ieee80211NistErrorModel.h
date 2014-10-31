@@ -28,8 +28,6 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * \ingroup wifi
- *
  * A model for the error rate for different modulations.  For OFDM modulation,
  * the model description and validation can be found in
  * http://www.nsnam.org/~pei/80211ofdm.pdf.  For DSSS modulations (802.11b),
