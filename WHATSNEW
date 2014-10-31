@@ -1,18 +1,41 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.99.0 (July 2014)
------------------------
+INET-2.99.0 (November 2014)
+---------------------------
 
-Requires OMNeT++ 4.6.
+This release is a snapshot of the development that has begun in early 2013, and
+will culminate in the release of INET-3.0. The code is work in progress, which
+means all details may still change until 3.0 is reached.
+
+This release requires OMNeT++ 4.6 or later.
+
+The highlights of this release are:
+
+ 1. Network layer refactoring that allows higher layer protocols (including
+    routing protocols) to be written in a network protocol agnostic manner.
+
+ 2. A new physical layer model that builds upon the INET and MiXiM physical
+    layers, and brings them to new heights. Design goals were extreme modularity,
+    extensibility, the ability to support (and easily switch between) various
+    levels of detail, and the ability to add support for exploiting various
+    pieces of parallel hardware.
+
+ 3. Extensive refactoring aimed at improving code quality. It includes
+    directory restructuring, code formatting, refactoring of init stages and
+    publish-subscribe communication, and more.
+
+Read on for further details.
 
 Geometry model:
+
  - Added new orientation related classes: EulerAngles, Rotation, and Quaternion.
  - Added new basic 3D geometry classes: LineSegment, Box, Plane, and Polygon.
  - Added new 3D convex shapes: Cuboid, Sphere, Prism, and Polyhedron.
  - Added new geometry cache data structures: SpatialGrid, QuadTree, and BVHTree.
 
 Physical environment model:
+
  - Removed obsolete classes: Obstacle, ObstacleControl, and AnnotationManager.
  - Implemented a completely new physical environment model as follows.
  - Added a new global PhysicalEnvironment module that provides some trivial
@@ -32,6 +55,7 @@ Physical environment model:
    environment, the physical objects, and the configuration of the object cache.
 
 Power model:
+
  - Removed obsolete classes: IBattery, BasicBattery, InetSimpleBattery and Energy.
  - Implemented a completely new power model.
  - Added new interfaces: IEnergyConsumer, IEnergyStorage, and IEnergyGenerator.
@@ -40,6 +64,7 @@ Power model:
    the reception state, and the transmission state: StateBasedEnergyConsumer.
 
 Physical layer:
+
  - Refactored and unified the existing INET and MiXiM physical layer models into
    a new extended and scalable model as follows.
  - Designed new interfaces and classes to support optimistic parallel computation
@@ -61,6 +86,7 @@ Physical layer:
    errors and to enhance self documentation.
 
 Physical layer radio model:
+
  - Removed obsolete classes: Radio, IdealRadio, GenericRadio, GenericRadioModel,
    IRadio, IRadioModel, INoiseGenerator, and some others.
  - Added new interfaces: IRadio, IAntenna, ITransmitter, IReceiver, and IErrorModel.
@@ -78,6 +104,7 @@ Physical layer radio model:
    DipoleAntenna, and InterpolatingAntenna.
 
 Physical layer radio medium model:
+
  - Removed obsolete classes: ChannelAccess ChannelControl, IdealChannelModel,
    IdealChannelModelAccess and some others.
  - Added new interfaces to model the radio medium: IRadioMedium, IPropagation,
@@ -91,12 +118,14 @@ Physical layer radio medium model:
  - Refactored existing path loss models: FreeSpacePathLoss, LogNormalShadowing,
    TwoRayGroundReflection, NakagamiFading, RayleighFading, RicianFading, and
    SUIPathLoss.
- - Added new path loss models: BreakpointPathLoss and UWBIRStochasticPathLoss from MiXiM.
+ - Added new path loss models: BreakpointPathLoss and UWBIRStochasticPathLoss
+   from MiXiM.
  - Added a new obstacle loss model: TracingObstacleLoss.
  - Added INeighborCache implementations: ListNeighborCache, GridNeighborCache,
    and QuadTreeNeighborCache.
 
 Physical layer communication model:
+
  - Removed obsolete classes: AirFrame, IdealAirFrame and SnrList.
  - Added new interfaces: IRadioFrame, ITransmission, IArrival, IReception,
    INoise, ISNIR, IListening, and IReceptionDecision.
@@ -107,17 +136,20 @@ Physical layer communication model:
    representations for transmissions, receptions, and noise.
 
 Link layer:
+
  - Added a simple MAC protocol for testing purposes: IdealMac.
  - Ported MAC protocols from MiXiM: CSMA, BMACLayer, and LMacLayer.
- 
+
 Network layer:
+
  - IPv4/IPv6: dynamic registration of upper layer protocols.
    TCP, UDP, SCTP, RSVP, OSPF, MANET are all merged into transport gates.
    Network user modules must register their protocol number by sending
-   an IPRegisterProtocolCommand from initialize.
+   an IPRegisterProtocolCommand from initialize().
    Introduced an IPSocket class that wraps the registration process.
 
- - BIG REFACTORING: routing tables and routes now implement a common IRoutingTable and IRoute (details below)
+ - Refactoring: routing tables and routes now implement a common IRoutingTable
+   and IRoute C++ interface (details below)
 
    Motivation: allow uniform access to the IPv4, IPv6 and possibly other routing tables;
    e.g. some wireless networks may use MAC address as network address. Also, in
@@ -136,59 +168,82 @@ Network layer:
     - merged routing table change notification constants for IPv4 and IPv6
 
  - NetworkLayer was renamed to IPv4NetworkLayer and moved into src/networklayer/ipv4;
-   same for IPv6 (NetworkLayer6 -> IPv6NetworkLayer)
- - IPvXAddress --> L3Address, IPvXAddressResolver --> L3AddressResolver
- - Added new address types: MACAddress, ModuleIdAddress, ModulePathAddress; 
- - Added GenericNetworkProtocol & co. ---- TODO revise!!!!
- - Added MultiNetworkLayer
+   same for IPv6 (NetworkLayer6 -> IPv6NetworkLayer).
+
+ - IPvXAddress ha been extended and renamed to L3Address. Similarly,
+   IPvXAddressResolver became L3AddressResolver. In addition to IPv4 and IPv6
+   addresses, L3Address also allows using other kinds of addresses and identifiers
+   (e.g. MACAddress, module IDs, module paths) for network-layer addressing.
+
+ - Added GenericNetworkProtocol, which is a simplified network protocol with
+   table-based forwarding. It uses L3Address, so it is agnostic to the network-layer
+   address type.
+
+ - Added MultiNetworkLayer, which is a wrapper for multiple network layers; in
+   practice it can be used for simulating IPv4/IPv6 dual-stack hosts.
+
  - Ported network protocols from MiXiM: Flood, ProbabilisticBroadcast, and WiseRoute.
 
+C++ source cleanup:
+
+ - Changed include directives to specify the full path of the header file. This
+   resolves ambiguities caused by different projects having similar header files,
+   and by case-insensitive file systems (Windows).
+
+ - Changed header guards to use a uniform syntax.
+
+ - Applied code formatting (whitespace, braces, etc.) Formatter script (based on
+   uncrustify) is under _scripts/reformat, for future formatting needs.
+
+ - Introduced C++ namespaces: inet, inet::utils, inet::ospf, inet::bgp, inet::sctp, etc.
+
+ - Init stages have been refactored: initialization is now done bottom-up,
+   by layers, and hardcoded init stage numbers have been replaced by symbolic
+   constants.
+
+ - Removed NotificationBoard and INotifiable: all modules now use OMNeT++ signals
+   for publish/subscribe communication.
+
+ - Improved logging: log messages have been classified by importance, and logging
+   to EV has been replaced by EV_ERROR, EV_WARN, EV (for EV_INFO), EV_DETAIL,
+   EV_DEBUG and EV_TRACE accordingly. Proper support for these log categories
+   will be available from OMNeT++ 5.0, for 4.x they are simply mapped to EV.
+
+ - Several modules have been adapted to the coding conventions, e.g. the RTP models.
+
 Directory reorganization:
- - moved src/ under src/inet/ to avoid header conflicts with 3rd party software.
+
+ - Moved src/ under src/inet/ to avoid header conflicts with 3rd party software.
+
  - base/ and util/ have been consolidated into common/ and its several subdirectories
    (e.g. common/misc/, common/geometry/, common/queue/, common/lifecycle/)
- - queue/ became common/queue/
- - routing protocols have been moved into the new routing/ toplevel directory
-   from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/
- - protocols in networklayer/manetrouting/ have been moved into routing/extras/
- - transport/ has been renamed to transportlayer/
- - battery/ has been replaced with power/, intended to hold all models for all
-   kinds of power management related components
- - the physicallayer/ toplevel directory has been created to hold the new physical
-   layer model
- - the environment/ toplevel directory has been created for models that represent
-   the global physical environment
- - world/ no longer exists, its contents has been distributed to other directories
- - status/ lives on as common/lifecycle/
- - networklayer/autorouting/ has become networklayer/configurator/
- - applications/httptools/ split up to several subdirectories: browser/, server/,
-   configurator/, common/
 
-C++ source cleanup:
- - Changed include directives to specify the full path of the header file.
- - Changed header guards to use a uniform syntax.
- - Applied code formatting (whitespace, braces, etc.) 
- - Introduced C++ namespaces: inet, inet::utils, inet::ospf, inet::bgp, inet::sctp, ...
- - init stages: reorganized by layers, replaced integers with predefined constants
- - use standard omnetpp signals publish/subscribe communication, removed the
-   obsolete of INotifiable and NotificationBoard
- - logging revised
-    EV_ERROR, EV_WARN, EV (for EV_INFO), EV_DETAIL, EV_DEBUG,... TODO document when to use which!
- - several apps adapted to the coding conventions, e.g. the RTP models
+ - queue/ has become common/queue/.
 
-New protocols:
- - TODO
+ - Routing protocols have been moved into the new routing/ toplevel directory
+   from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/.
 
-Revised protocols:
- - TODO
+ - Protocols in networklayer/manetrouting/ have been moved into routing/extras/.
 
-TODO note: "gitk integration"; changes start from the "inet3-branch-start" tag
-TODO inet manual -- document the above conventions!!! coding conventions too!
+ - transport/ has been renamed to transportlayer/.
 
+ - battery/ has been replaced by power/, intended to hold models for power management
+   related components.
 
+ - The physicallayer/ toplevel directory has been created to hold the new physical
+   layer model.
 
+ - The environment/ toplevel directory has been created for models that represent
+   the global physical environment.
 
+ - world/ no longer exists, its contents has been distributed to other directories.
 
+ - status/ lives on as common/lifecycle/.
+
+ - networklayer/autorouting/ has become networklayer/configurator/.
+
+ - applications/httptools/ has been split up to several subdirectories: browser/,
+   server/, configurator/, common/.
 
 
 INET-2.4.0 (June 12, 2014)
