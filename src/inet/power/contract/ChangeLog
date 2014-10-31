@@ -1,6 +1,8 @@
-2014-01-22  Levente Meszaros
+2014-10-31  Levente Meszaros
 
-	Added IPowerConsumer and IPowerSource.
+    Added initial implementation:
+    IEnergyConsumer, IEnergyGenerator, IEnergySink, IEnergySource,
+    IEnergyStorage
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 

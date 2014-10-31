@@ -1,4 +1,4 @@
-2014-07-03  Levente Meszaros
+2014-07-03  Levente Meszaros & Benjamin Seregi
 
 	Environment: Removed obsolete Obstacle, ObstacleControl and AnnotationManager classes
     
@@ -7,7 +7,7 @@
 	- PhysicalEnvironment/PhysicalObject/Material
 	- IObstacleLoss/ObstacleLoss (in physicallayer/contract/, physicallayer/obstacles/)
 
-2014-06-25  Levente Meszaros
+2014-06-25  Levente Meszaros & Benjamin Seregi
 
 	Added PhysicalEnvironment, PhysicalObject, Material classes
 

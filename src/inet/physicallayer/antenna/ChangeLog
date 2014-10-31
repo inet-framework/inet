@@ -1,4 +1,4 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
 	Added initial implementation:
 	ConstantGainAntenna, DipoleAntenna, InterpolatingAntenna, IsotropicAntenna

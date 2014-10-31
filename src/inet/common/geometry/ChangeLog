@@ -1,0 +1,8 @@
+2014-10-31  Benjamin Seregi & Levente Meszaros 
+
+    Added initial implementation:
+    EulerAngles, Quaternion, Rotation,
+    ShapeBase, GeometricObjectBase,
+    BVHTree, QuadTree, SpatialGrid,
+    Box, LineSegment, Plane, Polygon,
+    Sphere, Cuboid, Prism, Polyhedron

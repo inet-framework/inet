@@ -1,6 +1,8 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
-	Added initial implementation:
-	Interpolation, MappingBase, SimpleTimeConstMapping, MappingUtils
+	Copied implementation from MiXiM.
+	Fixed printing 1 dimensional mappings.
+	Fixed TimeMappingIterator STEPS interpolation bug.
+	Added FrequencyMapping and FrequencyMappingIterator.
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

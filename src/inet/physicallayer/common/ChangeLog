@@ -1,7 +1,8 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-	Arrival, BandListening, ListeningDecision, Modulation, ModulationType,
-	Radio, RadioFrame, RadioMedium, ReceptionDecision
+	Arrival, BandListening, ConvolutionalCoder, FlatErrorModel, Interference,
+	ListeningDecision, Modulation, ModulationType, Radio, RadioFrame,
+	RadioMedium, ReceptionDecision
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

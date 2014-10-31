@@ -1,8 +1,10 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-	DimensionalAttenuation, DimensionalBackgroundNoise, DimensionalNoise,
-	DimensionalReceiver, DimensionalReception, DimensionalTransmission,
-	DimensionalTransmitter, DimensionalUtils
+	DimensionalAttenuation, DimensionalIsotropicBackgroundNoise,
+	DimensionalNoise, DimensionalSNIR,
+	DimensionalReceiver, DimensionalReception,
+	DimensionalTransmission, DimensionalTransmitter,
+	DimensionalRadio, DimensionalRadioMedium
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

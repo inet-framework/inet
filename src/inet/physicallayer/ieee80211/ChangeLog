@@ -1,7 +1,10 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
 	Added initial implementation:
+	BerParseFile, Ieee80211DimensionalReceiver, Ieee80211DimensionalTransmitter,
+	Ieee80211DimensionalTransmission, Ieee80211Modulation,
 	Ieee80211Radio, Ieee80211ScalarReceiver, Ieee80211ScalarTransmitter,
-	Ieee80211ScalarTransmission, BerParseFile, Radio80211aControlInfo
+	Ieee80211ScalarTransmission, Radio80211aControlInfo, Ieee80211Scrambler,
+	Ieee80211Interleaver
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

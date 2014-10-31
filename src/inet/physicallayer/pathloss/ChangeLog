@@ -1,7 +1,8 @@
-2014-06-23  Levente Meszaros
+2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-	FreeSpacePathLoss, SUIPathLoss, TwoRayGroundReflection, LogNormalShadowing,
-	NakagamiFading, RayleighFading, RicianFading
+	BreakpointPathLoss, FreeSpacePathLoss, LogNormalShadowing, NakagamiFading, 
+	RayleighFading, RicianFading, SUIPathLoss, TwoRayGroundReflection,
+	UWBIRStochasticPathLoss
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

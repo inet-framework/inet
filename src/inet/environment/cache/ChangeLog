@@ -1,6 +1,6 @@
-2014-10-31  Levente Meszaros
+2014-10-31  Benjamin Seregi & Levente Meszaros
 
 	Added initial implementation:
-	ConstantSpeedPropagation, ConstantTimePropagation
+	IObjectCache, BVHObjectCache, GridObjectCache
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
