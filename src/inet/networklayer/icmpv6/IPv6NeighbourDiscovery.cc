@@ -2540,10 +2540,11 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
     cModule *node = getContainingNode(this);
     cGate *gate = node->gate(ie->getNodeOutputGateId());
     ASSERT(gate != NULL);
-    cGate *connectedGate = gate->getNextGate();
-    if (connectedGate != NULL) {
-        cModule *connectedNode = connectedGate->getOwnerModule();
-        ASSERT(isNetworkNode(connectedNode));
+    cGate *connectedGate = gate->getPathEndGate();
+    if (connectedGate != gate) {
+        cModule *connectedNode = getContainingNode(connectedGate->getOwnerModule());
+        if(!connectedNode)
+            throw cRuntimeError("The connected module %s is not in a network node.", connectedGate->getOwnerModule()->getFullPath().c_str());
         if (isWirelessAccessPoint(connectedNode))
             return true;
     }
