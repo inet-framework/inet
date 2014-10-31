@@ -15,12 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 #include "inet/physicallayer/base/FlatTransmissionBase.h"
 #include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
 namespace inet {
 
@@ -80,11 +81,11 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
         headerSize = HEADER_WITHOUT_PREAMBLE;
     else
         headerSize = 24;
-    ModulationType modeBody = WifiModulationType::getModulationType(opMode, bitrate);
+    ModulationType modeBody = Ieee80211Descriptor::getModulationType(opMode, bitrate);
     ModulationType modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
     if (opMode == 'g') {
         if (autoHeaderSize) {
-            ModulationType modeBodyA = WifiModulationType::getModulationType('a', bitrate);
+            ModulationType modeBodyA = Ieee80211Descriptor::getModulationType('a', bitrate);
             headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed)) * modeHeader.getDataRate());
         }
     }

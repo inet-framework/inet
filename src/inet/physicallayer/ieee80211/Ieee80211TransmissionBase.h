@@ -19,7 +19,7 @@
 #define __INET_IEEE80211TRANSMISSIONBASE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 #define __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 
 #include "inet/physicallayer/dimensional/DimensionalTransmitter.h"
-#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 

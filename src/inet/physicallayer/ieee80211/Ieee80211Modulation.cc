@@ -17,12 +17,12 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
 namespace inet {
 
-namespace ieee80211 {
+namespace physicallayer {
 
 ModulationType WifiModulationType::GetDsssRate1Mbps()
 {
@@ -467,12 +467,6 @@ ModulationType WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
     return mode;
 }
 
-ModulationType WifiModulationType::getModulationType(char mode, double bitrate)
-{
-    int i = Ieee80211Descriptor::getIdx(mode, bitrate);
-    return Ieee80211Descriptor::getDescriptor(i).modulationType;
-}
-
 simtime_t WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble)
 {
     switch (payloadMode.getModulationClass()) {
@@ -787,7 +781,7 @@ simtime_t WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, Wi
     }
 }
 
-} // namespace ieee80211
+} // namespace physicallayer
 
 } // namespace inet
 

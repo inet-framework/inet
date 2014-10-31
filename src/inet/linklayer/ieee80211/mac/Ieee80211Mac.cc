@@ -1393,7 +1393,7 @@ simtime_t Ieee80211Mac::getSIFS()
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
     if (useModulationParameters) {
         ModulationType modType;
-        modType = WifiModulationType::getModulationType(opMode, bitrate);
+        modType = Ieee80211Descriptor::getModulationType(opMode, bitrate);
         return WifiModulationType::getSifsTime(modType, wifiPreambleType);
     }
 
@@ -1405,7 +1405,7 @@ simtime_t Ieee80211Mac::getSlotTime()
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
     if (useModulationParameters) {
         ModulationType modType;
-        modType = WifiModulationType::getModulationType(opMode, bitrate);
+        modType = Ieee80211Descriptor::getModulationType(opMode, bitrate);
         return WifiModulationType::getSlotDuration(modType, wifiPreambleType);
     }
     return ST;
@@ -1432,7 +1432,7 @@ simtime_t Ieee80211Mac::getDIFS(int category)
 simtime_t Ieee80211Mac::getHeaderTime(double bitrate)
 {
     ModulationType modType;
-    modType = WifiModulationType::getModulationType(opMode, bitrate);
+    modType = Ieee80211Descriptor::getModulationType(opMode, bitrate);
     return WifiModulationType::getPreambleAndHeader(modType, wifiPreambleType);
 }
 
@@ -1555,7 +1555,7 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
         EV_DEBUG << "scheduling data timeout period\n";
         if (useModulationParameters) {
             ModulationType modType;
-            modType = WifiModulationType::getModulationType(opMode, bitRate);
+            modType = Ieee80211Descriptor::getModulationType(opMode, bitRate);
             double duration = computeFrameDuration(frameToSend);
             double slot = SIMTIME_DBL(WifiModulationType::getSlotDuration(modType, wifiPreambleType));
             double sifs = SIMTIME_DBL(WifiModulationType::getSifsTime(modType, wifiPreambleType));
@@ -2054,7 +2054,7 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 {
     double duration;
     ModulationType modType;
-    modType = WifiModulationType::getModulationType(opMode, bitrate);
+    modType = Ieee80211Descriptor::getModulationType(opMode, bitrate);
     if (PHY_HEADER_LENGTH < 0)
         duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(bits, modType, wifiPreambleType));
     else
@@ -2537,7 +2537,7 @@ ModulationType Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
         if (Ieee80211Descriptor::getDescriptor(idx).mode != opMode)
             break;
         ModulationType thismode;
-        thismode = WifiModulationType::getModulationType(opMode, Ieee80211Descriptor::getDescriptor(idx).bitrate);
+        thismode = Ieee80211Descriptor::getModulationType(opMode, Ieee80211Descriptor::getDescriptor(idx).bitrate);
 
         /* If the rate:
          *

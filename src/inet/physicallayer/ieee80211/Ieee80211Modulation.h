@@ -1,5 +1,3 @@
-#ifndef __INET_WIFIMODE_H
-#define __INET_WIFIMODE_H
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2005,2006 INRIA
@@ -19,13 +17,25 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+
+#ifndef __INET_IEEE80211MODULATION_H
+#define __INET_IEEE80211MODULATION_H
+
 #include "inet/physicallayer/common/ModulationType.h"
 
 namespace inet {
 
-namespace ieee80211 {
+namespace physicallayer {
+
+/**
+ * See IEEE Std 802.11-2007 section 18.2.2.
+ */
+enum WifiPreamble {
+    WIFI_PREAMBLE_LONG,
+    WIFI_PREAMBLE_SHORT,
+    WIFI_PREAMBLE_HT_MF,
+    WIFI_PREAMBLE_HT_GF
+};
 
 class WifiModulationType
 {
@@ -67,8 +77,6 @@ class WifiModulationType
     static ModulationType GetOfdmRate12MbpsBW5MHz();
     static ModulationType GetOfdmRate13_5MbpsBW5MHz();
 
-    static ModulationType getModulationType(char mode, double bitrate);
-
     static simtime_t getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble);
     static simtime_t getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble);
     static simtime_t getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble);
@@ -80,9 +88,9 @@ class WifiModulationType
     static ModulationType getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble);
 };
 
-} // namespace ieee80211
+} // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_WIFIMODE_H
+#endif // ifndef __INET_IEEE80211MODULATION_H
 

@@ -1,8 +1,6 @@
 #ifndef __INET_IEEE80211DATARATE_H
 #define __INET_IEEE80211DATARATE_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/physicallayer/common/ModulationType.h"
 
 namespace inet {
@@ -30,6 +28,7 @@ class Ieee80211Descriptor
     static bool incIdx(int& idx);
     static bool decIdx(int& idx);
     static const Ieee80211DescriptorData& getDescriptor(int idx);
+    static ModulationType getModulationType(char mode, double bitrate);
     static int size() { return descriptorSize; }
 };
 

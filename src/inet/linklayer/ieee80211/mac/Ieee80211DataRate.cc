@@ -20,11 +20,13 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 /* Bit rates for 802.11b/g/a/p.
  * Must be ordered by mode, bitrate.
@@ -199,6 +201,12 @@ const Ieee80211DescriptorData& Ieee80211Descriptor::getDescriptor(int idx)
     ASSERT(idx >= 0 && idx < descriptorSize);
 
     return data[idx];
+}
+
+ModulationType Ieee80211Descriptor::getModulationType(char mode, double bitrate)
+{
+    int i = getIdx(mode, bitrate);
+    return getDescriptor(i).modulationType;
 }
 
 } // namespace ieee80211

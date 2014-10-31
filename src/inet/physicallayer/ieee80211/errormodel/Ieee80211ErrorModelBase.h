@@ -19,6 +19,7 @@
 #define __INET_IEEE80211ERRORMODELBASE_H
 
 #include "inet/physicallayer/base/ErrorModelBase.h"
+#include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {

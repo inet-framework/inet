@@ -19,7 +19,7 @@
 #define __INET_IEEE80211SCALARTRANSMITTER_H
 
 #include "inet/physicallayer/scalar/ScalarTransmitter.h"
-#include "inet/physicallayer/ieee80211/WifiPreambleType.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 

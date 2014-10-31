@@ -21,8 +21,9 @@
 #include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmitter.h"
 #include "inet/physicallayer/ieee80211/Ieee80211ScalarTransmission.h"
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
+#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
 namespace inet {
 
@@ -70,7 +71,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    ModulationType modulationType = WifiModulationType::getModulationType(opMode, transmissionBitrate.get());
+    ModulationType modulationType = Ieee80211Descriptor::getModulationType(opMode, transmissionBitrate.get());
     const simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();

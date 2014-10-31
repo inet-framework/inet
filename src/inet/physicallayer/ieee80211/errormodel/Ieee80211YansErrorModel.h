@@ -20,7 +20,6 @@
 #ifndef __INET_YANSERRORRATEMODEL_H
 #define __INET_YANSERRORRATEMODEL_H
 
-#include "inet/linklayer/ieee80211/mac/WifiMode.h"
 #include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
 
