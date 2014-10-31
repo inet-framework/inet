@@ -23,6 +23,7 @@
 #define __INET_UNITS_H
 
 #include <cmath>
+#include <iostream>
 
 namespace inet {
 
@@ -717,8 +718,8 @@ struct output_unit2<scale<Unit, Num, Den> >
 
 } // namespace internal
 
-template<typename Str, typename Value, typename Unit>
-Str& operator<<(Str& os, const value<Value, Unit>& value)
+template<typename Value, typename Unit>
+std::ostream& operator<<(std::ostream& os, const value<Value, Unit>& value)
 {
     os << value.get() << ' ';
     output_unit<Unit>::fn(os);
