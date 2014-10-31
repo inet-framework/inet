@@ -53,11 +53,14 @@ module NodeBase
         string networkLayerType = default("IPv4NetworkLayer");
         string routingTableType = default("IPv4RoutingTable");
         bool IPForward = default(true);               // TODO should we remove these parameters from the routingTable
-        bool forwardMulticast = default(false);
+        bool forwardMulticast = default(false);       //      and use the parameters of the node in the C++ code?
         string energyStorageType = default("");
         string energyGeneratorType = default("");
-        routingTable.IPForward = IPForward;
-        routingTable.forwardMulticast = forwardMulticast; //      and use the parameters of the node in the C++ code?
+        routingTable.IPForward = IPForward;     // for IPv4
+        routingTable.isRouter = IPForward;     // for IPv6
+        routingTable.forwardingEnabled = IPForward;     // for Generic
+        routingTable.forwardMulticast = forwardMulticast;   // for IPv4, IPv6
+        routingTable.multicastForwardingEnabled = forwardMulticast;     // for Generic
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
