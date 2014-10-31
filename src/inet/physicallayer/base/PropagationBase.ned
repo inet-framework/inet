@@ -22,5 +22,5 @@ import inet.physicallayer.contract.IPropagation;
 module PropagationBase like IPropagation
 {
     parameters:
-        double propagationSpeed = default(299792458); // TODO: @unit(mps) = default(299792458mps); // when omnetpp unit conversion is fixed
+        double propagationSpeed @unit(mps) = default(299792458mps);
 }

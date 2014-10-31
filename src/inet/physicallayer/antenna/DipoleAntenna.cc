@@ -24,7 +24,8 @@ namespace physicallayer {
 Define_Module(DipoleAntenna);
 
 DipoleAntenna::DipoleAntenna() :
-    AntennaBase()
+    AntennaBase(),
+    length(NaN)
 {
 }
 
