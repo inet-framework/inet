@@ -34,7 +34,7 @@ network IGMPTestNetwork
         // Querier router
         router: Router {
             @display("p=384,152");
-            forwardMulticast = true;
+            multicastForwarding = true;
         }
         etherSwitch: EtherSwitch {
             @display("p=221,151");
@@ -42,7 +42,7 @@ network IGMPTestNetwork
         // Non-querier router
         nqrouter: Router {
             @display("p=221,275");
-            forwardMulticast = true;
+            multicastForwarding = true;
         }
     connections:
         host.ethg++ <--> ethernetline <--> etherSwitch.ethg++;

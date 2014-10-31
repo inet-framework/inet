@@ -78,7 +78,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     IInterfaceTable *ift;    // cached pointer
 
     IPv4Address routerId;
-    bool IPForward;
+    bool forwarding;
     bool multicastForward;
     bool isNodeUp;
 
@@ -189,7 +189,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     /**
      * IPv4 forwarding on/off
      */
-    virtual bool isForwardingEnabled() const { return IPForward; }
+    virtual bool isForwardingEnabled() const { return forwarding; }
 
     /**
      * IPv4 multicast forwarding on/off

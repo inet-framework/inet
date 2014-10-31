@@ -134,7 +134,7 @@ description = "Aodv Simple test"
 
 # ip settings
 **.ip.procDelay = 10us
-# **.IPForward=false
+# **.forwarding=false
 
 
 ######################################################################

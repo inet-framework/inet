@@ -47,7 +47,7 @@ module BGPRouterSimple
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = "auto";
                 @display("p=52,172;i=block/table2_s");
         }

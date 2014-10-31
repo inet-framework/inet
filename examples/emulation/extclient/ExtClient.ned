@@ -29,7 +29,7 @@ network ExtClient
     submodules:
         peer: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli1d.mrt";
                 numExtInterfaces = 1;
                 @display("p=29,90;i=laptop3");

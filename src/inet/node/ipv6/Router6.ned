@@ -29,7 +29,7 @@ module Router6 extends NodeBase
 {
     parameters:
         @display("i=abstract/router");
-        IPForward = true;
+        forwarding = true;
         xml routes = default(xml("<routingTable/>"));
         networkLayerType = "IPv6NetworkLayer";
         routingTableType = "IPv6RoutingTable";

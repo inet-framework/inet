@@ -56,7 +56,7 @@ module Car
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = "";
                 routingFile = "";
                 @display("p=60,326");

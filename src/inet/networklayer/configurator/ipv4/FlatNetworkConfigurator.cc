@@ -70,7 +70,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
         if (nodeInfo[i].isIPNode) {
             nodeInfo[i].ift = L3AddressResolver().interfaceTableOf(mod);
             nodeInfo[i].rt = L3AddressResolver().routingTableOf(mod);
-            nodeInfo[i].ipForwardEnabled = mod->hasPar("IPForward") ? mod->par("IPForward").boolValue() : false;
+            nodeInfo[i].ipForwardEnabled = mod->hasPar("forwarding") ? mod->par("forwarding").boolValue() : false;
             topo.getNode(i)->setWeight(nodeInfo[i].ipForwardEnabled ? 0.0 : INFINITY);
         }
     }

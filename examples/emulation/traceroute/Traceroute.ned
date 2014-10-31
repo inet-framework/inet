@@ -44,7 +44,7 @@ network Traceroute
     submodules:
         cli1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli1.mrt";
                 @display("p=37,62;i=laptop3");
             gates:
@@ -52,7 +52,7 @@ network Traceroute
         }
         cli2: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli2.mrt";
                 @display("p=35,131;i=laptop3");
             gates:
@@ -60,7 +60,7 @@ network Traceroute
         }
         cli3: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli3.mrt";
                 @display("p=40,223;i=laptop3");
             gates:
@@ -68,7 +68,7 @@ network Traceroute
         }
         cli4: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli4.mrt";
                 @display("p=40,295;i=laptop3");
             gates:
@@ -76,7 +76,7 @@ network Traceroute
         }
         cli5: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli5.mrt";
                 @display("p=40,383;i=laptop3");
             gates:
@@ -84,7 +84,7 @@ network Traceroute
         }
         cli6: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli6.mrt";
                 @display("p=40,439;i=laptop3");
             gates:
@@ -92,7 +92,7 @@ network Traceroute
         }
         cli7: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli7.mrt";
                 @display("p=40,511;i=laptop3");
             gates:
@@ -100,7 +100,7 @@ network Traceroute
         }
         cli8: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "cli8.mrt";
                 @display("p=40,575;i=laptop3");
             gates:

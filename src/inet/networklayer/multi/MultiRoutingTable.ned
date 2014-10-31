@@ -34,15 +34,23 @@ module MultiRoutingTable like IRoutingTable
         bool enableIPv4 = default(haveClass("inet::IPv4RoutingTable"));
         bool enableIPv6 = default(haveClass("inet::IPv6RoutingTable"));
         bool enableGeneric = default(haveClass("inet::GenericRoutingTable"));
+        bool forwarding;
+        bool multicastForwarding;
 
     submodules:
         ipv4: <"IPv4RoutingTable"> like IRoutingTable if enableIPv4 {
             @display("p=50,50;is=s");
+            forwarding = forwarding;
+            multicastForwarding = multicastForwarding;
         }
         ipv6: <"IPv6RoutingTable"> like IRoutingTable if enableIPv6 {
             @display("p=50,100;is=s");
+            forwarding = forwarding;
+            multicastForwarding = multicastForwarding;
         }
         generic: <"GenericRoutingTable"> like IRoutingTable if enableGeneric {
             @display("p=50,150;is=s");
+            forwarding = forwarding;
+            multicastForwarding = multicastForwarding;
         }
 }

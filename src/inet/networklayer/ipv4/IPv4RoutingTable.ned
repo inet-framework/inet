@@ -54,8 +54,8 @@ simple IPv4RoutingTable like IRoutingTable
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
-        bool IPForward = default(true);  // turns IP forwarding on/off
-        bool forwardMulticast = default(false); // turns multicast forwarding on/off
+        bool forwarding = default(true);  // turns IP forwarding on/off
+        bool multicastForwarding = default(false); // turns multicast forwarding on/off
         string routingFile = default("");  // routing table file name
         @signal[NF_ROUTE_ADDED](type=IPv4Route);
         @signal[NF_ROUTE_DELETED](type=IPv4Route);

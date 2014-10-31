@@ -54,7 +54,7 @@ module RSVP_LSR
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = routerId;
                 @display("p=58,174;is=s");
         }

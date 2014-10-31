@@ -46,72 +46,72 @@ network MulticastNetwork
     submodules:
         host1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=125,52;i=device/pc2");
             gates:
                 pppg[1];
         }
         host2: StandardHost {
             parameters:
-                IPForward = true;
-                forwardMulticast = true;
+                forwarding = true;
+                multicastForwarding = true;
                 @display("p=60,244;i=device/pc2");
             gates:
                 pppg[2];
         }
         host3: StandardHost {
             parameters:
-                IPForward = true;
-                forwardMulticast = true;
+                forwarding = true;
+                multicastForwarding = true;
                 @display("p=196,244;i=device/pc2");
             gates:
                 pppg[2];
         }
         host4: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=406,305;i=device/pc2");
             gates:
                 pppg[1];
         }
         host5: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=492,59;i=device/pc2");
             gates:
                 pppg[1];
         }
         host6: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=492,204;i=device/pc2");
             gates:
                 pppg[1];
         }
         router1: Router {
             parameters:
-                forwardMulticast = true;
+                multicastForwarding = true;
                 @display("p=124,135");
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
-                forwardMulticast = true;
+                multicastForwarding = true;
                 @display("p=292,135");
             gates:
                 pppg[3];
         }
         router3: Router {
             parameters:
-                forwardMulticast = true;
+                multicastForwarding = true;
                 @display("p=292,238");
             gates:
                 pppg[2];
         }
         router4: Router {
             parameters:
-                forwardMulticast = true;
+                multicastForwarding = true;
                 @display("p=408,135");
             gates:
                 pppg[3];

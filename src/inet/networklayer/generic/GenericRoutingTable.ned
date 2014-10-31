@@ -30,8 +30,8 @@ simple GenericRoutingTable like IRoutingTable
         string routerId = default("auto"); // for routers, the router id using address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
-        bool forwardingEnabled = default(true);  // turns IP forwarding on/off
-        bool multicastForwardingEnabled = default(false); // turns multicast forwarding on/off
+        bool forwarding = default(true);  // turns IP forwarding on/off
+        bool multicastForwarding = default(false); // turns multicast forwarding on/off
         @signal[NF_ROUTE_ADDED](type=GenericRoute);
         @signal[NF_ROUTE_DELETED](type=GenericRoute);
         @signal[NF_ROUTE_CHANGED](type=GenericRoute);

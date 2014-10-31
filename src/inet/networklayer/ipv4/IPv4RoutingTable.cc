@@ -79,12 +79,12 @@ void IPv4RoutingTable::initialize(int stage)
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-        IPForward = par("IPForward").boolValue();
-        multicastForward = par("forwardMulticast");
+        forwarding = par("forwarding").boolValue();
+        multicastForward = par("multicastForwarding");
 
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
-        WATCH(IPForward);
+        WATCH(forwarding);
         WATCH(multicastForward);
         WATCH(routerId);
     }
@@ -314,7 +314,7 @@ void IPv4RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
     // join "224.0.0.1" and "224.0.0.2" (if router) multicast groups automatically
     if (ie->isMulticast()) {
         d->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
-        if (IPForward)
+        if (forwarding)
             d->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
     }
 }

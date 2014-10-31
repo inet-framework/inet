@@ -130,7 +130,7 @@ module InternetCloud
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = "auto";
                 @display("p=60,196");
         }

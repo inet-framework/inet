@@ -23,7 +23,7 @@ network SCTPFeatureTest
     submodules:
         sctp_client: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "../../lib/sctp_client.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=laptop3;p=128,317");
@@ -32,7 +32,7 @@ network SCTPFeatureTest
         }
         sctp_server: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 routingTable.routingFile = "../../lib/sctp_server.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=laptop3");

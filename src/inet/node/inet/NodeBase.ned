@@ -35,7 +35,7 @@ import inet.power.contract.IEnergyGenerator;
 // of Router, StandardHost, WirelessHost etc.
 //
 // NOTE:
-//    - IPForward is turned on by default.
+//    - forwarding is turned on by default.
 //    - use this model only as a base type. In simulations use ~Router,
 //      ~StandardHost, ~WirelessHost and ~AdhocHost
 //
@@ -52,15 +52,12 @@ module NodeBase
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
         string networkLayerType = default("IPv4NetworkLayer");
         string routingTableType = default("IPv4RoutingTable");
-        bool IPForward = default(true);               // TODO should we remove these parameters from the routingTable
-        bool forwardMulticast = default(false);       //      and use the parameters of the node in the C++ code?
+        bool forwarding = default(true);
+        bool multicastForwarding = default(false);
         string energyStorageType = default("");
         string energyGeneratorType = default("");
-        routingTable.IPForward = IPForward;     // for IPv4
-        routingTable.isRouter = IPForward;     // for IPv6
-        routingTable.forwardingEnabled = IPForward;     // for Generic
-        routingTable.forwardMulticast = forwardMulticast;   // for IPv4, IPv6
-        routingTable.multicastForwardingEnabled = forwardMulticast;     // for Generic
+        routingTable.forwarding = forwarding;
+        routingTable.multicastForwarding = multicastForwarding;   // for IPv4, IPv6, Generic
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");

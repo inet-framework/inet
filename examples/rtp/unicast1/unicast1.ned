@@ -19,7 +19,7 @@ network RTPUnicast1
     submodules:
         host1: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
@@ -28,7 +28,7 @@ network RTPUnicast1
         }
         host2: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
@@ -37,7 +37,7 @@ network RTPUnicast1
         }
         host3: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
@@ -46,7 +46,7 @@ network RTPUnicast1
         }
         host4: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host1";
                 portNumber = 5004;

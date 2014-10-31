@@ -37,7 +37,7 @@ module AdhocHost extends WirelessHost
         @display("i=device/cellphone");
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");  // use adhoc management
         string routingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman") = default("");  // used mobile routing protocol. see: inet.networklayer.manetrouting
-        IPForward = default(true);
+        forwarding = default(true);
 
     submodules:
         manetrouting: <routingProtocol> like IManetRouting if routingProtocol != "" {

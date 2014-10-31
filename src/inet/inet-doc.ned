@@ -207,7 +207,7 @@
 //    - <tt>inet_addr:</tt> - IP address
 //    - <tt>Mask:</tt> - netmask
 //    - <tt>Groups:</tt> Multicast groups. 224.0.0.1 is added automatically,
-//      and 224.0.0.2 also if the node is a router (IPForward==true).
+//      and 224.0.0.2 also if the node is a router (forwarding==true).
 //    - <tt>MTU:</tt> - MTU on the link (e.g. Ethernet: 1500)
 //    - <tt>Metric:</tt> - integer route metric
 //    - flags: <tt>BROADCAST</tt>, <tt>MULTICAST</tt>, <tt>POINTTOPOINT</tt>

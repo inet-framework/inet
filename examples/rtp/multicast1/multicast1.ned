@@ -19,7 +19,7 @@ network RTPMulticast1
     submodules:
         host1: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
@@ -28,7 +28,7 @@ network RTPMulticast1
         }
         host2: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
@@ -37,7 +37,7 @@ network RTPMulticast1
         }
         host3: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
@@ -46,7 +46,7 @@ network RTPMulticast1
         }
         host4: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
@@ -55,7 +55,7 @@ network RTPMulticast1
         }
         router1: Router {
             parameters:
-                forwardMulticast = true;
+                multicastForwarding = true;
                 @display("p=150,150");
             gates:
                 pppg[];

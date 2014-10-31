@@ -39,8 +39,8 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
     L3Address routerId;
     L3Address::AddressType addressType;
-    bool forwardingEnabled;
-    bool multicastForwardingEnabled;
+    bool forwarding;
+    bool multicastForwarding;
 
     typedef std::vector<GenericRoute *> RouteVector;
     RouteVector routes;    // unicast route table, sorted by prefix match order

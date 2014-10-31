@@ -34,8 +34,9 @@ simple IPv6RoutingTable like IRoutingTable
         string ipv6TunnelingModule = default("^.networkLayer.iptunneling");
         @display("i=block/table");
         xml routes = default(xml("<routingTable/>"));
-        bool isRouter = default(false);
-        bool forwardMulticast = default(false);
+        bool forwarding = default(false);
+        bool isRouter = default(this.forwarding);
+        bool multicastForwarding = default(false);
         @signal[NF_ROUTE_ADDED](type=IPv6Route);
         @signal[NF_ROUTE_CHANGED](type=IPv6Route);
         @signal[NF_ROUTE_DELETED](type=IPv6Route);

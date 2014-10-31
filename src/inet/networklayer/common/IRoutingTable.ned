@@ -24,4 +24,6 @@ moduleinterface IRoutingTable
 {
     parameters:
         @display("i=block/table");
+        bool forwarding;
+        bool multicastForwarding;
 }

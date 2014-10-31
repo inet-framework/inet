@@ -67,7 +67,7 @@ void IPv6RoutingTable::initialize(int stage)
         WATCH_PTRVECTOR(routeList);
         WATCH_MAP(destCache);    // FIXME commented out for now
         isrouter = par("isRouter");
-        multicastForward = par("forwardMulticast");
+        multicastForward = par("multicastForwarding");
         WATCH(isrouter);
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

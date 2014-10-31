@@ -46,7 +46,7 @@ module StandardHost6 extends NodeBase
         string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
-        IPForward = default(false);  // disable routing by default
+        forwarding = default(false);  // disable routing by default
         xml routes = default(xml("<routingTable/>"));
         networkLayerType = "IPv6NetworkLayer";
         routingTableType = "IPv6RoutingTable";

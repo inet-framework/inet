@@ -51,7 +51,7 @@ module Router extends NodeBase
 {
     parameters:
         @display("i=abstract/router");
-        IPForward = true;
+        forwarding = true;
         bool hasOSPF = default(false);
         bool hasRIP = default(false);
         bool hasBGP = default(false);

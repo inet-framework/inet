@@ -29,7 +29,7 @@ import inet.transportlayer.IUDP;
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and applications.
-// IP forwarding is disabled by default (see IPForward).
+// IP forwarding is disabled by default (see forwarding).
 // - Can be connected via ethernet interface to other nodes using
 //   the ethg gate. By default full-duplex connections are supported
 //   only (twisted pair). Set **.eth[*].typename="EthernetInterface" for
@@ -58,7 +58,7 @@ module StandardHost extends NodeBase
         string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailable("UDP","UDP_None"));
         string sctpType = default(firstAvailable("SCTP","SCTP_None"));
-        IPForward = default(false);  // disable routing by default
+        forwarding = default(false);  // disable routing by default
         networkLayer.proxyARP = default(false);
     submodules:
         tcpApp[numTcpApps]: <> like ITCPApp {

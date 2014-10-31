@@ -60,13 +60,13 @@ void GenericRoutingTable::initialize(int stage)
             addressType = L3Address::MODULEID;
         else
             throw cRuntimeError("Unknown address type");
-        forwardingEnabled = par("forwardingEnabled").boolValue();
-        multicastForwardingEnabled = par("multicastForwardingEnabled");
+        forwarding = par("forwarding").boolValue();
+        multicastForwarding = par("multicastForwarding");
 
 //TODO        WATCH_PTRVECTOR(routes);
 //TODO        WATCH_PTRVECTOR(multicastRoutes);
-        WATCH(forwardingEnabled);
-        WATCH(multicastForwardingEnabled);
+        WATCH(forwarding);
+        WATCH(multicastForwarding);
         WATCH(routerId);
 
         cModule *host = getContainingNode(this);
@@ -218,12 +218,12 @@ bool GenericRoutingTable::routeLessThan(const GenericRoute *a, const GenericRout
 
 bool GenericRoutingTable::isForwardingEnabled() const
 {
-    return forwardingEnabled;
+    return forwarding;
 }
 
 bool GenericRoutingTable::isMulticastForwardingEnabled() const
 {
-    return multicastForwardingEnabled;
+    return multicastForwarding;
 }
 
 L3Address GenericRoutingTable::getRouterIdAsGeneric() const

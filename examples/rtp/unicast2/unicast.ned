@@ -18,7 +18,7 @@ network RTPUnicast2
     submodules:
         sender: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "receiver";
                 portNumber = 5004;
@@ -29,7 +29,7 @@ network RTPUnicast2
         }
         receiver: RTPHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "sender";
                 portNumber = 5004;

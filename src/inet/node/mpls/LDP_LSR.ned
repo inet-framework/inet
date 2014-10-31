@@ -59,7 +59,7 @@ module LDP_LSR
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = routerId;
                 @display("p=70,240");
         }

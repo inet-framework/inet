@@ -13,14 +13,14 @@ network multinat
     submodules:
         Peer_1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
         @display("p=48,124;i=device/laptop");
             gates:
                 pppg[2];
     }
         Server: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
            //     routingTable.routingFile = "../../lib/nat_server.mrt";
         @display("p=452,116;i=device/server");
             gates:
