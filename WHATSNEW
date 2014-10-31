@@ -35,7 +35,7 @@ Power model:
  - Removed obsolete classes: IBattery, BasicBattery, InetSimpleBattery and Energy.
  - Implemented a completely new power model.
  - Added new interfaces: IEnergyConsumer, IEnergyStorage, and IEnergyGenerator.
- - Added power source implementations: IdealEnergyStorage, and SimpleEnergyStorage.
+ - Added implementations: IdealEnergyStorage, and SimpleEnergyStorage.
  - Added a new power consumer implementation for radios based on the radio mode,
    the reception state, and the transmission state: StateBasedEnergyConsumer.
 
@@ -63,10 +63,12 @@ Physical layer:
 Physical layer radio model:
  - Removed obsolete classes: Radio, IdealRadio, GenericRadio, GenericRadioModel,
    IRadio, IRadioModel, INoiseGenerator, and some others.
- - Added new interfaces: IRadio, IAntenna, ITransmitter, and IReceiver.
+ - Added new interfaces: IRadio, IAntenna, ITransmitter, IReceiver, and IErrorModel.
  - Added new implementation classes: Radio, IdealRadio, ScalarRadio,
    DimensionalRadio, Ieee80211Radio, and Ieee802154UWBIRRadio.
  - Added a number of implementation base classes and subcomponents unlisted here.
+ - Added and updated error model implementations: FlatErrorModel,
+   Ieee80211NistErrorModel, Ieee80211YansErrorModel
  - Introduced controllable radio mode: off, sleep, receiver, transmitter,
    transceiver, and switching.
  - Introduced automatically signaled reception state: undefined, idle, busy,
@@ -104,77 +106,89 @@ Physical layer communication model:
  - Added range based, narrow band scalar and dimensional signal power
    representations for transmissions, receptions, and noise.
 
-XXX note: "gitk integration"; changes start from the "inet3-branch-start" tag
-Radio infrastructure and physical layer:
-- modules taken over from MiXiM: TODO
-- TODO
+Link layer:
+ - Added a simple MAC protocol for testing purposes: IdealMac.
+ - Ported MAC protocols from MiXiM: CSMA, BMACLayer, and LMacLayer.
+ 
+Network layer:
+ - IPv4/IPv6: dynamic registration of upper layer protocols.
+   TCP, UDP, SCTP, RSVP, OSPF, MANET are all merged into transport gates.
+   Network user modules must register their protocol number by sending
+   an IPRegisterProtocolCommand from initialize.
+   Introduced an IPSocket class that wraps the registration process.
 
-New protocols:
-- TODO
+ - BIG REFACTORING: routing tables and routes now implement a common IRoutingTable and IRoute (details below)
 
-Revised protocols:
-- TODO
+   Motivation: allow uniform access to the IPv4, IPv6 and possibly other routing tables;
+   e.g. some wireless networks may use MAC address as network address. Also, in
+   simulation it sometimes makes sense to work with simple abstract addresses like
+   module names, indices or IDs.
 
-Refactoring:
-- directory reorganization
-    - base/ and util/ have been consolidated into common/ and its several subdirectories (e.g. common/misc/, common/geometry/, common/queue/, common/lifecycle/)
-    - queue/ became common/queue/
-    - full path in C++ include directives
-    - moved the content of src/ under src/inet/
-    -
-    - routing protocols have been moved into the new routing/ toplevel directory from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/
-    - protocols in networklayer/manetrouting/ have been moved into routing/extras/
-    - transport/ has been renamed to transportlayer/
-    - battery/ has been replaced with power/, intended to hold all models for all kinds of power sources and power management related components
-    - the physicallayer/ toplevel directory has been created to hold the new physical layer model
-    - the environment/ toplevel directory has been created for models that represent the global physical environment
-    - world/ no longer exists, its contents has been distributed to other directories
-    - status/ lives on as common/lifecycle/
-    - networklayer/autorouting/ has become networklayer/configurator/
-    - applications/httptools/ split up to several subdirectories: browser/, server/, configurator/, common/
+   Being able to uniformly access routing tables containing different types of
+   addresses makes it possible to implement routing protocols in generic way.
+   I.e. the same DYMO module can work with IPv6, IPv6, MAC and other addresses
+   without change and recompiling.
 
-- code formatting
-- uniform header guards
-- namespaces: inet, inet::utils, inet::ospf, inet::bgp, inet::sctp, ...
-- init stages: reorganized by layers
-- use signals everywhere for pub/sub communication, instead of INotifiable and NotificationBoard
-- logging revised
-    EV_ERROR, EV_WARN, EV (for EV_INFO), EV_DETAIL, EV_DEBUG,... TODO document when to use which!
-- several apps adapted to the coding conventions, e.g. the RTP models
-
-Network layer refactoring:
-
-- IPv4/IPv6: dynamic registration of upper layer protocols.
-  TCP, UDP, SCTP, RSVP, OSPF, MANET are all merged into transport gates.
-  Network user modules must register their protocol number by sending
-  an IPRegisterProtocolCommand from initialize.
-  Introduced an IPSocket class that wraps the registration process.
-
-- BIG REFACTORING: routing tables and routes now implement a common IRoutingTable and IRoute (details below)
-
-    Motivation: allow uniform access to the IPv4, IPv6 and possibly other routing tables;
-    e.g. some wireless networks may use MAC address as network address. Also, in
-    simulation it sometimes makes sense to work with simple abstract addresses like
-    module names, indices or IDs.
-
-    Being able to uniformly access routing tables containing different types of
-    addresses makes it possible to implement routing protocols in generic way.
-    I.e. the same DYMO module can work with IPv6, IPv6, MAC and other addresses
-    without change and recompiling.
-
-    Ingredients of this patch:
+   Ingredients of this patch:
     - generic L3Address class that can hold all kinds of addresses (=union)
     - interfaces for generic access: IRoutingTable, IRoute, INetworkDatagram, etc.
-    - Ping refactoring (use generic addressing instead of hardcoded IPv4IPv6)
+    - Ping refactoring (use generic addressing instead of hardcoded IPv4, IPv6)
     - merged routing table change notification constants for IPv4 and IPv6
 
-- NetworkLayer was renamed to IPv4NetworkLayer and moved into src/networklayer/ipv4; same for IPv6 (NetworkLayer6 -> IPv6NetworkLayer)
-- IPvXAddress --> L3Address, IPvXAddressResolver --> L3AddressResolver
-- new address types: MACAddress, ModuleIdAddress, ModulePathAddress; added GenericNetworkProtocol & co. ---- TODO revise!!!!
-- added MultiNetworkLayer
-- TODO
+ - NetworkLayer was renamed to IPv4NetworkLayer and moved into src/networklayer/ipv4;
+   same for IPv6 (NetworkLayer6 -> IPv6NetworkLayer)
+ - IPvXAddress --> L3Address, IPvXAddressResolver --> L3AddressResolver
+ - Added new address types: MACAddress, ModuleIdAddress, ModulePathAddress; 
+ - Added GenericNetworkProtocol & co. ---- TODO revise!!!!
+ - Added MultiNetworkLayer
+ - Ported network protocols from MiXiM: Flood, ProbabilisticBroadcast, and WiseRoute.
 
+Directory reorganization:
+ - moved src/ under src/inet/ to avoid header conflicts with 3rd party software.
+ - base/ and util/ have been consolidated into common/ and its several subdirectories
+   (e.g. common/misc/, common/geometry/, common/queue/, common/lifecycle/)
+ - queue/ became common/queue/
+ - routing protocols have been moved into the new routing/ toplevel directory
+   from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/
+ - protocols in networklayer/manetrouting/ have been moved into routing/extras/
+ - transport/ has been renamed to transportlayer/
+ - battery/ has been replaced with power/, intended to hold all models for all
+   kinds of power management related components
+ - the physicallayer/ toplevel directory has been created to hold the new physical
+   layer model
+ - the environment/ toplevel directory has been created for models that represent
+   the global physical environment
+ - world/ no longer exists, its contents has been distributed to other directories
+ - status/ lives on as common/lifecycle/
+ - networklayer/autorouting/ has become networklayer/configurator/
+ - applications/httptools/ split up to several subdirectories: browser/, server/,
+   configurator/, common/
+
+C++ source cleanup:
+ - Changed include directives to specify the full path of the header file.
+ - Changed header guards to use a uniform syntax.
+ - Applied code formatting (whitespace, braces, etc.) 
+ - Introduced C++ namespaces: inet, inet::utils, inet::ospf, inet::bgp, inet::sctp, ...
+ - init stages: reorganized by layers, replaced integers with predefined constants
+ - use standard omnetpp signals publish/subscribe communication, removed the
+   obsolete of INotifiable and NotificationBoard
+ - logging revised
+    EV_ERROR, EV_WARN, EV (for EV_INFO), EV_DETAIL, EV_DEBUG,... TODO document when to use which!
+ - several apps adapted to the coding conventions, e.g. the RTP models
+
+New protocols:
+ - TODO
+
+Revised protocols:
+ - TODO
+
+TODO note: "gitk integration"; changes start from the "inet3-branch-start" tag
 TODO inet manual -- document the above conventions!!! coding conventions too!
+
+
+
+
+
 
 
 INET-2.4.0 (June 12, 2014)
