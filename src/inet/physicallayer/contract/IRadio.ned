@@ -26,18 +26,18 @@ import inet.physicallayer.contract.IPhysicalLayer;
 // <b>Transmission</b>
 //
 // Upper layers (wireless L2 protocols) can send frames to the radio module.
-// Frames will be encapsulated into ~IRadioFrame messages and distributed to
+// Frames will be encapsulated into RadioFrame messages and distributed to
 // other network nodes within communication range.
 //
 // The global ~IRadioMedium module keeps track of node positions, and knows
 // which nodes are within communication and interference distance of others
 // (neighbour list). When transmitting, the radio module obtains the neighbour
-// list, and sends a copy of the ~IRadioFrame to each neighbour.
+// list, and sends a copy of the RadioFrame to each neighbour.
 //
 //
 // <b>Reception</b>
 //
-// Received ~IRadioFrame messages get delivered to the radioIn gate of the
+// Received RadioFrame messages get delivered to the radioIn gate of the
 // module. If it was found to have been received correctly, it gets decapsulated
 // and the frame sent to the upper layer.
 //

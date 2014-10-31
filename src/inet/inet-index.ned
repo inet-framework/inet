@@ -38,8 +38,6 @@
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //
 // A few useful starting points for browsing the documentation:
-//  - example networks: ~BulkTransfer, ~MulticastNetwork,
-//    ~MixedLAN, etc.
 //  - hosts, routers, switches and other network level modules:
 //    ~StandardHost, ~Router, ~EtherSwitch, ~EtherHub, ~InternetCloud etc.
 //  - network interfaces: ~EthernetInterface, ~PPPInterface, ~Ieee80211Nic
@@ -49,7 +47,7 @@
 //  - IPv6 support: ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6, ~IPv6RoutingTable;
 //    see <a href="ipv6overview.html">IPv6 model overview</a>
 //  - transport layer: ~TCP, ~UDP, ~SCTP
-//  - ~InterfaceTable and ~NotificationBoard are there in every
+//  - ~InterfaceTable and ~IPv4RoutingTable can be found in every
 //    host and router model
 //  - queues in router network interfaces: ~DropTailQueue, ~DiffservQueue.
 //  - ~IPv4NetworkConfigurator automatically assigns IPv4 addresses and
@@ -65,7 +63,7 @@
 //    ~TCPSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, ~SimpleVoIPSender,
 //    ~SimpleVoIPReceiver etc.
 //  - wireless support: ~IRadioMedium, ~Ieee80211Nic
-//  - mobility: ~MobileHost; mobility models such as ~TurtleMobility,
+//  - Mobility models: ~TurtleMobility,
 //    ~BonnMotionMobility, ~ANSimMobility, ~RandomWPMobility, ~MassMobility
 //  - MPLS models: the core modules are ~MPLS, ~LIBTable, ~LDP, ~RSVP, ~TED,
 //    ~LinkStateRouting; MPLS-enabled routers are ~LDP_LSR, ~RSVP_LSR;

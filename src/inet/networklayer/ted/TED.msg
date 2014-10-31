@@ -49,7 +49,7 @@ struct TELinkStateInfo
 
 
 //
-// Data structure supplied with NF_TED_CHANGE ~NotificationBoard notifications.
+// Data structure supplied with NF_TED_CHANGE signal.
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.
 //

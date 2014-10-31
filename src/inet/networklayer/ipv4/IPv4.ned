@@ -33,7 +33,7 @@ package inet.networklayer.ipv4;
 // etc. of the IPv4 datagram in which the packet arrived.
 //
 // ~IPv4 can serve several higher-layer protocols. The higher layer protocols should
-// send one or more RegisterProtocol message (a simple ~cMessage with
+// send one or more RegisterProtocol message (a simple cMessage with
 // ~IPRegisterProtocolCommand controlinfo and kind=IP_C_REGISTER_PROTOCOL)
 // to IPv4 module, for fill up the protocol-to-gateindex map.
 // When delivering packets to them, the output gate is determined from the Protocol
@@ -48,8 +48,8 @@ package inet.networklayer.ipv4;
 // No message exchange with ~IPv4RoutingTable takes place.
 //
 // A routed datagram will be sent to the queueOut gate, with an
-// ~IPv4Controlinfo  object attached. queueOut is expected to be
-// connected to ~INIC modules.
+// ~IPv4ControlInfo  object attached. queueOut is expected to be
+// connected to ~INic modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling ~IPv4RoutingTable's methods in C++.
@@ -79,7 +79,7 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~IPv4RoutingTable, ~IPv4ControlInfo, ~ARP, ~IPSocket
+// @see ~IPv4RoutingTable, ~IPv4ControlInfo, ~ARP
 //
 // @author Andras Varga
 //

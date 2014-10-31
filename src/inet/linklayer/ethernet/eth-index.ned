@@ -30,7 +30,6 @@
 // represented by ~EthernetInterface.
 //
 // A few useful topics:
-//  - example networks: ~MixedLAN, ~LargeNet
 //  - <a href="ether-overview.html">model overview</a>
 //  - <a href="eth-standards.html">implemented standards</a>
 //  - <a href="llc-app.html">communication between LLC and higher layers</a>

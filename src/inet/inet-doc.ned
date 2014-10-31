@@ -47,8 +47,7 @@
 // a MAC, and possibly other simple modules. See ~EthernetInterface as an example.
 //
 // Not all modules implement protocols though. There are modules which hold
-// data (for example ~IPv4RoutingTable), facilitate communication of modules
-// (~NotificationBoard), perform autoconfiguration of a network
+// data (for example ~IPv4RoutingTable), perform autoconfiguration of a network
 // (~FlatNetworkConfigurator), move a mobile node around (for example
 // ~ConstSpeedMobility), and perform housekeeping associated with radio channels
 // in wireless simulations (~IRadioMedium).
@@ -92,17 +91,6 @@
 //   <code>routingTable</code> for other modules to find it.
 //
 // - ~IPv6RoutingTable. This is like ~IPv4RoutingTable, but for IPv6.
-//
-// - ~NotificationBoard. This module makes it possible for several modules to
-//   communicate in a publish-subscribe manner. For example, the radio module
-//   (~Ieee80211Radio) fires a <i>"radio state changed"</i> notification when
-//   the state of the radio channel changes (from TRANSMIT to IDLE, for example),
-//   and it will be delivered to other modules that have previously subscribed
-//   to that notification category. The notification mechanism also works
-//   my C++ functions calls, no message sending is involved.
-//   The notification board submodule within the host (router) must be called
-//   <code>notificationBoard</code> for other modules to find it.
-//
 //
 // <h3>Common modules at network level</h3>
 //
