@@ -109,8 +109,14 @@ void PolyhedronTest::test() const
             PolyhedronFace *face = *fit;
             PolyhedronPoint testPoint(convexCombination);
             // An arbitrary point is an inner point if and only if it can't see any faces.
-            if (face->isVisibleFrom(&testPoint))
-                throw cRuntimeError("The algorithm is incorrect!");
+
+            // KLUDGE: this check supposed to be face->isVisibleFrom(&testPoint) but it's too sensible due to >0
+            PolyhedronPoint *facePoint = face->getEdge(0)->getP1();
+            PolyhedronPoint facePointPoint = testPoint - *facePoint;
+            if (facePointPoint * face->getOutwardNormalVector() > 1E-10) {
+                std::cout << "The algorithm is incorrect!" << endl;
+                return;
+            }
         }
     }
 }
