@@ -44,6 +44,7 @@
 simple TCPScriptableTester
 {
     parameters:
+        @class(::inet::tcp::TCPScriptableTester);
         string script;
         @display("i=device/router");
     gates:
@@ -61,6 +62,7 @@ simple TCPScriptableTester
 simple TCPRandomTester
 {
     parameters:
+        @class(::inet::tcp::TCPRandomTester);
         double pdelete; // probability of deleting a packet
         double pdelay;  // probability of delaying a packet
         double pcopy;   // probability of creating several copies of the packet
