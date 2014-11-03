@@ -72,7 +72,6 @@
                        inet.networklayer.ipv4
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.arp.ipv4
-                       inet.node.inet
                        inet.common.serializer.ipv4
                       "
         extraSourceFolders = ""
