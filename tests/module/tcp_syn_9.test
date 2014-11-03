@@ -14,7 +14,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="%c %C@"
+####cmdenv-log-format="%c %C@"
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -33,9 +33,9 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^testing)|(tcptester@)/)
+    if ($sor =~ /(^\[)/)
     {
-        $sor =~ s/^[^@]+@//;
+        $sor =~ s/^\[testing\] DEBUG: //;
         print $sor;
     }
 }
@@ -75,11 +75,11 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
- (TcpTestClient)TcpTestNet1.cli_app@TcpTestNet1.cli_app: received 100 bytes in 1 packets
- (TCP)TcpTestNet1.cli_tcp@TcpTestNet1.cli_tcp: finishing with 1 connections open.
- (TCP)TcpTestNet1.srv_tcp@TcpTestNet1.srv_tcp: finishing with 1 connections open.
- (TcpTestClient)TcpTestNet1.srv_app@TcpTestNet1.srv_app: received 100 bytes in 1 packets
- (TCPScriptableTester)TcpTestNet1.tcptester@[5.006] tcpdump finished, A:7 B:7 segments
+TcpTestNet1.cli_app: received 100 bytes in 1 packets
+TcpTestNet1.cli_tcp: finishing with 1 connections open.
+TcpTestNet1.srv_tcp: finishing with 1 connections open.
+TcpTestNet1.srv_app: received 100 bytes in 1 packets
+[5.006] tcpdump finished, A:7 B:7 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

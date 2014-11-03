@@ -15,7 +15,7 @@ cmdenv-express-mode=false
 #[Parameters]
 *.testing=true
 
-cmdenv-log-format=""
+####cmdenv-log-format=""
 *.tcptester.cmdenv-ev-output=true
 **.cmdenv-ev-output=false
 
@@ -33,18 +33,18 @@ cmdenv-log-format=""
 include ../../lib/defaults.ini
 
 %contains: stdout
-cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
-srv_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+[testing] DEBUG: cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+[testing] DEBUG: srv_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 [0.001 A001] A.1000 > B.2000: A S 0:0(0) win 16384
 [0.001 B001] A.1000 < B.2000: A S 0:0(0) win 16384
-srv_tcp: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
-cli_tcp: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
+[testing] DEBUG: srv_tcp: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
+[testing] DEBUG: cli_tcp: SYN_SENT --> SYN_RCVD  (on RCV_SYN)
 [0.003 B002] A.1000 < B.2000: A S 0:0(0) ack 1 win 16384
 [0.003 A002] A.1000 > B.2000: A S 0:0(0) ack 1 win 16384
 [0.005 A003] A.1000 > B.2000: A ack 1 win 16384
 [0.005 B003] A.1000 < B.2000: A ack 1 win 16384
-srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
-cli_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[testing] DEBUG: srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[testing] DEBUG: cli_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [1.001 A004] A.1000 > B.2000: A 1:101(100) ack 1 win 16384
 [1.001 B004] A.1000 < B.2000: A 1:101(100) ack 1 win 16384
 

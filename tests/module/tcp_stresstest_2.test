@@ -17,7 +17,7 @@ cmdenv-event-banners=false
 #[Parameters]
 *.testing=true
 
-cmdenv-log-format=""
+####cmdenv-log-format=""
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=655360B  # 640K

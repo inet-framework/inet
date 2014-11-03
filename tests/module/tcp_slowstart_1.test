@@ -13,7 +13,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="%c %C@"
+####cmdenv-log-format="%c %C@"
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=16384B # sixteen 1024-byte segments
@@ -25,9 +25,8 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^testing)|(tcptester@)/)
+    if ($sor =~ /(^\[\d)/)
     {
-        $sor =~ s/^[^@]+@//;
         print $sor;
     }
 }
@@ -63,11 +62,11 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
- (TcpTestClient)TcpTestNet1.cli_app@TcpTestNet1.cli_app: received 0 bytes in 0 packets
- (TCP)TcpTestNet1.cli_tcp@TcpTestNet1.cli_tcp: finishing with 1 connections open.
- (TCP)TcpTestNet1.srv_tcp@TcpTestNet1.srv_tcp: finishing with 1 connections open.
- (TcpTestClient)TcpTestNet1.srv_app@TcpTestNet1.srv_app: received 16384 bytes in 16 packets
- (TCPScriptableTester)TcpTestNet1.tcptester@[1.424] tcpdump finished, A:18 B:10 segments
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.cli_tcp: finishing with 1 connections open.
+TcpTestNet1.srv_tcp: finishing with 1 connections open.
+TcpTestNet1.srv_app: received 16384 bytes in 16 packets
+[1.424] tcpdump finished, A:18 B:10 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

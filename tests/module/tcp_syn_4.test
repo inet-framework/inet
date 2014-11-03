@@ -16,7 +16,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="%c %C@"
+####cmdenv-log-format="%c %C@"
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -31,9 +31,9 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^testing)|(tcptester@)/)
+    if ($sor =~ /^\[/)
     {
-        $sor =~ s/^[^@]+@//;
+        $sor =~ s/^\[testing\] DEBUG: //;
         print $sor;
     }
 }

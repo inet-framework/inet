@@ -20,7 +20,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="%c %C@"
+####cmdenv-log-format="%c %C@"
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -38,9 +38,9 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^testing)|(tcptester@)/)
+    if ($sor =~ /(^\[)/)
     {
-        $sor =~ s/^[^@]+@//;
+        $sor =~ s/^\[testing\] DEBUG: //;
         print $sor;
     }
 }
@@ -70,11 +70,11 @@ cli_tcp: ESTABLISHED --> CLOSED  (on RCV_RST)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
- (TcpTestClient)TcpTestNet1.cli_app@TcpTestNet1.cli_app: received 0 bytes in 0 packets
- (TCP)TcpTestNet1.cli_tcp@TcpTestNet1.cli_tcp: finishing with 0 connections open.
- (TCP)TcpTestNet1.srv_tcp@TcpTestNet1.srv_tcp: finishing with 1 connections open.
- (TcpTestClient)TcpTestNet1.srv_app@TcpTestNet1.srv_app: received 0 bytes in 0 packets
- (TCPScriptableTester)TcpTestNet1.tcptester@[100.004] tcpdump finished, A:7 B:6 segments
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.cli_tcp: finishing with 0 connections open.
+TcpTestNet1.srv_tcp: finishing with 1 connections open.
+TcpTestNet1.srv_app: received 0 bytes in 0 packets
+[100.004] tcpdump finished, A:7 B:6 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

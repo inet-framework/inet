@@ -15,7 +15,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="%c %C@"
+####cmdenv-log-format="%c %C@"
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=100B
@@ -30,9 +30,8 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^testing)|(tcptester@)/)
+    if ($sor =~ /^\[/)
     {
-        $sor =~ s/^[^@]+@//;
         print $sor;
     }
 }
@@ -53,9 +52,7 @@ while($sor = <FILE>)
 [1102.001 A013] A.1000 > B.2000: A 1:101(100) ack 501 win 16384 # deleting
 [1342.001 A014] A.1000 > B.2000: A 1:101(100) ack 501 win 16384 # deleting
 [1582.001 A015] A.1000 > B.2000: A 1:101(100) ack 501 win 16384 # deleting
-cli_tcp: ESTABLISHED --> CLOSED  (on ABORT)
-%#--------------------------------------------------------------------------------------------------------------
-%contains: postrun-command(1).out
+[testing] DEBUG: cli_tcp: ESTABLISHED --> CLOSED  (on ABORT)
 [1822.000] tcpdump finished, A:15 B:1 segments
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
