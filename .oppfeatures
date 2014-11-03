@@ -232,6 +232,34 @@
         linkerFlags = ""
         />
     <feature
+        id="NetPerfMeter"
+        name="Network performance meter"
+        description = "An application to measure transport level network performance"
+        initiallyEnabled = "true"
+        requires = "UDP TCP_INET SCTP"
+        labels = ""
+        nedPackages = "
+                       inet.applications.netperfmeter
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_NETPERFMETER"
+        linkerFlags = ""
+        />
+    <feature
+        id="NetPerfMeter_examples"
+        name="Network performance meter examples"
+        description = "An example to show how to use the NetPerfMeter application to measure fairness"
+        initiallyEnabled = "true"
+        requires = "NetPerfMeter"
+        labels = "examples"
+        nedPackages = "
+                       inet.examples.netperfmeter
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="DHCP"
         name="DHCP"
         description = "DHCP protocol that can be installed as an UDP application"
@@ -451,6 +479,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_AODV"
+        linkerFlags = ""
+        />
+    <feature
+        id="AODV_examples"
+        name="AODV examples"
+        description = "Examples for the AODV protocol"
+        initiallyEnabled = "true"
+        requires = "AODV"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.aodv
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
         linkerFlags = ""
         />
     <feature
