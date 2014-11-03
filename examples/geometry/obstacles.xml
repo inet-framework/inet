@@ -24,8 +24,8 @@
     <object position="center 650 300 0" orientation="30 0 0" shape="prism 100 0 0 150 0 75 129.9" material="brick" fill-color="47 165 28" />
     <object position="center 800 300 0" orientation="60 0 0" shape="prism 100 0 0 150 0 75 129.9" material="brick" fill-color="47 165 28" />
 
-    <!-- Rotated polytopes -->
-    <object position="center 500 450 0" orientation="30 0 0" shape="polytope 0 0 100 0 100 0 0 100 100 100 0 100 100 100 100 100 0 0 100 100 0 0 0 0" material="brick" fill-color="47 165 28" />
-    <object position="center 700 450 0" orientation="67 0 0" shape="polytope 0 100 100 100 100 0 0 0 0 100 0 100" material="brick" fill-color="47 165 28" />
-    <object position="center 900 450 0" orientation="10 0 0" shape="polytope 0 100 100 100 100 0 0 0 0 100 0 100 55 252 0" material="brick" fill-color="47 165 28" />
+    <!-- Rotated polyhedrons -->
+    <object position="center 500 450 0" orientation="30 0 0" shape="polyhedron 0 0 100 0 100 0 0 100 100 100 0 100 100 100 100 100 0 0 100 100 0 0 0 0" material="brick" fill-color="47 165 28" />
+    <object position="center 700 450 0" orientation="67 0 0" shape="polyhedron 0 100 100 100 100 0 0 0 0 100 0 100" material="brick" fill-color="47 165 28" />
+    <object position="center 900 450 0" orientation="10 0 0" shape="polyhedron 0 100 100 100 100 0 0 0 0 100 0 100 55 252 0" material="brick" fill-color="47 165 28" />
 </environment>

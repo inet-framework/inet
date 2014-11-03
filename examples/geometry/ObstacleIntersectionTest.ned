@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.examples.geometry.rotation;
+package inet.examples.geometry;
 
 import inet.environment.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
