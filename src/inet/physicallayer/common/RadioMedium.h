@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include "inet/physicallayer/contract/INeighborCache.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/contract/IArrival.h"
 #include "inet/physicallayer/contract/IInterference.h"
@@ -104,15 +105,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         RANGE_FILTER_ANYWHERE,
         RANGE_FILTER_INTERFERENCE_RANGE,
         RANGE_FILTER_COMMUNICATION_RANGE,
-    };
-
-  public:
-    class INeighborCache
-    {
-      public:
-        virtual void addRadio(const IRadio *radio) = 0;
-        virtual void removeRadio(const IRadio *radio) = 0;
-        virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const = 0;
     };
 
   protected:

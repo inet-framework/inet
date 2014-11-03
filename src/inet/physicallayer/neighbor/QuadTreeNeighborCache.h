@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighborCache
+class QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
     typedef std::vector<const IRadio *> Radios;
@@ -47,8 +47,8 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
   protected:
     QuadTree *quadTree;
     Radios radios;
-    cMessage *rebuildQuadTreeTimer;
     RadioMedium *radioMedium;
+    cMessage *rebuildQuadTreeTimer;
     Coord constraintAreaMax, constraintAreaMin;
     unsigned int maxNumOfPointsPerQuadrant;
     double rebuildPeriod;
@@ -62,11 +62,13 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
     void rebuildQuadTree();
 
   public:
-    void addRadio(const IRadio *radio);
-    void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
+
+    virtual void printToStream(std::ostream& stream) const {}
+    virtual void addRadio(const IRadio *radio);
+    virtual void removeRadio(const IRadio *radio);
+    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
 };
 
 } // namespace physicallayer

@@ -50,6 +50,9 @@ class INET_API StationaryMobility : public MobilityBase
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
 
     virtual double getMaxSpeed() const { return 0; }
+
+    virtual Coord getConstraintAreaMax() const { return lastPosition; }
+    virtual Coord getConstraintAreaMin() const { return lastPosition; }
 };
 
 } // namespace inet

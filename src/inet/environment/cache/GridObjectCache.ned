@@ -25,9 +25,9 @@ module GridObjectCache like IObjectCache
 {
     parameters:
         string physicalEnvironmentModule = default("^");
-        double cellSizeX @unit(m) = default(0m/0); // NaN mean use cell count
-        double cellSizeY @unit(m) = default(0m/0); // NaN mean use cell count
-        double cellSizeZ @unit(m) = default(0m/0); // NaN mean use cell count
+        double cellSizeX @unit(m) = default(0m/0); // NaN means use cell count
+        double cellSizeY @unit(m) = default(0m/0); // NaN means use cell count
+        double cellSizeZ @unit(m) = default(0m/0); // NaN means use cell count
         int cellCountX = default(10); // divide space to so many cells
         int cellCountY = default(10); // divide space to so many cells
         int cellCountZ = default(10); // divide space to so many cells

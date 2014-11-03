@@ -24,6 +24,18 @@ namespace physicallayer {
 
 Define_Module(GridNeighborCache);
 
+GridNeighborCache::GridNeighborCache() :
+    grid(NULL),
+    radioMedium(NULL),
+    constraintAreaMin(Coord::NIL),
+    constraintAreaMax(Coord::NIL),
+    refillCellsTimer(NULL),
+    refillPeriod(NaN),
+    maxSpeed(NaN),
+    cellSize(Coord::NIL)
+{
+}
+
 void GridNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -37,8 +49,14 @@ void GridNeighborCache::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         constraintAreaMax = radioMedium->getConstraintAreaMax();
         constraintAreaMin = radioMedium->getConstraintAreaMin();
-        grid = new SpatialGrid(cellSize, constraintAreaMin, constraintAreaMax);
         maxSpeed = radioMedium->getMaxSpeed().get();
+        const Coord constraintAreaSize = constraintAreaMax - constraintAreaMin;
+        if (isNaN(cellSize.x))
+            cellSize.x = constraintAreaSize.x / par("cellCountX").doubleValue();
+        if (isNaN(cellSize.y))
+            cellSize.y = constraintAreaSize.y / par("cellCountY").doubleValue();
+        if (isNaN(cellSize.z))
+            cellSize.z = constraintAreaSize.z / par("cellCountZ").doubleValue();
         fillCubeVector();
         scheduleAt(simTime() + refillPeriod, refillCellsTimer);
     }

@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule
+class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
     typedef std::vector<const IRadio *> Radios;
@@ -60,12 +60,14 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
     void fillCubeVector();
 
   public:
-    void addRadio(const IRadio *radio);
-    void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
-
-    GridNeighborCache() : grid(NULL), radioMedium(NULL), refillCellsTimer(NULL) {};
+    GridNeighborCache();
     virtual ~GridNeighborCache();
+
+    virtual void printToStream(std::ostream& stream) const {}
+
+    virtual void addRadio(const IRadio *radio);
+    virtual void removeRadio(const IRadio *radio);
+    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
 };
 
 } // namespace physicallayer

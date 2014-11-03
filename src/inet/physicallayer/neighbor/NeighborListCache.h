@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModule
+class NeighborListCache : public cSimpleModule, public INeighborCache
 {
   public:
     struct RadioEntry
@@ -61,11 +61,13 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
     void removeRadioFromNeighborLists(const IRadio *radio);
 
   public:
-    void addRadio(const IRadio *radio);
-    void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
-    NeighborListCache() : radioMedium(NULL), updateNeighborListsTimer(NULL) {};
+    NeighborListCache();
     ~NeighborListCache();
+
+    virtual void printToStream(std::ostream& stream) const {}
+    virtual void addRadio(const IRadio *radio);
+    virtual void removeRadio(const IRadio *radio);
+    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
 };
 
 } // namespace physicallayer

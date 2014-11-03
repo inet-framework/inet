@@ -132,8 +132,10 @@ Coord SpatialGrid::computeConstraintAreaSideLengths() const
 
 SpatialGrid::Triplet<int> SpatialGrid::computeNumberOfVoxels() const
 {
-    return Triplet<int>(ceil(constraintAreaSideLengths.x / voxelSizes.x), ceil(constraintAreaSideLengths.y / voxelSizes.y),
-            ceil(constraintAreaSideLengths.z / voxelSizes.z));
+    return Triplet<int>(
+            constraintAreaSideLengths.x == 0 ? 0 : ceil(constraintAreaSideLengths.x / voxelSizes.x),
+            constraintAreaSideLengths.y == 0 ? 0 : ceil(constraintAreaSideLengths.y / voxelSizes.y),
+            constraintAreaSideLengths.z == 0 ? 0 : ceil(constraintAreaSideLengths.z / voxelSizes.z));
 }
 
 unsigned int SpatialGrid::computeGridVectorLength() const
@@ -187,16 +189,11 @@ void SpatialGrid::clearGrid()
 
 SpatialGrid::Triplet<int> SpatialGrid::coordToMatrixIndices(const Coord& pos) const
 {
-    int xCoord = voxelSizes.x == 0 ? 0 : floor(pos.x / voxelSizes.x);
-    int yCoord = voxelSizes.y == 0 ? 0 : floor(pos.y / voxelSizes.y);
-    int zCoord = voxelSizes.z == 0 ? 0 : floor(pos.z / voxelSizes.z);
-    Triplet<int> matCoord = Triplet<int>(xCoord, yCoord, zCoord);
-    for (unsigned int i = 0; i < 3; i++)
-        if (matCoord[i] == numVoxels[i])
-            matCoord[i]--;
-    return matCoord;
+    int xCoord = numVoxels[0] == 0 ? 0 : std::min((int)floor((pos.x - constraintAreaMin.x) / voxelSizes.x), numVoxels[0] - 1);
+    int yCoord = numVoxels[1] == 0 ? 0 : std::min((int)floor((pos.y - constraintAreaMin.y) / voxelSizes.y), numVoxels[1] - 1);
+    int zCoord = numVoxels[2] == 0 ? 0 : std::min((int)floor((pos.z - constraintAreaMin.z) / voxelSizes.z), numVoxels[2] - 1);
+    return Triplet<int>(xCoord, yCoord, zCoord);
 }
-
 
 SpatialGrid::LineSegmentIterator::LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const Triplet<double> &voxelSizes, const Triplet<int>& numVoxels)
 {
@@ -204,7 +201,7 @@ SpatialGrid::LineSegmentIterator::LineSegmentIterator(const SpatialGrid *spatial
     Coord p0 = lineSegment.getPoint1();
     Coord p1 = lineSegment.getPoint2();
     Coord segmentDirection = p1 - p0;
-    Triplet<double> point0 = Triplet<double>(p0.x, p0.y, p0.z);
+    Triplet<double> point0 = Triplet<double>(p0.x - spatialGrid->constraintAreaMin.x, p0.y - spatialGrid->constraintAreaMin.y, p0.z - spatialGrid->constraintAreaMin.z);
     Triplet<double> direction = Triplet<double>(segmentDirection.x, segmentDirection.y, segmentDirection.z);
     index = spatialGrid->coordToMatrixIndices(p0);
     endPoint = spatialGrid->coordToMatrixIndices(p1);
@@ -218,12 +215,13 @@ SpatialGrid::LineSegmentIterator::LineSegmentIterator(const SpatialGrid *spatial
             step[i] = -1;
         else
             step[i] = 0;
-        double d = point0[i] - index[i] * voxelSizes[i];
-        if (step[i] > 0)
-            d = voxelSizes[i] - d;
-        ASSERT(d >= 0 && d <= voxelSizes[i]);
-        if (ithdirection != 0)
+        if (ithdirection != 0) {
+            double d = point0[i] - index[i] * voxelSizes[i];
+            if (step[i] > 0)
+                d = voxelSizes[i] - d;
+            ASSERT(d >= 0 && d <= voxelSizes[i]);
             tExit[i] = d / std::abs(ithdirection);
+        }
         else
             tExit[i] = std::numeric_limits<double>::max();
     }

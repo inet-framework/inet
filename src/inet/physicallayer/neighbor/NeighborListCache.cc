@@ -23,6 +23,16 @@ namespace inet {
 namespace physicallayer {
 
 Define_Module(NeighborListCache);
+
+NeighborListCache::NeighborListCache() :
+    radioMedium(NULL),
+    updateNeighborListsTimer(NULL),
+    updatePeriod(sNaN),
+    range(sNaN),
+    maxSpeed(sNaN)
+{
+}
+
 void NeighborListCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {

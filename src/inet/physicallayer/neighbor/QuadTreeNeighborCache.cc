@@ -24,11 +24,16 @@ namespace physicallayer {
 
 Define_Module(QuadTreeNeighborCache);
 
-QuadTreeNeighborCache::QuadTreeNeighborCache()
+QuadTreeNeighborCache::QuadTreeNeighborCache() :
+    quadTree(NULL),
+    radioMedium(NULL),
+    rebuildQuadTreeTimer(NULL),
+    constraintAreaMax(Coord::NIL),
+    constraintAreaMin(Coord::NIL),
+    maxNumOfPointsPerQuadrant(0),
+    rebuildPeriod(NaN),
+    maxSpeed(NaN)
 {
-    quadTree = NULL;
-    radioMedium = NULL;
-    rebuildQuadTreeTimer = NULL;
 }
 
 void QuadTreeNeighborCache::initialize(int stage)
