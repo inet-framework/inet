@@ -617,6 +617,8 @@ void RadioMedium::removeNonInterferingTransmissions()
         transmissionIndex++;
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
     baseTransmissionId += transmissionIndex;
+    for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.begin() + transmissionIndex; it++)
+        delete *it;
     transmissions.erase(transmissions.begin(), transmissions.begin() + transmissionIndex);
     for (std::vector<TransmissionCacheEntry>::const_iterator it = cache.begin(); it != cache.begin() + transmissionIndex; it++) {
         const TransmissionCacheEntry& transmissionCacheEntry = *it;
@@ -730,9 +732,16 @@ const IReception *RadioMedium::getReception(const IRadio *receiver, const ITrans
 
 const IInterference *RadioMedium::getInterference(const IRadio *receiver, const ITransmission *transmission) const
 {
+    return getInterference(receiver, getCachedListening(receiver, transmission), transmission);
+}
+
+const IInterference *RadioMedium::getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const
+{
+    cacheInterferenceGetCount++;
     const IInterference *interference = getCachedInterference(receiver, transmission);
-    if (!interference) {
-        const IListening *listening = getCachedListening(receiver, transmission);
+    if (interference)
+        cacheInterferenceHitCount++;
+    else {
         interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
         setCachedInterference(receiver, transmission, interference);
     }
@@ -761,19 +770,6 @@ const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *t
         setCachedSNIR(receiver, transmission, snir);
     }
     return snir;
-}
-
-const IInterference *RadioMedium::getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const
-{
-    cacheInterferenceGetCount++;
-    const IInterference *interference = getCachedInterference(receiver, transmission);
-    if (interference)
-        cacheInterferenceHitCount++;
-    else {
-        interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-        setCachedInterference(receiver, transmission, interference);
-    }
-    return interference;
 }
 
 const IReceptionDecision *RadioMedium::getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
@@ -963,7 +959,8 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     const ITransmission *transmission = radioFrame->getTransmission();
     const IArrival *arrival = getArrival(radio, transmission);
     const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-    const IReceptionDecision *decision = receiveFromMedium(radio, listening, transmission);
+    const IReceptionDecision *decision = getReceptionDecision(radio, listening, transmission);
+    removeCachedDecision(radio, transmission);
     if (recordCommunicationLog) {
         const IReception *reception = decision->getReception();
         communicationLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
@@ -989,14 +986,8 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     }
     if (displayCommunication)
         updateCanvas();
+    delete decision;
     return macFrame;
-}
-
-const IReceptionDecision *RadioMedium::receiveFromMedium(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
-{
-    const IReceptionDecision *decision = getReceptionDecision(radio, listening, transmission);
-    removeCachedDecision(radio, transmission);
-    return decision;
 }
 
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const

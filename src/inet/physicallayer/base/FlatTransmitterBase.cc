@@ -32,6 +32,11 @@ FlatTransmitterBase::FlatTransmitterBase() :
 {
 }
 
+FlatTransmitterBase::~FlatTransmitterBase()
+{
+    delete modulation;
+}
+
 void FlatTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);

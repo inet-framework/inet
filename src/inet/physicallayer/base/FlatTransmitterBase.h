@@ -40,6 +40,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
 
   public:
     FlatTransmitterBase();
+    virtual ~FlatTransmitterBase();
 
     virtual void printToStream(std::ostream& stream) const;
 

@@ -454,14 +454,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IListeningDecision *computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
 
+    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
+    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const;
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
-
-    /**
-     * Returns a reception decision that describes the reception of the provided
-     * transmission by the receiver.
-     */
-    virtual const IReceptionDecision *receiveFromMedium(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
     //@}
 
     /** @name Graphics */
@@ -503,12 +502,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IListeningDecision *listenOnMedium(const IRadio *radio, const IListening *listening) const;
 
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const;
-
-    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
