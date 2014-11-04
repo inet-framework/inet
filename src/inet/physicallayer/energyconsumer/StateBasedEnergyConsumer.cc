@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/power/StateBasedEnergyConsumer.h"
+#include "inet/physicallayer/energyconsumer/StateBasedEnergyConsumer.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
