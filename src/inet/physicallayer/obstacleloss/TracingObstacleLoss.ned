@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.obstacle;
+package inet.physicallayer.obstacleloss;
 
 import inet.physicallayer.contract.IObstacleLoss;
 
