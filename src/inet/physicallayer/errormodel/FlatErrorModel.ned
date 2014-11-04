@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common;
+package inet.physicallayer.errormodel;
 
 import inet.physicallayer.base.ErrorModelBase;
 

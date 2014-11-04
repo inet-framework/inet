@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/FlatErrorModel.h"
+#include "inet/physicallayer/errormodel/FlatErrorModel.h"
 #include "inet/physicallayer/base/FlatTransmissionBase.h"
 
 namespace inet {

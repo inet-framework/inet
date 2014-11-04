@@ -23,7 +23,6 @@
 #include "inet/physicallayer/common/BandListening.h"
 #include "inet/physicallayer/common/ListeningDecision.h"
 #include "inet/physicallayer/common/ReceptionDecision.h"
-#include "inet/physicallayer/common/FlatErrorModel.h"
 
 namespace inet {
 
