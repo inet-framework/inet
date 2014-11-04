@@ -62,6 +62,23 @@ void GridNeighborCache::initialize(int stage)
     }
 }
 
+void GridNeighborCache::handleMessage(cMessage *msg)
+{
+    if (!msg->isSelfMessage())
+        throw cRuntimeError("This module only handles self messages");
+    EV_DETAIL << "Updating the grid cells" << endl;
+    fillCubeVector();
+    scheduleAt(simTime() + refillPeriod, msg);
+}
+
+void GridNeighborCache::printToStream(std::ostream& stream) const
+{
+    stream << "GridNeighborCache, "
+           << "cellSize = " << cellSize << ", "
+           << "refillPeriod = " << refillPeriod << ", "
+           << "maxSpeed = " << maxSpeed;
+}
+
 void GridNeighborCache::fillCubeVector()
 {
     delete grid;
@@ -71,16 +88,6 @@ void GridNeighborCache::fillCubeVector()
         Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
         grid->insertPoint(check_and_cast<const cObject *>(radio), radioPos);
     }
-}
-
-
-void GridNeighborCache::handleMessage(cMessage *msg)
-{
-    if (!msg->isSelfMessage())
-        throw cRuntimeError("This module only handles self messages");
-    EV_DETAIL << "Updating the grid cells" << endl;
-    fillCubeVector();
-    scheduleAt(simTime() + refillPeriod, msg);
 }
 
 void GridNeighborCache::addRadio(const IRadio *radio)

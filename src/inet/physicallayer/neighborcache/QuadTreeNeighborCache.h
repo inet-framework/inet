@@ -51,7 +51,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
     cMessage *rebuildQuadTreeTimer;
     Coord constraintAreaMax, constraintAreaMin;
     unsigned int maxNumOfPointsPerQuadrant;
-    double rebuildPeriod;
+    double refillPeriod;
     double maxSpeed;
 
   protected:
@@ -65,7 +65,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const {}
+    virtual void printToStream(std::ostream& stream) const;
     virtual void addRadio(const IRadio *radio);
     virtual void removeRadio(const IRadio *radio);
     virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;

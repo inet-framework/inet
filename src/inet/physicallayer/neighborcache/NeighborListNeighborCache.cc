@@ -27,7 +27,7 @@ Define_Module(NeighborListNeighborCache);
 NeighborListNeighborCache::NeighborListNeighborCache() :
     radioMedium(NULL),
     updateNeighborListsTimer(NULL),
-    updatePeriod(sNaN),
+    refillPeriod(sNaN),
     range(sNaN),
     maxSpeed(sNaN)
 {
@@ -37,15 +37,23 @@ void NeighborListNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
-        updatePeriod = par("refillPeriod");
+        refillPeriod = par("refillPeriod");
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         maxSpeed = radioMedium->getMaxSpeed().get();
         updateNeighborLists();
-        scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
+        scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
     }
+}
+
+void NeighborListNeighborCache::printToStream(std::ostream& stream) const
+{
+    stream << "NeighborListNeighborCache, "
+           << "refillPeriod = " << refillPeriod << ", "
+           << "range = " << range << ", "
+           << "maxSpeed = " << maxSpeed;
 }
 
 void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
@@ -71,14 +79,14 @@ void NeighborListNeighborCache::handleMessage(cMessage *msg)
 
     updateNeighborLists();
 
-    scheduleAt(simTime() + updatePeriod, msg);
+    scheduleAt(simTime() + refillPeriod, msg);
 }
 
 void NeighborListNeighborCache::updateNeighborList(RadioEntry *radioEntry)
 {
     IMobility *radioMobility = radioEntry->radio->getAntenna()->getMobility();
     Coord radioPosition = radioMobility->getCurrentPosition();
-    double radius = maxSpeed * updatePeriod + range;
+    double radius = maxSpeed * refillPeriod + range;
     radioEntry->neighborVector.clear();
 
     for (unsigned int i = 0; i < radios.size(); i++) {
@@ -99,7 +107,7 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
     updateNeighborLists();
     maxSpeed = radioMedium->getMaxSpeed().get();
     if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled() && initialized())
-        scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
+        scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
 }
 
 void NeighborListNeighborCache::removeRadio(const IRadio *radio)

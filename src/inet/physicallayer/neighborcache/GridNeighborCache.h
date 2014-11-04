@@ -63,7 +63,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
     GridNeighborCache();
     virtual ~GridNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const {}
+    virtual void printToStream(std::ostream& stream) const;
 
     virtual void addRadio(const IRadio *radio);
     virtual void removeRadio(const IRadio *radio);

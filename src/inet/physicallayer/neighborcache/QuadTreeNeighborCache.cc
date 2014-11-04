@@ -31,7 +31,7 @@ QuadTreeNeighborCache::QuadTreeNeighborCache() :
     constraintAreaMax(Coord::NIL),
     constraintAreaMin(Coord::NIL),
     maxNumOfPointsPerQuadrant(0),
-    rebuildPeriod(NaN),
+    refillPeriod(NaN),
     maxSpeed(NaN)
 {
 }
@@ -41,7 +41,7 @@ void QuadTreeNeighborCache::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
-        rebuildPeriod = par("refillPeriod");
+        refillPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
@@ -50,7 +50,7 @@ void QuadTreeNeighborCache::initialize(int stage)
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
         maxSpeed = radioMedium->getMaxSpeed().get();
         rebuildQuadTree();
-        scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
+        scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
     }
 }
 
@@ -59,7 +59,15 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     if (!msg->isSelfMessage())
         throw cRuntimeError("This module only handles self messages");
     rebuildQuadTree();
-    scheduleAt(simTime() + rebuildPeriod, msg);
+    scheduleAt(simTime() + refillPeriod, msg);
+}
+
+void QuadTreeNeighborCache::printToStream(std::ostream& stream) const
+{
+    stream << "QuadTreeNeighborCache, "
+           << "maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant << ", "
+           << "refillPeriod = " << refillPeriod << ", "
+           << "maxSpeed = " << maxSpeed;
 }
 
 void QuadTreeNeighborCache::addRadio(const IRadio *radio)
@@ -68,7 +76,7 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
     maxSpeed = radioMedium->getMaxSpeed().get();
     if (maxSpeed != 0 && !rebuildQuadTreeTimer->isScheduled() && initialized())
-        scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
+        scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
     Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
     Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
     // If the constraintArea changed we must rebuild the QuadTree
@@ -109,7 +117,7 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
 
 void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
 {
-    double radius = range + rebuildPeriod * maxSpeed;
+    double radius = range + refillPeriod * maxSpeed;
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
     QuadTreeNeighborCacheVisitor visitor(radioMedium, transmitter, frame);
     quadTree->rangeQuery(transmitterPos, radius, &visitor);

@@ -48,7 +48,7 @@ class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
     RadioEntries radios;
     cMessage *updateNeighborListsTimer;
     RadioEntryCache radioToEntry;
-    double updatePeriod;
+    double refillPeriod;
     double range;
     double maxSpeed;
 
@@ -64,7 +64,7 @@ class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
     NeighborListNeighborCache();
     ~NeighborListNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const {}
+    virtual void printToStream(std::ostream& stream) const;
     virtual void addRadio(const IRadio *radio);
     virtual void removeRadio(const IRadio *radio);
     virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
