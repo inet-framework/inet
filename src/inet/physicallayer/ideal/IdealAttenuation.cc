@@ -27,6 +27,11 @@ namespace physicallayer {
 
 Define_Module(IdealAttenuation);
 
+void IdealAttenuation::printToStream(std::ostream& stream) const
+{
+    stream << "IdealAttenuation";
+}
+
 const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
@@ -49,6 +54,16 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
     else
         power = IdealReception::POWER_UNDETECTABLE;
     return new IdealReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
+}
+
+const INoise *IdealAttenuation::computeNoise(const IListening *listening, const IInterference *interference) const
+{
+    throw cRuntimeError("Unsupported operation");
+}
+
+const ISNIR *IdealAttenuation::computeSNIR(const IReception *reception, const INoise *noise) const
+{
+    throw cRuntimeError("Unsupported operation");
 }
 
 } // namespace physicallayer

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/base/SNIRReceiverBase.h"
 #include "inet/physicallayer/common/ReceptionDecision.h"
 
@@ -40,12 +41,6 @@ void SNIRReceiverBase::printToStream(std::ostream& stream) const
     stream << "snirThreshold = " << snirThreshold;
 }
 
-bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
-{
-    return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&
-           carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
-}
-
 const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     RadioReceptionIndication *indication = new RadioReceptionIndication();
@@ -60,7 +55,10 @@ bool SNIRReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 
 const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    const ISNIR *snir = computeSNIR(reception, computeNoise(listening, interference));
+    const IRadio *receiver = reception->getReceiver();
+    const IRadioMedium *medium = receiver->getMedium();
+    const ITransmission *transmission = reception->getTransmission();
+    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(snir);

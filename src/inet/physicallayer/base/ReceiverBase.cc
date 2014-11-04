@@ -37,7 +37,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         return !reception->getReceiver()->getReceptionInProgress();
     else {
         const IRadio *radio = reception->getReceiver();
-        const IRadioMedium *channel = radio->getMedium();
+        const IRadioMedium *radioMedium = radio->getMedium();
         const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
         for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
             const IReception *interferingReception = *it;
@@ -50,7 +50,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
                     if (radio->getReceptionInProgress() == interferingTransmission)
                         return false;
                 }
-                else if (channel->isReceptionAttempted(radio, interferingTransmission))
+                else if (radioMedium->isReceptionAttempted(radio, interferingTransmission))
                     return false;
             }
         }

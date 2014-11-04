@@ -26,9 +26,15 @@ namespace physicallayer {
 
 class INET_API ScalarAttenuation : public AttenuationBase
 {
+  protected:
+    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
+
   public:
     virtual void printToStream(std::ostream& stream) const { stream << "ScalarAttenuation"; }
+
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };
 
 } // namespace physicallayer

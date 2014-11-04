@@ -33,8 +33,6 @@ class INET_API SNIRReceiverBase : public ReceiverBase
   protected:
     virtual void initialize(int stage);
 
-    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
-
     /**
      * Returns the physical properties of the reception including noise and
      * signal related measures, error probabilities, actual error counts, etc.
@@ -48,18 +46,6 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      * be purely functional and support optimistic parallel computation.
      */
     virtual bool computeIsReceptionSuccessful(const ISNIR *snir) const;
-
-    /**
-     * Returns the total noise summing up all the interfering receptions and
-     * noises. This function must be purely functional and support optimistic
-     * parallel computation.
-     */
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
-
-    /**
-     * Returns the signal to noise and interference ratio.
-     */
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 
   public:
     SNIRReceiverBase();

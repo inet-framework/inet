@@ -27,8 +27,10 @@ namespace physicallayer {
 class INET_API IdealAttenuation : public cModule, public IAttenuation
 {
   public:
+    virtual void printToStream(std::ostream& stream) const;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void printToStream(std::ostream& stream) const { stream << "IdealAttenuation"; }
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };
 
 } // namespace physicallayer

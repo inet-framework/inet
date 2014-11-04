@@ -19,8 +19,11 @@
 #define __INET_IATTENUATION_H
 
 #include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/IListening.h"
 #include "inet/physicallayer/contract/ITransmission.h"
 #include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/contract/IInterference.h"
+#include "inet/physicallayer/contract/ISNIR.h"
 
 namespace inet {
 
@@ -36,10 +39,22 @@ class INET_API IAttenuation : public IPrintableObject
   public:
     /**
      * Returns the reception for the provided transmission at the receiver.
-     * The result incorporates all modeled attenuation including the way the
-     * receiver listens on the radio channel. This function never returns NULL.
+     * The result incorporates all modeled attenuation. This function never
+     * returns NULL.
      */
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
+
+    /**
+     * Returns the total noise summing up all the interfering receptions and
+     * noises. This function never returns NULL.
+     */
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
+
+    /**
+     * Returns the signal to noise and interference ratio. This function never
+     * returns NULL.
+     */
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 };
 
 } // namespace physicallayer

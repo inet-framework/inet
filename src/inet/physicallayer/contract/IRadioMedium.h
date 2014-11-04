@@ -27,6 +27,7 @@
 #include "inet/physicallayer/contract/IObstacleLoss.h"
 #include "inet/physicallayer/contract/IAttenuation.h"
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/IReceptionDecision.h"
 #include "inet/physicallayer/contract/IListeningDecision.h"
 
@@ -144,6 +145,34 @@ class INET_API IRadioMedium : public IPrintableObject
      * transmission is live on the radio medium.
      */
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const = 0;
+
+    /**
+     * Returns the reception of the transmission arriving at the provided receiver.
+     * This function never returns NULL as long as the transmission is live on
+     * the radio medium.
+     */
+    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
+
+    /**
+     * Returns the interference of the transmission arriving at the provided receiver.
+     * This function never returns NULL as long as the transmission is live on
+     * the radio medium.
+     */
+    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const = 0;
+
+    /**
+     * Returns the total noise computed from the interference of the transmission
+     * arriving at the provided receiver. This function never returns NULL as
+     * long as the transmission is live on the radio medium.
+     */
+    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const = 0;
+
+    /**
+     * Returns the signal to noise and interference ratio of the transmission
+     * arriving at the provided receiver. This function never returns NULL as
+     * long as the transmission is live on the radio medium.
+     */
+    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;
 };
 
 } // namespace physicallayer

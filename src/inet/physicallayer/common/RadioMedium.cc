@@ -31,6 +31,25 @@ namespace physicallayer {
 
 Define_Module(RadioMedium);
 
+RadioMedium::ReceptionCacheEntry::ReceptionCacheEntry() :
+    frame(NULL),
+    arrival(NULL),
+    listening(NULL),
+    reception(NULL),
+    interference(NULL),
+    noise(NULL),
+    snir(NULL),
+    decision(NULL)
+{
+}
+
+RadioMedium::TransmissionCacheEntry::TransmissionCacheEntry() :
+    frame(NULL),
+    figure(NULL),
+    receptionCacheEntries(NULL)
+{
+}
+
 RadioMedium::RadioMedium() :
     propagation(NULL),
     pathLoss(NULL),
@@ -94,6 +113,8 @@ RadioMedium::~RadioMedium()
                 delete cacheEntry.listening;
                 delete cacheEntry.reception;
                 delete cacheEntry.interference;
+                delete cacheEntry.noise;
+                delete cacheEntry.snir;
                 delete cacheEntry.decision;
             }
             delete receptionCacheEntries;
@@ -333,6 +354,46 @@ void RadioMedium::removeCachedInterference(const IRadio *radio, const ITransmiss
         cacheEntry->interference = NULL;
 }
 
+const INoise *RadioMedium::getCachedNoise(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    return cacheEntry ? cacheEntry->noise : NULL;
+}
+
+void RadioMedium::setCachedNoise(const IRadio *radio, const ITransmission *transmission, const INoise *noise) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->noise = noise;
+}
+
+void RadioMedium::removeCachedNoise(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->noise = NULL;
+}
+
+const ISNIR *RadioMedium::getCachedSNIR(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    return cacheEntry ? cacheEntry->snir : NULL;
+}
+
+void RadioMedium::setCachedSNIR(const IRadio *radio, const ITransmission *transmission, const ISNIR *snir) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->snir = snir;
+}
+
+void RadioMedium::removeCachedSNIR(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->snir = NULL;
+}
+
 const IReceptionDecision *RadioMedium::getCachedDecision(const IRadio *radio, const ITransmission *transmission) const
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
@@ -568,6 +629,8 @@ void RadioMedium::removeNonInterferingTransmissions()
                 delete cacheEntry.listening;
                 delete cacheEntry.reception;
                 delete cacheEntry.interference;
+                delete cacheEntry.noise;
+                delete cacheEntry.snir;
                 delete cacheEntry.decision;
             }
             delete receptionCacheEntries;
@@ -646,18 +709,58 @@ const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *ra
     return decision;
 }
 
-const IReception *RadioMedium::getReception(const IRadio *radio, const ITransmission *transmission) const
+const IArrival *RadioMedium::getArrival(const IRadio *receiver, const ITransmission *transmission) const
+{
+    return getCachedArrival(receiver, transmission);
+}
+
+const IReception *RadioMedium::getReception(const IRadio *receiver, const ITransmission *transmission) const
 {
     cacheReceptionGetCount++;
-    const IReception *reception = getCachedReception(radio, transmission);
+    const IReception *reception = getCachedReception(receiver, transmission);
     if (reception)
         cacheReceptionHitCount++;
     else {
-        reception = computeReception(radio, transmission);
-        setCachedReception(radio, transmission, reception);
-        EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << endl;
+        reception = computeReception(receiver, transmission);
+        setCachedReception(receiver, transmission, reception);
+        EV_DEBUG << "Receiving " << transmission << " from medium by " << receiver << " arrives as " << reception << endl;
     }
     return reception;
+}
+
+const IInterference *RadioMedium::getInterference(const IRadio *receiver, const ITransmission *transmission) const
+{
+    const IInterference *interference = getCachedInterference(receiver, transmission);
+    if (!interference) {
+        const IListening *listening = getCachedListening(receiver, transmission);
+        interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+        setCachedInterference(receiver, transmission, interference);
+    }
+    return interference;
+}
+
+const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission *transmission) const
+{
+    const INoise *noise = getCachedNoise(receiver, transmission);
+    if (!noise) {
+        const IListening *listening = getCachedListening(receiver, transmission);
+        const IInterference *interference = getInterference(receiver, transmission);
+        noise = attenuation->computeNoise(listening, interference);
+        setCachedNoise(receiver, transmission, noise);
+    }
+    return noise;
+}
+
+const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *transmission) const
+{
+    const ISNIR *snir = getCachedSNIR(receiver, transmission);
+    if (!snir) {
+        const IReception *reception = getReception(receiver, transmission);
+        const INoise *noise = getNoise(receiver, transmission);
+        snir = attenuation->computeSNIR(reception, noise);
+        setCachedSNIR(receiver, transmission, snir);
+    }
+    return snir;
 }
 
 const IInterference *RadioMedium::getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const
@@ -935,11 +1038,6 @@ bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission 
     if (displayCommunication)
         const_cast<RadioMedium *>(this)->updateCanvas();
     return isReceptionAttempted;
-}
-
-const IArrival *RadioMedium::getArrival(const IRadio *radio, const ITransmission *transmission) const
-{
-    return getCachedArrival(radio, transmission);
 }
 
 void RadioMedium::sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame)

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/base/FlatReceiverBase.h"
 #include "inet/physicallayer/base/FlatTransmissionBase.h"
 #include "inet/physicallayer/base/FlatReceptionBase.h"
@@ -110,10 +111,12 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const INoise *noise = computeNoise(listening, interference);
+    const IRadio *receiver = listening->getReceiver();
+    const IRadioMedium *radioMedium = receiver->getMedium();
+    const IAttenuation *attenuation = radioMedium->getAttenuation();
+    const INoise *noise = attenuation->computeNoise(listening, interference);
     const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
-    delete noise;
     bool isListeningPossible = maxPower >= energyDetection;
     EV_DEBUG << "Computing listening possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
     return new ListeningDecision(listening, isListeningPossible);

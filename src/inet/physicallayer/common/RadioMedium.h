@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/INeighborCache.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/contract/IArrival.h"
@@ -56,17 +57,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         const IListening *listening;
         const IReception *reception;
         const IInterference *interference;
+        const INoise *noise;
+        const ISNIR *snir;
         const IReceptionDecision *decision;
 
       public:
-        ReceptionCacheEntry() :
-            frame(NULL),
-            arrival(NULL),
-            listening(NULL),
-            reception(NULL),
-            interference(NULL),
-            decision(NULL)
-        {}
+        ReceptionCacheEntry();
     };
 
     /**
@@ -94,11 +90,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         std::vector<ReceptionCacheEntry> *receptionCacheEntries;
 
       public:
-        TransmissionCacheEntry() :
-            frame(NULL),
-            figure(NULL),
-            receptionCacheEntries(NULL)
-        {}
+        TransmissionCacheEntry();
     };
 
     enum RangeFilterKind {
@@ -381,6 +373,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) const;
     virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission) const;
 
+    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) const;
+    virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) const;
+
+    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) const;
+    virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) const;
+
     virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission) const;
     virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision) const;
     virtual void removeCachedDecision(const IRadio *radio, const ITransmission *transmission) const;
@@ -454,7 +454,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IListeningDecision *computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
 
-    virtual const IReception *getReception(const IRadio *radio, const ITransmission *transmission) const;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
 
@@ -506,6 +505,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const;
 
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
