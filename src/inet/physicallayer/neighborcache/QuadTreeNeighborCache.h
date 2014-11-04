@@ -75,5 +75,5 @@ class QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
 
 } // namespace inet
 
-#endif /* QUADTREENEIGHBORCACHE_H_ */
+#endif // ifndef __INET_QUADTREENEIGHBORCACHE_H
 

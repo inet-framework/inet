@@ -1,5 +1,5 @@
 %description:
-NeighborListCache test based on Ping results.
+NeighborListNeighborCache test based on Ping results.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
@@ -106,7 +106,7 @@ ned-path = .;../../../../src;../../lib
 **.radioMedium.maxCommunicationRange = 250m
 **.radioMedium.rangeFilter = "communicationRange"
 
-**.radioMedium.neighborCacheType = "NeighborListCache"
+**.radioMedium.neighborCacheType = "NeighborListNeighborCache"
 **.radioMedium.neighborCache.range = 250m
 
 %#--------------------------------------------------------------------------------------------------------------

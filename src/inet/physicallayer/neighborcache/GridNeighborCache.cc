@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/neighbor/GridNeighborCache.h"
+#include "inet/physicallayer/neighborcache/GridNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

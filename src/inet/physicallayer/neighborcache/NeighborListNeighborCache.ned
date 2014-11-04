@@ -13,16 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.neighbor;
+package inet.physicallayer.neighborcache;
 
 import inet.physicallayer.contract.INeighborCache;
 
-module QuadTreeNeighborCache like INeighborCache
+module NeighborListNeighborCache like INeighborCache
 {
     parameters:
         string radioMediumModule = default("^");
-        int maxNumOfPointsPerQuadrant;
+        double range @unit(m);
         double refillPeriod @unit(s);
         @display("i=block/cogwheel");
-        @class(QuadTreeNeighborCache);
+        @class(NeighborListNeighborCache);
 }

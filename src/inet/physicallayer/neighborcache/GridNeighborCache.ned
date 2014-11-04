@@ -13,17 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.neighbor;
+package inet.physicallayer.neighborcache;
 
 import inet.physicallayer.contract.INeighborCache;
 
-module NeighborListCache like INeighborCache
+module GridNeighborCache like INeighborCache
 {
     parameters:
         string radioMediumModule = default("^");
-        double range @unit(m);
-        double refillPeriod @unit(s);
+        double cellSizeX @unit(m) = default(0m/0); // NaN means use cell count
+        double cellSizeY @unit(m) = default(0m/0); // NaN means use cell count
+        double cellSizeZ @unit(m) = default(0m/0); // NaN means use cell count
+        int cellCountX = default(10); // divide space to so many cells
+        int cellCountY = default(10); // divide space to so many cells
+        int cellCountZ = default(10); // divide space to so many cells
+        double refillPeriod @unit(s) = default(1s);
         @display("i=block/cogwheel");
-        @class(NeighborListCache);
+        @class(GridNeighborCache);
 }
-

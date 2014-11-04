@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NEIGHBORLISTCACHE_H
-#define __INET_NEIGHBORLISTCACHE_H
+#ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H
+#define __INET_NEIGHBORLISTNEIGHBORCACHE_H
 
 #include "inet/physicallayer/common/RadioMedium.h"
 #include <set>
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class NeighborListCache : public cSimpleModule, public INeighborCache
+class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
     struct RadioEntry
@@ -61,8 +61,8 @@ class NeighborListCache : public cSimpleModule, public INeighborCache
     void removeRadioFromNeighborLists(const IRadio *radio);
 
   public:
-    NeighborListCache();
-    ~NeighborListCache();
+    NeighborListNeighborCache();
+    ~NeighborListNeighborCache();
 
     virtual void printToStream(std::ostream& stream) const {}
     virtual void addRadio(const IRadio *radio);
@@ -74,5 +74,5 @@ class NeighborListCache : public cSimpleModule, public INeighborCache
 
 } // namespace inet
 
-#endif /* NEIGHBORLISTCACHE_H_ */
+#endif // ifndef __INET_NEIGHBORLISTNEIGHBORCACHE_H
 

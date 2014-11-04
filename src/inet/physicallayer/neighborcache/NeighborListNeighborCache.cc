@@ -15,16 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/neighbor/NeighborListCache.h"
+#include "inet/physicallayer/neighborcache/NeighborListNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(NeighborListCache);
+Define_Module(NeighborListNeighborCache);
 
-NeighborListCache::NeighborListCache() :
+NeighborListNeighborCache::NeighborListNeighborCache() :
     radioMedium(NULL),
     updateNeighborListsTimer(NULL),
     updatePeriod(sNaN),
@@ -33,7 +33,7 @@ NeighborListCache::NeighborListCache() :
 {
 }
 
-void NeighborListCache::initialize(int stage)
+void NeighborListNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
@@ -48,10 +48,10 @@ void NeighborListCache::initialize(int stage)
     }
 }
 
-void NeighborListCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
+void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
 {
     if (this->range < range)
-        throw cRuntimeError("The transmitter's (id: %d) range is bigger then the global NeighborListCache range", transmitter->getId());
+        throw cRuntimeError("The transmitter's (id: %d) range is bigger then the cache range", transmitter->getId());
 
     RadioEntryCache::const_iterator it = radioToEntry.find(transmitter);
     if (it == radioToEntry.end())
@@ -64,7 +64,7 @@ void NeighborListCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
         radioMedium->sendToRadio(transmitter, neighborVector[i], frame);
 }
 
-void NeighborListCache::handleMessage(cMessage *msg)
+void NeighborListNeighborCache::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
         throw cRuntimeError("This module only handles self messages");
@@ -74,7 +74,7 @@ void NeighborListCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + updatePeriod, msg);
 }
 
-void NeighborListCache::updateNeighborList(RadioEntry *radioEntry)
+void NeighborListNeighborCache::updateNeighborList(RadioEntry *radioEntry)
 {
     IMobility *radioMobility = radioEntry->radio->getAntenna()->getMobility();
     Coord radioPosition = radioMobility->getCurrentPosition();
@@ -91,7 +91,7 @@ void NeighborListCache::updateNeighborList(RadioEntry *radioEntry)
     }
 }
 
-void NeighborListCache::addRadio(const IRadio *radio)
+void NeighborListNeighborCache::addRadio(const IRadio *radio)
 {
     RadioEntry *newEntry = new RadioEntry(radio);
     radios.push_back(newEntry);
@@ -102,7 +102,7 @@ void NeighborListCache::addRadio(const IRadio *radio)
         scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
 }
 
-void NeighborListCache::removeRadio(const IRadio *radio)
+void NeighborListNeighborCache::removeRadio(const IRadio *radio)
 {
     RadioEntries::iterator it = find(radios.begin(), radios.end(), radioToEntry[radio]);
     if (it != radios.end()) {
@@ -117,14 +117,14 @@ void NeighborListCache::removeRadio(const IRadio *radio)
     }
 }
 
-void NeighborListCache::updateNeighborLists()
+void NeighborListNeighborCache::updateNeighborLists()
 {
     EV_DETAIL << "Updating the neighbor lists" << endl;
     for (unsigned int i = 0; i < radios.size(); i++)
         updateNeighborList(radios[i]);
 }
 
-void NeighborListCache::removeRadioFromNeighborLists(const IRadio *radio)
+void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio)
 {
     for (unsigned int i = 0; i < radios.size(); i++) {
         Radios neighborVector = radios[i]->neighborVector;
@@ -134,7 +134,7 @@ void NeighborListCache::removeRadioFromNeighborLists(const IRadio *radio)
     }
 }
 
-NeighborListCache::~NeighborListCache()
+NeighborListNeighborCache::~NeighborListNeighborCache()
 {
     for (unsigned int i = 0; i < radios.size(); i++)
         delete radios[i];

@@ -1,6 +1,6 @@
 2014-10-31  Benjamin Seregi & Levente Meszaros
 
 	Added initial implementation:
-	GridNeighborCache, NeighborListCache, QuadTreeNeighborCache
+	GridNeighborCache, NeighborListNeighborCache, QuadTreeNeighborCache
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

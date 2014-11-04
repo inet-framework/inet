@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/neighbor/QuadTreeNeighborCache.h"
+#include "inet/physicallayer/neighborcache/QuadTreeNeighborCache.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
