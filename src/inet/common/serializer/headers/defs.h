@@ -18,36 +18,7 @@
 #ifndef __INET_DEFS_H
 #define __INET_DEFS_H
 
-namespace inet {
-
-namespace serializer {
-
-//
-// Get integer types defined
-//
-#if defined(_MSC_VER) && (_MSC_VER < 1600)
-typedef __int8 int8_t;
-typedef __int16 int16_t;
-typedef __int32 int32_t;
-typedef __int64 int64_t;
-typedef unsigned __int8 uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-#else // if defined(_MSC_VER) && (_MSC_VER < 1600)
 #include <stdint.h>    /* ISO C compliant platforms: Linux, Mac OS/X, recent MSVC versions */
-#endif // if defined(_MSC_VER) && (_MSC_VER < 1600)
-
-/* if nothing else helps:
-   typedef signed char         int8_t;
-   typedef short               int16_t;
-   typedef int                 int32_t;
-   typedef long long           int64_t;
-   typedef unsigned char       uint8_t;
-   typedef unsigned short      uint16_t;
-   typedef unsigned int        uint32_t;
-   typedef unsigned long long  uint64_t;
- */
 
 //
 // Get endianness macros defined
@@ -72,10 +43,6 @@ typedef unsigned __int64 uint64_t;
 #if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
 #error Endian macros (LITTLE_ENDIAN, BIG_ENDIAN, BYTE_ORDER) are not set up correctly -- please fix this header file and report it.
 #endif // if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
-
-} // namespace serializer
-
-} // namespace inet
 
 #endif // ifndef __INET_DEFS_H
 
