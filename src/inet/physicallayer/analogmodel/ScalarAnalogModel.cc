@@ -17,11 +17,11 @@
 
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/analog/ScalarAnalogModel.h"
-#include "inet/physicallayer/analog/ScalarTransmission.h"
-#include "inet/physicallayer/analog/ScalarReception.h"
-#include "inet/physicallayer/analog/ScalarNoise.h"
-#include "inet/physicallayer/analog/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/ScalarAnalogModel.h"
+#include "inet/physicallayer/analogmodel/ScalarTransmission.h"
+#include "inet/physicallayer/analogmodel/ScalarReception.h"
+#include "inet/physicallayer/analogmodel/ScalarNoise.h"
+#include "inet/physicallayer/analogmodel/ScalarSNIR.h"
 
 namespace inet {
 

@@ -15,26 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analog/ScalarReception.h"
+#ifndef __INET_DIMENSIONALSNIR_H
+#define __INET_DIMENSIONALSNIR_H
+
+#include "inet/physicallayer/base/SNIRBase.h"
+#include "inet/physicallayer/analogmodel/DimensionalReception.h"
+#include "inet/physicallayer/analogmodel/DimensionalNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
-    FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
-    power(power)
+class INET_API DimensionalSNIR : public SNIRBase
 {
-}
+  protected:
+    mutable double minSNIR;
 
-void ScalarReception::printToStream(std::ostream& stream) const
-{
-    stream << "ScalarReception, "
-           << "power = " << power << ", ";
-    FlatReceptionBase::printToStream(stream);
-}
+  protected:
+    virtual double computeMin() const;
+
+  public:
+    DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
+
+    virtual void printToStream(std::ostream& stream) const;
+
+    virtual double getMin() const;
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_DIMENSIONALSNIR_H
 

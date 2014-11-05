@@ -15,39 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analog/ScalarSNIR.h"
+#ifndef __INET_SCALARSNIR_H
+#define __INET_SCALARSNIR_H
+
+#include "inet/physicallayer/base/SNIRBase.h"
+#include "inet/physicallayer/analogmodel/ScalarReception.h"
+#include "inet/physicallayer/analogmodel/ScalarNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-ScalarSNIR::ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise) :
-    SNIRBase(reception, noise),
-    minSNIR(NaN)
+class INET_API ScalarSNIR : public SNIRBase
 {
-}
+  protected:
+    mutable double minSNIR;
 
-void ScalarSNIR::printToStream(std::ostream& stream) const
-{
-    stream << "ScalarSNIR, "
-           << "minSNIR = " << minSNIR;
-}
+  protected:
+    virtual double computeMin() const;
 
-double ScalarSNIR::computeMin() const
-{
-    const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
-    const ScalarNoise *scalarNoise= check_and_cast<const ScalarNoise *>(noise);
-    return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
-}
+  public:
+    ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
 
-double ScalarSNIR::getMin() const
-{
-    if (isNaN(minSNIR))
-        minSNIR = computeMin();
-    return minSNIR;
-}
+    virtual void printToStream(std::ostream& stream) const;
+
+    virtual double getMin() const;
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_SCALARSNIR_H
 

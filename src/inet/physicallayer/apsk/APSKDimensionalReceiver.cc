@@ -16,9 +16,9 @@
 //
 
 #include "inet/physicallayer/apsk/APSKDimensionalReceiver.h"
-#include "inet/physicallayer/analog/DimensionalReception.h"
-#include "inet/physicallayer/analog/DimensionalNoise.h"
-#include "inet/physicallayer/analog/DimensionalSNIR.h"
+#include "inet/physicallayer/analogmodel/DimensionalReception.h"
+#include "inet/physicallayer/analogmodel/DimensionalNoise.h"
+#include "inet/physicallayer/analogmodel/DimensionalSNIR.h"
 #include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {

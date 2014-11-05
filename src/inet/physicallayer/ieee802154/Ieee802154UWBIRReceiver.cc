@@ -16,8 +16,8 @@
 //
 
 #include "inet/physicallayer/ieee802154/Ieee802154UWBIRReceiver.h"
-#include "inet/physicallayer/analog/DimensionalReception.h"
-#include "inet/physicallayer/analog/DimensionalNoise.h"
+#include "inet/physicallayer/analogmodel/DimensionalReception.h"
+#include "inet/physicallayer/analogmodel/DimensionalNoise.h"
 #include "inet/physicallayer/common/BandListening.h"
 #include "inet/physicallayer/common/ListeningDecision.h"
 #include "inet/physicallayer/common/ReceptionDecision.h"

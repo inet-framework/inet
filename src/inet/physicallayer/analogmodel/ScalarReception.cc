@@ -15,16 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analog/DimensionalTransmission.h"
+#include "inet/physicallayer/analogmodel/ScalarReception.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power) :
-    FlatTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate),
+ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
+    FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
     power(power)
 {
+}
+
+void ScalarReception::printToStream(std::ostream& stream) const
+{
+    stream << "ScalarReception, "
+           << "power = " << power << ", ";
+    FlatReceptionBase::printToStream(stream);
 }
 
 } // namespace physicallayer

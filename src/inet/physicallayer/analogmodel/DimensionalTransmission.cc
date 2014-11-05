@@ -15,36 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALSNIR_H
-#define __INET_DIMENSIONALSNIR_H
-
-#include "inet/physicallayer/base/SNIRBase.h"
-#include "inet/physicallayer/analog/DimensionalReception.h"
-#include "inet/physicallayer/analog/DimensionalNoise.h"
+#include "inet/physicallayer/analogmodel/DimensionalTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalSNIR : public SNIRBase
+DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power) :
+    FlatTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate),
+    power(power)
 {
-  protected:
-    mutable double minSNIR;
-
-  protected:
-    virtual double computeMin() const;
-
-  public:
-    DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
-
-    virtual void printToStream(std::ostream& stream) const;
-
-    virtual double getMin() const;
-};
+}
 
 } // namespace physicallayer
 
 } // namespace inet
-
-#endif // ifndef __INET_DIMENSIONALSNIR_H
 

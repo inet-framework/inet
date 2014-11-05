@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analog/DimensionalSNIR.h"
+#include "inet/physicallayer/analogmodel/DimensionalSNIR.h"
 
 namespace inet {
 

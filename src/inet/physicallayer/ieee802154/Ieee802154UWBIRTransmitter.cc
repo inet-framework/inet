@@ -22,7 +22,7 @@
 
 #include "inet/physicallayer/ieee802154/Ieee802154UWBIRTransmitter.h"
 #include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/analog/DimensionalTransmission.h"
+#include "inet/physicallayer/analogmodel/DimensionalTransmission.h"
 
 namespace inet {
 

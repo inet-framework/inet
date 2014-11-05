@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/apsk/APSKScalarTransmitter.h"
-#include "inet/physicallayer/analog/ScalarTransmission.h"
+#include "inet/physicallayer/analogmodel/ScalarTransmission.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
 #include "inet/mobility/contract/IMobility.h"
 

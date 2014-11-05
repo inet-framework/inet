@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.analog;
+package inet.physicallayer.analogmodel;
 
 import inet.physicallayer.contract.IAnalogModel;
 
