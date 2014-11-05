@@ -15,14 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.apsk;
 
-import inet.physicallayer.base.FlatReceiverBase;
+import inet.physicallayer.common.Radio;
 
-module DimensionalReceiver extends FlatReceiverBase
+module DimensionalRadio extends Radio
 {
     parameters:
-        modulation = default("BPSK");
-        errorModelType = default("APSKErrorModel");
-        @class(DimensionalReceiver);
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
+        antennaType = default("IsotropicAntenna");
+        transmitterType = default("DimensionalTransmitter");
+        receiverType = default("DimensionalReceiver");
+        *.carrierFrequency = carrierFrequency;
+        *.bandwidth = bandwidth;
+        @class(Radio);
 }

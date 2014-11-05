@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.scalar.ScalarTransmitter;
+import inet.physicallayer.apsk.ScalarTransmitter;
 
 module Ieee80211ScalarTransmitter extends ScalarTransmitter
 {

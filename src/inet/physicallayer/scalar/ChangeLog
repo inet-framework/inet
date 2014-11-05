@@ -1,8 +1,7 @@
 2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-	ScalarAttenuation, ScalarIsotropicBackgroundNoise, ScalarNoise, ScalarRadio,
-	ScalarRadioMedium, ScalarReceiver, ScalarReception, ScalarTransmission,
-	ScalarTransmitter, ScalarSNIR
+	ScalarAttenuation, ScalarNoise, ScalarSNIR, ScalarReception,
+	ScalarTransmission
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.scalar.ScalarReceiver;
+import inet.physicallayer.apsk.ScalarReceiver;
 
 module Ieee80211ScalarReceiver extends ScalarReceiver
 {

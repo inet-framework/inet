@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.dimensional.DimensionalReceiver;
+import inet.physicallayer.apsk.DimensionalReceiver;
 
 module Ieee80211DimensionalReceiver extends DimensionalReceiver
 {

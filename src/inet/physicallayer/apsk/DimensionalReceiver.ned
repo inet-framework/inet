@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.scalar;
+package inet.physicallayer.apsk;
 
-import inet.physicallayer.base.FlatTransmitterBase;
+import inet.physicallayer.base.FlatReceiverBase;
 
-module ScalarTransmitter extends FlatTransmitterBase
+module DimensionalReceiver extends FlatReceiverBase
 {
     parameters:
         modulation = default("BPSK");
-        @class(ScalarTransmitter);
+        errorModelType = default("APSKErrorModel");
+        @class(DimensionalReceiver);
 }

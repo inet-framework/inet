@@ -17,7 +17,8 @@
 
 package inet.physicallayer.ieee802154;
 
-import inet.physicallayer.dimensional.DimensionalRadioMedium;
+import inet.physicallayer.apsk.DimensionalRadioMedium;
+
 
 module Ieee802154UWBIRRadioMedium extends DimensionalRadioMedium
 {

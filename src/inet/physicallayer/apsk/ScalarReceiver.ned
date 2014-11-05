@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,15 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.scalar;
+package inet.physicallayer.apsk;
 
-import inet.physicallayer.common.RadioMedium;
+import inet.physicallayer.base.FlatReceiverBase;
 
-module ScalarRadioMedium extends RadioMedium
+module ScalarReceiver extends FlatReceiverBase
 {
     parameters:
-        propagationType = default("ConstantSpeedPropagation");
-        pathLossType = default("FreeSpacePathLoss");
-        attenuationType = default("ScalarAttenuation");
-        backgroundNoiseType = default("ScalarIsotropicBackgroundNoise");
+        modulation = default("BPSK");
+        errorModelType = default("APSKErrorModel");
+        @class(ScalarReceiver);
 }

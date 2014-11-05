@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,15 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.apsk;
 
-import inet.physicallayer.common.RadioMedium;
+import inet.physicallayer.base.FlatTransmitterBase;
 
-module DimensionalRadioMedium extends RadioMedium
+module ScalarTransmitter extends FlatTransmitterBase
 {
     parameters:
-        propagationType = default("ConstantSpeedPropagation");
-        pathLossType = default("FreeSpacePathLoss");
-        attenuationType = default("DimensionalAttenuation");
-        backgroundNoiseType = default("DimensionalIsotropicBackgroundNoise");
+        modulation = default("BPSK");
+        @class(ScalarTransmitter);
 }

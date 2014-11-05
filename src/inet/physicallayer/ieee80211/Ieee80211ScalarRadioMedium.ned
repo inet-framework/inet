@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.scalar.ScalarRadioMedium;
+import inet.physicallayer.apsk.ScalarRadioMedium;
 
 module Ieee80211ScalarRadioMedium extends ScalarRadioMedium
 {

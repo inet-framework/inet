@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.dimensional.DimensionalRadio;
+import inet.physicallayer.apsk.DimensionalRadio;
 
 module Ieee80211DimensionalRadio extends DimensionalRadio
 {

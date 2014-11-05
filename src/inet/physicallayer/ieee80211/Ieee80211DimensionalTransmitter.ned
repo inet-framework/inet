@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.dimensional.DimensionalTransmitter;
+import inet.physicallayer.apsk.DimensionalTransmitter;
 
 module Ieee80211DimensionalTransmitter extends DimensionalTransmitter
 {

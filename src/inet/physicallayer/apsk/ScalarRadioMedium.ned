@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.apsk;
 
-import inet.physicallayer.common.Radio;
+import inet.physicallayer.common.RadioMedium;
 
-module DimensionalRadio extends Radio
+module ScalarRadioMedium extends RadioMedium
 {
     parameters:
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("DimensionalTransmitter");
-        receiverType = default("DimensionalReceiver");
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
-        @class(Radio);
+        propagationType = default("ConstantSpeedPropagation");
+        pathLossType = default("FreeSpacePathLoss");
+        attenuationType = default("ScalarAttenuation");
+        backgroundNoiseType = default("ScalarIsotropicBackgroundNoise");
 }
