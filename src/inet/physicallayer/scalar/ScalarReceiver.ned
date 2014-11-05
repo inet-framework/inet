@@ -22,5 +22,7 @@ import inet.physicallayer.base.FlatReceiverBase;
 module ScalarReceiver extends FlatReceiverBase
 {
     parameters:
+        modulation = default("BPSK");
+        errorModelType = default("APSKErrorModel");
         @class(ScalarReceiver);
 }

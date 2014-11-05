@@ -17,10 +17,9 @@
 
 package inet.physicallayer.base;
 
-import inet.physicallayer.contract.IErrorModel;
-import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.contract.ITransmitter;
 
-module FlatTransmitterBase like IReceiver
+module FlatTransmitterBase like ITransmitter
 {
     parameters:
         double bitrate @unit(bps);

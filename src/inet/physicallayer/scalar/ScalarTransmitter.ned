@@ -22,5 +22,6 @@ import inet.physicallayer.base.FlatTransmitterBase;
 module ScalarTransmitter extends FlatTransmitterBase
 {
     parameters:
+        modulation = default("BPSK");
         @class(ScalarTransmitter);
 }

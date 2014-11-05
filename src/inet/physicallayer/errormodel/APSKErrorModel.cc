@@ -34,6 +34,8 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
     double bitErrorRate = computeBitErrorRate(snir);
     if (bitErrorRate == 0.0)
         return 0.0;
+    else if (bitErrorRate == 1.0)
+        return 1.0;
     else {
         const IReception *reception = snir->getReception();
         const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
