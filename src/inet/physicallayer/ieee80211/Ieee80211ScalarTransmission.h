@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211SCALARTRANSMISSION_H
 #define __INET_IEEE80211SCALARTRANSMISSION_H
 
-#include "inet/physicallayer/scalar/ScalarTransmission.h"
+#include "inet/physicallayer/analog/ScalarTransmission.h"
 #include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
 
 namespace inet {

@@ -15,16 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalTransmission.h"
+#include "inet/physicallayer/analog/ScalarTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power) :
+ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
     FlatTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate),
     power(power)
 {
+}
+
+void ScalarTransmission::printToStream(std::ostream& stream) const
+{
+    stream << "ScalarTransmission, "
+           << "power = " << power;
+    FlatTransmissionBase::printToStream(stream);
 }
 
 } // namespace physicallayer

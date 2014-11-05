@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.analog;
 
 import inet.physicallayer.contract.IAttenuation;
 
-module DimensionalAttenuation like IAttenuation
+module ScalarAttenuation like IAttenuation
 {
     parameters:
-        bool attenuateWithCarrierFrequency = default(true);
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
-        @class(DimensionalAttenuation);
+        @class(ScalarAttenuation);
 }

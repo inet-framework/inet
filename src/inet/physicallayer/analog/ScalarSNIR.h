@@ -15,30 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/APSKDimensionalReceiver.h"
-#include "inet/physicallayer/analog/DimensionalReception.h"
-#include "inet/physicallayer/analog/DimensionalNoise.h"
-#include "inet/physicallayer/analog/DimensionalSNIR.h"
-#include "inet/physicallayer/common/BandListening.h"
+#ifndef __INET_SCALARSNIR_H
+#define __INET_SCALARSNIR_H
+
+#include "inet/physicallayer/base/SNIRBase.h"
+#include "inet/physicallayer/analog/ScalarReception.h"
+#include "inet/physicallayer/analog/ScalarNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKDimensionalReceiver);
-
-APSKDimensionalReceiver::APSKDimensionalReceiver() :
-    FlatReceiverBase()
+class INET_API ScalarSNIR : public SNIRBase
 {
-}
+  protected:
+    mutable double minSNIR;
 
-void APSKDimensionalReceiver::printToStream(std::ostream& stream) const
-{
-    stream << "APSKDimensionalReceiver, ";
-    FlatReceiverBase::printToStream(stream);
-}
+  protected:
+    virtual double computeMin() const;
+
+  public:
+    ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
+
+    virtual void printToStream(std::ostream& stream) const;
+
+    virtual double getMin() const;
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_SCALARSNIR_H
 

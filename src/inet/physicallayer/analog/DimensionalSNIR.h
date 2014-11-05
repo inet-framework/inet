@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARSNIR_H
-#define __INET_SCALARSNIR_H
+#ifndef __INET_DIMENSIONALSNIR_H
+#define __INET_DIMENSIONALSNIR_H
 
 #include "inet/physicallayer/base/SNIRBase.h"
-#include "inet/physicallayer/scalar/ScalarReception.h"
-#include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/analog/DimensionalReception.h"
+#include "inet/physicallayer/analog/DimensionalNoise.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarSNIR : public SNIRBase
+class INET_API DimensionalSNIR : public SNIRBase
 {
   protected:
     mutable double minSNIR;
@@ -35,7 +35,7 @@ class INET_API ScalarSNIR : public SNIRBase
     virtual double computeMin() const;
 
   public:
-    ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
+    DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
 
     virtual void printToStream(std::ostream& stream) const;
 
@@ -46,5 +46,5 @@ class INET_API ScalarSNIR : public SNIRBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARSNIR_H
+#endif // ifndef __INET_DIMENSIONALSNIR_H
 

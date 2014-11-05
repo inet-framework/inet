@@ -70,7 +70,7 @@ class RIPPacket;
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/common/RadioFrame.h"
-#include "inet/physicallayer/scalar/ScalarTransmission.h"
+#include "inet/physicallayer/analog/ScalarTransmission.h"
 #else // ifdef WITH_RADIO
 namespace inet { namespace physicallayer { class RadioFrame; } }
 #endif // ifdef WITH_RADIO

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalReception.h"
+#include "inet/physicallayer/analog/DimensionalReception.h"
 
 namespace inet {
 

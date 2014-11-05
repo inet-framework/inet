@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/analog/ScalarNoise.h"
 
 namespace inet {
 

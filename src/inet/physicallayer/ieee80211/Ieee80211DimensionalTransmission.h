@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211DIMENSIONALTRANSMISSION_H
 #define __INET_IEEE80211DIMENSIONALTRANSMISSION_H
 
-#include "inet/physicallayer/dimensional/DimensionalTransmission.h"
+#include "inet/physicallayer/analog/DimensionalTransmission.h"
 #include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
 
 namespace inet {

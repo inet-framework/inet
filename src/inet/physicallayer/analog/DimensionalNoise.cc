@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalNoise.h"
+#include "inet/physicallayer/analog/DimensionalNoise.h"
 
 namespace inet {
 

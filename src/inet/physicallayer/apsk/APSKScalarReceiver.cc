@@ -16,9 +16,9 @@
 //
 
 #include "inet/physicallayer/apsk/APSKScalarReceiver.h"
-#include "inet/physicallayer/scalar/ScalarReception.h"
-#include "inet/physicallayer/scalar/ScalarNoise.h"
-#include "inet/physicallayer/scalar/ScalarSNIR.h"
+#include "inet/physicallayer/analog/ScalarReception.h"
+#include "inet/physicallayer/analog/ScalarNoise.h"
+#include "inet/physicallayer/analog/ScalarSNIR.h"
 #include "inet/physicallayer/common/BandListening.h"
 
 namespace inet {
