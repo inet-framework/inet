@@ -19,7 +19,7 @@ record-eventlog = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.numUdpApps = 1
 **.client.udpApp[0].typename = "DHCPClient"
-**.client.udpApp[0].log-level = detail
+#**.client.udpApp[0].log-level = detail
 
 **.server.udpApp[0].typename = "DHCPServer"
 **.server.udpApp[0].subnetMask = "255.255.255.0"

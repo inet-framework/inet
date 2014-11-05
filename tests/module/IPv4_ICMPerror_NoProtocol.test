@@ -39,8 +39,8 @@ cmdenv-express-mode=false
 **.eth[*].mac.duplexEnabled = true
 
 %contains: stdout
-Transport protocol ID=17 not connected, discarding packet
-sending ICMP error ICMP-error-#1-type13-code2
+ERROR: Transport protocol ID=17 not connected, discarding packet
+DETAIL: sending ICMP error ICMP-error-#1-type13-code2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
