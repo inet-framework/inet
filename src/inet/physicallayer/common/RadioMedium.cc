@@ -928,12 +928,12 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
 #endif
         communicationFigure->setTags("ongoing_transmission");
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
-        communicationFigure->setFilled(true);
         communicationFigure->setFillColor(color);
         communicationFigure->setLineWidth(1);
         communicationFigure->setLineColor(cFigure::BLACK);
         groupFigure->addFigure(communicationFigure);
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
+        communicationFigure->setFilled(true);
         communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineOpacity(0.5);
         cLabelFigure *nameFigure = new cLabelFigure();
