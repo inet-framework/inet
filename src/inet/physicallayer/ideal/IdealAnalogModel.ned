@@ -17,10 +17,10 @@
 
 package inet.physicallayer.ideal;
 
-import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IAnalogModel;
 
-module IdealAttenuation like IAttenuation
+module IdealAnalogModel like IAnalogModel
 {
     parameters:
-        @class(IdealAttenuation);
+        @class(IdealAnalogModel);
 }

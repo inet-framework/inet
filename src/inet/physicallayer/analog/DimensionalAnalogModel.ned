@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,26 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ATTENUATIONBASE_H
-#define __INET_ATTENUATIONBASE_H
+package inet.physicallayer.analog;
 
-#include "inet/physicallayer/contract/IAttenuation.h"
-#include "inet/physicallayer/contract/IArrival.h"
-#include "inet/physicallayer/contract/ITransmission.h"
+import inet.physicallayer.contract.IAnalogModel;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API AttenuationBase : public cModule, public virtual IAttenuation
+module DimensionalAnalogModel like IAnalogModel
 {
-  protected:
-    virtual EulerAngles computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_ATTENUATIONBASE_H
-
+    parameters:
+        bool attenuateWithCarrierFrequency = default(true);
+        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
+        @class(DimensionalAnalogModel);
+}

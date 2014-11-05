@@ -17,7 +17,7 @@
 
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/analog/ScalarAttenuation.h"
+#include "inet/physicallayer/analog/ScalarAnalogModel.h"
 #include "inet/physicallayer/analog/ScalarTransmission.h"
 #include "inet/physicallayer/analog/ScalarReception.h"
 #include "inet/physicallayer/analog/ScalarNoise.h"
@@ -27,15 +27,15 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ScalarAttenuation);
+Define_Module(ScalarAnalogModel);
 
-bool ScalarAttenuation::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
+bool ScalarAnalogModel::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
 {
     return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
     const IRadio *transmitterRadio = transmission->getTransmitter();
@@ -62,7 +62,7 @@ const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadi
     return new ScalarReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth(), receptionPower);
 }
 
-const INoise *ScalarAttenuation::computeNoise(const IListening *listening, const IInterference *interference) const
+const INoise *ScalarAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     Hz carrierFrequency = bandListening->getCarrierFrequency();
@@ -120,7 +120,7 @@ const INoise *ScalarAttenuation::computeNoise(const IListening *listening, const
     return new ScalarNoise(noiseStartTime, noiseEndTime, carrierFrequency, bandwidth, powerChanges);
 }
 
-const ISNIR *ScalarAttenuation::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISNIR *ScalarAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);

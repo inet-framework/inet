@@ -17,7 +17,7 @@
 
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/analog/DimensionalAttenuation.h"
+#include "inet/physicallayer/analog/DimensionalAnalogModel.h"
 #include "inet/physicallayer/analog/DimensionalTransmission.h"
 #include "inet/physicallayer/analog/DimensionalReception.h"
 #include "inet/physicallayer/analog/DimensionalNoise.h"
@@ -27,9 +27,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalAttenuation);
+Define_Module(DimensionalAnalogModel);
 
-void DimensionalAttenuation::initialize(int stage)
+void DimensionalAnalogModel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         attenuateWithCarrierFrequency = par("attenuateWithCarrierFrequency");
@@ -43,14 +43,14 @@ void DimensionalAttenuation::initialize(int stage)
     }
 }
 
-void DimensionalAttenuation::printToStream(std::ostream& stream) const
+void DimensionalAnalogModel::printToStream(std::ostream& stream) const
 {
-    stream << "DimensionalAttenuation, "
+    stream << "DimensionalAnalogModel, "
            << "attenuateWithCarrierFrequency = " << attenuateWithCarrierFrequency << ", "
            << "interpolationMode = " << interpolationMode;
 }
 
-const IReception *DimensionalAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
     const IRadio *transmitterRadio = transmission->getTransmitter();
@@ -113,7 +113,7 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     return new DimensionalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, dimensionalTransmission->getCarrierFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
 }
 
-const INoise *DimensionalAttenuation::computeNoise(const IListening *listening, const IInterference *interference) const
+const INoise *DimensionalAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     Hz carrierFrequency = bandListening->getCarrierFrequency();
@@ -147,7 +147,7 @@ const INoise *DimensionalAttenuation::computeNoise(const IListening *listening, 
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 
-const ISNIR *DimensionalAttenuation::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISNIR *DimensionalAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);

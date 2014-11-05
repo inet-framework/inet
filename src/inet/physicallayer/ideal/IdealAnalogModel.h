@@ -15,23 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARATTENUATION_H
-#define __INET_SCALARATTENUATION_H
+#ifndef __INET_IDEALANALOGMODEL_H
+#define __INET_IDEALANALOGMODEL_H
 
-#include "inet/physicallayer/base/AttenuationBase.h"
+#include "inet/physicallayer/contract/IAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarAttenuation : public AttenuationBase
+class INET_API IdealAnalogModel : public cModule, public IAnalogModel
 {
-  protected:
-    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
-
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "ScalarAttenuation"; }
-
+    virtual void printToStream(std::ostream& stream) const;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
     virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
@@ -41,5 +37,5 @@ class INET_API ScalarAttenuation : public AttenuationBase
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARATTENUATION_H
+#endif // ifndef __INET_IDEALANALOGMODEL_H
 

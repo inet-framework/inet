@@ -15,27 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALATTENUATION_H
-#define __INET_IDEALATTENUATION_H
-
-#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/base/AnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API IdealAttenuation : public cModule, public IAttenuation
+EulerAngles AnalogModelBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {
-  public:
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
-};
+    const Coord transmissionStartPosition = transmission->getStartPosition();
+    const Coord arrivalStartPosition = arrival->getStartPosition();
+    Coord transmissionStartDirection = arrivalStartPosition - transmissionStartPosition;
+    double z = transmissionStartDirection.z;
+    transmissionStartDirection.z = 0;
+    double heading = atan2(transmissionStartDirection.y, transmissionStartDirection.x);
+    double elevation = atan2(z, transmissionStartDirection.length());
+    return EulerAngles(heading, elevation, 0);
+}
 
 } // namespace physicallayer
 
 } // namespace inet
-
-#endif // ifndef __INET_IDEALATTENUATION_H
 

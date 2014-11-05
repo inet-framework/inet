@@ -53,7 +53,7 @@ RadioMedium::TransmissionCacheEntry::TransmissionCacheEntry() :
 RadioMedium::RadioMedium() :
     propagation(NULL),
     pathLoss(NULL),
-    attenuation(NULL),
+    analogModel(NULL),
     backgroundNoise(NULL),
     maxSpeed(mps(sNaN)),
     maxTransmissionPower(W(sNaN)),
@@ -131,7 +131,7 @@ void RadioMedium::initialize(int stage)
         propagation = check_and_cast<IPropagation *>(getSubmodule("propagation"));
         pathLoss = check_and_cast<IPathLoss *>(getSubmodule("pathLoss"));
         obstacleLoss = dynamic_cast<IObstacleLoss *>(getSubmodule("obstacleLoss"));
-        attenuation = check_and_cast<IAttenuation *>(getSubmodule("attenuation"));
+        analogModel = check_and_cast<IAnalogModel *>(getSubmodule("analogModel"));
         backgroundNoise = dynamic_cast<IBackgroundNoise *>(getSubmodule("backgroundNoise"));
         neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));
         const char *rangeFilterString = par("rangeFilter");
@@ -214,7 +214,7 @@ void RadioMedium::printToStream(std::ostream& stream) const
            << "maxCommunicationRange = " << maxCommunicationRange << ", "
            << "maxInterferenceRange = " << maxInterferenceRange << ", "
            << "propagation = { " << propagation << " }, "
-           << "attenuation = { " << attenuation << " }, "
+           << "analogModel = { " << analogModel << " }, "
            << "pathLoss = { " << pathLoss << " }, ";
     if (obstacleLoss)
         stream << "obstacleLoss = { " << obstacleLoss << " }, ";
@@ -673,7 +673,7 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
 const IReception *RadioMedium::computeReception(const IRadio *radio, const ITransmission *transmission) const
 {
     receptionComputationCount++;
-    return attenuation->computeReception(radio, transmission);
+    return analogModel->computeReception(radio, transmission);
 }
 
 const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const
@@ -754,7 +754,7 @@ const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission 
     if (!noise) {
         const IListening *listening = getCachedListening(receiver, transmission);
         const IInterference *interference = getInterference(receiver, transmission);
-        noise = attenuation->computeNoise(listening, interference);
+        noise = analogModel->computeNoise(listening, interference);
         setCachedNoise(receiver, transmission, noise);
     }
     return noise;
@@ -766,7 +766,7 @@ const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *t
     if (!snir) {
         const IReception *reception = getReception(receiver, transmission);
         const INoise *noise = getNoise(receiver, transmission);
-        snir = attenuation->computeSNIR(reception, noise);
+        snir = analogModel->computeSNIR(reception, noise);
         setCachedSNIR(receiver, transmission, snir);
     }
     return snir;

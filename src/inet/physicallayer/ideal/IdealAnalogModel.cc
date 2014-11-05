@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ideal/IdealAttenuation.h"
+#include "inet/physicallayer/ideal/IdealAnalogModel.h"
 #include "inet/physicallayer/ideal/IdealTransmission.h"
 #include "inet/physicallayer/ideal/IdealReception.h"
 #include "inet/physicallayer/contract/IArrival.h"
@@ -25,14 +25,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(IdealAttenuation);
+Define_Module(IdealAnalogModel);
 
-void IdealAttenuation::printToStream(std::ostream& stream) const
+void IdealAnalogModel::printToStream(std::ostream& stream) const
 {
-    stream << "IdealAttenuation";
+    stream << "IdealAnalogModel";
 }
 
-const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
     const IArrival *arrival = channel->getArrival(receiverRadio, transmission);
@@ -56,12 +56,12 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
     return new IdealReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
 }
 
-const INoise *IdealAttenuation::computeNoise(const IListening *listening, const IInterference *interference) const
+const INoise *IdealAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     throw cRuntimeError("Unsupported operation");
 }
 
-const ISNIR *IdealAttenuation::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISNIR *IdealAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     throw cRuntimeError("Unsupported operation");
 }

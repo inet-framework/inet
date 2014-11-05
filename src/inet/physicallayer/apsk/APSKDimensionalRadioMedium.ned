@@ -24,6 +24,6 @@ module APSKDimensionalRadioMedium extends RadioMedium
     parameters:
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
-        attenuationType = default("DimensionalAttenuation");
+        analogModelType = default("DimensionalAnalogModel");
         backgroundNoiseType = default("IsotropicDimensionalBackgroundNoise");
 }

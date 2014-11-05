@@ -111,8 +111,8 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
 {
     const IRadio *receiver = listening->getReceiver();
     const IRadioMedium *radioMedium = receiver->getMedium();
-    const IAttenuation *attenuation = radioMedium->getAttenuation();
-    const INoise *noise = attenuation->computeNoise(listening, interference);
+    const IAnalogModel *analogModel = radioMedium->getAnalogModel();
+    const INoise *noise = analogModel->computeNoise(listening, interference);
     const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     bool isListeningPossible = maxPower >= energyDetection;

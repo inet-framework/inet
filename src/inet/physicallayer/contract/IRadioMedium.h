@@ -25,7 +25,7 @@
 #include "inet/physicallayer/contract/IPropagation.h"
 #include "inet/physicallayer/contract/IPathLoss.h"
 #include "inet/physicallayer/contract/IObstacleLoss.h"
-#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/contract/IAnalogModel.h"
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
 #include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/IReceptionDecision.h"
@@ -87,10 +87,10 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual const IObstacleLoss *getObstacleLoss() const = 0;
 
     /**
-     * Returns the radio signal attenuation model of this radio medium. This
+     * Returns the radio signal analog model of this radio medium. This
      * function never returns NULL.
      */
-    virtual const IAttenuation *getAttenuation() const = 0;
+    virtual const IAnalogModel *getAnalogModel() const = 0;
 
     /**
      * Returns the background noise model of this radio medium. This function

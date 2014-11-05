@@ -17,12 +17,10 @@
 
 package inet.physicallayer.analog;
 
-import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IAnalogModel;
 
-module DimensionalAttenuation like IAttenuation
+module ScalarAnalogModel like IAnalogModel
 {
     parameters:
-        bool attenuateWithCarrierFrequency = default(true);
-        string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
-        @class(DimensionalAttenuation);
+        @class(ScalarAnalogModel);
 }

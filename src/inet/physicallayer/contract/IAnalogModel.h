@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IATTENUATION_H
-#define __INET_IATTENUATION_H
+#ifndef __INET_IANALOGMODEL_H
+#define __INET_IANALOGMODEL_H
 
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/physicallayer/contract/IListening.h"
@@ -34,7 +34,7 @@ namespace physicallayer {
  * includes various effects such as free-space path loss, shadowing, refraction,
  * reflection, absorption, diffraction and others.
  */
-class INET_API IAttenuation : public IPrintableObject
+class INET_API IAnalogModel : public IPrintableObject
 {
   public:
     /**
@@ -61,5 +61,5 @@ class INET_API IAttenuation : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IATTENUATION_H
+#endif // ifndef __INET_IANALOGMODEL_H
 

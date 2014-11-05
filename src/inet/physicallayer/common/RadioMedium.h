@@ -27,7 +27,7 @@
 #include "inet/physicallayer/contract/IArrival.h"
 #include "inet/physicallayer/contract/IInterference.h"
 #include "inet/physicallayer/contract/IPropagation.h"
-#include "inet/physicallayer/contract/IAttenuation.h"
+#include "inet/physicallayer/contract/IAnalogModel.h"
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/common/TrailFigure.h"
@@ -103,21 +103,21 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Parameters that control the behavior of the radio medium. */
     //@{
     /**
-     * The propagation model of transmissions is never NULL.
+     * The propagation model of the medium is never NULL.
      */
     const IPropagation *propagation;
     /**
-     * The path loss model of transmissions is never NULL.
+     * The path loss model of the medium is never NULL.
      */
     const IPathLoss *pathLoss;
     /**
-     * The obstacle loss model of transmissions or NULL if unused.
+     * The obstacle loss model of the medium or NULL if unused.
      */
     const IObstacleLoss *obstacleLoss;
     /**
-     * The attenuation model of transmissions is never NULL.
+     * The analog model of the medium is never NULL.
      */
-    const IAttenuation *attenuation;
+    const IAnalogModel *analogModel;
     /**
      * The background noise model or NULL if unused.
      */
@@ -488,7 +488,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IPropagation *getPropagation() const { return propagation; }
     virtual const IPathLoss *getPathLoss() const { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }
-    virtual const IAttenuation *getAttenuation() const { return attenuation; }
+    virtual const IAnalogModel *getAnalogModel() const { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
 
     virtual void addRadio(const IRadio *radio);

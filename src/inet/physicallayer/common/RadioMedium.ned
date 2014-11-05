@@ -17,7 +17,7 @@
 
 package inet.physicallayer.common;
 
-import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IAnalogModel;
 import inet.physicallayer.contract.INeighborCache;
 import inet.physicallayer.contract.IObstacleLoss;
 import inet.physicallayer.contract.IPathLoss;
@@ -39,7 +39,7 @@ module RadioMedium like IRadioMedium
         string propagationType;                   // NED type of the propagation model
         string pathLossType;                      // NED type of the path loss model
         string obstacleLossType = default("");    // NED type of the obstacle loss model
-        string attenuationType;                   // TODO: obsolete?
+        string analogModelType;                   // NED type of the analog model
         string backgroundNoiseType = default(""); // NED type of the background noise model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
 
@@ -86,7 +86,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,250");
         }
-        attenuation: <attenuationType> like IAttenuation {
+        analogModel: <analogModelType> like IAnalogModel {
             parameters:
                 @display("p=100,350");
         }

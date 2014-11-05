@@ -15,10 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract;
+#ifndef __INET_ANALOGMODELBASE_H
+#define __INET_ANALOGMODELBASE_H
 
-moduleinterface IAttenuation
+#include "inet/physicallayer/contract/IAnalogModel.h"
+#include "inet/physicallayer/contract/IArrival.h"
+#include "inet/physicallayer/contract/ITransmission.h"
+
+namespace inet {
+
+namespace physicallayer {
+
+class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
 {
-    parameters:
-        @display("i=block/cogwheel");
-}
+  protected:
+    virtual EulerAngles computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif // ifndef __INET_ANALOGMODELBASE_H
+

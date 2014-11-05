@@ -15,25 +15,31 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/AttenuationBase.h"
+#ifndef __INET_SCALARANALOGMODEL_H
+#define __INET_SCALARANALOGMODEL_H
+
+#include "inet/physicallayer/base/AnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
+class INET_API ScalarAnalogModel : public AnalogModelBase
 {
-    const Coord transmissionStartPosition = transmission->getStartPosition();
-    const Coord arrivalStartPosition = arrival->getStartPosition();
-    Coord transmissionStartDirection = arrivalStartPosition - transmissionStartPosition;
-    double z = transmissionStartDirection.z;
-    transmissionStartDirection.z = 0;
-    double heading = atan2(transmissionStartDirection.y, transmissionStartDirection.x);
-    double elevation = atan2(z, transmissionStartDirection.length());
-    return EulerAngles(heading, elevation, 0);
-}
+  protected:
+    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
+
+  public:
+    virtual void printToStream(std::ostream& stream) const { stream << "ScalarAnalogModel"; }
+
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_SCALARANALOGMODEL_H
 

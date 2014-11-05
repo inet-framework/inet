@@ -24,6 +24,6 @@ module IdealRadioMedium extends RadioMedium
     parameters:
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
-        attenuationType = default("IdealAttenuation");
+        analogModelType = default("IdealAnalogModel");
         backgroundNoiseType = default("");
 }
