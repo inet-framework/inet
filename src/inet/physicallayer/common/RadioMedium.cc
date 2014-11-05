@@ -243,7 +243,7 @@ void RadioMedium::handleMessage(cMessage *message)
 
 RadioMedium::TransmissionCacheEntry *RadioMedium::getTransmissionCacheEntry(const ITransmission *transmission) const
 {
-    size_t transmissionIndex = transmission->getId() - baseTransmissionId;
+    int transmissionIndex = transmission->getId() - baseTransmissionId;
     if (transmissionIndex < 0)
         return NULL;
     else {
@@ -263,7 +263,7 @@ RadioMedium::ReceptionCacheEntry *RadioMedium::getReceptionCacheEntry(const IRad
         return NULL;
     else {
         std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry->receptionCacheEntries;
-        size_t radioIndex = radio->getId() - baseRadioId;
+        int radioIndex = radio->getId() - baseRadioId;
         if (radioIndex < 0)
             return NULL;
         else {
