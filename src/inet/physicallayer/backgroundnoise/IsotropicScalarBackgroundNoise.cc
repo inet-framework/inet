@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/backgroundnoise/ScalarIsotropicBackgroundNoise.h"
+#include "inet/physicallayer/backgroundnoise/IsotropicScalarBackgroundNoise.h"
 #include "inet/physicallayer/scalar/ScalarNoise.h"
 #include "inet/physicallayer/common/BandListening.h"
 
@@ -23,14 +23,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ScalarIsotropicBackgroundNoise);
+Define_Module(IsotropicScalarBackgroundNoise);
 
-ScalarIsotropicBackgroundNoise::ScalarIsotropicBackgroundNoise() :
+IsotropicScalarBackgroundNoise::IsotropicScalarBackgroundNoise() :
     power(W(sNaN))
 {
 }
 
-void ScalarIsotropicBackgroundNoise::initialize(int stage)
+void IsotropicScalarBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -38,13 +38,13 @@ void ScalarIsotropicBackgroundNoise::initialize(int stage)
     }
 }
 
-void ScalarIsotropicBackgroundNoise::printToStream(std::ostream& stream) const
+void IsotropicScalarBackgroundNoise::printToStream(std::ostream& stream) const
 {
-    stream << "ScalarIsotropicBackgroundNoise, "
+    stream << "IsotropicScalarBackgroundNoise, "
            << "power = " << power;
 }
 
-const INoise *ScalarIsotropicBackgroundNoise::computeNoise(const IListening *listening) const
+const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     simtime_t startTime = listening->getStartTime();

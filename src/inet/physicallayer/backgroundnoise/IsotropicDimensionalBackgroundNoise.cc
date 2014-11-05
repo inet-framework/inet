@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/backgroundnoise/DimensionalIsotropicBackgroundNoise.h"
+#include "inet/physicallayer/backgroundnoise/IsotropicDimensionalBackgroundNoise.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/common/BandListening.h"
 
@@ -23,15 +23,15 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalIsotropicBackgroundNoise);
+Define_Module(IsotropicDimensionalBackgroundNoise);
 
-DimensionalIsotropicBackgroundNoise::DimensionalIsotropicBackgroundNoise() :
+IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
     interpolationMode((Mapping::InterpolationMethod)-1),
     power(W(sNaN))
 {
 }
 
-void DimensionalIsotropicBackgroundNoise::initialize(int stage)
+void IsotropicDimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -58,15 +58,15 @@ void DimensionalIsotropicBackgroundNoise::initialize(int stage)
     }
 }
 
-void DimensionalIsotropicBackgroundNoise::printToStream(std::ostream& stream) const
+void IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream) const
 {
-    stream << "DimensionalIsotropicBackgroundNoise, "
+    stream << "IsotropicDimensionalBackgroundNoise, "
            // TODO: << "dimensions = { " << dimensions << " }, "
            << "interpolationMode = " << interpolationMode << ", "
            << "power = " << power;
 }
 
-const INoise *DimensionalIsotropicBackgroundNoise::computeNoise(const IListening *listening) const
+const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening *listening) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const simtime_t startTime = listening->getStartTime();

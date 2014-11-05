@@ -25,5 +25,5 @@ module APSKScalarRadioMedium extends RadioMedium
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
         attenuationType = default("ScalarAttenuation");
-        backgroundNoiseType = default("ScalarIsotropicBackgroundNoise");
+        backgroundNoiseType = default("IsotropicScalarBackgroundNoise");
 }
