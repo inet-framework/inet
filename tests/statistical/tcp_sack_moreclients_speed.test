@@ -132,7 +132,9 @@ sim-time-limit = 2s+60s+12s
 **.ppp[*].queue.frameCapacity = 100  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -203,7 +205,7 @@ if(length(cliRcvd$value) == cliCount & min(cliRcvd$value) == cliRcvdBytes)
 cat("\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

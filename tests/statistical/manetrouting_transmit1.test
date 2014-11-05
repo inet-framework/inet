@@ -165,7 +165,9 @@ description = "Aodv Simple test"
 
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -231,7 +233,7 @@ cat("\n")
 
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

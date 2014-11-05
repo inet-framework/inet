@@ -216,13 +216,14 @@ sim-time-limit = 1200s
     </at>
 </scenario>
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
 options(width=160)
 library("omnetpp", warn.conflicts=FALSE)
-
 
 #TEST parameters
 runCount <- 6
@@ -284,7 +285,7 @@ cat("\n")
 
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

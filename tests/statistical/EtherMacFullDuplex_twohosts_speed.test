@@ -116,7 +116,9 @@ network = SpeedTest
 # Check: "rx channel utilization (%)" >= 98.0
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -155,8 +157,9 @@ if(length(used$scalars$value) == linecount & min(used$scalars$value) >= usedlimi
 }
 
 cat("\n")
+
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT: IDLE OK
 

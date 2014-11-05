@@ -125,7 +125,9 @@ sim-time-limit = 2s+20s+4.2s
 *.configurator.networkAddress = "192.168.1.0"
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -192,7 +194,7 @@ if(length(cliRcvd$value) == linecount & min(cliRcvd$value) == srvBytes)
 cat("\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

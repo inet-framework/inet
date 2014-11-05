@@ -118,7 +118,9 @@ network = CompareMACs
 *.host_eq_*.queue.dataQueue.frameCapacity = 100
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -202,7 +204,7 @@ if(length(xx$value) != linecount)
 cat("\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

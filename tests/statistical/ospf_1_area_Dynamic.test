@@ -217,13 +217,14 @@ num-rngs = 2
     </at>
 </scenario>
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
 options(width=160)
 library("omnetpp", warn.conflicts=FALSE)
-
 
 #TEST parameters
 runCount <- 7
@@ -285,7 +286,7 @@ cat("\n")
 
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
 

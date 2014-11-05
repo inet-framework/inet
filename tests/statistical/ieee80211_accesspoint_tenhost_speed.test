@@ -185,7 +185,9 @@ Throughput.numSrv = 10
 **.cli.sendInterval = 30ms
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -199,6 +201,7 @@ rcvdBytes <-  11000000/8 # bytes
 expectedRate <- 27.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
 unbalancedRate <- 25.0 # %
+
 # begin TEST:
 expectedRateMin <- expectedRate - maxDeviation
 expectedRateMax <- expectedRate + maxDeviation
@@ -255,7 +258,7 @@ if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
 cat("END\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
   IEEE80211 TEST RESULT:

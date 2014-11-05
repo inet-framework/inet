@@ -82,7 +82,9 @@ sim-time-limit = 20s
 **.host*.eth[*].queue.frameCapacity = 1
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -132,7 +134,7 @@ if(length(udpRcvd$value) == linecount & min(udpRcvd$value) >= echoedPk)
 cat("\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
   UDP SPEED TEST RESULT:

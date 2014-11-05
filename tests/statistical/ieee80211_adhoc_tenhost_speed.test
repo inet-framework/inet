@@ -171,7 +171,9 @@ Throughput.numSrv = 10
 **.cli.sendInterval = 10ms
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -241,7 +243,7 @@ if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
 cat("END\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
   IEEE80211 TEST RESULT:
