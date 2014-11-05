@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk;
+#ifndef __INET_APSKSCALARRECEIVER_H
+#define __INET_APSKSCALARRECEIVER_H
 
-import inet.physicallayer.common.Radio;
+#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/contract/IModulation.h"
 
-module ScalarRadio extends Radio
+namespace inet {
+
+namespace physicallayer {
+
+class INET_API APSKScalarReceiver : public FlatReceiverBase
 {
-    parameters:
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("ScalarTransmitter");
-        receiverType = default("ScalarReceiver");
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
-        @class(Radio);
-}
+  public:
+    APSKScalarReceiver();
+
+    virtual void printToStream(std::ostream& stream) const;
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif // ifndef __INET_APSKSCALARRECEIVER_H
+

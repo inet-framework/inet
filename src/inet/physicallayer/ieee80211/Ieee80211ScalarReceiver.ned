@@ -17,9 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.ScalarReceiver;
+import inet.physicallayer.apsk.APSKScalarReceiver;
 
-module Ieee80211ScalarReceiver extends ScalarReceiver
+module Ieee80211ScalarReceiver extends APSKScalarReceiver
 {
     parameters:
         string opMode @enum("b","g","a","p");

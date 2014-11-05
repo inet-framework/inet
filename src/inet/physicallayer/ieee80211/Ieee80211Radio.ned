@@ -17,10 +17,10 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.ScalarRadio;
+import inet.physicallayer.apsk.APSKScalarRadio;
 
 // TODO: rename to Ieee80211ScalarRadio
-module Ieee80211Radio extends ScalarRadio
+module Ieee80211Radio extends APSKScalarRadio
 {
     parameters:
         int channelNumber = default(0);

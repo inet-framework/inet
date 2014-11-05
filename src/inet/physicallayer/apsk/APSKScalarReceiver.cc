@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,14 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk;
+#include "inet/physicallayer/apsk/APSKScalarReceiver.h"
+#include "inet/physicallayer/scalar/ScalarReception.h"
+#include "inet/physicallayer/scalar/ScalarNoise.h"
+#include "inet/physicallayer/scalar/ScalarSNIR.h"
+#include "inet/physicallayer/common/BandListening.h"
 
-import inet.physicallayer.base.FlatReceiverBase;
+namespace inet {
 
-module DimensionalReceiver extends FlatReceiverBase
+namespace physicallayer {
+
+Define_Module(APSKScalarReceiver);
+
+APSKScalarReceiver::APSKScalarReceiver() :
+    FlatReceiverBase()
 {
-    parameters:
-        modulation = default("BPSK");
-        errorModelType = default("APSKErrorModel");
-        @class(DimensionalReceiver);
 }
+
+void APSKScalarReceiver::printToStream(std::ostream& stream) const
+{
+    stream << "APSKScalarReceiver, ";
+    FlatReceiverBase::printToStream(stream);
+}
+
+} // namespace physicallayer
+
+} // namespace inet
+

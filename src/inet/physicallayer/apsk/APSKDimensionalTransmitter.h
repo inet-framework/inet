@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALTRANSMITTER_H
-#define __INET_DIMENSIONALTRANSMITTER_H
+#ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
+#define __INET_APSKDIMENSIONALTRANSMITTER_H
 
 #include "inet/physicallayer/base/FlatTransmitterBase.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalTransmitter : public FlatTransmitterBase
+class INET_API APSKDimensionalTransmitter : public FlatTransmitterBase
 {
   protected:
     class TimeGainEntry {
@@ -68,7 +68,7 @@ class INET_API DimensionalTransmitter : public FlatTransmitterBase
     ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
-    DimensionalTransmitter();
+    APSKDimensionalTransmitter();
 
     virtual void printToStream(std::ostream& stream) const;
 
@@ -79,5 +79,5 @@ class INET_API DimensionalTransmitter : public FlatTransmitterBase
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALTRANSMITTER_H
+#endif // ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
 

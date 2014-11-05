@@ -34,7 +34,7 @@ namespace physicallayer {
 Define_Module(Ieee80211DimensionalTransmitter);
 
 Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
-    DimensionalTransmitter(),
+    APSKDimensionalTransmitter(),
     opMode('\0'),
     preambleMode((Ieee80211PreambleMode) - 1)
 {
@@ -42,7 +42,7 @@ Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
 
 void Ieee80211DimensionalTransmitter::initialize(int stage)
 {
-    DimensionalTransmitter::initialize(stage);
+    APSKDimensionalTransmitter::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))

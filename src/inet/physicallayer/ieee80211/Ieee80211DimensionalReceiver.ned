@@ -17,9 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.DimensionalReceiver;
+import inet.physicallayer.apsk.APSKDimensionalReceiver;
 
-module Ieee80211DimensionalReceiver extends DimensionalReceiver
+module Ieee80211DimensionalReceiver extends APSKDimensionalReceiver
 {
     parameters:
         string opMode @enum("b","g","a","p");

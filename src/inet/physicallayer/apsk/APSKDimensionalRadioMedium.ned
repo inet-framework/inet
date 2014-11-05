@@ -15,30 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/scalar/ScalarReceiver.h"
-#include "inet/physicallayer/scalar/ScalarReception.h"
-#include "inet/physicallayer/scalar/ScalarNoise.h"
-#include "inet/physicallayer/scalar/ScalarSNIR.h"
-#include "inet/physicallayer/common/BandListening.h"
+package inet.physicallayer.apsk;
 
-namespace inet {
+import inet.physicallayer.common.RadioMedium;
 
-namespace physicallayer {
-
-Define_Module(ScalarReceiver);
-
-ScalarReceiver::ScalarReceiver() :
-    FlatReceiverBase()
+module APSKDimensionalRadioMedium extends RadioMedium
 {
+    parameters:
+        propagationType = default("ConstantSpeedPropagation");
+        pathLossType = default("FreeSpacePathLoss");
+        attenuationType = default("DimensionalAttenuation");
+        backgroundNoiseType = default("DimensionalIsotropicBackgroundNoise");
 }
-
-void ScalarReceiver::printToStream(std::ostream& stream) const
-{
-    stream << "ScalarReceiver, ";
-    FlatReceiverBase::printToStream(stream);
-}
-
-} // namespace physicallayer
-
-} // namespace inet
-

@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211SCALARRECEIVER_H
 #define __INET_IEEE80211SCALARRECEIVER_H
 
-#include "inet/physicallayer/scalar/ScalarReceiver.h"
+#include "inet/physicallayer/apsk/APSKScalarReceiver.h"
 #include "inet/physicallayer/ieee80211/BerParseFile.h"
 #include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
+class INET_API Ieee80211ScalarReceiver : public APSKScalarReceiver
 {
   protected:
     char opMode;

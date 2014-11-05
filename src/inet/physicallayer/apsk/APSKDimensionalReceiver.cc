@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalReceiver.h"
+#include "inet/physicallayer/apsk/APSKDimensionalReceiver.h"
 #include "inet/physicallayer/dimensional/DimensionalReception.h"
 #include "inet/physicallayer/dimensional/DimensionalNoise.h"
 #include "inet/physicallayer/dimensional/DimensionalSNIR.h"
@@ -25,16 +25,16 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalReceiver);
+Define_Module(APSKDimensionalReceiver);
 
-DimensionalReceiver::DimensionalReceiver() :
+APSKDimensionalReceiver::APSKDimensionalReceiver() :
     FlatReceiverBase()
 {
 }
 
-void DimensionalReceiver::printToStream(std::ostream& stream) const
+void APSKDimensionalReceiver::printToStream(std::ostream& stream) const
 {
-    stream << "DimensionalReceiver, ";
+    stream << "APSKDimensionalReceiver, ";
     FlatReceiverBase::printToStream(stream);
 }
 

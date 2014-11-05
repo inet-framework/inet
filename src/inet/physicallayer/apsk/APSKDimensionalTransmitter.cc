@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/dimensional/DimensionalTransmitter.h"
+#include "inet/physicallayer/apsk/APSKDimensionalTransmitter.h"
 #include "inet/physicallayer/dimensional/DimensionalTransmission.h"
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -24,15 +24,15 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(DimensionalTransmitter);
+Define_Module(APSKDimensionalTransmitter);
 
-DimensionalTransmitter::DimensionalTransmitter() :
+APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
     FlatTransmitterBase(),
     interpolationMode((Mapping::InterpolationMethod)-1)
 {
 }
 
-void DimensionalTransmitter::initialize(int stage)
+void APSKDimensionalTransmitter::initialize(int stage)
 {
     FlatTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
@@ -115,9 +115,9 @@ void DimensionalTransmitter::initialize(int stage)
     }
 }
 
-void DimensionalTransmitter::printToStream(std::ostream& stream) const
+void APSKDimensionalTransmitter::printToStream(std::ostream& stream) const
 {
-    stream << "DimensionalTransmitter, "
+    stream << "APSKDimensionalTransmitter, "
            // TODO: << "dimensions = { " << dimensions << " } , "
            << "interpolationMode = " << interpolationMode << ", ";
            // TODO: << "timeGains = { " << timeGains << " }, "
@@ -125,7 +125,7 @@ void DimensionalTransmitter::printToStream(std::ostream& stream) const
     FlatTransmitterBase::printToStream(stream);
 }
 
-ConstMapping *DimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
+ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
 {
     Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
     Argument position(dimensions);
@@ -239,7 +239,7 @@ ConstMapping *DimensionalTransmitter::createPowerMapping(const simtime_t startTi
     return powerMapping;
 }
 
-const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     const simtime_t duration = macFrame->getBitLength() / bitrate.get();
     const simtime_t endTime = startTime + duration;

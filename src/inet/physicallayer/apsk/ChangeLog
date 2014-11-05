@@ -1,8 +1,8 @@
 2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-    ScalarReceiver, ScalarTransmitter, ScalarRadio, ScalarRadioMedium,
-	DimensionalReceiver, DimensionalTransmitter, DimensionalRadio,
-	DimensionalRadioMedium
+    APSKScalarReceiver, APSKScalarTransmitter, APSKScalarRadio, 
+    APSKScalarRadioMedium, APSKDimensionalReceiver, APSKDimensionalTransmitter,
+    APSKDimensionalRadio, APSKDimensionalRadioMedium
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 #define __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/dimensional/DimensionalTransmitter.h"
+#include "inet/physicallayer/apsk/APSKDimensionalTransmitter.h"
 #include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211DimensionalTransmitter : public DimensionalTransmitter
+class INET_API Ieee80211DimensionalTransmitter : public APSKDimensionalTransmitter
 {
   protected:
     char opMode;

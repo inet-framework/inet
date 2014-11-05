@@ -17,9 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.DimensionalRadio;
+import inet.physicallayer.apsk.APSKDimensionalRadio;
 
-module Ieee80211DimensionalRadio extends DimensionalRadio
+module Ieee80211DimensionalRadio extends APSKDimensionalRadio
 {
     parameters:
         int channelNumber = default(0);

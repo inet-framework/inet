@@ -17,10 +17,10 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.ScalarRadioMedium;
+import inet.physicallayer.apsk.APSKScalarRadioMedium;
 
 // TODO: rename to Ieee80211ScalarRadioMedium
-module Ieee80211RadioMedium extends ScalarRadioMedium
+module Ieee80211RadioMedium extends APSKScalarRadioMedium
 {
     parameters:
         // TODO: move to addRadio, query radios for these parameters

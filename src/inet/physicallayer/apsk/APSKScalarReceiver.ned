@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,27 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARTRANSMITTER_H
-#define __INET_SCALARTRANSMITTER_H
+package inet.physicallayer.apsk;
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+import inet.physicallayer.base.FlatReceiverBase;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API ScalarTransmitter : public FlatTransmitterBase
+module APSKScalarReceiver extends FlatReceiverBase
 {
-  public:
-    ScalarTransmitter();
-
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_SCALARTRANSMITTER_H
-
+    parameters:
+        modulation = default("BPSK");
+        errorModelType = default("APSKErrorModel");
+        @class(APSKScalarReceiver);
+}

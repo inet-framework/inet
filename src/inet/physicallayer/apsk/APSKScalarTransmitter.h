@@ -15,27 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALRECEIVER_H
-#define __INET_DIMENSIONALRECEIVER_H
+#ifndef __INET_APSKSCALARTRANSMITTER_H
+#define __INET_APSKSCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalReceiver : public FlatReceiverBase
+class INET_API APSKScalarTransmitter : public FlatTransmitterBase
 {
   public:
-    DimensionalReceiver();
+    APSKScalarTransmitter();
 
     virtual void printToStream(std::ostream& stream) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALRECEIVER_H
+#endif // ifndef __INET_APSKSCALARTRANSMITTER_H
 

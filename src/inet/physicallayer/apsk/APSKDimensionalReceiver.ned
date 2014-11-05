@@ -17,17 +17,12 @@
 
 package inet.physicallayer.apsk;
 
-import inet.physicallayer.common.Radio;
+import inet.physicallayer.base.FlatReceiverBase;
 
-module DimensionalRadio extends Radio
+module APSKDimensionalReceiver extends FlatReceiverBase
 {
     parameters:
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("DimensionalTransmitter");
-        receiverType = default("DimensionalReceiver");
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
-        @class(Radio);
+        modulation = default("BPSK");
+        errorModelType = default("APSKErrorModel");
+        @class(APSKDimensionalReceiver);
 }

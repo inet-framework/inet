@@ -19,11 +19,11 @@ package inet.physicallayer.apsk;
 
 import inet.physicallayer.common.RadioMedium;
 
-module DimensionalRadioMedium extends RadioMedium
+module APSKScalarRadioMedium extends RadioMedium
 {
     parameters:
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
-        attenuationType = default("DimensionalAttenuation");
-        backgroundNoiseType = default("DimensionalIsotropicBackgroundNoise");
+        attenuationType = default("ScalarAttenuation");
+        backgroundNoiseType = default("ScalarIsotropicBackgroundNoise");
 }

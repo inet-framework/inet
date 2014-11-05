@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/scalar/ScalarTransmitter.h"
+#include "inet/physicallayer/apsk/APSKScalarTransmitter.h"
 #include "inet/physicallayer/scalar/ScalarTransmission.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -24,20 +24,20 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ScalarTransmitter);
+Define_Module(APSKScalarTransmitter);
 
-ScalarTransmitter::ScalarTransmitter() :
+APSKScalarTransmitter::APSKScalarTransmitter() :
     FlatTransmitterBase()
 {
 }
 
-void ScalarTransmitter::printToStream(std::ostream& stream) const
+void APSKScalarTransmitter::printToStream(std::ostream& stream) const
 {
-    stream << "ScalarTransmitter, ";
+    stream << "APSKScalarTransmitter, ";
     FlatTransmitterBase::printToStream(stream);
 }
 
-const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;

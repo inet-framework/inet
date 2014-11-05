@@ -17,10 +17,9 @@
 
 package inet.physicallayer.ieee802154;
 
-import inet.physicallayer.apsk.DimensionalRadioMedium;
+import inet.physicallayer.apsk.APSKDimensionalRadioMedium;
 
-
-module Ieee802154UWBIRRadioMedium extends DimensionalRadioMedium
+module Ieee802154UWBIRRadioMedium extends APSKDimensionalRadioMedium
 {
     parameters:
         // TODO: move to addRadio, query radios for these parameters
