@@ -1,6 +1,6 @@
 %description:
 
-This is a test for DimensionalRadio busy reception state.
+This is a test for APSKDimensionalRadio busy reception state.
 The received signal is strong enough to sense but too weak to receive.
 Transmission and reception parameters must match with ScalarRadio.
 
@@ -8,12 +8,12 @@ Transmission and reception parameters must match with ScalarRadio.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.dimensional.DimensionalRadioMedium;
+import inet.physicallayer.apsk.APSKDimensionalRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: DimensionalRadioMedium;
+        radioMedium: APSKDimensionalRadioMedium;
         configurator: IPv4NetworkConfigurator;
         host1: WirelessHost;
         host2: WirelessHost;
@@ -50,7 +50,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "DimensionalRadio"
+*.host*.wlan[*].radioType = "APSKDimensionalRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.transmitter.power = 10mW

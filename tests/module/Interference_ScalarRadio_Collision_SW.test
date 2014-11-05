@@ -1,6 +1,6 @@
 %description:
 
-This is a test for scalar radio interference handling.
+This is a test for APSKScalarRadio interference handling.
 The first signal is stronger than the reception threshold.
 The second signal is weaker than the reception threshold.
 The second signal is strong enough to cause bit errors.
@@ -10,12 +10,12 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.scalar.ScalarRadioMedium;
+import inet.physicallayer.apsk.APSKScalarRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: ScalarRadioMedium;
+        radioMedium: APSKScalarRadioMedium;
         configurator: IPv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;
@@ -54,7 +54,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "ScalarRadio"
+*.host*.wlan[*].radioType = "APSKScalarRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.carrierFrequency = 2.4GHz

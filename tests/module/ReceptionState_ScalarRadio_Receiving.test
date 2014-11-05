@@ -1,6 +1,6 @@
 %description:
 
-This is a test for scalar radio receiving reception state.
+This is a test for APSKScalarRadio receiving reception state.
 The received signal is strong enough to receive.
 Transmission and reception parameters must match with DetailedRadio.
 
@@ -8,12 +8,12 @@ Transmission and reception parameters must match with DetailedRadio.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.scalar.ScalarRadioMedium;
+import inet.physicallayer.apsk.APSKScalarRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: ScalarRadioMedium;
+        radioMedium: APSKScalarRadioMedium;
         configurator: IPv4NetworkConfigurator;
         host1: WirelessHost;
         host2: WirelessHost;
@@ -50,7 +50,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "ScalarRadio"
+*.host*.wlan[*].radioType = "APSKScalarRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.transmitter.power = 100mW
