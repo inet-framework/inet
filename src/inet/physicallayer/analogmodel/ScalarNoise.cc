@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
-    FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
+    NarrowbandNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
     powerChanges(powerChanges)
 {
 }
@@ -31,7 +31,7 @@ void ScalarNoise::printToStream(std::ostream& stream) const
 {
     stream << "ScalarNoise, "
            << "powerChanges = { " << powerChanges << " }, ";
-    FlatNoiseBase::printToStream(stream);
+    NarrowbandNoiseBase::printToStream(stream);
 }
 
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

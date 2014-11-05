@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALNOISE_H
 #define __INET_DIMENSIONALNOISE_H
 
-#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
 #include "inet/physicallayer/mapping/MappingUtils.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalNoise : public FlatNoiseBase
+class INET_API DimensionalNoise : public NarrowbandNoiseBase
 {
   protected:
     const ConstMapping *power;

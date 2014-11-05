@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATRECEIVERBASE_H
-#define __INET_FLATRECEIVERBASE_H
+#ifndef __INET_NARROWBANDRECEIVERBASE_H
+#define __INET_NARROWBANDRECEIVERBASE_H
 
 #include "inet/physicallayer/contract/IModulation.h"
 #include "inet/physicallayer/contract/IErrorModel.h"
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatReceiverBase : public SNIRReceiverBase
+class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
 {
   protected:
     const IModulation *modulation;
@@ -45,8 +45,8 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
     virtual const RadioReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
   public:
-    FlatReceiverBase();
-    virtual ~FlatReceiverBase();
+    NarrowbandReceiverBase();
+    virtual ~NarrowbandReceiverBase();
 
     virtual void printToStream(std::ostream& stream) const;
 
@@ -70,5 +70,5 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATRECEIVERBASE_H
+#endif // ifndef __INET_NARROWBANDRECEIVERBASE_H
 

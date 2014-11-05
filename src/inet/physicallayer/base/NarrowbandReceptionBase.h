@@ -15,41 +15,33 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATTRANSMISSIONBASE_H
-#define __INET_FLATTRANSMISSIONBASE_H
+#ifndef __INET_NARROWBANDRECEPTIONBASE_H
+#define __INET_NARROWBANDRECEPTIONBASE_H
 
-#include "inet/physicallayer/base/TransmissionBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/base/ReceptionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatTransmissionBase : public TransmissionBase
+class INET_API NarrowbandReceptionBase : public ReceptionBase
 {
   protected:
-    const IModulation *modulation;
-    const int headerBitLength;
-    const int payloadBitLength;
     const Hz carrierFrequency;
     const Hz bandwidth;
-    const bps bitrate;
 
   public:
-    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate);
+    NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth);
 
     virtual void printToStream(std::ostream& stream) const;
-    virtual const IModulation *getModulation() const { return modulation; }
-    virtual int getHeaderBitLength() const { return headerBitLength; }
-    virtual int getPayloadBitLength() const { return payloadBitLength; }
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
-    virtual bps getBitrate() const { return bitrate; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATTRANSMISSIONBASE_H
+#endif // ifndef __INET_NARROWBANDRECEPTIONBASE_H
 

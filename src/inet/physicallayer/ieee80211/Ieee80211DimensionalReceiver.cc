@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalReceiver.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"

@@ -28,14 +28,14 @@ namespace physicallayer {
 Define_Module(APSKDimensionalReceiver);
 
 APSKDimensionalReceiver::APSKDimensionalReceiver() :
-    FlatReceiverBase()
+    NarrowbandReceiverBase()
 {
 }
 
 void APSKDimensionalReceiver::printToStream(std::ostream& stream) const
 {
     stream << "APSKDimensionalReceiver, ";
-    FlatReceiverBase::printToStream(stream);
+    NarrowbandReceiverBase::printToStream(stream);
 }
 
 } // namespace physicallayer

@@ -18,13 +18,13 @@
 #ifndef __INET_SCALARNOISE_H
 #define __INET_SCALARNOISE_H
 
-#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarNoise : public FlatNoiseBase
+class INET_API ScalarNoise : public NarrowbandNoiseBase
 {
   protected:
     const std::map<simtime_t, W> *powerChanges;

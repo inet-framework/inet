@@ -17,8 +17,8 @@
 
 #include "inet/physicallayer/ieee80211/Ieee80211Radio.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
 
 namespace inet {
@@ -62,7 +62,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 
 void Ieee80211Radio::setBitrate(bps newBitrate)
 {
-    FlatTransmitterBase *flatTransmitter = const_cast<FlatTransmitterBase *>(check_and_cast<const FlatTransmitterBase *>(transmitter));
+    NarrowbandTransmitterBase *flatTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
     flatTransmitter->setBitrate(newBitrate);
     endReceptionTimer = NULL;
 }
@@ -71,8 +71,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
     if (channelNumber != newChannelNumber) {
         Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-        FlatTransmitterBase *flatTransmitter = const_cast<FlatTransmitterBase *>(check_and_cast<const FlatTransmitterBase *>(transmitter));
-        FlatReceiverBase *flatReceiver = const_cast<FlatReceiverBase *>(check_and_cast<const FlatReceiverBase *>(receiver));
+        NarrowbandTransmitterBase *flatTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
+        NarrowbandReceiverBase *flatReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
         flatTransmitter->setCarrierFrequency(carrierFrequency);
         flatReceiver->setCarrierFrequency(carrierFrequency);
         EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";

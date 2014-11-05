@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALTRANSMISSION_H
 #define __INET_DIMENSIONALTRANSMISSION_H
 
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
 #include "inet/physicallayer/mapping/MappingUtils.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalTransmission : public FlatTransmissionBase
+class INET_API DimensionalTransmission : public NarrowbandTransmissionBase
 {
   protected:
     const ConstMapping *power;

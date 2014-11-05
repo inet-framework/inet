@@ -15,24 +15,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-FlatNoiseBase::FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
-    NoiseBase(startTime, endTime),
+NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
+    ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
     carrierFrequency(carrierFrequency),
     bandwidth(bandwidth)
 {
 }
 
-void FlatNoiseBase::printToStream(std::ostream& stream) const
+void NarrowbandReceptionBase::printToStream(std::ostream& stream) const
 {
     stream << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
-    NoiseBase::printToStream(stream);
+           << "bandwidth = " << bandwidth;
+    ReceptionBase::printToStream(stream);
 }
 
 } // namespace physicallayer

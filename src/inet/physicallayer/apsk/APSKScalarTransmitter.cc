@@ -27,14 +27,14 @@ namespace physicallayer {
 Define_Module(APSKScalarTransmitter);
 
 APSKScalarTransmitter::APSKScalarTransmitter() :
-    FlatTransmitterBase()
+    NarrowbandTransmitterBase()
 {
 }
 
 void APSKScalarTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "APSKScalarTransmitter, ";
-    FlatTransmitterBase::printToStream(stream);
+    NarrowbandTransmitterBase::printToStream(stream);
 }
 
 const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

@@ -27,14 +27,14 @@ namespace physicallayer {
 Define_Module(APSKDimensionalTransmitter);
 
 APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
-    FlatTransmitterBase(),
+    NarrowbandTransmitterBase(),
     interpolationMode((Mapping::InterpolationMethod)-1)
 {
 }
 
 void APSKDimensionalTransmitter::initialize(int stage)
 {
-    FlatTransmitterBase::initialize(stage);
+    NarrowbandTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         // TODO: factor parsing?
@@ -122,7 +122,7 @@ void APSKDimensionalTransmitter::printToStream(std::ostream& stream) const
            << "interpolationMode = " << interpolationMode << ", ";
            // TODO: << "timeGains = { " << timeGains << " }, "
            // TODO: << "frequencyGains = { " << frequencyGains << " }, ";
-    FlatTransmitterBase::printToStream(stream);
+    NarrowbandTransmitterBase::printToStream(stream);
 }
 
 ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const

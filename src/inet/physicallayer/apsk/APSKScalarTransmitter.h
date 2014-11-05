@@ -18,13 +18,13 @@
 #ifndef __INET_APSKSCALARTRANSMITTER_H
 #define __INET_APSKSCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKScalarTransmitter : public FlatTransmitterBase
+class INET_API APSKScalarTransmitter : public NarrowbandTransmitterBase
 {
   public:
     APSKScalarTransmitter();

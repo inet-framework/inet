@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/common/Modulation.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-FlatTransmitterBase::FlatTransmitterBase() :
+NarrowbandTransmitterBase::NarrowbandTransmitterBase() :
     modulation(NULL),
     headerBitLength(-1),
     carrierFrequency(Hz(sNaN)),
@@ -32,12 +32,12 @@ FlatTransmitterBase::FlatTransmitterBase() :
 {
 }
 
-FlatTransmitterBase::~FlatTransmitterBase()
+NarrowbandTransmitterBase::~NarrowbandTransmitterBase()
 {
     delete modulation;
 }
 
-void FlatTransmitterBase::initialize(int stage)
+void NarrowbandTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -58,7 +58,7 @@ void FlatTransmitterBase::initialize(int stage)
     }
 }
 
-void FlatTransmitterBase::printToStream(std::ostream& stream) const
+void NarrowbandTransmitterBase::printToStream(std::ostream& stream) const
 {
     stream << "modulation = { " << modulation << " }, "
            << "headerBitLength = " << headerBitLength << ", "

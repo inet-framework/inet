@@ -18,14 +18,14 @@
 #ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
 #define __INET_APSKDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDimensionalTransmitter : public FlatTransmitterBase
+class INET_API APSKDimensionalTransmitter : public NarrowbandTransmitterBase
 {
   protected:
     class TimeGainEntry {

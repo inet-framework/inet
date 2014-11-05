@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
+NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
     TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
     modulation(modulation),
     headerBitLength(headerBitLength),
@@ -32,7 +32,7 @@ FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPac
 {
 }
 
-void FlatTransmissionBase::printToStream(std::ostream& stream) const
+void NarrowbandTransmissionBase::printToStream(std::ostream& stream) const
 {
     stream << "modulation = { " << modulation << " }, "
            << "headerBitLength = " << headerBitLength << ", "

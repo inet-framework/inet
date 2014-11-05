@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/errormodel/APSKErrorModel.h"
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
 
 namespace inet {
 
@@ -38,7 +38,7 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
         return 1.0;
     else {
         const IReception *reception = snir->getReception();
-        const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
+        const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
         return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
     }
 }
@@ -46,7 +46,7 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
 double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     const IReception *reception = snir->getReception();
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
+    const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
     const IModulation *modulation = flatTransmission->getModulation();
     return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
 }

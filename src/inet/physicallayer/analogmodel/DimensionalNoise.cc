@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-    FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
+    NarrowbandNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
     power(power)
 {
 }
@@ -31,7 +31,7 @@ void DimensionalNoise::printToStream(std::ostream& stream) const
 {
     stream << "DimensionalNoise, "
            << "power = { " << power << " }";
-    FlatNoiseBase::printToStream(stream);
+    NarrowbandNoiseBase::printToStream(stream);
 }
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

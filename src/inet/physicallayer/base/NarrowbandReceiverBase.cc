@@ -16,10 +16,10 @@
 //
 
 #include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
-#include "inet/physicallayer/base/FlatReceptionBase.h"
-#include "inet/physicallayer/base/FlatNoiseBase.h"
+#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
+#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/common/Modulation.h"
 #include "inet/physicallayer/common/BandListening.h"
 #include "inet/physicallayer/common/ListeningDecision.h"
@@ -29,7 +29,7 @@ namespace inet {
 
 namespace physicallayer {
 
-FlatReceiverBase::FlatReceiverBase() :
+NarrowbandReceiverBase::NarrowbandReceiverBase() :
     SNIRReceiverBase(),
     modulation(NULL),
     errorModel(NULL),
@@ -40,13 +40,13 @@ FlatReceiverBase::FlatReceiverBase() :
 {
 }
 
-FlatReceiverBase::~FlatReceiverBase()
+NarrowbandReceiverBase::~NarrowbandReceiverBase()
 {
     delete errorModel;
     delete modulation;
 }
 
-void FlatReceiverBase::initialize(int stage)
+void NarrowbandReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -67,7 +67,7 @@ void FlatReceiverBase::initialize(int stage)
     }
 }
 
-void FlatReceiverBase::printToStream(std::ostream& stream) const
+void NarrowbandReceiverBase::printToStream(std::ostream& stream) const
 {
     stream << "modulation = { " << modulation << " }, "
            << "errorModel = { " << errorModel << " }, "
@@ -78,23 +78,23 @@ void FlatReceiverBase::printToStream(std::ostream& stream) const
     SNIRReceiverBase::printToStream(stream);
 }
 
-const IListening *FlatReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
 }
 
-bool FlatReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
+bool NarrowbandReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
 {
     // TODO: check if modulation matches?
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
+    const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
     return carrierFrequency == flatTransmission->getCarrierFrequency() && bandwidth == flatTransmission->getBandwidth();
 }
 
 // TODO: this is not purely functional, see interface comment
-bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
+bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
+    const NarrowbandReceptionBase *flatReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() != flatReception->getCarrierFrequency() || bandListening->getBandwidth() != flatReception->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
@@ -107,13 +107,13 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
     }
 }
 
-const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
+const IListeningDecision *NarrowbandReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     const IRadio *receiver = listening->getReceiver();
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);
-    const FlatNoiseBase *flatNoise = check_and_cast<const FlatNoiseBase *>(noise);
+    const NarrowbandNoiseBase *flatNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
     W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     bool isListeningPossible = maxPower >= energyDetection;
     delete noise;
@@ -121,7 +121,7 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
+bool NarrowbandReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
 {
     if (!SNIRReceiverBase::computeIsReceptionSuccessful(snir))
         return false;
@@ -138,7 +138,7 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
     }
 }
 
-const RadioReceptionIndication *FlatReceiverBase::computeReceptionIndication(const ISNIR *snir) const
+const RadioReceptionIndication *NarrowbandReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     RadioReceptionIndication *indication = const_cast<RadioReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
     if (errorModel) {
@@ -149,10 +149,10 @@ const RadioReceptionIndication *FlatReceiverBase::computeReceptionIndication(con
     return indication;
 }
 
-const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
+    const NarrowbandReceptionBase *flatReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth())
         return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference);
     else

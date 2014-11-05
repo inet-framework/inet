@@ -15,33 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATNOISEBASE_H
-#define __INET_FLATNOISEBASE_H
-
-#include "inet/physicallayer/base/NoiseBase.h"
+#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatNoiseBase : public NoiseBase
+NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
+    NoiseBase(startTime, endTime),
+    carrierFrequency(carrierFrequency),
+    bandwidth(bandwidth)
 {
-  protected:
-    const Hz carrierFrequency;
-    const Hz bandwidth;
+}
 
-  public:
-    FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth);
-
-    virtual void printToStream(std::ostream& stream) const;
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual Hz getBandwidth() const { return bandwidth; }
-    virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
-};
+void NarrowbandNoiseBase::printToStream(std::ostream& stream) const
+{
+    stream << "carrierFrequency = " << carrierFrequency << ", "
+           << "bandwidth = " << bandwidth << ", ";
+    NoiseBase::printToStream(stream);
+}
 
 } // namespace physicallayer
 
 } // namespace inet
-
-#endif // ifndef __INET_FLATNOISEBASE_H
 
