@@ -11,7 +11,7 @@ import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 
 
@@ -209,7 +209,7 @@ num-rngs = 2
     <at t="850">
         <connect src-module="RA" src-gate="ethg[0]"
                  dest-module="R1A" dest-gate="ethg[1]"
-                 channel-type="inet.util.ThruputMeteringChannel">
+                 channel-type="inet.common.misc.ThruputMeteringChannel">
             <param name="delay" value="0.1us" />
             <param name="datarate" value="100Mbps" />
             <param name="thruputDisplayFormat" value='"#N"' />

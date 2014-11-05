@@ -6,7 +6,7 @@ Testing manetrouting with AODVUU routing protocol, UDP forwarding
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv4.FlatNetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
@@ -43,7 +43,7 @@ network Net80211_aodv_test
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        radioMedium: ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }

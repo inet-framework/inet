@@ -7,13 +7,14 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
-import inet.node.wireless.AccessPoint;
-import inet.mobility.models.StationaryMobility;
-import inet.mobility.models.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
 import inet.applications.ethernet.EtherAppCli;
+import inet.common.queue.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.single.CircleMobility;
+import inet.mobility.static.StationaryMobility;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+
 
 module Ieee80211NicSTASimplified extends Ieee80211Nic
 {
@@ -24,7 +25,7 @@ module Ieee80211NicSTASimplified extends Ieee80211Nic
 module WirelessAPSimplified extends AccessPoint
 {
     parameters:
-        wlan[0].mgmtType = "Ieee80211MgmtAPSimplified";
+        wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
 }
 
 module ThroughputClient
@@ -35,6 +36,7 @@ module ThroughputClient
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
@@ -66,6 +68,7 @@ module ThroughputServer
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
@@ -114,7 +117,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        radioMedium: ScalarRadioMedium {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=61,46");
         }

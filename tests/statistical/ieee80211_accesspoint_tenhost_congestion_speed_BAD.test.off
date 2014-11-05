@@ -7,14 +7,14 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.world.radio.ChannelControl;
-import inet.nodes.wireless.AccessPoint;
-import inet.mobility.models.StationaryMobility;
-import inet.mobility.models.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+import inet.common.queue.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.single.CircleMobility;
+import inet.mobility.static.StationaryMobility;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+
 
 module Ieee80211NicSTASimplified extends Ieee80211Nic
 {
@@ -25,7 +25,7 @@ module Ieee80211NicSTASimplified extends Ieee80211Nic
 module WirelessAPSimplified extends AccessPoint
 {
     parameters:
-        wlan[0].mgmtType = "Ieee80211MgmtAPSimplified";
+        wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
 }
 
 module ThroughputClient
@@ -36,14 +36,11 @@ module ThroughputClient
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,70");
-        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -71,14 +68,11 @@ module ThroughputServer
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,70");
-        }
         sink: Sink {
             parameters:
                 @display("p=210,68,col");
@@ -123,7 +117,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=61,46");
         }
@@ -150,7 +144,7 @@ sim-time-limit = 50s
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
-**.channelControl.numChannels = 1
+**.mgmt.numChannels = 1
 
 # positions
 **.mobility.cx = 200m
@@ -158,12 +152,6 @@ sim-time-limit = 50s
 **.mobility.r = 100m
 **.mobility.speed = 1 mps
 **.mobility.updateInterval = 100ms
-
-# channel physical parameters
-*.channelControl.carrierFrequency = 2.4GHz
-*.channelControl.pMax = 20mW
-*.channelControl.sat = -110dBm
-*.channelControl.alpha = 2
 
 # access point
 **.ap.wlan*.mac.address = "10:00:00:00:00:00"
@@ -179,11 +167,6 @@ sim-time-limit = 50s
 **.wlan*.mac.cwMinData = 31
 **.wlan*.mac.cwMinBroadcast = 31
 
-**.radio.transmitterPower = 20.0mW
-**.radio.thermalNoise = -110dBm
-**.radio.sensitivity = -85dBm
-**.radio.pathLossAlpha = 2
-**.radio.snirThreshold = 4dB
 
 # cli
 **.cli.reqLength = 1250B
@@ -221,13 +204,13 @@ dataset <- loadDataset(scafile)
 cat("\nOMNETPP TEST RESULT:\n")
 
 sink <- dataset$scalars[grep("\\.srvHost\\[\\d\\]\\.sink", dataset$scalars$module),]
-#print(sink)
+#print(sink) ### debug
 secs <- (sink$value[sink$name == "rcvdPk:count"] / sink$value[sink$name == "packetPerSec"])
 sinkRcvd <- sink[sink$name == "rcvdPk:sum(packetBytes)",]
 
-#print(sinkRcvd)
+#print(sinkRcvd) ### debug
 cnt <- length(sinkRcvd$value)
-#print(cnt)
+#print(cnt) ### debug
 
 cat("  IEEE80211 TEST RESULT:\n")
 
