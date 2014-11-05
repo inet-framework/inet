@@ -23,7 +23,7 @@ import inet.physicallayer.contract.IReceiver;
 module FlatReceiverBase like IReceiver
 {
     parameters:
-        string errorModelType = default("FlatErrorModel"); // NED type of the error model
+        string errorModelType = default("APSKErrorModel"); // NED type of the error model
         string modulation = default("NULL"); // one of "BPSK", "16-QAM", "256-QAM" or "NULL"
         double energyDetection @unit(dBm);   // no signal is detected below this threshold (idle state)
         double sensitivity @unit(dBm);       // reception is not possible if the signal power is below sensitivity

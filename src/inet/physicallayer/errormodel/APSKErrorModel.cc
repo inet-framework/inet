@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/errormodel/FlatErrorModel.h"
+#include "inet/physicallayer/errormodel/APSKErrorModel.h"
 #include "inet/physicallayer/base/FlatTransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(FlatErrorModel);
+Define_Module(APSKErrorModel);
 
-void FlatErrorModel::printToStream(std::ostream& stream) const
+void APSKErrorModel::printToStream(std::ostream& stream) const
 {
-    stream << "FlatErrorModel";
+    stream << "APSKErrorModel";
 }
 
-double FlatErrorModel::computePacketErrorRate(const ISNIR *snir) const
+double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
 {
     double bitErrorRate = computeBitErrorRate(snir);
     if (bitErrorRate == 0.0)
@@ -41,7 +41,7 @@ double FlatErrorModel::computePacketErrorRate(const ISNIR *snir) const
     }
 }
 
-double FlatErrorModel::computeBitErrorRate(const ISNIR *snir) const
+double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     const IReception *reception = snir->getReception();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
@@ -49,7 +49,7 @@ double FlatErrorModel::computeBitErrorRate(const ISNIR *snir) const
     return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
 }
 
-double FlatErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
+double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
     return NaN;
 }

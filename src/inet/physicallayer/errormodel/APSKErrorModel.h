@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATERRORMODEL_H
-#define __INET_FLATERRORMODEL_H
+#ifndef __INET_APSKERRORMODEL_H
+#define __INET_APSKERRORMODEL_H
 
 #include "inet/physicallayer/base/ErrorModelBase.h"
 
@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API FlatErrorModel : public ErrorModelBase
+class INET_API APSKErrorModel : public ErrorModelBase
 {
   public:
     virtual void printToStream(std::ostream& stream) const;
@@ -40,5 +40,5 @@ class INET_API FlatErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATERRORMODEL_H
+#endif // ifndef __INET_APSKERRORMODEL_H
 

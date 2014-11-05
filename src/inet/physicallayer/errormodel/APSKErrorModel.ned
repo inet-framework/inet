@@ -19,8 +19,8 @@ package inet.physicallayer.errormodel;
 
 import inet.physicallayer.base.ErrorModelBase;
 
-module FlatErrorModel extends ErrorModelBase
+module APSKErrorModel extends ErrorModelBase
 {
     parameters:
-        @class(FlatErrorModel);
+        @class(APSKErrorModel);
 }
