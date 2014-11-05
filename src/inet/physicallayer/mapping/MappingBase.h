@@ -51,51 +51,12 @@ namespace physicallayer {
  */
 class INET_API Dimension
 {
-  public:
-    /** @brief Type for map from dimension name to ID.*/
-    typedef std::map<std::string, int> DimensionIDMap;
-    typedef DimensionIDMap::key_type DimensionNameType;
-    typedef DimensionIDMap::mapped_type DimensionIdType;
-
   protected:
-    /** @brief Type for map from ID to dimension name.*/
-    typedef std::map<DimensionIdType
-            , DimensionNameType> DimensionNameMap;
-
-    /**
-     * @brief stores the registered dimensions ids.
-     *
-     * Uses "construct-on-first-use" idiom to ensure correct initialization
-     * of static members.
-     */
-    static DimensionIDMap& dimensionIDs();
-
-    /**
-     * @brief Mapping from id to name of registered dimensions.
-     *
-     * Uses "construct-on-first-use" idiom to ensure correct initialization
-     * of static members.
-     */
-    static DimensionNameMap& dimensionNames();
-
-    /**
-     * @brief Stores the next free ID for a new dimension.
-     *
-     * Uses "construct-on-first-use" idiom to ensure correct initialization
-     * of static members.
-     */
-    static DimensionIdType& nextFreeID();
-
-    /**
-     * @brief Returns an instance of dimension which represents
-     * the dimension with the passed name.
-     */
-    static int getDimensionID(const DimensionNameType& name);
+    /** @brief The unique name of the dimension this instance represents.*/
+    const char *name;
 
     /** @brief The unique id of the dimension this instance represents.*/
-    DimensionIdType id;
-
-  protected:
+    int id;
 
   public:
     /** @brief Shortcut to the time Dimension, same as 'Dimension("time")',
@@ -115,27 +76,7 @@ class INET_API Dimension
      * @brief Creates a new dimension instance representing the
      * dimension with the passed name.
      */
-    Dimension(const DimensionNameType& name);
-
-    /**
-     * @brief Shortcut to the time Dimension, same as 'Dimension("time")',
-     * but spares the parsing of a string.
-     *
-     * This method should be used instead of the static "time" member
-     * when used during initialization of static variables since it assures
-     * the correct order of initialization.
-     * */
-    static Dimension& time_static();
-
-    /**
-     * @brief Shortcut to the frequency Dimension, same as 'Dimension("frequency")',
-     * but spares the parsing of a string.
-     *
-     * This method should be used instead of the static "frequency" member
-     * when used during initialization of static variables since it assures
-     * the correct order of initialization.
-     */
-    static Dimension& frequency_static();
+    Dimension(const char *name, int id);
 
     /**
      * @brief Returns true if the ids of the two dimensions are equal.
@@ -162,10 +103,9 @@ class INET_API Dimension
     /**
      * @brief Returns the name of this dimension.
      */
-    DimensionNameType getName() const
+    const char *getName() const
     {
-        static DimensionNameMap& dimensionNames = Dimension::dimensionNames();
-        return dimensionNames.find(id)->second;
+        return name;
     }
 
     /**
@@ -176,7 +116,7 @@ class INET_API Dimension
      * provide a sorting of dimensions.
      * Note: The "time"-dimension will always have the ID zero.
      */
-    DimensionIdType getID() const { return id; }
+    int getID() const { return id; }
 
     /** @brief Output operator for a dimension.*/
     friend std::ostream& operator<<(std::ostream& out, const Dimension& d)

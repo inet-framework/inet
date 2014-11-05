@@ -22,71 +22,14 @@ namespace inet {
 namespace physicallayer {
 //---Dimension implementation-----------------------------
 
-const Dimension Dimension::time = Dimension::time_static();
-const Dimension Dimension::frequency = Dimension::frequency_static();
+const Dimension Dimension::time("time", 0);
+const Dimension Dimension::frequency("frequency", 1);
 const Argument::mapped_type Argument::MappedZero = Argument::mapped_type(0);
 const Argument::mapped_type Argument::MappedOne = Argument::mapped_type(1);
 
-Dimension::DimensionIdType& Dimension::nextFreeID()
-{
-    static Dimension::DimensionIdType *nextID = new Dimension::DimensionIdType(1);
-    return *nextID;
-}
-
-Dimension::DimensionIDMap& Dimension::dimensionIDs()
-{
-    //use "construct-on-first-use" idiom to ensure correct order of
-    //static initialization
-    static DimensionIDMap *dimIDs = new DimensionIDMap();
-    return *dimIDs;
-}
-
-Dimension::DimensionNameMap& Dimension::dimensionNames()
-{
-    //use "construct-on-first-use" idiom to ensure correct order of
-    //static initialization
-    static DimensionNameMap *names = new DimensionNameMap();
-    return *names;
-}
-
-Dimension& Dimension::time_static()
-{
-    //use "construct-on-first-use" idiom to ensure correct order of
-    //static initialization
-    static Dimension *time = new Dimension("time");
-    return *time;
-}
-
-Dimension& Dimension::frequency_static()
-{
-    static Dimension *freq = new Dimension("frequency");
-    return *freq;
-}
-
-Dimension::DimensionIdType Dimension::getDimensionID(const Dimension::DimensionNameType& name)
-{
-    //get static members one time during initialization
-    static DimensionIDMap& dimensionIDs = Dimension::dimensionIDs();
-    static DimensionIdType& nextFreeID = Dimension::nextFreeID();
-    static DimensionNameMap& dimensionNames = Dimension::dimensionNames();
-
-    DimensionIDMap::iterator it = dimensionIDs.lower_bound(name);
-
-    if (it == dimensionIDs.end() || dimensionIDs.key_comp()(name, it->first)) {
-        DimensionIdType newID = 0;
-
-        //time gets its own id to make sure it has the smallest
-        if (dimensionIDs.key_comp()(name, "time") || dimensionIDs.key_comp()("time", name))
-            newID = nextFreeID++;
-
-        it = dimensionIDs.insert(it, DimensionIDMap::value_type(name, newID));
-        dimensionNames[newID] = name;
-    }
-    return it->second;
-}
-
-Dimension::Dimension(const Dimension::DimensionNameType& name)
-    : id(getDimensionID(name))
+Dimension::Dimension(const char *name, int id) :
+    name(name),
+    id(id)
 {
 }
 
