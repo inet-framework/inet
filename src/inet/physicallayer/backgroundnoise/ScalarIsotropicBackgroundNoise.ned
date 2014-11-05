@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.scalar;
+package inet.physicallayer.backgroundnoise;
 
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 
