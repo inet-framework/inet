@@ -25,9 +25,9 @@
 #include <omnetpp.h>
 #include "inet/common/Compat.h"
 
-#if OMNETPP_VERSION < 0x0403
-#  error At least OMNeT++/OMNEST version 4.3 required
-#endif // if OMNETPP_VERSION < 0x0403
+#if OMNETPP_VERSION < 0x0406
+#  error At least OMNeT++/OMNEST version 4.6 required
+#endif // if OMNETPP_VERSION < 0x0406
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT
