@@ -17,19 +17,13 @@
 
 package inet.physicallayer.dimensional;
 
-import inet.physicallayer.contract.ITransmitter;
+import inet.physicallayer.base.FlatTransmitterBase;
 
-module DimensionalTransmitter like ITransmitter
+module DimensionalTransmitter extends FlatTransmitterBase
 {
     parameters:
-        double bitrate @unit(bps);
-        double headerBitLength @unit(b);
-        double power @unit(W);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
-        string dimensions = default("time"); // dimensions of power: time and/or frequency
-        string timeGains = default("0% 0dB 100% 0dB"); // sequence of time and gain pairs; time is in [%] or [s], negative time measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
+        string dimensions = default("time");                // dimensions of power: time and/or frequency
+        string timeGains = default("0% 0dB 100% 0dB");      // sequence of time and gain pairs; time is in [%] or [s], negative time measures from the end; gain is in [dB] or [0..1]; default value is a flat signal
         string frequencyGains = default("0% 0dB 100% 0dB"); // sequence of frequency and gain pairs; frequency is in [%] or [Hz], negative frequency measures from the end; gain is in [dB] or [0..1]; default value is a flat signal 
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @class(DimensionalTransmitter);

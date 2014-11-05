@@ -23,13 +23,13 @@ import inet.physicallayer.contract.IReceiver;
 module FlatReceiverBase like IReceiver
 {
     parameters:
-        string errorModelType = default("APSKErrorModel"); // NED type of the error model
-        string modulation = default("NULL"); // one of "BPSK", "16-QAM", "256-QAM" or "NULL"
-        double energyDetection @unit(dBm);   // no signal is detected below this threshold (idle state)
-        double sensitivity @unit(dBm);       // reception is not possible if the signal power is below sensitivity
-        double snirThreshold @unit(dB);      // reception is not successful if the SNIR is below this threshold
-        double carrierFrequency @unit(Hz);   // the carrier frequency where this receiver listens on the medium
-        double bandwidth @unit(Hz);          // the bandwidth where this receiver listens on the medium
+        string errorModelType;             // NED type of the error model
+        string modulation;                 // one of "BPSK", "16-QAM", "256-QAM"
+        double energyDetection @unit(dBm); // no signal is detected below this threshold (idle state)
+        double sensitivity @unit(dBm);     // reception is not possible if the signal power is below sensitivity
+        double snirThreshold @unit(dB);    // reception is not successful if the SNIR is below this threshold
+        double carrierFrequency @unit(Hz); // the carrier frequency where this receiver listens on the medium
+        double bandwidth @unit(Hz);        // the bandwidth where this receiver listens on the medium
 
     submodules:
         errorModel: <errorModelType> like IErrorModel if errorModelType != "";

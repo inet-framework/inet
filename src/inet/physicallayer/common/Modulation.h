@@ -26,16 +26,6 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * Ideal modulation which returns zero bit error rate, regardless of the parameters.
- */
-class INET_API NullModulation : public IModulation
-{
-  public:
-    virtual const char *getName() { return "no bit errors"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
-};
-
-/**
  * BPSK modulation.
  */
 class INET_API BPSKModulation : public IModulation

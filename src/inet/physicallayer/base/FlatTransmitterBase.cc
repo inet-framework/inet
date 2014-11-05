@@ -45,9 +45,7 @@ void FlatTransmitterBase::initialize(int stage)
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL") == 0)
-            modulation = new NullModulation();
-        else if (strcmp(modulationName, "BPSK") == 0)
+        if (strcmp(modulationName, "BPSK") == 0)
             modulation = new BPSKModulation();
         else if (strcmp(modulationName, "16-QAM") == 0)
             modulation = new QAM16Modulation();

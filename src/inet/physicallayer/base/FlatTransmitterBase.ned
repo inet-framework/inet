@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,12 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.scalar;
+package inet.physicallayer.base;
 
-import inet.physicallayer.base.FlatTransmitterBase;
+import inet.physicallayer.contract.IErrorModel;
+import inet.physicallayer.contract.IReceiver;
 
-module ScalarTransmitter extends FlatTransmitterBase
+module FlatTransmitterBase like IReceiver
 {
     parameters:
-        @class(ScalarTransmitter);
+        double bitrate @unit(bps);
+        double headerBitLength @unit(b);
+        double power @unit(W);
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
+        string modulation; // "BPSK", "16-QAM", "256-QAM"
 }

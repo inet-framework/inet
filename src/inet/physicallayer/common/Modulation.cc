@@ -22,11 +22,6 @@ namespace inet {
 
 namespace physicallayer {
 
-double NullModulation::calculateBER(double, double, double) const
-{
-    return 0;
-}
-
 double BPSKModulation::calculateBER(double snir, double bandwidth, double bitrate) const
 {
     return 0.5 * exp(-snir * bandwidth / bitrate);
