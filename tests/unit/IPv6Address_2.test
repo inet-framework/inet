@@ -4,7 +4,12 @@ a misc IPv6Address test
 %includes:
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
+%global:
+
+using namespace inet;
+
 %activity:
+
 IPv6Address linkLocalAddr;
 IPv6Address siteLocalAddr;
 IPv6Address multicast;

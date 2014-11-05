@@ -6,7 +6,7 @@ Test MACAddress::formInterfaceIdentifier()
 #include "inet/networklayer/common/InterfaceToken.h"
 #include <iomanip>
 
-static std::ostream& operator<<(std::ostream& os, const InterfaceToken& token)
+static std::ostream& operator<<(std::ostream& os, const ::inet::InterfaceToken& token)
 {
     return os << "InterfaceToken(" << std::hex << std::setw(8) << std::setfill('0')
                                    << token.normal() << ","
@@ -15,7 +15,8 @@ static std::ostream& operator<<(std::ostream& os, const InterfaceToken& token)
 }
 
 %global:
-#define P(X)  EV << X << "-->" << MACAddress(X).formInterfaceIdentifier() << "\n"
+
+#define P(X)  EV << X << "-->" << ::inet::MACAddress(X).formInterfaceIdentifier() << "\n"
 
 %activity:
 P("00:00:00:00:00:00");

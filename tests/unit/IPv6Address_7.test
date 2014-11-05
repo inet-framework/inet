@@ -6,6 +6,9 @@ Test formLinkLocalAddress()
 #include "inet/networklayer/common/InterfaceToken.h"
 
 %global:
+
+using namespace inet;
+
 #define P(X)  EV << #X << "-->" << IPv6Address::formLinkLocalAddress(X) << "\n"
 
 %activity:

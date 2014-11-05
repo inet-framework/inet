@@ -7,6 +7,9 @@ Test the IP fragmentation reassembly buffer (IPv4FragBuf class)
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 %global:
+
+using namespace inet;
+
 struct Frag
 {
     ushort id;

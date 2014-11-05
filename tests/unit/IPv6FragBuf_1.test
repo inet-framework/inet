@@ -9,6 +9,9 @@ Adapted from IPFragBuf_1.test.
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 %global:
+
+using namespace inet;
+
 struct Frag
 {
     ushort id;
@@ -30,7 +33,7 @@ bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
     fh->setIdentification(f.id);
     fh->setFragmentOffset(f.offset);
     fh->setMoreFragments(!f.islast);
-	frag->addExtensionHeader(fh);
+    frag->addExtensionHeader(fh);
     frag->setByteLength(40+8+f.bytes);
 
     IPv6Datagram *dgram = fragbuf.addFragment(frag, fh, 0);

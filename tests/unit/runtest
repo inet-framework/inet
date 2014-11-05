@@ -11,10 +11,10 @@ if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
 if [ ! -d work ];  then mkdir work; fi
 rm -rf work/lib
 cp -pPR lib work/       # OSX dos not support cp -a
-opp_test -g $OPT -v $TESTFILES || exit 1
+opp_test gen $OPT -v $TESTFILES || exit 1
 echo
-(cd work; opp_makemake -f --deep -linet -L../../../src -P . --no-deep-includes -I./lib -I../../../src; $MAKE) || exit 1
+(cd work; opp_makemake -f --deep -lINET -L../../../src -P . --no-deep-includes -I./lib -I../../../src; $MAKE) || exit 1
 echo
-opp_test -r $OPT -v $TESTFILES || exit 1
+opp_test run $OPT -v $TESTFILES || exit 1
 echo
 echo Results can be found in ./work

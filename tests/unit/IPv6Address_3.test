@@ -6,6 +6,8 @@ test IPv6Address prefix mask generation
 
 %global:
 
+using namespace inet;
+
 %activity:
 for (int i=0; i<=128; i++)
 {

@@ -4,6 +4,10 @@ test IPv6Address scope and multicast scope
 %includes:
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
+%global:
+
+using namespace inet;
+
 %activity:
 #define P(X)  EV << #X << "  " << IPv6Address::scopeName(X.getScope()) << " " << \
                     (X.isMulticast() ? X.getMulticastScope() : -1) << "\n";

@@ -5,6 +5,10 @@ Test TCPVirtualDataRcvQueue class
 %includes:
 #include "TCPQueueTesterFunctions.h"
 
+%global:
+
+using namespace ::inet::tcp;
+
 %activity:
 TCPVirtualDataRcvQueue rcvQueue;
 TCPVirtualDataRcvQueue *q = &rcvQueue;

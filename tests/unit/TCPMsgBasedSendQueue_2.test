@@ -5,6 +5,10 @@ Enqueueing 4GB, but queue capacity only 2GiB.
 %includes:
 #include "TCPQueueTesterFunctions.h"
 
+%global:
+
+using namespace ::inet::tcp;
+
 %activity:
 TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;

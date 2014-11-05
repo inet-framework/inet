@@ -6,6 +6,8 @@ test IPv6Address constants
 
 %global:
 
+using namespace inet;
+
 %activity:
 #define P(X)  EV << #X << "  " << X << "\n";
 

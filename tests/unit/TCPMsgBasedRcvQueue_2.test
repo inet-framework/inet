@@ -5,6 +5,10 @@ Similar to TCPMsgBasedRcvQueue_1.test, but sequence number is turn out zero.
 %includes:
 #include "TCPQueueTesterFunctions.h"
 
+%global:
+
+using namespace ::inet::tcp;
+
 %activity:
 TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;

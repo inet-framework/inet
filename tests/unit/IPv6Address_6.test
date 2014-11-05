@@ -5,6 +5,9 @@ Test parsing IPv6 addresses with prefix
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 %global:
+
+using namespace inet;
+
 static void parseAddr(const char *s)
 {
     IPv6Address a;

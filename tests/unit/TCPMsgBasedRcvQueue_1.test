@@ -7,6 +7,10 @@ Tests TCPMsgBasedSendQueue, TCPMsgBasedRcvQueue classes
 %includes:
 #include "TCPQueueTesterFunctions.h"
 
+%global:
+
+using namespace ::inet::tcp;
+
 %activity:
 TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
