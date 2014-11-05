@@ -331,10 +331,10 @@
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0
-/examples/neighborcache/,            -f omnetpp.ini -c WithoutCache -r 0
-/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeCache -r 0
-/examples/neighborcache/,            -f omnetpp.ini -c NeighborListCache -r 0
-/examples/neighborcache/,            -f omnetpp.ini -c GridCache -r 0
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0
+/examples/neighborcache/,            -f omnetpp.ini -c GridCacheNeighborCache -r 0
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0
