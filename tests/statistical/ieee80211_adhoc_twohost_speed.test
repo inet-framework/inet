@@ -189,7 +189,7 @@ library("omnetpp", warn.conflicts=FALSE)
 scafile <- 'results/General-0.sca'
 linecount <- 1 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
-expectedRate <- 58.0 # %
+expectedRate <- 56.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
 unbalancedRate <- 12.0 # %
 # begin TEST:
