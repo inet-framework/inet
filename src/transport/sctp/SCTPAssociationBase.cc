@@ -144,6 +144,8 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     snprintf(str, sizeof(str), "ASCONF_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     AsconfTimer = new cMessage(str);
     AsconfTimer->setContextPointer(association);
+    snprintf(str, sizeof(str), "BLOCKING_TIMER %d:%s", assoc->assocId, addr.str().c_str());
+    BlockingTimer = new cMessage(str);
     HeartbeatTimer->setContextPointer(association);
     HeartbeatIntervalTimer->setContextPointer(association);
     CwndTimer->setContextPointer(association);
@@ -154,6 +156,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     CwndTimer->setControlInfo(pinfo->dup());
     ResetTimer->setControlInfo(pinfo->dup());
     AsconfTimer->setControlInfo(pinfo->dup());
+    BlockingTimer->setControlInfo(pinfo->dup());
 
     snprintf(str, sizeof(str), "RTO %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathRTO = new cOutVector(str);
@@ -1437,6 +1440,8 @@ void SCTPAssociation::removePath()
         delete path->ResetTimer;
         stopTimer(path->AsconfTimer);
         delete path->AsconfTimer;
+        stopTimer(path->BlockingTimer);
+        delete path->BlockingTimer;
         delete path;
         sctpPathMap.erase(pathIterator);
     }
