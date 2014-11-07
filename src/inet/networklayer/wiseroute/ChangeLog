@@ -1,3 +1,5 @@
+2014-11-07  ------ inet-2.99.0 released ------
+
 2014-01-22  Levente Meszaros
 
 	Ported the network protocol from MiXiM and adapted to the network protocol contract.
