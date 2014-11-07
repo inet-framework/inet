@@ -1,0 +1,86 @@
+%description:
+
+Test shutdown and startup operations on WirelessHost when transmit.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+record-eventlog = true
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+*.host.numRadios=1
+
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.numUdpApps = 1
+*.host.udpApp[0].typename = "DHCPClient"
+
+*.host.mobilityType = "StationaryMobility"
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 500m
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211RadioMedium;
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        host: AdhocHost;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+
+<scenario>
+    <at t="1.0">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="2.0">
+        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+    </at>
+    <at t="2.5">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+
+Test.host shutting down
+.*
+Test.host shut down
+.*
+Test.host starting up
+.*
+Test.host started
+.*
+Test.host shutting down
+.*
+Test.host shut down
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
