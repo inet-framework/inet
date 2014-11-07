@@ -20,7 +20,7 @@
 					<folderInfo id="org.omnetpp.cdt.gnu.config.debug.1590007136." name="/" resourcePath="">
 						<toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.561565264" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.442367031" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<builder autoBuildTarget="all" buildPath="${ProjDirPath}" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.omnetpp.cdt.gnu.builder.debug.1373225503" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="OMNeT++ Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.omnetpp.cdt.gnu.builder.debug">
+							<builder autoBuildTarget="all" buildPath="${ProjDirPath}" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.omnetpp.cdt.gnu.builder.debug.1373225503" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="OMNEST Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.omnetpp.cdt.gnu.builder.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
@@ -50,6 +50,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.529631020" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -76,6 +77,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.541669033" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -118,6 +120,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.164668854" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -144,6 +147,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1205441703" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -180,7 +184,7 @@
 					<folderInfo id="org.omnetpp.cdt.gnu.config.release.960890479." name="/" resourcePath="">
 						<toolChain id="org.omnetpp.cdt.gnu.toolchain.release.1853525977" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.release">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.8638873" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<builder id="org.omnetpp.cdt.gnu.builder.release.2101319956" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
+							<builder id="org.omnetpp.cdt.gnu.builder.release.2101319956" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNEST Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.879724210" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.209048065" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.preprocessor.def.261743951" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -205,6 +209,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1288707802" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -231,6 +236,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1382867862" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -273,6 +279,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.803078146" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -299,6 +306,7 @@
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_NETPERFMETER"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1633345790" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
