@@ -1,6 +1,6 @@
-# INET-HNRL-SPECIFIC INSTALLATION INSTRUCTIONS #
+# INET-HNRL-SPECIFIC INSTALLATION INSTRUCTIONS
 
-## GETTING STARTED ##
+## GETTING STARTED
 You shoud first read the original [INSTALL](INSTALL) document for the original
 [INET](http://inet.omnetpp.org) framework and make sure that you meet all the
 prerequsites mentioned there.
@@ -13,7 +13,7 @@ set paths for a root directory of OMNeT++ installation, a directory for SQLite
 header file, and a directory for SQLite library file as described in the
 following sections for command line and IDE installations.
 
-### If you are building from command line: ###
+### If you are building from command line:
 - **OMNETPP_ROOT**: You should set this environment variable for the root
   directory of OMNeT++ installation (without a trailing slash (Unix/Linux) or
   backslash (Windows)); 'Makefile' is prepared based on this environment
@@ -27,7 +27,7 @@ following sections for command line and IDE installations.
   where 'SQLITE_INC' and 'SQLITE_LIB' denote directories for SQLite header and
   SQLite library, respectively.
 
-### If you are using the IDE: ###
+### If you are using the IDE:
 - **OMNETPP_ROOT**: You should set this linked resource variable for the root
   directory of OMNeT++ installation as follows:
   1. Open the OMNeT++ IDE.

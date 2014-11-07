@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2014 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 //
 
 
-package inet.examples.traffic_engineering.isp_traffic_control2;
+package inet.examples.network_pricing.hybrid_service_plan;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.access.NgnAccessModem;
