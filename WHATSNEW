@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 2.5.1 (Nov 7, 2014)
+-------------------------
+
+   - fixed a crash in SCTP
+   - now builds with all features turned off
+
 INET 2.5.0 (Oct 29, 2014)
 -------------------------
 
