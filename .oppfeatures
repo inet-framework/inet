@@ -651,14 +651,13 @@
         nedPackages = "
                        inet.physicallayer.base
                        inet.physicallayer.antenna
-                       inet.physicallayer.dimensional
                        inet.physicallayer.common
                        inet.physicallayer.ideal
                        inet.physicallayer.mapping
                        inet.physicallayer.pathloss
-                       inet.physicallayer.power
+                       inet.physicallayer.energyconsumer
                        inet.physicallayer.propagation
-                       inet.physicallayer.scalar
+                       inet.physicallayer.analogmodel
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RADIO"
