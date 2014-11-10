@@ -40,6 +40,8 @@ inetLib = inetRoot + "/src/INET"
 opp_run = "opp_run"
 cpuTimeLimit = "6s"
 logFile = "test.out"
+memcheck = False
+memcheckFailedErrorCode = 1
 
 
 class SmokeTestCaseGenerator():
@@ -154,18 +156,23 @@ class SmokeTestCase(SimulationTestCase):
         self.args = args
 
     def runTest(self):
-        global inetRoot, opp_run, nedPath, cpuTimeLimit
+        global inetRoot, opp_run, nedPath, cpuTimeLimit, memcheck
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
-        command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
+        memcheckPrefix = ""
+        if memcheck:
+            memcheckPrefix = "valgrind --leak-check=full --error-exitcode=" + str(memcheckFailedErrorCode) + " "
+        command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false"
 
         result = self.runSimulation(self.title, command, workingdir)
 
         # process the result
-        if result.exitcode != 0:
+        if result.exitcode == memcheckFailedErrorCode:
+            assert False, "memcheck detected errors"
+        elif result.exitcode != 0:
             assert False, result.errormsg
         elif result.simulatedTime == 0:
             assert False, "zero time simulated"
@@ -392,8 +399,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', nargs='*', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
+    parser.add_argument('-c', '--memcheck', default=False, dest='memcheck', action='store_true', help='run using valgrind memcheck (default: false)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     args = parser.parse_args()
+    memcheck = args.memcheck
 
     if os.path.isfile(logFile):
         FILE = open(logFile, "w")
