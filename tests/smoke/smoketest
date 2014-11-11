@@ -218,12 +218,19 @@ class ThreadedTestSuite(unittest.BaseTestSuite):
             # cooperate removing every ip in the list. Each thread will do the
             # job as fast as it can.
             t = threading.Thread(target=self.runThread, args=(result, it))
+            t.daemon = True
             t.start()
             threads.append(t)
 
         # Wait until all the threads are done. .join() is blocking.
-        for t in threads:
-            t.join()
+        #for t in threads:
+        #    t.join()
+        runApp = True
+        while runApp and threading.active_count() > 1:
+            try:
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                runApp = False
         return result
 
     def runThread(self, result, it):
