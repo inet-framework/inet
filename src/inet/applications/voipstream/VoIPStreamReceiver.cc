@@ -151,7 +151,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     curConn.seqNo = vp->getSeqNo() - 1;
     curConn.timeStamp = vp->getTimeStamp();
     curConn.ssrc = vp->getSsrc();
-    curConn.codec = (enum CodecID)(vp->getCodec());
+    curConn.codec = (enum AVCodecID)(vp->getCodec());
     curConn.sampleBits = vp->getSampleBits();
     curConn.sampleRate = vp->getSampleRate();
     curConn.transmitBitrate = vp->getTransmitBitrate();

@@ -77,7 +77,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     class Buffer
     {
       public:
-        enum { BUFSIZE = AVCODEC_MAX_AUDIO_FRAME_SIZE };
+        enum { BUFSIZE = 48000*2*2 };   // 1 second of two channel 48kHz 16bit audio
 
       protected:
         char *samples;

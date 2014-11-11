@@ -30,7 +30,7 @@ extern "C" {
 
 namespace inet {
 
-void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits)
+void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
 {
     AVStream *st = avformat_new_stream(oc, NULL);
 
@@ -75,7 +75,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
 
     // add the audio stream using the default format codecs and initialize the codecs
     audio_st = NULL;
-    if (fmt->audio_codec != CODEC_ID_NONE)
+    if (fmt->audio_codec != AV_CODEC_ID_NONE)
         addAudioStream(fmt->audio_codec, sampleRate, sampleBits);
 
     av_dump_format(oc, 0, resultFile, 1);
@@ -115,10 +115,9 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
 
     AVPacket pkt;
     av_init_packet(&pkt);
-
     pkt.data = NULL;
     pkt.size = 0;
-    AVFrame *frame = avcodec_alloc_frame();
+    AVFrame *frame = av_frame_alloc();
 
     frame->nb_samples = samples;
 
@@ -137,6 +136,8 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
     if (ret < 0 || gotPacket != 1)
         throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
+
+    pkt.dts = 0;    //HACK for libav 11
 
     // write the compressed frame into the media file
     ret = av_interleaved_write_frame(oc, &pkt);
