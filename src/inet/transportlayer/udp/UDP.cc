@@ -109,6 +109,14 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_)
     typeOfService = 0;
 }
 
+UDP::SockDesc::~SockDesc()
+{
+    for(MulticastMembershipTable::iterator it = multicastMembershipTable.begin();
+            it != multicastMembershipTable.end();
+            ++it)
+        delete (*it);
+}
+
 //--------
 UDP::UDP()
 {

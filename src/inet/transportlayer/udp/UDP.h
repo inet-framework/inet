@@ -65,6 +65,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     struct SockDesc
     {
         SockDesc(int sockId, int appGateIndex);
+        ~SockDesc();
         int sockId;
         int appGateIndex;
         bool isBound;
