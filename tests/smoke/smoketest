@@ -41,7 +41,7 @@ opp_run = "opp_run"
 cpuTimeLimit = "6s"
 logFile = "test.out"
 memcheck = False
-memcheckFailedErrorCode = 1
+memcheckFailedErrorCode = 66
 
 
 class SmokeTestCaseGenerator():
@@ -162,7 +162,7 @@ class SmokeTestCase(SimulationTestCase):
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
         memcheckPrefix = ""
         if memcheck:
-            memcheckPrefix = "valgrind --leak-check=full --error-exitcode=" + str(memcheckFailedErrorCode) + " "
+            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " "
         command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false"
@@ -407,9 +407,11 @@ if __name__ == "__main__":
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', nargs='*', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-c', '--memcheck', default=False, dest='memcheck', action='store_true', help='run using valgrind memcheck (default: false)')
+    parser.add_argument('-s', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     args = parser.parse_args()
     memcheck = args.memcheck
+    cpuTimeLimit = args.cpuTimeLimit
 
     if os.path.isfile(logFile):
         FILE = open(logFile, "w")
