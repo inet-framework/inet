@@ -407,7 +407,7 @@
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            7b85-a1f7
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            6930-60a0
 
-/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,         bfa3-468f
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,         07d1-176e
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         c032-16b8

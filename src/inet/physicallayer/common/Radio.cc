@@ -208,7 +208,7 @@ const ITransmission *Radio::getReceptionInProgress() const
 
 void Radio::handleMessageWhenDown(cMessage *message)
 {
-    if (message->getArrivalGate() == radioIn)
+    if (message->getArrivalGate() == radioIn || isReceptionEndTimer(message))
         delete message;
     else
         OperationalBase::handleMessageWhenDown(message);
@@ -244,8 +244,10 @@ void Radio::handleSelfMessage(cMessage *message)
         endTransmission();
     else if (message == endSwitchTimer)
         completeRadioModeSwitch(nextRadioMode);
-    else
+    else if (isReceptionEndTimer(message))
         endReception(message);
+    else
+        throw cRuntimeError("Unknown self message");
 }
 
 void Radio::handleUpperCommand(cMessage *message)
@@ -334,6 +336,11 @@ void Radio::endReception(cMessage *message)
     }
     delete message;
     updateTransceiverState();
+}
+
+bool Radio::isReceptionEndTimer(cMessage *message)
+{
+    return !strcmp(message->getName(), "endReception");
 }
 
 bool Radio::isListeningPossible()
