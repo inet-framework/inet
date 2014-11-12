@@ -13,10 +13,12 @@
 
 package inet.routing.ospfv2;
 
+import inet.routing.IIPRouting;
+
 //
 // Implements the OSPFv4 routing protocol.
 //
-simple OSPFRouting
+simple OSPFRouting like IIPRouting
 {
     parameters:
         string interfaceTableModule;

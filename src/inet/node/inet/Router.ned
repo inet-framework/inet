@@ -17,9 +17,9 @@
 
 package inet.node.inet;
 
-import inet.routing.bgpv4.BGPRouting;
-import inet.routing.ospfv2.OSPFRouting;
-import inet.routing.rip.RIPRouting;
+import inet.applications.IUDPApp;
+import inet.routing.IBGPRouting;
+import inet.routing.IIPRouting;
 import inet.transportlayer.ITCP;
 import inet.transportlayer.IUDP;
 
@@ -57,12 +57,13 @@ module Router extends NodeBase
         bool hasBGP = default(false);
         string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default("UDP");
+
     submodules:
-        ospf: OSPFRouting if hasOSPF {
+        ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
             parameters:
                 @display("p=465,287,row");
         }
-        bgp: BGPRouting if hasBGP {
+        bgp: <"BGPRouting"> like IBGPRouting if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=214,80;i=block/network");
@@ -71,15 +72,15 @@ module Router extends NodeBase
             parameters:
                 @display("p=214,180;i=block/transport");
         }
-        rip: RIPRouting if hasRIP {
+        rip: <"RIPRouting"> like IUDPApp if hasRIP {
             parameters:
                 @display("p=404,80");
         }
         udp: <udpType> like IUDP if hasRIP {
             @display("p=404,180");
         }
-    connections allowunconnected:
 
+    connections allowunconnected:
         if hasOSPF {
             ospf.ipOut --> networkLayer.transportIn++;
             ospf.ipIn <-- networkLayer.transportOut++;

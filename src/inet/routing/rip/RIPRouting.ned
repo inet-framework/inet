@@ -17,6 +17,9 @@
 
 package inet.routing.rip;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Routing Information Protocol.
 //
@@ -60,7 +63,7 @@ package inet.routing.rip;
 //     - 'SplitHorizon':   do not sent routes whose next hop is the neighbor
 //     - 'SplitHorizonPoisenedReverse': if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
-simple RIPRouting
+simple RIPRouting like IUDPApp
 {
     parameters:
         @display("i=block/network2");

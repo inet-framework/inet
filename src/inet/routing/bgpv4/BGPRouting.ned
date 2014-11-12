@@ -17,7 +17,7 @@
 
 package inet.routing.bgpv4;
 
-import inet.applications.ITCPApp;
+import inet.routing.IBGPRouting;
 
 
 //
@@ -51,7 +51,7 @@ import inet.applications.ITCPApp;
 //
 // @author Helene Lageber
 //
-simple BGPRouting like ITCPApp
+simple BGPRouting like IBGPRouting
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
