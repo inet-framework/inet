@@ -677,11 +677,14 @@
         requires = ""
         labels = ""
         nedPackages = "
+                       inet.physicallayer.apsk
                        inet.physicallayer.base
                        inet.physicallayer.antenna
                        inet.physicallayer.common
+                       inet.physicallayer.errormodel
                        inet.physicallayer.ideal
                        inet.physicallayer.mapping
+                       inet.physicallayer.neighborcache
                        inet.physicallayer.pathloss
                        inet.physicallayer.energyconsumer
                        inet.physicallayer.propagation
@@ -766,6 +769,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
+                       inet.examples.neighborcache
                        inet.examples.wireless
                       "
         extraSourceFolders = ""
