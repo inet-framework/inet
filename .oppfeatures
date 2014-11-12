@@ -643,6 +643,34 @@
         linkerFlags = ""
         />
     <feature
+        id="physicalenvironment"
+        name="Physical environment"
+        description = "Physical environment support"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.physicalenvironment
+                       inet.physicalenvironment.objectcache
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="physicalenvironment_examples"
+        name="Physical environment examples"
+        description = "Physical environment examples"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.objectcache
+                       inet.examples.geometry
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
@@ -689,6 +717,22 @@
         nedPackages = "
                        inet.linklayer.ieee80211
                        inet.physicallayer.ieee80211
+                       inet.node.wireless
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_IEEE80211"
+        linkerFlags = ""
+        />
+    <feature
+        id="Ieee802154"
+        name="802.15.4a UWBIR"
+        description = "IEEE 802.15.4a UWBIR"
+        initiallyEnabled = "true"
+        requires = "mobility radio"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.linklayer.ieee802154
+                       inet.physicallayer.ieee802154
                        inet.node.wireless
                       "
         extraSourceFolders = ""
