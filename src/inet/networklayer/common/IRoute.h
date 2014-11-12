@@ -177,6 +177,7 @@ class INET_API IMulticastRoute
 
       public:
         OutInterface(const InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
+        OutInterface(const OutInterface& other) : ie(other.ie), _isLeaf(other._isLeaf) {}
         virtual ~OutInterface() {}
 
         const InterfaceEntry *getInterface() const { return ie; }

@@ -237,7 +237,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         clone->setInInterface(original->getInInterface());
         clone->setMulticastGroup(original->getMulticastGroup());
         for (int j = 0; j < (int)original->getNumOutInterfaces(); j++)
-            clone->addOutInterface(original->getOutInterface(j));
+            clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
         node->routingTable->addMulticastRoute(clone);
     }
 }
@@ -2015,7 +2015,9 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
     // routes are classified based on their action (gateway, interface, type, source, metric, etc.) and a color is assigned to them.
     RoutingTableInfo routingTableInfo;
     std::vector<IPv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
+#ifndef NDEBUG
     std::vector<RouteInfo *> originalRouteInfos;    // a copy of the original routes in the optimizer's format
+#endif // ifndef NDEBUG
 
     // build colorToRouteColor, originalRouteInfos and initial routeInfos in routingTableInfo
     for (int i = 0; i < (int)originalRoutes.size(); i++) {
@@ -2028,11 +2030,14 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
 
         // create original route and determine its color
         RouteInfo *originalRouteInfo = new RouteInfo(color, originalRoute->getDestination().getInt(), originalRoute->getNetmask().getInt());
+#ifndef NDEBUG
         originalRouteInfos.push_back(originalRouteInfo);
+#endif // ifndef NDEBUG
 
         // create a copy of the original route that can be destructively optimized later
         RouteInfo *optimizedRouteInfo = new RouteInfo(*originalRouteInfo);
         optimizedRouteInfo->originalRouteInfos.push_back(originalRouteInfo);
+        routingTableInfo.originalRouteInfos.push_back(originalRouteInfo);
         routingTableInfo.addRouteInfo(optimizedRouteInfo);
     }
 

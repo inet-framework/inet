@@ -62,6 +62,10 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
 
       public:
         Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
+        ~Node() {
+            for (int i = 0; i < (int)staticRoutes.size(); i++) delete staticRoutes[i];
+            for (int i = 0; i < (int)staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
+        }
     };
 
     /**
@@ -153,6 +157,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
 
       public:
         RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
+        ~RouteInfo() {} // don't delete originalRouteInfos elements, they are not exclusively owned
     };
 
     /**
@@ -161,9 +166,13 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
     class RoutingTableInfo
     {
       public:
+        std::vector<RouteInfo *> originalRouteInfos;    // keep track of the original routes
         std::vector<RouteInfo *> routeInfos;    // list of routes in the routing table
 
       public:
+        RoutingTableInfo() {}
+        ~RoutingTableInfo() { for (int i = 0; i < (int)originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
+
         int addRouteInfo(RouteInfo *routeInfo);
         void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
         RouteInfo *findBestMatchingRouteInfo(const uint32 destination) const { return findBestMatchingRouteInfo(destination, 0, routeInfos.size()); }
