@@ -649,8 +649,8 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.physicalenvironment
-                       inet.physicalenvironment.objectcache
+                       inet.environment
+                       inet.environment.cache
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -736,7 +736,6 @@
         nedPackages = "
                        inet.linklayer.ieee802154
                        inet.physicallayer.ieee802154
-                       inet.node.wireless
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IEEE80211"
