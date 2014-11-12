@@ -180,8 +180,10 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
         endReceptionTimer = NULL;
     }
     else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (endTransmissionTimer->isScheduled())
-            throw cRuntimeError("Aborting ongoing transmissions is not supported");
+        if (endTransmissionTimer->isScheduled()) {
+            EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
+            cancelEvent(endTransmissionTimer);
+        }
     }
     radioMode = previousRadioMode = nextRadioMode = newRadioMode;
     emit(radioModeChangedSignal, newRadioMode);
