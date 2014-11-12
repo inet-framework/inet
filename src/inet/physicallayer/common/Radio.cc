@@ -256,23 +256,23 @@ void Radio::handleLowerCommand(cMessage *message)
     throw cRuntimeError("Unsupported command");
 }
 
-bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Radio::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    PhysicalLayerBase::handleOperationStage(operation, stage, doneCallback);
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
-            setRadioMode(RADIO_MODE_OFF);
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
-            setRadioMode(RADIO_MODE_OFF);
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_LOCAL)
-            setRadioMode(RADIO_MODE_OFF);
-    }
-    return true;
+    // NOTE: we ignore switching time during start
+    completeRadioModeSwitch(RADIO_MODE_OFF);
+    return PhysicalLayerBase::handleNodeStart(doneCallback);
+}
+
+bool Radio::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    // NOTE: we ignore switching time during shutdown
+    completeRadioModeSwitch(RADIO_MODE_OFF);
+    return PhysicalLayerBase::handleNodeShutdown(doneCallback);
+}
+
+void Radio::handleNodeCrash()
+{
+    completeRadioModeSwitch(RADIO_MODE_OFF);
 }
 
 void Radio::startTransmission(cPacket *macFrame)

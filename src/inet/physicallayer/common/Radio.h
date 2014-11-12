@@ -175,13 +175,16 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void handleSelfMessage(cMessage *message);
     virtual void handleUpperCommand(cMessage *command);
     virtual void handleLowerCommand(cMessage *command);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 
     virtual void startTransmission(cPacket *macFrame);
     virtual void endTransmission();
 
     virtual void startReception(RadioFrame *radioFrame);
     virtual void endReception(cMessage *message);
+    virtual bool isReceptionEndTimer(cMessage *message);
 
     virtual bool isListeningPossible();
     virtual void updateTransceiverState();
