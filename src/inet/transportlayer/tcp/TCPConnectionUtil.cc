@@ -210,8 +210,8 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     conn->receiveQueue->setConnection(conn);
 
     // create SACK retransmit queue
-    rexmitQueue = new TCPSACKRexmitQueue();
-    rexmitQueue->setConnection(this);
+    conn->rexmitQueue = new TCPSACKRexmitQueue();
+    conn->rexmitQueue->setConnection(this);
 
     const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
     conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
