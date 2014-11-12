@@ -11,6 +11,7 @@ tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 record-eventlog = true
+sim-time-limit = 100s
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
