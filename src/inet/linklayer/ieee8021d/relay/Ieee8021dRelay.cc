@@ -184,7 +184,7 @@ void Ieee8021dRelay::learn(EtherFrame *frame)
 
 void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
 {
-    Ieee802Ctrl *controlInfo = dynamic_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
+    Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
     unsigned int portNum = controlInfo->getSwitchPort();
     MACAddress address = controlInfo->getDest();
     delete controlInfo;

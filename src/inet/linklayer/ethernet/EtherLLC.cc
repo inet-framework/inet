@@ -203,7 +203,7 @@ int EtherLLC::findPortForSAP(int dsap)
 void EtherLLC::handleRegisterSAP(cMessage *msg)
 {
     int port = msg->getArrivalGate()->getIndex();
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
@@ -221,7 +221,7 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
 
 void EtherLLC::handleDeregisterSAP(cMessage *msg)
 {
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
@@ -240,7 +240,7 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
 
 void EtherLLC::handleSendPause(cMessage *msg)
 {
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
 
