@@ -23,6 +23,21 @@ namespace httptools {
 
 Define_Module(HttpController);
 
+
+HttpController::HttpController() :
+    rdServerSelection(0)
+{
+}
+
+HttpController::~HttpController()
+{
+    // Clean up the server references
+    for (std::map<std::string, WebServerEntry *>::iterator it = webSiteList.begin(); it != webSiteList.end(); ++it)
+        delete it->second;
+
+    delete rdServerSelection;
+}
+
 void HttpController::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -87,6 +102,7 @@ void HttpController::finish()
     // Clean up the server references
     for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
         delete (*iter).second;
+    webSiteList.clear();
 }
 
 void HttpController::handleMessage(cMessage *msg)

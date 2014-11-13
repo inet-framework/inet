@@ -105,6 +105,9 @@ class HttpController : public cSimpleModule
     //@}
 
   public:
+    HttpController();
+    ~HttpController();
+
     /** @name public interface used by server and browser objects in the simulation */
     //@{
     /**
