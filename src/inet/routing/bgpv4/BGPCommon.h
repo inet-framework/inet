@@ -63,6 +63,7 @@ struct SessionInfo
     TCPSocket *socket;
     TCPSocket *socketListen;
     bool sessionEstablished;
+    SessionInfo() : linkIntf(0), socket(0), socketListen(0) {}
 };
 
 } // namespace bgp

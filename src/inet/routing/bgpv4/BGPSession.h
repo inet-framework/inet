@@ -53,8 +53,8 @@ class INET_API BGPSession : public cObject
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
-    void setSocket(TCPSocket *socket) { _info.socket = socket; }
-    void setSocketListen(TCPSocket *socket) { _info.socketListen = socket; }
+    void setSocket(TCPSocket *socket) { delete _info.socket; _info.socket = socket; }
+    void setSocketListen(TCPSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
     //getters for accessing session information:
     void getStatistics(unsigned int *statTab);

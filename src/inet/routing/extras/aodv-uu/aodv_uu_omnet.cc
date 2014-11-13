@@ -152,7 +152,7 @@ void NS_CLASS initialize(int stage)
             linkLayerFeeback();
 
         /* From main.c */
-        progname = strdup("AODV-UU");
+        progname = "AODV-UU";
         /* From debug.c */
         /* Note: log_nmsgs was never used anywhere */
         log_nmsgs = 0;

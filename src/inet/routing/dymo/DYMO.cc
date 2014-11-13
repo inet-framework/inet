@@ -1335,18 +1335,18 @@ bool DYMO::isClientAddress(const L3Address& address)
 void DYMO::addSelfNode(RteMsg *rteMsg)
 {
     const L3Address& address = getSelfAddress();
-    AddressBlock *addressBlock = new AddressBlock();
-    addressBlock->setAddress(address);
-    addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
-    addressBlock->setHasValidityTime(false);
-    addressBlock->setValidityTime(-1);
-    addressBlock->setHasMetric(true);
-    addressBlock->setMetric(0);
-    addressBlock->setHasMetricType(true);
-    addressBlock->setMetricType(HOP_COUNT);
-    addressBlock->setHasSequenceNumber(true);
-    addressBlock->setSequenceNumber(sequenceNumber);
-    addNode(rteMsg, *addressBlock);
+    AddressBlock addressBlock;
+    addressBlock.setAddress(address);
+    addressBlock.setPrefixLength(addressType->getMaxPrefixLength());
+    addressBlock.setHasValidityTime(false);
+    addressBlock.setValidityTime(-1);
+    addressBlock.setHasMetric(true);
+    addressBlock.setMetric(0);
+    addressBlock.setHasMetricType(true);
+    addressBlock.setMetricType(HOP_COUNT);
+    addressBlock.setHasSequenceNumber(true);
+    addressBlock.setSequenceNumber(sequenceNumber);
+    addNode(rteMsg, addressBlock);
 }
 
 void DYMO::addNode(RteMsg *rteMsg, AddressBlock& addressBlock)

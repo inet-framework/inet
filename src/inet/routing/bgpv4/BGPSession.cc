@@ -42,8 +42,9 @@ BGPSession::~BGPSession()
     _bgpRouting.getCancelAndDelete(_ptrStartEvent);
     _bgpRouting.getCancelAndDelete(_ptrHoldTimer);
     _bgpRouting.getCancelAndDelete(_ptrKeepAliveTimer);
-    _info.socket->~TCPSocket();
-    _info.socketListen->~TCPSocket();
+    delete _info.socket;
+    delete _info.socketListen;
+    delete _fsm;
 }
 
 void BGPSession::setInfo(SessionInfo info)

@@ -32,7 +32,7 @@ BGPRouting::~BGPRouting(void)
     for (std::map<SessionID, BGPSession *>::iterator sessionIterator = _BGPSessions.begin();
          sessionIterator != _BGPSessions.end(); sessionIterator++)
     {
-        (*sessionIterator).second->~BGPSession();
+        delete (*sessionIterator).second;
     }
     _BGPRoutingTable.erase(_BGPRoutingTable.begin(), _BGPRoutingTable.end());
     _prefixListIN.erase(_prefixListIN.begin(), _prefixListIN.end());
@@ -533,7 +533,7 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
             continue;
         }
         if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
-            RoutingTableEntry *entry = new RoutingTableEntry();
+            RoutingTableEntry *entry = new RoutingTableEntry();     //FIXME Who will delete this entry?
             entry->setDestination(IPv4Address((*ASConfigIt)->getAttribute("Address")));
             entry->setNetmask(IPv4Address((*ASConfigIt)->getAttribute("Netmask")));
             if (nodeName == "DenyRouteIN") {

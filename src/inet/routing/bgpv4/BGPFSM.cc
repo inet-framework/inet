@@ -430,6 +430,7 @@ void Established::entry()
             std::string entryn = rtEntry->getNetmask().str();
             BGPEntry->addAS(session._info.ASValue);
             session.updateSendProcess(BGPEntry);
+            delete BGPEntry;
         }
     }
 
