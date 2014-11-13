@@ -1096,6 +1096,7 @@ void IPv4::flush()
     delete cancelService();
     queue.clear();
     pendingPackets.clear();
+    queuedDatagramsForHooks.clear();
 }
 
 bool IPv4::isNodeUp()
