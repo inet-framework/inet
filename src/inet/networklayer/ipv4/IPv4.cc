@@ -1095,6 +1095,10 @@ void IPv4::flush()
 {
     delete cancelService();
     queue.clear();
+
+    for (PendingPackets::iterator it = pendingPackets.begin(); it != pendingPackets.end(); ++it) {
+        it->second.clear();
+    }
     pendingPackets.clear();
     queuedDatagramsForHooks.clear();
 }
