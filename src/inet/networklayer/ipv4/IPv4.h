@@ -228,7 +228,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie);
 
   public:
-    IPv4() { rt = NULL; ift = NULL; arp = NULL; arpOutGate = NULL; }
+    IPv4();
+    virtual ~IPv4();
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

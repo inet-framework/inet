@@ -43,6 +43,33 @@ Define_Module(IPv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
+IPv4::IPv4() :
+    rt(NULL),
+    ift(NULL),
+    arp(NULL),
+    icmp(NULL),
+    arpInGate(NULL),
+    arpOutGate(NULL),
+    transportInGateBaseId(-1),
+    queueOutGateBaseId(-1),
+    defaultTimeToLive(-1),
+    defaultMCTimeToLive(-1),
+    forceBroadcast(false),
+    useProxyARP(false),
+    isUp(true),
+    curFragmentId(-1),
+    numMulticast(0),
+    numLocalDeliver(0),
+    numDropped(0),
+    numUnroutable(0),
+    numForwarded(0)
+{
+}
+
+IPv4::~IPv4()
+{
+}
+
 void IPv4::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
