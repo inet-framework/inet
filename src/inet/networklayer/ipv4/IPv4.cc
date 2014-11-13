@@ -68,6 +68,7 @@ IPv4::IPv4() :
 
 IPv4::~IPv4()
 {
+    flush();
 }
 
 void IPv4::initialize(int stage)
@@ -352,7 +353,7 @@ void IPv4::handlePacketFromARP(cPacket *packet)
 
 void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
-    IPv4ControlInfo *controlInfo = dynamic_cast<IPv4ControlInfo *>(datagram->removeControlInfo());
+    IPv4ControlInfo *controlInfo = check_and_cast_nullable<IPv4ControlInfo *>(datagram->removeControlInfo());
     bool multicastLoop = true;
     if (controlInfo != NULL) {
         multicastLoop = controlInfo->getMulticastLoop();
