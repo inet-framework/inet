@@ -199,7 +199,7 @@ void SCTPServer::handleMessage(cMessage *msg)
         switch (msg->getKind()) {
             case SCTP_I_PEER_CLOSED:
             case SCTP_I_ABORT: {
-                SCTPCommand *command = dynamic_cast<SCTPCommand *>(msg->removeControlInfo());
+                SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 assocId = command->getAssocId();
                 serverAssocStatMap[assocId].peerClosed = true;
                 if (par("numPacketsToReceivePerClient").longValue() == 0) {
@@ -227,7 +227,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 
             case SCTP_I_ESTABLISHED: {
                 count = 0;
-                SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
+                SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                 numSessions++;
                 assocId = connectInfo->getAssocId();
                 inboundStreams = connectInfo->getInboundStreams();

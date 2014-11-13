@@ -239,7 +239,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             if (clientSocket.getState() == SCTPSocket::CONNECTING)
                 clientSocket.processMessage(PK(msg));
             else {
-                SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
+                SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                 numSessions++;
                 serverAssocId = connectInfo->getAssocId();
                 id = serverAssocId;

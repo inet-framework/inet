@@ -204,7 +204,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
             }
 
             case SCTP_I_ESTABLISHED: {
-                SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
+                SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                 numSessions++;
                 assocId = connectInfo->getAssocId();
                 id = assocId;

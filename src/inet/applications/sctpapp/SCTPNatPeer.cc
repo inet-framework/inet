@@ -238,7 +238,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     clientSocket.processMessage(PK(msg));
                 else {
                     int32 count = 0;
-                    SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
+                    SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                     numSessions++;
                     serverAssocId = connectInfo->getAssocId();
                     id = serverAssocId;
@@ -254,9 +254,9 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     endToEndDelay[serverAssocId] = new cOutVector(text);
                     sprintf(text, "Hist: EndToEndDelay of assoc %d", serverAssocId);
                     histEndToEndDelay[serverAssocId] = new cDoubleHistogram(text);
-
-                    //delete connectInfo;
+                    delete connectInfo;
                     delete msg;
+
                     if ((int64)(long)par("numPacketsToSendPerClient") > 0) {
                         SentPacketsPerAssoc::iterator i = sentPacketsPerAssoc.find(serverAssocId);
                         numRequestsToSend = i->second;
