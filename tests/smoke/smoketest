@@ -409,9 +409,11 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--memcheck', default=False, dest='memcheck', action='store_true', help='run using valgrind memcheck (default: false)')
     parser.add_argument('-s', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
+    parser.add_argument('-l', '--logfile', default='test.out', dest='logFile', help='name of logfile (default: test.out)')
     args = parser.parse_args()
     memcheck = args.memcheck
     cpuTimeLimit = args.cpuTimeLimit
+    logFile = args.logFile
 
     if os.path.isfile(logFile):
         FILE = open(logFile, "w")
