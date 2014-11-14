@@ -72,7 +72,7 @@ class INET_API PhysicalEnvironment : public cModule
     /** @name Cache */
     //@{
     IObjectCache *objectCache;
-    std::map<int, const ShapeBase *> idToShapeMap;
+    std::map<int, const ShapeBase *> idToShapeMap;  // shared shapes
     std::map<int, const Material *> idToMaterialMap;
     std::map<int, const PhysicalObject *> idToObjectMap;
     std::map<const std::string, const Material *> nameToMaterialMap;

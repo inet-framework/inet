@@ -247,7 +247,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 orientation.gamma = math::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
-        const ShapeBase *shape;
+        const ShapeBase *shape = NULL;
         const char *shapeAttribute = element->getAttribute("shape");
         if (!shapeAttribute)
             throw cRuntimeError("Missing shape attribute of object");
@@ -263,6 +263,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (shapeTokenizer.hasMoreTokens())
                 size.z = atof(shapeTokenizer.nextToken());
             shape = new Cuboid(size);
+            shapes.push_back(shape);
         }
         else if (!strcmp(shapeType, "sphere"))
         {
@@ -270,6 +271,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (shapeTokenizer.hasMoreTokens())
                 radius = atof(shapeTokenizer.nextToken());
             shape = new Sphere(radius);
+            shapes.push_back(shape);
         }
         else if (!strcmp(shapeType, "prism"))
         {
@@ -293,6 +295,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
                 prismPoints.push_back(*it - center);
             shape = new Prism(height, Polygon(prismPoints));
+            shapes.push_back(shape);
         }
         else if (!strcmp(shapeType, "polyhedron"))
         {
@@ -314,6 +317,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
                 PolyhedronPoints.push_back(*it - center);
             shape = new Polyhedron(PolyhedronPoints);
+            shapes.push_back(shape);
         }
         else {
             int id = atoi(shapeAttribute);
