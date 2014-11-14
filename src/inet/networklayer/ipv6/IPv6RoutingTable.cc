@@ -903,13 +903,13 @@ bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
             while (!routeList.empty())
-                removeRoute(routeList[0]);
+                delete removeRoute(routeList[0]);
 
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
             while (!routeList.empty())
-                removeRoute(routeList[0]);
+                delete removeRoute(routeList[0]);
 
     }
     return true;

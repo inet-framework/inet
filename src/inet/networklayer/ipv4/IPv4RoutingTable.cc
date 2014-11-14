@@ -841,14 +841,14 @@ bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER) {
             while (!routes.empty())
-                removeRoute(routes[0]);
+                delete removeRoute(routes[0]);
             isNodeUp = false;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             while (!routes.empty())
-                removeRoute(routes[0]);
+                delete removeRoute(routes[0]);
             isNodeUp = false;
         }
     }
