@@ -312,18 +312,18 @@ void Dijkstra::clear()
          }
          link_array_->erase(link_array_->begin());
     }
-    delete link_array_;
     link_array_->clear();
     delete link_array_;
+    link_array_ = NULL;
+
     dijkstraMap.clear();
 
     nonprocessed_nodes_->clear();
     delete nonprocessed_nodes_;
+    nonprocessed_nodes_ = NULL;
+
     all_nodes_->clear();
     delete all_nodes_;
-
-    link_array_ = NULL;
-    nonprocessed_nodes_ = NULL;
     all_nodes_ = NULL;
 }
 
