@@ -113,6 +113,7 @@ void AODVRouting::handleMessage(cMessage *msg)
 
         EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
         delete msg;
+        return;
     }
 
     if (msg->isSelfMessage()) {
