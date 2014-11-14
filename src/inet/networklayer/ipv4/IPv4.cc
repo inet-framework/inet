@@ -1094,12 +1094,20 @@ void IPv4::stop()
 void IPv4::flush()
 {
     delete cancelService();
+    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.info() << endl;
     queue.clear();
 
+    EV_DEBUG << "IPv4::flush(): pending packets:\n";
     for (PendingPackets::iterator it = pendingPackets.begin(); it != pendingPackets.end(); ++it) {
+        EV_DEBUG << "IPv4::flush():    " << it->first << ": " << it->second.info() << endl;
         it->second.clear();
     }
     pendingPackets.clear();
+
+    EV_DEBUG << "IPv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    for (DatagramQueueForHooks::iterator it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
+        delete it->datagram;
+    }
     queuedDatagramsForHooks.clear();
 }
 
@@ -1121,9 +1129,13 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, 
                 delete datagram;
                 return r;
 
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(dynamic_cast<IPv4Datagram *>(datagram), inIE, NULL, IPv4Address::UNSPECIFIED_ADDRESS, INetfilter::IHook::LOCALIN));
+            case INetfilter::IHook::QUEUE: {
+                IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(datagram);
+                if (dgram->getOwner() != this)
+                    throw cRuntimeError("Model error: netfilter hook changed the owner of queued datagram '%s'", dgram->getFullName());
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(dgram, inIE, NULL, IPv4Address::UNSPECIFIED_ADDRESS, INetfilter::IHook::LOCALIN));
                 return r;
+            }
 
             case INetfilter::IHook::STOLEN:
                 return r;

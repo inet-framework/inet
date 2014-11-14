@@ -59,8 +59,11 @@ void CloudDelayerBase::finish()
 
 void CloudDelayerBase::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-        ipv4Layer->reinjectQueuedDatagram(check_and_cast<INetworkDatagram *>(msg));
+    if (msg->isSelfMessage()) {
+        INetworkDatagram *context = (INetworkDatagram *)msg->getContextPointer();
+        delete msg;
+        ipv4Layer->reinjectQueuedDatagram(context);
+    }
 }
 
 void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay)
@@ -94,8 +97,9 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram
     if (propDelay > SIMTIME_ZERO) {
         //TODO emit?
         EV_INFO << "Message " << msg->info() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
-        take(msg);
-        scheduleAt(simTime() + propDelay, msg);
+        cMessage *selfmsg = new cMessage("Delay");
+        selfmsg->setContextPointer(datagram);
+        scheduleAt(simTime() + propDelay, selfmsg);
         return INetfilter::IHook::QUEUE;
     }
     return INetfilter::IHook::ACCEPT;

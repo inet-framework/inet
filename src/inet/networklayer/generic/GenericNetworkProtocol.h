@@ -76,8 +76,10 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     ProtocolMapping mapping;    // where to send packets after decapsulation
 
     // hooks
-    std::multimap<int, IHook *> hooks;
-    std::list<QueuedDatagramForHook> queuedDatagramsForHooks;
+    typedef std::multimap<int, IHook *> HookList;
+    HookList hooks;
+    typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
+    DatagramQueueForHooks queuedDatagramsForHooks;
 
     // statistics
     int numLocalDeliver;
@@ -149,7 +151,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     virtual IHook::Result datagramLocalOutHook(GenericDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHop);
 
   public:
-    GenericNetworkProtocol() {}
+    GenericNetworkProtocol();
+    ~GenericNetworkProtocol();
 
     virtual void registerHook(int priority, IHook *hook);
     virtual void unregisterHook(int priority, IHook *hook);

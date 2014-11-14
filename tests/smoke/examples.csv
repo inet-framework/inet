@@ -337,7 +337,7 @@
 /examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0
 /examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0
 /examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0
-/examples/neighborcache/,            -f omnetpp.ini -c GridCacheNeighborCache -r 0
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0
 /examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0
 /examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0

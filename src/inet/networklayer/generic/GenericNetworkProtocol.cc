@@ -31,6 +31,27 @@ namespace inet {
 
 Define_Module(GenericNetworkProtocol);
 
+GenericNetworkProtocol::GenericNetworkProtocol() :
+        interfaceTable(NULL),
+        routingTable(NULL),
+        arp(NULL),
+        queueOutBaseGateId(-1),
+        defaultHopLimit(-1),
+        numLocalDeliver(0),
+        numDropped(0),
+        numUnroutable(0),
+        numForwarded(0)
+{
+}
+
+GenericNetworkProtocol::~GenericNetworkProtocol()
+{
+    for (DatagramQueueForHooks::iterator it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
+        delete it->datagram;
+    }
+    queuedDatagramsForHooks.clear();
+}
+
 void GenericNetworkProtocol::initialize()
 {
     QueueBase::initialize();
@@ -551,6 +572,8 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Generic
                 return r;
 
             case IHook::QUEUE:
+                if (datagram->getOwner() != this)
+                    throw cRuntimeError("Model error: netfilter hook changed the owner of queued datagram '%s'", datagram->getFullName());
                 queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, NULL, nextHop, INetfilter::IHook::PREROUTING));
                 return r;
 
