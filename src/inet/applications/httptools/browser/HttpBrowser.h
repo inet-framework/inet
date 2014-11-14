@@ -132,6 +132,8 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      */
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status);
 
+    virtual void socketDeleted(int connId, void *yourPtr);
+
     // Socket establishment and data submission
     /*
      * Establishes a socket and queues a single message for transmission.

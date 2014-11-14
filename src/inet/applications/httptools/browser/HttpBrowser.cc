@@ -106,6 +106,7 @@ void HttpBrowser::sendRequestToServer(HttpRequestMessage *request)
 
     if (controller->getServerInfo(request->targetUrl(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << request->targetUrl() << endl;
+        delete request;
         return;
     }
 
@@ -135,6 +136,11 @@ void HttpBrowser::sendRequestsToServer(std::string www, HttpRequestQueue queue)
 
     if (controller->getServerInfo(www.c_str(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << www << endl;
+        while (!queue.empty()) {
+            HttpRequestMessage *msg = queue.back();
+            queue.pop_back();
+            delete msg;
+        }
         return;
     }
 
@@ -231,7 +237,6 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
-    delete sockdata;
 }
 
 void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
@@ -253,6 +258,23 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
+}
+
+void HttpBrowser::socketDeleted(int connId, void *yourPtr)
+{
+    if (yourPtr == NULL) {
+        throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
+    }
+
+    SockData *sockdata = (SockData *)yourPtr;
+    TCPSocket *socket = sockdata->socket;
+    ASSERT(connId == socket->getConnectionId());
+    HttpRequestQueue& queue = sockdata->messageQueue;
+    while (!queue.empty()) {
+        HttpRequestMessage *msg = queue.back();
+        queue.pop_back();
+        delete msg;
+    }
     delete sockdata;
 }
 

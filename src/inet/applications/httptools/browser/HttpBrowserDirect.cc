@@ -58,6 +58,7 @@ void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
     HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getServerModule(request->targetUrl()));
     if (serverModule == NULL) {
         EV_ERROR << "Failed to get server module for " << request->targetUrl() << endl;
+        delete request;
     }
     else {
         EV_DEBUG << "Sending request to " << serverModule->getHostName() << endl;
@@ -80,8 +81,14 @@ void HttpBrowserDirect::sendRequestToRandomServer()
 void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue queue)
 {
     HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase *>(controller->getServerModule(www.c_str()));
-    if (serverModule == NULL)
+    if (serverModule == NULL) {
         EV_ERROR << "Failed to get server module " << www << endl;
+        while (!queue.empty()) {
+            HttpRequestMessage *msg = queue.back();
+            queue.pop_back();
+            delete msg;
+        }
+    }
     else {
         while (!queue.empty()) {
             HttpRequestMessage *msg = queue.back();
