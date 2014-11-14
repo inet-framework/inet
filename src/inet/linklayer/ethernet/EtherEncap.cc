@@ -162,6 +162,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int pauseUnits = etherctrl->getPauseUnits();
+    MACAddress dest = etherctrl->getDest();
     delete etherctrl;
 
     EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";
@@ -171,7 +172,6 @@ void EtherEncap::handleSendPause(cMessage *msg)
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
-    MACAddress dest = etherctrl->getDest();
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
     frame->setDest(dest);
