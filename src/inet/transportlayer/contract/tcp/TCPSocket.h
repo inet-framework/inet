@@ -142,6 +142,7 @@ class INET_API TCPSocket
         virtual void socketClosed(int connId, void *yourPtr) {}
         virtual void socketFailure(int connId, void *yourPtr, int code) {}
         virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+        virtual void socketDeleted(int connId, void *yourPtr) {}
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
@@ -186,7 +187,7 @@ class INET_API TCPSocket
     /**
      * Destructor
      */
-    ~TCPSocket() {}
+    ~TCPSocket();
 
     /**
      * Returns the internal connection Id. TCP uses the (gate index, connId) pair

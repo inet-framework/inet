@@ -64,6 +64,12 @@ TCPSocket::TCPSocket(cMessage *msg)
     }
 }
 
+TCPSocket::~TCPSocket()
+{
+    if (cb)
+        cb->socketDeleted(connId, yourPtr);
+}
+
 const char *TCPSocket::stateName(int state)
 {
 #define CASE(x)    case x: \
