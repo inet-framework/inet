@@ -102,7 +102,6 @@ RadioMedium::RadioMedium() :
 
 RadioMedium::~RadioMedium()
 {
-    delete backgroundNoise;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;
     cancelAndDelete(updateCanvasTimer);

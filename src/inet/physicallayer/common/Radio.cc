@@ -55,9 +55,6 @@ Radio::Radio() :
 
 Radio::~Radio()
 {
-    delete antenna;
-    delete transmitter;
-    delete receiver;
     cancelAndDelete(endTransmissionTimer);
     cancelAndDelete(endSwitchTimer);
 }
