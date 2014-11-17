@@ -39,7 +39,7 @@ void NarrowbandTransmissionBase::printToStream(std::ostream& stream) const
            << "payloadBitLength = " << payloadBitLength << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth << ", "
-           << "bitrate = " << bitrate;
+           << "bitrate = " << bitrate << ", ";
     TransmissionBase::printToStream(stream);
 }
 

@@ -53,6 +53,7 @@ RadioMedium::TransmissionCacheEntry::TransmissionCacheEntry() :
 RadioMedium::RadioMedium() :
     propagation(NULL),
     pathLoss(NULL),
+    obstacleLoss(NULL),
     analogModel(NULL),
     backgroundNoise(NULL),
     maxSpeed(mps(sNaN)),

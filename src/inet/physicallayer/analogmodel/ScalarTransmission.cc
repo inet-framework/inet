@@ -30,7 +30,7 @@ ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const cPacket 
 void ScalarTransmission::printToStream(std::ostream& stream) const
 {
     stream << "ScalarTransmission, "
-           << "power = " << power;
+           << "power = " << power << ", ";
     NarrowbandTransmissionBase::printToStream(stream);
 }
 

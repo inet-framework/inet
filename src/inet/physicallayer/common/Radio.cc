@@ -37,6 +37,8 @@ Radio::Radio() :
     transmitter(NULL),
     receiver(NULL),
     medium(NULL),
+    displayCommunicationRange(false),
+    displayInterferenceRange(false),
     upperLayerOut(NULL),
     upperLayerIn(NULL),
     radioIn(NULL),
