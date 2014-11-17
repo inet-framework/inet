@@ -257,7 +257,7 @@ RadioMedium::TransmissionCacheEntry *RadioMedium::getTransmissionCacheEntry(cons
     if (transmissionIndex < 0)
         return NULL;
     else {
-        if (transmissionIndex >= cache.size())
+        if (transmissionIndex >= (int)cache.size())
             cache.resize(transmissionIndex + 1);
         TransmissionCacheEntry& transmissionCacheEntry = cache[transmissionIndex];
         if (!transmissionCacheEntry.receptionCacheEntries)
@@ -277,7 +277,7 @@ RadioMedium::ReceptionCacheEntry *RadioMedium::getReceptionCacheEntry(const IRad
         if (radioIndex < 0)
             return NULL;
         else {
-            if (radioIndex >= receptionCacheEntries->size())
+            if (radioIndex >= (int)receptionCacheEntries->size())
                 receptionCacheEntries->resize(radioIndex + 1);
             return &(*receptionCacheEntries)[radioIndex];
         }
