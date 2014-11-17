@@ -164,7 +164,7 @@ void SimpleEnergyStorage::scheduleTimer()
         if (remainingTime == 0)
             targetCapacity -= printCapacityStep;
         // override target capacity if shutdown is needed
-        if (!isNaN(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeStartCapacity && nodeShutdownCapacity > targetCapacity)
+        if (!isNaN(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeShutdownCapacity && nodeShutdownCapacity > targetCapacity)
             targetCapacity = nodeShutdownCapacity;
     }
     // enforce target capacity to be in range
