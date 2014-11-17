@@ -22,5 +22,7 @@ import inet.physicallayer.base.PropagationBase;
 module ConstantSpeedPropagation extends PropagationBase
 {
     parameters:
+        bool ignoreMovementDuringPropagation = default(true);
+        bool ignoreMovementDuringReception = default(true);
         @class(ConstantSpeedPropagation);
 }

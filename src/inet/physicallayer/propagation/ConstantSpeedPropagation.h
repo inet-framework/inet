@@ -27,9 +27,11 @@ namespace physicallayer {
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
   protected:
-    const int mobilityApproximationCount;
+    bool ignoreMovementDuringPropagation;
+    bool ignoreMovementDuringReception;
 
   protected:
+    virtual void initialize(int stage);
     virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
 
   public:

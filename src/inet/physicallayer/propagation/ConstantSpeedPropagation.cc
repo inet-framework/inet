@@ -26,35 +26,31 @@ Define_Module(ConstantSpeedPropagation);
 
 ConstantSpeedPropagation::ConstantSpeedPropagation() :
     PropagationBase(),
-    mobilityApproximationCount(0)
+    ignoreMovementDuringPropagation(false),
+    ignoreMovementDuringReception(false)
 {
+}
+
+void ConstantSpeedPropagation::initialize(int stage)
+{
+    PropagationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        ignoreMovementDuringPropagation = par("ignoreMovementDuringPropagation");
+        ignoreMovementDuringReception = par("ignoreMovementDuringReception");
+    }
 }
 
 const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
 {
-    switch (mobilityApproximationCount) {
-        case 0:
-            return mobility->getCurrentPosition();
-
-// TODO: revive
-//        case 1:
-//            return mobility->getPosition(time);
-//        case 2:
-//        {
-//            // NOTE: repeat once again to approximate the movement during propagation
-//            double distance = position.distance(mobility->getPosition(time));
-//            simtime_t propagationTime = distance / propagationSpeed.get();
-//            return mobility->getPosition(time + propagationTime);
-//        }
-        default:
-            throw cRuntimeError("Unknown mobility approximation count '%d'", mobilityApproximationCount);
-    }
+//    return mobility->getPosition(time);
+    throw cRuntimeError("Movement approximation is not implemented");
 }
 
 void ConstantSpeedPropagation::printToStream(std::ostream& stream) const
 {
     stream << "ConstantSpeedPropagation, "
-           << "mobilityApproximationCount = " << mobilityApproximationCount << ", ";
+           << "ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation << ", "
+           << "ignoreMovementDuringReception = " << ignoreMovementDuringReception << ", ";
     PropagationBase::printToStream(stream);
 }
 
@@ -65,15 +61,24 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
     const simtime_t endTime = transmission->getEndTime();
     const Coord startPosition = transmission->getStartPosition();
     const Coord endPosition = transmission->getEndPosition();
-    const Coord startArrivalPosition = computeArrivalPosition(startTime, startPosition, mobility);
-    const Coord endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
+    const Coord startArrivalPosition = ignoreMovementDuringPropagation ? mobility->getCurrentPosition() : computeArrivalPosition(startTime, startPosition, mobility);
     const simtime_t startPropagationTime = startPosition.distance(startArrivalPosition) / propagationSpeed.get();
-    const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
     const simtime_t startArrivalTime = startTime + startPropagationTime;
-    const simtime_t endArrivalTime = endTime + endPropagationTime;
     const EulerAngles startArrivalOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
-    return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+    if (ignoreMovementDuringReception) {
+        const Coord endArrivalPosition = startArrivalPosition;
+        const simtime_t endPropagationTime = startPropagationTime;
+        const simtime_t endArrivalTime = endTime + startPropagationTime;
+        const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
+        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+    }
+    else {
+        const Coord endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
+        const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
+        const simtime_t endArrivalTime = endTime + endPropagationTime;
+        const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
+        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+    }
 }
 
 } // namespace physicallayer
