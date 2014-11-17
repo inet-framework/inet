@@ -90,6 +90,10 @@ RadioMedium::RadioMedium() :
     cacheReceptionHitCount(0),
     cacheInterferenceGetCount(0),
     cacheInterferenceHitCount(0),
+    cacheNoiseGetCount(0),
+    cacheNoiseHitCount(0),
+    cacheSNIRGetCount(0),
+    cacheSNIRHitCount(0),
     cacheDecisionGetCount(0),
     cacheDecisionHitCount(0)
 {
@@ -181,6 +185,8 @@ void RadioMedium::finish()
 {
     double receptionCacheHitPercentage = 100 * (double)cacheReceptionHitCount / (double)cacheReceptionGetCount;
     double interferenceCacheHitPercentage = 100 * (double)cacheInterferenceHitCount / (double)cacheInterferenceGetCount;
+    double noiseCacheHitPercentage = 100 * (double)cacheNoiseHitCount / (double)cacheNoiseGetCount;
+    double snirCacheHitPercentage = 100 * (double)cacheSNIRHitCount / (double)cacheSNIRGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
     EV_INFO << "Transmission count = " << transmissionCount << endl;
     EV_INFO << "Radio frame send count = " << sendCount << endl;
@@ -190,6 +196,8 @@ void RadioMedium::finish()
     EV_INFO << "Listening decision computation count = " << listeningDecisionComputationCount << endl;
     EV_INFO << "Reception cache hit = " << receptionCacheHitPercentage << " %" << endl;
     EV_INFO << "Interference cache hit = " << interferenceCacheHitPercentage << " %" << endl;
+    EV_INFO << "Noise cache hit = " << noiseCacheHitPercentage << " %" << endl;
+    EV_INFO << "SNIR cache hit = " << snirCacheHitPercentage << " %" << endl;
     EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
     recordScalar("transmission count", transmissionCount);
     recordScalar("radio frame send count", sendCount);
@@ -199,6 +207,8 @@ void RadioMedium::finish()
     recordScalar("listening decision computation count", listeningDecisionComputationCount);
     recordScalar("reception cache hit", receptionCacheHitPercentage, "%");
     recordScalar("interference cache hit", interferenceCacheHitPercentage, "%");
+    recordScalar("noise cache hit", noiseCacheHitPercentage, "%");
+    recordScalar("snir cache hit", snirCacheHitPercentage, "%");
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
@@ -750,8 +760,11 @@ const IInterference *RadioMedium::getInterference(const IRadio *receiver, const 
 
 const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission *transmission) const
 {
+    cacheNoiseGetCount++;
     const INoise *noise = getCachedNoise(receiver, transmission);
-    if (!noise) {
+    if (noise)
+        cacheNoiseHitCount++;
+    else {
         const IListening *listening = getCachedListening(receiver, transmission);
         const IInterference *interference = getInterference(receiver, transmission);
         noise = analogModel->computeNoise(listening, interference);
@@ -762,8 +775,11 @@ const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission 
 
 const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *transmission) const
 {
+    cacheSNIRGetCount++;
     const ISNIR *snir = getCachedSNIR(receiver, transmission);
-    if (!snir) {
+    if (snir)
+        cacheSNIRHitCount++;
+    else {
         const IReception *reception = getReception(receiver, transmission);
         const INoise *noise = getNoise(receiver, transmission);
         snir = analogModel->computeSNIR(reception, noise);

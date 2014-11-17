@@ -318,27 +318,43 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable long listeningDecisionComputationCount;
     /**
-     * Total number of radio signal reception cache queries.
+     * Total number of reception cache queries.
      */
     mutable long cacheReceptionGetCount;
     /**
-     * Total number of radio signal reception cache hits.
+     * Total number of reception cache hits.
      */
     mutable long cacheReceptionHitCount;
     /**
-     * Total number of radio signal interference cache queries.
+     * Total number of interference cache queries.
      */
     mutable long cacheInterferenceGetCount;
     /**
-     * Total number of radio signal interference cache hits.
+     * Total number of interference cache hits.
      */
     mutable long cacheInterferenceHitCount;
     /**
-     * Total number of radio signal reception decision cache queries.
+     * Total number of noise cache queries.
+     */
+    mutable long cacheNoiseGetCount;
+    /**
+     * Total number of noise cache hits.
+     */
+    mutable long cacheNoiseHitCount;
+    /**
+     * Total number of SNIR cache queries.
+     */
+    mutable long cacheSNIRGetCount;
+    /**
+     * Total number of SNIR cache hits.
+     */
+    mutable long cacheSNIRHitCount;
+    /**
+     * Total number of reception decision cache queries.
      */
     mutable long cacheDecisionGetCount;
     /**
-     * Total number of radio signal reception decision cache hits.
+     * Total number of reception decision cache hits.
      */
     mutable long cacheDecisionHitCount;
     //@}
