@@ -145,6 +145,7 @@ void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICM
 
     IPv4Datagram *datagram = ctrl->removeOrigDatagram();
     int inputInterfaceId = ctrl->getInterfaceId();
+    delete ctrl;
     take(transportPacket);
     take(datagram);
     datagram->encapsulate(transportPacket);
