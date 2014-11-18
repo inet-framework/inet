@@ -98,6 +98,8 @@ class INET_API Posture
     /** @brief Construct a posture object with the given ID and number of nodes, respectively */
     Posture(unsigned int, unsigned int);
 
+    ~Posture();
+
     /** @brief Return the number of nodes existing in the WBAN. */
     int getNumNodes() const { return numNodes; }
 

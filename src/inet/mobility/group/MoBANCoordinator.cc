@@ -51,6 +51,30 @@ namespace inet {
 
 Define_Module(MoBANCoordinator);
 
+MoBANCoordinator::MoBANCoordinator() :
+        speed(0),
+        maxSpeed(0),
+        logfile(NULL),
+        numPostures(0),
+        currentPosture(NULL),
+        useMobilityPattern(false),
+        mobilityPattern(NULL),
+        patternLength(0),
+        currentPattern(-1),
+        markovMatrix(NULL),
+        postureSelStrategy(MoBANCoordinator::posture_sel_type(-1)),
+        transitions(NULL)
+{
+}
+
+MoBANCoordinator::~MoBANCoordinator()
+{
+    delete transitions;
+    delete [] mobilityPattern;
+    for (unsigned int i = 0; i < postureList.size(); i++)
+        delete postureList[i];
+}
+
 void MoBANCoordinator::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

@@ -62,6 +62,21 @@ Posture::Posture(unsigned int ID, unsigned int num)
         alphaSD[i] = new double[numNodes];
 }
 
+Posture::~Posture()
+{
+    delete [] nodePs;
+    delete [] nodeRadius;
+    delete [] nodeSpeed;
+
+    for (unsigned int i = 0; i < numNodes; ++i)
+        delete [] alphaMean[i];
+    delete [] alphaMean;
+
+    for (unsigned int i = 0; i < numNodes; ++i)
+        delete [] alphaSD[i];
+    delete [] alphaSD;
+}
+
 bool Posture::setPs(unsigned int i, Coord ps)
 {
     if (i < numNodes) {

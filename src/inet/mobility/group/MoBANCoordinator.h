@@ -211,7 +211,8 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     void computeMaxSpeed();
 
   public:
-    MoBANCoordinator() : maxSpeed(0) {};
+    MoBANCoordinator();
+    ~MoBANCoordinator();
     virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
