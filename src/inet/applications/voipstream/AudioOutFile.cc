@@ -143,6 +143,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     ret = av_interleaved_write_frame(oc, &pkt);
     if (ret != 0)
         throw cRuntimeError("Error while writing audio frame: %d", ret);
+    av_frame_free(&frame);
 }
 
 bool AudioOutFile::close()
@@ -162,11 +163,6 @@ bool AudioOutFile::close()
     if (audio_st)
         avcodec_close(audio_st->codec);
 
-    /* free the streams */
-    for (unsigned int i = 0; i < oc->nb_streams; i++) {
-        av_freep(&oc->streams[i]->codec);
-        av_freep(&oc->streams[i]);
-    }
 
     if (!(oc->oformat->flags & AVFMT_NOFILE)) {
         /* close the output file */
@@ -174,7 +170,7 @@ bool AudioOutFile::close()
     }
 
     /* free the stream */
-    av_free(oc);
+    avformat_free_context(oc);
     oc = NULL;
     return true;
 }

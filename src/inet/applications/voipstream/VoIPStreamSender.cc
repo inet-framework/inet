@@ -47,7 +47,12 @@ VoIPStreamSender::VoIPStreamSender()
 
 VoIPStreamSender::~VoIPStreamSender()
 {
+    if (pEncoderCtx) {
+        avcodec_close(pEncoderCtx);
+        avcodec_free_context(&pEncoderCtx);
+    }
     cancelAndDelete(timer);
+    av_free_packet(&packet);
 }
 
 VoIPStreamSender::Buffer::Buffer() :
@@ -65,9 +70,12 @@ VoIPStreamSender::Buffer::~Buffer()
 
 void VoIPStreamSender::Buffer::clear(int framesize)
 {
-    delete samples;
-    bufferSize = BUFSIZE + framesize;
-    samples = new char[bufferSize];
+    int newsize = BUFSIZE + framesize;
+    if (bufferSize != newsize) {
+        delete [] samples;
+        bufferSize = newsize;
+        samples = new char[bufferSize];
+    }
     readOffset = 0;
     writeOffset = 0;
 }
@@ -173,6 +181,9 @@ void VoIPStreamSender::finish()
     av_free_packet(&packet);
     outFile.close();
 
+    if (pCodecCtx) {
+        avcodec_close(pCodecCtx);
+    }
     if (pReSampleCtx) {
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         avresample_close(pReSampleCtx);
@@ -183,8 +194,9 @@ void VoIPStreamSender::finish()
         pReSampleCtx = NULL;
     }
 
-    if (this->pFormatCtx)
+    if (pFormatCtx) {
         avformat_close_input(&pFormatCtx);
+    }
 }
 
 void VoIPStreamSender::openSoundFile(const char *name)
@@ -311,7 +323,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
     av_init_packet(&opacket);
     opacket.data = NULL;
     opacket.size = 0;
-    AVFrame *frame = avcodec_alloc_frame();
+    AVFrame *frame = av_frame_alloc();
 
     frame->nb_samples = samples;
 
@@ -360,7 +372,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
 
     av_free_packet(&opacket);
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    avcodec_free_frame(&frame);
+    av_frame_free(&frame);
 #else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     av_freep(&frame);
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
@@ -447,14 +459,17 @@ void VoIPStreamSender::readFrame()
             continue;
 
         AVPacket avpkt;
+        avpkt.data = NULL;
+        avpkt.size = 0;
         av_init_packet(&avpkt);
+        ASSERT(avpkt.data == NULL && avpkt.size == 0);
         avpkt.data = packet.data;
         avpkt.size = packet.size;
 
         while (avpkt.size > 0) {
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
             // decode audio and save the decoded samples in our buffer
-            AVFrame *frame = avcodec_alloc_frame();
+            AVFrame *frame = av_frame_alloc();
             int gotFrame;
             int decoded = avcodec_decode_audio4(pCodecCtx, frame, &gotFrame, &avpkt);
             if (decoded < 0 || !gotFrame)
@@ -500,7 +515,7 @@ void VoIPStreamSender::readFrame()
                 sampleBuffer.notifyWrote(decoded * outBytesPerSample);
                 delete[] tmpSamples;
             }
-            avcodec_free_frame(&frame);
+            av_frame_free(&frame);
 #else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
             uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
 
@@ -530,7 +545,9 @@ void VoIPStreamSender::readFrame()
             sampleBuffer.notifyWrote(decoded * inBytesPerSample);
             delete[] tmpSamples;
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
+            av_free_packet(&avpkt);
         }
+        av_free_packet(&packet);
     }
 }
 

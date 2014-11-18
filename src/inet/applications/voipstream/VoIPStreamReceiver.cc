@@ -203,6 +203,7 @@ void VoIPStreamReceiver::closeConnection()
     if (!curConn.offline) {
         curConn.offline = true;
         avcodec_close(curConn.decCtx);
+        avcodec_free_context(&curConn.decCtx);
         curConn.outFile.close();
         emit(connStateSignal, -1L);    // so that sum() yields the number of active sessions
     }
