@@ -91,7 +91,7 @@ class INET_API IPv6Route : public cObject, public IRoute
         _protocolData = NULL;
     }
 
-    virtual ~IPv6Route() {}
+    virtual ~IPv6Route() { delete _protocolData; }
 
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
