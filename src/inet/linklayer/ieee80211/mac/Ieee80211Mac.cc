@@ -71,7 +71,11 @@ Ieee80211Mac::Ieee80211Mac() :
 
 Ieee80211Mac::~Ieee80211Mac()
 {
-    cancelAndDelete(endSIFS);
+    if (endSIFS) {
+        delete (Ieee80211Frame *)endSIFS->getContextPointer();
+        endSIFS->setContextPointer(NULL);
+        cancelAndDelete(endSIFS);
+    }
     cancelAndDelete(endDIFS);
     cancelAndDelete(endTimeout);
     cancelAndDelete(endReserve);
