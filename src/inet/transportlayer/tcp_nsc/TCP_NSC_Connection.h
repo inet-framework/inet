@@ -88,6 +88,7 @@ class INET_API TCP_NSC_Connection
 
   public:
     TCP_NSC_Connection();
+    ~TCP_NSC_Connection();
     cMessage *createEstablishedMsg();
     void listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
     void connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);

@@ -75,6 +75,12 @@ TCP_NSC_Connection::TCP_NSC_Connection()
 {
 }
 
+TCP_NSC_Connection::~TCP_NSC_Connection()
+{
+    delete receiveQueueM;
+    delete sendQueueM;
+}
+
 // create a TCP_I_ESTABLISHED msg
 cMessage *TCP_NSC_Connection::createEstablishedMsg()
 {
