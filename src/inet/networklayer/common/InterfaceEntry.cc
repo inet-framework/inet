@@ -211,6 +211,14 @@ void InterfaceEntry::resetInterface()
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
+#ifdef WITH_GENERIC
+    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
+        delete genericNetworkProtocolData;
+    genericNetworkProtocolData = NULL;
+#else // ifdef WITH_GENERIC
+    if (genericNetworkProtocolData)
+        throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
+#endif // ifdef WITH_GENERIC
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
     isisdata = NULL;
