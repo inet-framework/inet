@@ -274,7 +274,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             if (tosAttr)
                 filter.tos = parseIntAttribute(tosAttr, "tos");
             if (tosMaskAttr)
-                filter.tosMask = parseIntAttribute(tosAttr, "tosMask");
+                filter.tosMask = parseIntAttribute(tosMaskAttr, "tosMask");
             if (srcPortAttr)
                 filter.srcPortMin = filter.srcPortMax = parseIntAttribute(srcPortAttr, "srcPort");
             if (srcPortMinAttr)
