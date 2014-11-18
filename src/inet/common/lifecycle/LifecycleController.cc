@@ -109,6 +109,7 @@ bool LifecycleController::resumeOperation(LifecycleOperation *operation)
     // done: invoke callback (unless we are still under initiateOperation())
     if (operation->operationCompletionCallback && !operation->insideInitiateOperation)
         operation->operationCompletionCallback->invoke();
+    delete operation;
     return true;    // done
 }
 
