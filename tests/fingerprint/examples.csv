@@ -120,6 +120,9 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          0830-159c
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          1e52-f085
 
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            7088-b179
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            fd13-2ebf
+
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572
 
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             3485-6be4
