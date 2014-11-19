@@ -271,7 +271,7 @@ FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
 
     EV << "in encaps...\n";
 
-    INetworkProtocolControlInfo *cInfo = dynamic_cast<INetworkProtocolControlInfo *>(appPkt->removeControlInfo());
+    INetworkProtocolControlInfo *cInfo = check_and_cast_nullable<INetworkProtocolControlInfo *>(appPkt->removeControlInfo());
     FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
     pkt->setTransportProtocol(cInfo->getTransportProtocol());
     pkt->setBitLength(headerLength);
