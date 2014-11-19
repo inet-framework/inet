@@ -121,6 +121,7 @@ TcpLwipConnection::~TcpLwipConnection()
 {
     if (pcbM)
         pcbM->callback_arg = NULL;
+    //FIXME memory leak, who will free pcbM?
 
     delete receiveQueueM;
     delete sendQueueM;
