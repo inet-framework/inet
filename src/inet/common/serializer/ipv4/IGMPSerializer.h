@@ -19,7 +19,7 @@
 #ifndef __INET_IGMPSERIALIZER_H
 #define __INET_IGMPSERIALIZER_H
 
-#include "inet/networklayer/ipv4/IGMPMessage_m.h"
+#include "inet/networklayer/ipv4/IGMPMessage.h"
 
 namespace inet {
 
@@ -42,7 +42,7 @@ class IGMPSerializer
     /**
      * Puts a packet sniffed from the wire into an IGMPMessage.
      */
-    void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
+    IGMPMessage *parse(const unsigned char *buf, unsigned int bufsize);
 };
 
 } // namespace serializer
