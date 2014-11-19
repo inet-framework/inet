@@ -86,11 +86,19 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     // are rescheduled for later resubmission.
     class ScheduledDatagram : public cPacket
     {
-      public:
+      protected:
         IPv6Datagram *datagram;
         const InterfaceEntry *ie;
         MACAddress macAddr;
         bool fromHL;
+      public:
+        ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
+        ~ScheduledDatagram();
+        const InterfaceEntry *getIE() { return ie; }
+        const IPv6Address& getSrcAddress() {return datagram->getSrcAddress(); }
+        const MACAddress& getMACAddress() { return macAddr; }
+        bool getFromHL() { return fromHL; }
+        IPv6Datagram *removeDatagram() { IPv6Datagram *ret = datagram; datagram = NULL; return ret; }
     };
 #endif /* WITH_xMIPv6 */
 
@@ -189,7 +197,8 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
   public:
-    IPv6() {}
+    IPv6();
+    ~IPv6();
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook);

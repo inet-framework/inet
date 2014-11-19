@@ -140,10 +140,13 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 
     //List of periodic RA msgs(used only for router interfaces)
     RATimerList raTimerList;
+
     //List of pending Duplicate Address Detections
     DADList dadList;
+
     //List of pending Router & Prefix Discoveries
     RDList rdList;
+
     //List of Advertising Interfaces
     AdvIfList advIfList;
 

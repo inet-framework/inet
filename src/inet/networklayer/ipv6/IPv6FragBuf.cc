@@ -35,6 +35,9 @@ IPv6FragBuf::IPv6FragBuf()
 
 IPv6FragBuf::~IPv6FragBuf()
 {
+    for (Buffers::iterator it = bufs.begin(); it != bufs.end(); ++it) {
+        delete it->second.datagram;
+    }
 }
 
 void IPv6FragBuf::init(ICMPv6 *icmp)

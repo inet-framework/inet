@@ -56,10 +56,30 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
     // FIXME delete the following data structures, cancelAndDelete timers in them etc.
     // Deleting the data structures my become unnecessary if the lists store the
     // structs themselves and not pointers.
+
     //   RATimerList raTimerList;
+    for (RATimerList::iterator it=raTimerList.begin(); it != raTimerList.end(); ++it) {
+        cancelAndDelete(*it);
+        delete (*it);
+    }
+
     //   DADList dadList;
+    for (DADList::iterator it=dadList.begin(); it != dadList.end(); ++it) {
+        cancelAndDelete((*it)->timeoutMsg);
+        delete (*it);
+    }
+
     //   RDList rdList;
+    for (RDList::iterator it=rdList.begin(); it != rdList.end(); ++it) {
+        cancelAndDelete((*it)->timeoutMsg);
+        delete (*it);
+    }
+
     //   AdvIfList advIfList;
+    for (AdvIfList::iterator it=advIfList.begin(); it != advIfList.end(); ++it) {
+        cancelAndDelete((*it)->raTimeoutMsg);
+        delete (*it);
+    }
 }
 
 void IPv6NeighbourDiscovery::initialize(int stage)
@@ -488,6 +508,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
         EV_DETAIL << "Max number of probes have been sent." << endl;
         EV_DETAIL << "Neighbour is Unreachable, removing NCE." << endl;
         neighbourCache.remove(nceKey->address, nceKey->interfaceID);
+        delete timeoutMsg;
         return;
     }
 
@@ -1029,8 +1050,11 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
         IPv6ControlInfo *rsCtrlInfo)
 {
-    if (validateRSPacket(rs, rsCtrlInfo) == false)
+    if (validateRSPacket(rs, rsCtrlInfo) == false) {
+        delete rsCtrlInfo;
+        delete rs;
         return;
+    }
 
     //Find out which interface the RS message arrived on.
     InterfaceEntry *ie = ift->getInterfaceById(rsCtrlInfo->getInterfaceId());
@@ -1041,14 +1065,18 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "This is an advertising interface, processing RS\n";
 
-        if (validateRSPacket(rs, rsCtrlInfo) == false)
+        if (validateRSPacket(rs, rsCtrlInfo) == false) {
+            delete rsCtrlInfo;
+            delete rs;
             return;
+        }
 
         EV_INFO << "RS message validated\n";
 
         //First we extract RS specific information from the received message
         MACAddress macAddr = rs->getSourceLinkLayerAddress();
         EV_INFO << "MAC Address '" << macAddr << "' extracted\n";
+        delete rsCtrlInfo;
         delete rs;
 
         /*A router MAY choose to unicast the response directly to the soliciting
@@ -1098,6 +1126,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
     }
     else {
         EV_INFO << "This interface is a host, discarding RA message\n";
+        delete rsCtrlInfo;
         delete rs;
     }
 }
@@ -1248,11 +1277,13 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "Interface is an advertising interface, dropping RA message.\n";
+        delete raCtrlInfo;
         delete ra;
         return;
     }
     else {
         if (validateRAPacket(ra, raCtrlInfo) == false) {
+            delete raCtrlInfo;
             delete ra;
             return;
         }
@@ -1262,6 +1293,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
             // in case we are currently performing DAD we ignore this RA
             // TODO improve this procedure in order to allow reinitiating DAD
             // (which means cancel current DAD, start new DAD)
+            delete raCtrlInfo;
             delete ra;
             return;
         }

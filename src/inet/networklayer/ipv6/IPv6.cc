@@ -44,6 +44,38 @@ namespace inet {
 
 Define_Module(IPv6);
 
+IPv6::IPv6() :
+        ift(NULL),
+        rt(NULL),
+        nd(NULL),
+        icmp(NULL),
+        tunneling(NULL),
+        curFragmentId(0),
+        numMulticast(0),
+        numLocalDeliver(0),
+        numDropped(0),
+        numUnroutable(0),
+        numForwarded(0)
+{
+}
+
+IPv6::~IPv6()
+{
+}
+
+IPv6::ScheduledDatagram::ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+        datagram(datagram),
+        ie(ie),
+        macAddr(macAddr),
+        fromHL(fromHL)
+{
+}
+
+IPv6::ScheduledDatagram::~ScheduledDatagram()
+{
+    delete datagram;
+}
+
 void IPv6::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -117,14 +149,14 @@ void IPv6::endService(cPacket *msg)
         ScheduledDatagram *sDgram = check_and_cast<ScheduledDatagram *>(msg);
 
         // take care of datagram which was supposed to be sent over a tentative address
-        if (sDgram->ie->ipv6Data()->isTentativeAddress(sDgram->datagram->getSrcAddress())) {
+        if (sDgram->getIE()->ipv6Data()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
             queue.insert(sDgram);
         }
         else {
             // address is not tentative anymore - send out datagram
             numForwarded++;
-            fragmentAndSend(sDgram->datagram, sDgram->ie, sDgram->macAddr, sDgram->fromHL);
+            fragmentAndSend(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMACAddress(), sDgram->getFromHL());
             delete sDgram;
         }
     }
@@ -394,7 +426,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
         if (rt->isLocalAddress(destAddr)) {
             EV_INFO << "local delivery of multicast packet\n";
             numLocalDeliver++;
-            localDeliver((IPv6Datagram *)datagram->dup());
+            localDeliver(datagram->dup());
         }
 
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
@@ -539,9 +571,11 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     int protocol = datagram->getTransportProtocol();
     cPacket *packet = decapsulate(datagram);
 
+
     if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage *>(packet)) {
         EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
         send(packet, "ndOut");
+        packet = NULL;
     }
 #ifdef WITH_xMIPv6
     else if (protocol == IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader *>(packet)) {
@@ -550,6 +584,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         if (rt->hasMIPv6Support()) {
             EV_INFO << "MIPv6 packet: passing it to xMIPv6 module\n";
             send(check_and_cast<MobilityHeader *>(packet), "xMIPv6Out");
+            packet = NULL;
         }
         else {
             // update 12.9.07 - CB
@@ -559,17 +594,18 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
             EV_INFO << "No MIPv6 support on this node!\n";
             IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
             icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
-
-            //delete packet; // 13.9.07 - CB, update 21.9.07 - CB
+            packet = NULL;
         }
     }
 #endif /* WITH_xMIPv6 */
     else if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message *>(packet)) {
         handleReceivedICMP(dynamic_cast<ICMPv6Message *>(packet));
+        packet = NULL;
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
+        packet = NULL;
     }
     else {
         int gateindex = mapping.findOutputGateForProtocol(protocol);
@@ -580,6 +616,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
                 EV_INFO << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
                 //TODO: Indication of forward progress
                 send(packet, outGate);
+                packet = NULL;
                 return;
             }
         }
@@ -588,7 +625,9 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
         IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
         icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+        packet = NULL;
     }
+    ASSERT(packet == NULL);
 }
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)
@@ -706,11 +745,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
         // as it can not be sent before the address' tentative status is cleared - CB
         if (ie->ipv6Data()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
-            ScheduledDatagram *sDgram = new ScheduledDatagram();
-            sDgram->datagram = datagram;
-            sDgram->ie = ie;
-            sDgram->macAddr = nextHopAddr;
-            sDgram->fromHL = fromHL;
+            ScheduledDatagram *sDgram = new ScheduledDatagram(datagram, ie, nextHopAddr, fromHL);
             queue.insert(sDgram);
             return;
         }
