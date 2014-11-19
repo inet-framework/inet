@@ -101,7 +101,7 @@ namespace math {
 #define qNaN        std::numeric_limits<double>::quiet_NaN()
 #define sNaN        std::numeric_limits<double>::signaling_NaN()
 #define NaN         qNaN
-#define isNaN(X)    isnan(X)
+#define isNaN(X)    std::isnan(X)
 
 /**
  * Returns the rest of a whole-numbered division.
