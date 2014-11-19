@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/INeighborCache.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
@@ -91,6 +92,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
       public:
         TransmissionCacheEntry();
+    };
+
+    class RadioCacheEntry {
+      public:
+        IntervalTree *receptionIntervals;
+
+      public:
+        RadioCacheEntry();
     };
 
     enum RangeFilterKind {
@@ -262,13 +271,19 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable INeighborCache *neighborCache;
     /**
-     * Caches pre-computed radio signal information for transmissions and
-     * radios. The outer vector is indexed by transmission id (offset with
-     * base transmission id) and the inner vector is indexed by radio id.
-     * Values that are no longer needed are removed from the beginning only.
-     * May contain NULL values for not yet pre-computed information.
+     * Caches pre-computed information for transmissions. The outer vector is
+     * indexed by transmission id (offset with base transmission id) and the
+     * inner vector is indexed by radio id. Values that are no longer needed are
+     * removed from the beginning only. May contain NULL values for not yet
+     * pre-computed information.
      */
-    mutable std::vector<TransmissionCacheEntry> cache;
+    mutable std::vector<TransmissionCacheEntry> transmissionCache;
+    /**
+     * Caches pre-computed information for radios. The outer vector is indexed
+     * by radio id (offset with base transmission id) and the inner vector is
+     * indexed by transmission id.
+     */
+    mutable std::vector<RadioCacheEntry> radioCache;
     //@}
 
     /** @name Logging */
@@ -370,6 +385,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     /** @name Cache */
     //@{
+    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) const;
     virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) const;
     virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) const;
 
