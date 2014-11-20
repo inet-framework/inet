@@ -34,9 +34,10 @@ BGPRouting::~BGPRouting(void)
     {
         delete (*sessionIterator).second;
     }
-    _BGPRoutingTable.erase(_BGPRoutingTable.begin(), _BGPRoutingTable.end());
-    _prefixListIN.erase(_prefixListIN.begin(), _prefixListIN.end());
-    _prefixListOUT.erase(_prefixListOUT.begin(), _prefixListOUT.end());
+
+    for (RoutingTableEntryVector::iterator it = _prefixListINOUT.begin(); it != _prefixListINOUT.end(); ++it) {
+        delete (*it);
+    }
 }
 
 void BGPRouting::initialize(int stage)
@@ -282,16 +283,19 @@ void BGPRouting::processMessage(const BGPUpdateMessage& msg)
         // RFC 4271, 9.1.  Decision Process
         decisionProcessResult = decisionProcess(msg, entry, _currSessionId);
         //RFC 4271, 9.2.  Update-Send Process
-        if (decisionProcessResult != 0) {
+        if (decisionProcessResult != 0)
             updateSendProcess(decisionProcessResult, _currSessionId, entry);
-        }
     }
+    else
+        delete entry;
 }
 
+/* add entry to routing table, or delete entry */
 unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTableEntry *entry, SessionID sessionIndex)
 {
     //Don't add the route if it exists in PrefixListINTable or in ASListINTable
     if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry)) {
+        delete entry;
         return 0;
     }
 
@@ -305,6 +309,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
     unsigned long BGPindex = isInTable(_BGPRoutingTable, entry);
     if (BGPindex != (unsigned long)-1) {
         if (tieBreakingProcess(_BGPRoutingTable[BGPindex], entry)) {
+            delete entry;
             return 0;
         }
         else {
@@ -319,16 +324,18 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
     int indexIP = isInRoutingTable(_rt, entry->getDestination());
     if (indexIP != -1 && _rt->getRoute(indexIP)->getSourceType() != IRoute::BGP) {
         if (_BGPSessions[sessionIndex]->getType() != IGP) {
+            delete entry;
             return 0;
         }
         else {
+            IPv4Route *oldEntry = _rt->getRoute(indexIP);
             IPv4Route *newEntry = new IPv4Route;
-            newEntry->setDestination(_rt->getRoute(indexIP)->getDestination());
-            newEntry->setNetmask(_rt->getRoute(indexIP)->getNetmask());
-            newEntry->setGateway(_rt->getRoute(indexIP)->getGateway());
-            newEntry->setInterface(_rt->getRoute(indexIP)->getInterface());
+            newEntry->setDestination(oldEntry->getDestination());
+            newEntry->setNetmask(oldEntry->getNetmask());
+            newEntry->setGateway(oldEntry->getGateway());
+            newEntry->setInterface(oldEntry->getInterface());
             newEntry->setSourceType(IRoute::BGP);
-            _rt->deleteRoute(_rt->getRoute(indexIP));
+            _rt->deleteRoute(oldEntry);
             _rt->addRoute(newEntry);
         }
     }
@@ -538,13 +545,16 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
             entry->setNetmask(IPv4Address((*ASConfigIt)->getAttribute("Netmask")));
             if (nodeName == "DenyRouteIN") {
                 _prefixListIN.push_back(entry);
+                _prefixListINOUT.push_back(entry);
             }
             else if (nodeName == "DenyRouteOUT") {
                 _prefixListOUT.push_back(entry);
+                _prefixListINOUT.push_back(entry);
             }
             else {
                 _prefixListIN.push_back(entry);
                 _prefixListOUT.push_back(entry);
+                _prefixListINOUT.push_back(entry);
             }
         }
         else if (nodeName == "DenyAS" || nodeName == "DenyASIN" || nodeName == "DenyASOUT") {
@@ -685,7 +695,11 @@ SessionID BGPRouting::findIdFromPeerAddr(std::map<SessionID, BGPSession *> sessi
     return -1;
 }
 
-/*delete BGP Routing entry, if the route deleted correctly return true, false else*/
+/*
+ *  Delete BGP Routing entry, if the route deleted correctly return true, false else.
+ *  Side effects when returns true:
+ *      _BGPRoutingTable changed, iterators on _BGPRoutingTable will be invalid.
+ */
 bool BGPRouting::deleteBGPRoutingEntry(RoutingTableEntry *entry)
 {
     for (std::vector<RoutingTableEntry *>::iterator it = _BGPRoutingTable.begin();

@@ -136,9 +136,11 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
 
     IInterfaceTable *_inft;
     IIPv4RoutingTable *_rt;    // The IP routing table
-    std::vector<RoutingTableEntry *> _BGPRoutingTable;    // The BGP routing table
-    std::vector<RoutingTableEntry *> _prefixListIN;
-    std::vector<RoutingTableEntry *> _prefixListOUT;
+    typedef std::vector<RoutingTableEntry *> RoutingTableEntryVector;
+    RoutingTableEntryVector _BGPRoutingTable;    // The BGP routing table
+    RoutingTableEntryVector _prefixListIN;
+    RoutingTableEntryVector _prefixListOUT;
+    RoutingTableEntryVector _prefixListINOUT;      // store union of pointers in _prefixListIN and _prefixListOUT
     std::vector<ASID> _ASListIN;
     std::vector<ASID> _ASListOUT;
     std::map<SessionID, BGPSession *> _BGPSessions;
