@@ -14,7 +14,7 @@ cmdenv-log-format = "%t %N: "
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
 **.IPForward = true
-**.forwardMulticast = true
+**.multicastForwarding = true
 
 **.scenarioManager.script = xml("<scenario/>")
 

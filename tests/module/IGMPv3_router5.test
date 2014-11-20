@@ -17,7 +17,7 @@ network=TestIGMPNetwork
 **.igmp.lastMemberQueryCount = 1
 
 **.IPForward = true
-**.forwardMulticast = true
+**.multicastForwarding = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 %#--------------------------------------------------------------------------------------------------------------
