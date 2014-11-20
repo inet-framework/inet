@@ -32,6 +32,9 @@
 #include <algorithm>
 #include <bitset>
 
+
+namespace inet {
+
 using namespace std;
 
 Define_Module(IGMPv3);
@@ -1417,3 +1420,6 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
 }
+
+} // namespace inet
+

@@ -20,6 +20,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/pim/modes/PIMDM.h"
 
+namespace inet {
+
 Define_Module(PIMDM);
 
 using namespace std;
@@ -1992,4 +1994,6 @@ bool PIMDM::DownstreamInterface::isInOlist() const
     bool hasNeighbors = pimdm()->pimNbt->getNumNeighbors(ie->getInterfaceId()) > 0;
     return ((hasNeighbors && pruneState != PRUNED) || hasConnectedReceivers()) && assertState != I_LOST_ASSERT;
 }
+
+} // namespace inet
 

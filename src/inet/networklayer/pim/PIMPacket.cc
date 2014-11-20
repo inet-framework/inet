@@ -17,6 +17,8 @@
 
 #include "inet/networklayer/pim/PIMPacket.h"
 
+namespace inet {
+
 Register_Class(PIMHello);
 
 
@@ -143,3 +145,6 @@ void PIMHello::setOptions(unsigned int k, const HelloOptionPtr& options)
     delete this->options_var[k];
     this->options_var[k] = options;
 }
+
+} // namespace inet
+

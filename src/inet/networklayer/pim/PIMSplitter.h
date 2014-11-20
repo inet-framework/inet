@@ -25,6 +25,7 @@
 #include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
 #include "inet/networklayer/pim/PIMPacket_m.h"
 
+namespace inet {
 
 /**
  * PIMSplitter register itself for PIM protocol (103) in the network layer,
@@ -55,6 +56,8 @@ class INET_API PIMSplitter : public cSimpleModule
 		virtual void handleMessage(cMessage *msg);
 		virtual void processPIMPacket(PIMPacket *pkt);
 };
+
+} // namespace inet
 
 #endif
 

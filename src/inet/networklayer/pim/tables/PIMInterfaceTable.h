@@ -23,6 +23,8 @@
 #include "inet/networklayer/common/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
+namespace inet {
+
 /**
  * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.
  */
@@ -91,5 +93,7 @@ class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
         virtual void addInterface(InterfaceEntry *ie);
         virtual void removeInterface(InterfaceEntry *ie);
 };
+
+} // namespace inet
 
 #endif

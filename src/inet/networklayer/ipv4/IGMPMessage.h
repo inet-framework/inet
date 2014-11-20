@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/ipv4/IGMPMessage_m.h"
 
+namespace inet {
 
 class INET_API IGMPv3Query : public IGMPv3Query_Base
 {
@@ -36,6 +37,6 @@ class INET_API IGMPv3Query : public IGMPv3Query_Base
         virtual void setMaxRespCode(unsigned char maxRespCode) { this->maxRespTime_var = maxRespCode; }
 };
 
-// TODO move to cpp file: Register_Class(IGMPv3Query);
+} // namespace inet
 
 #endif

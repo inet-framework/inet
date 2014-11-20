@@ -23,6 +23,8 @@
 
 using namespace std;
 
+namespace inet {
+
 Define_Module(PIMInterfaceTable);
 
 // for WATCH_VECTOR
@@ -174,3 +176,6 @@ void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
     if (it != pimInterfaces.end())
         pimInterfaces.erase(it);
 }
+
+} //namespace inet
+

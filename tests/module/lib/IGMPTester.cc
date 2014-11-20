@@ -15,6 +15,8 @@
 
 using namespace std;
 
+namespace inet {
+
 class INET_API IGMPTester : public cSimpleModule, public IScriptable
 {
   private:
@@ -408,4 +410,6 @@ void IGMPTester::parseIPv4AddressVector(const char *str, IPv4AddressVector &resu
     }
     sort(result.begin(), result.end());
 }
+
+} // namespace inet
 

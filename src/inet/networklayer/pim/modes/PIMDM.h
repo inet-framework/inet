@@ -30,6 +30,8 @@
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/networklayer/pim/modes/PIMBase.h"
 
+namespace inet {
+
 /**
  * Implementation of PIM-DM protocol (RFC 3973).
  *
@@ -248,5 +250,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         virtual void handleNodeCrash();
         virtual void stopPIMRouting();
 };
+
+} // namespace inet
 
 #endif

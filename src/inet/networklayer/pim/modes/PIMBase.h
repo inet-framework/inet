@@ -28,6 +28,7 @@
 #include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
 #include "inet/networklayer/pim/PIMPacket.h"
 
+namespace inet {
 
 /**
  * Base class of PIMSM and PIMDM modules.
@@ -198,5 +199,6 @@ class INET_API PIMBase : public OperationalBase
         virtual void handleNodeCrash();
 };
 
+} // namespace inet
 
 #endif

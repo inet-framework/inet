@@ -23,8 +23,9 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/pim/modes/PIMSM.h"
 
-Define_Module(PIMSM);
+namespace inet {
 
+Define_Module(PIMSM);
 
 simsignal_t PIMSM::sentRegisterPkSignal = registerSignal("sentRegisterPk");
 simsignal_t PIMSM::rcvdRegisterPkSignal = registerSignal("rcvdRegisterPk");
@@ -2275,3 +2276,6 @@ void PIMSM::DownstreamInterface::startPrunePendingTimer(double joinPruneOverride
     prunePendingTimer->setContextPointer(this);
     pimsm()->scheduleAt(simTime() + joinPruneOverrideInterval, prunePendingTimer);
 }
+
+} // namespace inet
+

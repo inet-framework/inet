@@ -24,6 +24,8 @@
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/networklayer/pim/modes/PIMBase.h"
 
+namespace inet {
+
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
 #define MAX_TTL 255                     /**< Maximum TTL */
 
@@ -312,5 +314,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         IPv4MulticastRoute *createIPv4Route(Route *route);
         IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
 };
+
+} // namespace inet
 
 #endif

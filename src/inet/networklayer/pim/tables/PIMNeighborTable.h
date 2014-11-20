@@ -22,6 +22,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
+namespace inet {
+
 class PIMNeighborTable;
 
 /**
@@ -132,5 +134,7 @@ class INET_API PIMNeighborTable: public cSimpleModule
 		virtual void handleMessage(cMessage *);
 		virtual void processLivenessTimer(cMessage *timer);
 };
+
+} // namespace inet
 
 #endif

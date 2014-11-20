@@ -24,6 +24,8 @@
 #include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 #include "inet/networklayer/pim/PIMSplitter.h"
 
+namespace inet {
+
 using namespace std;
 
 Define_Module(PIMSplitter);
@@ -117,3 +119,6 @@ void PIMSplitter::processPIMPacket(PIMPacket *pkt)
             throw cRuntimeError("PIMSplitter: PIM mode of interface '%s' is invalid.", ie->getName());
     }
 }
+
+} // namespace inet
+

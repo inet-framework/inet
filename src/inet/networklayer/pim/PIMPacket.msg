@@ -25,6 +25,8 @@ cplusplus {{
 #define ENCODED_SOURCE_ADDRESS_LENGTH  8 // IPv4 only
 }}
 
+namespace inet;
+
 //struct IPAddress;
 class noncobject IPv4Address;
 

@@ -25,6 +25,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/pim/modes/PIMBase.h"
 
+namespace inet {
+
 using namespace std;
 
 const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
@@ -236,3 +238,6 @@ void PIMBase::processHelloPacket(PIMHello *packet)
 
     delete packet;
 }
+
+} // namespace inet
+

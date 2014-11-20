@@ -20,6 +20,8 @@
 
 #include "inet/networklayer/pim/PIMPacket_m.h"
 
+namespace inet {
+
 class INET_API PIMHello : public PIMHello_Base
 {
   protected:
@@ -50,5 +52,6 @@ class INET_API PIMHello : public PIMHello_Base
     virtual void setOptions(unsigned int k, const HelloOptionPtr& options);
 };
 
+} // namespace inet
 
 #endif // _PIMPACKET_H_

@@ -20,6 +20,8 @@
 
 #include "inet/networklayer/pim/tables/PIMNeighborTable.h"
 
+namespace inet {
+
 Register_Abstract_Class(PIMNeighbor);
 Define_Module(PIMNeighborTable);
 
@@ -189,4 +191,6 @@ PIMNeighbor *PIMNeighborTable::getNeighbor(int interfaceId, int index)
     InterfaceToNeighborsMap::iterator it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : NULL;
 }
+
+} // namespace inet
 

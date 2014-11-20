@@ -33,6 +33,8 @@
 
 #include <set>
 
+namespace inet {
+
 class IInterfaceTable;
 class IRoutingTable;
 
@@ -259,39 +261,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected cListener
         virtual double decodeTime(unsigned char code);
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} // namespace inet
 
 #endif /* INET_IGMPV3_H */
