@@ -145,7 +145,7 @@ void IGMPTester::handleMessage(cMessage *msg)
     }
 
     IGMPMessage *igmpMsg = check_and_cast<IGMPMessage*>(msg);
-    EV_DEBUG << "Received: " << igmpMsg << ".\n";
+    EV << "IGMPTester: Received: " << igmpMsg << ".\n";
     delete msg;
 }
 
@@ -361,7 +361,7 @@ void IGMPTester::processSetFilterCommand(IPv4Address group, McastSourceFilterMod
 
 void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
 {
-    EV_DEBUG << ie->getName() << ": " << what << " = ";
+    EV << "IGMPTester: " << ie->getName() << ": " << what << " = ";
 
     if (what == "groups")
     {
@@ -369,7 +369,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
-            EV_DEBUG << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0?"":", ") << group << " " << sourceList.info();
         }
     }
     else if (what == "listeners")
@@ -378,11 +378,11 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
-            EV_DEBUG << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0?"":", ") << group << " " << sourceList.info();
         }
     }
 
-    EV_DEBUG << ".\n";
+    EV << ".\n";
 }
 
 void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest)
@@ -396,7 +396,7 @@ void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest
     controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
 
-    EV_DEBUG << "Sending: " << msg << ".\n";
+    EV << "IGMPTester: Sending: " << msg << ".\n";
     send(msg, "igmpOut");
 }
 
