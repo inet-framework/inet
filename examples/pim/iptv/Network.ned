@@ -17,11 +17,11 @@
 
 package inet.examples.pim.iptv;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.MulticastRouter;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.MulticastRouter;
+import inet.node.inet.StandardHost;
 
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.StandardHost;
 
 //
 // A generated network with grid topology.

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.inet;
+package inet.node.inet;
 
 import inet.networklayer.pim.PIMRouting;
 
@@ -27,7 +27,7 @@ module MulticastRouter extends Router
     parameters:
         @display("i=abstract/router");
         bool hasPIM = default(true);
-        forwardMulticast = true;
+        multicastForwarding = true;
     submodules:
         pim: PIMRouting if hasPIM {
             @display("p=175,287");

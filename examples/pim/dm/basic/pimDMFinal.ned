@@ -20,11 +20,11 @@
 
 package inet.examples.pim.dm.basic;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.MulticastRouter;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ethernet.Eth100M;
-import inet.world.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.MulticastRouter;
+import inet.node.inet.StandardHost;
+
 
 network pimDMFinal
 {
