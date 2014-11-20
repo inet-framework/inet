@@ -9,7 +9,7 @@ Checks that a router sends general queries.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=300s
 cmdenv-express-mode = false
-cmdenv-log-format = "%t %N: "
+#cmdenv-log-format = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
@@ -26,12 +26,12 @@ network=TestIGMPNetwork
 %# queryInterval = 125s
 %# startupQueryInterval = queryInterval / 4
 %#
-%postrun-command: grep "tester: Received" test.out > received.out || true
+%postrun-command: grep "IGMPTester: Received" test.out > received.out || true
 %contains-regex: received.out
-0 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
-31.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
-156.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
-281.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

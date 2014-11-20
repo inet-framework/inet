@@ -11,7 +11,7 @@ See RFC 3376 6.4.2.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = false
-cmdenv-log-format = "%t %N: "
+#cmdenv-log-format = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
@@ -72,15 +72,15 @@ network=TestIGMPNetwork
 %#
 %# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
 %#
-%postrun-command: grep "tester: Received" test.out > tester.out || true
+%postrun-command: grep "IGMPTester: Received" test.out > tester.out || true
 %contains-regex: tester.out
-2 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1,.*>.
-3 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.2,.*>.
-4 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
-6 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.4,.*>.
-7 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.3,.*>.
-8 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
-8 tester: Received: IGMPv3Query<group=225.0.0.1, sourceList=,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.2,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.4,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=,.*>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

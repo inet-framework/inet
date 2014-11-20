@@ -9,7 +9,7 @@ Checks the router leave latency.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=10s
 cmdenv-express-mode = false
-cmdenv-log-format = "%t %N: "
+#cmdenv-log-format = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
@@ -43,10 +43,10 @@ network=TestIGMPNetwork
 %#
 %# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
 %#
-%postrun-command: grep "tester:.*listeners" test.out > tester.out || true
-%contains-regex: tester.out
-1.* tester: eth0: listeners = 225.0.0.1 E\.
-3.* tester: eth0: listeners = \.
+%postrun-command: grep "IGMPTester: .* listeners" test.out > tester.out || true
+%contains: tester.out
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+IGMPTester: eth0: listeners = .
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
