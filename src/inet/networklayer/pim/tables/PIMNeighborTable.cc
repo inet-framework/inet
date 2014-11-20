@@ -17,7 +17,8 @@
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
 #include <algorithm>
-#include "PIMNeighborTable.h"
+
+#include "inet/networklayer/pim/tables/PIMNeighborTable.h"
 
 Register_Abstract_Class(PIMNeighbor);
 Define_Module(PIMNeighborTable);

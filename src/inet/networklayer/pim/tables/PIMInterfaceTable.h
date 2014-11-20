@@ -19,9 +19,9 @@
 #ifndef __INET_PIMINTERFACETABLE_H
 #define __INET_PIMINTERFACETABLE_H
 
-#include "INETDefs.h"
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 /**
  * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.

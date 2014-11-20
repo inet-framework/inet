@@ -19,14 +19,15 @@
 #ifndef __INET_PIMBASE_H
 #define __INET_PIMBASE_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "OperationalBase.h"
-#include "PIMNeighborTable.h"
-#include "PIMInterfaceTable.h"
-#include "PIMPacket.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/networklayer/pim/tables/PIMNeighborTable.h"
+#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
+#include "inet/networklayer/pim/PIMPacket.h"
+
 
 /**
  * Base class of PIMSM and PIMDM modules.

@@ -19,10 +19,10 @@
 #ifndef __INET_PIMSM_H
 #define __INET_PIMSM_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IPv4Route.h"
-#include "PIMBase.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/pim/modes/PIMBase.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
 #define MAX_TTL 255                     /**< Maximum TTL */

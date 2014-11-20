@@ -25,11 +25,11 @@
 #ifndef INET_IGMPV3_H
 #define INET_IGMPV3_H
 
-#include "INETDefs.h"
-#include "IPv4Address.h"
-#include "IGMPMessage.h"
-#include "InterfaceEntry.h"
-#include "IPv4InterfaceData.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IGMPMessage.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 #include <set>
 

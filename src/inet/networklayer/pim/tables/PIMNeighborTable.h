@@ -19,8 +19,8 @@
 #ifndef __INET_PIMNEIGHBORTABLE_H
 #define __INET_PIMNEIGHBORTABLE_H
 
-#include "INETDefs.h"
-#include "InterfaceEntry.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 class PIMNeighborTable;
 

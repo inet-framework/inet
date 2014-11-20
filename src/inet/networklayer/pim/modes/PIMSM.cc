@@ -16,12 +16,12 @@
 //
 // Authors: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
-#include "IPv4InterfaceData.h"
-#include "ModuleAccess.h"
-#include "NotifierConsts.h"
-#include "PIMSM.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/pim/modes/PIMSM.h"
 
 Define_Module(PIMSM);
 

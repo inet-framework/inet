@@ -16,14 +16,14 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "IPv4Datagram.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "InterfaceTable.h"
-#include "IPv4Address.h"
-#include "ModuleAccess.h"
-#include "PIMBase.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/pim/modes/PIMBase.h"
 
 using namespace std;
 

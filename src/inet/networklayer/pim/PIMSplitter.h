@@ -19,11 +19,12 @@
 #ifndef __INET_PIMSPLITTER_H
 #define __INET_PIMSPLITTER_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "IInterfaceTable.h"
-#include "PIMInterfaceTable.h"
-#include "PIMPacket_m.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
+#include "inet/networklayer/pim/PIMPacket_m.h"
+
 
 /**
  * PIMSplitter register itself for PIM protocol (103) in the network layer,

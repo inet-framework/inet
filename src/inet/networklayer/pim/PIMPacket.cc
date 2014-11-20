@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PIMPacket.h"
+#include "inet/networklayer/pim/PIMPacket.h"
 
 Register_Class(PIMHello);
 

@@ -16,9 +16,9 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "IPv4Datagram.h"
-#include "ModuleAccess.h"
-#include "PIMDM.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/pim/modes/PIMDM.h"
 
 Define_Module(PIMDM);
 

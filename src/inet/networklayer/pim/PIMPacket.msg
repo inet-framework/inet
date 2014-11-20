@@ -17,7 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
 cplusplus {{
-#include "IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 #define PIM_HEADER_LENGTH 4
 #define ENCODED_UNICODE_ADDRESS_LENGTH 6 // IPv4 only

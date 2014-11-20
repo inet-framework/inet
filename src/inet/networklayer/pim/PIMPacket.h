@@ -18,7 +18,7 @@
 #ifndef _PIMPACKET_H_
 #define _PIMPACKET_H_
 
-#include "PIMPacket_m.h"
+#include "inet/networklayer/pim/PIMPacket_m.h"
 
 class INET_API PIMHello : public PIMHello_Base
 {

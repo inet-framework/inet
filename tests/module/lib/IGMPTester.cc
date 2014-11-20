@@ -1,17 +1,17 @@
 #include <algorithm>
 #include <fstream>
 
-#include "INETDefs.h"
-#include "IScriptable.h"
-#include "IPv4Address.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4ControlInfo.h"
-#include "IInterfaceTable.h"
-#include "IIPv4RoutingTable.h"
-#include "IPSocket.h"
-#include "IGMPMessage.h"
-#include "ModuleAccess.h"
-#include "NetworkProtocolCommand_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/scenario/IScriptable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/ipv4/IGMPMessage.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 
 using namespace std;
 

@@ -16,13 +16,13 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "IPProtocolId_m.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "ICMPMessage_m.h"
-#include "ModuleAccess.h"
-#include "NetworkProtocolCommand_m.h"
-#include "PIMSplitter.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+#include "inet/networklayer/pim/PIMSplitter.h"
 
 using namespace std;
 

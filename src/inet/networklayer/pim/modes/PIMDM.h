@@ -19,16 +19,16 @@
 #ifndef __INET_PIMDM_H
 #define __INET_PIMDM_H
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "PIMPacket_m.h"
-#include "NotifierConsts.h"
-#include "PIMNeighborTable.h"
-#include "PIMInterfaceTable.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4Route.h"
-#include "PIMBase.h"
+#include "inet/networklayer/pim/PIMPacket_m.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/networklayer/pim/tables/PIMNeighborTable.h"
+#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/pim/modes/PIMBase.h"
 
 /**
  * Implementation of PIM-DM protocol (RFC 3973).

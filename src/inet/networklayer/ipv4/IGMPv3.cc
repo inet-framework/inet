@@ -22,12 +22,12 @@
  * @detail
  */
 
-#include "IGMPv3.h"
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "IPv4RoutingTable.h"
-#include "ModuleAccess.h"
+#include "inet/networklayer/ipv4/IGMPv3.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/common/ModuleAccess.h"
 
 #include <algorithm>
 #include <bitset>

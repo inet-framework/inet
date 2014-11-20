@@ -18,8 +18,9 @@
 #ifndef _IGMPMESSAGE_H_
 #define _IGMPMESSAGE_H_
 
-#include "INETDefs.h"
-#include "IGMPMessage_m.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ipv4/IGMPMessage_m.h"
+
 
 class INET_API IGMPv3Query : public IGMPv3Query_Base
 {

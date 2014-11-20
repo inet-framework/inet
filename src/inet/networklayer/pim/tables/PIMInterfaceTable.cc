@@ -16,10 +16,10 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "InterfaceMatcher.h"
-#include "IPv4InterfaceData.h"
-#include "ModuleAccess.h"
-#include "PIMInterfaceTable.h"
+#include "inet/networklayer/common/InterfaceMatcher.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
 
 using namespace std;
 
