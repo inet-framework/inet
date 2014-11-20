@@ -101,12 +101,12 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
             switch (type)
             {
                 case 0:             options_var[i] = NULL; break;
-                case Holdtime:      options_var[i] = new HoldtimeOption();
-                case LANPruneDelay: options_var[i] = new LANPruneDelayOption();
-                case DRPriority:    options_var[i] = new DRPriorityOption();
-                case GenerationID:  options_var[i] = new GenerationIDOption();
-                //case StateRefreshCapable: TODO
-                //case AddressList:
+                case Holdtime:      options_var[i] = new HoldtimeOption(); break;
+                case LANPruneDelay: options_var[i] = new LANPruneDelayOption(); break;
+                case DRPriority:    options_var[i] = new DRPriorityOption(); break;
+                case GenerationID:  options_var[i] = new GenerationIDOption(); break;
+                //case StateRefreshCapable: TODO  break;
+                //case AddressList: break;
                 default:
                     throw cRuntimeError("PIMHello::parsimUnpack(): unknown option type: %sd.", type);
             }
