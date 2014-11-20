@@ -341,7 +341,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
     }
 
     entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
-    _BGPRoutingTable.push_back(entry);
+    _BGPRoutingTable.push_back(entry);      //FIXME model error?  entry stored in _BGPRoutingTable, but sometimes not stored in _rt, memory leak
 
     if (_BGPSessions[sessionIndex]->getType() == EGP) {
         std::string entryh = entry->getDestination().str();
@@ -360,7 +360,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
             simulation.setContext(this);
         }
     }
-    return NEW_ROUTE_ADDED;
+    return NEW_ROUTE_ADDED;     //FIXME model error? When returns NEW_ROUTE_ADDED then entry stored in _BGPRoutingTable, but sometimes not stored in _rt
 }
 
 bool BGPRouting::tieBreakingProcess(RoutingTableEntry *oldEntry, RoutingTableEntry *entry)
