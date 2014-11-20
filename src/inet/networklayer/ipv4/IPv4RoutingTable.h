@@ -300,7 +300,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     virtual IPv4Route *removeRoute(IPv4Route *entry);
 
     /**
-     * Deletes the given route from the routing table.
+     * Removes the given route from the routing table, and delete it.
      * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
