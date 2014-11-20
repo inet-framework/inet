@@ -1,8 +1,9 @@
-import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.ipv4.IIGMP;
 import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 
 network TestIGMPNetwork
