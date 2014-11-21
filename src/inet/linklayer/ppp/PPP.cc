@@ -39,11 +39,6 @@ simsignal_t PPP::packetReceivedFromLowerSignal = registerSignal("packetReceivedF
 simsignal_t PPP::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t PPP::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
-PPP::PPP()
-{
-    endTransmissionEvent = NULL;
-}
-
 PPP::~PPP()
 {
     cancelAndDelete(endTransmissionEvent);

@@ -37,23 +37,23 @@ class IPassiveQueue;
 class INET_API PPP : public MACBase
 {
   protected:
-    long txQueueLimit;
-    cGate *physOutGate;
-    cChannel *datarateChannel;    // NULL if we're not connected
+    long txQueueLimit = -1;
+    cGate *physOutGate = NULL;
+    cChannel *datarateChannel = NULL;    // NULL if we're not connected
 
     cQueue txQueue;
-    cMessage *endTransmissionEvent;
-    IPassiveQueue *queueModule;
+    cMessage *endTransmissionEvent = NULL;
+    IPassiveQueue *queueModule = NULL;
 
     TxNotifDetails notifDetails;
 
     std::string oldConnColor;
 
     // statistics
-    long numSent;
-    long numRcvdOK;
-    long numBitErr;
-    long numDroppedIfaceDown;
+    long numSent = 0;
+    long numRcvdOK = 0;
+    long numBitErr = 0;
+    long numDroppedIfaceDown = 0;
 
     static simsignal_t txStateSignal;
     static simsignal_t rxPkOkSignal;
@@ -83,7 +83,6 @@ class INET_API PPP : public MACBase
     virtual void clearQueue();
 
   public:
-    PPP();
     virtual ~PPP();
 
   protected:
