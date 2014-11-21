@@ -120,8 +120,8 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          0830-159c
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          1e52-f085
 
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            7088-b179
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            fd13-2ebf
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            fbd3-73ef
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            4afd-cad0
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572
 
@@ -342,7 +342,7 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            954c-991b
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            954c-991b
 
-/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            0105-2cdc
+/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            b014-246e
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            cb47-82c8
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            15a0-a9a9
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            647e-f0fc
