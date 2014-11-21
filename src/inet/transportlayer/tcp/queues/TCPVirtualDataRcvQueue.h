@@ -38,7 +38,7 @@ namespace tcp {
 class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 {
   protected:
-    uint32 rcv_nxt;
+    uint32 rcv_nxt = 0;
 
     class Region
     {
