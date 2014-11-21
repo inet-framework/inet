@@ -36,28 +36,28 @@ namespace inet {
  */
 class INET_API PIMSplitter : public cSimpleModule
 {
-	private:
-	    IInterfaceTable *ift;
-	    PIMInterfaceTable *pimIft;
+  private:
+    IInterfaceTable *ift;
+    PIMInterfaceTable *pimIft;
 
-	    cGate *ipIn;
-	    cGate *ipOut;
-	    cGate *pimDMIn;
-	    cGate *pimDMOut;
-        cGate *pimSMIn;
-        cGate *pimSMOut;
+    cGate *ipIn;
+    cGate *ipOut;
+    cGate *pimDMIn;
+    cGate *pimDMOut;
+    cGate *pimSMIn;
+    cGate *pimSMOut;
 
-    public:
-        PIMSplitter() : ift(NULL), pimIft(NULL) {};
+  public:
+    PIMSplitter() : ift(NULL), pimIft(NULL) {};
 
-	protected:
-		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
-        virtual void initialize(int stage);
-		virtual void handleMessage(cMessage *msg);
-		virtual void processPIMPacket(PIMPacket *pkt);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
+    virtual void processPIMPacket(PIMPacket *pkt);
 };
 
-} // namespace inet
+}    // namespace inet
 
-#endif
+#endif // ifndef __INET_PIMSPLITTER_H
 

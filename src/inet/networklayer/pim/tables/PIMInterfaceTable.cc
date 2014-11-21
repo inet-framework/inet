@@ -24,11 +24,10 @@
 using namespace std;
 
 namespace inet {
-
 Define_Module(PIMInterfaceTable);
 
 // for WATCH_VECTOR
-std::ostream& operator<<(std::ostream& os, const PIMInterface* e)
+std::ostream& operator<<(std::ostream& os, const PIMInterface *e)
 {
     os << "name = " << e->getInterfacePtr()->getName() << "; mode = ";
     if (e->getMode() == PIMInterface::DenseMode)
@@ -47,7 +46,7 @@ std::string PIMInterface::info() const
 
 PIMInterfaceTable::~PIMInterfaceTable()
 {
-    for (std::vector<PIMInterface*>::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
+    for (std::vector<PIMInterface *>::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         delete *it;
 }
 
@@ -60,12 +59,10 @@ void PIMInterfaceTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
-		WATCH_VECTOR(pimInterfaces);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH_VECTOR(pimInterfaces);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
         configureInterfaces(par("pimConfig").xmlValue());
 
         cModule *host = findContainingNode(this);
@@ -82,14 +79,11 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
     InterfaceMatcher matcher(interfaceElements);
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-    for (int k = 0; k < ift->getNumInterfaces(); ++k)
-    {
+    for (int k = 0; k < ift->getNumInterfaces(); ++k) {
         InterfaceEntry *ie = ift->getInterface(k);
-        if (ie->isMulticast() && !ie->isLoopback())
-        {
+        if (ie->isMulticast() && !ie->isLoopback()) {
             int i = matcher.findMatchingSelector(ie);
-            if (i >= 0)
-            {
+            if (i >= 0) {
                 PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
                 if (pimInterface)
                     pimInterfaces.push_back(pimInterface);
@@ -120,10 +114,11 @@ PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement
 
 PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
 {
-	for(int i = 0; i < getNumInterfaces(); i++)
-		if(interfaceId == getInterface(i)->getInterfaceId())
-			return getInterface(i);
-	return NULL;
+    for (int i = 0; i < getNumInterfaces(); i++)
+        if (interfaceId == getInterface(i)->getInterfaceId())
+            return getInterface(i);
+
+    return NULL;
 }
 
 void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
@@ -131,15 +126,13 @@ void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
     Enter_Method_Silent();
     printNotificationBanner(signalID, details);
 
-    if (signalID == NF_INTERFACE_CREATED)
-    {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
+    if (signalID == NF_INTERFACE_CREATED) {
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(details);
         if (ie->isMulticast() && !ie->isLoopback())
             addInterface(ie);
     }
-    else if (signalID == NF_INTERFACE_DELETED)
-    {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
+    else if (signalID == NF_INTERFACE_DELETED) {
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(details);
         if (ie->isMulticast() && !ie->isLoopback())
             removeInterface(ie);
     }
@@ -150,6 +143,7 @@ PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface
     for (PIMInterfaceVector::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         if ((*it)->getInterfacePtr() == ie)
             return it;
+
     return pimInterfaces.end();
 }
 
@@ -157,13 +151,12 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
 {
     ASSERT(findInterface(ie) == pimInterfaces.end());
 
-    cXMLElement * config = par("pimConfig").xmlValue();
+    cXMLElement *config = par("pimConfig").xmlValue();
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
 
     int i = matcher.findMatchingSelector(ie);
-    if (i >= 0)
-    {
+    if (i >= 0) {
         PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
         if (pimInterface)
             pimInterfaces.push_back(pimInterface);
@@ -176,6 +169,5 @@ void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
     if (it != pimInterfaces.end())
         pimInterfaces.erase(it);
 }
-
-} //namespace inet
+}    //namespace inet
 

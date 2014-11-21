@@ -620,7 +620,7 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
-            processQuery(ie, controlInfo->getSrcAddr(), check_and_cast<IGMPQuery*>(msg));
+            processQuery(ie, controlInfo->getSrcAddr(), check_and_cast<IGMPQuery *>(msg));
             break;
 
         //case IGMPV1_MEMBERSHIP_REPORT:
@@ -628,11 +628,11 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
         //    delete msg;
         //    break;
         case IGMPV2_MEMBERSHIP_REPORT:
-            processV2Report(ie, check_and_cast<IGMPv2Report*>(msg));
+            processV2Report(ie, check_and_cast<IGMPv2Report *>(msg));
             break;
 
         case IGMPV2_LEAVE_GROUP:
-            processLeave(ie, check_and_cast<IGMPv2Leave*>(msg));
+            processLeave(ie, check_and_cast<IGMPv2Leave *>(msg));
             break;
 
         default:
@@ -704,7 +704,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPQue
     numQueriesRecv++;
 
     IPv4Address& groupAddr = msg->getGroupAddress();
-    IGMPv2Query *v2Query = dynamic_cast<IGMPv2Query*>(msg);
+    IGMPv2Query *v2Query = dynamic_cast<IGMPv2Query *>(msg);
     int maxRespTime = v2Query ? v2Query->getMaxRespTime() : 100;
 
     if (groupAddr.isUnspecified()) {
@@ -852,5 +852,5 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPv2Leave *msg)
     delete msg;
 }
 
-} // namespace inet
+}    // namespace inet
 

@@ -28,72 +28,71 @@ namespace inet {
 /**
  * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.
  */
-class INET_API PIMInterface: public cObject
+class INET_API PIMInterface : public cObject
 {
-    public:
-        enum PIMMode
-        {
-            DenseMode = 1,
-            SparseMode = 2
-        };
+  public:
+    enum PIMMode {
+        DenseMode = 1,
+        SparseMode = 2
+    };
 
-	protected:
-        InterfaceEntry *ie;
+  protected:
+    InterfaceEntry *ie;
 
-        // parameters
-        PIMMode mode;
-        bool stateRefreshFlag;
+    // parameters
+    PIMMode mode;
+    bool stateRefreshFlag;
 
-        // state
-        IPv4Address drAddress;
+    // state
+    IPv4Address drAddress;
 
-	public:
-        PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
-		    : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
-	    virtual std::string info() const;
+  public:
+    PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
+        : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
+    virtual std::string info() const;
 
-	    int getInterfaceId() const { return ie->getInterfaceId(); }
-		InterfaceEntry *getInterfacePtr() const {return ie;}
-		PIMMode getMode() const {return mode;}
-		bool getSR() const {return stateRefreshFlag;}
+    int getInterfaceId() const { return ie->getInterfaceId(); }
+    InterfaceEntry *getInterfacePtr() const { return ie; }
+    PIMMode getMode() const { return mode; }
+    bool getSR() const { return stateRefreshFlag; }
 
-		IPv4Address getDRAddress() const { return drAddress; }
-		void setDRAddress(IPv4Address address) { drAddress = address; }
+    IPv4Address getDRAddress() const { return drAddress; }
+    void setDRAddress(IPv4Address address) { drAddress = address; }
 };
-
 
 /**
  * PIMInterfaceTable contains an PIMInterface entry for each interface on which PIM is enabled.
  * When interfaces are added to/deleted from the InterfaceTable, then the corresponding
  * PIMInterface entry is added/deleted automatically.
  */
-class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
+class INET_API PIMInterfaceTable : public cSimpleModule, protected cListener
 {
-	protected:
-        typedef std::vector<PIMInterface*> PIMInterfaceVector;
+  protected:
+    typedef std::vector<PIMInterface *> PIMInterfaceVector;
 
-		PIMInterfaceVector pimInterfaces;
+    PIMInterfaceVector pimInterfaces;
 
-	public:
-		virtual ~PIMInterfaceTable();
+  public:
+    virtual ~PIMInterfaceTable();
 
-        virtual int getNumInterfaces() {return pimInterfaces.size();}
-		virtual PIMInterface *getInterface(int k) {return pimInterfaces[k];}
-        virtual PIMInterface *getInterfaceById(int interfaceId);
+    virtual int getNumInterfaces() { return pimInterfaces.size(); }
+    virtual PIMInterface *getInterface(int k) { return pimInterfaces[k]; }
+    virtual PIMInterface *getInterfaceById(int interfaceId);
 
-	protected:
-        virtual int numInitStages() const  {return NUM_INIT_STAGES;}
-		virtual void initialize(int stage);
-		virtual void handleMessage(cMessage *);
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-        virtual void configureInterfaces(cXMLElement *config);
-		virtual PIMInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
-        virtual PIMInterfaceVector::iterator findInterface(InterfaceEntry *ie);
-        virtual void addInterface(InterfaceEntry *ie);
-        virtual void removeInterface(InterfaceEntry *ie);
+    virtual void configureInterfaces(cXMLElement *config);
+    virtual PIMInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
+    virtual PIMInterfaceVector::iterator findInterface(InterfaceEntry *ie);
+    virtual void addInterface(InterfaceEntry *ie);
+    virtual void removeInterface(InterfaceEntry *ie);
 };
 
-} // namespace inet
+}    // namespace inet
 
-#endif
+#endif // ifndef __INET_PIMINTERFACETABLE_H
+

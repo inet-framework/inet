@@ -25,7 +25,7 @@ namespace inet {
 class INET_API PIMHello : public PIMHello_Base
 {
   protected:
-    HelloOptionPtr *options_var; // array ptr
+    HelloOptionPtr *options_var;    // array ptr
     unsigned int options_arraysize;
 
   private:
@@ -36,11 +36,11 @@ class INET_API PIMHello : public PIMHello_Base
     bool operator==(const PIMHello&);
 
   public:
-    PIMHello(const char *name=NULL, int kind=0);
+    PIMHello(const char *name = NULL, int kind = 0);
     PIMHello(const PIMHello& other);
     virtual ~PIMHello();
     PIMHello& operator=(const PIMHello& other);
-    virtual PIMHello *dup() const {return new PIMHello(*this);}
+    virtual PIMHello *dup() const { return new PIMHello(*this); }
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -48,10 +48,11 @@ class INET_API PIMHello : public PIMHello_Base
     virtual void setOptionsArraySize(unsigned int size);
     virtual unsigned int getOptionsArraySize() const;
     virtual HelloOptionPtr& getOptions(unsigned int k);
-    virtual const HelloOptionPtr& getOptions(unsigned int k) const {return const_cast<PIMHello*>(this)->getOptions(k);}
+    virtual const HelloOptionPtr& getOptions(unsigned int k) const { return const_cast<PIMHello *>(this)->getOptions(k); }
     virtual void setOptions(unsigned int k, const HelloOptionPtr& options);
 };
 
-} // namespace inet
+}    // namespace inet
 
-#endif // _PIMPACKET_H_
+#endif    // _PIMPACKET_H_
+

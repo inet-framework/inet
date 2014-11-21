@@ -21,8 +21,7 @@ namespace inet {
 
 Register_Class(PIMHello);
 
-
-PIMHello::PIMHello(const char *name, int kind) : PIMHello_Base(name,kind)
+PIMHello::PIMHello(const char *name, int kind) : PIMHello_Base(name, kind)
 {
     this->setType(Hello);
 
@@ -39,17 +38,17 @@ PIMHello::PIMHello(const PIMHello& other) : PIMHello_Base(other)
 
 PIMHello::~PIMHello()
 {
-    if (options_var)
-    {
-        for (unsigned int i=0; i < options_arraysize; i++)
+    if (options_var) {
+        for (unsigned int i = 0; i < options_arraysize; i++)
             delete options_var[i];
     }
-    delete [] options_var;
+    delete[] options_var;
 }
 
 PIMHello& PIMHello::operator=(const PIMHello& other)
 {
-    if (this==&other) return *this;
+    if (this == &other)
+        return *this;
     PIMPacket::operator=(other);
     copy(other);
     return *this;
@@ -59,11 +58,11 @@ void PIMHello::copy(const PIMHello& other)
 {
     for (unsigned int i = 0; i < options_arraysize; i++)
         delete options_var[i];
-    delete [] options_var;
+    delete[] options_var;
 
-    this->options_var = (other.options_arraysize==0) ? NULL : new HelloOptionPtr[other.options_arraysize];
+    this->options_var = (other.options_arraysize == 0) ? NULL : new HelloOptionPtr[other.options_arraysize];
     options_arraysize = other.options_arraysize;
-    for (unsigned int i=0; i<options_arraysize; i++)
+    for (unsigned int i = 0; i < options_arraysize; i++)
         this->options_var[i] = other.options_var[i]->dup();
 }
 
@@ -71,10 +70,8 @@ void PIMHello::parsimPack(cCommBuffer *b)
 {
     PIMHello_Base::parsimPack(b);
     b->pack(options_arraysize);
-    for (unsigned int i=0; i<options_arraysize; i++)
-    {
-        if (options_var[i])
-        {
+    for (unsigned int i = 0; i < options_arraysize; i++) {
+        if (options_var[i]) {
             doPacking(b, options_var[i]->getType());
             doPacking(b, options_var[i]);
         }
@@ -86,25 +83,39 @@ void PIMHello::parsimPack(cCommBuffer *b)
 void PIMHello::parsimUnpack(cCommBuffer *b)
 {
     PIMHello_Base::parsimUnpack(b);
-    for (unsigned int i=0; i < options_arraysize; i++)
+    for (unsigned int i = 0; i < options_arraysize; i++)
         delete options_var[i];
-    delete [] this->options_var;
+    delete[] this->options_var;
     b->unpack(options_arraysize);
-    if (options_arraysize==0) {
+    if (options_arraysize == 0) {
         this->options_var = 0;
-    } else {
+    }
+    else {
         this->options_var = new HelloOptionPtr[options_arraysize];
-        for (unsigned int i=0; i < options_arraysize; i++)
-        {
+        for (unsigned int i = 0; i < options_arraysize; i++) {
             short int type;
             doUnpacking(b, type);
-            switch (type)
-            {
-                case 0:             options_var[i] = NULL; break;
-                case Holdtime:      options_var[i] = new HoldtimeOption(); break;
-                case LANPruneDelay: options_var[i] = new LANPruneDelayOption(); break;
-                case DRPriority:    options_var[i] = new DRPriorityOption(); break;
-                case GenerationID:  options_var[i] = new GenerationIDOption(); break;
+            switch (type) {
+                case 0:
+                    options_var[i] = NULL;
+                    break;
+
+                case Holdtime:
+                    options_var[i] = new HoldtimeOption();
+                    break;
+
+                case LANPruneDelay:
+                    options_var[i] = new LANPruneDelayOption();
+                    break;
+
+                case DRPriority:
+                    options_var[i] = new DRPriorityOption();
+                    break;
+
+                case GenerationID:
+                    options_var[i] = new GenerationIDOption();
+                    break;
+
                 //case StateRefreshCapable: TODO  break;
                 //case AddressList: break;
                 default:
@@ -118,13 +129,13 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
 
 void PIMHello::setOptionsArraySize(unsigned int size)
 {
-    HelloOptionPtr *options_var2 = (size==0) ? NULL : new HelloOptionPtr[size];
-    for (unsigned int i=0; i<size; i++)
+    HelloOptionPtr *options_var2 = (size == 0) ? NULL : new HelloOptionPtr[size];
+    for (unsigned int i = 0; i < size; i++)
         options_var2[i] = i < options_arraysize ? options_var[i] : NULL;
-    for (unsigned int i=size; i < options_arraysize; i++)
+    for (unsigned int i = size; i < options_arraysize; i++)
         delete options_var[i];
     options_arraysize = size;
-    delete [] options_var;
+    delete[] options_var;
     this->options_var = options_var2;
 }
 
@@ -135,16 +146,18 @@ unsigned int PIMHello::getOptionsArraySize() const
 
 HelloOptionPtr& PIMHello::getOptions(unsigned int k)
 {
-    if (k>=options_arraysize) throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
+    if (k >= options_arraysize)
+        throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     return options_var[k];
 }
 
 void PIMHello::setOptions(unsigned int k, const HelloOptionPtr& options)
 {
-    if (k>=options_arraysize) throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
+    if (k >= options_arraysize)
+        throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     delete this->options_var[k];
     this->options_var[k] = options;
 }
 
-} // namespace inet
+}    // namespace inet
 

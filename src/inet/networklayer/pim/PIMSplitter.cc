@@ -25,7 +25,6 @@
 #include "inet/networklayer/pim/PIMSplitter.h"
 
 namespace inet {
-
 using namespace std;
 
 Define_Module(PIMSplitter);
@@ -34,8 +33,7 @@ void PIMSplitter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         pimIft = getModuleFromPar<PIMInterfaceTable>(par("pimInterfaceTableModule"), this);
 
@@ -46,8 +44,7 @@ void PIMSplitter::initialize(int stage)
         pimSMIn = gate("pimSMIn");
         pimSMOut = gate("pimSMOut");
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER)
-    {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         IPSocket ipSocket(ipOut);
         ipSocket.registerProtocol(IP_PROT_PIM);
     }
@@ -57,37 +54,31 @@ void PIMSplitter::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->getArrivalGate();
 
-    if (arrivalGate == ipIn)
-    {
-        PIMPacket *pimPacket = dynamic_cast<PIMPacket*>(msg);
-        if (pimPacket)
-        {
+    if (arrivalGate == ipIn) {
+        PIMPacket *pimPacket = dynamic_cast<PIMPacket *>(msg);
+        if (pimPacket) {
             processPIMPacket(pimPacket);
         }
-        else if (dynamic_cast<ICMPMessage*>(msg))
-        {
+        else if (dynamic_cast<ICMPMessage *>(msg)) {
             EV_WARN << "Received ICMP error, ignoring.\n";
             delete msg;
         }
         else
             throw cRuntimeError("PIMSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
     }
-    else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn)
-    {
-        if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
-        {
+    else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
+        if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
             // Drop protocol registrations, splitter register PIM protocol itself
             delete msg;
         }
-        else
-        {
+        else {
             // Send other packets to the network layer
             EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
             send(msg, ipOut);
         }
     }
     else
-        throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate?arrivalGate->getBaseName():"NULL");
+        throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "NULL");
 }
 
 void PIMSplitter::processPIMPacket(PIMPacket *pkt)
@@ -99,26 +90,25 @@ void PIMSplitter::processPIMPacket(PIMPacket *pkt)
     EV_INFO << "Received packet on interface '" << ie->getName() << "'" << endl;
 
     PIMInterface *pimInt = pimIft->getInterfaceById(ie->getInterfaceId());
-    if (!pimInt)
-    {
+    if (!pimInt) {
         EV_WARN << "PIM is not enabled on interface '" << ie->getName() << "', dropping packet." << endl;
         delete pkt;
     }
 
-    switch(pimInt->getMode())
-    {
+    switch (pimInt->getMode()) {
         case PIMInterface::DenseMode:
             EV_INFO << "Sending packet to PIMDM.\n";
             send(pkt, pimDMOut);
             break;
+
         case PIMInterface::SparseMode:
             EV_INFO << "Sending packet to PIMSM.\n";
             send(pkt, pimSMOut);
             break;
+
         default:
             throw cRuntimeError("PIMSplitter: PIM mode of interface '%s' is invalid.", ie->getName());
     }
 }
-
-} // namespace inet
+}    // namespace inet
 
