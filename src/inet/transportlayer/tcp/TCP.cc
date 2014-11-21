@@ -534,14 +534,14 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             //FIXME implementation
             isOperational = true;
             updateDisplayString();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
             //FIXME close connections???
             reset();
             isOperational = false;
@@ -549,7 +549,7 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             //FIXME implementation
             reset();
             isOperational = false;
