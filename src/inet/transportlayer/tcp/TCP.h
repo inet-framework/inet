@@ -134,7 +134,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
-    ushort lastEphemeralPort;
+    ushort lastEphemeralPort = (ushort)-1;
     std::multiset<ushort> usedEphemeralPorts;
 
   protected:
@@ -152,8 +152,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     static bool testing;    // switches between tcpEV and testingEV
     static bool logverbose;    // if !testing, turns on more verbose logging
 
-    bool recordStatistics;    // output vectors on/off
-    bool isOperational;    // lifecycle: node is up/down
+    bool recordStatistics = false;    // output vectors on/off
+    bool isOperational = false;    // lifecycle: node is up/down
 
   public:
     TCP() {}
