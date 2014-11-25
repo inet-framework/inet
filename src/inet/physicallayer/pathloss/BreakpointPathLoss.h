@@ -27,7 +27,7 @@ class INET_API BreakpointPathLoss : public cModule, public IPathLoss
 	BreakpointPathLoss();
 	virtual void printToStream(std::ostream& stream) const;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
-    virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const { return m(NaN); }
+    virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const;
 };
 
 } // namespace physicallayer
