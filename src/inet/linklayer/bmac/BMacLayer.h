@@ -69,6 +69,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     BMacLayer()
         : MACProtocolBase()
         , macQueue()
+        , radio(NULL)
+        , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
