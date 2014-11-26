@@ -36,6 +36,7 @@ Register_Class(IPv4MulticastRoute);
 
 IPv4Route::~IPv4Route()
 {
+    delete protocolData;
 }
 
 std::string IPv4Route::info() const
