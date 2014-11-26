@@ -211,16 +211,6 @@ Define_Module(RoutingTableRecorder);
 
 Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
 
-class RoutingTableRecorderListener : public cListener
-{
-  private:
-    RoutingTableRecorder *recorder;
-
-  public:
-    RoutingTableRecorderListener(RoutingTableRecorder *recorder) : recorder(recorder) {}
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) { recorder->receiveChangeNotification(source, signalID, obj); }
-};
-
 RoutingTableRecorder::RoutingTableRecorder()
 {
     routingLogFile = NULL;
@@ -248,17 +238,16 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 void RoutingTableRecorder::hookListeners()
 {
     cModule *systemModule = simulation.getSystemModule();
-    cListener *listener = new RoutingTableRecorderListener(this);
-    systemModule->subscribe(NF_INTERFACE_CREATED, listener);
-    systemModule->subscribe(NF_INTERFACE_DELETED, listener);
-    systemModule->subscribe(NF_INTERFACE_CONFIG_CHANGED, listener);
-    systemModule->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, listener);
-    //systemModule->subscribe(NF_INTERFACE_IPv6CONFIG_CHANGED, listener);
-    //systemModule->subscribe(NF_INTERFACE_STATE_CHANGED, listener);
+    systemModule->subscribe(NF_INTERFACE_CREATED, this);
+    systemModule->subscribe(NF_INTERFACE_DELETED, this);
+    systemModule->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+    systemModule->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+    //systemModule->subscribe(NF_INTERFACE_IPv6CONFIG_CHANGED, this);
+    //systemModule->subscribe(NF_INTERFACE_STATE_CHANGED, this);
 
-    systemModule->subscribe(NF_ROUTE_ADDED, listener);
-    systemModule->subscribe(NF_ROUTE_DELETED, listener);
-    systemModule->subscribe(NF_ROUTE_CHANGED, listener);
+    systemModule->subscribe(NF_ROUTE_ADDED, this);
+    systemModule->subscribe(NF_ROUTE_DELETED, this);
+    systemModule->subscribe(NF_ROUTE_CHANGED, this);
 }
 
 void RoutingTableRecorder::ensureRoutingLogFileOpen()

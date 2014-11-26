@@ -86,16 +86,16 @@ namespace inet {
  *
  * @see IPv4RoutingTable, IPv4Route
  */
-class INET_API RoutingTableRecorder : public cSimpleModule
+class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
 {
-    friend class RoutingTableRecorderListener;
-
   private:
     FILE *routingLogFile;
 
   public:
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) { receiveChangeNotification(source, signalID, obj); }
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
