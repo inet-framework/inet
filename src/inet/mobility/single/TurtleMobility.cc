@@ -22,31 +22,14 @@ namespace inet {
 
 Define_Module(TurtleMobility);
 
-void TurtleMobility::computeMaxSpeed(cXMLElement *nodes)
+TurtleMobility::TurtleMobility() :
+    turtleScript(NULL),
+    nextStatement(NULL),
+    speed(0),
+    angle(0),
+    borderPolicy(REFLECT),
+    maxSpeed(0)
 {
-    // Recursively traverse the whole config file, looking for
-    // speed attributes
-    cXMLElementList childs = nodes->getChildren();
-    for (cXMLElementList::iterator it = childs.begin(); it != childs.end(); it++)
-    {
-        const char *speedAttr = (*it)->getAttribute("speed");
-        if (speedAttr)
-        {
-            double speed = atof(speedAttr);
-            if (speed > maxSpeed)
-                maxSpeed = speed;
-        }
-        if (*it)
-            computeMaxSpeed(*it);
-    }
-}
-
-TurtleMobility::TurtleMobility()
-{
-    turtleScript = NULL;
-    nextStatement = NULL;
-    speed = 0;
-    angle = 0;
 }
 
 void TurtleMobility::initialize(int stage)
@@ -353,6 +336,25 @@ void TurtleMobility::gotoNextStatement()
     else {
         // go to next statement (must exist -- see "if" above)
         nextStatement = nextStatement->getNextSibling();
+    }
+}
+
+void TurtleMobility::computeMaxSpeed(cXMLElement *nodes)
+{
+    // Recursively traverse the whole config file, looking for
+    // speed attributes
+    cXMLElementList childs = nodes->getChildren();
+    for (cXMLElementList::iterator it = childs.begin(); it != childs.end(); it++)
+    {
+        const char *speedAttr = (*it)->getAttribute("speed");
+        if (speedAttr)
+        {
+            double speed = atof(speedAttr);
+            if (speed > maxSpeed)
+                maxSpeed = speed;
+        }
+        if (*it)
+            computeMaxSpeed(*it);
     }
 }
 
