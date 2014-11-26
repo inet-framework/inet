@@ -66,6 +66,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
         , macState(IDLE_1)
         , status(STATUS_OK)
         , radio(NULL)
+        , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
         , sifs()
         , macAckWaitDuration()
         , headerLength(0)
