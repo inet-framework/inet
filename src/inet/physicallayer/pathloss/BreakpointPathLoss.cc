@@ -18,8 +18,8 @@ BreakpointPathLoss::BreakpointPathLoss() :
 void BreakpointPathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        l01 = math::dB2fraction(par("L01"));
-        l02 = math::dB2fraction(par("L02"));
+        l01 = math::dB2fraction(par("l01"));
+        l02 = math::dB2fraction(par("l02"));
         alpha1 = par("alpha1");
         alpha2 = par("alpha2");
         breakpointDistance = m(par("breakpointDistance"));
@@ -47,6 +47,26 @@ double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m
         return 1 / (l01 * pow(distance.get(), alpha1));
     else
         return 1 / (l02 * pow(unit(distance / breakpointDistance).get(), alpha2));
+}
+
+m BreakpointPathLoss::computeRange(mps propagationSpeed, Hz frequency, double loss) const
+{
+    // this assumes the path loss is a continuous function
+    // the result should be the same for the second case including l02 and alpha2
+    double breakpointPathLoss = 1 / (l01 * pow(breakpointDistance.get(), alpha1));
+
+    if(loss < breakpointPathLoss) {
+        // the allowed loss factor is smaller than the one faced at the breakpoint distance
+        // -> range is higher than breakpointDistance
+        // loss = 1 / (l02 * (d / d0)^alpha2)
+        // (d / d0)^alpha2 = 1 / (loss * l02)
+        // (d / d0) = 1 / ((loss * l02)^(1/alpha2))
+        // d = d0 / ((loss * l02)^(1/alpha2))
+        return breakpointDistance / (pow(loss * l02, 1/alpha2));
+    }
+    else {
+        return m(1) / (pow(loss * l01, 1/alpha1));
+    }
 }
 
 } // namespace physicallayer
