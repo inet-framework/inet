@@ -17,6 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/common/INETMath.h"
 #include "inet/routing/dymo/DYMO.h"
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
@@ -46,13 +47,33 @@ Define_Module(DYMO);
 // construction
 //
 
-DYMO::DYMO()
+DYMO::DYMO() :
+    clientAddresses(NULL),
+    useMulticastRREP(false),
+    interfaces(NULL),
+    activeInterval(NaN),
+    maxIdleTime(NaN),
+    maxSequenceNumberLifetime(NaN),
+    routeRREQWaitTime(NaN),
+    rreqHolddownTime(NaN),
+    maxHopCount(-1),
+    discoveryAttemptsMax(-1),
+    appendInformation(false),
+    bufferSizePackets(-1),
+    bufferSizeBytes(-1),
+    maxJitter(NaN),
+    sendIntermediateRREP(false),
+    minHopLimit(-1),
+    maxHopLimit(-1),
+    host(NULL),
+    nodeStatus(NULL),
+    addressType(NULL),
+    interfaceTable(NULL),
+    routingTable(NULL),
+    networkProtocol(NULL),
+    expungeTimer(NULL),
+    sequenceNumber(0)
 {
-    addressType = NULL;
-    interfaceTable = NULL;
-    routingTable = NULL;
-    networkProtocol = NULL;
-    expungeTimer = NULL;
 }
 
 DYMO::~DYMO()
