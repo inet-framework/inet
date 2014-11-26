@@ -674,8 +674,8 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
         EV_DEBUG << "Passing on command " << msg->getName() << " to physical layer\n";
         if (pendingRadioConfigMsg != NULL) {
             // merge contents of the old command into the new one, then delete it
-            RadioConfigureCommand *oldConfigureCommand = check_and_cast<RadioConfigureCommand *>(pendingRadioConfigMsg->getControlInfo());
-            RadioConfigureCommand *newConfigureCommand = check_and_cast<RadioConfigureCommand *>(msg->getControlInfo());
+            ConfigureRadioCommand *oldConfigureCommand = check_and_cast<ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
+            ConfigureRadioCommand *newConfigureCommand = check_and_cast<ConfigureRadioCommand *>(msg->getControlInfo());
             if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
                 newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
             if (isNaN(newConfigureCommand->getBitrate().get()) && !isNaN(oldConfigureCommand->getBitrate().get()))
@@ -1552,8 +1552,8 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
 {
     double tim;
     double bitRate = bitrate;
-    if (dynamic_cast<RadioTransmissionRequest *>(frameToSend->getControlInfo())) {
-        bitRate = dynamic_cast<RadioTransmissionRequest *>(frameToSend->getControlInfo())->getBitrate().get();
+    if (dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo())) {
+        bitRate = dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo())->getBitrate().get();
         if (bitRate == 0)
             bitRate = bitrate;
     }
@@ -1776,9 +1776,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
 
     if (frameToSend->getControlInfo() != NULL) {
         cObject *ctr = frameToSend->getControlInfo();
-        RadioTransmissionRequest *ctrl = dynamic_cast<RadioTransmissionRequest *>(ctr);
+        TransmissionRequest *ctrl = dynamic_cast<TransmissionRequest *>(ctr);
         if (ctrl == NULL)
-            throw cRuntimeError("control info is not RadioTransmissionRequest but %s", ctr->getClassName());
+            throw cRuntimeError("control info is not TransmissionRequest but %s", ctr->getClassName());
         frame->setControlInfo(ctrl->dup());
     }
     if (isMulticast(frameToSend))
@@ -1792,8 +1792,8 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
             ASSERT(transmissionQueue()->end() != nextframeToSend);
             double bitRate = bitrate;
             int size = (*nextframeToSend)->getBitLength();
-            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<RadioTransmissionRequest *>(transmissionQueue()->front()->getControlInfo())) {
-                bitRate = dynamic_cast<RadioTransmissionRequest *>(transmissionQueue()->front()->getControlInfo())->getBitrate().get();
+            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo())) {
+                bitRate = dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo())->getBitrate().get();
                 if (bitRate == 0)
                     bitRate = bitrate;
             }
@@ -1847,10 +1847,10 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
-    RadioTransmissionRequest *oldTransmissionRequest = dynamic_cast<RadioTransmissionRequest *>(frameToSend->getControlInfo());
+    TransmissionRequest *oldTransmissionRequest = dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo());
     if (oldTransmissionRequest) {
         EV_DEBUG << "Per frame1 params" << endl;
-        RadioTransmissionRequest *newTransmissionRequest = new RadioTransmissionRequest();
+        TransmissionRequest *newTransmissionRequest = new TransmissionRequest();
         *newTransmissionRequest = *oldTransmissionRequest;
         frame->setControlInfo(newTransmissionRequest);
     }
@@ -1862,7 +1862,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo() == NULL);
-    RadioTransmissionRequest *ctrl = new RadioTransmissionRequest();
+    TransmissionRequest *ctrl = new TransmissionRequest();
     ctrl->setBitrate(bps(basicBitrate));
     frame->setControlInfo(ctrl);
     return frame;
@@ -1871,7 +1871,7 @@ Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 Ieee80211Frame *Ieee80211Mac::setControlBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==NULL);
-    RadioTransmissionRequest *ctrl = new RadioTransmissionRequest();
+    TransmissionRequest *ctrl = new TransmissionRequest();
     ctrl->setBitrate((bps)controlBitRate);
     frame->setControlInfo(ctrl);
     return frame;
@@ -1884,13 +1884,13 @@ Ieee80211Frame *Ieee80211Mac::setBitrateFrame(Ieee80211Frame *frame)
             delete frame->removeControlInfo();
         return frame;
     }
-    RadioTransmissionRequest *ctrl = NULL;
+    TransmissionRequest *ctrl = NULL;
     if (frame->getControlInfo() == NULL) {
-        ctrl = new RadioTransmissionRequest();
+        ctrl = new TransmissionRequest();
         frame->setControlInfo(ctrl);
     }
     else
-        ctrl = dynamic_cast<RadioTransmissionRequest *>(frame->getControlInfo());
+        ctrl = dynamic_cast<TransmissionRequest *>(frame->getControlInfo());
     if (ctrl)
         ctrl->setBitrate(bps(getBitrate()));
     return frame;
@@ -2042,10 +2042,10 @@ void Ieee80211Mac::popTransmissionQueue()
 
 double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 {
-    RadioTransmissionRequest *ctrl;
+    TransmissionRequest *ctrl;
     double duration;
     EV_DEBUG << *msg;
-    ctrl = dynamic_cast<RadioTransmissionRequest *>(msg->removeControlInfo());
+    ctrl = dynamic_cast<TransmissionRequest *>(msg->removeControlInfo());
     if (ctrl) {
         EV_DEBUG << "Per frame2 params bitrate " << ctrl->getBitrate().get() / 1e6 << "Mb" << endl;
         duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate().get());

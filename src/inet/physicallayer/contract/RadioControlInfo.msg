@@ -19,7 +19,7 @@ cplusplus {{
 #include "inet/physicallayer/base/PhysicalLayerDefs.h"
 }}
 
-namespace inet;
+namespace inet::physicallayer;
 
 class noncobject bps;
 class noncobject W;
@@ -33,11 +33,11 @@ enum RadioCommandCode
 }
 
 //
-// Control info attached to a command that is sent to the ~Radio.
+// Control info attached to a configure command that is sent to the ~Radio.
 //
-class RadioConfigureCommand
+class ConfigureRadioCommand
 {
-    int channelNumber = -1;  // new channel number in the range [0, numChannels] or -1 if not set.
+    int channelNumber = -1; // new channel number in the range [0, numChannels] or -1 if not set.
     bps bitrate = bps(NaN); // new default bitrate in the range (0, +infinity) or NaN if not set.
     W power = W(NaN);       // new default transmission power in the range (0, +infinity) or NaN if not set.
 }
@@ -45,7 +45,7 @@ class RadioConfigureCommand
 //
 // Control info attached to a mac frame that is sent down to the ~Radio.
 //
-class RadioTransmissionRequest
+class TransmissionRequest
 {
     bps bitrate = bps(NaN); // override default bitrate in the range (0, +infinity) or NaN if not set.
     W power = W(NaN);       // override default transmission power in the range (0, +infinity) or NaN if not set.
@@ -54,13 +54,13 @@ class RadioTransmissionRequest
 //
 // Control info attached to a mac frame that is sent up from the ~Radio.
 //
-class RadioReceptionIndication
+class ReceptionIndication
 {
     int bitErrorCount = -1;       // number of erroneous bits in the range [0, +infinity) or -1 if unknown.
     int symbolErrorCount = -1;    // number of erroneous symbols in the range [0, +infinity) or -1 if unknown.
     double packetErrorRate = NaN; // packet error rate (probability) in the range [0, 1] or NaN if unknown.
     double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
     double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
-    W minRSSI = W(NaN);          // minimum receive signal strength indication in the range (0, +infinity) or NaN if unknown.
-    double minSNIR = NaN;        // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
+    W minRSSI = W(NaN);           // minimum receive signal strength indication in the range (0, +infinity) or NaN if unknown.
+    double minSNIR = NaN;         // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
 }

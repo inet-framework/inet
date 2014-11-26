@@ -116,13 +116,13 @@ class INET_API IRadioMedium : public IPrintableObject
      * Returns a new radio frame containing the radio signal transmission that
      * represents the provided MAC frame. A copy of this radio frame is sent
      * to all affected radios. The MAC frame control info must be an instance
-     * of the RadioTransmissionRequest class.
+     * of the TransmissionRequest class.
      */
     virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) = 0;
 
     /**
      * Returns the MAC frame that was transmitted in the provided radio frame.
-     * The MAC frame control info will be an instance of the RadioReceptionIndication
+     * The MAC frame control info will be an instance of the ReceptionIndication
      * class.
      */
     virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) = 0;

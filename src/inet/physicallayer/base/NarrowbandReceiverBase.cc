@@ -142,9 +142,9 @@ bool NarrowbandReceiverBase::computeIsReceptionSuccessful(const IListening *list
     }
 }
 
-const RadioReceptionIndication *NarrowbandReceiverBase::computeReceptionIndication(const ISNIR *snir) const
+const ReceptionIndication *NarrowbandReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
-    RadioReceptionIndication *indication = const_cast<RadioReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
+    ReceptionIndication *indication = const_cast<ReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
     if (errorModel) {
         indication->setPacketErrorRate(errorModel->computePacketErrorRate(snir));
         indication->setBitErrorRate(errorModel->computeBitErrorRate(snir));
@@ -160,7 +160,7 @@ const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const
     if (bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth())
         return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference);
     else
-        return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
+        return new ReceptionDecision(reception, new ReceptionIndication(), false, false, false);
 }
 
 } // namespace physicallayer

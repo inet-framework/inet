@@ -47,7 +47,7 @@ void Ieee80211Radio::initialize(int stage)
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
+        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         bps newBitrate = configureCommand->getBitrate();
         if (!isNaN(newBitrate.get()))
             setBitrate(newBitrate);

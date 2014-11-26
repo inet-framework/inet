@@ -42,7 +42,7 @@ class INET_API IReceptionDecision : public IPrintableObject
     /**
      * Returns the physical properties of the reception.
      */
-    virtual const RadioReceptionIndication *getIndication() const = 0;
+    virtual const ReceptionIndication *getIndication() const = 0;
 
     /**
      * Returns whether synchronization is possible according to the physical

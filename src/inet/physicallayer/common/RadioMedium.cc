@@ -1028,7 +1028,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     }
     cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
     macFrame->setBitError(!decision->isReceptionSuccessful());
-    macFrame->setControlInfo(const_cast<RadioReceptionIndication *>(decision->getIndication()));
+    macFrame->setControlInfo(const_cast<ReceptionIndication *>(decision->getIndication()));
     delete listening;
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
         cLineFigure *communicationFigure = new cLineFigure();

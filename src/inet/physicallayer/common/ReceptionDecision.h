@@ -28,7 +28,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 {
   protected:
     const IReception *reception;
-    const RadioReceptionIndication *indication;
+    const ReceptionIndication *indication;
     const bool isSynchronizationPossible_;
     const bool isSynchronizationAttempted_;
     const bool isSynchronizationSuccessful_;
@@ -37,13 +37,13 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
     const bool isReceptionSuccessful_;
 
   public:
-    ReceptionDecision(const IReception *reception, const RadioReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
+    ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
 
     virtual void printToStream(std::ostream& stream) const;
 
     virtual const IReception *getReception() const { return reception; }
 
-    virtual const RadioReceptionIndication *getIndication() const { return indication; }
+    virtual const ReceptionIndication *getIndication() const { return indication; }
 
     virtual bool isReceptionPossible() const { return isReceptionPossible_; }
 

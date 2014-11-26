@@ -87,7 +87,7 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *lis
 
 const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    RadioReceptionIndication *indication = new RadioReceptionIndication();
+    ReceptionIndication *indication = new ReceptionIndication();
     bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference);
     return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }

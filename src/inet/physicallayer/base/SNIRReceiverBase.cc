@@ -41,9 +41,9 @@ void SNIRReceiverBase::printToStream(std::ostream& stream) const
     stream << "snirThreshold = " << snirThreshold;
 }
 
-const RadioReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
+const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
-    RadioReceptionIndication *indication = new RadioReceptionIndication();
+    ReceptionIndication *indication = new ReceptionIndication();
     indication->setMinSNIR(snir->getMin());
     return indication;
 }
@@ -66,7 +66,7 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference);
-    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : NULL;
+    const ReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : NULL;
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

@@ -99,7 +99,7 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
 
 const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    RadioReceptionIndication *indication = new RadioReceptionIndication();
+    ReceptionIndication *indication = new ReceptionIndication();
     bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference);
     return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }

@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionDecision::ReceptionDecision(const IReception *reception, const RadioReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
+ReceptionDecision::ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
     reception(reception),
     indication(indication),
     isSynchronizationPossible_(false),
