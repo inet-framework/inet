@@ -1723,20 +1723,21 @@ OLSR_ETX::send_pkt()
                 op1->setSn(0);
             }
 
-            int j = 0;
+            int j1 = 0;
+            int j2 = 0;
             for (std::vector<OLSR_ETX_msg>::iterator it = msgs_.begin(); it != msgs_.end();)
             {
-                if (j == OLSR_ETX_MAX_MSGS)
+                if (j1 == OLSR_ETX_MAX_MSGS)
                     break;
-                op1->setMsgArraySize(j+1);
-                op1->setMsg(j++, *it);
+                op1->setMsgArraySize(j1+1);
+                op1->setMsg(j1++, *it);
 
                 if (i != 0)
                     op1->setByteLength(op1->getByteLength()+(*it).size());
                 else /* if (i == 0) */
                 {
-                    op2->setMsgArraySize(j+1);
-                    op2->setMsg(j++, *it);
+                    op2->setMsgArraySize(j2+1);
+                    op2->setMsg(j2++, *it);
                 }
                 it = msgs_.erase(it);
             }
