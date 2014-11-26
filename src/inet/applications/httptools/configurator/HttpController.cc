@@ -25,7 +25,7 @@ Define_Module(HttpController);
 
 
 HttpController::HttpController() :
-    rdServerSelection(0)
+    rdServerSelection(NULL)
 {
 }
 
