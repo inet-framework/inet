@@ -411,7 +411,7 @@
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         c032-16b8
-/examples/wireless/scaling/,         -f omnetpp.ini -c SequentialRadioMedium -r 0,  100s,         1031-2cf4
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,         1031-2cf4
 /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 10s,         2f90-ebb3
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              b04a-aaec
