@@ -32,6 +32,8 @@ ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChan
 
     intvlStartTime = intvlLastPkTime = 0;
     intvlNumPackets = intvlNumBits = 0;
+
+    currentBitPerSec = currentPkPerSec = 0;
 }
 
 ThruputMeteringChannel::~ThruputMeteringChannel()
