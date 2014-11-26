@@ -27,6 +27,7 @@ RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     destinationType(RoutingTableEntry::NETWORK_DESTINATION),
     area(BACKBONE_AREAID),
     pathType(RoutingTableEntry::INTRAAREA),
+    cost(0),
     type2Cost(0),
     linkStateOrigin(NULL)
 {
