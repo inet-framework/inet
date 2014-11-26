@@ -76,7 +76,7 @@ module Radio like IRadio
 
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
 
         @statistic[minSNIR](title="Min SNIR"; source=minSNIR; record=histogram);
         @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate; record=histogram);
