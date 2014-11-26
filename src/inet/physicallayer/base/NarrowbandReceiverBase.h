@@ -41,7 +41,7 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
 
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    virtual bool computeIsReceptionSuccessful(const ISNIR *snir) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
     virtual const RadioReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
   public:

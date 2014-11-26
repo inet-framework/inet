@@ -98,6 +98,13 @@ class INET_API IReceiver : public IPrintableObject
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
 
     /**
+     * Returns whether the reception is actually successful or failed by the
+     * receiver. This function must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
+
+    /**
      * Returns the result of the reception process specifying whether it was
      * successful or not and any other physical properties. This function must
      * be purely functional and support optimistic parallel computation.

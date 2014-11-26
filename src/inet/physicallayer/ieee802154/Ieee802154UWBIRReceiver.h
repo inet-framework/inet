@@ -48,6 +48,7 @@ class INET_API Ieee802154UWBIRReceiver : public ReceiverBase
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 };
 

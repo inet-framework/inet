@@ -33,6 +33,7 @@ class INET_API IdealReceiver : public ReceiverBase
     virtual void initialize(int stage);
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
   public:
     IdealReceiver();

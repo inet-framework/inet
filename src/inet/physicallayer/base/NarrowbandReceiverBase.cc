@@ -121,9 +121,13 @@ const IListeningDecision *NarrowbandReceiverBase::computeListeningDecision(const
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool NarrowbandReceiverBase::computeIsReceptionSuccessful(const ISNIR *snir) const
+bool NarrowbandReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
-    if (!SNIRReceiverBase::computeIsReceptionSuccessful(snir))
+    const ITransmission *transmission = reception->getTransmission();
+    const IRadio *receiver = reception->getReceiver();
+    const IRadioMedium *medium = receiver->getMedium();
+    const ISNIR *snir = medium->getSNIR(receiver, transmission);
+    if (!SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference))
         return false;
     else if (!errorModel)
         return true;
