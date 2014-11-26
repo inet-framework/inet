@@ -2806,6 +2806,33 @@ void OLSR::finish()
     */
 }
 
+OLSR::OLSR() :
+    OLSR_HELLO_INTERVAL(NaN),
+    OLSR_TC_INTERVAL(NaN),
+    OLSR_MID_INTERVAL(NaN),
+    OLSR_REFRESH_INTERVAL(NaN),
+    topologyChange(false),
+    timerQueuePtr(NULL),
+    timerMessage(NULL),
+    state_ptr(NULL),
+    pkt_seq_(-1),
+    msg_seq_(-1),
+    ansn_(-1),
+    hello_ival_(-1),
+    tc_ival_(-1),
+    mid_ival_(-1),
+    willingness_(-1),
+    use_mac_(-1),
+    useIndex(false),
+    ra_addr_(),
+    optimizedMid(false),
+    nodeName(),
+    helloTimer(NULL),
+    tcTimer(NULL),
+    midTimer(NULL)
+{
+}
+
 OLSR::~OLSR()
 {
     rtable_.clear();

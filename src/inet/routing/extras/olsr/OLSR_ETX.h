@@ -250,7 +250,7 @@ class OLSR_ETX : public OLSR
 
     public:
         bool getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost);
-        OLSR_ETX() {}
+        OLSR_ETX();
         ~OLSR_ETX();
         static double emf_to_seconds(uint8_t);
         static uint8_t seconds_to_emf(double);

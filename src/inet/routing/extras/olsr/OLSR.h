@@ -533,7 +533,7 @@ class OLSR : public ManetRoutingBase
     const char * getNodeId(const nsaddr_t &addr);
 
   public:
-    OLSR() {}
+    OLSR();
     virtual ~OLSR();
 
 
