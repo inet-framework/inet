@@ -19,7 +19,7 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.contract.ITransmitter;
 
-module FlatTransmitterBase like ITransmitter
+module NarrowbandTransmitterBase like ITransmitter
 {
     parameters:
         double bitrate @unit(bps);

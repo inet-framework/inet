@@ -17,9 +17,9 @@
 
 package inet.physicallayer.apsk;
 
-import inet.physicallayer.base.FlatTransmitterBase;
+import inet.physicallayer.base.NarrowbandTransmitterBase;
 
-module APSKDimensionalTransmitter extends FlatTransmitterBase
+module APSKDimensionalTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
         string dimensions = default("time");                // dimensions of power: time and/or frequency

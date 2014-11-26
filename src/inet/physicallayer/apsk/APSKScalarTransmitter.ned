@@ -17,9 +17,9 @@
 
 package inet.physicallayer.apsk;
 
-import inet.physicallayer.base.FlatTransmitterBase;
+import inet.physicallayer.base.NarrowbandTransmitterBase;
 
-module APSKScalarTransmitter extends FlatTransmitterBase
+module APSKScalarTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
         modulation = default("BPSK");

@@ -38,17 +38,17 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
         return 1.0;
     else {
         const IReception *reception = snir->getReception();
-        const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
+        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
+        return 1.0 - pow(1.0 - bitErrorRate, narrowbandTransmission->getPayloadBitLength());
     }
 }
 
 double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     const IReception *reception = snir->getReception();
-    const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-    const IModulation *modulation = flatTransmission->getModulation();
-    return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth().get(), flatTransmission->getBitrate().get());
+    const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
+    const IModulation *modulation = narrowbandTransmission->getModulation();
+    return modulation->calculateBER(snir->getMin(), narrowbandTransmission->getBandwidth().get(), narrowbandTransmission->getBitrate().get());
 }
 
 double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir) const

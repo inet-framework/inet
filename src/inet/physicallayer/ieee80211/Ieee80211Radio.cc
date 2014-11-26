@@ -62,8 +62,8 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 
 void Ieee80211Radio::setBitrate(bps newBitrate)
 {
-    NarrowbandTransmitterBase *flatTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    flatTransmitter->setBitrate(newBitrate);
+    NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
+    narrowbandTransmitter->setBitrate(newBitrate);
     endReceptionTimer = NULL;
 }
 
@@ -71,10 +71,10 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
     if (channelNumber != newChannelNumber) {
         Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-        NarrowbandTransmitterBase *flatTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-        NarrowbandReceiverBase *flatReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
-        flatTransmitter->setCarrierFrequency(carrierFrequency);
-        flatReceiver->setCarrierFrequency(carrierFrequency);
+        NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
+        NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
+        narrowbandTransmitter->setCarrierFrequency(carrierFrequency);
+        narrowbandReceiver->setCarrierFrequency(carrierFrequency);
         EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";
         channelNumber = newChannelNumber;
         endReceptionTimer = NULL;

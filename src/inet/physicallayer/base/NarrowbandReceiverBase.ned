@@ -20,7 +20,7 @@ package inet.physicallayer.base;
 import inet.physicallayer.contract.IErrorModel;
 import inet.physicallayer.contract.IReceiver;
 
-module FlatReceiverBase like IReceiver
+module NarrowbandReceiverBase like IReceiver
 {
     parameters:
         string errorModelType;             // NED type of the error model

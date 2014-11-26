@@ -86,21 +86,21 @@ const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, c
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
 {
     // TODO: check if modulation matches?
-    const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
-    return carrierFrequency == flatTransmission->getCarrierFrequency() && bandwidth == flatTransmission->getBandwidth();
+    const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
+    return carrierFrequency == narrowbandTransmission->getCarrierFrequency() && bandwidth == narrowbandTransmission->getBandwidth();
 }
 
 // TODO: this is not purely functional, see interface comment
 bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const NarrowbandReceptionBase *flatReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
-    if (bandListening->getCarrierFrequency() != flatReception->getCarrierFrequency() || bandListening->getBandwidth() != flatReception->getBandwidth()) {
+    const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
+    if (bandListening->getCarrierFrequency() != narrowbandReception->getCarrierFrequency() || bandListening->getBandwidth() != narrowbandReception->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
     else {
-        W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime());
+        W minReceptionPower = narrowbandReception->computeMinPower(reception->getStartTime(), reception->getEndTime());
         bool isReceptionPossible = minReceptionPower >= sensitivity;
         EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
         return isReceptionPossible;
@@ -113,8 +113,8 @@ const IListeningDecision *NarrowbandReceiverBase::computeListeningDecision(const
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
     const INoise *noise = analogModel->computeNoise(listening, interference);
-    const NarrowbandNoiseBase *flatNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
-    W maxPower = flatNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
+    const NarrowbandNoiseBase *narrowbandNoise = check_and_cast<const NarrowbandNoiseBase *>(noise);
+    W maxPower = narrowbandNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     bool isListeningPossible = maxPower >= energyDetection;
     delete noise;
     EV_DEBUG << "Computing listening possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
@@ -156,8 +156,8 @@ const ReceptionIndication *NarrowbandReceiverBase::computeReceptionIndication(co
 const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-    const NarrowbandReceptionBase *flatReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
-    if (bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth())
+    const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
+    if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() == narrowbandReception->getBandwidth())
         return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference);
     else
         return new ReceptionDecision(reception, new ReceptionIndication(), false, false, false);

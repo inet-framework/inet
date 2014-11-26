@@ -69,10 +69,10 @@ void Ieee80211ErrorModelBase::initialize(int stage)
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
 {
     const ITransmission *transmission = snir->getReception()->getTransmission();
-    const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
+    const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
-    int bitLength = flatTransmission->getPayloadBitLength();
-    double bitrate = flatTransmission->getBitrate().get();
+    int bitLength = narrowbandTransmission->getPayloadBitLength();
+    double bitrate = narrowbandTransmission->getBitrate().get();
     Ieee80211PreambleMode preambleUsed = ieee80211Transmission->getPreambleMode();
     char opMode = ieee80211Transmission->getOpMode();
 

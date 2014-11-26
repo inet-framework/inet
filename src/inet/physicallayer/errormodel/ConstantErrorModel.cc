@@ -55,8 +55,8 @@ double ConstantErrorModel::computePacketErrorRate(const ISNIR *snir) const
     else {
         double bitErrorRate = computeBitErrorRate(snir);
         const IReception *reception = snir->getReception();
-        const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
+        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
+        return 1.0 - pow(1.0 - bitErrorRate, narrowbandTransmission->getPayloadBitLength());
     }
 }
 
@@ -66,8 +66,8 @@ double ConstantErrorModel::computeBitErrorRate(const ISNIR *snir) const
         return bitErrorRate;
     else {
         const IReception *reception = snir->getReception();
-        const NarrowbandTransmissionBase *flatTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        const IModulation *modulation = flatTransmission->getModulation();
+        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
+        const IModulation *modulation = narrowbandTransmission->getModulation();
         double symbolErrorRate = computeSymbolErrorRate(snir);
         // TODO: compute bit error rate based on symbol error rate and modulation
         throw cRuntimeError("Not yet implemented");
