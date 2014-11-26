@@ -71,9 +71,9 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER)
             prepareNode();
-        else if (stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
+        else if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
             configureNode();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/

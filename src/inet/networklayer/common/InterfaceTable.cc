@@ -508,11 +508,11 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
     if (dynamic_cast<NodeStartOperation *>(operation)) {
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_LINK_LAYER)
             resetInterfaces();
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
             resetInterfaces();
     }
     return true;

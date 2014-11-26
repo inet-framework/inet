@@ -97,14 +97,14 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
     Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             ASSERT(ospfRouter == NULL);
             isUp = true;
             createOspfRouter();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             ASSERT(ospfRouter);
             isUp = false;
             delete ospfRouter;
@@ -112,7 +112,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             ASSERT(ospfRouter);
             isUp = false;
             delete ospfRouter;

@@ -84,7 +84,7 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             if (simTime() <= tOpen) {
                 timeoutMsg->setKind(MSGKIND_CONNECT);
                 scheduleAt(tOpen, timeoutMsg);
@@ -92,7 +92,7 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
             if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
                 close();
@@ -100,7 +100,7 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
     else

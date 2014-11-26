@@ -1137,14 +1137,14 @@ bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             icmp = NULL;
             icmpv6 = NULL;
             isOperational = true;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
             clearAllSockets();
             icmp = NULL;
             icmpv6 = NULL;
@@ -1152,7 +1152,7 @@ bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             clearAllSockets();
             icmp = NULL;
             icmpv6 = NULL;

@@ -78,7 +78,7 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             simtime_t now = simTime();
             simtime_t startTime = par("startTime");
             simtime_t start = std::max(startTime, now);
@@ -89,7 +89,7 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
             if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
                 close();
@@ -97,7 +97,7 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
     else

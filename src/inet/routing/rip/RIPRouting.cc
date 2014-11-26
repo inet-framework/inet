@@ -416,7 +416,7 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
     Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             isOperational = true;
             cancelEvent(startupTimer);
             scheduleAt(simTime() + par("startupTime").doubleValue(), startupTimer);
@@ -424,7 +424,7 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             // invalidate routes
             for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
                 invalidateRoute(*it);
@@ -442,7 +442,7 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             stopRIPRouting();
             isOperational = false;
             return true;
