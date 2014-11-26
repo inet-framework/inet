@@ -242,15 +242,15 @@ bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, int 
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
             start();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER)
             stop();
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_LOCAL) // crash is immediate
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) // crash is immediate
             stop();
     }
     else
