@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVe
 std::string PIMNeighbor::info() const
 {
     std::stringstream out;
-    out << this;
+    out << "PIMNeighbor addr=" << address << ", iface=" << ie->getName() << ", v=" << version << ", priority=" << this->drPriority << "}";
     return out.str();
 }
 
