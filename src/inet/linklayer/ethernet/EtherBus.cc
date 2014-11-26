@@ -15,6 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "inet/common/INETMath.h"
 #include "inet/linklayer/ethernet/EtherBus.h"
 
 namespace inet {
@@ -27,9 +28,15 @@ inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
     return os;
 }
 
-EtherBus::EtherBus()
+EtherBus::EtherBus() :
+    propagationSpeed(NaN),
+    tap(NULL),
+    numTaps(-1),
+    inputGateBaseId(-1),
+    outputGateBaseId(-1),
+    dataratesDiffer(false),
+    numMessages(-1)
 {
-    tap = NULL;
 }
 
 EtherBus::~EtherBus()
