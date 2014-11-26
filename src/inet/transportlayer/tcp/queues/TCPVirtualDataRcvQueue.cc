@@ -76,7 +76,9 @@ ulong TCPVirtualDataRcvQueue::Region::getLengthTo(uint32 seq) const
 
 ////////////////////////////////////////////////////////////////////
 
-TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() : TCPReceiveQueue()
+TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() :
+    TCPReceiveQueue(),
+    rcv_nxt(-1)
 {
 }
 
