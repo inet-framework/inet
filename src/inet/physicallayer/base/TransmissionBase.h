@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API TransmissionBase : public virtual ITransmission
+class INET_API TransmissionBase : public ITransmission
 {
   protected:
     const int id;

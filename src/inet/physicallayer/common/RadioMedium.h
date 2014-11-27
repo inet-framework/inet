@@ -37,12 +37,15 @@ namespace inet {
 
 namespace physicallayer {
 
+class CUDAParallelStrategy;
+
 /**
  * The default implementation of the radio medium interface.
  */
 // TODO: add tests for various optimization configurations
 class INET_API RadioMedium : public cSimpleModule, public cListener, public IRadioMedium
 {
+  friend CUDAParallelStrategy;
   protected:
     /**
      * Caches the intermediate computation results related to a reception.
@@ -131,6 +134,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The background noise model or NULL if unused.
      */
     const IBackgroundNoise *backgroundNoise;
+    /**
+     * The parallel computation strategy or NULL if unused.
+     */
+    const IParallelStrategy *parallelStrategy;
     /**
      * The maximum speed among the radios is in the range [0, +infinity) or
      * NaN if unspecified.
@@ -522,6 +529,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }
     virtual const IAnalogModel *getAnalogModel() const { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
+    virtual const IParallelStrategy *getParallelStrategy() const { return parallelStrategy; }
 
     virtual void addRadio(const IRadio *radio);
     virtual void removeRadio(const IRadio *radio);

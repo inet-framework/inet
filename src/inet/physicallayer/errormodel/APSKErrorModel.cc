@@ -31,16 +31,19 @@ void APSKErrorModel::printToStream(std::ostream& stream) const
 
 double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
 {
+    double packetErrorRate;
     double bitErrorRate = computeBitErrorRate(snir);
     if (bitErrorRate == 0.0)
-        return 0.0;
+        packetErrorRate = 0.0;
     else if (bitErrorRate == 1.0)
-        return 1.0;
+        packetErrorRate = 1.0;
     else {
         const IReception *reception = snir->getReception();
         const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        return 1.0 - pow(1.0 - bitErrorRate, narrowbandTransmission->getPayloadBitLength());
+        packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, narrowbandTransmission->getPayloadBitLength());
     }
+    EV_DEBUG << "Computing PER from SNIR, packetErrorRate = " << packetErrorRate << endl;
+    return packetErrorRate;
 }
 
 double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
@@ -48,7 +51,10 @@ double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
     const IReception *reception = snir->getReception();
     const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
     const IModulation *modulation = narrowbandTransmission->getModulation();
-    return modulation->calculateBER(snir->getMin(), narrowbandTransmission->getBandwidth().get(), narrowbandTransmission->getBitrate().get());
+    double minSNIR = snir->getMin();
+    double bitErrorRate = modulation->calculateBER(minSNIR, narrowbandTransmission->getBandwidth().get(), narrowbandTransmission->getBitrate().get());
+    EV_DEBUG << "Computing BER from SNIR, minSNIR = " << minSNIR << ", bitErrorRate = " << bitErrorRate << endl;
+    return bitErrorRate;
 }
 
 double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir) const

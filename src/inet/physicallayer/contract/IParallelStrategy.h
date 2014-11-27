@@ -15,40 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARSNIR_H
-#define __INET_SCALARSNIR_H
+#ifndef __INET_IPARALLELSTRATEGY_H
+#define __INET_IPARALLELSTRATEGY_H
 
-#include "inet/physicallayer/base/SNIRBase.h"
-#include "inet/physicallayer/analogmodel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/ScalarNoise.h"
+#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class CUDAParallelStrategy;
-
-class INET_API ScalarSNIR : public SNIRBase
+/**
+ * TODO
+ */
+class INET_API IParallelStrategy : public IPrintableObject
 {
-  friend CUDAParallelStrategy;
-
-  protected:
-    mutable double minSNIR;
-
-  protected:
-    virtual double computeMin() const;
-
   public:
-    ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
-
-    virtual void printToStream(std::ostream& stream) const;
-
-    virtual double getMin() const;
+    virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARSNIR_H
+#endif // ifndef __INET_IPARALLELSTRATEGY_H
 

@@ -53,3 +53,12 @@ endif
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
+INCLUDE_PATH += -I"/usr/local/cuda-5.5/include"
+LIBS += -L"/usr/local/cuda-5.5/lib64"
+
+$O/inet/physicallayer/parallel/CUDAParallelStrategyKernel.o: inet/physicallayer/parallel/CUDAParallelStrategyKernel.cu
+	@$(MKPATH) $(dir $@)
+	$(qecho) "$<"
+	nvcc -arch=sm_20 --prec-sqrt=true -O0 -Xcicc -O0 -Xptxas -O0 -c -Xcompiler "$(CXXFLAGS) $(COPTS)" $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR) -o $@ $<
+
+$O/$(TARGET): $(OBJS) $(EXTRA_OBJS) Makefile

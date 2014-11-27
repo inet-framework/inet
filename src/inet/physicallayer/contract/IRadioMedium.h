@@ -27,6 +27,7 @@
 #include "inet/physicallayer/contract/IObstacleLoss.h"
 #include "inet/physicallayer/contract/IAnalogModel.h"
 #include "inet/physicallayer/contract/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/IParallelStrategy.h"
 #include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/IReceptionDecision.h"
 #include "inet/physicallayer/contract/IListeningDecision.h"
@@ -97,6 +98,12 @@ class INET_API IRadioMedium : public IPrintableObject
      * may return NULL.
      */
     virtual const IBackgroundNoise *getBackgroundNoise() const = 0;
+
+    /**
+     * Returns the parallel computation strategy of this radio medium. This
+     * function may return NULL.
+     */
+    virtual const IParallelStrategy *getParallelStrategy() const = 0;
 
     /**
      * Adds a new radio to the radio medium. An exception is thrown if the

@@ -422,9 +422,10 @@
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,         07d1-176e
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
-/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         c032-16b8
-/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,         1031-2cf4
-/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 10s,         2f90-ebb3
+/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       10s,         c032-16b8
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,         1031-2cf4
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,         2f90-ebb3
+/examples/wireless/scaling/,         -f omnetpp.ini -c CUDARadioMedium -r 0,        10s,         2f90-ebb3
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              b04a-aaec
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              6aab-b31f

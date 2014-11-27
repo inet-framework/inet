@@ -20,10 +20,13 @@ package inet.physicallayer.common;
 import inet.physicallayer.contract.IAnalogModel;
 import inet.physicallayer.contract.INeighborCache;
 import inet.physicallayer.contract.IObstacleLoss;
+import inet.physicallayer.contract.IParallelStrategy;
 import inet.physicallayer.contract.IPathLoss;
 import inet.physicallayer.contract.IPropagation;
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 import inet.physicallayer.contract.IRadioMedium;
+
+module Dummy {}
 
 //
 // The medium model describes the shared physical medium where communication
@@ -42,6 +45,7 @@ module RadioMedium like IRadioMedium
         string analogModelType;                   // NED type of the analog model
         string backgroundNoiseType = default(""); // NED type of the background noise model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
+        string parallelStrategyType = default("");// NED type of the parallel computation strategy
 
         // channel limit parameters
         double carrierFrequency @unit(Hz) = default(0Hz/0);       // TODO: rename to maxRangeCarrierFrequency
@@ -98,4 +102,9 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,550");
         }
+        parallelStrategy: <parallelStrategyType> like IParallelStrategy if parallelStrategyType != "" {
+            parameters:
+                @display("p=100,650");
+        }
+        dummy: Dummy if parallelStrategyType == "";
 }
