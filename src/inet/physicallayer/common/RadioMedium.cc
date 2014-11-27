@@ -882,7 +882,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     transmissionCount++;
     transmissions.push_back(transmission);
     if (parallelStrategy)
-        parallelStrategy->computeCache(&radios, &transmissions);
+        const_cast<IParallelStrategy *>(parallelStrategy)->computeCache(&radios, &transmissions);
     else {
         simtime_t maxArrivalEndTime = simTime();
         for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {

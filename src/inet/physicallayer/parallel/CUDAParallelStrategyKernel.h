@@ -18,6 +18,10 @@
 #ifndef __INET_CUDAPARALLELSTRATEGYKERNEL_H
 #define __INET_CUDAPARALLELSTRATEGYKERNEL_H
 
+// In order to get the same fingerprint from the CUDA implementation use
+// int64_t instead of double for simulation times and compile this file with
+// -O0 -prec-sqrt=true
+
 namespace inet {
 
 namespace physicallayer {
@@ -26,15 +30,21 @@ namespace physicallayer {
 
 typedef int64_t cuda_simtime_t;
 
+void hostShift(void *buffer, int offset, int size);
+
 void hostComputeAllReceptionsForTransmission(double timeScale, int radioCount, double propagationSpeed, double pathLossAlpha,
                                              double transmissionPower, double transmissionCarrierFrequency, cuda_simtime_t transmissionTime,
                                              double transmissionPositionX, double transmissionPositionY, double transmissionPositionZ,
                                              double *receptionPositionXs, double *receptionPositionYs, double *receptionPositionZs,
                                              cuda_simtime_t *propagationTimes, cuda_simtime_t *receptionTimes, double *receptionPowers);
 
-void hostComputeMinSNIRsForAllReceptions(int transmissionCount, int radioCount, double backgroundNoisePower,
-                                         cuda_simtime_t *transmissionDurations, cuda_simtime_t *receptionTimes, double *receptionPowers,
-                                         double *minSNIRs);
+void hostComputeAllMinSNIRsForAllReceptions2(int transmissionCount, int radioCount, double backgroundNoisePower,
+                                             cuda_simtime_t *transmissionDurations, cuda_simtime_t *receptionTimes, double *receptionPowers,
+                                             double *minSNIRs);
+
+void hostComputeAllMinSNIRsForAllReceptions(int transmissionCount, int radioCount, double backgroundNoisePower,
+                                            cuda_simtime_t *transmissionDurations, cuda_simtime_t *receptionTimes, double *receptionPowers,
+                                            double *minSNIRs);
 
 } // namespace physicallayer
 

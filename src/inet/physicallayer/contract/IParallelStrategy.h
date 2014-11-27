@@ -31,7 +31,7 @@ namespace physicallayer {
 class INET_API IParallelStrategy : public IPrintableObject
 {
   public:
-    virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const = 0;
+    virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) = 0;
 };
 
 } // namespace physicallayer

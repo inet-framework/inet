@@ -38,6 +38,14 @@ Define_Module(CUDAParallelStrategy);
 
 CUDAParallelStrategy::CUDAParallelStrategy() :
     radioMedium(NULL),
+    baseRadioId(0),
+    baseTransmissionId(0),
+    allocatedRadioCount(0),
+    allocatedTransmissionCount(0),
+    allocatedReceptionCount(0),
+    computedRadioCount(0),
+    computedTransmissionCount(0),
+    computedReceptionCount(0),
     hostRadioPositionXs(NULL),
     hostRadioPositionYs(NULL),
     hostRadioPositionZs(NULL),
@@ -51,24 +59,34 @@ CUDAParallelStrategy::CUDAParallelStrategy() :
     deviceReceptionTimes(NULL),
     deviceReceptionPowers(NULL),
     pathLossAlpha(NaN),
-    backgroundNoisePower(NaN)
+    backgroundNoisePower(NaN),
+    hostAllMinSNIRs(NULL),
+    deviceTransmissionDurations(NULL),
+    deviceAllReceptionTimes(NULL),
+    deviceAllReceptionPowers(NULL),
+    deviceAllMinSNIRs(NULL)
 {
 }
 
 CUDAParallelStrategy::~CUDAParallelStrategy()
 {
-    delete hostRadioPositionXs;
-    delete hostRadioPositionYs;
-    delete hostRadioPositionZs;
-    delete hostPropagationTimes;
-    delete hostReceptionTimes;
-    delete hostReceptionPowers;
+    delete [] hostRadioPositionXs;
+    delete [] hostRadioPositionYs;
+    delete [] hostRadioPositionZs;
+    delete [] hostPropagationTimes;
+    delete [] hostReceptionTimes;
+    delete [] hostReceptionPowers;
+    delete [] hostAllMinSNIRs;
     CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionXs));
     CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionYs));
     CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionZs));
     CUDA_ERROR_CHECK(cudaFree(devicePropagationTimes));
     CUDA_ERROR_CHECK(cudaFree(deviceReceptionTimes));
     CUDA_ERROR_CHECK(cudaFree(deviceReceptionPowers));
+    CUDA_ERROR_CHECK(cudaFree(deviceTransmissionDurations));
+    CUDA_ERROR_CHECK(cudaFree(deviceAllReceptionTimes));
+    CUDA_ERROR_CHECK(cudaFree(deviceAllReceptionPowers));
+    CUDA_ERROR_CHECK(cudaFree(deviceAllMinSNIRs));
 }
 
 void CUDAParallelStrategy::initialize(int stage)
@@ -77,22 +95,6 @@ void CUDAParallelStrategy::initialize(int stage)
         radioMedium = check_and_cast<RadioMedium *>(getModuleByPath(par("radioMediumModule")));
     }
     else if (stage == INITSTAGE_LAST - 1) {
-        int radioCount = radioMedium->radios.size();
-        int radioSize = radioCount * sizeof(double);
-        int receptionDoublesSize = radioCount * sizeof(double);
-        int receptionTimesSize = radioCount * sizeof(cuda_simtime_t);
-        hostRadioPositionXs = new double[radioCount];
-        hostRadioPositionYs = new double[radioCount];
-        hostRadioPositionZs = new double[radioCount];
-        hostPropagationTimes = new cuda_simtime_t[radioCount];
-        hostReceptionTimes = new cuda_simtime_t[radioCount];
-        hostReceptionPowers = new double[radioCount];
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionXs, radioSize));
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionYs, radioSize));
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionZs, radioSize));
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&devicePropagationTimes, receptionTimesSize));
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceReceptionTimes, receptionTimesSize));
-        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceReceptionPowers, receptionDoublesSize));
         check_and_cast<const ScalarAnalogModel *>(radioMedium->getAnalogModel());
         pathLossAlpha = check_and_cast<const FreeSpacePathLoss *>(radioMedium->getPathLoss())->getAlpha();
         backgroundNoisePower = check_and_cast<const IsotropicScalarBackgroundNoise *>(radioMedium->getBackgroundNoise())->getPower().get();
@@ -104,60 +106,114 @@ void CUDAParallelStrategy::printToStream(std::ostream& stream) const
     stream << "CUDAParalellStrategy";
 }
 
-void CUDAParallelStrategy::computeAllReceptionsForTransmission(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const
+void CUDAParallelStrategy::reallocateDeviceBuffer(void **buffer, int oldSize, int newSize)
 {
-    // compute the propagation times, reception times, and reception powers for all receivers
+    void *oldBuffer = *buffer;
+    void *newBuffer;
+    CUDA_ERROR_CHECK(cudaMalloc((void **)&newBuffer, newSize));
+    if (oldBuffer) {
+        CUDA_ERROR_CHECK(cudaMemcpy(newBuffer, oldBuffer, oldSize, cudaMemcpyDeviceToDevice));
+        CUDA_ERROR_CHECK(cudaFree(oldBuffer));
+    }
+    *buffer = newBuffer;
+}
+
+void CUDAParallelStrategy::reallocateBuffers(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions)
+{
     int radioCount = radios->size();
-    int radioSize = radioCount * sizeof(double);
-    int receptionDoublesSize = radioCount * sizeof(double);
-    int receptionTimesSize = radioCount * sizeof(cuda_simtime_t);
+    int transmissionCount = transmissions->size();
+    int receptionCount = radioCount * transmissionCount;
+    if (radioCount > allocatedRadioCount) {
+        // free
+        delete [] hostRadioPositionXs;
+        delete [] hostRadioPositionYs;
+        delete [] hostRadioPositionZs;
+        delete [] hostPropagationTimes;
+        delete [] hostReceptionTimes;
+        delete [] hostReceptionPowers;
+        CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionXs));
+        CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionYs));
+        CUDA_ERROR_CHECK(cudaFree(deviceRadioPositionZs));
+        CUDA_ERROR_CHECK(cudaFree(devicePropagationTimes));
+        CUDA_ERROR_CHECK(cudaFree(deviceReceptionTimes));
+        CUDA_ERROR_CHECK(cudaFree(deviceReceptionPowers));
+        // allocate
+        hostRadioPositionXs = new double[radioCount];
+        hostRadioPositionYs = new double[radioCount];
+        hostRadioPositionZs = new double[radioCount];
+        hostPropagationTimes = new cuda_simtime_t[radioCount];
+        hostReceptionTimes = new cuda_simtime_t[radioCount];
+        hostReceptionPowers = new double[radioCount];
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionXs, radioCount * sizeof(double)));
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionYs, radioCount * sizeof(double)));
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceRadioPositionZs, radioCount * sizeof(double)));
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&devicePropagationTimes, radioCount * sizeof(cuda_simtime_t)));
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceReceptionTimes, radioCount * sizeof(cuda_simtime_t)));
+        CUDA_ERROR_CHECK(cudaMalloc((void**)&deviceReceptionPowers, radioCount * sizeof(double)));
+        allocatedRadioCount = radioCount;
+    }
+    int deletedTransmissionCount = transmissions->at(0)->getId() - baseTransmissionId;
+    if (deletedTransmissionCount != 0) {
+        hostShift(deviceTransmissionDurations, deletedTransmissionCount * sizeof(cuda_simtime_t), allocatedTransmissionCount * sizeof(cuda_simtime_t));
+        hostShift(deviceAllReceptionTimes, radioCount * deletedTransmissionCount * sizeof(cuda_simtime_t), allocatedReceptionCount * sizeof(cuda_simtime_t));
+        hostShift(deviceAllReceptionPowers, radioCount * deletedTransmissionCount * sizeof(double), allocatedReceptionCount * sizeof(double));
+        hostShift(deviceAllMinSNIRs, radioCount * deletedTransmissionCount * sizeof(double), allocatedReceptionCount * sizeof(double));
+    }
+    if (transmissionCount > allocatedTransmissionCount) {
+        delete [] hostAllMinSNIRs;
+        hostAllMinSNIRs = new double[receptionCount];
+        reallocateDeviceBuffer((void**)&deviceTransmissionDurations, computedTransmissionCount * sizeof(cuda_simtime_t), transmissionCount * sizeof(cuda_simtime_t));
+        reallocateDeviceBuffer((void**)&deviceAllReceptionTimes, computedReceptionCount * sizeof(cuda_simtime_t), receptionCount * sizeof(cuda_simtime_t));
+        reallocateDeviceBuffer((void**)&deviceAllReceptionPowers, computedReceptionCount * sizeof(double), receptionCount * sizeof(double));
+        reallocateDeviceBuffer((void**)&deviceAllMinSNIRs, computedReceptionCount * sizeof(double), receptionCount * sizeof(double));
+        allocatedTransmissionCount = transmissionCount;
+        allocatedReceptionCount = receptionCount;
+    }
+}
+
+// TODO: the idea would be to reduce the computation to strictly those where the SNIR might actually change
+// TODO: keep track of noise per radio independent of reception? sort begin/end simultaneuously?
+void CUDAParallelStrategy::computeAllReceptionsForTransmission(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions)
+{
+    int radioCount = radios->size();
+    int transmissionCount = transmissions->size();
     double timeScale = (double)SimTime::getScale();
     double propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed().get();
-    const ITransmission *transmission = transmissions->at(transmissions->size() - 1);
-    const ScalarTransmission *scalarTransmission = static_cast<const ScalarTransmission *>(transmission);
-    const Coord transmissionPosition = scalarTransmission->getStartPosition();
-    simtime_t transmissionDuration = transmission->getEndTime() - transmission->getStartTime();
-    Hz carrierFrequency = scalarTransmission->getCarrierFrequency();
-    Hz bandwidth = scalarTransmission->getBandwidth();
-    EV_DEBUG << "Computing all receptions for last transmission, radioCount = " << radioCount << ", transmissionCount = " << transmissions->size() << endl;
+    const ScalarTransmission *transmission = static_cast<const ScalarTransmission *>(transmissions->at(transmissionCount - 1));
+    const Coord transmissionPosition = transmission->getStartPosition();
+    const simtime_t transmissionDuration = transmission->getEndTime() - transmission->getStartTime();
+    Hz carrierFrequency = transmission->getCarrierFrequency();
+    Hz bandwidth = transmission->getBandwidth();
+    EV_DEBUG << "Computing all receptions for last transmission, radioCount = " << radioCount << endl;
 
-    // prepare host data
     EV_TRACE << "Preparing host data" << endl;
-    int index = 0;
-    for (std::vector<const IRadio *>::const_iterator it = radios->begin(); it != radios->end(); it++)
-    {
-        const IRadio *radio = *it;
-        Coord position = radio->getAntenna()->getMobility()->getCurrentPosition();
-        hostRadioPositionXs[index] = position.x;
-        hostRadioPositionYs[index] = position.y;
-        hostRadioPositionZs[index] = position.z;
-        index++;
+    for (int receiverIndex = 0; receiverIndex < radioCount; receiverIndex++) {
+        const IRadio *receiver = radios->at(receiverIndex);
+        Coord position = receiver->getAntenna()->getMobility()->getCurrentPosition();
+        hostRadioPositionXs[receiverIndex] = position.x;
+        hostRadioPositionYs[receiverIndex] = position.y;
+        hostRadioPositionZs[receiverIndex] = position.z;
     }
 
-    // copy data from host to device
     EV_TRACE << "Copying host data to device memory" << endl;
-    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionXs, hostRadioPositionXs, radioSize, cudaMemcpyHostToDevice));
-    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionYs, hostRadioPositionYs, radioSize, cudaMemcpyHostToDevice));
-    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionZs, hostRadioPositionZs, radioSize, cudaMemcpyHostToDevice));
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionXs, hostRadioPositionXs, radioCount * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionYs, hostRadioPositionYs, radioCount * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceRadioPositionZs, hostRadioPositionZs, radioCount * sizeof(double), cudaMemcpyHostToDevice));
 
-    // start the computation on the device
     EV_TRACE << "Starting computation on device" << endl;
-
     hostComputeAllReceptionsForTransmission(
             timeScale, radioCount, propagationSpeed, pathLossAlpha,
-            scalarTransmission->getPower().get(), carrierFrequency.get(), scalarTransmission->getStartTime().raw(),
+            transmission->getPower().get(), carrierFrequency.get(), transmission->getStartTime().raw(),
             transmissionPosition.x, transmissionPosition.y, transmissionPosition.z,
             deviceRadioPositionXs, deviceRadioPositionYs, deviceRadioPositionZs,
             devicePropagationTimes, deviceReceptionTimes, deviceReceptionPowers);
 
-//    CUDA_ERROR_CHECK(cudaThreadSynchronize());
-
-    // copy data from device to host
     EV_TRACE << "Copying device data to host memory" << endl;
-    CUDA_ERROR_CHECK(cudaMemcpy(hostPropagationTimes, devicePropagationTimes, receptionTimesSize, cudaMemcpyDeviceToHost));
-    CUDA_ERROR_CHECK(cudaMemcpy(hostReceptionTimes, deviceReceptionTimes, receptionTimesSize, cudaMemcpyDeviceToHost));
-    CUDA_ERROR_CHECK(cudaMemcpy(hostReceptionPowers, deviceReceptionPowers, receptionDoublesSize, cudaMemcpyDeviceToHost));
+    CUDA_ERROR_CHECK(cudaMemcpy(hostPropagationTimes, devicePropagationTimes, radioCount * sizeof(cuda_simtime_t), cudaMemcpyDeviceToHost));
+    CUDA_ERROR_CHECK(cudaMemcpy(hostReceptionTimes, deviceReceptionTimes, radioCount * sizeof(cuda_simtime_t), cudaMemcpyDeviceToHost));
+    CUDA_ERROR_CHECK(cudaMemcpy(hostReceptionPowers, deviceReceptionPowers, radioCount * sizeof(double), cudaMemcpyDeviceToHost));
 
+    EV_TRACE << "Processing computation result" << endl;
     simtime_t maxArrivalEndTime = simTime();
     for (int receiverIndex = 0; receiverIndex < radioCount; receiverIndex++) {
         const IRadio *receiver = radios->at(receiverIndex);
@@ -189,8 +245,56 @@ void CUDAParallelStrategy::computeAllReceptionsForTransmission(const std::vector
     radioMedium->getTransmissionCacheEntry(transmission)->interferenceEndTime = maxArrivalEndTime + radioMedium->maxTransmissionDuration;
 }
 
+void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions2(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions)
+{
+    int radioCount = radios->size();
+    int transmissionCount = transmissions->size();
+    int receptionCount = transmissionCount * radioCount;
+    const ITransmission *transmission = transmissions->at(transmissionCount - 1);
+    EV_DEBUG << "Computing all min SNIRs for all transmissions, transmission count = " << transmissionCount << ", radio count = " << radioCount << ", reception count = " << receptionCount << endl;
+
+    EV_TRACE << "Preparing host data" << endl;
+    cuda_simtime_t hostTransmissionDuration = (transmission->getEndTime() - transmission->getStartTime()).raw();
+
+    EV_TRACE << "Copying host data to device memory" << endl;
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceTransmissionDurations + transmissionCount - 1, &hostTransmissionDuration, sizeof(cuda_simtime_t), cudaMemcpyHostToDevice));
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceAllReceptionTimes + radioCount * (transmissionCount - 1), hostReceptionTimes, radioCount * sizeof(cuda_simtime_t), cudaMemcpyHostToDevice));
+    CUDA_ERROR_CHECK(cudaMemcpy(deviceAllReceptionPowers + radioCount * (transmissionCount - 1), hostReceptionPowers, radioCount * sizeof(double), cudaMemcpyHostToDevice));
+
+    EV_TRACE << "Starting computation on device" << endl;
+    hostComputeAllMinSNIRsForAllReceptions2(
+            transmissionCount, radioCount, backgroundNoisePower,
+            deviceTransmissionDurations, deviceAllReceptionTimes, deviceAllReceptionPowers,
+            deviceAllMinSNIRs);
+
+    EV_TRACE << "Copying device data to host memory" << endl;
+    CUDA_ERROR_CHECK(cudaMemcpy(hostAllMinSNIRs, deviceAllMinSNIRs, receptionCount * sizeof(double), cudaMemcpyDeviceToHost));
+
+    EV_TRACE << "Processing computation result" << endl;
+    for (int receptionIndex = 0; receptionIndex < receptionCount; receptionIndex++) {
+        int radioIndex = receptionIndex % radioCount;
+        int transmissionIndex = receptionIndex / radioCount;
+        const IRadio *receiver = radios->at(radioIndex);
+        const ITransmission *transmission = transmissions->at(transmissionIndex);
+        if (receiver != transmission->getTransmitter()) {
+            // TODO: fake interference to avoid its computation?
+//            const IInterference *interference = radioMedium->getCachedInterference(receiver, transmission);
+//            if (!interference)
+//                radioMedium->setCachedInterference(receiver, transmission, new Interference(NULL, NULL));
+            const ScalarSNIR *snir = dynamic_cast<const ScalarSNIR *>(radioMedium->getCachedSNIR(receiver, transmission));
+            if (!snir) {
+                const ScalarReception *reception = static_cast<const ScalarReception *>(radioMedium->getReception(receiver, transmission));
+                snir = new ScalarSNIR(reception, NULL);
+                radioMedium->setCachedSNIR(receiver, transmission, snir);
+            }
+            snir->minSNIR = hostAllMinSNIRs[receptionIndex];
+            EV_TRACE << "Computation result, transmission id = " << transmission->getId() << ", receiver id = " << receiver->getId() << ", minSNIR = " << snir->minSNIR << endl;
+        }
+    }
+}
+
 // TODO: we could do better than this by recomputing only those SNIRs which are actually invalid
-void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const
+void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions)
 {
     // compute the minimum SNIR for all receptions
     int transmissionCount = transmissions->size();
@@ -230,9 +334,9 @@ void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions(const std::vector<
             const RadioMedium::TransmissionCacheEntry& transmissionCacheEntry = radioMedium->transmissionCache[transmissionIndex];
             if (transmissionCacheEntry.receptionCacheEntries) {
                 const RadioMedium::ReceptionCacheEntry& receptionCacheEntry = transmissionCacheEntry.receptionCacheEntries->at(radioIndex);
-                const ScalarReception *scalarReception = static_cast<const ScalarReception *>(receptionCacheEntry.reception);
-                hostReceptionTimes[receptionIndex] = scalarReception->getStartTime().raw();
-                hostReceptionPowers[receptionIndex] = scalarReception->getPower().get();
+                const ScalarReception *reception = static_cast<const ScalarReception *>(receptionCacheEntry.reception);
+                hostReceptionTimes[receptionIndex] = reception->getStartTime().raw();
+                hostReceptionPowers[receptionIndex] = reception->getPower().get();
             }
         }
         EV_TRACE << "Prepared host data, transmission id = " << transmissionIndex << ", radio id = " << radioIndex << ", reception time = " << hostReceptionTimes[receptionIndex] << ", transmission duration =  " << hostTransmissionDurations[transmissionIndex] << ", reception power = " << hostReceptionPowers[receptionIndex] << endl;
@@ -258,12 +362,10 @@ void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions(const std::vector<
     // start the computation on the device
     EV_TRACE << "Starting computation on device" << endl;
 
-    hostComputeMinSNIRsForAllReceptions(
+    hostComputeAllMinSNIRsForAllReceptions(
             transmissionCount, radioCount, backgroundNoisePower,
             deviceTransmissionDurations, deviceReceptionTimes, deviceReceptionPowers,
             deviceMinSNIRs);
-
-//    CUDA_ERROR_CHECK(cudaThreadSynchronize());
 
     // copy data from device to host
     EV_TRACE << "Copying device data to host memory" << endl;
@@ -304,10 +406,15 @@ void CUDAParallelStrategy::computeAllMinSNIRsForAllReceptions(const std::vector<
     delete hostMinSNIRs;
 }
 
-void CUDAParallelStrategy::computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const
+void CUDAParallelStrategy::computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions)
 {
+    reallocateBuffers(radios, transmissions);
     computeAllReceptionsForTransmission(radios, transmissions);
     computeAllMinSNIRsForAllReceptions(radios, transmissions);
+    // TODO: computeAllMinSNIRsForAllReceptions2(radios, transmissions);
+    computedRadioCount = radios->size();
+    computedTransmissionCount = transmissions->size();
+    computedReceptionCount = computedRadioCount * computedTransmissionCount;
 }
 
 } // namespace physicallayer

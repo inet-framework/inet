@@ -44,6 +44,17 @@ class INET_API CUDAParallelStrategy : public cModule, public IParallelStrategy
     protected:
         RadioMedium *radioMedium;
 
+        int baseRadioId;
+        int baseTransmissionId;
+
+        int allocatedRadioCount;
+        int allocatedTransmissionCount;
+        int allocatedReceptionCount;
+
+        int computedRadioCount;
+        int computedTransmissionCount;
+        int computedReceptionCount;
+
         double *hostRadioPositionXs;
         double *hostRadioPositionYs;
         double *hostRadioPositionZs;
@@ -61,18 +72,38 @@ class INET_API CUDAParallelStrategy : public cModule, public IParallelStrategy
         double pathLossAlpha;
         double backgroundNoisePower;
 
+        double *hostAllMinSNIRs;
+
+        cuda_simtime_t *deviceTransmissionDurations;
+        cuda_simtime_t *deviceAllReceptionTimes;
+        double *deviceAllReceptionPowers;
+        double *deviceAllMinSNIRs;
+
     protected:
         virtual int numInitStages() const { return INITSTAGE_LAST; }
         virtual void initialize(int stage);
-        virtual void computeAllReceptionsForTransmission(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const;
-        virtual void computeAllMinSNIRsForAllReceptions(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const;
+        virtual void reallocateDeviceBuffer(void **buffer, int oldSize, int newSize);
+        virtual void reallocateBuffers(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions);
+
+        /**
+         * Computes the propagation times, reception times, and reception powers for all receivers for the last transmission.
+         */
+        virtual void computeAllReceptionsForTransmission(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions);
+
+        /**
+         * Computes the minimum SNIRs for all receptions as affected by the last transmission.
+         */
+        virtual void computeAllMinSNIRsForAllReceptions2(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions);
+
+        // TODO: delete
+        virtual void computeAllMinSNIRsForAllReceptions(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions);
 
     public:
         CUDAParallelStrategy();
         virtual ~CUDAParallelStrategy();
 
         virtual void printToStream(std::ostream& stream) const;
-        virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions) const;
+        virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const ITransmission *> *transmissions);
 };
 
 } // namespace physicallayer
