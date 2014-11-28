@@ -82,8 +82,6 @@ ShortBitVector::ShortBitVector(const char* str)
 ShortBitVector::ShortBitVector(unsigned int num)
 {
     undef = false;
-    if (num < 0)
-        throw cRuntimeError("num = %d must be a positive integer", num);
     if (num == 0)
         size = 1;
     else
@@ -97,8 +95,6 @@ ShortBitVector::ShortBitVector(unsigned int num, unsigned int fixedSize)
     if (fixedSize > MAX_LENGTH)
         throw cRuntimeError("fixedSize = %d must be less then 32", fixedSize);
     size = fixedSize;
-    if (num < 0)
-        throw cRuntimeError("num = %d must be a positive integer", num);
     bitVector = num;
 }
 
