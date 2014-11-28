@@ -360,7 +360,7 @@ L3Address GPSR::getSelfAddress() const
 
 L3Address GPSR::getSenderNeighborAddress(INetworkDatagram *datagram) const
 {
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     return packet->getSenderAddress();
 }
 
@@ -453,7 +453,7 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
 
 L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     if (packet->getRoutingMode() == GPSR_GREEDY_ROUTING)
         return findGreedyRoutingNextHop(datagram, destination);
     else if (packet->getRoutingMode() == GPSR_PERIMETER_ROUTING)
@@ -465,7 +465,7 @@ L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destina
 L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using greedy routing: destination = " << destination << endl;
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
     Coord destinationPosition = packet->getDestinationPosition();
@@ -496,7 +496,7 @@ L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Add
 L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using perimeter routing: destination = " << destination << endl;
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
     Coord perimeterRoutingStartPosition = packet->getPerimeterRoutingStartPosition();
@@ -560,7 +560,7 @@ INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const 
     }
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
-        GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+        GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
         packet->setSenderAddress(getSelfAddress());
         // KLUDGE: find output interface
         outputInterfaceEntry = interfaceTable->getInterface(1);
@@ -583,7 +583,7 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagra
 
 INetfilter::IHook::Result GPSR::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry)
 {
-    cPacket *networkPacket = dynamic_cast<cPacket *>(datagram);
+    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
     GPSRPacket *gpsrPacket = dynamic_cast<GPSRPacket *>(networkPacket->getEncapsulatedPacket());
     if (gpsrPacket) {
         networkPacket->decapsulate();
@@ -599,7 +599,7 @@ INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram,
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
-        cPacket *networkPacket = dynamic_cast<cPacket *>(datagram);
+        cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
         GPSRPacket *gpsrPacket = createPacket(datagram->getDestinationAddress(), networkPacket->decapsulate());
         networkPacket->encapsulate(gpsrPacket);
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
