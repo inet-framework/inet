@@ -108,15 +108,12 @@ void Flood::handleUpperPacket(cPacket *m)
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
-            cBroadcastList::iterator it;
-
             //serach the broadcast list of outdated entries and delete them
-            for (it = bcMsgs.begin(); it != bcMsgs.end(); ++it) {
-                if (it->delTime < simTime()) {
-                    bcMsgs.erase(it);
-                    it--;
-                    break;
-                }
+            for (cBroadcastList::iterator it = bcMsgs.begin(); it != bcMsgs.end(); ) {
+                if (it->delTime < simTime())
+                    it = bcMsgs.erase(it);
+                else
+                    ++it;
             }
             //delete oldest entry if max size is reached
             if (bcMsgs.size() >= bcMaxEntries) {
@@ -224,17 +221,18 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
     cBroadcastList::iterator it;
 
     //serach the broadcast list of outdated entries and delete them
-    for (it = bcMsgs.begin(); it != bcMsgs.end(); it++) {
+    for (it = bcMsgs.begin(); it != bcMsgs.end(); ) {
         if (it->delTime < simTime()) {
-            bcMsgs.erase(it);
-            it--;
+            it = bcMsgs.erase(it);
         }
         //message was already broadcasted
-        if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum == msg->getSeqNum())) {
+        else if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum == msg->getSeqNum())) {
             // update entry
             it->delTime = simTime() + bcDelTime;
             return false;
         }
+        else
+            ++it;
     }
 
     //delete oldest entry if max size is reached
