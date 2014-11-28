@@ -113,7 +113,7 @@
 
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          fe01-d055
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          d5a6-0850
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          668b-aecb
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          d731-116e
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          342c-eec8
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          dec4-372d
 /examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          5d8e-4088

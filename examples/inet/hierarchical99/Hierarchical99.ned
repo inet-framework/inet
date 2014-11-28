@@ -18,7 +18,7 @@
 
 package inet.examples.inet.hierarchical99;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.contract.INetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10G;
@@ -34,6 +34,7 @@ import inet.node.inet.StandardHost;
 network Hierarchical99
 {
     parameters:
+        string networkConfiguratorType;
         @display("bgb=708,518;bgl=22");
     types:
         module LAN
@@ -107,9 +108,8 @@ network Hierarchical99
         recorder: RoutingTableRecorder {
             @display("p=37,81");
         }
-        configurator: IPv4NetworkConfigurator {
+        networkConfigurator: <networkConfiguratorType> like INetworkConfigurator {
             @display("p=37,31");
-            config = xmldoc("hierarchical99.xml");
         }
         area11: Area {
             @display("p=261,80;t=10.11.x.x");
