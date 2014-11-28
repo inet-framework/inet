@@ -70,7 +70,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     if (topology.getNumNodes() == 0)
-        error("Empty network!");
+        throw cRuntimeError("Empty network!");
 
     // extract nodes, fill in interfaceTable and routingTable members in node
     for (int i = 0; i < topology.getNumNodes(); i++) {

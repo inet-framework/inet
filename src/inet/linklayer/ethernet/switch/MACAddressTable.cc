@@ -265,7 +265,7 @@ void MACAddressTable::readAddressTable(const char *fileName)
 {
     FILE *fp = fopen(fileName, "r");
     if (fp == NULL)
-        error("cannot open address table file `%s'", fileName);
+        throw cRuntimeError("cannot open address table file `%s'", fileName);
 
     //  Syntax of the file goes as:
     //  VLAN ID, address in hexadecimal representation, portno
@@ -299,7 +299,7 @@ void MACAddressTable::readAddressTable(const char *fileName)
 
         // broken line?
         if (!portno || !hexaddress)
-            error("line %d invalid in address table file `%s'", lineno, fileName);
+            throw cRuntimeError("line %d invalid in address table file `%s'", lineno, fileName);
 
         // Create an entry with address and portno and insert into table
         AddressEntry entry(atoi(vlanID), atoi(portno), 0);

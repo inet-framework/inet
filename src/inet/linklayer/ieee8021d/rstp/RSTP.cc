@@ -112,7 +112,7 @@ void RSTP::handleMessage(cMessage *msg)
                 break;
 
             default:
-                error("Unknown self message");
+                throw cRuntimeError("Unknown self message");
                 break;
         }
     }

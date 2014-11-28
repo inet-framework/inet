@@ -149,7 +149,7 @@ void TCP::handleMessage(cMessage *msg)
 
             cObject *ctrl = tcpseg->removeControlInfo();
             if (!ctrl)
-                error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
+                throw cRuntimeError("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
 
             INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
             srcAddr = controlInfo->getSourceAddress();

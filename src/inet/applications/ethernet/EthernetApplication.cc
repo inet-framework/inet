@@ -60,10 +60,10 @@ MACAddress EthernetApplication::resolveDestMACAddress()
         if (!destMACAddress.tryParse(destAddress)) {
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
-                error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
+                throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
             cModule *destMAC = destStation->getSubmodule("mac");
             if (!destMAC)
-                error("module '%s' has no 'mac' submodule", destAddress);
+                throw cRuntimeError("module '%s' has no 'mac' submodule", destAddress);
             destMACAddress.setAddress(destMAC->par("address"));
         }
     }

@@ -42,7 +42,7 @@ void Ieee8021dRelay::initialize(int stage)
         // number of ports
         portCount = gate("ifOut", 0)->size();
         if (gate("ifIn", 0)->size() != (int)portCount)
-            error("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
+            throw cRuntimeError("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

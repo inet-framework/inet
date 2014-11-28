@@ -148,7 +148,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
 
     cObject *ctrl = tcpsegP->removeControlInfo();
     if (!ctrl)
-        error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
+        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
 
     INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
     srcAddr = controlInfo->getSourceAddress();

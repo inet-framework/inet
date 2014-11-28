@@ -519,7 +519,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 
         case SEND_DATA:
             if (msg->getKind() == LMAC_WAKEUP) {
-                error("I am still sending a message, while a new slot is starting!\n");
+                throw cRuntimeError("I am still sending a message, while a new slot is starting!\n");
             }
             else {
                 EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;

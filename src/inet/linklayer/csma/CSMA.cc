@@ -83,9 +83,9 @@ void CSMA::initialize(int stage)
                 backoffMethod = CONSTANT;
             }
             else {
-                error("Unknown backoff method \"%s\".\
-					   Use \"constant\", \"linear\" or \"\
-					   \"exponential\".", backoffMethodStr.c_str());
+                throw cRuntimeError("Unknown backoff method \"%s\".\
+                       Use \"constant\", \"linear\" or \"\
+                       \"exponential\".", backoffMethodStr.c_str());
             }
             initialCW = par("contentionWindow");
         }
@@ -797,7 +797,7 @@ simtime_t CSMA::scheduleBackoff()
         }
 
         default:
-            error("Unknown backoff method!");
+            throw cRuntimeError("Unknown backoff method!");
             break;
     }
 
