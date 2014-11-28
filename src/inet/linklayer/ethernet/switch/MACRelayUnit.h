@@ -27,18 +27,15 @@ class EtherFrame;
 
 class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
 {
-  public:
-    MACRelayUnit();
-
   protected:
-    IMACAddressTable *addressTable;
-    int numPorts;
+    IMACAddressTable *addressTable = nullptr;
+    int numPorts = 0;
 
     // Parameters for statistics collection
-    long numProcessedFrames;
-    long numDiscardedFrames;
+    long numProcessedFrames = 0;
+    long numDiscardedFrames = 0;
 
-    bool isOperational;    // for lifecycle
+    bool isOperational = false;    // for lifecycle
 
   protected:
     virtual void initialize(int stage);

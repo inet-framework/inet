@@ -24,11 +24,6 @@ namespace inet {
 
 Define_Module(MACRelayUnit);
 
-MACRelayUnit::MACRelayUnit()
-{
-    addressTable = NULL;
-}
-
 void MACRelayUnit::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
