@@ -20,6 +20,8 @@
 
 package inet.networklayer.configurator.ipv4;
 
+import inet.networklayer.configurator.contract.INetworkConfigurator;
+
 //
 // This module assigns IP addresses and sets up static routing for an IPv4 network.
 // It assigns per-interface IP addresses, strives to take subnets into account,
@@ -355,7 +357,7 @@ package inet.networklayer.configurator.ipv4;
 //      Incoming multicast datagrams are forwarded to each child interface except the
 //      one they arrived in.
 //
-simple IPv4NetworkConfigurator
+simple IPv4NetworkConfigurator like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");

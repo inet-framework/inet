@@ -20,10 +20,12 @@
 
 package inet.networklayer.configurator.generic;
 
+import inet.networklayer.configurator.contract.INetworkConfigurator;
+
 //
+// TODO
 //
-//
-simple GenericNetworkConfigurator
+simple GenericNetworkConfigurator like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");
