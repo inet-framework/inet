@@ -17,6 +17,7 @@
 
 #include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 
 namespace inet {
 
@@ -24,7 +25,31 @@ Register_Class(GenericRoute);
 
 std::string GenericRoute::info() const
 {
-    return "";    //TODO
+    std::stringstream out;
+
+    out << "dest:";
+    if (destination.isUnspecified())
+        out << "*  ";
+    else
+        out << destination << "  ";
+    out << "gw:";
+    if (nextHop.isUnspecified())
+        out << "*  ";
+    else
+        out << nextHop << "  ";
+    out << "metric:" << metric << " ";
+    out << "if:";
+    if (!interface)
+        out << "*";
+    else
+        out << interface->getName();
+    if (interface && interface->getGenericNetworkProtocolData())
+        out << "(" << interface->getGenericNetworkProtocolData()->getAddress() << ")";
+    out << "  ";
+    out << (nextHop.isUnspecified() ? "DIRECT" : "REMOTE");
+    out << " " << IRoute::sourceTypeName(sourceType);
+
+    return out.str();
 }
 
 std::string GenericRoute::detailedInfo() const

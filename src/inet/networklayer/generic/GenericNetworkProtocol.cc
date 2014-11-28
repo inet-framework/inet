@@ -435,7 +435,7 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     delete datagram;
 }
 
-void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const L3Address& nextHop)
+void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, L3Address nextHop)
 {
     if (datagram->getByteLength() > ie->getMTU())
         throw cRuntimeError("datagram too large"); //TODO refine
@@ -454,8 +454,10 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     }
 
     // determine what address to look up in ARP cache
-    if (nextHop.isUnspecified())
-        throw cRuntimeError("No next hop");
+    if (nextHop.isUnspecified()) {
+        nextHop = datagram->getDestinationAddress();
+        EV_WARN << "no next-hop address, using destination address " << nextHop << " (proxy ARP)\n";
+    }
 
     // send out datagram to NIC, with control info attached
     MACAddress nextHopMAC = arp->resolveL3Address(nextHop, ie);

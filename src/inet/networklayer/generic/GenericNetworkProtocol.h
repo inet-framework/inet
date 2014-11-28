@@ -138,7 +138,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     /**
      * Last TTL check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const L3Address& nextHop);
+    virtual void sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, L3Address nextHop);
 
     virtual void datagramPreRouting(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const L3Address& nextHop);
     virtual void datagramLocalIn(GenericDatagram *datagram, const InterfaceEntry *inIE);

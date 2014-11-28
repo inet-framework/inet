@@ -94,7 +94,7 @@ class INET_API GenericRoute : public cObject, public IRoute
     virtual cObject *getProtocolData() const { return protocolData; }
 };
 
-class GenericMulticastRoute
+class GenericMulticastRoute : public cObject
 {
 };
 

@@ -51,7 +51,7 @@ void GenericNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER_3) {
         long initializeStartTime = clock();
 
         GenericTopology topology;
@@ -462,7 +462,7 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
             InterfaceEntry *nextHopInterfaceEntry = NULL;
             while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
-                if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
+                if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getGenericNetworkProtocolData())
                     nextHopInterfaceEntry = link->sourceInterfaceInfo->interfaceEntry;
                 node = (Node *)node->getPath(0)->getRemoteNode();
             }
@@ -478,10 +478,10 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
                 L3Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                 if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData()) {
                     GenericRoute *route = new GenericRoute();
-                    L3Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                     route->setSourceType(IRoute::MANUAL);
                     route->setDestination(destinationAddress);
                     route->setInterface(sourceInterfaceEntry);
+                    L3Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                     if (nextHopAddress != destinationAddress)
                         route->setNextHop(nextHopAddress);
                     EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->info() << endl;

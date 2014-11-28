@@ -30,6 +30,18 @@ namespace inet {
 
 Define_Module(GenericRoutingTable);
 
+std::ostream& operator<<(std::ostream& os, const GenericRoute& e)
+{
+    os << e.info();
+    return os;
+};
+
+std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
+{
+    os << e.info();
+    return os;
+};
+
 GenericRoutingTable::GenericRoutingTable()
 {
     ift = NULL;
@@ -63,8 +75,8 @@ void GenericRoutingTable::initialize(int stage)
         forwarding = par("forwarding").boolValue();
         multicastForwarding = par("multicastForwarding");
 
-//TODO        WATCH_PTRVECTOR(routes);
-//TODO        WATCH_PTRVECTOR(multicastRoutes);
+        WATCH_PTRVECTOR(routes);
+        WATCH_PTRVECTOR(multicastRoutes);
         WATCH(forwarding);
         WATCH(multicastForwarding);
         WATCH(routerId);
