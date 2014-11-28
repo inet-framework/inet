@@ -1150,16 +1150,16 @@ void SCTPAssociation::sendPacketDrop(const bool flag)
                 delete chunk;
                 delete pktdrop;
                 disposeOf(state->sctpmsg);
-                disposeOf(drop);
                 EV_DETAIL << "laenge=" << drop->getByteLength() << " numberOfChunks=1\n";
+                disposeOf(drop);
                 return;
             }
         }
         else {
             delete pktdrop;
             disposeOf(state->sctpmsg);
-            disposeOf(drop);
             EV_DETAIL << "laenge=" << drop->getByteLength() << " numberOfChunks=1\n";
+            disposeOf(drop);
             return;
         }
         pktdrop->setTFlag(true);
