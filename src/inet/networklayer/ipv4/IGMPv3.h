@@ -22,8 +22,8 @@
  * @detail
  */
 
-#ifndef INET_IGMPV3_H
-#define INET_IGMPV3_H
+#ifndef __INET_IGMPV3_H
+#define __INET_IGMPV3_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"

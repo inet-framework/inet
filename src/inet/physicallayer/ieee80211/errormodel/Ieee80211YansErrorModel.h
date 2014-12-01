@@ -17,8 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef __INET_YANSERRORRATEMODEL_H
-#define __INET_YANSERRORRATEMODEL_H
+#ifndef __INET_IEEE80211YANSERRORMODEL_H
+#define __INET_IEEE80211YANSERRORMODEL_H
 
 #include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"

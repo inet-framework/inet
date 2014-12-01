@@ -34,8 +34,8 @@
 
 /** \author Jia Pan */
 
-#ifndef __INET_INTERVAL_TREE_H
-#define __INET_INTERVAL_TREE_H
+#ifndef __INET_INTERVALTREE_H
+#define __INET_INTERVALTREE_H
 
 #include <deque>
 #include <limits>

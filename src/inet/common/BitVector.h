@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BITVECTOR_H_
-#define __INET_BITVECTOR_H_
+#ifndef __INET_BITVECTOR_H
+#define __INET_BITVECTOR_H
 
 #include "inet/common/INETDefs.h"
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _IGMPMESSAGE_H_
-#define _IGMPMESSAGE_H_
+#ifndef __INET_IGMPMESSAGE_H
+#define __INET_IGMPMESSAGE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/ipv4/IGMPMessage_m.h"

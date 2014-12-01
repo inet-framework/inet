@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211INTERLEAVER_H_
-#define __INET_IEEE80211INTERLEAVER_H_
+#ifndef __INET_IEEE80211INTERLEAVER_H
+#define __INET_IEEE80211INTERLEAVER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"

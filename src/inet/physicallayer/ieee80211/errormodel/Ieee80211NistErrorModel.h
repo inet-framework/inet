@@ -17,8 +17,8 @@
  *
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
-#ifndef __INET_NISTERRORRATEMODEL_H
-#define __INET_NISTERRORRATEMODEL_H
+#ifndef __INET_IEEE80211NISTERRORMODEL_H
+#define __INET_IEEE80211NISTERRORMODEL_H
 
 #include "inet/physicallayer/ieee80211/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"

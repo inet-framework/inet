@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 #ifndef __INET_IEEE802154UWBIRTRANSMITTER_H
-#define	__INET_IEEE802154UWBIRTRANSMITTER_H
+#define __INET_IEEE802154UWBIRTRANSMITTER_H
 
 #include <vector>
 #include "inet/physicallayer/mapping/MappingBase.h"
