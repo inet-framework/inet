@@ -279,29 +279,6 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
     cModule *hostModule = interfaceEntry->getInterfaceTable()->getHostModule();
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
-    cXMLElement *root = par("config").xmlValue();
-    cXMLElementList wirelessElements = root->getChildrenByTagName("wireless");
-    for (int i = 0; i < (int)wirelessElements.size(); i++) {
-        cXMLElement *wirelessElement = wirelessElements[i];
-        const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
-        const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
-        try {
-            // parse host/interface expressions
-            Matcher hostMatcher(hostAttr);
-            Matcher interfaceMatcher(interfaceAttr);
-
-            // Note: "hosts", "interfaces" must ALL match on the interface for the rule to apply
-            if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
-                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
-            {
-                const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
-                return idAttr ? idAttr : wirelessElement->getSourceLocation();
-            }
-        }
-        catch (std::exception& e) {
-            throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
-        }
-    }
 
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
     cModule *module = interfaceEntry->getInterfaceModule();
