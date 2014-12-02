@@ -191,6 +191,26 @@ inline double deg2rad(double deg) { return deg * M_PI / 180; }
  */
 inline double rad2deg(double rad) { return rad * 180 / M_PI; }
 
+/**
+ * Implementation of the n choose k (binomial coefficient) function, from the MiXiM Framework
+ * Author Karl Wessel
+ */
+inline double n_choose_k(int n, int k) {
+    if (n < k)
+        return 0.0;
+
+    const int       iK     = (k<<1) > n ? n-k : k;
+    const double    dNSubK = (n-iK);
+    register int    i      = 1;
+    register double dRes   = i > iK ? 1.0 : (dNSubK+i);
+
+    for (++i; i <= iK; ++i) {
+        dRes *= dNSubK+i;
+        dRes /= i;
+    }
+    return dRes;
+}
+
 } // namespace math
 
 } // namespace inet

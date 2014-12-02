@@ -55,6 +55,16 @@ class INET_API QAM256Modulation : public IModulation
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
 
+/**
+ * DSSS OQPSK-16 modulation used in the 802.15.4 standard
+ */
+class INET_API DSSSOQPSK16Modulation : public IModulation
+{
+  public:
+    virtual const char *getName() { return "DSSS-OQPSK-16"; }
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+};
+
 } // namespace physicallayer
 
 } // namespace inet
