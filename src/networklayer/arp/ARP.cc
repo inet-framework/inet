@@ -648,7 +648,6 @@ void ARP::receiveChangeNotification(int category, const cObject *details)
         entry->macAddress = ie->getMacAddress();
         IPv4Address ipAddr = ie->ipv4Data()->getIPAddress();
         ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(),std::make_pair(ipAddr, entry));
-        ASSERT(where->second == entry);
         entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
     }
 }

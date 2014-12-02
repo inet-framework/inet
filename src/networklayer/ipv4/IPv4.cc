@@ -272,6 +272,14 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
             // ICMP errors are delivered to the appropriate higher layer protocol
             IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
+            if(protocol == IP_PROT_UDP){
+            	if(strcmp(getParentModule()->getParentModule()->getName(), "router") == 0){
+            		std::cout << "[IPv4] Deleting packet, router doesn't support UDP!" << std::endl;
+            		// FIXME better error handling?
+            		delete packet;
+            		return;
+            	}
+            }
             int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(packet, "transportOut", gateindex);
             break;
@@ -378,8 +386,13 @@ void IPv4::datagramLocalOut(IPv4Datagram* datagram, const InterfaceEntry* destIE
                 EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
                 destIE = NULL;
             }
-            if (!destIE)
+            if (!destIE){
                 destIE = ift->getFirstLoopbackInterface();
+                if(!destIE){
+                    std::cout << destAddr << " does not exist anymore!" << std::endl;
+                    return;
+                }
+            }
             ASSERT(destIE);
             routeUnicastPacket(datagram, NULL, destIE, destAddr);
         }
