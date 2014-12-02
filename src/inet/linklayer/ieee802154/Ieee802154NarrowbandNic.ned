@@ -52,26 +52,26 @@ module Ieee802154NarrowbandNic like IWirelessNic
                 
                 // length of MAC header
                 // aMinMPDUOverhead = 9 Octets (802.15.4-2006, page 159)
-                int headerLength @unit(bit) = default(72 bit);
+                headerLength = default(72 bit);
 
                 // Exponential Backoff
-                string backoffMethod = default("exponential");
+                backoffMethod = default("exponential");
                 
                 // Maximum number of frame retransmission
                 // 802.15.4-2006, page 164
-                int macMaxFrameRetries = default(3);
+                macMaxFrameRetries = default(3);
                 
                 // Maximum number of extra backoffs (excluding the first unconditional one) before frame drop
                 // 802.15.4-2006, page 163
-                int macMaxCSMABackoffs = default(4);
+                macMaxCSMABackoffs = default(4);
                 
                 // Minimum backoff exponent
                 // 802.15.4-2006, page 164
-                double macMinBE = default(3);
+                macMinBE = default(3);
                 
                 // Maximum backoff exponent
                 // 802.15.4-2006, page 163
-                double macMaxBE = default(5);
+                macMaxBE = default(5);
         }
         radio: <radioType> like IRadio {
             parameters:
