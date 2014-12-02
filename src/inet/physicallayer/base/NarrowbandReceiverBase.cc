@@ -62,6 +62,8 @@ void NarrowbandReceiverBase::initialize(int stage)
             modulation = new QAM16Modulation();
         else if (strcmp(modulationName, "256-QAM") == 0)
             modulation = new QAM256Modulation();
+        else if (strcmp(modulationName, "DSSS-OQPSK-16") == 0)
+            modulation = new DSSSOQPSK16Modulation();
         else
             throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
     }
