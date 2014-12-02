@@ -26,7 +26,7 @@ namespace inet {
 class INET_API TransportProtocolBase : public LayeredProtocolBase
 {
   public:
-    TransportProtocolBase();
+    TransportProtocolBase() {};
 
   protected:
     virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_TRANSPORT_LAYER; }

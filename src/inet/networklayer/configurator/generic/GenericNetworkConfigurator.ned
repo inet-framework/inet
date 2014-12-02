@@ -29,6 +29,7 @@ simple GenericNetworkConfigurator like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");
+        xml config = default(xml("<config/>")); // XML configuration parameters
         bool addStaticRoutes = default(true);  // add static routes to the routing tables of all nodes to route to all destination interfaces (only where applicable; turn off when config file contains manual routes)
         bool dumpTopology = default(false);  // print extracted network topology to the module output
         bool dumpRoutes = default(false);    // print configured and optimized routing tables for all nodes to the module output
