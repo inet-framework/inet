@@ -27,16 +27,16 @@ class INET_API EthernetApplication : public cSimpleModule
 {
   protected:
     // send parameters
-    long seqNum;
-    cPar *reqLength;
-    cPar *respLength;
-    cPar *waitTime;
+    long seqNum = 0;
+    cPar *reqLength = nullptr;
+    cPar *respLength = nullptr;
+    cPar *waitTime = nullptr;
 
     MACAddress destMACAddress;
 
     // Reception statistics
-    long packetsSent;
-    long packetsReceived;
+    long packetsSent = 0;
+    long packetsReceived = 0;
 
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;

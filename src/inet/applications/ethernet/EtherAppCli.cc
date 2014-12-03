@@ -33,15 +33,6 @@ Define_Module(EtherAppCli);
 simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
 simsignal_t EtherAppCli::rcvdPkSignal = registerSignal("rcvdPk");
 
-EtherAppCli::EtherAppCli()
-{
-    reqLength = NULL;
-    respLength = NULL;
-    sendInterval = NULL;
-    timerMsg = NULL;
-    nodeStatus = NULL;
-}
-
 EtherAppCli::~EtherAppCli()
 {
     cancelAndDelete(timerMsg);

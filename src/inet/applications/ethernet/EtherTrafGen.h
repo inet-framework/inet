@@ -34,24 +34,24 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
   protected:
     enum Kinds { START = 100, NEXT };
 
-    long seqNum;
+    long seqNum = 0;
 
     // send parameters
-    cPar *sendInterval;
-    cPar *numPacketsPerBurst;
-    cPar *packetLength;
-    int etherType;
+    cPar *sendInterval = nullptr;
+    cPar *numPacketsPerBurst = nullptr;
+    cPar *packetLength = nullptr;
+    int etherType = 0;
     MACAddress destMACAddress;
-    NodeStatus *nodeStatus;
+    NodeStatus *nodeStatus = nullptr;
 
     // self messages
-    cMessage *timerMsg;
+    cMessage *timerMsg = nullptr;
     simtime_t startTime;
     simtime_t stopTime;
 
     // receive statistics
-    long packetsSent;
-    long packetsReceived;
+    long packetsSent = 0;
+    long packetsReceived = 0;
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 

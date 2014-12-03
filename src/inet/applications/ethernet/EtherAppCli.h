@@ -35,24 +35,24 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     enum Kinds { START = 100, NEXT };
 
     // send parameters
-    long seqNum;
-    cPar *reqLength;
-    cPar *respLength;
-    cPar *sendInterval;
+    long seqNum = 0;
+    cPar *reqLength = nullptr;
+    cPar *respLength = nullptr;
+    cPar *sendInterval = nullptr;
 
-    int localSAP;
-    int remoteSAP;
+    int localSAP = -1;
+    int remoteSAP = -1;
     MACAddress destMACAddress;
-    NodeStatus *nodeStatus;
+    NodeStatus *nodeStatus = nullptr;
 
     // self messages
-    cMessage *timerMsg;
+    cMessage *timerMsg = nullptr;
     simtime_t startTime;
     simtime_t stopTime;
 
     // receive statistics
-    long packetsSent;
-    long packetsReceived;
+    long packetsSent = 0;
+    long packetsReceived = 0;
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
@@ -75,7 +75,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    EtherAppCli();
+    EtherAppCli() {}
     virtual ~EtherAppCli();
 };
 

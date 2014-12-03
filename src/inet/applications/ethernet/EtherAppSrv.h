@@ -35,12 +35,12 @@ namespace inet {
 class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
 {
   protected:
-    int localSAP;
-    NodeStatus *nodeStatus;
+    int localSAP = 0;
+    NodeStatus *nodeStatus = nullptr;
 
     // statistics
-    long packetsSent;
-    long packetsReceived;
+    long packetsSent = 0;
+    long packetsReceived = 0;
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
