@@ -565,8 +565,8 @@ void IGMPv3::processIgmpMessage(IGMPMessage *msg)
 
         // TODO process v1/v2 reports
         default:
-            delete msg;
-            throw cRuntimeError("IGMPv2: Unhandled message type (%dq)", msg->getType());
+            //delete msg;
+            throw cRuntimeError("IGMPv3: Unhandled message type (%dq)", msg->getType());
     }
 }
 
