@@ -28,26 +28,6 @@ HttpBrowserBase::HttpBrowserBase()
 {
     m_bDisplayMessage = true;
     m_bDisplayResponseContent = true;
-    eventTimer = NULL;
-    controller = NULL;
-
-    rdProcessingDelay = NULL;
-    rdActivityLength = NULL;
-    rdInterRequestInterval = NULL;
-    rdInterSessionInterval = NULL;
-    rdRequestSize = NULL;
-    rdReqInSession = NULL;
-
-    htmlRequested = 0;
-    htmlReceived = 0;
-    htmlErrorsReceived = 0;
-    imgResourcesRequested = 0;
-    imgResourcesReceived = 0;
-    textResourcesRequested = 0;
-    textResourcesReceived = 0;
-    messagesInCurrentSession = 0;
-    sessionCount = 0;
-    connectionsCount = 0;
 }
 
 HttpBrowserBase::~HttpBrowserBase()

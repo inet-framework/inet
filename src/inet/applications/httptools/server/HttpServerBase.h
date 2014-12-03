@@ -56,7 +56,7 @@ class INET_API HttpServerBase : public HttpNodeBase
      */
     struct HtmlPageData
     {
-        long size;
+        long size = 0;
         std::string body;
     };
 
@@ -68,18 +68,18 @@ class INET_API HttpServerBase : public HttpNodeBase
     simtime_t activationTime;    // the activation time of the server -- initial startup delay
 
     // Basic statistics
-    long htmlDocsServed;
-    long imgResourcesServed;
-    long textResourcesServed;
-    long badRequests;
+    long htmlDocsServed = 0;
+    long imgResourcesServed = 0;
+    long textResourcesServed = 0;
+    long badRequests = 0;
 
-    rdObject *rdReplyDelay;    ///< The processing delay of the server.
-    rdObject *rdHtmlPageSize;    ///< The HTML page size distribution for the site.
-    rdObject *rdTextResourceSize;    ///< The text resource size distribution for the site.
-    rdObject *rdImageResourceSize;    ///< The image resource size distribution for the site.
-    rdObject *rdNumResources;    ///< Number of resources per HTML page.
-    rdObject *rdTextImageResourceRatio;    ///< The ratio of text resources to images referenced in HTML pages.
-    rdObject *rdErrorMsgSize;    ///< The size of error messages.
+    rdObject *rdReplyDelay = nullptr;    ///< The processing delay of the server.
+    rdObject *rdHtmlPageSize = nullptr;    ///< The HTML page size distribution for the site.
+    rdObject *rdTextResourceSize = nullptr;    ///< The text resource size distribution for the site.
+    rdObject *rdImageResourceSize = nullptr;    ///< The image resource size distribution for the site.
+    rdObject *rdNumResources = nullptr;    ///< Number of resources per HTML page.
+    rdObject *rdTextImageResourceRatio = nullptr;    ///< The ratio of text resources to images referenced in HTML pages.
+    rdObject *rdErrorMsgSize = nullptr;    ///< The size of error messages.
 
   protected:
     virtual void initialize(int stage);

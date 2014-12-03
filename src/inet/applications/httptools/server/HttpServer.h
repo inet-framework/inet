@@ -41,8 +41,8 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
   protected:
     TCPSocket listensocket;
     TCPSocketMap sockCollection;
-    unsigned long numBroken;
-    unsigned long socketsOpened;
+    unsigned long numBroken = 0;
+    unsigned long socketsOpened = 0;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

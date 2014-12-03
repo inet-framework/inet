@@ -71,7 +71,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         simtime_t time;    // Event triggering time
         std::string wwwhost;    // Host to contact
         std::string resourceName;    // The resource to request
-        HttpNodeBase *serverModule;    // Reference to the omnet server object. Resolved at parse time.
+        HttpNodeBase *serverModule = nullptr;    // Reference to the omnet server object. Resolved at parse time.
     };
 
     /*
@@ -84,36 +84,36 @@ class INET_API HttpBrowserBase : public HttpNodeBase
      */
     typedef std::deque<HttpRequestMessage *> HttpRequestQueue;
 
-    cMessage *eventTimer;    // The timer object used to trigger browsing events
-    HttpController *controller;    // Reference to the central controller object
+    cMessage *eventTimer = nullptr;    // The timer object used to trigger browsing events
+    HttpController *controller = nullptr;    // Reference to the central controller object
 
-    bool scriptedMode;    // Set to true if a script file is defined
+    bool scriptedMode = false;    // Set to true if a script file is defined
     BrowseEventsList browseEvents;    // Queue of browse events used in scripted mode
 
     /* The current session parameters */
-    int reqInCurSession;    // The number of requests made so far in the current session
-    int reqNoInCurSession;    // The total number of requests to be made in the current session
-    double activityPeriodLength;    // The length of the currently active activity period
+    int reqInCurSession = 0;    // The number of requests made so far in the current session
+    int reqNoInCurSession = 0;    // The total number of requests to be made in the current session
+    double activityPeriodLength = NaN;    // The length of the currently active activity period
     simtime_t acitivityPeriodEnd;    // The end in simulation time of the current activity period
 
     /* The random objects */
-    rdObject *rdProcessingDelay;
-    rdObject *rdActivityLength;
-    rdObject *rdInterRequestInterval;
-    rdObject *rdInterSessionInterval;
-    rdObject *rdRequestSize;
-    rdObject *rdReqInSession;
+    rdObject *rdProcessingDelay = nullptr;
+    rdObject *rdActivityLength = nullptr;
+    rdObject *rdInterRequestInterval = nullptr;
+    rdObject *rdInterSessionInterval = nullptr;
+    rdObject *rdRequestSize = nullptr;
+    rdObject *rdReqInSession = nullptr;
 
-    long htmlRequested;
-    long htmlReceived;
-    long htmlErrorsReceived;
-    long imgResourcesRequested;
-    long imgResourcesReceived;
-    long textResourcesRequested;
-    long textResourcesReceived;
-    long messagesInCurrentSession;
-    long sessionCount;
-    long connectionsCount;
+    long htmlRequested = 0;
+    long htmlReceived = 0;
+    long htmlErrorsReceived = 0;
+    long imgResourcesRequested = 0;
+    long imgResourcesReceived = 0;
+    long textResourcesRequested = 0;
+    long textResourcesReceived = 0;
+    long messagesInCurrentSession = 0;
+    long sessionCount = 0;
+    long connectionsCount = 0;
 
   protected:
     virtual void initialize(int stage);

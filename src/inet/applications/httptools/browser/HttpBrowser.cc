@@ -25,8 +25,6 @@ Define_Module(HttpBrowser);
 
 HttpBrowser::HttpBrowser()
 {
-    numBroken = 0;
-    socketsOpened = 0;
 }
 
 HttpBrowser::~HttpBrowser()

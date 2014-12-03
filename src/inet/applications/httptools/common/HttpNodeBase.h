@@ -56,13 +56,13 @@ enum LOG_FORMAT { lf_short, lf_long };
 class HttpNodeBase : public cSimpleModule, public ILifecycle
 {
   protected:
-    unsigned long linkSpeed;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
-    int httpProtocol;    // the http protocol. http/1.0: 10 ; http/1.1: 11
+    unsigned long linkSpeed = 0;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
+    int httpProtocol = 0;    // the http protocol. http/1.0: 10 ; http/1.1: 11
     std::string logFileName;    // the log file name for message generation events
-    bool enableLogging;    // enable/disable of logging message generation events to file
-    LOG_FORMAT outputFormat;    // The format used to log message events to the log file (if enabled)
-    bool m_bDisplayMessage;    // enable/disable logging of message events to the console
-    bool m_bDisplayResponseContent;    // enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set
+    bool enableLogging = true;    // enable/disable of logging message generation events to file
+    LOG_FORMAT outputFormat = lf_short;    // The format used to log message events to the log file (if enabled)
+    bool m_bDisplayMessage = true;    // enable/disable logging of message events to the console
+    bool m_bDisplayResponseContent = true;    // enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set
 
   protected:
     /* Direct message passing utilities */

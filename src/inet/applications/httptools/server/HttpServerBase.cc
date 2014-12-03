@@ -26,13 +26,6 @@ namespace httptools {
 
 HttpServerBase::HttpServerBase()
 {
-    rdReplyDelay = NULL;
-    rdHtmlPageSize = NULL;
-    rdTextResourceSize = NULL;
-    rdImageResourceSize = NULL;
-    rdNumResources = NULL;
-    rdTextImageResourceRatio = NULL;
-    rdErrorMsgSize = NULL;
 }
 
 HttpServerBase::~HttpServerBase()

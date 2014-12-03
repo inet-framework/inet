@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/httptools/common/HttpUtils.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -45,7 +46,9 @@ enum DISTR_TYPE { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_consta
 class rdObject
 {
   protected:
-    DISTR_TYPE m_type;
+    DISTR_TYPE m_type = dt_normal;
+
+  protected:
     bool _hasKey(cXMLAttributeMap attributes, std::string key) { return attributes.find(key) != attributes.end(); }
 
   public:
@@ -67,11 +70,11 @@ class rdObject
 class rdNormal : public rdObject
 {
   protected:
-    double m_mean;    ///< The mean of the distribution.
-    double m_sd;    ///< The sd of the distribution.
-    double m_min;    ///< The minimum limit   .
-    bool m_bMinLimit;    ///< Set if the minimum limit is set.
-    bool m_nonNegative;    ///< Non-negative only -- uses the truncnormal function.
+    double m_mean = NaN;    ///< The mean of the distribution.
+    double m_sd = NaN;    ///< The sd of the distribution.
+    double m_min = NaN;    ///< The minimum limit   .
+    bool m_bMinLimit = NaN;    ///< Set if the minimum limit is set.
+    bool m_nonNegative = NaN;    ///< Non-negative only -- uses the truncnormal function.
 
   public:
 
@@ -108,8 +111,8 @@ class rdNormal : public rdObject
 class rdUniform : public rdObject
 {
   protected:
-    double m_beginning;    ///< Low limit
-    double m_end;    ///< High limit
+    double m_beginning = NaN;    ///< Low limit
+    double m_end = NaN;    ///< High limit
 
   public:
     /*
@@ -141,11 +144,11 @@ class rdUniform : public rdObject
 class rdExponential : public rdObject
 {
   protected:
-    double m_mean;    // the distribution mean
-    double m_min;    // the low limit
-    double m_max;    // the high limit
-    bool m_bMinLimit;
-    bool m_bMaxLimit;
+    double m_mean = NaN;    // the distribution mean
+    double m_min = NaN;    // the low limit
+    double m_max = NaN;    // the high limit
+    bool m_bMinLimit = false;
+    bool m_bMaxLimit = false;
 
   public:
 
@@ -179,14 +182,14 @@ class rdHistogram : public rdObject
   protected:
     struct rdHistogramBin
     {
-        int count;
-        double sum;
+        int count = 0;
+        double sum = NaN;
     };
 
     typedef std::vector<rdHistogramBin> rdHistogramBins;
 
     rdHistogramBins m_bins;
-    bool m_zeroBased;
+    bool m_zeroBased = false;
 
   private:
     void __parseBinString(std::string binstr);
@@ -217,7 +220,7 @@ class rdHistogram : public rdObject
 class rdConstant : public rdObject
 {
   protected:
-    double m_value;    ///< The constant
+    double m_value = NaN;    ///< The constant
 
   public:
 
@@ -245,10 +248,10 @@ class rdConstant : public rdObject
 class rdZipf : public rdObject
 {
   protected:
-    double m_alpha;    // the alpha value
-    int m_number;    // the number of nodes to pick from
-    double m_c;    // helper constant.
-    bool m_baseZero;    // true if we want a zero-based return value
+    double m_alpha = NaN;    // the alpha value
+    int m_number = 0;    // the number of nodes to pick from
+    double m_c = NaN;    // helper constant.
+    bool m_baseZero = false;    // true if we want a zero-based return value
 
   private:
     // Initialization methods.

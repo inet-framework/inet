@@ -41,8 +41,8 @@ namespace httptools {
 class INET_API HttpServerEvilA : public HttpServer
 {
   private:
-    int badLow;
-    int badHigh;
+    int badLow = 0;
+    int badHigh = 0;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

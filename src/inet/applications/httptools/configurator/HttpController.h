@@ -24,6 +24,7 @@
 #include <fstream>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 #include "inet/applications/httptools/common/HttpUtils.h"
 #include "inet/applications/httptools/common/HttpRandom.h"
@@ -64,25 +65,25 @@ class HttpController : public cSimpleModule
     {
         std::string name;    ///< The server URL.
         std::string host;    ///< The OMNeT++ object name.
-        int port;    ///< Listening port.
-        cModule *module;    ///< The actual OMNeT++ module reference to the server object.
+        int port = -1;    ///< Listening port.
+        cModule *module = nullptr;    ///< The actual OMNeT++ module reference to the server object.
         simtime_t activationTime;    ///< Activation time for the server relative to simulation start.
         simtime_t statusSetTime;    ///< Special status set time.
-        ServerStatus serverStatus;    ///< The default is SS_NORMAL -- no modification events set.
-        double pvalue;    ///< Special (elevated) picking probability if SS_SPECIAL is set.
-        double pamortize;    ///< Amortization factor -- reduces special probability on each hit.
-        unsigned long accessCount;    ///< A counter for the number of server hits.
+        ServerStatus serverStatus = SS_NORMAL;    ///< The default is SS_NORMAL -- no modification events set.
+        double pvalue = NaN;    ///< Special (elevated) picking probability if SS_SPECIAL is set.
+        double pamortize = NaN;    ///< Amortization factor -- reduces special probability on each hit.
+        unsigned long accessCount = 0;    ///< A counter for the number of server hits.
     };
 
   protected:
     std::map<std::string, WebServerEntry *> webSiteList;    ///< A list of registered web sites (server objects)
     std::vector<WebServerEntry *> pickList;    ///< The picklist used to select sites at random.
     std::list<WebServerEntry *> specialList;    ///< The special list -- contains sites with active popularity modification events.
-    double pspecial;    ///< The probability [0,1) of selecting a site from the special list.
+    double pspecial = NaN;    ///< The probability [0,1) of selecting a site from the special list.
 
-    unsigned long totalLookups;    ///< A counter for the total number of lookups
+    unsigned long totalLookups = 0;    ///< A counter for the total number of lookups
 
-    rdObject *rdServerSelection;    ///< The random object for the server selection.
+    rdObject *rdServerSelection = nullptr;    ///< The random object for the server selection.
 
   protected:
     /** @name cSimpleModule redefinitions */
