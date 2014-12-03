@@ -1696,7 +1696,7 @@ PIMInterface *PIMSM::getIncomingInterface(IPv4Datagram *datagram)
 {
     cGate *g = datagram->getArrivalGate();
     if (g) {
-        InterfaceEntry *ie = g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
+        InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(g->getIndex());
         if (ie)
             return pimIft->getInterfaceById(ie->getInterfaceId());
     }
