@@ -898,7 +898,7 @@ void PIMDM::processGraftRetryTimer(cMessage *timer)
 {
     EV_INFO << "GraftRetryTimer expired.\n";
     UpstreamInterface *upstream = static_cast<UpstreamInterface *>(timer->getContextPointer());
-    ASSERT(upstream->graftPruneState = UpstreamInterface::ACK_PENDING);
+    ASSERT(upstream->graftPruneState == UpstreamInterface::ACK_PENDING);
     ASSERT(timer == upstream->graftRetryTimer);
 
     Route *route = upstream->route();
