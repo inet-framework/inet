@@ -122,29 +122,23 @@ void EthernetApplication::receivePacket(cMessage *msg)
         MACAddress srcAddr = ctrl->getSrc();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
-        char msgname[30];
-        strcpy(msgname, msg->getName());
         delete ctrl;
 
         // send back packets asked by EthernetApplication Client side
-        int k = 0;
-        strcat(msgname, "-resp-");
-        char *s = msgname + strlen(msgname);
-        while (replyBytes > 0) {
+        for (int k = 0; replyBytes > 0; k++) {
             int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
             replyBytes -= l;
 
-            sprintf(s, "%d", k);
+            std::ostringstream s;
+            s << msg->getName() << "-resp-" << k;
 
-            EV << "Generating packet `" << msgname << "'\n";
+            EV << "Generating packet `" << s.str().c_str() << "'\n";
 
-            EtherAppResp *datapacket = new EtherAppResp(msgname, IEEE802CTRL_DATA);
+            EtherAppResp *datapacket = new EtherAppResp(s.str().c_str(), IEEE802CTRL_DATA);
             datapacket->setRequestId(requestId);
             datapacket->setByteLength(l);
             sendPacket(datapacket, srcAddr);
             packetsSent++;
-
-            k++;
         }
     }
 
