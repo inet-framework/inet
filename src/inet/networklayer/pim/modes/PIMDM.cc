@@ -168,7 +168,7 @@ void PIMDM::handleMessageWhenUp(cMessage *msg)
             return;
         }
 
-        PIMPacket *pkt = dynamic_cast<PIMPacket *>(msg);
+        PIMPacket *pkt = static_cast<PIMPacket *>(msg);
         switch (pkt->getType()) {
             case Hello:
                 processHelloPacket(check_and_cast<PIMHello *>(pkt));
