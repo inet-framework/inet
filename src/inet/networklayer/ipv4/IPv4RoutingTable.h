@@ -75,12 +75,12 @@ class IRoutingTable;
 class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable, protected cListener, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift;    // cached pointer
+    IInterfaceTable *ift = nullptr;    // cached pointer
 
     IPv4Address routerId;
-    bool forwarding;
-    bool multicastForward;
-    bool isNodeUp;
+    bool forwarding = false;
+    bool multicastForward = false;
+    bool isNodeUp = false;
 
     // for convenience
     typedef IPv4MulticastRoute::OutInterface OutInterface;
@@ -142,7 +142,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     IPv4MulticastRoute *internalRemoveMulticastRoute(IPv4MulticastRoute *entry);
 
   public:
-    IPv4RoutingTable();
+    IPv4RoutingTable() {}
     virtual ~IPv4RoutingTable();
 
   protected:

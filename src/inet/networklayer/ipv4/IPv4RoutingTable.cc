@@ -51,11 +51,6 @@ std::ostream& operator<<(std::ostream& os, const IPv4MulticastRoute& e)
     return os;
 };
 
-IPv4RoutingTable::IPv4RoutingTable()
-{
-    ift = NULL;
-}
-
 IPv4RoutingTable::~IPv4RoutingTable()
 {
     for (unsigned int i = 0; i < routes.size(); i++)
