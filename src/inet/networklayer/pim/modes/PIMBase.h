@@ -154,30 +154,30 @@ class INET_API PIMBase : public OperationalBase
     static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
   protected:
-    IIPv4RoutingTable *rt;
-    IInterfaceTable *ift;
-    PIMInterfaceTable *pimIft;
-    PIMNeighborTable *pimNbt;
+    IIPv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
+    PIMInterfaceTable *pimIft = nullptr;
+    PIMNeighborTable *pimNbt = nullptr;
 
-    bool isUp;
-    bool isEnabled;
-    const char *hostname;
+    bool isUp = false;
+    bool isEnabled = false;
+    const char *hostname = nullptr;
 
     // parameters
-    double helloPeriod;
-    double holdTime;
-    int designatedRouterPriority;
+    double helloPeriod = 0;
+    double holdTime = 0;
+    int designatedRouterPriority = 0;
 
-    PIMInterface::PIMMode mode;
-    uint32_t generationID;
-    cMessage *helloTimer;
+    PIMInterface::PIMMode mode = (PIMInterface::PIMMode)0;
+    uint32_t generationID = 0;
+    cMessage *helloTimer = nullptr;
 
     // signals
     static simsignal_t sentHelloPkSignal;
     static simsignal_t rcvdHelloPkSignal;
 
   public:
-    PIMBase(PIMInterface::PIMMode mode) : isUp(false), isEnabled(false), mode(mode), helloTimer(NULL) {}
+    PIMBase(PIMInterface::PIMMode mode) : mode(mode) {}
     virtual ~PIMBase();
 
   protected:
