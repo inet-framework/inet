@@ -48,32 +48,32 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     };
 
     // parameters
-    int serverPort;
-    int clientPort;
+    int serverPort = -1;
+    int clientPort = -1;
     UDPSocket socket;    // UDP socket for client-server communication
     std::string hostName;
     simtime_t startTime;    // application start time
     MACAddress macAddress;    // client's MAC address
-    cModule *host;    // containing host module (@node)
-    InterfaceEntry *ie;    // interface to configure
-    IIPv4RoutingTable *irt;    // routing table to update
+    cModule *host = nullptr;    // containing host module (@node)
+    InterfaceEntry *ie = nullptr;    // interface to configure
+    IIPv4RoutingTable *irt = nullptr;    // routing table to update
 
     // state
-    cMessage *timerT1;    // time at which the client enters the RENEWING state
-    cMessage *timerT2;    // time at which the client enters the REBINDING state
-    cMessage *timerTo;    // response timeout: WAIT_ACK, WAIT_OFFER
-    cMessage *leaseTimer;    // length of time the lease is valid
-    cMessage *startTimer;    // self message to start DHCP initialization
-    bool isOperational;    // lifecycle
-    ClientState clientState;    // current state
-    unsigned int xid;    // transaction id; to associate messages and responses between a client and a server
-    DHCPLease *lease;    // leased IP information
-    IPv4Route *route;    // last added route
+    cMessage *timerT1 = nullptr;    // time at which the client enters the RENEWING state
+    cMessage *timerT2 = nullptr;    // time at which the client enters the REBINDING state
+    cMessage *timerTo = nullptr;    // response timeout: WAIT_ACK, WAIT_OFFER
+    cMessage *leaseTimer = nullptr;    // length of time the lease is valid
+    cMessage *startTimer = nullptr;    // self message to start DHCP initialization
+    bool isOperational = false;    // lifecycle
+    ClientState clientState = INIT;    // current state
+    unsigned int xid = 0;    // transaction id; to associate messages and responses between a client and a server
+    DHCPLease *lease = nullptr;    // leased IP information
+    IPv4Route *route = nullptr;    // last added route
 
     // statistics
-    int numSent;    // number of sent DHCP messages
-    int numReceived;    // number of received DHCP messages
-    int responseTimeout;    // timeout waiting for DHCPACKs, DHCPOFFERs
+    int numSent = 0;    // number of sent DHCP messages
+    int numReceived = 0;    // number of received DHCP messages
+    int responseTimeout = 0;    // timeout waiting for DHCPACKs, DHCPOFFERs
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -181,7 +181,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    DHCPClient();
+    DHCPClient() {}
     virtual ~DHCPClient();
 };
 

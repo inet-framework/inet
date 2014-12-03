@@ -45,23 +45,23 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     };
     DHCPLeased leased;    // lookup table for lease infos
 
-    bool isOperational;    // lifecycle
-    int numSent;    // num of sent UDP packets
-    int numReceived;    // num of received UDP packets
-    int serverPort;    // server port
-    int clientPort;    // client port
+    bool isOperational = false;    // lifecycle
+    int numSent = 0;    // num of sent UDP packets
+    int numReceived = 0;    // num of received UDP packets
+    int serverPort = -1;    // server port
+    int clientPort = -1;    // client port
 
     /* Set by management, see DHCPServer NED file. */
-    unsigned int maxNumOfClients;
-    unsigned int leaseTime;
+    unsigned int maxNumOfClients = 0;
+    unsigned int leaseTime = 0;
     IPv4Address subnetMask;
     IPv4Address gateway;
     IPv4Address ipAddressStart;
 
-    InterfaceEntry *ie;    // interface to serve DHCP requests on
+    InterfaceEntry *ie = nullptr;    // interface to serve DHCP requests on
     UDPSocket socket;
     simtime_t startTime;    // application start time
-    cMessage *startTimer;    // self message to start DHCP server
+    cMessage *startTimer = nullptr;    // self message to start DHCP server
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

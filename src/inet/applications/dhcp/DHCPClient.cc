@@ -28,20 +28,6 @@ namespace inet {
 
 Define_Module(DHCPClient);
 
-DHCPClient::DHCPClient() :
-    host(NULL),
-    ie(NULL),
-    irt(NULL),
-    timerT1(NULL),
-    timerT2(NULL),
-    timerTo(NULL),
-    leaseTimer(NULL),
-    startTimer(NULL),
-    lease(NULL),
-    route(NULL)
-{
-}
-
 DHCPClient::~DHCPClient()
 {
     cancelAndDelete(timerT1);

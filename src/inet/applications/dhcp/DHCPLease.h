@@ -31,7 +31,7 @@ namespace inet {
 class DHCPLease
 {
   public:
-    long xid;
+    long xid = -1;
     IPv4Address ip;
     MACAddress mac;
     IPv4Address gateway;
@@ -43,7 +43,7 @@ class DHCPLease
     simtime_t leaseTime;
     simtime_t renewalTime;
     simtime_t rebindTime;
-    bool leased;
+    bool leased = false;
 };
 
 inline std::ostream& operator<<(std::ostream& os, DHCPLease obj)
