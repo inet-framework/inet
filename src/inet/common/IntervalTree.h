@@ -86,7 +86,7 @@ class IntervalTreeNode
 
   protected:
     /// @brief interval stored in the node
-    Interval* stored_interval;
+    Interval* stored_interval = nullptr;
 
     simtime_t key;
 
@@ -95,13 +95,13 @@ class IntervalTreeNode
     simtime_t max_high;
 
     /// @brief red or black node: if red = false then the node is black
-    bool red;
+    bool red = false;
 
-    IntervalTreeNode* left;
+    IntervalTreeNode* left = nullptr;
 
-    IntervalTreeNode* right;
+    IntervalTreeNode* right = nullptr;
 
-    IntervalTreeNode* parent;
+    IntervalTreeNode* parent = nullptr;
 };
 
 /// @brief Class describes the information needed when we take the
@@ -110,11 +110,11 @@ class IntervalTreeNode
 struct it_recursion_node
 {
   public:
-    IntervalTreeNode* start_node;
+    IntervalTreeNode* start_node = nullptr;
 
-    unsigned int parent_index;
+    unsigned int parent_index = 0;
 
-    bool try_right_branch;
+    bool try_right_branch = false;
 };
 
 /// @brief Interval tree
@@ -147,9 +147,9 @@ class IntervalTree
 
   protected:
 
-    IntervalTreeNode* root;
+    IntervalTreeNode* root = nullptr;
 
-    IntervalTreeNode* nil;
+    IntervalTreeNode* nil = nullptr;
 
     /// @brief left rotation of tree node
     void leftRotate(IntervalTreeNode* node);
@@ -172,10 +172,10 @@ class IntervalTree
     void deleteFixup(IntervalTreeNode* node);
 
   private:
-    unsigned int recursion_node_stack_size;
-    it_recursion_node* recursion_node_stack;
-    unsigned int current_parent;
-    unsigned int recursion_node_stack_top;
+    unsigned int recursion_node_stack_size = 0;
+    it_recursion_node* recursion_node_stack = nullptr;
+    unsigned int current_parent = 0;
+    unsigned int recursion_node_stack_top = 0;
 };
 
 } // namespace physicallayer
