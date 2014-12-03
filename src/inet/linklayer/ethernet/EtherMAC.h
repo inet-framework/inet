@@ -38,7 +38,7 @@ class IPassiveQueue;
 class INET_API EtherMAC : public EtherMACBase
 {
   public:
-    EtherMAC();
+    EtherMAC() {}
     virtual ~EtherMAC();
 
   protected:
@@ -51,13 +51,15 @@ class INET_API EtherMAC : public EtherMACBase
 
   protected:
     // states
-    int numConcurrentTransmissions;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
-    int backoffs;    // value of backoff for exponential back-off algorithm
-    long currentSendPkTreeID;
+    int numConcurrentTransmissions = 0;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
+    int backoffs = 0;    // value of backoff for exponential back-off algorithm
+    long currentSendPkTreeID = -1;
 
     // other variables
-    EtherTraffic *frameBeingReceived;
-    cMessage *endRxMsg, *endBackoffMsg, *endJammingMsg;
+    EtherTraffic *frameBeingReceived = nullptr;
+    cMessage *endRxMsg = nullptr;
+    cMessage *endBackoffMsg = nullptr;
+    cMessage *endJammingMsg = nullptr;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
@@ -74,10 +76,10 @@ class INET_API EtherMAC : public EtherMACBase
     simtime_t totalCollisionTime;    // total duration of collisions on channel
     simtime_t totalSuccessfulRxTxTime;    // total duration of successful transmissions on channel
     simtime_t channelBusySince;    // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
-    unsigned long numCollisions;    // collisions (NOT number of collided frames!) sensed
-    unsigned long numBackoffs;    // number of retransmissions
-    unsigned int framesSentInBurst;    // Number of frames send out in current frame burst
-    long bytesSentInBurst;    // Number of bytes transmitted in current frame burst
+    unsigned long numCollisions = 0;    // collisions (NOT number of collided frames!) sensed
+    unsigned long numBackoffs = 0;    // number of retransmissions
+    unsigned int framesSentInBurst = 0;    // Number of frames send out in current frame burst
+    long bytesSentInBurst = 0;    // Number of bytes transmitted in current frame burst
 
     static simsignal_t collisionSignal;
     static simsignal_t backoffSignal;

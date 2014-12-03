@@ -42,7 +42,7 @@ const double EtherMACBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
 const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr = {
     0.0,
-    0,
+    0.0,
     0,
     0,
     0,
@@ -140,12 +140,6 @@ EtherMACBase::EtherMACBase()
 {
     lastTxFinishTime = -1.0;    // never equals to current simtime
     curEtherDescr = &nullEtherDescr;
-    transmissionChannel = NULL;
-    physInGate = NULL;
-    physOutGate = NULL;
-    upperLayerInGate = NULL;
-    curTxFrame = NULL;
-    endTxMsg = endIFGMsg = endPauseMsg = NULL;
 }
 
 EtherMACBase::~EtherMACBase()

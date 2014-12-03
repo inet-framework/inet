@@ -44,12 +44,6 @@ Define_Module(EtherMAC);
 simsignal_t EtherMAC::collisionSignal = registerSignal("collision");
 simsignal_t EtherMAC::backoffSignal = registerSignal("backoff");
 
-EtherMAC::EtherMAC()
-{
-    frameBeingReceived = NULL;
-    endJammingMsg = endRxMsg = endBackoffMsg = NULL;
-}
-
 EtherMAC::~EtherMAC()
 {
     delete frameBeingReceived;

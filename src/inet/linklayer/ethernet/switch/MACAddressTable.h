@@ -30,10 +30,10 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
   protected:
     struct AddressEntry
     {
-        unsigned int vid;    // VLAN ID
-        int portno;    // Input port
+        unsigned int vid = 0;    // VLAN ID
+        int portno = -1;    // Input port
         simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
-        AddressEntry() : vid(0) {}
+        AddressEntry() {}
         AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
             vid(vid), portno(portno), insertionTime(insertionTime) {}
     };
@@ -50,7 +50,7 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
 
     simtime_t agingTime;    // Max idle time for address table entries
     simtime_t lastPurge;    // Time of the last call of removeAgedEntriesFromAllVlans()
-    AddressTable *addressTable;    // VLAN-unaware address lookup (vid = 0)
+    AddressTable *addressTable = nullptr;    // VLAN-unaware address lookup (vid = 0)
     VlanAddressTable vlanAddressTable;    // VLAN-aware address lookup
 
   protected:

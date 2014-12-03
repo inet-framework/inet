@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/INETMath.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/MACBase.h"
 #include "inet/linklayer/common/MACAddress.h"
@@ -90,7 +91,7 @@ class INET_API EtherMACBase : public MACBase
     {
       protected:
         cQueue queue;
-        int queueLimit;    // max queue length
+        int queueLimit = 0;    // max queue length
 
       protected:
         static int packetCompare(cObject *a, cObject *b);    // PAUSE frames have higher priority
@@ -109,11 +110,10 @@ class INET_API EtherMACBase : public MACBase
     class MacQueue
     {
       public:
-        InnerQueue *innerQueue;
-        IPassiveQueue *extQueue;
+        InnerQueue *innerQueue = nullptr;
+        IPassiveQueue *extQueue = nullptr;
 
       public:
-        MacQueue() : innerQueue(NULL), extQueue(NULL) {};
         ~MacQueue() { delete innerQueue; };
         bool isEmpty() { return innerQueue ? innerQueue->empty() : extQueue->isEmpty(); }
         void setExternalQueue(IPassiveQueue *_extQueue)
@@ -127,46 +127,46 @@ class INET_API EtherMACBase : public MACBase
     static const EtherDescr nullEtherDescr;
 
     // configuration
-    const EtherDescr *curEtherDescr;    // constants for the current Ethernet mode, e.g. txrate
+    const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
     MACAddress address;    // own MAC address
-    bool connected;    // true if connected to a network, set automatically by exploring the network configuration
-    bool disabled;    // true if the MAC is disabled, defined by the user
-    bool promiscuous;    // if true, passes up all received frames
-    bool duplexMode;    // true if operating in full-duplex mode
-    bool frameBursting;    // frame bursting on/off (Gigabit Ethernet)
-    bool connectionColoring;    // colors the connection when transmitting
+    bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
+    bool disabled = false;    // true if the MAC is disabled, defined by the user
+    bool promiscuous = false;    // if true, passes up all received frames
+    bool duplexMode = false;    // true if operating in full-duplex mode
+    bool frameBursting = false;    // frame bursting on/off (Gigabit Ethernet)
+    bool connectionColoring = false;    // colors the connection when transmitting
 
     // gate pointers, etc.
     MacQueue txQueue;    // the output queue
-    cChannel *transmissionChannel;    // transmission channel
-    cGate *physInGate;    // pointer to the "phys$i" gate
-    cGate *physOutGate;    // pointer to the "phys$o" gate
-    cGate *upperLayerInGate;    // pointer to the "upperLayerIn" gate
+    cChannel *transmissionChannel = nullptr;    // transmission channel
+    cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
+    cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
+    cGate *upperLayerInGate = nullptr;    // pointer to the "upperLayerIn" gate
 
     // state
-    bool channelsDiffer;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
+    bool channelsDiffer = false;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
     MACTransmitState transmitState;    // "transmit state" of the MAC
     MACReceiveState receiveState;    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
-    int pauseUnitsRequested;    // requested pause duration, or zero -- examined at endTx
-    EtherFrame *curTxFrame;    // frame being transmitted
+    int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
+    EtherFrame *curTxFrame = nullptr;    // frame being transmitted
 
     // self messages
-    cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
+    cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
 
     // statistics
-    unsigned long numFramesSent;
-    unsigned long numFramesReceivedOK;
-    unsigned long numBytesSent;    // includes Ethernet frame bytes with preamble
-    unsigned long numBytesReceivedOK;    // includes Ethernet frame bytes with preamble
-    unsigned long numFramesFromHL;    // packets received from higher layer (LLC or MACRelayUnit)
-    unsigned long numDroppedPkFromHLIfaceDown;    // packets from higher layer dropped because interface down or not connected
-    unsigned long numDroppedIfaceDown;    // packets from network layer dropped because interface down or not connected
-    unsigned long numDroppedBitError;    // frames dropped because of bit errors
-    unsigned long numDroppedNotForUs;    // frames dropped because destination address didn't match
-    unsigned long numFramesPassedToHL;    // frames passed to higher layer
-    unsigned long numPauseFramesRcvd;    // PAUSE frames received from network
-    unsigned long numPauseFramesSent;    // PAUSE frames sent
+    unsigned long numFramesSent = 0;
+    unsigned long numFramesReceivedOK = 0;
+    unsigned long numBytesSent = 0;    // includes Ethernet frame bytes with preamble
+    unsigned long numBytesReceivedOK = 0;    // includes Ethernet frame bytes with preamble
+    unsigned long numFramesFromHL = 0;    // packets received from higher layer (LLC or MACRelayUnit)
+    unsigned long numDroppedPkFromHLIfaceDown = 0;    // packets from higher layer dropped because interface down or not connected
+    unsigned long numDroppedIfaceDown = 0;    // packets from network layer dropped because interface down or not connected
+    unsigned long numDroppedBitError = 0;    // frames dropped because of bit errors
+    unsigned long numDroppedNotForUs = 0;    // frames dropped because destination address didn't match
+    unsigned long numFramesPassedToHL = 0;    // frames passed to higher layer
+    unsigned long numPauseFramesRcvd = 0;    // PAUSE frames received from network
+    unsigned long numPauseFramesSent = 0;    // PAUSE frames sent
 
     static simsignal_t txPkSignal;
     static simsignal_t rxPkOkSignal;
