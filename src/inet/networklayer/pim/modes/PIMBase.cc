@@ -202,11 +202,11 @@ void PIMBase::processHelloPacket(PIMHello *packet)
     for (unsigned int i = 0; i < packet->getOptionsArraySize(); i++) {
         HelloOption *option = packet->getOptions(i);
         if (dynamic_cast<HoldtimeOption *>(option))
-            holdTime = (double)dynamic_cast<HoldtimeOption *>(option)->getHoldTime();
+            holdTime = (double)static_cast<HoldtimeOption *>(option)->getHoldTime();
         else if (dynamic_cast<DRPriorityOption *>(option))
-            drPriority = check_and_cast<DRPriorityOption *>(option)->getPriority();
+            drPriority = static_cast<DRPriorityOption *>(option)->getPriority();
         else if (dynamic_cast<GenerationIDOption *>(option))
-            generationId = check_and_cast<GenerationIDOption *>(option)->getGenerationID();
+            generationId = static_cast<GenerationIDOption *>(option)->getGenerationID();
     }
 
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
