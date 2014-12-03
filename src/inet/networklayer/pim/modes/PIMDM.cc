@@ -686,6 +686,7 @@ void PIMDM::processAssertPacket(PIMAssert *pkt)
     Interface *incomingInterface = route->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
         static_cast<Interface *>(route->upstreamInterface) :
         static_cast<Interface *>(route->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+    ASSERT(incomingInterface);
 
     EV_INFO << "Received Assert(S=" << source << ", G=" << group
             << ") packet on interface '" << incomingInterface->ie->getName() << "'.\n";
