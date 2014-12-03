@@ -156,14 +156,14 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
   private:
     // parameters
-    double pruneInterval;
-    double pruneLimitInterval;
-    double overrideInterval;
-    double propagationDelay;
-    double graftRetryInterval;
-    double sourceActiveInterval;
-    double stateRefreshInterval;
-    double assertTime;
+    double pruneInterval = 0;
+    double pruneLimitInterval = 0;
+    double overrideInterval = 0;
+    double propagationDelay = 0;
+    double graftRetryInterval = 0;
+    double sourceActiveInterval = 0;
+    double stateRefreshInterval = 0;
+    double assertTime = 0;
 
     // signals
     static simsignal_t sentGraftPkSignal;
