@@ -639,7 +639,7 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
             if (externalRouter)
                 send(msg, "routerOut");
             else {
-                delete msg;
+                //delete msg;
                 throw cRuntimeError("IGMPv2: Unhandled message type (%dq)", msg->getType());
             }
             break;
