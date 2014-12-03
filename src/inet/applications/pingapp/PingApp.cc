@@ -41,9 +41,6 @@ simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
 PingApp::PingApp()
 {
-    timer = NULL;
-    nodeStatus = NULL;
-    sendIntervalPar = NULL;
 }
 
 PingApp::~PingApp()

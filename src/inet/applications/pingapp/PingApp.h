@@ -41,20 +41,20 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     L3Address destAddr;
     L3Address srcAddr;
     int packetSize;
-    cPar *sendIntervalPar;
-    int hopLimit;
-    int count;
+    cPar *sendIntervalPar = nullptr;
+    int hopLimit = 0;
+    int count = 0;
     simtime_t startTime;
     simtime_t stopTime;
-    bool printPing;
+    bool printPing = false;
 
     // state
-    int pid;    // to determine which hosts are associated with the responses
-    cMessage *timer;    // to schedule the next Ping request
-    NodeStatus *nodeStatus;    // lifecycle
+    int pid = 0;    // to determine which hosts are associated with the responses
+    cMessage *timer = nullptr;    // to schedule the next Ping request
+    NodeStatus *nodeStatus = nullptr;    // lifecycle
     simtime_t lastStart;    // the last time when the app was started (lifecycle)
-    long sendSeqNo;    // to match the response with the request that caused the response
-    long expectedReplySeqNo;
+    long sendSeqNo = 0;    // to match the response with the request that caused the response
+    long expectedReplySeqNo = 0;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
 
     // statistics
@@ -64,10 +64,10 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     static simsignal_t outOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
-    long sentCount;    // number of sent Ping requests
-    long lossCount;    // number of lost requests
-    long outOfOrderArrivalCount;    // number of responses which arrived too late
-    long numPongs;    // number of received Ping requests
+    long sentCount = 0;    // number of sent Ping requests
+    long lossCount = 0;    // number of lost requests
+    long outOfOrderArrivalCount = 0;    // number of responses which arrived too late
+    long numPongs = 0;    // number of received Ping requests
 
   protected:
     virtual void initialize(int stage);
