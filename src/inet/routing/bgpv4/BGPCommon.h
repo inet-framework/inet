@@ -54,16 +54,15 @@ typedef unsigned long SessionID;
 
 struct SessionInfo
 {
-    SessionID sessionID;
-    BGPSessionType sessionType;
-    ASID ASValue;
+    SessionID sessionID = 0;
+    BGPSessionType sessionType = INCOMPLETE;
+    ASID ASValue = 0;
     IPv4Address routerID;
     IPv4Address peerAddr;
-    InterfaceEntry *linkIntf;
-    TCPSocket *socket;
-    TCPSocket *socketListen;
-    bool sessionEstablished;
-    SessionInfo() : linkIntf(NULL), socket(NULL), socketListen(NULL) {}
+    InterfaceEntry *linkIntf = nullptr;
+    TCPSocket *socket = nullptr;
+    TCPSocket *socketListen = nullptr;
+    bool sessionEstablished = false;
 };
 
 } // namespace bgp
