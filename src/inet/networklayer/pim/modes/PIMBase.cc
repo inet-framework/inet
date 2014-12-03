@@ -188,7 +188,7 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 
 void PIMBase::processHelloPacket(PIMHello *packet)
 {
-    IPv4ControlInfo *ctrl = dynamic_cast<IPv4ControlInfo *>(packet->getControlInfo());
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     int interfaceId = ctrl->getInterfaceId();
     IPv4Address address = ctrl->getSrcAddr();
     int version = packet->getVersion();
