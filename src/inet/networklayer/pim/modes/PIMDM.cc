@@ -1065,14 +1065,14 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         datagram = check_and_cast<IPv4Datagram *>(details);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface ? pimInterface->getInterfaceId() : -1);
+            multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
         datagram = check_and_cast<IPv4Datagram *>(details);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastPacketArrivedOnRpfInterface(pimInterface ? pimInterface->getInterfaceId() : -1,
+            multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(),
                     datagram->getDestAddress(), datagram->getSrcAddress(), datagram->getTimeToLive());
     }
     // RPF interface has changed
@@ -1670,7 +1670,7 @@ PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
 {
     cGate *g = datagram->getArrivalGate();
     if (g) {
-        InterfaceEntry *ie = g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
+        InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(g->getIndex());
         if (ie)
             return pimIft->getInterfaceById(ie->getInterfaceId());
     }
