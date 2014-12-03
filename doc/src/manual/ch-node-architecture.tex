@@ -17,27 +17,34 @@ Interfaces are registered dynamically during the initialization phase by
 modules that represent network interface cards (NICs). Other modules access
 interface information via a C++ class interface.
 
-\item \tbf{Routing Table (\nedtype{RoutingTable})}. This module contains
-the IPv4 routing table. It is also accessed from other via a C++ interface.
+\item \tbf{Routing Table (\nedtype{IPv4RoutingTable})}. This module contains
+the IPv4 routing table. It is also accessed from other modules via a C++ interface.
 The interface contains member functions for adding, removing, enumerating
 and looking up routes, and finding the best matching route for a given
-destination IP address. The IP module calls uses the latter function for
+destination IPv4 address. The IPv4 module calls the latter function for
 routing packets, and routing protocols such as OSPF or BGP call the route
 manipulation methods to add and manage discovered routes. For IPv6
-simulations, \nedtype{RoutingTable} is replaced (or co-exists) with
-a \nedtype{RoutingTable6} module; and for Mobile IPv6 simulations
-(xMIPv6 project [TODO]), possibly with a \nedtype{BindingCache} module
+simulations, \nedtype{IPv4RoutingTable} is replaced (or co-exists) with
+a \nedtype{IPv6RoutingTable} module
+
+\iffalse TODO
+; and for Mobile IPv6 simulations (xMIPv6 project [TODO])
+\fi
+
+, possibly with a \nedtype{BindingCache} module
 as well.
 
+\iffalse TODO
 \item \tbf{Notification Board (\nedtype{NotificationBoard})}. This module
 makes it possible for several modules to communicate in a publish-subscribe
 manner. Notifications include change notifications (``routing table
 changed'') and state changes (``radio became idle'').
+\fi
 
 \item \tbf{Mobility module}. In simulations involving node mobility, this
 module is responsible for moving around the node in the simulated
 ``playground.'' A mobility module is also needed for wireless simulations
-even if the node is stationery, because the mobility module stores the
+even if the node is stationary, because the mobility module stores the
 node's location, needed to compute wireless transmissions. Different
 mobility models (Random Walk, etc.) are supported via different module
 types, and many host models define their mobility submodules with
@@ -50,7 +57,7 @@ wireless NICs, a radio module or modules). Examples are
 \nedtype{PPPInterface}, \nedtype{EthernetInterface}, and WLAN interfaces
 such as \nedtype{Ieee80211NicSTA}. The queue submodule stores packets
 waiting for transmission, and it is usually defined as having parametric
-type as it has multiple implementations to accomodate different needs
+type as it has multiple implementations to accommodate different needs
 (\nedtype{DropTailQueue}, \nedtype{REDQueue}, \nedtype{DropTailQoSQueue},
 etc.) Most MACs also have an internal queue to allow operation without an
 external queue module, the advantage being smaller overhead. The NIC's
@@ -58,30 +65,35 @@ entry in the host's \nedtype{InterfaceTable} is usually registered by the
 MAC module at the beginning of the simulation.
 
 \item \tbf{Network layer}. Modules that represent protocols of the network
-layer are usually grouped into a compound module: \nedtype{NetworkLayer}
-for IP, and \nedtype{NetworkLayer6} for IPv6. \nedtype{NetworkLayer}
-contains the modules \nedtype{IP}, \nedtype{ARP}, \nedtype{ICMP} and
-\nedtype{ErrorHandling}. The \nedtype{IP} module performs IP
+layer are usually grouped into a compound module: \nedtype{IPv4NetworkLayer}
+for IPv4, and \nedtype{IPv6NetworkLayer} for IPv6. \nedtype{IPv4NetworkLayer}
+contains the modules \nedtype{IPv4}, \nedtype{ARP}, \nedtype{ICMP} and
+\nedtype{ErrorHandling}. The \nedtype{IPv4} module performs IP
 encapsulation/decapsulation and routing of datagrams; for the latter it
-accesses the C++ function call interface of the \nedtype{RoutingTable}.
+accesses the C++ function call interface of the \nedtype{IPv4RoutingTable}.
 Packet forwarding can be turned on/off via a module parameter. The
 \nedtype{ARP} module is put into the path of packets leaving the network
 layer towards the NICs, and performs address resolution for interfaces that
 need it (e.g. Ethernet). \nedtype{ICMP} deals with sending and receiving
 ICMP packets. The \nedtype{ErrorHandling} module receives and logs ICMP
-error replies. The IPv6 network layer, \nedtype{NetworkLayer6} contains the
+error replies. The IPv6 network layer, \nedtype{IPv6NetworkLayer} contains the
 modules \nedtype{IPv6}, \nedtype{ICMPv6}, \nedtype{IPv6NeighbourDiscovery}
-and \nedtype{IPv6ErrorHandling}. For Mobile IPv6 simulations (xMIPv6
-project [TODO]), \nedtype{NetworkLayer6} is extended with further modules.
+and \nedtype{IPv6ErrorHandling}. For Mobile IPv6 simulations 
+
+\iffalse TODO
+(xMIPv6 project [TODO]),
+\fi
+
+\nedtype{IPv6NetworkLayer} is extended with further modules.
 
 \item \tbf{Transport layer protocols}. Transport protocols are represented
 by modules connected to the network layer; currently TCP, UDP and SCTP are
 supported. TCP has several implementations: \nedtype{TCP} is the OMNeT++
 native implementation; the \nedtype{TCP\_lwip} module wraps the lwIP TCP
-stack [TODO]; and the \nedtype{TCP\_NSC} module wraps the Network
-Simulation Cradle library [TODO]. For this reason, the \ttt{tcp} submodule
-is usually defined with a parametric submodule type (\ttt{"tcp: <tcpType>
-like ITCP"}).  UDP and SCTP are implemented by the \nedtype{UDP} and
+stack \iffalse [TODO] \fi; and the \nedtype{TCP\_NSC} module wraps the Network
+Simulation Cradle library \iffalse [TODO] \fi. For this reason, the \ttt{tcp} 
+submodule is usually defined with a parametric submodule type (\ttt{"tcp:
+<tcpType> like ITCP"}). UDP and SCTP are implemented by the \nedtype{UDP} and
 \nedtype{SCTP} modules, respectively.
 
 \item \sloppypar \tbf{Applications}. Application modules typically connect to TCP
@@ -98,7 +110,7 @@ are typically not present in router models.
 \item \tbf{Routing protocols}. Router models typically contain modules that
 implement routing protocols such as OSPF or BGP. These modules are
 connected to the TCP and/or the UDP module, and manipulate routes in the
-\nedtype{RoutingTable} module via C++ function calls.
+\nedtype{IPv4RoutingTable} module via C++ function calls.
 
 \item \tbf{MPLS modules}. Additional modules are needed for MPLS
 simulations. The \nedtype{MPLS} module is placed between the network layer
@@ -113,10 +125,12 @@ contain a relay unit, which switches frames among Ethernet (and other
 IEEE 802) NICs. Concrete relay unit types include \nedtype{MACRelayUnitPP}
 and \nedtype{MACRelayUnitNP}, which differ in their performance models.
 
-\item \tbf{Battery module}. INET extensions uses for wireless sensor
+\iffalse TODO
+\item \tbf{Power consumption}. INET extensions uses for wireless sensor
 networks (WSNs) may add a battery module to the node model. The battery
 module would keep track of energy consumption. A battery module is provided
 e.g. by the INETMANET project.
+\fi
 
 \end{itemize}
 
@@ -131,11 +145,12 @@ not need a network layer, a routing table or interface table; it may need a
 notification board though. Some NICs (e.g. \nedtype{EtherMAC}) can be used
 without and interface table and queue models as well.
 
+\iffalse TODO
 The notification board (\nedtype{NotificationBoard}) and the interface
 table (\nedtype{InterfaceTable}) will be described later in this chapter.
 Other modules are covered in later chapters, i.e. \nedtype{RoutingTable}
 in the IPv4 chapter.
-
+\fi
 
 \section{Addresses}
 
@@ -150,24 +165,27 @@ method) that corresponds to the all-zeros address.
   \item \cppclass{MACAddress} represents a 48-bit IEEE 802 MAC address. The
     textual notation it understands and produces is hex string.
 
-  \item \cppclass{IPAddress} represents a 32-bit IPv4 address. It can parse
+  \item \cppclass{IPv4Address} represents a 32-bit IPv4 address. It can parse
     and produce textual representations in the "dotted decimal" syntax.
 
   \item \cppclass{IPv6Address} represents a 128-bit IPv6 address. It can parse
     and produce address strings in the canonical (RFC 3513) syntax.
 
-  \item \cppclass{IPvXAddress} is conceptually a union of a \cppclass{IPAddress}
+  \item \cppclass{L3Address} is conceptually a union of a \cppclass{IPv4Address}
     and \cppclass{IPv6Address}: an instance stores either an IPv4 address or an
-    IPv6 address. \cppclass{IPvXAddress} is mainly used in the transport layer and above
-    to abstract away network addresses. It can be assigned from both \cppclass{IPAddress}
+    IPv6 address. \cppclass{L3Address} is mainly used in the transport layer and above
+    to abstract away network addresses. It can be assigned from both \cppclass{IPv4Address}
     and \cppclass{IPv6Address}, and can also parse string representations of both.
-    The \ffunc{isIPv6()}, \ffunc{get4()} and \ffunc{get6()} methods can be used
+    The \ffunc{getType()}, \ffunc{toIPv4()} and \ffunc{toIPv6()} methods can be used
     to access the value.
 \end{itemize}
 
-TODO: Resolving addresses with IPAddressResolver
+\iffalse TODO
+TODO: Resolving addresses with L3AddressResolver
+\fi
 
 
+\iffalse TODO
 \section{The Notification Board}
 
 The \nedtype{NotificationBoard} module allows publish-subscribe
@@ -242,7 +260,7 @@ nb = NotificationBoardAccess().get();  // best done in initialize()
 \end{cpp}
 
 TODO how to fire a notification
-
+\fi
 
 
 \section{The Interface Table}
@@ -252,6 +270,7 @@ the INET Framework: information about the network interfaces in the host.
 The interface table module does not send or receive messages; other modules
 access it using standard C++ member function calls.
 
+\iffalse TODO
 \subsection{Accessing the Interface Table}
 
 If a module wants to work with the interface table, first it needs to obtain a
@@ -280,6 +299,7 @@ class interface that \cppclass{InterfaceTable} implements. Using the abstract
 class interface allows one to transparently replace the interface table with
 another implementation, without the need for any change or even
 recompilation of the INET Framework.
+\fi
 
 \subsection{Interface Entries}
 
@@ -311,7 +331,7 @@ Data stored by an interface entry include:
 \end{itemize}
 
 \tbf{Extensibility}. You have probably noticed that the above list does not
-contain data such as the IP or IPv6 address of the interface. Such
+contain data such as the IPv4 or IPv6 address of the interface. Such
 information is not part of \cppclass{InterfaceEntry} because we do not want
 \nedtype{InterfaceTable} to depend on either the IPv4 or the IPv6 protocol
 implementation; we want both to be optional, and we want
@@ -356,14 +376,14 @@ simulations only \ffunc{ipv4Data()} will return a non-\ttt{NULL} value.
 Interfaces are registered dynamically in the initialization phase by modules
 that represent network interface cards (NICs). The INET Framework makes use
 of the multi-stage initialization feature of OMNeT++, and interface registration takes
-place in the first stage (i.e. stage 0).
+place in the first stage (i.e. stage \ttt{INITSTAGE\_LINK\_LAYER}).
 
 Example code that performs interface registration:
 
 \begin{cpp}
 void PPP::initialize(int stage)
 {
-    if (stage==0) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         ...
         interfaceEntry = registerInterface(datarate);
     ...
@@ -399,6 +419,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 \end{cpp}
 
 
+\iffalse TODO
 \subsection{Interface Change Notifications}
 
 \nedtype{InterfaceTable} has a change notification mechanism built in, with
@@ -425,8 +446,9 @@ categories in the host's \nedtype{NotificationBoard}:
 In all those notifications, the data field is a pointer to the
 corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
+\fi
 
-
+\iffalse TODO
 \section{Initialization Stages}
 
 Node architecture makes it necessary to use multi-stage initialization.
@@ -446,7 +468,7 @@ In stage 4, TODO...
 ...
 
 The multi-stage initialization process itself is described in the OMNeT++ Manual.
-
+\fi
 
 \section{Communication between protocol layers}
 
@@ -471,6 +493,7 @@ Control info only holds auxiliary information for the next protocol layer,
 and is not supposed to be sent over the network to other hosts and routers.
 
 
+\iffalse TODO
 \section{Publish-Subscribe Communication within Nodes}
 
 The \nedtype{NotificationBoard} module makes it possible for several modules to
@@ -483,16 +506,19 @@ calls, no message sending is involved.
 
 The notification board submodule within the host (router) must be called
 \ttt{notificationBoard} for other modules to find it.
+\fi
 
-
+\iffalse TODO
 \section{Network interfaces}
 
 todo...
+\fi
 
+\iffalse TODO
 \section{The wireless infrastructure}
 
 todo...
-
+\fi
 
 
 \section{NED Conventions}
@@ -553,7 +579,9 @@ Gates can also be labelled with \ttt{@labels()}; the purpose is to make it easie
 to connect modules in the editor. If you connect two modules in the editor,
 the gate selection menu will list gate pairs that have a label in common.
 
-TODO screenshot
+\iffalse TODO
+screenshot
+\fi
 
 For example, when connecting hosts and routers, the editor will offer connecting
 Ethernet gates with Ethernet gates, and PPP gates with PPP gates. This is the

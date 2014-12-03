@@ -1339,7 +1339,7 @@ routing tables of selected nodes. The element has the following attributes:
 
     \item \ttt{@destination}
       Optional parameter attribute that specifies the destination address in
-      the route (IPvXAddressResolver syntax). The default value is "*".
+      the route (L3AddressResolver syntax). The default value is "*".
       e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
 
     \item \ttt{@netmask}
@@ -1349,7 +1349,7 @@ routing tables of selected nodes. The element has the following attributes:
 
     \item \ttt{@gateway}
       Optional parameter attribute that specifies the gateway (next-hop)
-      address in the route (IPvXAddressResolver syntax). When unspecified
+      address in the route (L3AddressResolver syntax). When unspecified
       the interface parameter must be specified. The default value is "*".
       e.g. "192.168.1.254" or "subnet.router" or "*"
 
@@ -1716,7 +1716,7 @@ The \fpar{sendInterval} parameter can be a constant or a random value (e.g. expo
 If the \fpar{destAddresses} parameter contains more than one address, one
 of them is randomly for each packet. An address may be given in the
 dotted decimal notation (or, for IPv6, in the usual notation with colons),
-or with the module name. (The \cppclass{IPvXAddressResolver} class is used to resolve
+or with the module name. (The \cppclass{L3AddressResolver} class is used to resolve
 the address.) To disable the model, set destAddresses to "".
 
 The \nedtype{IPvXTrafGen} sends messages with length \fpar{packetLength}.
@@ -1743,7 +1743,7 @@ parameters of the replies.
 Start/stop time, sendInterval etc. can be specified via parameters. An address
 may be given in the dotted decimal notation (or, for IPv6, in the usual
 notation with colons), or with the module name.
-(The \cppclass{IPvXAddressResolver} class is used to resolve the address.)
+(The \cppclass{L3AddressResolver} class is used to resolve the address.)
 To disable send, specify empty destAddr.
 
 Every ping request is sent out with a sequence number, and replies are
