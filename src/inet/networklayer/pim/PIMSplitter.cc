@@ -93,6 +93,7 @@ void PIMSplitter::processPIMPacket(PIMPacket *pkt)
     if (!pimInt) {
         EV_WARN << "PIM is not enabled on interface '" << ie->getName() << "', dropping packet." << endl;
         delete pkt;
+        return;
     }
 
     switch (pimInt->getMode()) {
