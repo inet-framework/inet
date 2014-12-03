@@ -98,7 +98,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected cListener
     {
         IGMPv3 *owner;
         InterfaceEntry *ie;
-        int multicastRouterVersion;
+//        int multicastRouterVersion;
         GroupToHostDataMap groups;
         cMessage *generalQueryTimer;    // for scheduling responses to General Queries
 
