@@ -702,10 +702,13 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 
     // process (*,G) asserts and (S,G) asserts for which there is no assert state in (S,G) routes
     Route *routeG = findRouteG(group);
-    PimsmInterface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-        static_cast<PimsmInterface *>(routeG->upstreamInterface) :
-        static_cast<PimsmInterface *>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
-    processAssertG(incomingInterface, receivedMetric);
+    if (routeG) {
+        PimsmInterface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+            static_cast<PimsmInterface *>(routeG->upstreamInterface) :
+            static_cast<PimsmInterface *>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+        ASSERT(incomingInterface);
+        processAssertG(incomingInterface, receivedMetric);
+    }
 
     delete pkt;
 }
