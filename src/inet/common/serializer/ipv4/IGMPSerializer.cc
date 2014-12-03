@@ -53,13 +53,15 @@ int IGMPSerializer::serialize(const IGMPMessage *pkt, unsigned char *buf, unsign
             igmp->igmp_group.s_addr = htonl(check_and_cast<const IGMPQuery*>(pkt)->getGroupAddress().getInt());
             if (dynamic_cast<const IGMPv2Query*>(pkt))
             {
-                igmp->igmp_code = dynamic_cast<const IGMPv2Query*>(pkt)->getMaxRespTime();
+                igmp->igmp_code = static_cast<const IGMPv2Query*>(pkt)->getMaxRespTime();
             }
             else if (dynamic_cast<const IGMPv3Query*>(pkt))
             {
-                igmp->igmp_code = dynamic_cast<const IGMPv3Query*>(pkt)->getMaxRespCode();
+                igmp->igmp_code = static_cast<const IGMPv3Query*>(pkt)->getMaxRespCode();
                 // TODO source list
             }
+            else
+                throw cRuntimeError("unknown IGMP_MEMBERSHIP_QUERY: %s", pkt->getClassName());
             break;
 
         case IGMPV1_MEMBERSHIP_REPORT:
