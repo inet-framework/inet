@@ -37,18 +37,15 @@ namespace inet {
 class INET_API PIMSplitter : public cSimpleModule
 {
   private:
-    IInterfaceTable *ift;
-    PIMInterfaceTable *pimIft;
+    IInterfaceTable *ift = nullptr;
+    PIMInterfaceTable *pimIft = nullptr;
 
-    cGate *ipIn;
-    cGate *ipOut;
-    cGate *pimDMIn;
-    cGate *pimDMOut;
-    cGate *pimSMIn;
-    cGate *pimSMOut;
-
-  public:
-    PIMSplitter() : ift(NULL), pimIft(NULL) {};
+    cGate *ipIn = nullptr;
+    cGate *ipOut = nullptr;
+    cGate *pimDMIn = nullptr;
+    cGate *pimDMOut = nullptr;
+    cGate *pimSMIn = nullptr;
+    cGate *pimSMOut = nullptr;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
