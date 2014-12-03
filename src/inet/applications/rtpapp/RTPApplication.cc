@@ -26,13 +26,6 @@ namespace inet {
 
 Define_Module(RTPApplication)
 
-RTPApplication::RTPApplication()
-{
-    fileName = NULL;
-    commonName = NULL;
-    profileName = NULL;
-}
-
 void RTPApplication::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

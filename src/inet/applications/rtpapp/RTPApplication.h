@@ -34,12 +34,12 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     };
 
     // parameters
-    const char *fileName;    // the name of the file to be transmitted
-    const char *commonName;    // the CNAME of this participant.
-    const char *profileName;    // the name of the used profile
-    int bandwidth;    // the reserved bandwidth for rtp/rtcp in bytes/second
-    int port;    // one of the udp port used
-    int payloadType;    // the payload type of the data in the file
+    const char *fileName = nullptr;    // the name of the file to be transmitted
+    const char *commonName = nullptr;    // the CNAME of this participant.
+    const char *profileName = nullptr;    // the name of the used profile
+    int bandwidth = 0;    // the reserved bandwidth for rtp/rtcp in bytes/second
+    int port = -1;    // one of the udp port used
+    int payloadType = -1;    // the payload type of the data in the file
     simtime_t sessionEnterDelay;    // the delay after the application enters the session
     simtime_t transmissionStartDelay;    // the delay after the application starts the transmission
     simtime_t transmissionStopDelay;    // the delay after the application stops the transmission
@@ -47,8 +47,8 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 
     // state
     IPv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
-    uint32 ssrc;
-    bool isActiveSession;
+    uint32 ssrc = 0;
+    bool isActiveSession = false;
 
   protected:
     virtual void initialize(int stage);
@@ -57,7 +57,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    RTPApplication();
+    RTPApplication() {}
 };
 
 } // namespace inet
