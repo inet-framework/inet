@@ -50,6 +50,7 @@ void HttpServerDirect::handleMessage(cMessage *msg)
         if (senderModule == NULL) {
             EV_ERROR << "Unspecified sender module in received message " << msg->getName() << endl;
             delete msg;
+            return;
         }
 
         EV_DEBUG << "Sender is " << senderModule->getFullName()
