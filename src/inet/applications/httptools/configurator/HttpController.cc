@@ -337,17 +337,15 @@ void HttpController::cancelSpecialStatus(const char *www)
 
 HttpController::WebServerEntry *HttpController::selectFromSpecialList()
 {
-    if (specialList.size() == 0) {
+
+    if (specialList.empty()) {
         EV_ERROR << "No entries in special list. Cannot select server with special probability" << endl;
         return NULL;
     }
 
-    WebServerEntry *en = NULL;
+    WebServerEntry *en = specialList.front();
 
-    if (specialList.size() == 1) {
-        en = specialList.front();
-    }
-    else {
+    if (specialList.size() > 1) {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
         std::list<WebServerEntry *>::iterator i;
