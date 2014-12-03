@@ -38,17 +38,17 @@ class INET_API UDPBasicApp : public ApplicationBase
 
     // parameters
     std::vector<L3Address> destAddresses;
-    int localPort, destPort;
+    int localPort = -1, destPort = -1;
     simtime_t startTime;
     simtime_t stopTime;
 
     // state
     UDPSocket socket;
-    cMessage *selfMsg;
+    cMessage *selfMsg = nullptr;
 
     // statistics
-    int numSent;
-    int numReceived;
+    int numSent = 0;
+    int numReceived = 0;
 
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
@@ -74,7 +74,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void handleNodeCrash();
 
   public:
-    UDPBasicApp();
+    UDPBasicApp() {}
     ~UDPBasicApp();
 };
 

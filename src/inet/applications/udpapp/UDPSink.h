@@ -35,17 +35,17 @@ class INET_API UDPSink : public ApplicationBase
     enum SelfMsgKinds { START = 1, STOP };
 
     UDPSocket socket;
-    int localPort;
+    int localPort = -1;
     L3Address multicastGroup;
     simtime_t startTime;
     simtime_t stopTime;
-    cMessage *selfMsg;
+    cMessage *selfMsg = nullptr;
 
-    int numReceived;
+    int numReceived = 0;
     static simsignal_t rcvdPkSignal;
 
   public:
-    UDPSink();
+    UDPSink() {}
     virtual ~UDPSink();
 
   protected:

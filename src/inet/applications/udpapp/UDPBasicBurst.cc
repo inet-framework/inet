@@ -44,15 +44,6 @@ simsignal_t UDPBasicBurst::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
 simsignal_t UDPBasicBurst::dropPkSignal = registerSignal("dropPk");
 
-UDPBasicBurst::UDPBasicBurst()
-{
-    messageLengthPar = NULL;
-    burstDurationPar = NULL;
-    sleepDurationPar = NULL;
-    sendIntervalPar = NULL;
-    timerNext = NULL;
-}
-
 UDPBasicBurst::~UDPBasicBurst()
 {
     cancelAndDelete(timerNext);

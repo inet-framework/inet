@@ -34,10 +34,6 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
     return out;
 }
 
-UDPVideoStreamSvr::UDPVideoStreamSvr()
-{
-}
-
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
     for (VideoStreamMap::iterator it = streams.begin(); it != streams.end(); ++it)

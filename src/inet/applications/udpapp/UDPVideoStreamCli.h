@@ -39,7 +39,7 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
 
     // state
     UDPSocket socket;
-    cMessage *selfMsg;
+    cMessage *selfMsg = nullptr;
 
     // statistics
     static simsignal_t rcvdPkSignal;
@@ -59,7 +59,7 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     virtual void handleNodeCrash();
 
   public:
-    UDPVideoStreamCli() { selfMsg = NULL; }
+    UDPVideoStreamCli() { }
     virtual ~UDPVideoStreamCli() { cancelAndDelete(selfMsg); }
 };
 
