@@ -270,7 +270,7 @@ void HttpBrowserBase::handleSelfScriptedEvent()
 void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 {
     EV_DEBUG << "Sending delayed message " << msg->getName() << " @ T=" << simTime() << endl;
-    HttpRequestMessage *reqmsg = dynamic_cast<HttpRequestMessage *>(msg);
+    HttpRequestMessage *reqmsg = check_and_cast<HttpRequestMessage *>(msg);
     reqmsg->setKind(HTTPT_REQUEST_MESSAGE);
     sendRequestToServer(reqmsg);
 }
