@@ -30,10 +30,6 @@ namespace inet {
 
 Define_Module(TelnetApp);
 
-TelnetApp::TelnetApp()
-{
-    timeoutMsg = NULL;
-}
 
 TelnetApp::~TelnetApp()
 {

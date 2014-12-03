@@ -19,6 +19,7 @@
 #define __INET_TCPECHOAPP_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
@@ -33,13 +34,13 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
 {
   protected:
     simtime_t delay;
-    double echoFactor;
+    double echoFactor = NaN;
 
     TCPSocket socket;
-    NodeStatus *nodeStatus;
+    NodeStatus *nodeStatus = nullptr;
 
-    long bytesRcvd;
-    long bytesSent;
+    long bytesRcvd = 0;
+    long bytesSent = 0;
 
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
@@ -57,7 +58,7 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    TCPEchoApp();
+    TCPEchoApp() {}
 };
 
 } // namespace inet

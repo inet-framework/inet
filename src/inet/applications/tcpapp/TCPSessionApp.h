@@ -46,12 +46,12 @@ class INET_API TCPSessionApp : public TCPAppBase
     simtime_t tOpen;
     simtime_t tSend;
     simtime_t tClose;
-    int sendBytes;
+    int sendBytes = 0;
 
     // state
-    int commandIndex;
-    cMessage *timeoutMsg;
-    NodeStatus *nodeStatus;
+    int commandIndex = -1;
+    cMessage *timeoutMsg = nullptr;
+    NodeStatus *nodeStatus = nullptr;
 
   protected:
     virtual bool isNodeUp();
@@ -72,7 +72,7 @@ class INET_API TCPSessionApp : public TCPAppBase
     virtual void socketFailure(int connId, void *yourPtr, int code);
 
   public:
-    TCPSessionApp();
+    TCPSessionApp() {}
     virtual ~TCPSessionApp();
 };
 

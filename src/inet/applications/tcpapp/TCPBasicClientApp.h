@@ -32,10 +32,10 @@ namespace inet {
 class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
 {
   protected:
-    cMessage *timeoutMsg;
-    NodeStatus *nodeStatus;
-    bool earlySend;    // if true, don't wait with sendRequest() until established()
-    int numRequestsToSend;    // requests to send in this session
+    cMessage *timeoutMsg = nullptr;
+    NodeStatus *nodeStatus = nullptr;
+    bool earlySend = false;    // if true, don't wait with sendRequest() until established()
+    int numRequestsToSend = 0;    // requests to send in this session
     simtime_t startTime;
     simtime_t stopTime;
 
@@ -53,7 +53,7 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    TCPBasicClientApp();
+    TCPBasicClientApp() {}
     virtual ~TCPBasicClientApp();
 };
 

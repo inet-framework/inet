@@ -30,9 +30,9 @@ namespace inet {
 class INET_API TelnetApp : public TCPAppBase, public ILifecycle
 {
   protected:
-    cMessage *timeoutMsg;
-    int numLinesToType;    // lines (commands) the user will type in this session
-    int numCharsToType;    // characters the user will type for current line (command)
+    cMessage *timeoutMsg = nullptr;
+    int numLinesToType = 0;    // lines (commands) the user will type in this session
+    int numCharsToType = 0;    // characters the user will type for current line (command)
     simtime_t stopTime;
 
   protected:
@@ -49,7 +49,7 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    TelnetApp();
+    TelnetApp() {}
     virtual ~TelnetApp();
 };
 

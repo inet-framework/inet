@@ -30,11 +30,6 @@ Define_Module(TCPSessionApp);
 #define MSGKIND_SEND       2
 #define MSGKIND_CLOSE      3
 
-TCPSessionApp::TCPSessionApp()
-{
-    timeoutMsg = NULL;
-    nodeStatus = NULL;
-}
 
 TCPSessionApp::~TCPSessionApp()
 {

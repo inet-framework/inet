@@ -29,11 +29,6 @@ Define_Module(TCPEchoApp);
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
 
-TCPEchoApp::TCPEchoApp()
-{
-    nodeStatus = NULL;
-}
-
 void TCPEchoApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
