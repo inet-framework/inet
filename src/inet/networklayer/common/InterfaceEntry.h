@@ -62,14 +62,14 @@ class INET_API InterfaceProtocolData : public cObject
     friend class InterfaceEntry;    //only this guy is allowed to set ownerp
 
   protected:
-    InterfaceEntry *ownerp;    // the interface entry this object belongs to
+    InterfaceEntry *ownerp = nullptr;    // the interface entry this object belongs to
 
   protected:
     // fires notification with the given signalID, and the interface entry as obj
     virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
-    InterfaceProtocolData() { ownerp = NULL; }
+    InterfaceProtocolData() { }
 
     /**
      * Returns the InterfaceEntry that contains this data object, or NULL
@@ -103,29 +103,29 @@ class INET_API InterfaceEntry : public cNamedObject
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
 
   protected:
-    IInterfaceTable *ownerp;    ///< IInterfaceTable that contains this interface, or NULL
-    cModule *interfaceModule;    ///< interface module, or NULL
-    int interfaceId;    ///< identifies the interface in the IInterfaceTable
-    int nwLayerGateIndex;    ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
-    int nodeOutputGateId;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
-    int nodeInputGateId;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int mtu;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
-    State state;    ///< requested interface state, similar to Linux ifup/ifdown
-    bool carrier;    ///< current state (up/down) of the physical layer, e.g. Ethernet cable
-    bool broadcast;    ///< interface supports broadcast
-    bool multicast;    ///< interface supports multicast
-    bool pointToPoint;    ///< interface is point-to-point link
-    bool loopback;    ///< interface is loopback interface
-    double datarate;    ///< data rate in bit/s
+    IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or NULL
+    cModule *interfaceModule = nullptr;    ///< interface module, or NULL
+    int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
+    int nwLayerGateIndex = -1;    ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
+    int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
+    int nodeInputGateId = -1;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
+    int mtu = 0;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
+    State state = DOWN;    ///< requested interface state, similar to Linux ifup/ifdown
+    bool carrier = false;    ///< current state (up/down) of the physical layer, e.g. Ethernet cable
+    bool broadcast = false;    ///< interface supports broadcast
+    bool multicast = false;    ///< interface supports multicast
+    bool pointToPoint = false;    ///< interface is point-to-point link
+    bool loopback = false;    ///< interface is loopback interface
+    double datarate = 0;    ///< data rate in bit/s
     MACAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token;    ///< for IPv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
-    IPv4InterfaceData *ipv4data;    ///< IPv4-specific interface info (IPv4 address, etc)
-    IPv6InterfaceData *ipv6data;    ///< IPv6-specific interface info (IPv6 addresses, etc)
-    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
-    ISISInterfaceData *isisdata;    ///< ISIS-specific interface info
-    TRILLInterfaceData *trilldata;    ///< TRILL-specific interface info
-    Ieee8021dInterfaceData *ieee8021ddata;
+    IPv4InterfaceData *ipv4data = nullptr;    ///< IPv4-specific interface info (IPv4 address, etc)
+    IPv6InterfaceData *ipv6data = nullptr;    ///< IPv6-specific interface info (IPv6 addresses, etc)
+    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
+    ISISInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
+    TRILLInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
+    Ieee8021dInterfaceData *ieee8021ddata = nullptr;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:

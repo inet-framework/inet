@@ -64,30 +64,10 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
 
 InterfaceEntry::InterfaceEntry(cModule *ifmod)
 {
-    ownerp = NULL;
     interfaceModule = ifmod;
-
-    nwLayerGateIndex = -1;
-    nodeOutputGateId = -1;
-    nodeInputGateId = -1;
-
-    mtu = 0;
-
     state = UP;
     carrier = true;
-    broadcast = false;
-    multicast = false;
-    pointToPoint = false;
-    loopback = false;
     datarate = 0;
-
-    ipv4data = NULL;
-    ipv6data = NULL;
-    genericNetworkProtocolData = NULL;
-    isisdata = NULL;
-    trilldata = NULL;
-    ieee8021ddata = NULL;
-    estimateCostProcessArray.clear();
 }
 
 InterfaceEntry::~InterfaceEntry()
