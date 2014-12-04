@@ -47,7 +47,7 @@ class INET_API RoutingTableParser
     /**
      * Constructor
      */
-    RoutingTableParser(IInterfaceTable *ift, IIPv4RoutingTable *rt);
+    RoutingTableParser(IInterfaceTable *ift, IIPv4RoutingTable *rt) : ift(ift), rt(rt) {}
 
     /**
      * Destructor
