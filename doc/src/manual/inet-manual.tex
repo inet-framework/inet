@@ -50,6 +50,32 @@
 %% try this for spell checking: cat ess2002.tex | ispell -l -t -a | sort | uniq | more
 
 %%
+%% The following snippet changes the horizontal spacing between the number and
+%% the title in the table of contents.
+%%
+%% http://tex.stackexchange.com/questions/33841/how-to-modify-the-space-between-the-numbers-and-text-of-sectioning-titles-in-the
+%%
+\makeatletter
+ \renewcommand*\l@section{\@dottedtocline{1}{2em}{3em}}
+ \renewcommand*\l@subsection{\@dottedtocline{2}{5em}{4em}}
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{2em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\makeatother
+
+%%
 %% OMNeT++ logo, use as {\opp}
 %%
 \makeatletter
