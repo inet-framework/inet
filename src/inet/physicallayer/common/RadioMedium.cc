@@ -722,7 +722,7 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
 const IReception *RadioMedium::computeReception(const IRadio *radio, const ITransmission *transmission) const
 {
     receptionComputationCount++;
-    return analogModel->computeReception(radio, transmission);
+    return analogModel->computeReception(radio, transmission, getArrival(radio, transmission));
 }
 
 const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const

@@ -24,6 +24,7 @@
 #include "inet/physicallayer/contract/IReception.h"
 #include "inet/physicallayer/contract/IInterference.h"
 #include "inet/physicallayer/contract/ISNIR.h"
+#include "inet/physicallayer/contract/IArrival.h"
 
 namespace inet {
 
@@ -42,7 +43,7 @@ class INET_API IAnalogModel : public IPrintableObject
      * The result incorporates all modeled attenuation. This function never
      * returns nullptr.
      */
-    virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
+    virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) const = 0;
 
     /**
      * Returns the total noise summing up all the interfering receptions and

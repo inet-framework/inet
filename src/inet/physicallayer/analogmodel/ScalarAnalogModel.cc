@@ -35,14 +35,13 @@ bool ScalarAnalogModel::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1,
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
     const IRadio *transmitterRadio = transmission->getTransmitter();
     const IAntenna *receiverAntenna = receiverRadio->getAntenna();
     const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const ScalarTransmission *scalarTransmission = check_and_cast<const ScalarTransmission *>(transmission);
-    const IArrival *arrival = channel->getArrival(receiverRadio, transmission);
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();

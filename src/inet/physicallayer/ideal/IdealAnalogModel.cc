@@ -32,10 +32,8 @@ void IdealAnalogModel::printToStream(std::ostream& stream) const
     stream << "IdealAnalogModel";
 }
 
-const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
-    const IRadioMedium *channel = receiverRadio->getMedium();
-    const IArrival *arrival = channel->getArrival(receiverRadio, transmission);
     const IdealTransmission *idealTransmission = check_and_cast<const IdealTransmission *>(transmission);
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();

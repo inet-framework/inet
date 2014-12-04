@@ -50,14 +50,13 @@ void DimensionalAnalogModel::printToStream(std::ostream& stream) const
            << "interpolationMode = " << interpolationMode;
 }
 
-const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
+const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *channel = receiverRadio->getMedium();
     const IRadio *transmitterRadio = transmission->getTransmitter();
     const IAntenna *receiverAntenna = receiverRadio->getAntenna();
     const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const DimensionalTransmission *dimensionalTransmission = check_and_cast<const DimensionalTransmission *>(transmission);
-    const IArrival *arrival = channel->getArrival(receiverRadio, transmission);
     const simtime_t transmissionStartTime = transmission->getStartTime();
     const simtime_t transmissionEndTime = transmission->getEndTime();
     const simtime_t receptionStartTime = arrival->getStartTime();
