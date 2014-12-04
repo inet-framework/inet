@@ -82,6 +82,15 @@ class INET_API ZCoordFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
+/**
+ * Filter that expects a cMessage and outputs its source address as string
+ */
+class INET_API MessageSourceAddrFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+};
+
 } // namespace filters
 
 } // namespace utils

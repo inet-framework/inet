@@ -21,6 +21,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -81,6 +82,20 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
 {
     if (dynamic_cast<Coord *>(object))
         fire(this, t, ((Coord *)object)->z);
+}
+
+Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
+
+void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+{
+    if (dynamic_cast<cMessage *>(object)) {
+        cMessage *msg = (cMessage *)object;
+
+        INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+        if (ctrl != NULL) {
+            fire(this, t, ctrl->getSourceAddress().str().c_str());
+        }
+    }
 }
 
 } // namespace filters
