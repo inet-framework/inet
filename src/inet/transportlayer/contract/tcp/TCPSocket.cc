@@ -56,7 +56,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         // However, for convenience we extract TCPConnectInfo already here, so that
         // remote address/port can be read already after the ctor call.
 
-        TCPConnectInfo *connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
+        TCPConnectInfo *connectInfo = check_and_cast<TCPConnectInfo *>(msg->getControlInfo());
         localAddr = connectInfo->getLocalAddr();
         remoteAddr = connectInfo->getRemoteAddr();
         localPrt = connectInfo->getLocalPort();
@@ -274,7 +274,7 @@ void TCPSocket::processMessage(cMessage *msg)
             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
             // want to create a new TCPSocket object via new TCPSocket(msg).
             sockstate = CONNECTED;
-            connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
+            connectInfo = check_and_cast<TCPConnectInfo *>(msg->getControlInfo());
             localAddr = connectInfo->getLocalAddr();
             remoteAddr = connectInfo->getRemoteAddr();
             localPrt = connectInfo->getLocalPort();
