@@ -447,6 +447,8 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
                 continue;
 
             double linkWeight = dest->getLinkIn(i)->getWeight();
+
+            // links with linkWeight == 0 might induce circles
             ASSERT(linkWeight > 0.0);
 
             double newdist = dest->dist + linkWeight;
