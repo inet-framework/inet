@@ -50,14 +50,14 @@ class RoutingTableEntry : public IPv4Route
     static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
 
   private:
-    IInterfaceTable *ift;
-    RoutingDestinationType destinationType;
+    IInterfaceTable *ift = nullptr;
+    RoutingDestinationType destinationType = 0;
     OSPFOptions optionalCapabilities;
     AreaID area;
-    RoutingPathType pathType;
-    Metric cost;
-    Metric type2Cost;
-    const OSPFLSA *linkStateOrigin;
+    RoutingPathType pathType = (RoutingPathType)-1;
+    Metric cost = 0;
+    Metric type2Cost = 0;
+    const OSPFLSA *linkStateOrigin = nullptr;
     std::vector<NextHop> nextHops;
     // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
     // IPv4Route::gateway is nextHops[0].hopAddress

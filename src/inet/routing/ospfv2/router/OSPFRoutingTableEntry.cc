@@ -23,17 +23,12 @@ namespace ospf {
 
 RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
-    IPv4Route(),
     destinationType(RoutingTableEntry::NETWORK_DESTINATION),
     area(BACKBONE_AREAID),
-    pathType(RoutingTableEntry::INTRAAREA),
-    cost(0),
-    type2Cost(0),
-    linkStateOrigin(NULL)
+    pathType(RoutingTableEntry::INTRAAREA)
 {
     setNetmask(IPv4Address::ALLONES_ADDRESS);
     setSourceType(IRoute::OSPF);
-    memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 
 RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry) :
