@@ -46,7 +46,6 @@
 %% for navigation in dvi files, only needed by old teTeX versions
 %%\usepackage{srcltx}
 
-
 %% try this for spell checking: cat ess2002.tex | ispell -l -t -a | sort | uniq | more
 
 %%
@@ -109,6 +108,13 @@
   \usepackage{graphicx}
   \usepackage[plainpages=false]{hyperref}   %% automatic hyperlinking
 \fi
+
+%%
+%% Draft conditional to include unfinished parts
+%%
+\newif\ifdraft
+\draftfalse %% uncomment for final version
+%\drafttrue %% uncomment for draft version
 
 %%
 %% Generate Index
@@ -429,12 +435,12 @@
 \include{ch-tcp}
 \cleardoublepage
 
-\iffalse TODO
+\ifdraft TODO
 \include{ch-sctp}
 \cleardoublepage
 \fi
 
-\iffalse TODO
+\ifdraft TODO
 \include{ch-routing}
 \cleardoublepage
 \fi
@@ -445,7 +451,7 @@
 \include{ch-mpls}
 \cleardoublepage
 
-\iffalse TODO
+\ifdraft TODO
 \include{ch-apps}
 \cleardoublepage
 \fi

@@ -107,14 +107,14 @@ and updates the entry in the interface table.
 % FIXME: The module does not notice if the datarate of the channel changed!
 %        It should update the interface entry.
 
-\iffalse TODO
+\ifdraft TODO
 The node containing the PPP module must also contain a
 \nedtype{NofiticationBoard} component. Notifications are sent when
 transmission of a new PPP frame started (\verb!NF_PP_TX_BEGIN!), finished
 (\verb!NF_PP_TX_END!) or when a PPP frame received (\verb!NF_PP_RX_END!).
 \fi
 
-\iffalse TODO
+\ifdraft TODO
 The PPP component is the source of the following signals:
 \begin{itemize}
 \item \tbf{txState} state of the link (0=idle,1=busy)

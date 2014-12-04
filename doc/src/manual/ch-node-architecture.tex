@@ -27,14 +27,14 @@ manipulation methods to add and manage discovered routes. For IPv6
 simulations, \nedtype{IPv4RoutingTable} is replaced (or co-exists) with
 a \nedtype{IPv6RoutingTable} module
 
-\iffalse TODO
+\ifdraft TODO
 ; and for Mobile IPv6 simulations (xMIPv6 project [TODO])
 \fi
 
 , possibly with a \nedtype{BindingCache} module
 as well.
 
-\iffalse TODO
+\ifdraft TODO
 \item \tbf{Notification Board (\nedtype{NotificationBoard})}. This module
 makes it possible for several modules to communicate in a publish-subscribe
 manner. Notifications include change notifications (``routing table
@@ -80,7 +80,7 @@ error replies. The IPv6 network layer, \nedtype{IPv6NetworkLayer} contains the
 modules \nedtype{IPv6}, \nedtype{ICMPv6}, \nedtype{IPv6NeighbourDiscovery}
 and \nedtype{IPv6ErrorHandling}. For Mobile IPv6 simulations 
 
-\iffalse TODO
+\ifdraft TODO
 (xMIPv6 project [TODO]),
 \fi
 
@@ -90,8 +90,8 @@ and \nedtype{IPv6ErrorHandling}. For Mobile IPv6 simulations
 by modules connected to the network layer; currently TCP, UDP and SCTP are
 supported. TCP has several implementations: \nedtype{TCP} is the OMNeT++
 native implementation; the \nedtype{TCP\_lwip} module wraps the lwIP TCP
-stack \iffalse [TODO] \fi; and the \nedtype{TCP\_NSC} module wraps the Network
-Simulation Cradle library \iffalse [TODO] \fi. For this reason, the \ttt{tcp} 
+stack \ifdraft [TODO] \fi; and the \nedtype{TCP\_NSC} module wraps the Network
+Simulation Cradle library \ifdraft [TODO] \fi. For this reason, the \ttt{tcp} 
 submodule is usually defined with a parametric submodule type (\ttt{"tcp:
 <tcpType> like ITCP"}). UDP and SCTP are implemented by the \nedtype{UDP} and
 \nedtype{SCTP} modules, respectively.
@@ -125,7 +125,7 @@ contain a relay unit, which switches frames among Ethernet (and other
 IEEE 802) NICs. Concrete relay unit types include \nedtype{MACRelayUnitPP}
 and \nedtype{MACRelayUnitNP}, which differ in their performance models.
 
-\iffalse TODO
+\ifdraft TODO
 \item \tbf{Power consumption}. INET extensions uses for wireless sensor
 networks (WSNs) may add a battery module to the node model. The battery
 module would keep track of energy consumption. A battery module is provided
@@ -145,7 +145,7 @@ not need a network layer, a routing table or interface table; it may need a
 notification board though. Some NICs (e.g. \nedtype{EtherMAC}) can be used
 without and interface table and queue models as well.
 
-\iffalse TODO
+\ifdraft TODO
 The notification board (\nedtype{NotificationBoard}) and the interface
 table (\nedtype{InterfaceTable}) will be described later in this chapter.
 Other modules are covered in later chapters, i.e. \nedtype{RoutingTable}
@@ -180,12 +180,12 @@ method) that corresponds to the all-zeros address.
     to access the value.
 \end{itemize}
 
-\iffalse TODO
+\ifdraft TODO
 TODO: Resolving addresses with L3AddressResolver
 \fi
 
 
-\iffalse TODO
+\ifdraft TODO
 \section{The Notification Board}
 
 The \nedtype{NotificationBoard} module allows publish-subscribe
@@ -270,7 +270,7 @@ the INET Framework: information about the network interfaces in the host.
 The interface table module does not send or receive messages; other modules
 access it using standard C++ member function calls.
 
-\iffalse TODO
+\ifdraft TODO
 \subsection{Accessing the Interface Table}
 
 If a module wants to work with the interface table, first it needs to obtain a
@@ -419,7 +419,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 \end{cpp}
 
 
-\iffalse TODO
+\ifdraft TODO
 \subsection{Interface Change Notifications}
 
 \nedtype{InterfaceTable} has a change notification mechanism built in, with
@@ -448,7 +448,7 @@ corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
 \fi
 
-\iffalse TODO
+\ifdraft TODO
 \section{Initialization Stages}
 
 Node architecture makes it necessary to use multi-stage initialization.
@@ -493,7 +493,7 @@ Control info only holds auxiliary information for the next protocol layer,
 and is not supposed to be sent over the network to other hosts and routers.
 
 
-\iffalse TODO
+\ifdraft TODO
 \section{Publish-Subscribe Communication within Nodes}
 
 The \nedtype{NotificationBoard} module makes it possible for several modules to
@@ -508,13 +508,13 @@ The notification board submodule within the host (router) must be called
 \ttt{notificationBoard} for other modules to find it.
 \fi
 
-\iffalse TODO
+\ifdraft TODO
 \section{Network interfaces}
 
 todo...
 \fi
 
-\iffalse TODO
+\ifdraft TODO
 \section{The wireless infrastructure}
 
 todo...
@@ -579,7 +579,7 @@ Gates can also be labelled with \ttt{@labels()}; the purpose is to make it easie
 to connect modules in the editor. If you connect two modules in the editor,
 the gate selection menu will list gate pairs that have a label in common.
 
-\iffalse TODO
+\ifdraft TODO
 screenshot
 \fi
 
