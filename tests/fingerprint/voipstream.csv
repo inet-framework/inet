@@ -47,5 +47,5 @@
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 8,   60s,     35ff-4e4e
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     d287-35f1
 
-/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     9908-3c1a
+/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     af78-d089
 /examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     0708-2659
