@@ -38,10 +38,10 @@ namespace ospf {
 class OSPFRouting : public cSimpleModule, public ILifecycle
 {
   private:
-    IIPv4RoutingTable *rt;
-    IInterfaceTable *ift;
-    bool isUp;
-    Router *ospfRouter;    // root object of the OSPF data structure
+    IIPv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
+    bool isUp = false;
+    Router *ospfRouter = nullptr;    // root object of the OSPF data structure
 
   public:
     OSPFRouting();

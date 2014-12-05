@@ -38,8 +38,6 @@ Define_Module(OSPFRouting);
 
 OSPFRouting::OSPFRouting()
 {
-    isUp = false;
-    ospfRouter = nullptr;
 }
 
 OSPFRouting::~OSPFRouting()
