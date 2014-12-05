@@ -1,326 +1,185 @@
+
+-----------------------------------------------------------------------------------------------------------
+2004
+<aarizaq@uma.es>
+Adam Malik(mailto:towdie13@gmail.com)
+Adriano
+Adriano (University of Pisa)
+Ahmed Ayadi
+Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
 Alberto Cortés
 alfonso
 Alfonso Ariza
-andras
-Andras Varga
-Benjamin Seregi
-Benmartin92
-Borb�ly Tam�s
-dev
-Florian Meier
-Henrick
-Hornig Rudolf
-Irene Ruengeler
-jlai
-Levente Meszaros
-Levente Mészáros
-Levente M�sz�ros
-levy
-Michael Tüxen
-(no author)
-ProZsolt
-rhornig
-Rudolf Hornig
-ruengeler
-Tamas Borbely
-Tamás Borbély
-tomi
-tuexen
-unknown
-vojta
-Zoltan Bojthe
-Zsolt Prontvai
------------------------------------------------------------------------------------------------------------
-Alberto Cortés
-Alfonso Ariza
-andras
-Andras Varga
-avarga
-Benjamin Seregi
-Benmartin92
-dev
-Florian Meier
-Hornig Rudolf
-jlai
-Levente Meszaros
-Levente Mészáros
-Levente M�sz�ros
-levy
-rhornig
-Rudolf Hornig
-ruengeler
-Tamas Borbely
-Tamás Borbély
-tomi
-tuexen
-vojta
-Zoltan Bojthe
-Zsolt Prontvai
------------------------------------------------------------------------------------------------------------
-Adriano (University of Pisa)
-Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
-Alfonso Ariza
+Alfonso Ariza                                   *
 Alfonso Ariza  (clean code
-fix some errors
-new radio model)
 Alfonso Ariza Quintana
+Alfonso Ariza Quintana.<aarizaq@uma.ea>
 Alfonso Ariza Quintana aarizaq@uma.es              *
 Alfonso Ariza Quintana (global arp)
-Alfonso Ariza Quintana
-Universidad de Malaga
-Alfonso Ariza
-Universidad de Malaga
+Alvaro Torres Cortes
+Amre El-Hoiydi
+andras
+Andras
 Andras Babos
 Andras Babos and Andras Varga
 Andras Varga
 Andras Varga
-
-Andras Varga
 Andras Varga and Levente Meszaros
 Andras Varga and Levente Meszaros (original code)
 Andras Varga and Levente M�sz�ros
-Andras Varga; CTIE
-Monash University
-Australia
-Andras Varga
-Levente Meszaros
-Andras Varga
-Levente Meszaros and Lukas Hluze
-Alfonso Ariza
-Alfonso Ariza                                   *
-Eduard Hiti (feedback to macho@ehiti.de)
-Irene Ruengeler
-Matthias Oppitz
-Matthias Oppitz
-Ahmed Ayadi
-Matthias Oppitz
-Ahmed Ayadi
-Matthias Oppitz <Matthias.Oppitz@gmx.de>
-Thomas Dreibholz
-Christian Dankbar
-Christian Dankbar
-Irene Ruengeler
-Michael Tuexen
-Christian Dankbar
-Irene Ruengeler
-Michael Tuexen
-Andras Varga
-Christoph Sommer
-Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
-Christoph Sommer <christoph.sommer@uibk.ac.at>
-Emin Ilker Cetinbas
-Emin Ilker Cetinbas
-Andras Varga
-Eric Wu
-Eric Wu and Steve Woon
-Monash University
-Melbourne
-Australia
-Faqir Zarrar Yousaf
-Florian Meier
-Georg Lutz
-Institut fuer Telematik
-University of Karlsruhe
-Helene Lageber
-Ingmar Baumgart
-Irene Ruengeler
-Irene Ruengeler
-Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
-Jan Ringo�
-www.ringos.cz
-Jan Ringo
-www.ringos.cz
-Johnny Lai
-Monash University
-Melbourne
-Australia
-Juan-Carlos Maureira
-Juan Luis Garrote Molinero
-Kristjan V. Jonsson
-LDSS (kristjanvj@gmail.com)
-Levente Meszaros
-Lukáš Hlůže   lukas@hluze.cz (802.11e)
-Lukáš Hlůže (Lukás Hluze) lukas@hluze.cz (802.11e)
-Marcin Kosiba
-Matthias Oppitz
-Matthias Oppitz
-Arndt Buschmann
-Matthias Oppitz
-Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
-Matthias Oppitz <Matthias.Oppitz@gmx.de>
-M. Bohge (bohge@tkn.tu-berlin.de)
-M. Renwanz
-Michael Tuexen
-Mohamed Louizi
-Peterpaul Klein Haneveld
-Robin Seggelmann
-Sam Jansen
-Andras Varga
-Sam Jansen
-Andras Varga
-
-Sorin    (802.11g)
-Thomas Dreibholz
-Thomas Dreibholz
-Thomas Reschka
-Vincent Oberle (vincent@oberle.com)
-Vojta Janota
-Vojtech Janota
-Vojtech Janota
-Andras Varga
-Wei Yang
-Ng
-Xuan Thang Nguyen
-Zoltan Bojthe
-Zsolt Prontvai
------------------------------------------------------------------------------------------------------------
-
-Adam Malik(mailto:towdie13@gmail.com)
-Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-Adriano
-Zoltan Bojthe
-alfonso
-Alfonso Ariza
-Alfonso Ariza
-<aarizaq@uma.es>
-Alfonso Ariza Quintana
-Alfonso Ariza Quintana.<aarizaq@uma.ea>
-andras
-Andras
-Andras Varga
-Andras Varga
-2004
 Andras Varga (andras@omnetpp.org)
+Andras Varga; CTIE
 Andras Varga (generalized
-ported to LineSegmentsMobilityBase)
-Andras Varga
-Tamas Borbely
-Andras Varga
-Vojta Janota
+Andreas Koepke
 Andreas Kuntz
 Anna Foerster
 ANSA Team
-Benjamin Martin Seregi
+Arndt Buschmann
+Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
+Australia
+avarga
 Axel Wegener
+Bastian Halmos
 Benjamin Martin Seregi
 Benjamin Seregi
+Benmartin92
 Bj�n Wiberg <bjorn.wiberg@home.se>
 Bjoern Hendriks
+Borb�ly Tam�s
 Christian
+Christian Dankbar
 Christian Frank
 Christoph Sommer
-Christoph Sommer
-David Eckhoff
-Christoph Sommer
-David Eckhoff
-Falko Dressler
-Zheng Yao
-Tobias Mayer
-Alvaro Torres Cortes
-Luca Bedogni
-Christoph Sommer
-David Eckhoff
-Luca Bedogni
-Bastian Halmos
+Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+Christoph Sommer <christoph.sommer@uibk.ac.at>
 Damien Piguet
-Damien Piguet
-Dimitris Kotsakos
-Jérôme Rousselot
-Damien Piguet
-Jerome Rousselot
 Daniel Krajzewicz
 Daniel Willkomm
-Daniel Willkomm
-Andras Varga
-Daniel Willkomm
-Andras Varga
-Zoltan Bojthe
+David Eckhoff
+dev
 Dimitris Kotsakos
-George Alyfantis
-Damien Piguet
+Eduard Hiti (feedback to macho@ehiti.de)
 Emin Ilker Cetinbas
-Emin Ilker Cetinbas
-Andras Varga
 Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
-Erik Nordstr� <erik.nordstrom@it.uu.se>
-Erik Nordstr�
-<erik.nordstrom@it.uu.se>
-Erik Nordstr�m
-<erik.nordstrom@it.uu.se>
-Erik Nordström
+Eric Wu
+Eric Wu and Steve Woon
 <erikn@it.uu.se>
+Erik Nordstr�
+Erik Nordstr� <erik.nordstrom@it.uu.se>
+Erik Nordstr�m
+Erik Nordström
+<erik.nordstrom@it.uu.se>
+Falko Dressler
+Faqir Zarrar Yousaf
+Felix Schmidt-Eisenlohr
+fix some errors
+Florian Meier
 Friedemann Wesner
 Gary Pei <guangyu.pei@boeing.com>
+George Alyfantis
 Georg Lutz
 Georg Lutz (georglutz AT gmx DOT de)
-Institut fuer Telematik
-
 Helene Lageber
-Irene Ruengeler)
-Isabel Dietrich
-Jan Ringos
+Henrick
+Hornig Rudolf
 http://Tringi.Mx-3.cz
+Ingmar Baumgart
+Institut fuer Telematik
+Irene Ruengeler
+Irene Ruengeler)
+Irene Ruengeler
+Isabel Dietrich
+Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
+Jan-March 2001
+Jan Ringo�
+Jan Ringo
+Jan Ringos
 Jerome Rousselot
-Jerome Rousselot
-Amre El-Hoiydi
-Marc Loebbers
-Yosia Hadisusanto
-Andreas Koepke
+Jérôme Rousselot
 Jerome Rousselot <jerome.rousselot@csem.ch>
-Jerome Rousselot
-Marcel Steine
-Amre El-Hoiydi
-
-Jerome Rousselot
-Marc Loebbers
 Jia Pan */
 Jirka Klaue
+jlai
 Jochen Reber
-Jochen Reber
-Andras Varga
+Johnny Lai
+Juan-Carlos Maureira
 Juan Luis Garrote Molinero
 Karl Wess
 Karl Wessel
 Karl Wessel (port for MiXiM)
 Konrad Polys
-Krzysztof Grochla
 Kristjan V. Jonsson
 Kristjan V. Jonsson (kristjanvj@gmail.com)
 Kristjan V. Jonsson (LDSS) <kristjanvj@gmail.com>
+Krzysztof Grochla
+LDSS (kristjanvj@gmail.com)
 Levente Meszaros
 Levente Meszaros)
-Levente Meszaros (levy@omnetpp.org)
+Levente Mészáros
+Levente Meszaros and Lukas Hluze
 Levente Meszaros <levy@omnetpp.org>
-Andras Varga (andras@omnetpp.org)
+Levente Meszaros (levy@omnetpp.org)
+Levente M�sz�ros
+levy
+Luca Bedogni
+Lukáš Hlůže   lukas@hluze.cz (802.11e)
+Lukáš Hlůže (Lukás Hluze) lukas@hluze.cz (802.11e)
 Majid Nabi
 Majid Nabi <m.nabi@tue.nl>
+Marcel Steine
 Marcin Kosiba
 Marcin Kosiba marcin.kosiba@gmail.com
-Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
-Michael Behrisch
-Andras Babos
-Oliver Graute
-Oliver Graute
-Andreas Kuntz
-Felix Schmidt-Eisenlohr
-Peterpaul Klein Haneveld
-Steffen Sroka
-Steffen Sroka
 Marc Loebbers
-Daniel Willkomm
+Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
+Matthias Oppitz
+Matthias Oppitz <Matthias.Oppitz@gmx.de>
+M. Bohge (bohge@tkn.tu-berlin.de)
+Melbourne
+Michael Behrisch
+Michael Tuexen
+Michael Tüxen
+Mohamed Louizi
+Monash University
+M. Renwanz
+new radio model)
+Ng
+(no author)
+Oliver Graute
+Peterpaul Klein Haneveld
+ported to LineSegmentsMobilityBase)
+ProZsolt
+rhornig
+Robin Seggelmann
+Rudolf Hornig
+ruengeler
+Sam Jansen
+Sorin    (802.11g)
+Steffen Sroka
 Tamas Borbely
+Tamás Borbély
 Thimor Bohn
+Thomas Dreibholz
+Thomas Dreibholz
+Thomas Reschka
 Tino Morenz
+Tobias Mayer
 Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz)
+tomi
+tuexen
+Universidad de Malaga
+University of Karlsruhe
+unknown
 Veronika Rybova
-Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-Veronika Rybova
-Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz)
-Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-Veronika Rybova
-Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 Vincent Oberle
-Vincent Oberle
-Jan-March 2001
+Vincent Oberle (vincent@oberle.com)
+Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+vojta
+Vojta Janota
+Vojtech Janota
+Wei Yang
+www.ringos.cz
+Xuan Thang Nguyen
+Yosia Hadisusanto
+Zheng Yao
 Zoltan Bojthe
 Zsolt Prontvai
