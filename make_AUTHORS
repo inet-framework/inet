@@ -7,6 +7,6 @@ find src -type f | egrep -v "(tcp_lwip/lwip|aodv-uu/aodv-uu|dsr/dsr-uu|dymo/dymo
 cat filelist.tmp | xargs grep -iR '(c)'  | sed 's/.*20[01][0-9] *//' | sed 's/.*(C) *//' | sort | uniq
 echo -----------------------------------------------------------------------------------------------------------
 cat filelist.tmp | xargs grep -iRE '\bAuthors?\b' |  grep -v 'THE AUTHOR ' | sed 's/.*authors\?:\? *//i' | sort | uniq
-
-
+echo -----------------------------------------------------------------------------------------------------------
+find src -name ChangeLog | xargs grep -iE 'patch|report'
 
