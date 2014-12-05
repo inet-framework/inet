@@ -37,8 +37,8 @@ class INET_API Loopback : public MACBase
 {
   protected:
     // statistics
-    long numSent;
-    long numRcvdOK;
+    long numSent = 0;
+    long numRcvdOK = 0;
 
     static simsignal_t packetSentToUpperSignal;
     static simsignal_t packetReceivedFromUpperSignal;
@@ -50,7 +50,7 @@ class INET_API Loopback : public MACBase
     virtual bool isUpperMsg(cMessage *msg);
 
   public:
-    Loopback();
+    Loopback() {}
     virtual ~Loopback();
 
   protected:
