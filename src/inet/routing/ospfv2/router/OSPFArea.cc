@@ -92,7 +92,7 @@ void Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
     if (erased && found) // the found entry contains new entry and new entry contains erased entry ==> the found entry also contains the erased entry
         throw cRuntimeError("Model error: bad contents in areaAddressRanges vector");
     if (erased) {
-        std::vector<IPv4AddressRange>::iterator it = areaAddressRanges.begin();
+        auto it = areaAddressRanges.begin();
         while (it != areaAddressRanges.end()) {
             if (*it == NULL_IPV4ADDRESSRANGE)
                 it = areaAddressRanges.erase(it);
@@ -261,7 +261,7 @@ Interface *Area::findVirtualLink(RouterID routerID)
 bool Area::installRouterLSA(OSPFRouterLSA *lsa)
 {
     LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
-    std::map<LinkStateID, RouterLSA *>::iterator lsaIt = routerLSAsByID.find(linkStateID);
+    auto lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
         LSAKeyType lsaKey;
 
@@ -282,7 +282,7 @@ bool Area::installRouterLSA(OSPFRouterLSA *lsa)
 bool Area::installNetworkLSA(OSPFNetworkLSA *lsa)
 {
     LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
-    std::map<LinkStateID, NetworkLSA *>::iterator lsaIt = networkLSAsByID.find(linkStateID);
+    auto lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
         LSAKeyType lsaKey;
 
@@ -307,7 +307,7 @@ bool Area::installSummaryLSA(OSPFSummaryLSA *lsa)
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
 
-    std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::iterator lsaIt = summaryLSAsByID.find(lsaKey);
+    auto lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
         LSAKeyType lsaKey;
 
@@ -327,7 +327,7 @@ bool Area::installSummaryLSA(OSPFSummaryLSA *lsa)
 
 RouterLSA *Area::findRouterLSA(LinkStateID linkStateID)
 {
-    std::map<LinkStateID, RouterLSA *>::iterator lsaIt = routerLSAsByID.find(linkStateID);
+    auto lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -349,7 +349,7 @@ const RouterLSA *Area::findRouterLSA(LinkStateID linkStateID) const
 
 NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID)
 {
-    std::map<LinkStateID, NetworkLSA *>::iterator lsaIt = networkLSAsByID.find(linkStateID);
+    auto lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -371,7 +371,7 @@ const NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID) const
 
 SummaryLSA *Area::findSummaryLSA(LSAKeyType lsaKey)
 {
-    std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::iterator lsaIt = summaryLSAsByID.find(lsaKey);
+    auto lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -470,7 +470,7 @@ void Area::ageDatabase()
         }
     }
 
-    std::vector<RouterLSA *>::iterator routerIt = routerLSAs.begin();
+    auto routerIt = routerLSAs.begin();
     while (routerIt != routerLSAs.end()) {
         if ((*routerIt) == nullptr) {
             routerIt = routerLSAs.erase(routerIt);
@@ -574,7 +574,7 @@ void Area::ageDatabase()
         }
     }
 
-    std::vector<NetworkLSA *>::iterator networkIt = networkLSAs.begin();
+    auto networkIt = networkLSAs.begin();
     while (networkIt != networkLSAs.end()) {
         if ((*networkIt) == nullptr) {
             networkIt = networkLSAs.erase(networkIt);
@@ -673,7 +673,7 @@ void Area::ageDatabase()
         }
     }
 
-    std::vector<SummaryLSA *>::iterator summaryIt = summaryLSAs.begin();
+    auto summaryIt = summaryLSAs.begin();
     while (summaryIt != summaryLSAs.end()) {
         if ((*summaryIt) == nullptr) {
             summaryIt = summaryLSAs.erase(summaryIt);
@@ -1164,7 +1164,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                 lsaKey.linkStateID = entry->getDestination();
                 lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::iterator lsaIt = summaryLSAsByID.find(lsaKey);
+                auto lsaIt = summaryLSAsByID.find(lsaKey);
                 if (lsaIt == summaryLSAsByID.end()) {
                     delete (lsaToReoriginate);
                     lsaToReoriginate = nullptr;
@@ -1224,7 +1224,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                     lsaKey.linkStateID = entry->getDestination();
                     lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                    std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::iterator lsaIt = summaryLSAsByID.find(lsaKey);
+                    auto lsaIt = summaryLSAsByID.find(lsaKey);
                     if (lsaIt == summaryLSAsByID.end()) {
                         delete (lsaToReoriginate);
                         lsaToReoriginate = nullptr;
@@ -1298,7 +1298,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         lsaKey.linkStateID = entry->getDestination();
                         lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                        std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::iterator lsaIt = summaryLSAsByID.find(lsaKey);
+                        auto lsaIt = summaryLSAsByID.find(lsaKey);
                         if (lsaIt == summaryLSAsByID.end()) {
                             delete (lsaToReoriginate);
                             lsaToReoriginate = nullptr;
@@ -1637,7 +1637,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
             treeVertices.push_back(closestVertex);
 
-            for (std::vector<OSPFLSA *>::iterator it = candidateVertices.begin(); it != candidateVertices.end(); it++) {
+            for (auto it = candidateVertices.begin(); it != candidateVertices.end(); it++) {
                 if ((*it) == closestVertex) {
                     candidateVertices.erase(it);
                     break;
@@ -2380,11 +2380,11 @@ void Area::calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRouting
                 /* Look for an equal cost entry in the sameOrWorseCost list, and
                  * also clear the more expensive entries from the newRoutingTable.
                  */
-                for (std::list<RoutingTableEntry *>::iterator it = sameOrWorseCost.begin(); it != sameOrWorseCost.end(); it++) {
+                for (auto it = sameOrWorseCost.begin(); it != sameOrWorseCost.end(); it++) {
                     RoutingTableEntry *checkedEntry = (*it);
 
                     if (checkedEntry->getCost() > currentCost) {
-                        for (std::vector<RoutingTableEntry *>::iterator entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {
+                        for (auto entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {
                             if (checkedEntry == (*entryIt)) {
                                 newRoutingTable.erase(entryIt);
                                 break;

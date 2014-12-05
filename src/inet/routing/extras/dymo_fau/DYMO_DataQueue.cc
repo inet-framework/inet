@@ -110,7 +110,7 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Resul
     {
 #define ARP_DELAY 0.001
         tryAgain = false;
-        for (std::list<DYMO_QueuedData>::iterator iter = dataQueue.begin(); iter != dataQueue.end(); iter++)
+        for (auto iter = dataQueue.begin(); iter != dataQueue.end(); iter++)
         {
             DYMO_QueuedData qd = *iter;
             if (qd.destAddr.prefixMatches(destAddr, prefix))

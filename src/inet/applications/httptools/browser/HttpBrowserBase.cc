@@ -336,7 +336,7 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
             cStringTokenizer lineTokenizer((const char *)appmsg->payload(), "\n");
             std::vector<std::string> lines = lineTokenizer.asVector();
             std::map<std::string, HttpRequestQueue> requestQueues;
-            for (std::vector<std::string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
+            for (auto iter = lines.begin(); iter != lines.end(); iter++) {
                 std::string resourceLine = *iter;
                 cStringTokenizer fieldTokenizer(resourceLine.c_str(), ";");
                 std::vector<std::string> fields = fieldTokenizer.asVector();
@@ -379,7 +379,7 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
             // Iterate through the list of queues (one for each recipient encountered) and submit each queue.
             // A single socket will thus be opened for each recipient for a rough HTTP/1.1 emulation.
             // This is only done for messages which are not delayed in the simulated page.
-            std::map<std::string, HttpRequestQueue>::iterator i = requestQueues.begin();
+            auto i = requestQueues.begin();
             for ( ; i != requestQueues.end(); i++)
                 sendRequestsToServer((*i).first, (*i).second);
         }

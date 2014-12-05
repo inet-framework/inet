@@ -71,7 +71,7 @@ void Router::addArea(Area *area)
 
 Area *Router::getAreaByID(AreaID areaID)
 {
-    std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+    auto areaIt = areasByID.find(areaID);
     if (areaIt != areasByID.end()) {
         return areaIt->second;
     }
@@ -109,7 +109,7 @@ bool Router::installLSA(OSPFLSA *lsa, AreaID areaID    /*= BACKBONE_AREAID*/)
 {
     switch (lsa->getHeader().getLsType()) {
         case ROUTERLSA_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 OSPFRouterLSA *ospfRouterLSA = check_and_cast<OSPFRouterLSA *>(lsa);
                 return areaIt->second->installRouterLSA(ospfRouterLSA);
@@ -118,7 +118,7 @@ bool Router::installLSA(OSPFLSA *lsa, AreaID areaID    /*= BACKBONE_AREAID*/)
         break;
 
         case NETWORKLSA_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 OSPFNetworkLSA *ospfNetworkLSA = check_and_cast<OSPFNetworkLSA *>(lsa);
                 return areaIt->second->installNetworkLSA(ospfNetworkLSA);
@@ -128,7 +128,7 @@ bool Router::installLSA(OSPFLSA *lsa, AreaID areaID    /*= BACKBONE_AREAID*/)
 
         case SUMMARYLSA_NETWORKS_TYPE:
         case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 OSPFSummaryLSA *ospfSummaryLSA = check_and_cast<OSPFSummaryLSA *>(lsa);
                 return areaIt->second->installSummaryLSA(ospfSummaryLSA);
@@ -190,7 +190,7 @@ bool Router::installASExternalLSA(OSPFASExternalLSA *lsa)
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = routerID;
 
-    std::map<LSAKeyType, ASExternalLSA *, LSAKeyType_Less>::iterator lsaIt = asExternalLSAsByID.find(lsaKey);
+    auto lsaIt = asExternalLSAsByID.find(lsaKey);
     if ((lsaIt != asExternalLSAsByID.end()) &&
         reachable &&
         (lsaIt->second->getContents().getE_ExternalMetricType() == lsa->getContents().getE_ExternalMetricType()) &&
@@ -231,7 +231,7 @@ OSPFLSA *Router::findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID)
 {
     switch (lsaType) {
         case ROUTERLSA_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 return areaIt->second->findRouterLSA(lsaKey.linkStateID);
             }
@@ -239,7 +239,7 @@ OSPFLSA *Router::findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID)
         break;
 
         case NETWORKLSA_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 return areaIt->second->findNetworkLSA(lsaKey.linkStateID);
             }
@@ -248,7 +248,7 @@ OSPFLSA *Router::findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID)
 
         case SUMMARYLSA_NETWORKS_TYPE:
         case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE: {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 return areaIt->second->findSummaryLSA(lsaKey);
             }
@@ -269,7 +269,7 @@ OSPFLSA *Router::findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID)
 
 ASExternalLSA *Router::findASExternalLSA(LSAKeyType lsaKey)
 {
-    std::map<LSAKeyType, ASExternalLSA *, LSAKeyType_Less>::iterator lsaIt = asExternalLSAsByID.find(lsaKey);
+    auto lsaIt = asExternalLSAsByID.find(lsaKey);
     if (lsaIt != asExternalLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -375,7 +375,7 @@ void Router::ageDatabase()
         }
     }
 
-    std::vector<ASExternalLSA *>::iterator it = asExternalLSAs.begin();
+    auto it = asExternalLSAs.begin();
     while (it != asExternalLSAs.end()) {
         if ((*it) == nullptr) {
             it = asExternalLSAs.erase(it);
@@ -442,7 +442,7 @@ bool Router::floodLSA(OSPFLSA *lsa, AreaID areaID    /*= BACKBONE_AREAID*/, Inte
             }
         }
         else {
-            std::map<AreaID, Area *>::iterator areaIt = areasByID.find(areaID);
+            auto areaIt = areasByID.find(areaID);
             if (areaIt != areasByID.end()) {
                 floodedBackOut = areaIt->second->floodLSA(lsa, intf, neighbor);
             }
@@ -818,7 +818,7 @@ std::vector<RoutingTableEntry *> Router::getRoutesToASBoundaryRouter(const std::
 void Router::pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry *>& asbrEntries) const
 {
     bool hasNonBackboneIntraAreaPath = false;
-    for (std::vector<RoutingTableEntry *>::iterator it = asbrEntries.begin(); it != asbrEntries.end(); it++) {
+    for (auto it = asbrEntries.begin(); it != asbrEntries.end(); it++) {
         RoutingTableEntry *routingEntry = *it;
         if ((routingEntry->getPathType() == RoutingTableEntry::INTRAAREA) &&
             (routingEntry->getArea() != BACKBONE_AREAID))
@@ -829,7 +829,7 @@ void Router::pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry *>& asbr
     }
 
     if (hasNonBackboneIntraAreaPath) {
-        std::vector<RoutingTableEntry *>::iterator it = asbrEntries.begin();
+        auto it = asbrEntries.begin();
         while (it != asbrEntries.end()) {
             if (((*it)->getPathType() != RoutingTableEntry::INTRAAREA) ||
                 ((*it)->getArea() == BACKBONE_AREAID))
@@ -1407,14 +1407,14 @@ void Router::removeExternalRoute(IPv4Address networkAddress)
     lsaKey.linkStateID = networkAddress;
     lsaKey.advertisingRouter = routerID;
 
-    std::map<LSAKeyType, ASExternalLSA *, LSAKeyType_Less>::iterator lsaIt = asExternalLSAsByID.find(lsaKey);
+    auto lsaIt = asExternalLSAsByID.find(lsaKey);
     if (lsaIt != asExternalLSAsByID.end()) {
         lsaIt->second->getHeader().setLsAge(MAX_AGE);
         lsaIt->second->setPurgeable();
         floodLSA(lsaIt->second, BACKBONE_AREAID);
     }
 
-    std::map<IPv4Address, OSPFASExternalLSAContents>::iterator externalIt = externalRoutes.find(networkAddress);
+    auto externalIt = externalRoutes.find(networkAddress);
     if (externalIt != externalRoutes.end()) {
         externalRoutes.erase(externalIt);
     }

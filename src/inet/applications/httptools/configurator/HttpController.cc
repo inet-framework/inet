@@ -32,7 +32,7 @@ HttpController::HttpController() :
 HttpController::~HttpController()
 {
     // Clean up the server references
-    for (std::map<std::string, WebServerEntry *>::iterator it = webSiteList.begin(); it != webSiteList.end(); ++it)
+    for (auto it = webSiteList.begin(); it != webSiteList.end(); ++it)
         delete it->second;
 
     delete rdServerSelection;
@@ -149,7 +149,7 @@ void HttpController::registerServer(const char *objectName, const char *wwwName,
     webSiteList[en->name] = en;
 
     int pos;
-    std::vector<WebServerEntry *>::iterator begin = pickList.begin();
+    auto begin = pickList.begin();
     if (rank == INSERT_RANDOM) {
         if (pickList.size() == 0) {
             pickList.push_back(en);

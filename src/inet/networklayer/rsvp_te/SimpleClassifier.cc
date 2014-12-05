@@ -133,7 +133,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
     int fecid = getParameterIntValue(fec, "id");
 
-    std::vector<FECEntry>::iterator it = findFEC(fecid);
+    auto it = findFEC(fecid);
 
     if (getUniqueChildIfExists(fec, "label")) {
         // bind-fec to label

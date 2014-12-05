@@ -61,7 +61,7 @@ simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecks
 
 bool UDP::MulticastMembership::isSourceAllowed(L3Address sourceAddr)
 {
-    std::vector<L3Address>::iterator it = std::find(sourceList.begin(), sourceList.end(), sourceAddr);
+    auto it = std::find(sourceList.begin(), sourceList.end(), sourceAddr);
     return (filterMode == UDP_INCLUDE_MCAST_SOURCES && it != sourceList.end()) ||
            (filterMode == UDP_EXCLUDE_MCAST_SOURCES && it == sourceList.end());
 }
@@ -991,7 +991,7 @@ void UDP::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
     bool changed = false;
     for (unsigned int i = 0; i < sourceList.size(); ++i) {
         const L3Address& sourceAddress = sourceList[i];
-        std::vector<L3Address>::iterator it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
+        auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
             excludedSources.push_back(sourceAddress);
             changed = true;
@@ -1022,7 +1022,7 @@ void UDP::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mu
     bool changed = false;
     for (unsigned int i = 0; i < sourceList.size(); ++i) {
         const L3Address& sourceAddress = sourceList[i];
-        std::vector<L3Address>::iterator it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
+        auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
             excludedSources.erase(it);
             changed = true;
@@ -1056,7 +1056,7 @@ void UDP::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multi
     bool changed = false;
     for (unsigned int i = 0; i < sourceList.size(); ++i) {
         const L3Address& sourceAddress = sourceList[i];
-        std::vector<L3Address>::iterator it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
+        auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
             includedSources.push_back(sourceAddress);
             changed = true;
@@ -1087,7 +1087,7 @@ void UDP::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
     bool changed = false;
     for (unsigned int i = 0; i < sourceList.size(); ++i) {
         const L3Address& sourceAddress = sourceList[i];
-        std::vector<L3Address>::iterator it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
+        auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
             includedSources.erase(it);
             changed = true;

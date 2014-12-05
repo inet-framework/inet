@@ -147,7 +147,7 @@ edge* Dijkstra::get_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node)
     auto itLink = link_array_->find(dest_node);
     if (itLink==link_array_->end())
         throw cRuntimeError("link_array_ error");
-    for (std::vector<edge*>::iterator it = itLink->second.begin(); it != itLink->second.end(); it++)
+    for (auto it = itLink->second.begin(); it != itLink->second.end(); it++)
     {
         edge* current_edge = *it;
         if (current_edge->last_node() == last_node)

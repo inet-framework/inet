@@ -585,7 +585,7 @@ void SCTPAssociation::sendInit()
         state->sizeKeyVector += 2;
         initChunk->setChunkTypesArraySize(state->chunkList.size());
         int32 k = 0;
-        for (std::vector<uint16>::iterator it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
+        for (auto it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
             initChunk->setChunkTypes(k, (*it));
             state->keyVector[state->sizeKeyVector] = (*it);
             state->sizeKeyVector++;
@@ -771,7 +771,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         }
         initAckChunk->setChunkTypesArraySize(state->chunkList.size());
         int32 k = 0;
-        for (std::vector<uint16>::iterator it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
+        for (auto it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
             initAckChunk->setChunkTypes(k, (*it));
             k++;
         }
@@ -1650,7 +1650,7 @@ SCTPSackChunk *SCTPAssociation::createSack()
     if (numDups > 0) {
         sackChunk->setDupTsnsArraySize(numDups);
         uint32 key = 0;
-        for (std::list<uint32>::iterator iterator = state->dupList.begin();
+        for (auto iterator = state->dupList.begin();
              iterator != state->dupList.end(); iterator++)
         {
             sackChunk->setDupTsns(key, *iterator);

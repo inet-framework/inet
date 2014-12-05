@@ -377,12 +377,12 @@ std::vector<L3Address> GPSR::getPlanarNeighbors()
     std::vector<L3Address> planarNeighbors;
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
     Coord selfPosition = mobility->getCurrentPosition();
-    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+    for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
         const L3Address& neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
-            for (std::vector<L3Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
+            for (auto jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
                 const L3Address& witnessAddress = *jt;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
@@ -397,7 +397,7 @@ std::vector<L3Address> GPSR::getPlanarNeighbors()
         else if (planarizationMode == GPSR_GG_PLANARIZATION) {
             Coord middlePosition = (selfPosition + neighborPosition) / 2;
             double neighborDistance = (neighborPosition - middlePosition).length();
-            for (std::vector<L3Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
+            for (auto jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
                 const L3Address& witnessAddress = *jt;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
@@ -422,7 +422,7 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
     L3Address bestNeighborAddress = startNeighborAddress;
     double bestNeighborAngleDifference = 2 * PI;
     std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
-    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+    for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
         const L3Address& neighborAddress = *it;
         double neighborAngle = getNeighborAngle(neighborAddress);
         double neighborAngleDifference = neighborAngle - startNeighborAngle;
@@ -462,7 +462,7 @@ L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Add
     double bestDistance = (destinationPosition - selfPosition).length();
     L3Address bestNeighbor;
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
-    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+    for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
         const L3Address& neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         double neighborDistance = (destinationPosition - neighborPosition).length();

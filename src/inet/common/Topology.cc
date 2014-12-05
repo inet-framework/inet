@@ -260,7 +260,7 @@ int Topology::addNode(Node *node)
     }
     else {
         // must find an insertion point because nodes[] is ordered by module ID
-        std::vector<Node *>::iterator it = std::lower_bound(nodes.begin(), nodes.end(), node, lessByModuleId);
+        auto it = std::lower_bound(nodes.begin(), nodes.end(), node, lessByModuleId);
         it = nodes.insert(it, node);
         return it - nodes.begin();
     }
@@ -285,7 +285,7 @@ void Topology::deleteNode(Node *node)
     node->inLinks.clear();
 
     // remove from nodes[]
-    std::vector<Node *>::iterator it = find(nodes, node);
+    auto it = find(nodes, node);
     ASSERT(it != nodes.end());
     nodes.erase(it);
 
@@ -344,7 +344,7 @@ void Topology::deleteLink(Link *link)
 void Topology::unlinkFromSourceNode(Link *link)
 {
     std::vector<Link *>& srcOutLinks = link->srcNode->outLinks;
-    std::vector<Link *>::iterator it = find(srcOutLinks, link);
+    auto it = find(srcOutLinks, link);
     ASSERT(it != srcOutLinks.end());
     srcOutLinks.erase(it);
 }
@@ -352,7 +352,7 @@ void Topology::unlinkFromSourceNode(Link *link)
 void Topology::unlinkFromDestNode(Link *link)
 {
     std::vector<Link *>& destInLinks = link->destNode->inLinks;
-    std::vector<Link *>::iterator it = find(destInLinks, link);
+    auto it = find(destInLinks, link);
     ASSERT(it != destInLinks.end());
     destInLinks.erase(it);
 }
@@ -368,8 +368,8 @@ Topology::Node *Topology::getNodeFor(cModule *mod)
 {
     // binary search because nodes[] is ordered by module ID
     Node tmpNode(mod->getId());
-    std::vector<Node *>::iterator it = std::lower_bound(nodes.begin(), nodes.end(), &tmpNode, lessByModuleId);
-//TODO: this does not compile with VC9 (VC10 is OK): std::vector<Node*>::iterator it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
+    auto it = std::lower_bound(nodes.begin(), nodes.end(), &tmpNode, lessByModuleId);
+//TODO: this does not compile with VC9 (VC10 is OK): auto it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
     return it == nodes.end() || (*it)->moduleId != mod->getId() ? nullptr : *it;
 }
 

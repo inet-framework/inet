@@ -116,7 +116,7 @@ std::vector<SCTPPathVariables *> SCTPAssociation::getSortedPathMap()
     }
 
     EV << "SORTED PATH MAP:" << endl;
-    for (std::vector<SCTPPathVariables *>::iterator iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
+    for (auto iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
         SCTPPathVariables *path = *iterator;
         EV << " - " << path->remoteAddress
            << "  cwnd=" << path->cwnd
@@ -263,13 +263,13 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
 
         // ------ ... then, try sending on all other paths --------------------
         std::vector<SCTPPathVariables *> sortedPaths = getSortedPathMap();
-        for (std::vector<SCTPPathVariables *>::iterator iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
+        for (auto iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
             SCTPPathVariables *path = *iterator;
             EV << path->remoteAddress << " [" << path->lastTransmission << "]\t";
         }
         EV << endl;
 
-        for (std::vector<SCTPPathVariables *>::iterator iterator = sortedPaths.begin();
+        for (auto iterator = sortedPaths.begin();
              iterator != sortedPaths.end(); ++iterator)
         {
             SCTPPathVariables *path = *iterator;
@@ -281,7 +281,7 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
         if ((state->strictCwndBooking) &&
             (sctpPathMap.size() > 1))    // T.D. 08.02.2010: strict behaviour only for more than 1 paths!
         {    // T.D. 14.01.2010: Second pass for "Strict Cwnd Booking" option.
-            for (std::vector<SCTPPathVariables *>::iterator iterator = sortedPaths.begin();
+            for (auto iterator = sortedPaths.begin();
                  iterator != sortedPaths.end(); ++iterator)
             {
                 SCTPPathVariables *path = *iterator;
@@ -508,7 +508,7 @@ void SCTPAssociation::sendSACKviaSelectedPath(SCTPMessage *sctpMsg)
 
             // Solution is now to make a round-robin selection among paths,
             // taking the path with the longest time passed since last SACK.
-            for (std::list<SCTPPathVariables *>::iterator iterator = state->lastDataSourceList.begin();
+            for (auto iterator = state->lastDataSourceList.begin();
                  iterator != state->lastDataSourceList.end(); iterator++)
             {
                 SCTPPathVariables *path = *iterator;
@@ -520,7 +520,7 @@ void SCTPAssociation::sendSACKviaSelectedPath(SCTPMessage *sctpMsg)
         else if (state->cmtSackPath == SCTPStateVariables::CSP_SmallestSRTT) {
             /* Instead of RR among last DATA paths, send SACK on
                the DATA path having the smallest SRTT. */
-            for (std::list<SCTPPathVariables *>::iterator iterator = state->lastDataSourceList.begin();
+            for (auto iterator = state->lastDataSourceList.begin();
                  iterator != state->lastDataSourceList.end(); iterator++)
             {
                 SCTPPathVariables *path = *iterator;

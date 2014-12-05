@@ -255,7 +255,7 @@ void SCTP::handleMessage(cMessage *msg)
                     assoc = nullptr;
                     SCTPOpenCommand *open = check_and_cast<SCTPOpenCommand *>(controlInfo);
                     EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
-                    for (std::list<SCTPAssociation *>::iterator iter = assocList.begin(); iter != assocList.end(); iter++) {
+                    for (auto iter = assocList.begin(); iter != assocList.end(); iter++) {
                         EV_DETAIL << "remoteAddr=" << (*iter)->remoteAddr << ", remotePort=" << (*iter)->remotePort << ", localPort=" << (*iter)->localPort << "\n";
                         if ((*iter)->remoteAddr == open->getRemoteAddr() && (*iter)->localPort == open->getLocalPort() && (*iter)->remotePort == open->getRemotePort()) {
                             assoc = (*iter);

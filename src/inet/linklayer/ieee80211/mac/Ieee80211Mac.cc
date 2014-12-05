@@ -642,7 +642,7 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
                 transmissionQueue()->push_back(frame);
             else {
                 // in other case search the possition
-                std::list<Ieee80211DataOrMgmtFrame *>::iterator p = transmissionQueue()->end();
+                auto p = transmissionQueue()->end();
                 while ((*p)->getReceiverAddress().isMulticast() && (p != transmissionQueue()->begin())) {    // search the first broadcast frame
                     if (dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr)
                         break;

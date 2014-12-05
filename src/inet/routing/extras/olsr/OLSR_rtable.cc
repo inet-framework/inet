@@ -216,7 +216,7 @@ std::string OLSR_rtable::detailedInfo()
 {
     std::stringstream out;
 
-    for (std::map<nsaddr_t, OLSR_rt_entry*>::iterator it = rt_.begin(); it != rt_.end(); it++)
+    for (auto it = rt_.begin(); it != rt_.end(); it++)
     {
         OLSR_rt_entry* entry = dynamic_cast<OLSR_rt_entry *> ((*it).second);
         out << "dest:"<< OLSR::node_id(entry->dest_addr()) << " ";

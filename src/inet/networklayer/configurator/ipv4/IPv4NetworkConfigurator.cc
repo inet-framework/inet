@@ -62,7 +62,7 @@ IPv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *link
 
 int IPv4NetworkConfigurator::RoutingTableInfo::addRouteInfo(RouteInfo *routeInfo)
 {
-    std::vector<RouteInfo *>::iterator it = upper_bound(routeInfos.begin(), routeInfos.end(), routeInfo, routeInfoLessThan);
+    auto it = upper_bound(routeInfos.begin(), routeInfos.end(), routeInfo, routeInfoLessThan);
     int index = it - routeInfos.begin();
     routeInfos.insert(it, routeInfo);
     return index;
@@ -163,7 +163,7 @@ void IPv4NetworkConfigurator::configureAllInterfaces()
 void IPv4NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 {
     ensureConfigurationComputed(topology);
-    std::map<InterfaceEntry *, InterfaceInfo *>::iterator it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry);
     if (it != topology.interfaceInfos.end()) {
         InterfaceInfo *interfaceInfo = it->second;
         if (interfaceInfo->configure)
@@ -207,7 +207,7 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
         interfaceData->setNetmask(IPv4Address(interfaceInfo->netmask));
     }
     // TODO: should we leave joined multicast groups first?
-    for (std::vector<IPv4Address>::iterator it = interfaceInfo->multicastGroups.begin(); it != interfaceInfo->multicastGroups.end(); it++)
+    for (auto it = interfaceInfo->multicastGroups.begin(); it != interfaceInfo->multicastGroups.end(); it++)
         interfaceData->joinMulticastGroup(*it);
 }
 
@@ -715,7 +715,7 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
         LinkInfo *selectedLink = topology.linkInfos[linkIndex];
 
         std::vector<InterfaceInfo *> unconfiguredInterfaces;
-        for (std::vector<InterfaceInfo *>::iterator it = selectedLink->interfaceInfos.begin(); it != selectedLink->interfaceInfos.end(); ++it)
+        for (auto it = selectedLink->interfaceInfos.begin(); it != selectedLink->interfaceInfos.end(); ++it)
             unconfiguredInterfaces.push_back(*it);
         // repeat until all interfaces of the selected link become configured
         // and assign addresses to groups of interfaces having compatible address and netmask specifications
@@ -2082,7 +2082,7 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
 
 bool IPv4NetworkConfigurator::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
-    std::map<InterfaceEntry *, InterfaceInfo *>::iterator it = topology.interfaceInfos.find(interfaceEntry);
+    auto it = topology.interfaceInfos.find(interfaceEntry);
     if (it == topology.interfaceInfos.end())
         return false;
     else {

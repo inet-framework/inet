@@ -77,7 +77,7 @@ std::string DYMO_OutstandingRREQList::detailedInfo() const
 
 DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(unsigned int destAddr, int prefix)
 {
-    for (std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
+    for (auto iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
     {
         if (IPv4Address(destAddr).prefixMatches(IPv4Address((*iter)->destAddr), prefix)) return *iter;
     }
@@ -86,7 +86,7 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(unsigned int destA
 
 DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getExpired()
 {
-    for (std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
+    for (auto iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
     {
         if ((*iter)->wait_time->stopWhenExpired()) return *iter;
     }
@@ -110,7 +110,7 @@ void DYMO_OutstandingRREQList::add(DYMO_OutstandingRREQ* outstandingRREQ)
 
 void DYMO_OutstandingRREQList::del(DYMO_OutstandingRREQ* outstandingRREQ)
 {
-    std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin();
+    auto iter = outstandingRREQs.begin();
     while (iter != outstandingRREQs.end())
     {
         if ((*iter) == outstandingRREQ)
@@ -129,7 +129,7 @@ void DYMO_OutstandingRREQList::del(DYMO_OutstandingRREQ* outstandingRREQ)
 
 void DYMO_OutstandingRREQList::delAll()
 {
-    std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin();
+    auto iter = outstandingRREQs.begin();
     while (iter != outstandingRREQs.end())
     {
         (*iter)->wait_time->cancel();

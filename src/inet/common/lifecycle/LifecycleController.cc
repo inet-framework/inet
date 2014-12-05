@@ -45,7 +45,7 @@ void LifecycleController::Callback::invoke()
 template<typename T>
 void vector_delete_element(std::vector<T *>& v, T *p)
 {
-    typename std::vector<T *>::iterator it = std::find(v.begin(), v.end(), p);
+    auto it = std::find(v.begin(), v.end(), p);
     ASSERT(it != v.end());
     v.erase(it);
     delete p;

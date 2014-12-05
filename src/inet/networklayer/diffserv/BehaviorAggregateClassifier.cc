@@ -87,7 +87,7 @@ int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
 {
     int dscp = getDscpFromPacket(packet);
     if (dscp >= 0) {
-        std::map<int, int>::iterator it = dscpToGateIndexMap.find(dscp);
+        auto it = dscpToGateIndexMap.find(dscp);
         if (it != dscpToGateIndexMap.end())
             return it->second;
     }

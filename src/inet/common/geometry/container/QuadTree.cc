@@ -83,7 +83,7 @@ void QuadTree::splitPoints()
     // The node is not a leaf anymore
     // so we have to split its point
     for (unsigned int i = 0; i < points.size(); i++) {
-        std::map<const cObject *, Coord>::iterator it = lastPosition->find(points[i]);
+        auto it = lastPosition->find(points[i]);
         Coord pos;
         if (it != lastPosition->end())
             pos = it->second;
@@ -157,7 +157,7 @@ bool QuadTree::remove(const cObject *point)
     // This helps to searchRadioQuadrant(), since we don't have to traverse
     // the whole QuadTree and check each node's vector one by one.
     Coord lastPos;
-    std::map<const cObject *, Coord>::iterator lastIt = lastPosition->find(point);
+    auto lastIt = lastPosition->find(point);
     if (lastIt != lastPosition->end())
         lastPos = lastIt->second;
     else

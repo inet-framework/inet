@@ -249,7 +249,7 @@ void GenericNetworkConfigurator::extractWirelessTopology(GenericTopology& topolo
     }
 
     // add links between all pairs of wireless interfaces (full graph)
-    for (std::map<std::string, LinkInfo *>::iterator it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++) {
+    for (auto it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++) {
         LinkInfo *linkInfo = it->second;
         for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = linkInfo->interfaceInfos.at(i);

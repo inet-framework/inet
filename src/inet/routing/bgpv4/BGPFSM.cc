@@ -435,7 +435,7 @@ void Established::entry()
     }
 
     std::vector<RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
-    for (std::vector<RoutingTableEntry *>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
+    for (auto it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
         session.updateSendProcess((*it));
     }
 

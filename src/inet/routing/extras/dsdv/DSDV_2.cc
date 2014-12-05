@@ -211,7 +211,7 @@ void DSDV_2::handleMessage(cMessage *msg)
         }
         else
         {
-            for (list<forwardHello*>::iterator it = forwardList->begin(); it != forwardList->end(); it++)
+            for (auto it = forwardList->begin(); it != forwardList->end(); it++)
             {
                 if ( (*it)->event == msg )
                 {

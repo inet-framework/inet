@@ -1752,7 +1752,7 @@ PIMDM::DownstreamInterface *PIMDM::Route::createDownstreamInterface(InterfaceEnt
 
 PIMDM::DownstreamInterface *PIMDM::Route::removeDownstreamInterface(int interfaceId)
 {
-    for (vector<DownstreamInterface *>::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it) {
+    for (auto it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it) {
         DownstreamInterface *downstream = *it;
         if (downstream->ie->getInterfaceId() == interfaceId) {
             downstreamInterfaces.erase(it);

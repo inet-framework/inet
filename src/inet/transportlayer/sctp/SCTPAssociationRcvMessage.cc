@@ -2069,7 +2069,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     state->lastTsnReceived = tsn;
 
     bool found = false;
-    for (std::list<SCTPPathVariables *>::iterator iterator = state->lastDataSourceList.begin();
+    for (auto iterator = state->lastDataSourceList.begin();
          iterator != state->lastDataSourceList.end(); iterator++)
     {
         if (*iterator == path) {

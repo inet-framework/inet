@@ -34,7 +34,7 @@ const IEnergyConsumer *EnergySourceBase::getEnergyConsumer(int energyConsumerId)
 W EnergySourceBase::computeTotalConsumedPower()
 {
     W totalConsumedPower = W(0);
-    for (std::vector<EnergyConsumerEntry>::iterator it = energyConsumers.begin(); it != energyConsumers.end(); it++)
+    for (auto it = energyConsumers.begin(); it != energyConsumers.end(); it++)
         totalConsumedPower += (*it).consumedPower;
     return totalConsumedPower;
 }

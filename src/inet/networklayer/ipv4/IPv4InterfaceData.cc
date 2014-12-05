@@ -235,7 +235,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
 
     std::map<IPv4Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
     for (IPv4AddressVector::const_iterator source = oldSourceList.begin(); source != oldSourceList.end(); ++source) {
-        std::map<IPv4Address, int>::iterator count = counts->find(*source);
+        auto count = counts->find(*source);
         if (count == counts->end())
             throw cRuntimeError("Inconsistent reference counts in IPv4InterfaceData.");
         else if (count->second == 1)
@@ -246,7 +246,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
 
     counts = newFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
     for (IPv4AddressVector::const_iterator source = newSourceList.begin(); source != newSourceList.end(); ++source) {
-        std::map<IPv4Address, int>::iterator count = counts->find(*source);
+        auto count = counts->find(*source);
         if (count == counts->end())
             (*counts)[*source] = 1;
         else
@@ -300,13 +300,13 @@ bool IPv4InterfaceData::HostMulticastGroupData::updateSourceList()
     IPv4AddressVector sourceList;
     if (numOfExcludeModeSockets == 0) {
         // If all socket is in INCLUDE mode, then the sourceList is the union of included sources
-        for (std::map<IPv4Address, int>::iterator it = includeCounts.begin(); it != includeCounts.end(); ++it)
+        for (auto it = includeCounts.begin(); it != includeCounts.end(); ++it)
             sourceList.push_back(it->first);
     }
     else {
         // If some socket is in EXCLUDE mode, then the sourceList contains the sources that are
         // excluded by all EXCLUDE mode sockets except if there is a socket including the source.
-        for (std::map<IPv4Address, int>::iterator it = excludeCounts.begin(); it != excludeCounts.end(); ++it)
+        for (auto it = excludeCounts.begin(); it != excludeCounts.end(); ++it)
             if (it->second == numOfExcludeModeSockets && includeCounts.find(it->first) == includeCounts.end())
                 sourceList.push_back(it->first);
 

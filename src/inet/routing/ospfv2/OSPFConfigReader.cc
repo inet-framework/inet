@@ -462,7 +462,7 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         areaList.insert(BACKBONE_AREAID);
     }
     // load area information
-    for (std::set<AreaID>::iterator areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {
+    for (auto areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {
         loadAreaFromXML(*asConfig, *areaIt);
     }
 

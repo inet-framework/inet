@@ -111,21 +111,21 @@ void PassiveQueueBase::finish()
 
 void PassiveQueueBase::addListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    auto it = find(listeners.begin(), listeners.end(), listener);
     if (it == listeners.end())
         listeners.push_back(listener);
 }
 
 void PassiveQueueBase::removeListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    auto it = find(listeners.begin(), listeners.end(), listener);
     if (it != listeners.end())
         listeners.erase(it);
 }
 
 void PassiveQueueBase::notifyListeners()
 {
-    for (std::list<IPassiveQueueListener *>::iterator it = listeners.begin(); it != listeners.end(); ++it)
+    for (auto it = listeners.begin(); it != listeners.end(); ++it)
         (*it)->packetEnqueued(this);
 }
 

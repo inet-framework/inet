@@ -482,7 +482,7 @@ void TCP::removeConnection(TCPConnection *conn)
 
     // IMPORTANT: usedEphemeralPorts.erase(conn->localPort) is NOT GOOD because it
     // deletes ALL occurrences of the port from the multiset.
-    std::multiset<ushort>::iterator it = usedEphemeralPorts.find(conn->localPort);
+    auto it = usedEphemeralPorts.find(conn->localPort);
 
     if (it != usedEphemeralPorts.end())
         usedEphemeralPorts.erase(it);

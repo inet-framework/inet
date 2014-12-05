@@ -450,11 +450,11 @@ void RadioMedium::removeCachedDecision(const IRadio *radio, const ITransmission 
 
 void RadioMedium::invalidateCachedDecisions(const ITransmission *transmission)
 {
-    for (std::vector<TransmissionCacheEntry>::iterator it = transmissionCache.begin(); it != transmissionCache.end(); it++) {
+    for (auto it = transmissionCache.begin(); it != transmissionCache.end(); it++) {
         const TransmissionCacheEntry& transmissionCacheEntry = *it;
         std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries) {
-            for (std::vector<ReceptionCacheEntry>::iterator jt = receptionCacheEntries->begin(); jt != receptionCacheEntries->end(); jt++) {
+            for (auto jt = receptionCacheEntries->begin(); jt != receptionCacheEntries->end(); jt++) {
                 ReceptionCacheEntry& cacheEntry = *jt;
                 const IReceptionDecision *decision = cacheEntry.decision;
                 if (decision) {
@@ -1098,7 +1098,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
 {
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
-        for (std::vector<const ITransmission *>::iterator it = transmissions.begin(); it != transmissions.end(); it++) {
+        for (auto it = transmissions.begin(); it != transmissions.end(); it++) {
             const ITransmission *transmission = *it;
             const Radio *transmitterRadio = check_and_cast<const Radio *>(transmission->getTransmitter());
             ReceptionCacheEntry *receptionCacheEntry = getReceptionCacheEntry(receiverRadio, transmission);

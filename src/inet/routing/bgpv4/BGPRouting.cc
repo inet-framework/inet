@@ -29,7 +29,7 @@ Define_Module(BGPRouting);
 
 BGPRouting::~BGPRouting(void)
 {
-    for (std::map<SessionID, BGPSession *>::iterator sessionIterator = _BGPSessions.begin();
+    for (auto sessionIterator = _BGPSessions.begin();
          sessionIterator != _BGPSessions.end(); sessionIterator++)
     {
         delete (*sessionIterator).second;
@@ -117,7 +117,7 @@ void BGPRouting::finish()
     unsigned int statTab[NB_STATS] = {
         0, 0, 0, 0, 0, 0
     };
-    for (std::map<SessionID, BGPSession *>::iterator sessionIterator = _BGPSessions.begin(); sessionIterator != _BGPSessions.end(); sessionIterator++) {
+    for (auto sessionIterator = _BGPSessions.begin(); sessionIterator != _BGPSessions.end(); sessionIterator++) {
         (*sessionIterator).second->getStatistics(statTab);
     }
     recordScalar("OPENMsgSent", statTab[0]);
@@ -389,7 +389,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
     //if it is not the currentSession and if the session is already established
     //SESSION = IGP : send an update message to External BGP Peer (EGP) only
     //if it is not the currentSession and if the session is already established
-    for (std::map<SessionID, BGPSession *>::iterator sessionIt = _BGPSessions.begin();
+    for (auto sessionIt = _BGPSessions.begin();
          sessionIt != _BGPSessions.end(); sessionIt++)
     {
         if (isInTable(_prefixListOUT, entry) != (unsigned long)-1 || isInASList(_ASListOUT, entry) ||
@@ -620,7 +620,7 @@ void BGPRouting::loadConfigFromXML(cXMLElement *bgpConfig)
     if (routerInSameASList.size()) {
         unsigned int routerPeerPosition = 1;
         delayTab[3] += sessionList.size() * 2;
-        for (std::vector<const char *>::iterator it = routerInSameASList.begin(); it != routerInSameASList.end(); it++, routerPeerPosition++) {
+        for (auto it = routerInSameASList.begin(); it != routerInSameASList.end(); it++, routerPeerPosition++) {
             SessionID newSessionID;
             TCPSocket *socketListenIGP = new TCPSocket();
             newSessionID = createSession(IGP, (*it));
@@ -685,7 +685,7 @@ SessionID BGPRouting::createSession(BGPSessionType typeSession, const char *peer
 
 SessionID BGPRouting::findIdFromPeerAddr(std::map<SessionID, BGPSession *> sessions, IPv4Address peerAddr)
 {
-    for (std::map<SessionID, BGPSession *>::iterator sessionIterator = sessions.begin();
+    for (auto sessionIterator = sessions.begin();
          sessionIterator != sessions.end(); sessionIterator++)
     {
         if ((*sessionIterator).second->getPeerAddr().equals(peerAddr)) {
@@ -702,7 +702,7 @@ SessionID BGPRouting::findIdFromPeerAddr(std::map<SessionID, BGPSession *> sessi
  */
 bool BGPRouting::deleteBGPRoutingEntry(RoutingTableEntry *entry)
 {
-    for (std::vector<RoutingTableEntry *>::iterator it = _BGPRoutingTable.begin();
+    for (auto it = _BGPRoutingTable.begin();
          it != _BGPRoutingTable.end(); it++)
     {
         if (((*it)->getDestination().getInt() & (*it)->getNetmask().getInt()) ==
@@ -740,7 +740,7 @@ int BGPRouting::isInInterfaceTable(IInterfaceTable *ifTable, IPv4Address addr)
 
 SessionID BGPRouting::findIdFromSocketConnId(std::map<SessionID, BGPSession *> sessions, int connId)
 {
-    for (std::map<SessionID, BGPSession *>::iterator sessionIterator = sessions.begin();
+    for (auto sessionIterator = sessions.begin();
          sessionIterator != sessions.end(); sessionIterator++)
     {
         TCPSocket *socket = (*sessionIterator).second->getSocket();
@@ -768,7 +768,7 @@ unsigned long BGPRouting::isInTable(std::vector<RoutingTableEntry *> rtTable, Ro
 /*return true if the AS is found, false else*/
 bool BGPRouting::isInASList(std::vector<ASID> ASList, RoutingTableEntry *entry)
 {
-    for (std::vector<ASID>::iterator it = ASList.begin(); it != ASList.end(); it++) {
+    for (auto it = ASList.begin(); it != ASList.end(); it++) {
         for (unsigned int i = 0; i < entry->getASCount(); i++) {
             if ((*it) == entry->getAS(i)) {
                 return true;
@@ -803,7 +803,7 @@ unsigned char BGPRouting::asLoopDetection(RoutingTableEntry *entry, ASID myAS)
 SessionID BGPRouting::findNextSession(BGPSessionType type, bool startSession)
 {
     SessionID sessionID = -1;
-    for (std::map<SessionID, BGPSession *>::iterator sessionIterator = _BGPSessions.begin();
+    for (auto sessionIterator = _BGPSessions.begin();
          sessionIterator != _BGPSessions.end(); sessionIterator++)
     {
         if ((*sessionIterator).second->getType() == type && !(*sessionIterator).second->isEstablished()) {

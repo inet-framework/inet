@@ -197,7 +197,7 @@ void Interface::sendLSAcknowledgement(OSPFLSAHeader *lsaHeader, IPv4Address dest
 
 Neighbor *Interface::getNeighborByID(RouterID neighborID)
 {
-    std::map<RouterID, Neighbor *>::iterator neighborIt = neighboringRoutersByID.find(neighborID);
+    auto neighborIt = neighboringRoutersByID.find(neighborID);
     if (neighborIt != neighboringRoutersByID.end()) {
         return neighborIt->second;
     }
@@ -208,7 +208,7 @@ Neighbor *Interface::getNeighborByID(RouterID neighborID)
 
 Neighbor *Interface::getNeighborByAddress(IPv4Address address)
 {
-    std::map<IPv4Address, Neighbor *>::iterator neighborIt =
+    auto neighborIt =
         neighboringRoutersByAddress.find(address);
 
     if (neighborIt != neighboringRoutersByAddress.end()) {

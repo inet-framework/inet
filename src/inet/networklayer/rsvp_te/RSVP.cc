@@ -190,7 +190,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
     newSession.sobj.Extended_Tunnel_Id = routerId.getInt();
     newSession.sobj.DestAddress = getParameterIPAddressValue(session, "endpoint");
 
-    std::vector<traffic_session_t>::iterator sit = findSession(newSession.sobj);
+    auto sit = findSession(newSession.sobj);
 
     bool merge;
 
@@ -1690,11 +1690,11 @@ void RSVP::pathProblem(PathStateBlock_t *psb)
 
     // schedule re-creation if path is permanent
 
-    std::vector<traffic_session_t>::iterator sit = findSession(psb->Session_Object);
+    auto sit = findSession(psb->Session_Object);
     ASSERT(sit != traffic.end());
     traffic_session_t *s = &(*sit);
 
-    std::vector<traffic_path_t>::iterator pit = findPath(s, psb->Sender_Template_Object);
+    auto pit = findPath(s, psb->Sender_Template_Object);
     ASSERT(pit != s->paths.end());
     traffic_path_t *p = &(*pit);
 
@@ -1777,7 +1777,7 @@ void RSVP::delSession(const cXMLElement& node)
     sobj.Extended_Tunnel_Id = getParameterIPAddressValue(&node, "extended_tunnel_id", routerId).getInt();
     sobj.DestAddress = getParameterIPAddressValue(&node, "endpoint");
 
-    std::vector<traffic_session_t>::iterator sit = findSession(sobj);
+    auto sit = findSession(sobj);
     ASSERT(sit != traffic.end());
     traffic_session_t *session = &(*sit);
 

@@ -24,7 +24,7 @@ Define_Module(PriorityScheduler);
 
 bool PriorityScheduler::schedulePacket()
 {
-    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it) {
+    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it) {
         IPassiveQueue *inputQueue = *it;
         if (!inputQueue->isEmpty()) {
             inputQueue->requestPacket();

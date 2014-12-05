@@ -81,12 +81,12 @@ const INoise *ScalarAnalogModel::computeNoise(const IListening *listening, const
                 noiseStartTime = startTime;
             if (endTime > noiseEndTime)
                 noiseEndTime = endTime;
-            std::map<simtime_t, W>::iterator itStartTime = powerChanges->find(startTime);
+            auto itStartTime = powerChanges->find(startTime);
             if (itStartTime != powerChanges->end())
                 itStartTime->second += power;
             else
                 powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
-            std::map<simtime_t, W>::iterator itEndTime = powerChanges->find(endTime);
+            auto itEndTime = powerChanges->find(endTime);
             if (itEndTime != powerChanges->end())
                 itEndTime->second -= power;
             else
@@ -100,7 +100,7 @@ const INoise *ScalarAnalogModel::computeNoise(const IListening *listening, const
         if (carrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && bandwidth == scalarBackgroundNoise->getBandwidth()) {
             const std::map<simtime_t, W> *backgroundNoisePowerChanges = scalarBackgroundNoise->getPowerChanges();
             for (std::map<simtime_t, W>::const_iterator it = backgroundNoisePowerChanges->begin(); it != backgroundNoisePowerChanges->end(); it++) {
-                std::map<simtime_t, W>::iterator jt = powerChanges->find(it->first);
+                auto jt = powerChanges->find(it->first);
                 if (jt != powerChanges->end())
                     jt->second += it->second;
                 else

@@ -280,7 +280,7 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
 
     if (peek) {
         EV_DETAIL << "just peeking, use duplicate fb map." << endl;
-        for (std::map<uint16, int32>::iterator iter = state->ssFairBandwidthMap.begin(); iter != state->ssFairBandwidthMap.end(); ++iter) {
+        for (auto iter = state->ssFairBandwidthMap.begin(); iter != state->ssFairBandwidthMap.end(); ++iter) {
             peekMap[iter->first] = iter->second;
         }
         mapPointer = &peekMap;
@@ -338,7 +338,7 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
     }
 
     if (state->ssNextStream) {
-        for (std::map<uint16, int32>::iterator iter = mapPointer->begin(); iter != mapPointer->end(); ++iter) {
+        for (auto iter = mapPointer->begin(); iter != mapPointer->end(); ++iter) {
             if ((sid < 0 || (uint32)iter->second < bandwidth) && iter->second >= 0) {
                 sid = iter->first;
                 bandwidth = iter->second;

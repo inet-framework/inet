@@ -282,7 +282,7 @@ void AODVRouting::sendRREQ(AODVRREQ *rreq, const L3Address& destAddr, unsigned i
         return;
     }
 
-    std::map<L3Address, WaitForRREP *>::iterator rrepTimer = waitForRREPTimers.find(rreq->getDestAddr());
+    auto rrepTimer = waitForRREPTimers.find(rreq->getDestAddr());
     WaitForRREP *rrepTimerMsg = nullptr;
     if (rrepTimer != waitForRREPTimers.end()) {
         rrepTimerMsg = rrepTimer->second;
@@ -755,7 +755,7 @@ void AODVRouting::handleRREQ(AODVRREQ *rreq, const L3Address& sourceAddr, unsign
 
     // A node ignores all RREQs received from any node in its blacklist set.
 
-    std::map<L3Address, simtime_t>::iterator blackListIt = blacklist.find(sourceAddr);
+    auto blackListIt = blacklist.find(sourceAddr);
     if (blackListIt != blacklist.end()) {
         EV_INFO << "The sender node " << sourceAddr << " is in our blacklist. Ignoring the Route Request" << endl;
         delete rreq;
@@ -779,7 +779,7 @@ void AODVRouting::handleRREQ(AODVRREQ *rreq, const L3Address& sourceAddr, unsign
     // If such a RREQ has been received, the node silently discards the newly received RREQ.
 
     RREQIdentifier rreqIdentifier(rreq->getOriginatorAddr(), rreq->getRreqId());
-    std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare>::iterator checkRREQArrivalTime = rreqsArrivalTime.find(rreqIdentifier);
+    auto checkRREQArrivalTime = rreqsArrivalTime.find(rreqIdentifier);
     if (checkRREQArrivalTime != rreqsArrivalTime.end() && simTime() - checkRREQArrivalTime->second <= pathDiscoveryTime) {
         EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME= " << pathDiscoveryTime << ". Discarding it" << endl;
         delete rreq;
@@ -1229,11 +1229,11 @@ void AODVRouting::clearState()
 {
     rerrCount = rreqCount = rreqId = sequenceNum = 0;
     addressToRreqRetries.clear();
-    for (std::map<L3Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
+    for (auto it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
         cancelAndDelete(it->second);
 
     // FIXME: Drop the queued datagrams.
-    //for (std::multimap<Address, INetworkDatagram *>::iterator it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
+    //for (auto it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
     //    networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
     targetAddressToDelayedPackets.clear();
@@ -1293,11 +1293,11 @@ void AODVRouting::completeRouteDiscovery(const L3Address& target)
     EV_DETAIL << "Completing route discovery, originator " << getSelfIPAddress() << ", target " << target << endl;
     ASSERT(hasOngoingRouteDiscovery(target));
 
-    std::multimap<L3Address, INetworkDatagram *>::iterator lt = targetAddressToDelayedPackets.lower_bound(target);
-    std::multimap<L3Address, INetworkDatagram *>::iterator ut = targetAddressToDelayedPackets.upper_bound(target);
+    auto lt = targetAddressToDelayedPackets.lower_bound(target);
+    auto ut = targetAddressToDelayedPackets.upper_bound(target);
 
     // reinject the delayed datagrams
-    for (std::multimap<L3Address, INetworkDatagram *>::iterator it = lt; it != ut; it++) {
+    for (auto it = lt; it != ut; it++) {
         INetworkDatagram *datagram = it->second;
         EV_DETAIL << "Sending queued datagram: source " << datagram->getSourceAddress() << ", destination " << datagram->getDestinationAddress() << endl;
         networkProtocol->reinjectQueuedDatagram(const_cast<const INetworkDatagram *>(datagram));
@@ -1307,7 +1307,7 @@ void AODVRouting::completeRouteDiscovery(const L3Address& target)
     targetAddressToDelayedPackets.erase(lt, ut);
 
     // we have a route for the destination, thus we must cancel the WaitForRREPTimer events
-    std::map<L3Address, WaitForRREP *>::iterator waitRREPIter = waitForRREPTimers.find(target);
+    auto waitRREPIter = waitForRREPTimers.find(target);
     ASSERT(waitRREPIter != waitForRREPTimers.end());
     cancelAndDelete(waitRREPIter->second);
     waitForRREPTimers.erase(waitRREPIter);
@@ -1583,9 +1583,9 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
 void AODVRouting::cancelRouteDiscovery(const L3Address& destAddr)
 {
     ASSERT(hasOngoingRouteDiscovery(destAddr));
-    std::multimap<L3Address, INetworkDatagram *>::iterator lt = targetAddressToDelayedPackets.lower_bound(destAddr);
-    std::multimap<L3Address, INetworkDatagram *>::iterator ut = targetAddressToDelayedPackets.upper_bound(destAddr);
-    for (std::multimap<L3Address, INetworkDatagram *>::iterator it = lt; it != ut; it++)
+    auto lt = targetAddressToDelayedPackets.lower_bound(destAddr);
+    auto ut = targetAddressToDelayedPackets.upper_bound(destAddr);
+    for (auto it = lt; it != ut; it++)
         networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
     targetAddressToDelayedPackets.erase(lt, ut);
@@ -1654,8 +1654,8 @@ void AODVRouting::handleBlackListTimer()
 {
     simtime_t nextTime = SimTime::getMaxTime();
 
-    for (std::map<L3Address, simtime_t>::iterator it = blacklist.begin(); it != blacklist.end(); ) {
-        std::map<L3Address, simtime_t>::iterator current = it++;
+    for (auto it = blacklist.begin(); it != blacklist.end(); ) {
+        auto current = it++;
 
         // Nodes are removed from the blacklist set after a BLACKLIST_TIMEOUT period
         if (it->second <= simTime()) {

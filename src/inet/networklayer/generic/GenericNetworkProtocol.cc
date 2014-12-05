@@ -508,7 +508,7 @@ void GenericNetworkProtocol::registerHook(int priority, IHook *hook)
 void GenericNetworkProtocol::unregisterHook(int priority, IHook *hook)
 {
     Enter_Method("unregisterHook()");
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         if ((iter->first == priority) && (iter->second == hook)) {
             hooks.erase(iter);
             return;
@@ -519,7 +519,7 @@ void GenericNetworkProtocol::unregisterHook(int priority, IHook *hook)
 void GenericNetworkProtocol::dropQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("dropDatagram()");
-    for (std::list<QueuedDatagramForHook>::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             delete datagram;
             queuedDatagramsForHooks.erase(iter);
@@ -531,7 +531,7 @@ void GenericNetworkProtocol::dropQueuedDatagram(const INetworkDatagram *datagram
 void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("reinjectDatagram()");
-    for (std::list<QueuedDatagramForHook>::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             GenericDatagram *datagram = iter->datagram;
             const InterfaceEntry *inIE = iter->inIE;
@@ -563,7 +563,7 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram *data
 
 INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
@@ -591,7 +591,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Generic
 
 INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
@@ -617,7 +617,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(GenericDat
 
 INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
@@ -644,7 +644,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(Generi
 INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(GenericDatagram *datagram, const InterfaceEntry *inIE)
 {
     L3Address address;
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalInHook(datagram, inIE);
         switch (r) {
             case IHook::ACCEPT:
@@ -670,7 +670,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(GenericDat
 
 INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
-    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:

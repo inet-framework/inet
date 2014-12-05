@@ -141,7 +141,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
     std::vector<cModule *> deviceNodes;
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
-    for (std::vector<cModule *>::iterator it = hostNodes.begin(); it != hostNodes.end(); ++it) {
+    for (auto it = hostNodes.begin(); it != hostNodes.end(); ++it) {
         cModule *neighbour = *it;
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);

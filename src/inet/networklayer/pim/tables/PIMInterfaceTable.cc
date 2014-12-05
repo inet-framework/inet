@@ -46,7 +46,7 @@ std::string PIMInterface::info() const
 
 PIMInterfaceTable::~PIMInterfaceTable()
 {
-    for (std::vector<PIMInterface *>::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
+    for (auto it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         delete *it;
 }
 

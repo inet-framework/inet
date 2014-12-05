@@ -108,7 +108,7 @@ void Neighbor::processEvent(Neighbor::NeighborEventType event)
 
 void Neighbor::reset()
 {
-    for (std::list<OSPFLSA *>::iterator retIt = linkStateRetransmissionList.begin();
+    for (auto retIt = linkStateRetransmissionList.begin();
          retIt != linkStateRetransmissionList.end();
          retIt++)
     {
@@ -359,7 +359,7 @@ void Neighbor::sendLinkStateRequestPacket()
         requestPacket->setRequestsArraySize(0);
     }
     else {
-        std::list<OSPFLSAHeader *>::iterator it = linkStateRequestList.begin();
+        auto it = linkStateRequestList.begin();
 
         while ((it != linkStateRequestList.end()) && (packetSize <= (maxPacketSize - OSPF_REQUEST_LENGTH))) {
             unsigned long requestCount = requestPacket->getRequestsArraySize();
@@ -467,7 +467,7 @@ void Neighbor::addToRetransmissionList(OSPFLSA *lsa)
 
 void Neighbor::removeFromRetransmissionList(LSAKeyType lsaKey)
 {
-    std::list<OSPFLSA *>::iterator it = linkStateRetransmissionList.begin();
+    auto it = linkStateRetransmissionList.begin();
     while (it != linkStateRetransmissionList.end()) {
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
@@ -496,7 +496,7 @@ bool Neighbor::isLinkStateRequestListEmpty(LSAKeyType lsaKey) const
 
 OSPFLSA *Neighbor::findOnRetransmissionList(LSAKeyType lsaKey)
 {
-    for (std::list<OSPFLSA *>::iterator it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
+    for (auto it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
@@ -527,7 +527,7 @@ void Neighbor::addToRequestList(OSPFLSAHeader *lsaHeader)
 
 void Neighbor::removeFromRequestList(LSAKeyType lsaKey)
 {
-    std::list<OSPFLSAHeader *>::iterator it = linkStateRequestList.begin();
+    auto it = linkStateRequestList.begin();
     while (it != linkStateRequestList.end()) {
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
@@ -561,7 +561,7 @@ bool Neighbor::isLSAOnRequestList(LSAKeyType lsaKey) const
 
 OSPFLSAHeader *Neighbor::findOnRequestList(LSAKeyType lsaKey)
 {
-    for (std::list<OSPFLSAHeader *>::iterator it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
+    for (auto it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
@@ -609,7 +609,7 @@ bool Neighbor::isOnTransmittedLSAList(LSAKeyType lsaKey) const
 
 void Neighbor::ageTransmittedLSAList()
 {
-    std::list<TransmittedLSA>::iterator it = transmittedLSAs.begin();
+    auto it = transmittedLSAs.begin();
     while ((it != transmittedLSAs.end()) && (it->age == MIN_LS_ARRIVAL)) {
         transmittedLSAs.pop_front();
         it = transmittedLSAs.begin();
@@ -635,7 +635,7 @@ void Neighbor::retransmitUpdatePacket()
     bool packetFull = false;
     unsigned short lsaCount = 0;
     unsigned long packetLength = IP_MAX_HEADER_BYTES + OSPF_LSA_HEADER_LENGTH;
-    std::list<OSPFLSA *>::iterator it = linkStateRetransmissionList.begin();
+    auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
         LSAType lsaType = static_cast<LSAType>((*it)->getHeader().getLsType());

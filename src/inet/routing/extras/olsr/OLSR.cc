@@ -926,7 +926,7 @@ OLSR::mpr_computation()
             increment = false;
         }
 
-        for (std::set<nsaddr_t>::iterator it2 = deleted_addrs.begin();
+        for (auto it2 = deleted_addrs.begin();
                 it2 != deleted_addrs.end();
                 it2++)
         {
@@ -984,12 +984,12 @@ OLSR::mpr_computation()
         // by a node in the MPR set.
         OLSR_nb_tuple* max = nullptr;
         int max_r = 0;
-        for (std::set<int>::iterator it = rs.begin(); it != rs.end(); it++)
+        for (auto it = rs.begin(); it != rs.end(); it++)
         {
             int r = *it;
             if (r > 0)
             {
-                for (std::vector<OLSR_nb_tuple*>::iterator it2 = reachability[r].begin();
+                for (auto it2 = reachability[r].begin();
                         it2 != reachability[r].end();
                         it2++)
                 {
@@ -1037,7 +1037,7 @@ OLSR::mpr_computation()
             for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple = *it;
-                std::set<nsaddr_t>::iterator it2 =
+                auto it2 =
                     nb2hop_addrs.find(nb2hop_tuple->nb2hop_addr());
                 if (it2 != nb2hop_addrs.end())
                 {
@@ -1226,14 +1226,14 @@ OLSR::mpr_computation()
         // by a node in the MPR set.
         OLSR_nb_tuple *max = nullptr;
         int max_r = 0;
-        for (std::set<int>::iterator it = rs.begin(); it != rs.end(); it++)
+        for (auto it = rs.begin(); it != rs.end(); it++)
         {
             int r = *it;
             if (r == 0)
             {
                 continue;
             }
-            for (std::vector<OLSR_nb_tuple *>::iterator it2 = reachability[r].begin();
+            for (auto it2 = reachability[r].begin();
                     it2 != reachability[r].end(); it2++)
             {
                 OLSR_nb_tuple *nb_tuple = *it2;
@@ -1812,7 +1812,7 @@ OLSR::send_pkt()
         op->setReduceFuncionality(par("reduceFuncionality").boolValue());
 
         int j = 0;
-        for (std::vector<OLSR_msg>::iterator it = msgs_.begin(); it != msgs_.end();)
+        for (auto it = msgs_.begin(); it != msgs_.end();)
         {
             if (j == OLSR_MAX_MSGS)
                 break;
@@ -1899,7 +1899,7 @@ OLSR::send_hello()
 
             int count = msg.hello().count;
             link_code = (link_type & 0x03) | ((nb_type << 2) & 0x0f);
-            std::map<uint8_t, int>::iterator pos = linkcodes_count.find(link_code);
+            auto pos = linkcodes_count.find(link_code);
             if (pos == linkcodes_count.end())
             {
                 linkcodes_count[link_code] = count;

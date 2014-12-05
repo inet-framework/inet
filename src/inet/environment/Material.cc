@@ -64,7 +64,7 @@ const Material *Material::getMaterial(const char *name)
         addMaterial(new Material("concrete", Ohmm(1E+2), 4.5, 1));
         addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));
     }
-    std::map<const std::string, const Material *>::iterator it = materials.find(name);
+    auto it = materials.find(name);
     return it != materials.end() ? it->second : nullptr;
 }
 

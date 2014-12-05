@@ -520,7 +520,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
 
         // erase all 2 hop neighbor nodes that are now reached through this
         // newly added MPR. We are now looking for the backup links
-        for (std::set<nsaddr_t>::iterator it2 = deleted_addrs.begin();
+        for (auto it2 = deleted_addrs.begin();
                 it2 != deleted_addrs.end(); it2++)
         {
             for (auto it3 = N2.begin(); it3 != N2.end();)
@@ -577,12 +577,12 @@ OLSR_ETX::olsr_r1_mpr_computation()
         // by a node in the MPR set.
         OLSR_ETX_nb_tuple* max = nullptr;
         int max_r = 0;
-        for (std::set<int>::iterator it = rs.begin(); it != rs.end(); it++)
+        for (auto it = rs.begin(); it != rs.end(); it++)
         {
             int r = *it;
             if (r > 0)
             {
-                for (std::vector<OLSR_ETX_nb_tuple*>::iterator it2 = reachability[r].begin();
+                for (auto it2 = reachability[r].begin();
                         it2 != reachability[r].end(); it2++)
                 {
                     OLSR_ETX_nb_tuple* nb_tuple = *it2;
@@ -683,7 +683,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
                     throw cRuntimeError("\n Error conversion nd2hop tuple");
 
 
-                std::set<nsaddr_t>::iterator it2 =
+                auto it2 =
                     nb2hop_addrs.find(nb2hop_tuple->nb2hop_addr());
                 if (it2 != nb2hop_addrs.end())
                 {
@@ -781,12 +781,12 @@ OLSR_ETX::olsr_r2_mpr_computation()
         // which are now covered by a node in the MPR set.
         OLSR_ETX_nb_tuple* max = nullptr;
         int max_r = 0;
-        for (std::set<int>::iterator it = rs.begin(); it != rs.end(); it++)
+        for (auto it = rs.begin(); it != rs.end(); it++)
         {
             int r = *it;
             if (r > 0)
             {
-                for (std::vector<OLSR_ETX_nb_tuple*>::iterator it2 = reachability[r].begin();
+                for (auto it2 = reachability[r].begin();
                         it2 != reachability[r].end(); it2++)
                 {
                     OLSR_ETX_nb_tuple* nb_tuple = *it2;
@@ -902,7 +902,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
                 if (!nb2hop_tuple)
                     throw cRuntimeError("\n Error conversion nd2hop tuple");
 
-                std::set<nsaddr_t>::iterator it2 =
+                auto it2 =
                     nb2hop_addrs.find(nb2hop_tuple->nb2hop_addr());
                 if (it2 != nb2hop_addrs.end())
                 {
@@ -1020,12 +1020,12 @@ OLSR_ETX::qolsr_mpr_computation()
             if (nb2hop_tuple->nb2hop_addr() != z->nb2hop_addr())
                 continue;
             // Compare the one hop neighbor that reaches the two hop neighbor z with
-            for (std::set<int>::iterator it2 = rs.begin(); it2 != rs.end(); it2++)
+            for (auto it2 = rs.begin(); it2 != rs.end(); it2++)
             {
                 int r = *it2;
                 if (r > 0)
                 {
-                    for (std::vector<OLSR_ETX_nb_tuple*>::iterator it3 = reachability[r].begin();
+                    for (auto it3 = reachability[r].begin();
                             it3 != reachability[r].end(); it3++)
                     {
                         OLSR_ETX_nb_tuple* nb_tuple = *it3;
@@ -1152,7 +1152,7 @@ OLSR_ETX::qolsr_mpr_computation()
                     throw cRuntimeError("\n Error conversion nd2hop tuple");
 
 
-                std::set<nsaddr_t>::iterator it2 =
+                auto it2 =
                     nb2hop_addrs.find(nb2hop_tuple->nb2hop_addr());
                 if (it2 != nb2hop_addrs.end())
                 {
@@ -1280,7 +1280,7 @@ OLSR_ETX::rtable_dijkstra_computation()
         }
 
         bool found = false;
-        for (std::vector<OLSR_ETX_nb2hop_tuple*>::iterator it2 = N[nb_main_addr].begin();
+        for (auto it2 = N[nb_main_addr].begin();
                 it2 != N[nb_main_addr].end(); it2++)
         {
             OLSR_ETX_nb2hop_tuple* current_link = *it2;
@@ -1297,11 +1297,11 @@ OLSR_ETX::rtable_dijkstra_computation()
     }
     // we now have the best link to all of our 2 hop neighbors. Add this information
     // for each 2 hop neighbor to the edge vector...
-    for (std::set<nsaddr_t>::iterator it = N_index.begin(); it != N_index.end(); it++)
+    for (auto it = N_index.begin(); it != N_index.end(); it++)
     {
         nsaddr_t nb_main_addr = *it;
 
-        for (std::vector<OLSR_ETX_nb2hop_tuple*>::iterator it2 = N[nb_main_addr].begin();
+        for (auto it2 = N[nb_main_addr].begin();
                 it2 != N[nb_main_addr].end(); it2++)
         {
             OLSR_ETX_nb2hop_tuple* nb2hop_tuple = *it2;
@@ -1350,7 +1350,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     while (!processed_nodes.empty())
     {
 
-        std::multimap<int,nsaddr_t>::iterator it = processed_nodes.begin();
+        auto it = processed_nodes.begin();
         auto itDij = dijkstra->dijkstraMap.find(it->second);
         if (itDij==dijkstra->dijkstraMap.end())
             throw cRuntimeError("node not found in DijkstraMap");
@@ -1376,7 +1376,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     dijkstra->dijkstraMap.clear();
 #else
     std::set<nsaddr_t> processed_nodes;
-    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
+    for (auto it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
     {
         if (dijkstra->D(*it).hop_count() == 1)
         {
@@ -1386,10 +1386,10 @@ OLSR_ETX::rtable_dijkstra_computation()
             processed_nodes.insert(*it);
         }
     }
-    for (std::set<nsaddr_t>::iterator it = processed_nodes.begin(); it != processed_nodes.end(); it++)
+    for (auto it = processed_nodes.begin(); it != processed_nodes.end(); it++)
         dijkstra->all_nodes()->erase(*it);
     processed_nodes.clear();
-    for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
+    for (auto it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
     {
         if (dijkstra->D(*it).hop_count() == 2)
         {
@@ -1401,12 +1401,12 @@ OLSR_ETX::rtable_dijkstra_computation()
             processed_nodes.insert(*it);
         }
     }
-    for (std::set<nsaddr_t>::iterator it = processed_nodes.begin(); it != processed_nodes.end(); it++)
+    for (auto it = processed_nodes.begin(); it != processed_nodes.end(); it++)
         dijkstra->all_nodes()->erase(*it);
     processed_nodes.clear();
     for (int i = 3; i <= dijkstra->highest_hop(); i++)
     {
-        for (std::set<nsaddr_t>::iterator it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
+        for (auto it = dijkstra->all_nodes()->begin(); it != dijkstra->all_nodes()->end(); it++)
         {
             if (dijkstra->D(*it).hop_count() == i)
             {
@@ -1418,7 +1418,7 @@ OLSR_ETX::rtable_dijkstra_computation()
                 processed_nodes.insert(*it);
             }
         }
-        for (std::set<nsaddr_t>::iterator it = processed_nodes.begin(); it != processed_nodes.end(); it++)
+        for (auto it = processed_nodes.begin(); it != processed_nodes.end(); it++)
             dijkstra->all_nodes()->erase(*it);
         processed_nodes.clear();
     }
@@ -1725,7 +1725,7 @@ OLSR_ETX::send_pkt()
 
             int j1 = 0;
             int j2 = 0;
-            for (std::vector<OLSR_ETX_msg>::iterator it = msgs_.begin(); it != msgs_.end();)
+            for (auto it = msgs_.begin(); it != msgs_.end();)
             {
                 if (j1 == OLSR_ETX_MAX_MSGS)
                     break;
@@ -1759,7 +1759,7 @@ OLSR_ETX::send_pkt()
             op->setByteLength( OLSR_ETX_PKT_HDR_SIZE );
             op->setPkt_seq_num( pkt_seq());
             int j = 0;
-            for (std::vector<OLSR_msg>::iterator it = msgs_.begin(); it != msgs_.end();)
+            for (auto it = msgs_.begin(); it != msgs_.end();)
             {
                 if (j == OLSR_MAX_MSGS)
                     break;
@@ -1853,7 +1853,7 @@ OLSR_ETX::send_hello()
             int count = msg.hello().count;
 
             link_code = (link_type & 0x03) | ((nb_type << 2) & 0x0f);
-            std::map<uint8_t, int>::iterator pos = linkcodes_count.find(link_code);
+            auto pos = linkcodes_count.find(link_code);
             if (pos == linkcodes_count.end())
             {
                 linkcodes_count[link_code] = count;

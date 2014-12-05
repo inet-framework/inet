@@ -271,7 +271,7 @@ OLSROPT::update_topology_tuples(OLSR_msg msg, int index)
      * This shoud achieve the same but with less erase&add.
      *
      */
-    for (std::vector<OLSR_topology_tuple*>::iterator it = topologyset().begin(); it != topologyset().end();)
+    for (auto it = topologyset().begin(); it != topologyset().end();)
     {
         bool foundTuple = 0;
         if ((*it)->last_addr_ == msg.orig_addr()){ // for any tuple in the list that is

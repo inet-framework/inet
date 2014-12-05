@@ -781,7 +781,7 @@ void IPv4RoutingTable::updateNetmaskRoutes()
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k = 0; k < routes.size(); k++) {
         if (routes[k]->getSourceType() == IRoute::IFACENETMASK) {
-            std::vector<IPv4Route *>::iterator it = routes.begin() + (k--);    // '--' is necessary because indices shift down
+            auto it = routes.begin() + (k--);    // '--' is necessary because indices shift down
             IPv4Route *route = *it;
             routes.erase(it);
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
