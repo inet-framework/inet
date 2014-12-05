@@ -151,6 +151,10 @@ std::string InterfaceEntry::detailedInfo() const
     if (ipv6data)
         out << " " << ipv6data->detailedInfo() << "\n";
 #endif // ifdef WITH_IPv6
+#ifdef WITH_GENERIC
+    if (genericNetworkProtocolData)
+        out << " " << genericNetworkProtocolData->detailedInfo() << "\n";
+#endif // ifdef WITH_GENERIC
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)

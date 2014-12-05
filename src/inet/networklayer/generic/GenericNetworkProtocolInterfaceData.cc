@@ -25,18 +25,15 @@ namespace inet {
 std::string GenericNetworkProtocolInterfaceData::info() const
 {
     std::stringstream out;
-//TODO
-//    out << "IPv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
-//    out << "}";
+    out << "generic addr:" << getAddress();
     return out.str();
 }
 
 std::string GenericNetworkProtocolInterfaceData::detailedInfo() const
 {
-//TODO
     std::stringstream out;
-//    out << "inet addr:" << getIPAddress() << "\tMask: " << getNetmask() << "\n";
-//    out << "Metric: " << getMetric() << "\n";
+    out << "generic addr:" << getAddress() << "\n"
+        << "Metric: " << getMetric() << "\n";
     return out.str();
 }
 
