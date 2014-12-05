@@ -188,8 +188,6 @@ BitVector::BitVector(unsigned int num)
     size = 0;
     if (num == 0)
         appendBit(false);
-    else if (num < 0)
-        throw cRuntimeError("num = %d must be a positive integer", num);
     while (num > 0)
     {
         appendBit(num % 2);
@@ -230,8 +228,6 @@ BitVector::BitVector(unsigned int num, unsigned int fixedSize)
     size = 0;
     if (num == 0)
         appendBit(false);
-    else if (num < 0)
-        throw cRuntimeError("num = %d must be a positive integer", num);
     while (num > 0)
     {
         appendBit(num % 2);
