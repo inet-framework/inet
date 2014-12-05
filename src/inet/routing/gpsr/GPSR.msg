@@ -50,7 +50,7 @@ packet GPSRBeacon {
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
 packet GPSRPacket {
-    GPSRForwardingMode routingMode;
+    GPSRForwardingMode routingMode = (GPSRForwardingMode)-1;
     Coord destinationPosition;               // D
     Coord perimeterRoutingStartPosition;     // Lp
     Coord perimeterRoutingForwardPosition;   // Lf
