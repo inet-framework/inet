@@ -1,93 +1,81 @@
-Adam Malik
-Adriano
-Ahmed Ayadi  
-Alberto Cortes
-Alfonso Ariza Quintana
-Alvaro Torres Cortes
-Amre El-Hoiydi
-Andras Babos
-Andras Varga
-Andreas Koepke
-Andreas Kuntz
-Anna Foerster
-Arndt Buschmann 
-Axel Wegener
-Bastian Halmos
-Benjamin Martin Seregi
-Bjoern Hendriks
-Bjorn Wiberg 
-Christian Dankbar
-Christian Frank
-Christoph Sommer 
-Damien Piguet
-Daniel Krajzewicz
-Daniel Willkomm
-David Eckhoff
-Dimitris Kotsakos
-Eduard Hiti
-Emin Ilker Cetinbas
-Eric Wu
-Erik Nordstrom
-Falko Dressler
-Faqir Zarrar Yousaf
-Felix Schmidt-Eisenlohr
-Florian Meier
-Friedemann Wesner
-Gary Pei 
-George Alyfantis
-Georg Lutz
-Helene Lageber
-Henrick
-Ingmar Baumgart
-Irene Ruengeler
-Isabel Dietrich
-Jan Ringos
-Jerome Rousselot
-Jia Pan
-Jirka Klaue
-Jochen Reber
-Johnny Lai
-Juan-Carlos Maureira
-Juan Luis Garrote Molinero
-Karl Wessel
-Konrad Polys
-Kristjan V. Jonsson
-Krzysztof Grochla
-Levente Meszaros
-Luca Bedogni
-Lukas Hluze
-Majid Nabi 
-Marcel Steine
-Marcin Kosiba
-Marc Loebbers
-Matthias Oppitz 
-M. Bohge
-Michael Behrisch
-Michael Tuexen
-Mohamed Louizi
-M. Renwanz
-Oliver Graute
-Peterpaul Klein Haneveld
-Robin Seggelmann
-Rudolf Hornig
-Sam Jansen
-Sorin Cocorada
-Steffen Sroka
-Steve Woon
-Tamas Borbely
-Thimor Bohn
-Thomas Dreibholz
-Thomas Reschka
-Tino Morenz
-Tobias Mayer
-Tomas Prochazka
-Veronika Rybova
-Vincent Oberle
-Vladimir Vesely
-Vojtech Janota
-Wei Yang Ng
-Xuan Thang Nguyen
-Yosia Hadisusanto
-Zheng Yao
-Zoltan Bojthe
-Zsolt Prontvai
+Adam Malik (IGMPv3)
+Adriano (SimpleVoIP)
+Ahmed Ayadi (RTP)
+Alberto Cortes (SCTP)
+Alfonso Ariza Quintana (MANET protocols, IEEE 802.11)
+Alvaro Torres Cortes (TraCI)
+Amre El-Hoiydi (CSMA)
+Andras Babos (OSPFv4)
+Andras Varga (*)
+Andreas Koepke (CSMA)
+Andreas Kuntz (path loss)
+Anna Foerster (LMAC, BMAC)
+Arndt Buschmann (RTP)
+Bastian Halmos (TraCI)
+Benjamin Martin Seregi (*)
+Christian Dankbar (serializers, ExtInterface)
+Christian Frank (Coord)
+Christoph Sommer (TraCI, DYMO-FAU, etc.)
+Damien Piguet (ProbabilisticBroadcast, WiseRoute)
+Daniel Willkomm (Mobility, Flood, CSMA)
+David Eckhoff (TraCI)
+Dimitris Kotsakos (ProbabilisticBroadcast)
+Emin Ilker Cetinbas (mobility)
+Eric Wu (IPv6, IEEE 802.11)
+Falko Dressler (TraCI)
+Faqir Zarrar Yousaf (Mobile IPv6)
+Felix Schmidt-Eisenlohr (path loss)
+Florian Meier (IEEE 802.15.4)
+George Alyfantis (ProbabilisticBroadcast)
+Georg Lutz (RandomWPMobility)
+Helene Lageber (BGP)
+Ingmar Baumgart (IPv4, fixes)
+Irene Ruengeler (SCTP, SCTP apps, serializers)
+Isabel Dietrich (StaticGridMobility)
+Jerome Rousselot (802.15.4 UWB-IR, CSMA, WiseRoute)
+Jochen Reber (IPv4)
+Johnny Lai (UDPVideoStream, PingApp)
+Juan-Carlos Maureira (DHCP)
+Juan Luis Garrote Molinero (RSTP)
+Karl Wessel (MiXiM mapping classes)
+Konrad Polys (SUIPathLoss)
+Kristjan V. Jonsson (HttpTools)
+Krzysztof Grochla (SUIPathLoss)
+Levente Meszaros (*)
+Luca Bedogni (TraCI)
+Lukas Hluze (Ieee80211Mac)
+Marcel Steine (CSMA)
+Marcin Kosiba (ChiangMobility, GaussMarkovMobility)
+Marc Loebbers (CSMA, ConstSpeedMobility, SnrEval)
+Matthias Oppitz (RTP)
+M. Bohge (VoIPStream)
+Michael Tuexen (IEEE 802.11, ExtInterface)
+Mohamed Louizi (DYMO-FAU)
+M. Renwanz (VoIPStream)
+Oliver Graute (path loss)
+Peterpaul Klein Haneveld (TractorMobility)
+Robin Seggelmann (SCTP)
+Rudolf Hornig (*)
+Sorin Cocorada (IEEE 802.11)
+Steffen Sroka (mobility)
+Steve Woon (IEEE 801.11)
+Tamas Borbely (*)
+Thomas Dreibholz (SCTP, SCTP apps, TCPDump, PCAP)
+Thomas Reschka (TCP SACK)
+Tobias Mayer (TraCI)
+Tomas Prochazka (PIM-SM)
+Veronika Rybova (PIM-SM, PIM-DM)
+Vincent Oberle (IPv4)
+Vladimir Vesely (IGMPv3, PIM-SM, PIM-DM)
+Vojtech Janota (MPLS, LDP, RSVP-TE, TED)
+Wei Yang Ng (IPv6)
+Xuan Thang Nguyen (MPLS, RSVP-TE, LDP)
+Yosia Hadisusanto (CSMA)
+Zheng Yao (TraCI)
+Zoltan Bojthe (*)
+Zsolt Prontvai (*)
+
+* Authors of 3rd party software (e.g. lwIP, NSC, SUMO, Macho, batmand, etc.) not listed
+* Main source: copyright and author lines in sources; committers
+* Asterisk (*) means: OMNeT++ developer / team member
+
