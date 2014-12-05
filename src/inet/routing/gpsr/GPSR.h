@@ -49,25 +49,25 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
 {
   private:
     // GPSR parameters
-    GPSRPlanarizationMode planarizationMode;
-    const char *interfaces;
+    GPSRPlanarizationMode planarizationMode = (GPSRPlanarizationMode)-1;
+    const char *interfaces = nullptr;
     simtime_t beaconInterval;
     simtime_t maxJitter;
     simtime_t neighborValidityInterval;
 
     // context
-    cModule *host;
-    NodeStatus *nodeStatus;
-    IMobility *mobility;
-    IL3AddressType *addressType;
-    IInterfaceTable *interfaceTable;
-    IRoutingTable *routingTable;    // TODO: delete when necessary functions are moved to interface table
-    INetfilter *networkProtocol;
+    cModule *host = nullptr;
+    NodeStatus *nodeStatus = nullptr;
+    IMobility *mobility = nullptr;
+    IL3AddressType *addressType = nullptr;
+    IInterfaceTable *interfaceTable = nullptr;
+    IRoutingTable *routingTable = nullptr;    // TODO: delete when necessary functions are moved to interface table
+    INetfilter *networkProtocol = nullptr;
     static PositionTable globalPositionTable;    // KLUDGE: implement position registry protocol
 
     // internal
-    cMessage *beaconTimer;
-    cMessage *purgeNeighborsTimer;
+    cMessage *beaconTimer = nullptr;
+    cMessage *purgeNeighborsTimer = nullptr;
     PositionTable neighborPositionTable;
 
   public:

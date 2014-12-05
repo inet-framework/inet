@@ -38,16 +38,6 @@ PositionTable GPSR::globalPositionTable;
 
 GPSR::GPSR()
 {
-    interfaces = NULL;
-    host = NULL;
-    nodeStatus = NULL;
-    mobility = NULL;
-    addressType = NULL;
-    interfaceTable = NULL;
-    routingTable = NULL;
-    networkProtocol = NULL;
-    beaconTimer = NULL;
-    purgeNeighborsTimer = NULL;
 }
 
 GPSR::~GPSR()
