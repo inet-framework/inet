@@ -35,9 +35,9 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 {
   protected:
     // state
-    TraCIMobility *traci;
+    TraCIMobility *traci = nullptr;
     UDPSocket socket;
-    bool sentMessage;
+    bool sentMessage = false;
     static simsignal_t mobilityStateChangedSignal;
 
   protected:
@@ -55,7 +55,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
     virtual void handlePositionUpdate();
 
   public:
-    TraCIDemo() { traci = nullptr; }
+    TraCIDemo() { }
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 

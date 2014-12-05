@@ -36,12 +36,12 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
 {
   protected:
     // parameter
-    int testNumber;
+    int testNumber = -1;
 
     // state
-    TraCIMobility *traci;
+    TraCIMobility *traci = nullptr;
     std::set<std::string> visitedEdges;    // set of edges this vehicle visited
-    bool hasStopped;    // true if at some point in time this vehicle travelled at negligible speed
+    bool hasStopped = false;    // true if at some point in time this vehicle travelled at negligible speed
     static simsignal_t mobilityStateChangedSignal;
 
   protected:
@@ -60,7 +60,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    TraCITestApp() { traci = nullptr; }
+    TraCITestApp() { }
 };
 
 } // namespace inet
