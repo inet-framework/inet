@@ -220,7 +220,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
         // duplicate control
         int moduleId = (int)pk->par("sourceId");
         int msgId = (int)pk->par("msgId");
-        SourceSequence::iterator it = sourceSequence.find(moduleId);
+        auto it = sourceSequence.find(moduleId);
         if (it != sourceSequence.end()) {
             if (it->second >= msgId) {
                 EV_DEBUG << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;

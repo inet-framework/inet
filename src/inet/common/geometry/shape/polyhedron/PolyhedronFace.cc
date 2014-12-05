@@ -63,7 +63,7 @@ void PolyhedronFace::pushEdge(PolyhedronEdge* edge)
 
 PolyhedronFace::~PolyhedronFace()
 {
-    for (Edges::iterator it = edges.begin(); it != edges.end(); it++)
+    for (auto it = edges.begin(); it != edges.end(); it++)
         delete *it;
 }
 
@@ -88,7 +88,7 @@ bool PolyhedronFace::isVisibleFrom(const PolyhedronPoint* point) const
 
 PolyhedronEdge* PolyhedronFace::findEdge(PolyhedronEdge* edge)
 {
-    for (Edges::iterator it = edges.begin(); it != edges.end(); it++)
+    for (auto it = edges.begin(); it != edges.end(); it++)
     {
         PolyhedronEdge *currEdge = *it;
         if (*currEdge == *edge)

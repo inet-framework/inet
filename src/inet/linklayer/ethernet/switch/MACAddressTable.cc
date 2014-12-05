@@ -113,7 +113,7 @@ int MACAddressTable::getPortForAddress(MACAddress& address, unsigned int vid)
     if (table == nullptr)
         return -1;
 
-    AddressTable::iterator iter = table->find(address);
+    auto iter = table->find(address);
 
     if (iter == table->end()) {
         // not found
@@ -181,10 +181,10 @@ bool MACAddressTable::updateTableWithAddress(int portno, MACAddress& address, un
 void MACAddressTable::flush(int portno)
 {
     Enter_Method("MACAddressTable::flush():  Clearing gate %d cache", portno);
-    for (VlanAddressTable::iterator i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
+    for (auto i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
         AddressTable *table = i->second;
-        for (AddressTable::iterator j = table->begin(); j != table->end(); ) {
-            AddressTable::iterator cur = j++;
+        for (auto j = table->begin(); j != table->end(); ) {
+            auto cur = j++;
             if (cur->second.portno == portno)
                 table->erase(cur);
         }
@@ -199,18 +199,18 @@ void MACAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
     EV << "VLAN ID    MAC    Port    Inserted" << endl;
-    for (VlanAddressTable::iterator i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
+    for (auto i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
         AddressTable *table = i->second;
-        for (AddressTable::iterator j = table->begin(); j != table->end(); j++)
+        for (auto j = table->begin(); j != table->end(); j++)
             EV << j->second.vid << "   " << j->first << "   " << j->second.portno << "   " << j->second.insertionTime << endl;
     }
 }
 
 void MACAddressTable::copyTable(int portA, int portB)
 {
-    for (VlanAddressTable::iterator i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
+    for (auto i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
         AddressTable *table = i->second;
-        for (AddressTable::iterator j = table->begin(); j != table->end(); j++)
+        for (auto j = table->begin(); j != table->end(); j++)
             if (j->second.portno == portA)
                 j->second.portno = portB;
 
@@ -223,8 +223,8 @@ void MACAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
     if (table == nullptr)
         return;
     // TODO: this part could be factored out
-    for (AddressTable::iterator iter = table->begin(); iter != table->end(); ) {
-        AddressTable::iterator cur = iter++;    // iter will get invalidated after erase()
+    for (auto iter = table->begin(); iter != table->end(); ) {
+        auto cur = iter++;    // iter will get invalidated after erase()
         AddressEntry& entry = cur->second;
         if (entry.insertionTime + agingTime <= simTime()) {
             EV << "Removing aged entry from Address Table: "
@@ -236,11 +236,11 @@ void MACAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
 
 void MACAddressTable::removeAgedEntriesFromAllVlans()
 {
-    for (VlanAddressTable::iterator i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
+    for (auto i = vlanAddressTable.begin(); i != vlanAddressTable.end(); i++) {
         AddressTable *table = i->second;
         // TODO: this part could be factored out
-        for (AddressTable::iterator j = table->begin(); j != table->end(); ) {
-            AddressTable::iterator cur = j++;    // iter will get invalidated after erase()
+        for (auto j = table->begin(); j != table->end(); ) {
+            auto cur = j++;    // iter will get invalidated after erase()
             AddressEntry& entry = cur->second;
             if (entry.insertionTime + agingTime <= simTime()) {
                 EV << "Removing aged entry from Address Table: "
@@ -320,7 +320,7 @@ void MACAddressTable::readAddressTable(const char *fileName)
 
 void MACAddressTable::clearTable()
 {
-    for (VlanAddressTable::iterator iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
+    for (auto iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
         delete iter->second;
 
     vlanAddressTable.clear();
@@ -329,7 +329,7 @@ void MACAddressTable::clearTable()
 
 MACAddressTable::~MACAddressTable()
 {
-    for (VlanAddressTable::iterator iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
+    for (auto iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
         delete iter->second;
 }
 

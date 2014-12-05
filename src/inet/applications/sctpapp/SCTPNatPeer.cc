@@ -258,7 +258,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     delete msg;
 
                     if ((int64)(long)par("numPacketsToSendPerClient") > 0) {
-                        SentPacketsPerAssoc::iterator i = sentPacketsPerAssoc.find(serverAssocId);
+                        auto i = sentPacketsPerAssoc.find(serverAssocId);
                         numRequestsToSend = i->second;
                         if ((simtime_t)par("thinkTime") > 0) {
                             generateAndSend();
@@ -293,7 +293,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
 
                             EV << "!!!!!!!!!!!!!!!All data sent from Peer !!!!!!!!!!\n";
 
-                            RcvdPacketsPerAssoc::iterator j = rcvdPacketsPerAssoc.find(serverAssocId);
+                            auto j = rcvdPacketsPerAssoc.find(serverAssocId);
                             if (j->second == 0 && (simtime_t)par("waitToClose") > 0) {
                                 char as[5];
                                 sprintf(as, "%d", serverAssocId);
@@ -361,22 +361,22 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     delete smsg;
                 }
                 else {
-                    RcvdBytesPerAssoc::iterator j = rcvdBytesPerAssoc.find(id);
+                    auto j = rcvdBytesPerAssoc.find(id);
                     if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                         clientSocket.processMessage(PK(msg));
                     else {
                         j->second += PK(msg)->getBitLength() / 8;
-                        BytesPerAssoc::iterator k = bytesPerAssoc.find(id);
+                        auto k = bytesPerAssoc.find(id);
                         k->second->record(j->second);
                         packetsRcvd++;
                         if (!echo) {
                             if ((int64)(long)par("numPacketsToReceivePerClient") > 0) {
-                                RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
+                                auto i = rcvdPacketsPerAssoc.find(id);
                                 i->second--;
                                 SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-                                EndToEndDelay::iterator j = endToEndDelay.find(id);
+                                auto j = endToEndDelay.find(id);
                                 j->second->record(simulation.getSimTime() - smsg->getCreationTime());
-                                HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
+                                auto k = histEndToEndDelay.find(id);
                                 k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
 
                                 if (i->second == 0) {
@@ -395,9 +395,9 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                             cmd->setAssocId(id);
 
                             SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-                            EndToEndDelay::iterator j = endToEndDelay.find(id);
+                            auto j = endToEndDelay.find(id);
                             j->second->record(simulation.getSimTime() - smsg->getCreationTime());
-                            HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
+                            auto k = histEndToEndDelay.find(id);
                             k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
                             cPacket *cmsg = new cPacket("SVData");
                             bytesSent += smsg->getBitLength() / 8;
@@ -422,7 +422,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 id = command->getAssocId();
                 EV << "peer: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-                RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
+                auto i = rcvdPacketsPerAssoc.find(id);
                 if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                     clientSocket.processMessage(PK(msg));
                 else {
@@ -456,7 +456,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
 
     if (ev.isGUI()) {
         char buf[32];
-        RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.find(id);
+        auto l = rcvdBytesPerAssoc.find(id);
         sprintf(buf, "rcvd: %lld bytes\nsent: %lld bytes", (long long int)l->second, (long long int)bytesSent);
         getDisplayString().setTagArg("t", 0, buf);
     }
@@ -613,7 +613,7 @@ void SCTPNatPeer::socketFailure(int32, void *, int32 code)
 void SCTPNatPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
 {
     struct pathStatus ps;
-    SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
+    auto i = sctpPathStatus.find(status->getPathId());
     if (i != sctpPathStatus.end()) {
         ps = i->second;
         ps.active = status->getActive();
@@ -867,20 +867,20 @@ void SCTPNatPeer::finish()
 {
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); l++) {
+    for (auto l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); l++) {
         EV << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
-    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++) {
+    for (auto j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++) {
         delete j->second;
         bytesPerAssoc.erase(j);
     }
-    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); k++) {
+    for (auto k = endToEndDelay.begin(); k != endToEndDelay.end(); k++) {
         delete k->second;
         endToEndDelay.erase(k);
     }
-    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++) {
+    for (auto l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++) {
         delete l->second;
         histEndToEndDelay.erase(l);
     }

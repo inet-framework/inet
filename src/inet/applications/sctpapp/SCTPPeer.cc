@@ -55,15 +55,15 @@ SCTPPeer::~SCTPPeer()
     cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
-    for (BytesPerAssoc::iterator i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
+    for (auto i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
         delete i->second;
     bytesPerAssoc.clear();
 
-    for (EndToEndDelay::iterator i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
+    for (auto i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
         delete i->second;
     endToEndDelay.clear();
 
-    for (HistEndToEndDelay::iterator i = histEndToEndDelay.begin(); i != histEndToEndDelay.end(); ++i)
+    for (auto i = histEndToEndDelay.begin(); i != histEndToEndDelay.end(); ++i)
         delete i->second;
     histEndToEndDelay.clear();
 
@@ -259,7 +259,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 delete msg;
 
                 if (par("numPacketsToSendPerClient").longValue() > 0) {
-                    SentPacketsPerAssoc::iterator i = sentPacketsPerAssoc.find(serverAssocId);
+                    auto i = sentPacketsPerAssoc.find(serverAssocId);
                     numRequestsToSend = i->second;
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend(connectInfo);
@@ -295,7 +295,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
                         EV_INFO << "!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
 
-                        RcvdPacketsPerAssoc::iterator j = rcvdPacketsPerAssoc.find(serverAssocId);
+                        auto j = rcvdPacketsPerAssoc.find(serverAssocId);
                         if (j->second == 0 && par("waitToClose").doubleValue() > 0) {
                             char as[5];
                             sprintf(as, "%d", serverAssocId);
@@ -342,23 +342,23 @@ void SCTPPeer::handleMessage(cMessage *msg)
         case SCTP_I_DATA: {
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo());
             id = ind->getAssocId();
-            RcvdBytesPerAssoc::iterator j = rcvdBytesPerAssoc.find(id);
+            auto j = rcvdBytesPerAssoc.find(id);
             if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
             else {
                 j->second += PK(msg)->getByteLength();
-                BytesPerAssoc::iterator k = bytesPerAssoc.find(id);
+                auto k = bytesPerAssoc.find(id);
                 k->second->record(j->second);
                 packetsRcvd++;
 
                 if (!echo) {
                     if (par("numPacketsToReceivePerClient").longValue() > 0) {
-                        RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
+                        auto i = rcvdPacketsPerAssoc.find(id);
                         i->second--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-                        EndToEndDelay::iterator j = endToEndDelay.find(id);
+                        auto j = endToEndDelay.find(id);
                         j->second->record(simulation.getSimTime() - smsg->getCreationTime());
-                        HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
+                        auto k = histEndToEndDelay.find(id);
                         k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
@@ -378,9 +378,9 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
                     //FIXME: why do it: msg->dup(); ... ; delete msg;
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-                    EndToEndDelay::iterator j = endToEndDelay.find(id);
+                    auto j = endToEndDelay.find(id);
                     j->second->record(simulation.getSimTime() - smsg->getCreationTime());
-                    HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
+                    auto k = histEndToEndDelay.find(id);
                     k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
                     cPacket *cmsg = new cPacket("SVData");
                     bytesSent += smsg->getByteLength();
@@ -405,7 +405,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             id = command->getAssocId();
             EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-            RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
+            auto i = rcvdPacketsPerAssoc.find(id);
 
             if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
@@ -439,7 +439,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
     if (ev.isGUI()) {
         char buf[32];
-        RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.find(id);
+        auto l = rcvdBytesPerAssoc.find(id);
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", l->second, bytesSent);
         getDisplayString().setTagArg("t", 0, buf);
     }
@@ -530,7 +530,7 @@ void SCTPPeer::socketFailure(int, void *, int code)
 void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
 {
     struct PathStatus ps;
-    SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
+    auto i = sctpPathStatus.find(status->getPathId());
 
     if (i != sctpPathStatus.end()) {
         ps = i->second;
@@ -722,7 +722,7 @@ void SCTPPeer::finish()
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    for (RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); ++l)
+    for (auto l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); ++l)
         EV_DETAIL << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
 
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";

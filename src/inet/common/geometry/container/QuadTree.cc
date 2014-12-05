@@ -165,7 +165,7 @@ bool QuadTree::remove(const cObject *point)
     QuadTree *quadrant = searchQuadrant(lastPos);
     if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point: (%f, %f, %f)", lastPos.x, lastPos.y, lastPos.z);
-    Points::iterator it = find(quadrant->points.begin(), quadrant->points.end(), point);
+    auto it = find(quadrant->points.begin(), quadrant->points.end(), point);
     // If we find the object then we erase it from the quadrant's vector and lastPosition map
     if (it != quadrant->points.end()) {
         lastPosition->erase(lastIt);
@@ -238,7 +238,7 @@ bool QuadTree::move(const cObject *point, const Coord& newPos)
     // boundary coordinates equal to the constraint area coordinates.
     if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point (%f %f %f)", newPos.x, newPos.y, newPos.z);
-    Points::iterator it = find(quadrant->points.begin(), quadrant->points.end(), point);
+    auto it = find(quadrant->points.begin(), quadrant->points.end(), point);
     // If we search for a quadrant with the object's current position and then we find
     // it in the quadrant's vector, then the move occurred inside this quadrant,
     // thus we have nothing to do with this case

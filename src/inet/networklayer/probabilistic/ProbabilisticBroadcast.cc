@@ -198,7 +198,7 @@ void ProbabilisticBroadcast::finish()
     cancelAndDelete(broadcastTimer);
     // if some messages are still in the queue, delete them.
     while (!msgQueue.empty()) {
-        TimeMsgMap::iterator pos = msgQueue.begin();
+        auto pos = msgQueue.begin();
         tMsgDesc *msgDesc = pos->second;
         msgQueue.erase(pos);
         delete msgDesc->pkt;

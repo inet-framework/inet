@@ -546,7 +546,7 @@ void NS_CLASS print_rt_table(void *arg)
 
     if (write(log_rt_fd, rt_buf, len) < 0) throw cRuntimeError("write() error");
     len = 0;
-    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
         rt_table_t *rt = it->second;
 

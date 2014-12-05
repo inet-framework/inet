@@ -2606,9 +2606,9 @@ void Ieee80211Mac::removeOldTuplesFromDuplicateMap()
 {
     if (duplicateDetect && lastTimeDelete + duplicateTimeOut >= simTime()) {
         lastTimeDelete = simTime();
-        for (Ieee80211ASFTupleList::iterator it = asfTuplesList.begin(); it != asfTuplesList.end(); ) {
+        for (auto it = asfTuplesList.begin(); it != asfTuplesList.end(); ) {
             if (it->second.receivedTime + duplicateTimeOut < simTime()) {
-                Ieee80211ASFTupleList::iterator itAux = it;
+                auto itAux = it;
                 it++;
                 asfTuplesList.erase(itAux);
             }
@@ -2638,7 +2638,7 @@ bool Ieee80211Mac::isDuplicated(cMessage *msg)
     if (duplicateDetect) {    // duplicate detection filter
         Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg);
         if (frame) {
-            Ieee80211ASFTupleList::iterator it = asfTuplesList.find(frame->getTransmitterAddress());
+            auto it = asfTuplesList.find(frame->getTransmitterAddress());
             if (it == asfTuplesList.end()) {
                 Ieee80211ASFTuple tuple;
                 tuple.receivedTime = simTime();

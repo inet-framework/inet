@@ -62,7 +62,7 @@ int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
 int NS_CLASS timer_is_queued(struct timer *t)
 {
     if (t)
-        for (DymoTimerMap::iterator i = dymoTimerList->begin(); i != dymoTimerList->end(); i++)
+        for (auto i = dymoTimerList->begin(); i != dymoTimerList->end(); i++)
         {
             if ((*i).second == t)return 1;
         }
@@ -94,7 +94,7 @@ int NS_CLASS timer_remove(struct timer *t)
         return -1;
 
     t->used = 0;
-    for (DymoTimerMap::iterator i = dymoTimerList->begin(); i != dymoTimerList->end(); i++)
+    for (auto i = dymoTimerList->begin(); i != dymoTimerList->end(); i++)
     {
         if ((*i).second == t)
         {

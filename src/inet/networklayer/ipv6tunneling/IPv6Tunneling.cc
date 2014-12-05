@@ -235,7 +235,7 @@ bool IPv6Tunneling::destroyTunnel(const IPv6Address& src, const IPv6Address& des
 
 void IPv6Tunneling::destroyTunnel(const IPv6Address& entry, const IPv6Address& exit)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); ) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); ) {
         if (it->second.entry == entry && it->second.exit == exit) {
             destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
             break;
@@ -250,7 +250,7 @@ void IPv6Tunneling::destroyTunnel(const IPv6Address& entry, const IPv6Address& e
 
 void IPv6Tunneling::destroyTunnelForExitAndTrigger(const IPv6Address& exit, const IPv6Address& trigger)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); ) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); ) {
         if (it->second.exit == exit && it->second.destTrigger == trigger) {
             destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
             break;
@@ -265,7 +265,7 @@ void IPv6Tunneling::destroyTunnelForExitAndTrigger(const IPv6Address& exit, cons
 
 void IPv6Tunneling::destroyTunnelForEntryAndTrigger(const IPv6Address& entry, const IPv6Address& trigger)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); ) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); ) {
         if (it->second.entry == entry && it->second.destTrigger == trigger) {
             destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
             break;
@@ -280,9 +280,9 @@ void IPv6Tunneling::destroyTunnelForEntryAndTrigger(const IPv6Address& entry, co
 
 void IPv6Tunneling::destroyTunnels(const IPv6Address& entry)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); ) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); ) {
         if (it->second.entry == entry) {
-            Tunnels::iterator oldIt = it;
+            auto oldIt = it;
             ++it;
 
             destroyTunnel(oldIt->second.entry, oldIt->second.exit, oldIt->second.destTrigger);
@@ -297,7 +297,7 @@ void IPv6Tunneling::destroyTunnels(const IPv6Address& entry)
 
 void IPv6Tunneling::destroyTunnelFromTrigger(const IPv6Address& trigger)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); ++it) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); ++it) {
         if (it->second.destTrigger == trigger) {
             destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
 
@@ -332,7 +332,7 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress, TunnelType
 {
     int outInterfaceId = -1;
 
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
         if (tunnelType == NORMAL || tunnelType == NON_SPLIT || tunnelType == SPLIT) {
             // we search here for tunnels which have a destination trigger and
             // check whether the trigger is equal to the destination
@@ -535,7 +535,7 @@ int IPv6Tunneling::lookupTunnels(const IPv6Address& dest)
     // we search here for tunnels which have a destination trigger and
     // check whether the trigger is equal to the destination
     // only split tunnels or mobility paths are possible entry points
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
         if ((it->second.tunnelType != NON_SPLIT) && (it->second.destTrigger == dest)) {
             outInterfaceId = it->first;
             break;
@@ -551,7 +551,7 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
     // we'll just stop at the first match, because it is assumed that not
     // more than a single non-split tunnel is possible
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
         if (it->second.tunnelType == NON_SPLIT) {
             outInterfaceId = it->first;
             break;
@@ -563,7 +563,7 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
 bool IPv6Tunneling::isTunnelExit(const IPv6Address& exit)
 {
-    for (Tunnels::iterator it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
         // mobility "tunnels" are not relevant for decapsulation
         // 17.10.07 - same for Home Address Option
         if (it->second.tunnelType != T2RH && it->second.tunnelType != HA_OPT
@@ -579,7 +579,7 @@ bool IPv6Tunneling::isTunnelExit(const IPv6Address& exit)
 /*
    TunnelType IPv6Tunneling::getTunnelType(const int vIfIndex)
    {
-    Tunnels::iterator i = tunnels.find(vIfIndex);
+    auto i = tunnels.find(vIfIndex);
 
     if (i == tunnels.end())
         return 0;

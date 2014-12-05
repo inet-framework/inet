@@ -531,7 +531,7 @@ void SCTPClient::socketFailure(int, void *, int code)
 void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
 {
     struct PathStatus ps;
-    SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
+    auto i = sctpPathStatus.find(status->getPathId());
 
     if (i != sctpPathStatus.end()) {
         ps = i->second;

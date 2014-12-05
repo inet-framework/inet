@@ -138,7 +138,7 @@ IPv6ExtensionHeader *IPv6ControlInfo::removeFirstExtensionHeader()
         return nullptr;
 
 #ifdef WITH_IPv6
-    ExtensionHeaders::iterator first = extensionHeaders.begin();
+    auto first = extensionHeaders.begin();
     IPv6ExtensionHeader *ret = *first;
     extensionHeaders.erase(first);
     return ret;

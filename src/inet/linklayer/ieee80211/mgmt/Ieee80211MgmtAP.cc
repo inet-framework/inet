@@ -96,7 +96,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
     Ieee80211DataFrame *frame = encapsulate(msg);
     MACAddress macAddr = frame->getReceiverAddress();
     if (!macAddr.isMulticast()) {
-        STAList::iterator it = staList.find(macAddr);
+        auto it = staList.find(macAddr);
         if (it == staList.end() || it->second.status != ASSOCIATED) {
             EV << "STA with MAC address " << macAddr << " not associated with this AP, dropping frame\n";
             delete frame;    // XXX count drops?
@@ -123,7 +123,7 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
 
 Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFrame *frame)
 {
-    STAList::iterator it = staList.find(frame->getTransmitterAddress());
+    auto it = staList.find(frame->getTransmitterAddress());
     return it == staList.end() ? nullptr : &(it->second);
 }
 
@@ -173,7 +173,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     }
 
     // look up destination address in our STA list
-    STAList::iterator it = staList.find(frame->getAddress3());
+    auto it = staList.find(frame->getAddress3());
     if (it == staList.end()) {
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
         if (isConnectedToHL) {

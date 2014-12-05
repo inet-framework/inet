@@ -111,7 +111,7 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_)
 
 UDP::SockDesc::~SockDesc()
 {
-    for(MulticastMembershipTable::iterator it = multicastMembershipTable.begin();
+    for(auto it = multicastMembershipTable.begin();
             it != multicastMembershipTable.end();
             ++it)
         delete (*it);
@@ -318,7 +318,7 @@ void UDP::processPacketFromApp(cPacket *appData)
     const L3Address& srcAddr = ctrl->getSrcAddr().isUnspecified() ? sd->localAddr : ctrl->getSrcAddr();
     int interfaceId = ctrl->getInterfaceId();
     if (interfaceId == -1 && destAddr.isMulticast()) {
-        MulticastMembershipTable::iterator membership = sd->findFirstMulticastMembership(destAddr);
+        auto membership = sd->findFirstMulticastMembership(destAddr);
         interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
     }
     sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
@@ -532,7 +532,7 @@ void UDP::bind(int sockId, int gateIndex, const L3Address& localAddr, int localP
     if (localPort < -1 || localPort > 65535) // -1: ephemeral port
         throw cRuntimeError("bind: invalid local port number %d", localPort);
 
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    auto it = socketsByIdMap.find(sockId);
     SockDesc *sd = it != socketsByIdMap.end() ? it->second : nullptr;
 
     // to allow two sockets to bind to the same address/port combination
@@ -597,7 +597,7 @@ UDP::SockDesc *UDP::createSocket(int sockId, int gateIndex, const L3Address& loc
 void UDP::close(int sockId)
 {
     // remove from socketsByIdMap
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    auto it = socketsByIdMap.find(sockId);
     if (it == socketsByIdMap.end())
         throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
     SockDesc *sd = it->second;
@@ -607,7 +607,7 @@ void UDP::close(int sockId)
 
     // remove from socketsByPortMap
     SockDescList& list = socketsByPortMap[sd->localPort];
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    for (auto it = list.begin(); it != list.end(); ++it)
         if (*it == sd) {
             list.erase(it);
             break;
@@ -621,11 +621,11 @@ void UDP::clearAllSockets()
 {
     EV_INFO << "Clear all sockets\n";
 
-    for (SocketsByPortMap::iterator it = socketsByPortMap.begin(); it != socketsByPortMap.end(); ++it) {
+    for (auto it = socketsByPortMap.begin(); it != socketsByPortMap.end(); ++it) {
         it->second.clear();
     }
     socketsByPortMap.clear();
-    for (SocketsByIdMap::iterator it = socketsByIdMap.begin(); it != socketsByIdMap.end(); ++it)
+    for (auto it = socketsByIdMap.begin(); it != socketsByIdMap.end(); ++it)
         delete it->second;
     socketsByIdMap.clear();
 }
@@ -651,12 +651,12 @@ ushort UDP::getEphemeralPort()
 
 UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort)
 {
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    auto it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
         return nullptr;
 
     SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it) {
+    for (auto it = list.begin(); it != list.end(); ++it) {
         SockDesc *sd = *it;
         if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
             return sd;
@@ -666,7 +666,7 @@ UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const L3Address& localAddr, us
 
 UDP::SockDesc *UDP::findSocketForUnicastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
 {
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    auto it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
         return nullptr;
 
@@ -693,12 +693,12 @@ std::vector<UDP::SockDesc *> UDP::findSocketsForMcastBcastPacket(const L3Address
 {
     ASSERT(isMulticast || isBroadcast);
     std::vector<SockDesc *> result;
-    SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
+    auto it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
         return result;
 
     SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it) {
+    for (auto it = list.begin(); it != list.end(); ++it) {
         SockDesc *sd = *it;
         if (isBroadcast) {
             if (sd->isBroadcast) {
@@ -708,7 +708,7 @@ std::vector<UDP::SockDesc *> UDP::findSocketsForMcastBcastPacket(const L3Address
             }
         }
         else if (isMulticast) {
-            MulticastMembershipTable::iterator membership = sd->findFirstMulticastMembership(localAddr);
+            auto membership = sd->findFirstMulticastMembership(localAddr);
             if (membership != sd->multicastMembershipTable.end()) {
                 if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
                     (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr) &&
@@ -831,7 +831,7 @@ UDPPacket *UDP::createUDPPacket(const char *name)
 
 UDP::SockDesc *UDP::getSocketById(int sockId)
 {
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    auto it = socketsByIdMap.find(sockId);
     if (it == socketsByIdMap.end())
         throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
     return it->second;
@@ -843,7 +843,7 @@ UDP::SockDesc *UDP::getOrCreateSocket(int sockId, int gateIndex)
     if (sockId == -1)
         throw cRuntimeError("sockId in UDP command not filled in");
 
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    auto it = socketsByIdMap.find(sockId);
     if (it != socketsByIdMap.end())
         return it->second;
 
@@ -944,7 +944,7 @@ void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
     std::vector<L3Address> empty;
 
     for (unsigned int i = 0; i < multicastAddresses.size(); i++) {
-        MulticastMembershipTable::iterator it = sd->findFirstMulticastMembership(multicastAddresses[i]);
+        auto it = sd->findFirstMulticastMembership(multicastAddresses[i]);
         while (it != sd->multicastMembershipTable.end()) {
             MulticastMembership *membership = *it;
             if (membership->multicastAddress != multicastAddresses[i])
@@ -1187,7 +1187,7 @@ UDP::MulticastMembershipTable::iterator UDP::SockDesc::findFirstMulticastMembers
     membership.multicastAddress = multicastAddress;
     membership.interfaceId = 0;    // less than any other interfaceId
 
-    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
+    auto it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
     if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress)
         return it;
     else
@@ -1200,7 +1200,7 @@ UDP::MulticastMembership *UDP::SockDesc::findMulticastMembership(const L3Address
     membership.multicastAddress = multicastAddress;
     membership.interfaceId = interfaceId;
 
-    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
+    auto it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
     if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress && (*it)->interfaceId == interfaceId)
         return *it;
     else
@@ -1209,7 +1209,7 @@ UDP::MulticastMembership *UDP::SockDesc::findMulticastMembership(const L3Address
 
 void UDP::SockDesc::addMulticastMembership(MulticastMembership *membership)
 {
-    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), membership, lessMembership);
+    auto it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), membership, lessMembership);
     multicastMembershipTable.insert(it, membership);
 }
 

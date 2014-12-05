@@ -197,7 +197,7 @@ void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Addres
 
 BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::lookup(const IPv6Address& dest)
 {
-    BindingUpdateList6::iterator i = bindingUpdateList.find(dest);
+    auto i = bindingUpdateList.find(dest);
 
     return (i == bindingUpdateList.end()) ? nullptr : &(i->second);
 }
@@ -224,7 +224,7 @@ BindingUpdateList::MobilityState BindingUpdateList::getMobilityState(const IPv6A
 
 void BindingUpdateList::setMobilityState(const IPv6Address& dest, BindingUpdateList::MobilityState state)
 {
-    BindingUpdateList6::iterator i = bindingUpdateList.find(dest);
+    auto i = bindingUpdateList.find(dest);
 
     if (i != bindingUpdateList.end())
         i->second.state = state;
@@ -323,7 +323,7 @@ const IPv6Address& BindingUpdateList::getCoA(const IPv6Address& dest)
 
 bool BindingUpdateList::isInBindingUpdateList(const IPv6Address& dest, const IPv6Address& HoA)
 {
-    BindingUpdateList6::iterator pos = bindingUpdateList.find(dest);
+    auto pos = bindingUpdateList.find(dest);
 
     if (pos == bindingUpdateList.end())
         return false;

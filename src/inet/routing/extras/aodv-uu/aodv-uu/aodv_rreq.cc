@@ -1021,7 +1021,7 @@ NS_STATIC struct rreq_record *NS_CLASS rreq_record_find(struct in_addr orig_addr
 void NS_CLASS rreq_record_timeout(void *arg)
 {
     struct rreq_record *rec = (struct rreq_record *) arg;
-    for (RreqRecords::iterator it = rreq_records.begin();it!=rreq_records.end();it++)
+    for (auto it = rreq_records.begin();it!=rreq_records.end();it++)
     {
         struct rreq_record *recAux = *it;
         if (rec  == recAux)
@@ -1063,7 +1063,7 @@ struct blacklist *NS_CLASS rreq_blacklist_insert(struct in_addr dest_addr)
 
 struct blacklist *NS_CLASS rreq_blacklist_find(struct in_addr dest_addr)
 {
-    RreqBlacklist::iterator it = rreq_blacklist.find(dest_addr.s_addr);
+    auto it = rreq_blacklist.find(dest_addr.s_addr);
     if (it != rreq_blacklist.end())
         return it->second;
     return nullptr;
@@ -1072,7 +1072,7 @@ struct blacklist *NS_CLASS rreq_blacklist_find(struct in_addr dest_addr)
 void NS_CLASS rreq_blacklist_timeout(void *arg)
 {
     struct blacklist *bl = (struct blacklist *)arg;
-    for (RreqBlacklist::iterator it = rreq_blacklist.begin();it!=rreq_blacklist.end();it++)
+    for (auto it = rreq_blacklist.begin();it!=rreq_blacklist.end();it++)
     {
         struct blacklist *blAux = it->second;
         if (bl == blAux)

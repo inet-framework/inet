@@ -31,7 +31,7 @@ void Polyhedron::buildConvexHull()
     createInitialTetrahedron();
     //std::random_shuffle(points.begin(), points.end());
     initializeConflictGraph();
-    for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
+    for (auto pit = points.begin(); pit != points.end(); pit++)
     {
         PolyhedronPoint *currentPoint = *pit;
         if (currentPoint->isSelected())
@@ -47,7 +47,7 @@ void Polyhedron::buildConvexHull()
             // Computes a closed curve consisting of edges of the current convex hull
             // This closed curve can be interpreted as the border of the visible region from our current point
             Edges horizonEdges = computeHorizonEdges(conflictVector);
-            for (Edges::iterator eit = horizonEdges.begin(); eit != horizonEdges.end(); eit++)
+            for (auto eit = horizonEdges.begin(); eit != horizonEdges.end(); eit++)
             {
                 PolyhedronEdge *horizonEdge = *eit;
                 // Faces incident to horizonEdge in the current convex hull
@@ -98,7 +98,7 @@ void Polyhedron::createInitialTetrahedron()
 {
     // Initially, we choose four points that do not lie in a common plane, so that their
     // convex hull is a tetrahedron.
-    Points::iterator it = points.begin();
+    auto it = points.begin();
     PolyhedronPoint *p1 = *it;
     it++;
     p1->setToSelected();
@@ -174,7 +174,7 @@ Polyhedron::Edges Polyhedron::computeHorizonEdges(const Faces& visibleFaces) con
     {
         PolyhedronFace *visibleFace = *it;
         Edges& edges = visibleFace->getEdges();
-        for (Edges::iterator fit = edges.begin(); fit != edges.end(); fit++)
+        for (auto fit = edges.begin(); fit != edges.end(); fit++)
         {
             PolyhedronEdge *visibleEdge = *fit;
             PolyhedronFace *jointFace = visibleEdge->getJointFace();
@@ -191,10 +191,10 @@ Polyhedron::Edges Polyhedron::computeHorizonEdges(const Faces& visibleFaces) con
 
 void Polyhedron::initializeConflictGraph()
 {
-    for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
+    for (auto pit = points.begin(); pit != points.end(); pit++)
     {
         PolyhedronPoint *point = *pit;
-        for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
+        for (auto fit = faces.begin(); fit != faces.end(); fit++)
         {
             PolyhedronFace *face = *fit;
             // The conflict graph is a bipartite graph with point class and face class
@@ -217,7 +217,7 @@ bool Polyhedron::areCoplanar(const PolyhedronFace* face1, const PolyhedronFace* 
 void Polyhedron::mergeFaces(PolyhedronFace *newFace, PolyhedronFace *neighborFace, PolyhedronPoint *point)
 {
     Edges& edges = neighborFace->getEdges();
-    Edges::iterator eit = edges.begin();
+    auto eit = edges.begin();
     PolyhedronEdge *edge = *eit;
     // TODO: optimize
     while (edge->getJointFace() != newFace)
@@ -278,11 +278,11 @@ void Polyhedron::cleanConflictGraph(const Faces& conflictVector)
     {
         PolyhedronFace *face = *fit;
         Points& pConflict = face->getConflictVector();
-        for (Points::iterator pit = pConflict.begin(); pit != pConflict.end(); pit++)
+        for (auto pit = pConflict.begin(); pit != pConflict.end(); pit++)
         {
             PolyhedronPoint *point = *pit;
             Faces& currFConflict = point->getConflictVector();
-            Faces::iterator fit2 = std::find(currFConflict.begin(), currFConflict.end(), face);
+            auto fit2 = std::find(currFConflict.begin(), currFConflict.end(), face);
             if (fit2 == currFConflict.end())
                 throw cRuntimeError("PolyhedronFace not found in the point's conflict vector");
             currFConflict.erase(fit2);
@@ -326,10 +326,10 @@ PolyhedronPoint Polyhedron::computeOutwardNormalVector(const PolyhedronFace *fac
 void Polyhedron::connectFaces(PolyhedronFace* newFace)
 {
     Edges& newEdges = newFace->getEdges();
-    for (Edges::iterator eit = newEdges.begin(); eit != newEdges.end(); eit++)
+    for (auto eit = newEdges.begin(); eit != newEdges.end(); eit++)
     {
         PolyhedronEdge *newEdge = *eit;
-        for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
+        for (auto fit = faces.begin(); fit != faces.end(); fit++)
         {
             PolyhedronFace *currentFace = *fit;
             if (currentFace == newFace || currentFace->isWrapped()) continue;
@@ -345,7 +345,7 @@ void Polyhedron::connectFaces(PolyhedronFace* newFace)
 
 void Polyhedron::purgeWrappedFaces()
 {
-    Faces::iterator fit = faces.begin();
+    auto fit = faces.begin();
     while (fit != faces.end())
     {
         PolyhedronFace *face = *fit;
@@ -463,10 +463,10 @@ bool Polyhedron::isVisibleFromView(const PolyhedronFace *face, const Rotation& v
 
 Polyhedron::~Polyhedron()
 {
-    for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
+    for (auto pit = points.begin(); pit != points.end(); pit++)
         delete *pit;
 
-    for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
+    for (auto fit = faces.begin(); fit != faces.end(); fit++)
         delete *fit;
 
 }

@@ -218,7 +218,7 @@ class INET_API SCTP : public cSimpleModule
 
     inline AssocStat *getAssocStat(uint32 assocId)
     {
-        SCTP::AssocStatMap::iterator found = assocStatMap.find(assocId);
+        auto found = assocStatMap.find(assocId);
         if (found != assocStatMap.end()) {
             return &found->second;
         }

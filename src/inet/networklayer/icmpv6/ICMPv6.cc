@@ -156,7 +156,7 @@ void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
     payload->setControlInfo(ctrl);
     delete reply;
     long originatorId = payload->getOriginatorId();
-    PingMap::iterator i = pingMap.find(originatorId);
+    auto i = pingMap.find(originatorId);
     if (i != pingMap.end())
         send(payload, "pingOut", i->second);
     else {

@@ -45,7 +45,7 @@ ostream& operator<<(ostream& out, const PIMDM::Route *route)
 
 PIMDM::~PIMDM()
 {
-    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+    for (auto it = routes.begin(); it != routes.end(); ++it)
         delete it->second;
     routes.clear();
 }
@@ -1691,13 +1691,13 @@ IPv4MulticastRoute *PIMDM::findIPv4MulticastRoute(IPv4Address group, IPv4Address
 
 PIMDM::Route *PIMDM::findRoute(IPv4Address source, IPv4Address group)
 {
-    RoutingTable::iterator it = routes.find(SourceAndGroup(source, group));
+    auto it = routes.find(SourceAndGroup(source, group));
     return it != routes.end() ? it->second : nullptr;
 }
 
 void PIMDM::deleteRoute(IPv4Address source, IPv4Address group)
 {
-    RoutingTable::iterator it = routes.find(SourceAndGroup(source, group));
+    auto it = routes.find(SourceAndGroup(source, group));
     if (it != routes.end()) {
         delete it->second;
         routes.erase(it);
@@ -1721,7 +1721,7 @@ void PIMDM::clearRoutes()
     }
 
     // clear local table
-    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+    for (auto it = routes.begin(); it != routes.end(); ++it)
         delete it->second;
     routes.clear();
 }

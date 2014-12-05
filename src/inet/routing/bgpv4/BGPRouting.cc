@@ -35,7 +35,7 @@ BGPRouting::~BGPRouting(void)
         delete (*sessionIterator).second;
     }
 
-    for (RoutingTableEntryVector::iterator it = _prefixListINOUT.begin(); it != _prefixListINOUT.end(); ++it) {
+    for (auto it = _prefixListINOUT.begin(); it != _prefixListINOUT.end(); ++it) {
         delete (*it);
     }
 }
@@ -458,7 +458,7 @@ bool BGPRouting::checkExternalRoute(const IPv4Route *route)
 
 void BGPRouting::loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab)
 {
-    for (cXMLElementList::iterator timerElemIt = timerConfig.begin(); timerElemIt != timerConfig.end(); timerElemIt++) {
+    for (auto timerElemIt = timerConfig.begin(); timerElemIt != timerConfig.end(); timerElemIt++) {
         std::string nodeName = (*timerElemIt)->getTagName();
         if (nodeName == "connectRetryTime") {
             delayTab[0] = (double)atoi((*timerElemIt)->getNodeValue());
@@ -479,10 +479,10 @@ ASID BGPRouting::findMyAS(cXMLElementList& asList, int& outRouterPosition)
 {
     // find my own IPv4 address in the configuration file and return the AS id under which it is configured
     // and also the 1 based position of the entry inside the AS config element
-    for (cXMLElementList::iterator asListIt = asList.begin(); asListIt != asList.end(); asListIt++) {
+    for (auto asListIt = asList.begin(); asListIt != asList.end(); asListIt++) {
         cXMLElementList routerList = (*asListIt)->getChildrenByTagName("Router");
         outRouterPosition = 1;
-        for (cXMLElementList::iterator routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++) {
+        for (auto routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++) {
             IPv4Address routerAddr = IPv4Address((*routerListIt)->getAttribute("interAddr"));
             for (int i = 0; i < _inft->getNumInterfaces(); i++) {
                 if (_inft->getInterface(i)->ipv4Data()->getIPAddress() == routerAddr)
@@ -498,7 +498,7 @@ ASID BGPRouting::findMyAS(cXMLElementList& asList, int& outRouterPosition)
 void BGPRouting::loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab)
 {
     simtime_t saveStartDelay = delayTab[3];
-    for (cXMLElementList::iterator sessionListIt = sessionList.begin(); sessionListIt != sessionList.end(); sessionListIt++, delayTab[3] = saveStartDelay) {
+    for (auto sessionListIt = sessionList.begin(); sessionListIt != sessionList.end(); sessionListIt++, delayTab[3] = saveStartDelay) {
         const char *exterAddr = (*sessionListIt)->getFirstChild()->getAttribute("exterAddr");
         IPv4Address routerAddr1 = IPv4Address(exterAddr);
         exterAddr = (*sessionListIt)->getLastChild()->getAttribute("exterAddr");
@@ -531,7 +531,7 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
     //create deny Lists
     std::vector<const char *> routerInSameASList;
 
-    for (cXMLElementList::iterator ASConfigIt = ASConfig.begin(); ASConfigIt != ASConfig.end(); ASConfigIt++) {
+    for (auto ASConfigIt = ASConfig.begin(); ASConfigIt != ASConfig.end(); ASConfigIt++) {
         std::string nodeName = (*ASConfigIt)->getTagName();
         if (nodeName == "Router") {
             if (isInInterfaceTable(_inft, IPv4Address((*ASConfigIt)->getAttribute("interAddr"))) == -1) {

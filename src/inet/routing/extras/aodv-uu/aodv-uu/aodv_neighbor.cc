@@ -143,7 +143,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
        destination (dest) as next hop. These entries (destinations)
        cannot be reached either since dest is down. They should
        therefore also be included in the RERR. */
-    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
         rt_table_t *rt_u = it->second;;
         if (rt_u->state == VALID &&

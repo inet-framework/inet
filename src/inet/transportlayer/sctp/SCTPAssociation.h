@@ -1369,7 +1369,7 @@ class INET_API SCTPAssociation : public cObject
         if ((state->auth) && (state->peerAuth) && (typeInChunkList(chunkType)) && (authAdded == false)) {
             SCTPAuthenticationChunk *authChunk = createAuthChunk();
             sctpMsg->addChunk(authChunk);
-            SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+            auto it = sctpMain->assocStatMap.find(assocId);
             it->second.numAuthChunksSent++;
             return true;
         }

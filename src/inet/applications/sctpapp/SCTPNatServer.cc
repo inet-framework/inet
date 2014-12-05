@@ -243,7 +243,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 NatMessage *nat = check_and_cast<NatMessage *>(smsg->decapsulate());
                 bool found = false;
                 if (natVector.size() > 0) {
-                    for (NatVector::iterator it = natVector.begin(); it != natVector.end(); it++) {
+                    for (auto it = natVector.begin(); it != natVector.end(); it++) {
                         if ((*it)->peer1 == nat->getPeer1() || (*it)->peer1Assoc == assocId) {
                             EV << "found entry: info: Peer1 = " << nat->getPeer1() << "  peer1Address1=" << nat->getPeer1Addresses(0) << " peer2=" << nat->getPeer2() << " peer2Address1=" << nat->getPeer2Addresses(0) << "\n";
                             if (nat->getMulti() && nat->getPeer1AddressesArraySize() > 1 && nat->getPeer2AddressesArraySize() > 1) {
@@ -367,7 +367,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 printNatVector();
                 EV << " address added: LOCAL=" << ind->getLocalAddr() << ", remote=" << ind->getRemoteAddr() << " assoc=" << assocId << "\n";
                 if (natVector.size() > 0) {
-                    for (NatVector::iterator it = natVector.begin(); it != natVector.end(); it++) {
+                    for (auto it = natVector.begin(); it != natVector.end(); it++) {
                         if ((*it)->peer1Assoc == assocId) {
                             EV << "found entry for assoc1 = " << assocId << "  Peer1 = " << (*it)->peer1 << "  peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2=" << (*it)->peer2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << "\n";
                             if ((*it)->multi && (*it)->peer1Address2.isUnspecified()) {
@@ -475,7 +475,7 @@ void SCTPNatServer::handleTimer(cMessage *msg)
 
 void SCTPNatServer::printNatVector(void)
 {
-    for (NatVector::iterator it = natVector.begin(); it != natVector.end(); it++) {
+    for (auto it = natVector.begin(); it != natVector.end(); it++) {
         EV << "Peer1: " << (*it)->peer1 << " Assoc: " << (*it)->peer1Assoc << " Address1: " << (*it)->peer1Address1 << " Address2: " << (*it)->peer1Address2 << "Port: " << (*it)->peer1Port << endl;
         EV << "Peer2: " << (*it)->peer2 << " Assoc: " << (*it)->peer2Assoc << " Address1: " << (*it)->peer2Address1 << " Address2: " << (*it)->peer2Address2 << "Port: " << (*it)->peer2Port << endl;
     }

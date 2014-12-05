@@ -140,7 +140,7 @@ void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
 
 PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface(InterfaceEntry *ie)
 {
-    for (PIMInterfaceVector::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
+    for (auto it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         if ((*it)->getInterfacePtr() == ie)
             return it;
 
@@ -165,7 +165,7 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
 
 void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
 {
-    PIMInterfaceVector::iterator it = findInterface(ie);
+    auto it = findInterface(ie);
     if (it != pimInterfaces.end())
         pimInterfaces.erase(it);
 }

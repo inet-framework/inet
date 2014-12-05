@@ -167,7 +167,7 @@ int NS_CLASS seek_list_remove(seek_list_t * entry)
     if (!entry)
         return 0;
 
-    for (SeekHead::iterator it =seekhead.begin();it != seekhead.end(); it++)
+    for (auto it =seekhead.begin();it != seekhead.end(); it++)
     {
         if (it->second == entry)
         {
@@ -188,7 +188,7 @@ int NS_CLASS seek_list_remove(seek_list_t * entry)
 
 seek_list_t *NS_CLASS seek_list_find(struct in_addr dest_addr)
 {
-    SeekHead::iterator it =seekhead.find(dest_addr.s_addr);
+    auto it =seekhead.find(dest_addr.s_addr);
     if (it != seekhead.end())
         return it->second;
     return nullptr;
@@ -197,7 +197,7 @@ seek_list_t *NS_CLASS seek_list_find(struct in_addr dest_addr)
 #ifdef SEEK_LIST_DEBUG
 void NS_CLASS seek_list_print()
 {
-    for (SeekHead::iterator it =seekhead.begin();it != seekhead.end(); it++)
+    for (auto it =seekhead.begin();it != seekhead.end(); it++)
     {
         seek_list_t *entry = it->second;
         printf("%s %u %d %d\n", ip_to_str(entry->dest_addr),

@@ -195,7 +195,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
             EV_DETAIL << "Originator timeout: originator " << orig_node->orig << ", last_valid " << orig_node->last_valid << " \n";
 
             if (it != origMap.begin()) {
-                OrigMap::iterator itAux = it;
+                auto itAux = it;
                 it++;
                 origMap.erase(itAux);
             } else {

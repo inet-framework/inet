@@ -271,7 +271,7 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
         simtime_t expiryTime, simtime_t prefExpiryTime)
 {
-    for (AddressDataVector::iterator it = addresses.begin(); it != addresses.end(); it++) {
+    for (auto it = addresses.begin(); it != addresses.end(); it++) {
         if (it->address.matches(prefix, length)) {
             it->expiryTime = expiryTime;
             it->prefExpiryTime = prefExpiryTime;
@@ -595,7 +595,7 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
 {
     IPv6Address addr;
 
-    for (AddressDataVector::iterator it = addresses.begin(); it != addresses.end(); ++it) {    // 24.9.07 - CB
+    for (auto it = addresses.begin(); it != addresses.end(); ++it) {    // 24.9.07 - CB
         if ((*it).addrType == type) {
             addr = it->address;
             addresses.erase(it);

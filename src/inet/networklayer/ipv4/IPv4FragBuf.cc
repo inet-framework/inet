@@ -53,7 +53,7 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     key.src = datagram->getSrcAddress();
     key.dest = datagram->getDestAddress();
 
-    Buffers::iterator i = bufs.find(key);
+    auto i = bufs.find(key);
 
     DatagramBuffer *buf = nullptr;
 
@@ -111,7 +111,7 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
 
     ASSERT(icmpModule);
 
-    for (Buffers::iterator i = bufs.begin(); i != bufs.end(); ) {
+    for (auto i = bufs.begin(); i != bufs.end(); ) {
         // if too old, remove it
         DatagramBuffer& buf = i->second;
         if (buf.lastupdate < lastupdate) {
@@ -123,7 +123,7 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
             icmpModule->sendErrorMessage(buf.datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
 
             // delete
-            Buffers::iterator oldi = i++;
+            auto oldi = i++;
             bufs.erase(oldi);
         }
         else {

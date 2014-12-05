@@ -743,14 +743,14 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         sendAsconf(type);
     }
     else if (msg == FairStartTimer) {
-        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        auto it = sctpMain->assocStatMap.find(assocId);
         if (it != sctpMain->assocStatMap.end()) {
             it->second.fairStart = simulation.getSimTime();
             fairTimer = true;
         }
     }
     else if (msg == FairStopTimer) {
-        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        auto it = sctpMain->assocStatMap.find(assocId);
         if (it != sctpMain->assocStatMap.end()) {
             it->second.fairStop = simulation.getSimTime();
             it->second.fairLifeTime = it->second.fairStop - it->second.fairStart;
@@ -779,7 +779,7 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg,
 
     if (fsm->getState() == SCTP_S_ESTABLISHED) {
         bool found = false;
-        for (AddressVector::iterator k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
+        for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
             if ((*k) == msgDestAddr) {
                 found = true;
                 break;
@@ -1402,7 +1402,7 @@ void SCTPAssociation::stateEntered(int32 status)
 
             cStringTokenizer pathGroupsTokenizer(sctpMain->par("cmtCCPathGroups").stringValue());
             if (pathGroupsTokenizer.hasMoreTokens()) {
-                SCTPPathMap::iterator pathIterator = sctpPathMap.begin();
+                auto pathIterator = sctpPathMap.begin();
                 while (pathIterator != sctpPathMap.end()) {
                     const char *token = pathGroupsTokenizer.nextToken();
                     if (token == nullptr) {
@@ -1550,7 +1550,7 @@ void SCTPAssociation::removePath()
 
     while ((pathIterator = sctpPathMap.begin()) != sctpPathMap.end()) {
         SCTPPathVariables *path = pathIterator->second;
-        for (AddressVector::iterator j = remoteAddressList.begin(); j != remoteAddressList.end(); j++) {
+        for (auto j = remoteAddressList.begin(); j != remoteAddressList.end(); j++) {
             if ((*j) == path->remoteAddress) {
                 remoteAddressList.erase(j);
                 break;

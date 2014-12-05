@@ -1144,7 +1144,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& ol
         routeCount = routingTable.size();
         for (j = 0; j < routeCount; j++) {
             IPv4AddressRange destination(routingTable[j]->getDestination() & routingTable[j]->getNetmask(), routingTable[j]->getNetmask());
-            RoutingTableEntryMap::iterator destIt = oldTableMap.find(destination);
+            auto destIt = oldTableMap.find(destination);
             if (destIt == oldTableMap.end()) {    // new routing entry
                 SummaryLSA *lsaToReoriginate = nullptr;
                 SummaryLSA *newLSA = areas[i]->originateSummaryLSA(routingTable[j], originatedLSAMap, lsaToReoriginate);
@@ -1263,7 +1263,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& ol
         routeCount = oldRoutingTable.size();
         for (j = 0; j < routeCount; j++) {
             IPv4AddressRange destination(oldRoutingTable[j]->getDestination() & oldRoutingTable[j]->getNetmask(), oldRoutingTable[j]->getNetmask());
-            RoutingTableEntryMap::iterator destIt = newTableMap.find(destination);
+            auto destIt = newTableMap.find(destination);
             if (destIt == newTableMap.end()) {    // deleted routing entry
                 IPv4AddressRange destinationAddressRange(oldRoutingTable[j]->getDestination(), oldRoutingTable[j]->getNetmask());
 

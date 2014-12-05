@@ -52,13 +52,13 @@ void PositionTable::setPosition(const L3Address& address, const Coord& coord)
 
 void PositionTable::removePosition(const L3Address& address)
 {
-    AddressToPositionMap::iterator it = addressToPositionMap.find(address);
+    auto it = addressToPositionMap.find(address);
     addressToPositionMap.erase(it);
 }
 
 void PositionTable::removeOldPositions(simtime_t timestamp)
 {
-    for (AddressToPositionMap::iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); )
+    for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end(); )
         if (it->second.first <= timestamp)
             addressToPositionMap.erase(it++);
         else

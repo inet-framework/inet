@@ -36,7 +36,7 @@ void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables *chunk,
     state->outstandingBytes += chunk->booksize;
     statisticsOutstandingBytes->record(state->outstandingBytes);
 
-    CounterMap::iterator iterator = qCounter.roomRetransQ.find(path->remoteAddress);
+    auto iterator = qCounter.roomRetransQ.find(path->remoteAddress);
     state->outstandingMessages++;
     if (state->osbWithHeader)
         iterator->second += ADD_PADDING(chunk->booksize);
@@ -107,7 +107,7 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
 std::vector<SCTPPathVariables *> SCTPAssociation::getSortedPathMap()
 {
     std::vector<SCTPPathVariables *> sortedPaths;
-    for (SCTPPathMap::iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
         SCTPPathVariables *path = iterator->second;
         sortedPaths.insert(sortedPaths.end(), path);
     }
@@ -183,7 +183,7 @@ SCTPDataVariables *SCTPAssociation::makeDataVarFromDataMsg(SCTPDataMsg *datMsg,
     datVar->strReset = datMsg->getStrReset();
 
     // ------ Stream handling ---------------------------------------
-    SCTPSendStreamMap::iterator iterator = sendStreams.find(datMsg->getSid());
+    auto iterator = sendStreams.find(datMsg->getSid());
     SCTPSendStream *stream = iterator->second;
     uint32 nextSSN = stream->getNextStreamSeqNum();
     datVar->userData = datMsg->decapsulate();
@@ -220,7 +220,7 @@ SCTPPathVariables *SCTPAssociation::choosePathForRetransmission()
     uint32 max = 0;
     SCTPPathVariables *temp = nullptr;
 
-    for (SCTPPathMap::iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
         SCTPPathVariables *path = iterator->second;
         CounterMap::const_iterator tq = qCounter.roomTransQ.find(path->remoteAddress);
         if ((tq != qCounter.roomTransQ.end()) && (tq->second > max)) {
@@ -296,7 +296,7 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
         }
 
         // ------ ... then, try sending on all other paths --------------------
-        for (SCTPPathMap::iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+        for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
             SCTPPathVariables *path = iterator->second;
             if (path != firstPath) {
                 sendOnPath(path);
@@ -307,7 +307,7 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
             sendOnPath(firstPath, false);
 
             // ------ Then, try sending on all other paths ---------------------------
-            for (SCTPPathMap::iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+            for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
                 SCTPPathVariables *path = iterator->second;
                 if (path != firstPath) {
                     sendOnPath(path, false);
@@ -327,7 +327,7 @@ void SCTPAssociation::chunkReschedulingControl(SCTPPathVariables *path)
     double totalBandwidth = 0.0;
     unsigned int totalOutstandingBytes = 0;
     unsigned int totalQueuedBytes = 0;
-    for (SCTPPathMap::iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
         const SCTPPathVariables *myPath = iterator->second;
         totalQueuedBytes += myPath->queuedBytes;
         totalOutstandingBytes += myPath->outstandingBytes;
@@ -394,7 +394,7 @@ void SCTPAssociation::chunkReschedulingControl(SCTPPathVariables *path)
                  (simTime() >= path->blockingTimeout)))
             {
                 // ====== Rescheduling of chunk from other path to current path ====
-                SCTPQueue::PayloadQueue::iterator iterator = retransmissionQ->payloadQueue.begin();
+                auto iterator = retransmissionQ->payloadQueue.begin();
                 if (iterator != retransmissionQ->payloadQueue.end()) {
                     SCTPDataVariables *chunk = iterator->second;
                     SCTPPathVariables *lastPath = chunk->getLastDestinationPath();
@@ -732,7 +732,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
         }
         outstandingBytes = path->outstandingBytes;
         assert((int32)outstandingBytes >= 0);
-        CounterMap::iterator tq = qCounter.roomTransQ.find(path->remoteAddress);
+        auto tq = qCounter.roomTransQ.find(path->remoteAddress);
         tcount = tq->second;
         Tcount = getAllTransQ();
         scount = qCounter.roomSumSendStreams;    // includes header and padding
@@ -1205,7 +1205,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         }
                     }
 
-                    SCTP::AssocStatMap::iterator iterator = sctpMain->assocStatMap.find(assocId);
+                    auto iterator = sctpMain->assocStatMap.find(assocId);
                     iterator->second.transmittedBytes += datVar->len / 8;
 
                     datVar->setLastDestination(path);
@@ -1258,7 +1258,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                     EV_DETAIL << assocId << ": DataChunk with TSN=" << chunkPtr->getTsn() << " and length " << chunkPtr->getByteLength() << " added\n";
                     sctpMsg->addChunk(chunkPtr);
                     if (datVar->numberOfTransmissions > 1) {
-                        CounterMap::iterator tq = qCounter.roomTransQ.find(path->remoteAddress);
+                        auto tq = qCounter.roomTransQ.find(path->remoteAddress);
                         if (tq->second > 0) {
                             if (transmissionQ->getSizeOfFirstChunk(path->remoteAddress) > path->pmtu - sctpMsg->getByteLength() - 20)
                                 packetFull = true;
@@ -1414,7 +1414,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
 uint32 SCTPAssociation::getAllTransQ()
 {
     uint32 sum = 0;
-    for (CounterMap::iterator tq = qCounter.roomTransQ.begin(); tq != qCounter.roomTransQ.end(); tq++) {
+    for (auto tq = qCounter.roomTransQ.begin(); tq != qCounter.roomTransQ.end(); tq++) {
         sum += tq->second;
     }
     return sum;

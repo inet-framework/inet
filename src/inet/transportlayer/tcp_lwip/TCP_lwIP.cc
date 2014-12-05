@@ -123,7 +123,7 @@ TCP_lwIP::~TCP_lwIP()
     isAliveM = false;
 
     while (!tcpAppConnMapM.empty()) {
-        TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
+        auto i = tcpAppConnMapM.begin();
         delete i->second;
         tcpAppConnMapM.erase(i);
     }
@@ -488,7 +488,7 @@ void TCP_lwIP::updateDisplayString()
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (TcpAppConnMap::iterator i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); ++i) {
+    for (auto i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); ++i) {
         LwipTcpLayer::tcp_pcb *pcb = (*i).second->pcbM;
 
         if (nullptr == pcb) {
@@ -577,7 +577,7 @@ void TCP_lwIP::updateDisplayString()
 
 TcpLwipConnection *TCP_lwIP::findAppConn(int connIdP)
 {
-    TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
+    auto i = tcpAppConnMapM.find(connIdP);
     return i == tcpAppConnMapM.end() ? nullptr : (i->second);
 }
 

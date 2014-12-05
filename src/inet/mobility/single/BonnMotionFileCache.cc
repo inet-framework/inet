@@ -50,7 +50,7 @@ void BonnMotionFileCache::deleteInstance()
 const BonnMotionFile *BonnMotionFileCache::getFile(const char *filename)
 {
     // if found, return it from cache
-    BMFileMap::iterator it = cache.find(std::string(filename));
+    auto it = cache.find(std::string(filename));
     if (it != cache.end())
         return &(it->second);
 

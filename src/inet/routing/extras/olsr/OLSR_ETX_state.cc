@@ -42,7 +42,7 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
 {
     OLSR_ETX_link_tuple* best = nullptr;
 
-    for (ifaceassocset_t::iterator it = ifaceassocset_.begin();
+    for (auto it = ifaceassocset_.begin();
             it != ifaceassocset_.end(); it++)
     {
         OLSR_ETX_iface_assoc_tuple* iface_assoc_tuple = *it;

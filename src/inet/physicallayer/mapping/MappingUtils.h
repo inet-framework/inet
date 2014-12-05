@@ -1882,16 +1882,16 @@ class MultiDimMapping : public Mapping
 
     void copySubMappings()
     {
-        const typename interpolator_map_type::iterator itEnd = entries.end();
+        const auto itEnd = entries.end();
         Dimension nextDim = *(--dimensions.find(myDimension));
 
         if (nextDim == Dimension::time) {
-            for (typename interpolator_map_type::iterator it = entries.begin(); it != itEnd; ++it) {
+            for (auto it = entries.begin(); it != itEnd; ++it) {
                 it->second = new TimeMapping<Interpolator>(*(static_cast<TimeMapping<Interpolator> *>(it->second)));
             }
         }
         else {
-            for (typename interpolator_map_type::iterator it = entries.begin(); it != itEnd; ++it) {
+            for (auto it = entries.begin(); it != itEnd; ++it) {
                 if (outOfRangeMapping == 0) {
                     it->second = new MultiDimMapping<Interpolator>(*(static_cast<MultiDimMapping<Interpolator> *>(it->second)));
                 }
@@ -2038,7 +2038,7 @@ class MultiDimMapping : public Mapping
     virtual void setValue(const Argument& pos, argument_value_cref_t value)
     {
         argument_value_cref_t argVal = pos.getArgValue(myDimension);
-        typename interpolator_map_type::iterator posIt = entries.lower_bound(argVal);
+        auto posIt = entries.lower_bound(argVal);
 
         if (posIt == entries.end() || (entries.key_comp()(argVal, posIt->first))) {
             posIt = entries.insert(posIt, std::make_pair(argVal, createSubSignal()));
@@ -2201,7 +2201,7 @@ class INET_API FilledUpMapping : public MultiDimMapping<Linear>
             return;
         }
         argument_value_cref_t argVal = pos.getArgValue(myDimension);
-        interpolator_map_type::iterator posIt = entries.lower_bound(argVal);
+        auto posIt = entries.lower_bound(argVal);
 
         if (posIt == entries.end() || (entries.key_comp()(argVal, posIt->first))) {
             posIt = entries.insert(posIt, std::make_pair(argVal, createSubSignal()));

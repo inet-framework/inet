@@ -126,7 +126,7 @@ bool MatrixCloudDelayer::MatrixEntry::matches(const char *src, const char *dest)
 
 MatrixCloudDelayer::~MatrixCloudDelayer()
 {
-    for (MatrixEntryPtrVector::iterator i = matrixEntries.begin(); i != matrixEntries.end(); ++i)
+    for (auto i = matrixEntries.begin(); i != matrixEntries.end(); ++i)
         delete *i;
     matrixEntries.clear();
 }
@@ -182,7 +182,7 @@ void MatrixCloudDelayer::calculateDropAndDelay(const cMessage *msg, int srcID, i
 MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int srcID, int destID)
 {
     IDPair idPair(srcID, destID);
-    IDPairToDescriptorMap::iterator it = idPairToDescriptorMap.find(idPair);
+    auto it = idPairToDescriptorMap.find(idPair);
     if (it != idPairToDescriptorMap.end())
         return &(it->second);
 

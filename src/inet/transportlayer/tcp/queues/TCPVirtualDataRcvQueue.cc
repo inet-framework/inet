@@ -211,7 +211,7 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
 {
     uint32 bytes = 0;
 
-    for (RegionList::iterator i = regionList.begin(); i != regionList.end(); i++)
+    for (auto i = regionList.begin(); i != regionList.end(); i++)
         bytes += (*i)->getLength();
 
     return bytes;
@@ -236,7 +236,7 @@ void TCPVirtualDataRcvQueue::getQueueStatus()
 
 uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
 {
-    RegionList::iterator i = regionList.begin();
+    auto i = regionList.begin();
 
     while (i != regionList.end()) {
         if (seqLE((*i)->getBegin(), fromSeqNum) && seqLess(fromSeqNum, (*i)->getEnd())) {
@@ -252,7 +252,7 @@ uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
 
 uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
 {
-    RegionList::iterator i = regionList.begin();
+    auto i = regionList.begin();
 
     while (i != regionList.end()) {
         if (seqLess((*i)->getBegin(), toSeqNum) && seqLE(toSeqNum, (*i)->getEnd())) {

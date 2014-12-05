@@ -84,7 +84,7 @@ void EchoProtocol::processEchoReply(EchoPacket *reply)
     payload->setControlInfo(controlInfo);
     delete reply;
     long originatorId = payload->getOriginatorId();
-    PingMap::iterator i = pingMap.find(originatorId);
+    auto i = pingMap.find(originatorId);
     if (i != pingMap.end())
         send(payload, "pingOut", i->second);
     else {

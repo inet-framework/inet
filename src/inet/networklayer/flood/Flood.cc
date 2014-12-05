@@ -109,7 +109,7 @@ void Flood::handleUpperPacket(cPacket *m)
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
             //serach the broadcast list of outdated entries and delete them
-            for (cBroadcastList::iterator it = bcMsgs.begin(); it != bcMsgs.end(); ) {
+            for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
                 if (it->delTime < simTime())
                     it = bcMsgs.erase(it);
                 else

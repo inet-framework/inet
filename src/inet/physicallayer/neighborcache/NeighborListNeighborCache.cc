@@ -112,7 +112,7 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
 
 void NeighborListNeighborCache::removeRadio(const IRadio *radio)
 {
-    RadioEntries::iterator it = find(radios.begin(), radios.end(), radioToEntry[radio]);
+    auto it = find(radios.begin(), radios.end(), radioToEntry[radio]);
     if (it != radios.end()) {
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
@@ -136,7 +136,7 @@ void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio
 {
     for (unsigned int i = 0; i < radios.size(); i++) {
         Radios neighborVector = radios[i]->neighborVector;
-        Radios::iterator it = find(neighborVector.begin(), neighborVector.end(), radio);
+        auto it = find(neighborVector.begin(), neighborVector.end(), radio);
         if (it != neighborVector.end())
             neighborVector.erase(it);
     }

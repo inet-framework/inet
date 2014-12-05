@@ -68,8 +68,8 @@ void PIMNeighbor::changed()
 
 PIMNeighborTable::~PIMNeighborTable()
 {
-    for (InterfaceToNeighborsMap::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
-        for (PIMNeighborVector::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+    for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
             cancelEvent((*it2)->getLivenessTimer());
             delete (*it2);
         }
@@ -114,7 +114,7 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
 
     PIMNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
 
-    for (PIMNeighborVector::iterator it = neighborsOnInterface.begin(); it != neighborsOnInterface.end(); it++)
+    for (auto it = neighborsOnInterface.begin(); it != neighborsOnInterface.end(); it++)
         if ((*it)->getAddress() == entry->getAddress())
             return false;
 
@@ -134,10 +134,10 @@ bool PIMNeighborTable::deleteNeighbor(PIMNeighbor *neighbor)
 {
     Enter_Method_Silent();
 
-    InterfaceToNeighborsMap::iterator it = neighbors.find(neighbor->getInterfaceId());
+    auto it = neighbors.find(neighbor->getInterfaceId());
     if (it != neighbors.end()) {
         PIMNeighborVector& neighborsOnInterface = it->second;
-        PIMNeighborVector::iterator it2 = find(neighborsOnInterface.begin(), neighborsOnInterface.end(), neighbor);
+        auto it2 = find(neighborsOnInterface.begin(), neighborsOnInterface.end(), neighbor);
         if (it2 != neighborsOnInterface.end()) {
             neighborsOnInterface.erase(it2);
 
@@ -162,9 +162,9 @@ void PIMNeighborTable::restartLivenessTimer(PIMNeighbor *neighbor, double holdTi
 
 PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
 {
-    InterfaceToNeighborsMap::iterator neighborsOnInterface = neighbors.find(interfaceId);
+    auto neighborsOnInterface = neighbors.find(interfaceId);
     if (neighborsOnInterface != neighbors.end()) {
-        for (PIMNeighborVector::iterator it = neighborsOnInterface->second.begin(); it != neighborsOnInterface->second.end(); ++it)
+        for (auto it = neighborsOnInterface->second.begin(); it != neighborsOnInterface->second.end(); ++it)
             if ((*it)->getAddress() == addr && (*it)->getInterfaceId() == interfaceId)
                 return *it;
 
@@ -174,13 +174,13 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
 
 int PIMNeighborTable::getNumNeighbors(int interfaceId)
 {
-    InterfaceToNeighborsMap::iterator it = neighbors.find(interfaceId);
+    auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.size() : 0;
 }
 
 PIMNeighbor *PIMNeighborTable::getNeighbor(int interfaceId, int index)
 {
-    InterfaceToNeighborsMap::iterator it = neighbors.find(interfaceId);
+    auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : nullptr;
 }
 }    // namespace inet

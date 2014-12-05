@@ -727,7 +727,7 @@ OLSR::recv_olsr(cMessage* msg)
         {
             // If the message has been considered for forwarding, it should
             // not be retransmitted again
-            for (addr_list_t::iterator it = duplicated->iface_list().begin();
+            for (auto it = duplicated->iface_list().begin();
                     it != duplicated->iface_list().end();
                     it++)
             {
@@ -759,7 +759,7 @@ OLSR::recv_olsr(cMessage* msg)
  void CoverTwoHopNeighbors(const nsaddr_t &neighborMainAddr, nb2hopset_t & N2)
 { // first gather all 2-hop neighbors to be removed
     std::set<nsaddr_t> toRemove;
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); it++)
+    for (auto it = N2.begin(); it != N2.end(); it++)
     {
         OLSR_nb2hop_tuple* twoHopNeigh = *it;
         if (twoHopNeigh->nb_main_addr() == neighborMainAddr)
@@ -768,7 +768,7 @@ OLSR::recv_olsr(cMessage* msg)
         }
     }
     // Now remove all matching records from N2
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    for (auto it = N2.begin(); it != N2.end();)
     {
         OLSR_nb2hop_tuple* twoHopNeigh = *it;
         if (toRemove.find(twoHopNeigh->nb2hop_addr()) != toRemove.end())
@@ -794,7 +794,7 @@ OLSR::mpr_computation()
     nbset_t N; nb2hopset_t N2;
     // N is the subset of neighbors of the node, which are
     // neighbor "of the interface I"
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
         if ((*it)->getStatus() == OLSR_STATUS_SYM) // I think that we need this check
             N.push_back(*it);
 
@@ -804,7 +804,7 @@ OLSR::mpr_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_nb2hop_tuple* nb2hop_tuple = *it;
         bool ok = true;
@@ -831,7 +831,7 @@ OLSR::mpr_computation()
 
     // 1. Start with an MPR set made of all members of N with
     // N_willingness equal to WILL_ALWAYS
-    for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+    for (auto it = N.begin(); it != N.end(); it++)
     {
         OLSR_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() == OLSR_WILL_ALWAYS)
@@ -846,12 +846,12 @@ OLSR::mpr_computation()
     // nodes from N2 which are now covered by a node in the MPR set.
     mprset_t foundset;
     std::set<nsaddr_t> deleted_addrs;
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    for (auto it = N2.begin(); it != N2.end();)
     {
         increment = true;
         OLSR_nb2hop_tuple* nb2hop_tuple1 = *it;
 
-        mprset_t::iterator pos = foundset.find(nb2hop_tuple1->nb2hop_addr());
+        auto pos = foundset.find(nb2hop_tuple1->nb2hop_addr());
         if (pos != foundset.end())
         {
             it++;
@@ -859,7 +859,7 @@ OLSR::mpr_computation()
         }
 
         bool found = false;
-        for (nbset_t::iterator it2 = N.begin(); it2 != N.end(); it2++)
+        for (auto it2 = N.begin(); it2 != N.end(); it2++)
         {
             if ((*it2)->nb_main_addr() == nb2hop_tuple1->nb_main_addr())
             {
@@ -876,7 +876,7 @@ OLSR::mpr_computation()
 
         found = false;
 
-        for (nb2hopset_t::iterator it2 = it + 1; it2 != N2.end(); it2++)
+        for (auto it2 = it + 1; it2 != N2.end(); it2++)
         {
             OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
             if (nb2hop_tuple1->nb2hop_addr() == nb2hop_tuple2->nb2hop_addr())
@@ -891,7 +891,7 @@ OLSR::mpr_computation()
         {
             state_.insert_mpr_addr(nb2hop_tuple1->nb_main_addr());
 
-            for (nb2hopset_t::iterator it2 = it + 1; it2 != N2.end();)
+            for (auto it2 = it + 1; it2 != N2.end();)
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
                 if (nb2hop_tuple1->nb_main_addr() == nb2hop_tuple2->nb_main_addr())
@@ -907,7 +907,7 @@ OLSR::mpr_computation()
             int distanceFromEnd = std::distance(it, N2.end());
             int distance = std::distance(N2.begin(), it);
             int i = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); i < distance; i++) // check now the first section
+            for (auto it2 = N2.begin(); i < distance; i++) // check now the first section
             {
 
                 OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
@@ -930,7 +930,7 @@ OLSR::mpr_computation()
                 it2 != deleted_addrs.end();
                 it2++)
         {
-            for (nb2hopset_t::iterator it3 = N2.begin();
+            for (auto it3 = N2.begin();
                     it3 != N2.end();)
             {
                 if ((*it3)->nb2hop_addr() == *it2)
@@ -960,11 +960,11 @@ OLSR::mpr_computation()
         // through this 1-hop neighbor
         std::map<int, std::vector<OLSR_nb_tuple*> > reachability;
         std::set<int> rs;
-        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        for (auto it = N.begin(); it != N.end(); it++)
         {
             OLSR_nb_tuple* nb_tuple = *it;
             int r = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            for (auto it2 = N2.begin(); it2 != N2.end(); it2++)
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple = *it2;
                 if (nb_tuple->nb_main_addr() == nb2hop_tuple->nb_main_addr())
@@ -1022,7 +1022,7 @@ OLSR::mpr_computation()
         {
             state_.insert_mpr_addr(max->nb_main_addr());
             std::set<nsaddr_t> nb2hop_addrs;
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); )
+            for (auto it = N2.begin(); it != N2.end(); )
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple = *it;
                 if (nb2hop_tuple->nb_main_addr() == max->nb_main_addr())
@@ -1034,7 +1034,7 @@ OLSR::mpr_computation()
                     it++;
 
             }
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple = *it;
                 std::set<nsaddr_t>::iterator it2 =
@@ -1063,7 +1063,7 @@ OLSR::mpr_computation()
     nbset_t N; nb2hopset_t N2;
     // N is the subset of neighbors of the node, which are
     // neighbor "of the interface I"
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
         if ((*it)->getStatus() == OLSR_STATUS_SYM) // I think that we need this check
             N.push_back(*it);
 
@@ -1073,7 +1073,7 @@ OLSR::mpr_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_nb2hop_tuple* nb2hop_tuple = *it;
         // (ii)  the node performing the computation
@@ -1109,7 +1109,7 @@ OLSR::mpr_computation()
         // excluding:
         // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
         //       link to this node on some interface.
-        for (nbset_t::iterator it2 = N.begin(); it2 != N.end(); it2++)
+        for (auto it2 = N.begin(); it2 != N.end(); it2++)
         {
             OLSR_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb2hop_addr())
@@ -1124,7 +1124,7 @@ OLSR::mpr_computation()
 
     // 1. Start with an MPR set made of all members of N with
     // N_willingness equal to WILL_ALWAYS
-    for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+    for (auto it = N.begin(); it != N.end(); it++)
     {
         OLSR_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() == OLSR_WILL_ALWAYS)
@@ -1144,7 +1144,7 @@ OLSR::mpr_computation()
     // nodes from N2 which are now covered by a node in the MPR set.
 
     std::set<nsaddr_t> coveredTwoHopNeighbors;
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); it++)
+    for (auto it = N2.begin(); it != N2.end(); it++)
     {
         OLSR_nb2hop_tuple* twoHopNeigh = *it;
         bool onlyOne = true;
@@ -1175,7 +1175,7 @@ OLSR::mpr_computation()
         }
     }
     // Remove the nodes from N2 which are now covered by a node in the MPR set.
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    for (auto it = N2.begin(); it != N2.end();)
     {
         OLSR_nb2hop_tuple* twoHopNeigh = *it;
         if (coveredTwoHopNeighbors.find(twoHopNeigh->nb2hop_addr()) != coveredTwoHopNeighbors.end())
@@ -1201,11 +1201,11 @@ OLSR::mpr_computation()
         // through this 1-hop neighbor
         std::map<int, std::vector<OLSR_nb_tuple*> > reachability;
         std::set<int> rs;
-        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        for (auto it = N.begin(); it != N.end(); it++)
         {
             OLSR_nb_tuple* nb_tuple = *it;
             int r = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            for (auto it2 = N2.begin(); it2 != N2.end(); it2++)
             {
                 OLSR_nb2hop_tuple* nb2hop_tuple = *it2;
 
@@ -1296,14 +1296,14 @@ OLSR::rtable_computation()
     // 2. The new routing entries are added starting with the
     // symmetric neighbors (h=1) as the destination nodes.
 
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
     {
         OLSR_nb_tuple* nb_tuple = *it;
         if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
         {
             bool nb_main_addr = false;
             OLSR_link_tuple* lt = nullptr;
-            for (linkset_t::iterator it2 = linkset().begin(); it2 != linkset().end(); it2++)
+            for (auto it2 = linkset().begin(); it2 != linkset().end(); it2++)
             {
                 OLSR_link_tuple* link_tuple = *it2;
                 if (get_main_addr(link_tuple->nb_iface_addr()) == nb_tuple->nb_main_addr() && link_tuple->time() >= CURRENT_TIME)
@@ -1355,7 +1355,7 @@ OLSR::rtable_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_nb2hop_tuple* nb2hop_tuple = *it;
         bool ok = true;
@@ -1409,7 +1409,7 @@ OLSR::rtable_computation()
         // corresponds to R_dest_addr of a route entry whose R_dist
         // is equal to h, then a new route entry MUST be recorded in
         // the routing table (if it does not already exist)
-        for (topologyset_t::iterator it = topologyset().begin();
+        for (auto it = topologyset().begin();
                 it != topologyset().end();
                 it++)
         {
@@ -1445,7 +1445,7 @@ OLSR::rtable_computation()
         // AND there is no routing entry such that:
         //  R_dest_addr  == I_iface_addr
         // then a route entry is created in the routing table
-        for (ifaceassocset_t::iterator it = ifaceassocset().begin();
+        for (auto it = ifaceassocset().begin();
                 it != ifaceassocset().end();
                 it++)
         {
@@ -1606,7 +1606,7 @@ OLSR::process_mid(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
     for (int i = 0; i < mid.count; i++)
     {
         bool updated = false;
-        for (ifaceassocset_t::iterator it = ifaceassocset().begin();
+        for (auto it = ifaceassocset().begin();
                 it != ifaceassocset().end();
                 it++)
         {
@@ -1849,7 +1849,7 @@ OLSR::send_hello()
     msg.hello().count = 0;
 
     std::map<uint8_t, int> linkcodes_count;
-    for (linkset_t::iterator it = linkset().begin(); it != linkset().end(); it++)
+    for (auto it = linkset().begin(); it != linkset().end(); it++)
     {
         OLSR_link_tuple* link_tuple = *it;
         if (get_main_addr(link_tuple->local_iface_addr()) == ra_addr() && link_tuple->time() >= now)
@@ -1871,7 +1871,7 @@ OLSR::send_hello()
             else
             {
                 bool ok = false;
-                for (nbset_t::iterator nb_it = nbset().begin();
+                for (auto nb_it = nbset().begin();
                         nb_it != nbset().end();
                         nb_it++)
                 {
@@ -1947,7 +1947,7 @@ OLSR::send_tc()
     msg.tc().reserved() = 0;
     msg.tc().count = 0;
 
-    for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
+    for (auto it = mprselset().begin(); it != mprselset().end(); it++)
     {
         OLSR_mprsel_tuple* mprsel_tuple = *it;
         int count = msg.tc().count;
@@ -2112,7 +2112,7 @@ OLSR::populate_nb2hopset(OLSR_msg& msg)
     double now = CURRENT_TIME;
     OLSR_hello& hello = msg.hello();
 
-    for (linkset_t::iterator it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
+    for (auto it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
         OLSR_link_tuple* link_tuple = *it_lt;
         if (get_main_addr(link_tuple->nb_iface_addr()) == msg.orig_addr())
@@ -2678,7 +2678,7 @@ int
 OLSR::degree(OLSR_nb_tuple* tuple)
 {
     int degree = 0;
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_nb2hop_tuple* nb2hop_tuple = *it;
         if (nb2hop_tuple->nb_main_addr() == tuple->nb_main_addr())
@@ -3000,7 +3000,7 @@ bool OLSR::getDestAddress(cPacket *msg, L3Address &dest)
 
 void OLSR::scheduleNextEvent()
 {
-    TimerQueue::iterator e = timerQueuePtr->begin();
+    auto e = timerQueuePtr->begin();
     if (timerMessage->isScheduled())
     {
         if (e->first < timerMessage->getArrivalTime())

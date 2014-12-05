@@ -114,7 +114,7 @@ int NS_CLASS timer_remove(struct timer *t)
         return -1;
 
     t->used = 0;
-    for (AodvTimerMap::iterator it = aodvTimerMap.begin();it != aodvTimerMap.end();it++)
+    for (auto it = aodvTimerMap.begin();it != aodvTimerMap.end();it++)
     {
         if (it->second == t)
         {

@@ -138,7 +138,7 @@ void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
 void SCTPAssociation::cwndUpdateBeforeSack()
 {
     // First, calculate per-path values.
-    for (SCTPPathMap::iterator otherPathIterator = sctpPathMap.begin();
+    for (auto otherPathIterator = sctpPathMap.begin();
          otherPathIterator != sctpPathMap.end(); otherPathIterator++)
     {
         SCTPPathVariables *otherPath = otherPathIterator->second;
@@ -146,7 +146,7 @@ void SCTPAssociation::cwndUpdateBeforeSack()
     }
 
     // Calculate per-path-group values.
-    for (SCTPPathMap::iterator currentPathIterator = sctpPathMap.begin();
+    for (auto currentPathIterator = sctpPathMap.begin();
          currentPathIterator != sctpPathMap.end(); currentPathIterator++)
     {
         SCTPPathVariables *currentPath = currentPathIterator->second;
@@ -202,7 +202,7 @@ void SCTPAssociation::recordCwndUpdate(SCTPPathVariables *path)
         uint32 totalSsthresh = 0.0;
         uint32 totalCwnd = 0.0;
         double totalBandwidth = 0.0;
-        for (SCTPPathMap::iterator pathIterator = sctpPathMap.begin();
+        for (auto pathIterator = sctpPathMap.begin();
              pathIterator != sctpPathMap.end(); pathIterator++)
         {
             SCTPPathVariables *path = pathIterator->second;
@@ -277,7 +277,7 @@ int32 SCTPAssociation::rpPathBlockingControl(SCTPPathVariables *path, const doub
 
 void SCTPAssociation::cwndUpdateAfterSack()
 {
-    for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
+    for (auto iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
         SCTPPathVariables *path = iter->second;
         if (path->fastRecoveryActive == false) {
             // ====== Retransmission required -> reduce congestion window ======
@@ -401,7 +401,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
             }
         }
         else {
-            for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
+            for (auto iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
                 SCTPPathVariables *path = iter->second;
                 if (path->fastRecoveryActive) {
                     EV_INFO << assocId << ": " << simTime() << ":\tCC [cwndUpdateAfterSack] Still in Fast Recovery on path "
@@ -415,7 +415,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
 
 void SCTPAssociation::updateFastRecoveryStatus(const uint32 lastTsnAck)
 {
-    for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
+    for (auto iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
         SCTPPathVariables *path = iter->second;
 
         if (path->fastRecoveryActive) {

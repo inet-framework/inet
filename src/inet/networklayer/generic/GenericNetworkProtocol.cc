@@ -46,7 +46,7 @@ GenericNetworkProtocol::GenericNetworkProtocol() :
 
 GenericNetworkProtocol::~GenericNetworkProtocol()
 {
-    for (DatagramQueueForHooks::iterator it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
+    for (auto it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
         delete it->datagram;
     }
     queuedDatagramsForHooks.clear();

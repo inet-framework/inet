@@ -100,7 +100,7 @@ bool BindingCache::isInBindingCache(const IPv6Address& HoA) const
 
 void BindingCache::deleteEntry(IPv6Address& HoA)
 {
-    BindingCache6::iterator pos = bindingCache.find(HoA);
+    auto pos = bindingCache.find(HoA);
 
     if (pos != bindingCache.end()) // update 11.9.07 - CB
         bindingCache.erase(pos);

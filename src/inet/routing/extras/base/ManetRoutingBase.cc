@@ -262,7 +262,7 @@ void ManetRoutingBase::registerRoutingModule()
             globalRouteMap = new GlobalRouteMap;
         }
 
-        GlobalRouteMap::iterator it = globalRouteMap->find(getAddress());
+        auto it = globalRouteMap->find(getAddress());
         if (it == globalRouteMap->end())
         {
             ProtocolRoutingData data;
@@ -303,7 +303,7 @@ ManetRoutingBase::~ManetRoutingBase()
 
     if (globalRouteMap)
     {
-        GlobalRouteMap::iterator it = globalRouteMap->find(getAddress());
+        auto it = globalRouteMap->find(getAddress());
         if (it != globalRouteMap->end())
             globalRouteMap->erase(it);
         if (globalRouteMap->empty())
@@ -1007,7 +1007,7 @@ L3Address ManetRoutingBase::getNextHopInternal(const L3Address &dest)
         return L3Address();
     if (routesVector->empty())
         return L3Address();
-    RouteMap::iterator it = routesVector->find(dest);
+    auto it = routesVector->find(dest);
     if (it!=routesVector->end())
         return it->second;
     return L3Address();
@@ -1383,7 +1383,7 @@ void ManetRoutingBase::setRouteInternalStorege(const L3Address &dest, const L3Ad
      }
      else if (createInternalStore && routesVector)
      {
-         RouteMap::iterator it = routesVector->find(dest);
+         auto it = routesVector->find(dest);
          if (it != routesVector->end())
          {
              if (erase)
@@ -1405,7 +1405,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const L3Address &src, const L3Address 
     route.push_back(src);
     while (1)
     {
-        GlobalRouteMap::iterator it = globalRouteMap->find(next);
+        auto it = globalRouteMap->find(next);
         if (it==globalRouteMap->end())
             return false;
         if (it->second.empty())
@@ -1414,7 +1414,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const L3Address &src, const L3Address 
         if (it->second.size() == 1)
         {
             RouteMap *rt = it->second[0].routesVector;
-            RouteMap::iterator it2 = rt->find(dest);
+            auto it2 = rt->find(dest);
             if (it2 == rt->end())
                 return false;
             if (it2->second == dest)
@@ -1438,7 +1438,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const L3Address &src, const L3Address 
                 rt = it->second[0].routesVector;
             else
                 rt = it->second[1].routesVector;
-            RouteMap::iterator it2 = rt->find(dest);
+            auto it2 = rt->find(dest);
             if (it2 == rt->end())
             {
                 // search in the reactive

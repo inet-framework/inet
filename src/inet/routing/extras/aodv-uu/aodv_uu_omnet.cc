@@ -1381,7 +1381,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const int &i
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
         L3Address dest = fwd_rt->dest_addr.s_addr;
-        AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
+        auto it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
             if (it->second != fwd_rt)
@@ -1444,7 +1444,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const char  
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
         L3Address dest = fwd_rt->dest_addr.s_addr;
-        AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
+        auto it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
             if (it->second != fwd_rt)

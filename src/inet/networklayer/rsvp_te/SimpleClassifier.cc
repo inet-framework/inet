@@ -122,7 +122,7 @@ void SimpleClassifier::readTableFromXML(const cXMLElement *fectable)
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
     checkTags(fectable, "fecentry");
     cXMLElementList list = fectable->getChildrenByTagName("fecentry");
-    for (cXMLElementList::iterator it = list.begin(); it != list.end(); it++)
+    for (auto it = list.begin(); it != list.end(); it++)
         readItemFromXML(*it);
 }
 

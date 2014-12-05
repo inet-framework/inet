@@ -67,7 +67,7 @@ void TCPSACKRexmitQueue::discardUpTo(uint32 seqNum)
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
     if (!rexmitQueue.empty()) {
-        RexmitQueue::iterator i = rexmitQueue.begin();
+        auto i = rexmitQueue.begin();
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
             i = rexmitQueue.erase(i);
@@ -105,7 +105,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         fromSeqNum = toSeqNum;
     }
     else {
-        RexmitQueue::iterator i = rexmitQueue.begin();
+        auto i = rexmitQueue.begin();
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
             i++;
@@ -197,7 +197,7 @@ void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
     bool found = false;
 
     if (!rexmitQueue.empty()) {
-        RexmitQueue::iterator i = rexmitQueue.begin();
+        auto i = rexmitQueue.begin();
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
             i++;
@@ -300,13 +300,13 @@ uint32 TCPSACKRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32 f
 
 void TCPSACKRexmitQueue::resetSackedBit()
 {
-    for (RexmitQueue::iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
+    for (auto i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
         i->sacked = false; // reset sacked bit
 }
 
 void TCPSACKRexmitQueue::resetRexmittedBit()
 {
-    for (RexmitQueue::iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
+    for (auto i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
         i->rexmitted = false; // reset rexmitted bit
 }
 

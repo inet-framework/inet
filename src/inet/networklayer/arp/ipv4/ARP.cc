@@ -93,7 +93,7 @@ void ARP::finish()
 
 ARP::~ARP()
 {
-    for (ARPCache::iterator i = arpCache.begin(); i != arpCache.end(); ++i)
+    for (auto i = arpCache.begin(); i != arpCache.end(); ++i)
         delete i->second;
 }
 
@@ -161,7 +161,7 @@ void ARP::stop()
 void ARP::flush()
 {
     while (!arpCache.empty()) {
-        ARPCache::iterator i = arpCache.begin();
+        auto i = arpCache.begin();
         ARPCacheEntry *entry = i->second;
         cancelAndDelete(entry->timer);
         entry->timer = nullptr;
@@ -338,7 +338,7 @@ void ARP::processARPPacket(ARPPacket *arp)
 
     bool mergeFlag = false;
     // "If ... sender protocol address is already in my translation table"
-    ARPCache::iterator it = arpCache.find(srcIPAddress);
+    auto it = arpCache.find(srcIPAddress);
     if (it != arpCache.end()) {
         // "update the sender hardware address field"
         ARPCacheEntry *entry = it->second;
@@ -358,7 +358,7 @@ void ARP::processARPPacket(ARPPacket *arp)
             }
             else {
                 entry = new ARPCacheEntry();
-                ARPCache::iterator where = arpCache.insert(arpCache.begin(), std::make_pair(srcIPAddress, entry));
+                auto where = arpCache.insert(arpCache.begin(), std::make_pair(srcIPAddress, entry));
                 entry->myIter = where;
                 entry->ie = ie;
 
@@ -443,7 +443,7 @@ MACAddress ARP::resolveL3Address(const L3Address& address, const InterfaceEntry 
         // no cache entry: launch ARP request
         ARPCacheEntry *entry = new ARPCacheEntry();
         entry->owner = this;
-        ARPCache::iterator where = arpCache.insert(arpCache.begin(), std::make_pair(addr, entry));
+        auto where = arpCache.insert(arpCache.begin(), std::make_pair(addr, entry));
         entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         entry->ie = ie;
 

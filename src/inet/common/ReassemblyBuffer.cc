@@ -83,7 +83,7 @@ void ReassemblyBuffer::mergeFragments()
     bool oncemore;
     do {
         oncemore = false;
-        for (RegionVector::iterator i = frags.begin(); i != frags.end(); ) {
+        for (auto i = frags.begin(); i != frags.end(); ) {
             bool deleteit = false;
             Region& frag = *i;
             if (main.end == frag.beg) {

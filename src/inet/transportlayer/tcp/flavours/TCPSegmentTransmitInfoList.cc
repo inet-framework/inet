@@ -35,7 +35,7 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
     else if (end == regions.front().beg)
         regions.push_front(Item(beg, end, sentTime, sentTime, 1));
     else {
-        TCPSegmentTransmitInfoItems::iterator i = regions.begin();
+        auto i = regions.begin();
         while (seqLE(i->end, beg))
             ++i;
 

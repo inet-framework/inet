@@ -249,7 +249,7 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
 
 Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 {
-    for (AccessPointList::iterator it = apList.begin(); it != apList.end(); ++it)
+    for (auto it = apList.begin(); it != apList.end(); ++it)
         if (it->address == address)
             return &(*it);
 
@@ -258,7 +258,7 @@ Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 
 void Ieee80211MgmtSTA::clearAPList()
 {
-    for (AccessPointList::iterator it = apList.begin(); it != apList.end(); ++it)
+    for (auto it = apList.begin(); it != apList.end(); ++it)
         if (it->authTimeoutMsg)
             delete cancelEvent(it->authTimeoutMsg);
 
@@ -470,7 +470,7 @@ void Ieee80211MgmtSTA::sendScanConfirm()
     int n = apList.size();
     Ieee80211Prim_ScanConfirm *confirm = new Ieee80211Prim_ScanConfirm();
     confirm->setBssListArraySize(n);
-    AccessPointList::iterator it = apList.begin();
+    auto it = apList.begin();
     //XXX filter for req'd bssid and ssid
     for (int i = 0; i < n; i++, it++) {
         APInfo *ap = &(*it);

@@ -74,7 +74,7 @@ int NS_CLASS pending_rreq_remove(pending_rreq_t *entry)
     if (!entry)
         return 0;
 
-    DymoPendingRreq::iterator it = dymoPendingRreq->find(entry->dest_addr.s_addr);
+    auto it = dymoPendingRreq->find(entry->dest_addr.s_addr);
     if (it != dymoPendingRreq->end())
     {
         if ((*it).second == entry)
@@ -97,7 +97,7 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
     if (getAp(dest,apAddr))
         dest = apAddr;
 
-    DymoPendingRreq::iterator it = dymoPendingRreq->find(dest);
+    auto it = dymoPendingRreq->find(dest);
     if (it != dymoPendingRreq->end())
     {
         pending_rreq_t *entry = it->second;

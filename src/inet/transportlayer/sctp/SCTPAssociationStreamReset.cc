@@ -155,7 +155,7 @@ void SCTPAssociation::sendStreamResetRequest(uint16 type)
     resetChunk->setBitLength((SCTP_STREAM_RESET_CHUNK_LENGTH) * 8);
     uint32 srsn = state->streamResetSequenceNumber;
     SCTPResetTimer *rt = new SCTPResetTimer();
-    SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+    auto it = sctpMain->assocStatMap.find(assocId);
     switch (type) {
         case RESET_OUTGOING:
             EV_INFO << "RESET_OUTGOING\n";
@@ -268,7 +268,7 @@ void SCTPAssociation::sendStreamResetResponse(uint32 srrsn)
 
 void SCTPAssociation::resetExpectedSsns()
 {
-    for (SCTPReceiveStreamMap::iterator iter = receiveStreams.begin(); iter != receiveStreams.end(); iter++)
+    for (auto iter = receiveStreams.begin(); iter != receiveStreams.end(); iter++)
         iter->second->setExpectedStreamSeqNum(0);
     EV_INFO << "Expected Ssns have been resetted on " << localAddr << "\n";
     sendIndicationToApp(SCTP_I_RCV_STREAMS_RESETTED);
@@ -276,7 +276,7 @@ void SCTPAssociation::resetExpectedSsns()
 
 void SCTPAssociation::resetSsns()
 {
-    for (SCTPSendStreamMap::iterator iter = sendStreams.begin(); iter != sendStreams.end(); iter++)
+    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); iter++)
         iter->second->setNextStreamSeqNum(0);
     EV_INFO << "SSns resetted on " << localAddr << "\n";
     sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);

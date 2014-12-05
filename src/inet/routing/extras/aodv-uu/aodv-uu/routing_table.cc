@@ -89,7 +89,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 
     dest = dest_addr.s_addr;
     /* Check if we already have an entry for dest_addr */
-    AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
+    auto it = aodvRtTableMap.find(dest);
     if (it != aodvRtTableMap.end())
     {
         DEBUG(LOG_INFO, 0, "%s already exist in routing table!",
@@ -230,7 +230,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
         return nullptr;
 
     /* Check if we already have an entry for dest_addr */
-    AodvRtTableMap::iterator it = aodvRtTableMap.find(dest_addr.s_addr);
+    auto it = aodvRtTableMap.find(dest_addr.s_addr);
 
     if (it != aodvRtTableMap.end())
         return it->second;
@@ -251,7 +251,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
 rt_table_t *NS_CLASS rt_table_find_gateway()
 {
     rt_table_t *gw = nullptr;
-    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
         rt_table_t *rt = it->second;
         if ((rt->flags & RT_GATEWAY) && rt->state == VALID)
@@ -272,7 +272,7 @@ int NS_CLASS rt_table_update_inet_rt(rt_table_t * gw, u_int32_t life)
     if (!gw)
         return -1;
 
-    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
         rt_table_t *rt = it->second;
         if (rt->flags & RT_INET_DEST && rt->state == VALID)
@@ -350,7 +350,7 @@ int NS_CLASS rt_table_invalidate(rt_table_t * rt)
         int i;
 
         rt_table_t *gw = rt_table_find_gateway();
-        for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+        for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
         {
             rt_table_t *rt2 = it->second;
             if (rt2->state == VALID && (rt2->flags & RT_INET_DEST) && (rt2->next_hop.s_addr == rt->dest_addr.s_addr))
@@ -417,7 +417,7 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
     }
 
     L3Address dest = rt->dest_addr.s_addr;
-    AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
+    auto it = aodvRtTableMap.find(dest);
     if (it != aodvRtTableMap.end())
     {
         if (it->second != rt)

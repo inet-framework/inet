@@ -32,7 +32,7 @@ SCTPQueue::SCTPQueue()
 
 SCTPQueue::~SCTPQueue()
 {
-    for (PayloadQueue::iterator iterator = payloadQueue.begin();
+    for (auto iterator = payloadQueue.begin();
          iterator != payloadQueue.end(); iterator++)
     {
         SCTPDataVariables *chunk = iterator->second;
@@ -45,7 +45,7 @@ SCTPQueue::~SCTPQueue()
 
 bool SCTPQueue::checkAndInsertChunk(const uint32 key, SCTPDataVariables *chunk)
 {
-    PayloadQueue::iterator found = payloadQueue.find(key);
+    auto found = payloadQueue.find(key);
     if (found != payloadQueue.end()) {
         return false;
     }
@@ -61,7 +61,7 @@ uint32 SCTPQueue::getQueueSize() const
 SCTPDataVariables *SCTPQueue::extractMessage()
 {
     if (!payloadQueue.empty()) {
-        PayloadQueue::iterator iterator = payloadQueue.begin();
+        auto iterator = payloadQueue.begin();
         SCTPDataVariables *chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
@@ -72,7 +72,7 @@ SCTPDataVariables *SCTPQueue::extractMessage()
 SCTPDataVariables *SCTPQueue::getAndExtractChunk(const uint32 tsn)
 {
     if (!payloadQueue.empty()) {
-        PayloadQueue::iterator iterator = payloadQueue.find(tsn);
+        auto iterator = payloadQueue.find(tsn);
         SCTPDataVariables *chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
@@ -153,13 +153,13 @@ SCTPDataVariables *SCTPQueue::getChunkFast(const uint32 tsn, bool& firstTime)
 
 void SCTPQueue::removeMsg(const uint32 tsn)
 {
-    PayloadQueue::iterator iterator = payloadQueue.find(tsn);
+    auto iterator = payloadQueue.find(tsn);
     payloadQueue.erase(iterator);
 }
 
 bool SCTPQueue::deleteMsg(const uint32 tsn)
 {
-    PayloadQueue::iterator iterator = payloadQueue.find(tsn);
+    auto iterator = payloadQueue.find(tsn);
     if (iterator != payloadQueue.end()) {
         SCTPDataVariables *chunk = iterator->second;
         cMessage *msg = check_and_cast<cMessage *>(chunk->userData);
@@ -183,7 +183,7 @@ int32 SCTPQueue::getNumBytes() const
 
 SCTPDataVariables *SCTPQueue::dequeueChunkBySSN(const uint16 ssn)
 {
-    for (PayloadQueue::iterator iterator = payloadQueue.begin();
+    for (auto iterator = payloadQueue.begin();
          iterator != payloadQueue.end(); iterator++)
     {
         SCTPDataVariables *chunk = iterator->second;

@@ -276,7 +276,7 @@ void RTPProfile::processOutgoingPacket(RTPInnerPacket *rinp)
 
 RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
 {
-    SSRCGateMap::iterator objectIndex = _ssrcGates.find(ssrc);
+    auto objectIndex = _ssrcGates.find(ssrc);
     if (objectIndex == _ssrcGates.end())
         return nullptr;
     return objectIndex->second;

@@ -220,7 +220,7 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegmen
     cPacket *msg;
     uint32 endSeqNo;
 
-    PayloadList::iterator i = payloadListM.begin();
+    auto i = payloadListM.begin();
     while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != nullptr) {
         if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo)
             && (!isValidSeqNoM || seqLess(lastExtractedSeqNoM, endSeqNo)))

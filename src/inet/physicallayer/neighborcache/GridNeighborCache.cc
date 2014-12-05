@@ -113,7 +113,7 @@ void GridNeighborCache::addRadio(const IRadio *radio)
 
 void GridNeighborCache::removeRadio(const IRadio *radio)
 {
-    Radios::iterator it = find(radios.begin(), radios.end(), radio);
+    auto it = find(radios.begin(), radios.end(), radio);
     if (it != radios.end()) {
         radios.erase(it);
         Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();

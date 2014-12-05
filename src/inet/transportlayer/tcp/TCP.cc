@@ -107,7 +107,7 @@ void TCP::initialize(int stage)
 TCP::~TCP()
 {
     while (!tcpAppConnMap.empty()) {
-        TcpAppConnMap::iterator i = tcpAppConnMap.begin();
+        auto i = tcpAppConnMap.begin();
         delete i->second;
         tcpAppConnMap.erase(i);
     }
@@ -231,7 +231,7 @@ void TCP::updateDisplayString()
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (TcpAppConnMap::iterator i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i) {
+    for (auto i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i) {
         int state = (*i).second->getFsmState();
 
         switch (state) {
@@ -365,7 +365,7 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
     key.appGateIndex = appGateIndex;
     key.connId = connId;
 
-    TcpAppConnMap::iterator i = tcpAppConnMap.find(key);
+    auto i = tcpAppConnMap.find(key);
     return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
@@ -400,7 +400,7 @@ void TCP::addSockPair(TCPConnection *conn, L3Address localAddr, L3Address remote
     key.remotePort = conn->remotePort = remotePort;
 
     // make sure connection is unique
-    TcpConnMap::iterator it = tcpConnMap.find(key);
+    auto it = tcpConnMap.find(key);
     if (it != tcpConnMap.end()) {
         // throw "address already in use" error
         if (remoteAddr.isUnspecified() && remotePort == -1)
@@ -427,7 +427,7 @@ void TCP::updateSockPair(TCPConnection *conn, L3Address localAddr, L3Address rem
     key.remoteAddr = conn->remoteAddr;
     key.localPort = conn->localPort;
     key.remotePort = conn->remotePort;
-    TcpConnMap::iterator it = tcpConnMap.find(key);
+    auto it = tcpConnMap.find(key);
 
     ASSERT(it != tcpConnMap.end() && it->second == conn);
 
@@ -565,7 +565,7 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 
 void TCP::reset()
 {
-    for (TcpAppConnMap::iterator it = tcpAppConnMap.begin(); it != tcpAppConnMap.end(); ++it)
+    for (auto it = tcpAppConnMap.begin(); it != tcpAppConnMap.end(); ++it)
         delete it->second;
     tcpAppConnMap.clear();
     tcpConnMap.clear();

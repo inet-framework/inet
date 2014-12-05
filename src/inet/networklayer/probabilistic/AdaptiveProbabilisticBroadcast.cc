@@ -45,7 +45,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastDatagr
     //EV << "updateNeighMap(): neighAddress: " << nodeAddress << endl;
 
     //search for it in the "already-neighbors" map
-    NeighborMap::iterator it = neighMap.find(nodeAddress);
+    auto it = neighMap.find(nodeAddress);
 
     //if the node is a "new" neighbor
     if (it == neighMap.end()) {
@@ -84,7 +84,7 @@ void AdaptiveProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
     if (msg->getKind() == NEIGHBOR_TIMER) {
         const NeighborMap::key_type& node = *static_cast<NeighborMap::key_type *>(msg->getContextPointer());
         EV << "handleSelfMsg(): Remove node " << node << " from NeighMap!" << endl;
-        NeighborMap::iterator it = neighMap.find(node);
+        auto it = neighMap.find(node);
         cancelAndDelete(neighMap.find(it->first)->second);
         neighMap.erase(it);
         updateBeta();

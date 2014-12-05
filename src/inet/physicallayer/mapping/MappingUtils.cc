@@ -62,9 +62,9 @@ const ConstMapping *MappingUtils::createCompatibleMapping(const ConstMapping& sr
         return &src;
     }
 
-    const KeyMap::iterator keysEnd = DimensionIndizes.end();
+    const auto keysEnd = DimensionIndizes.end();
     do {
-        for (KeyMap::iterator keyDimIt = DimensionIndizes.begin(); keyDimIt != keysEnd; ++keyDimIt) {
+        for (auto keyDimIt = DimensionIndizes.begin(); keyDimIt != keysEnd; ++keyDimIt) {
             keyDimIt->second.insert(dstIt->getPosition().getArgValue(keyDimIt->first));
         }
 

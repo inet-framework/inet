@@ -167,7 +167,7 @@ void NS_CLASS hello_send(void *arg)
 #ifdef AODV_USE_STL_RT
                 for (i = 0; i < RT_TABLESIZE; i++)
                 {
-                    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+                    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
                     {
                         rt_table_t *rt = it->second;
                         /* If an entry has an active hello timer, we assume

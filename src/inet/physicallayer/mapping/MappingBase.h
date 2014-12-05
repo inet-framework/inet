@@ -1010,8 +1010,8 @@ class INET_API ConstMapping
 
         std::stringstream osDimHead(std::stringstream::out);
         bool bTimeIsIn = false;
-        const DimensionSet::iterator dimsEnd = dims.end();
-        for (DimensionSet::iterator it = dims.begin(); it != dimsEnd; ++it) {
+        const auto dimsEnd = dims.end();
+        for (auto it = dims.begin(); it != dimsEnd; ++it) {
             if (*it != Dimension::time) {
                 if (pOnlyDim && *it == *pOnlyDim) {
                     otherDim = *it;

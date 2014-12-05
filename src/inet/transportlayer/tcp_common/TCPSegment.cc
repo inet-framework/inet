@@ -173,7 +173,7 @@ unsigned int TCPSegment::getPayloadArraySize() const
 
 TCPPayloadMessage& TCPSegment::getPayload(unsigned int k)
 {
-    PayloadList::iterator i = payloadList.begin();
+    auto i = payloadList.begin();
     while (k > 0 && i != payloadList.end())
         (++i, --k);
     if (i == payloadList.end())

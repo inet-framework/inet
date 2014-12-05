@@ -54,7 +54,7 @@ void Dijkstra::add_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node, 
     // Also record the link delay and quality..
     link->getDelay() = delay;
     link->quality() = quality;
-    LinkArray::iterator it = link_array_->find(dest_node);
+    auto it = link_array_->find(dest_node);
     if (it==link_array_->end())
     {
         std::vector<edge*> val;
@@ -91,14 +91,14 @@ void Dijkstra::add_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node, 
 
 Dijkstra::NodesSet::iterator Dijkstra::best_cost()
 {
-    NodesSet::iterator best = nonprocessed_nodes_->end();
+    auto best = nonprocessed_nodes_->end();
 
     // Search for a node that was not processed yet and that has
     // the best cost to be reached from the node running dijkstra...
     NodesSet::iterator it;
     for (it = nonprocessed_nodes_->begin(); it != nonprocessed_nodes_->end(); it++)
     {
-        DijkstraMap::iterator itDij = dijkstraMap.find(*it);
+        auto itDij = dijkstraMap.find(*it);
         if (itDij==dijkstraMap.end())
             throw cRuntimeError("dijkstraMap error");
         if (itDij->second.hop_count() == -1) // there is no such link yet, i. e., it's cost is infinite...
@@ -107,7 +107,7 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost()
             best = it;
         else
         {
-            DijkstraMap::iterator itBest = dijkstraMap.find(*best);
+            auto itBest = dijkstraMap.find(*best);
             if (itBest==dijkstraMap.end())
                 throw cRuntimeError("dijkstraMap error");
             if (parameter->link_delay())
@@ -144,7 +144,7 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost()
 edge* Dijkstra::get_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node)
 {
     // Find the edge that connects dest_node and last_node
-    LinkArray::iterator itLink = link_array_->find(dest_node);
+    auto itLink = link_array_->find(dest_node);
     if (itLink==link_array_->end())
         throw cRuntimeError("link_array_ error");
     for (std::vector<edge*>::iterator it = itLink->second.begin(); it != itLink->second.end(); it++)
@@ -162,7 +162,7 @@ void Dijkstra::run()
     while (nonprocessed_nodes_->begin() != nonprocessed_nodes_->end())
     {
         // Get the node among those nom processed having best cost...
-        NodesSet::iterator current_node = best_cost();
+        auto current_node = best_cost();
         // If all non processed nodes have cost equals to infinite, there is
         // nothing left to do, but abort (this might be the case of a not
         // fully connected graph)
@@ -170,7 +170,7 @@ void Dijkstra::run()
             break;
 
         // for each node in all_nodes...
-        for (NodesSet::iterator dest_node = all_nodes_->begin(); dest_node != all_nodes_->end(); dest_node++)
+        for (auto dest_node = all_nodes_->begin(); dest_node != all_nodes_->end(); dest_node++)
         {
             // ... not processed yet...
             if (nonprocessed_nodes_->find(*dest_node) == nonprocessed_nodes_->end())
@@ -181,10 +181,10 @@ void Dijkstra::run()
             if (current_edge == nullptr)
                 continue;
             // D(node) = min (D(node), D(current_node) + edge(current_node, node).cost())
-            DijkstraMap::iterator itDest = dijkstraMap.find(*dest_node);
+            auto itDest = dijkstraMap.find(*dest_node);
             if (itDest==dijkstraMap.end())
                 throw cRuntimeError("dijkstraMap error node not found");
-            DijkstraMap::iterator itCurrent = dijkstraMap.find(*current_node);
+            auto itCurrent = dijkstraMap.find(*current_node);
             if (itCurrent==dijkstraMap.end())
                 throw cRuntimeError("dijkstraMap error node not found");
             // hop destHop = itDest->second;

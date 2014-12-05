@@ -68,7 +68,7 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 
     cPacket *msg;
     uint32 endSeqNo;
-    PayloadList::iterator i = payloadList.begin();
+    auto i = payloadList.begin();
     while (nullptr != (msg = tcpseg->removeFirstPayloadMessage(endSeqNo))) {
         while (i != payloadList.end() && seqLess(i->seqNo, endSeqNo))
             ++i;

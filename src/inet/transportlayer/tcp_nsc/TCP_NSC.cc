@@ -167,7 +167,7 @@ TCP_NSC::TCP_NSC()
 // if addrP not exists in map, it's create a new nsc addr
 uint32_t TCP_NSC::mapRemote2Nsc(L3Address const& addrP)
 {
-    Remote2NscMap::iterator i = remote2NscMapM.find(addrP);
+    auto i = remote2NscMapM.find(addrP);
     if (i != remote2NscMapM.end()) {
         return i->second;
     }
@@ -194,7 +194,7 @@ uint32_t TCP_NSC::mapRemote2Nsc(L3Address const& addrP)
 // nscAddrP in host byte order!
 L3Address const& TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 {
-    Nsc2RemoteMap::iterator i = nsc2RemoteMapM.find(nscAddrP);
+    auto i = nsc2RemoteMapM.find(nscAddrP);
 
     if (i != nsc2RemoteMapM.end())
         return i->second;
@@ -252,7 +252,7 @@ TCP_NSC::~TCP_NSC()
     isAliveM = false;
 
     while (!tcpAppConnMapM.empty()) {
-        TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
+        auto i = tcpAppConnMapM.begin();
         delete (*i).second.pNscSocketM;
         tcpAppConnMapM.erase(i);
     }
@@ -687,19 +687,19 @@ void TCP_NSC::updateDisplayString()
 
 TCP_NSC_Connection *TCP_NSC::findAppConn(int connIdP)
 {
-    TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
+    auto i = tcpAppConnMapM.find(connIdP);
     return i == tcpAppConnMapM.end() ? nullptr : &(i->second);
 }
 
 TCP_NSC_Connection *TCP_NSC::findConnByInetSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
-    SockPair2ConnIdMap::iterator i = inetSockPair2ConnIdMapM.find(sockPairP);
+    auto i = inetSockPair2ConnIdMapM.find(sockPairP);
     return i == inetSockPair2ConnIdMapM.end() ? nullptr : findAppConn(i->second);
 }
 
 TCP_NSC_Connection *TCP_NSC::findConnByNscSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
-    SockPair2ConnIdMap::iterator i = nscSockPair2ConnIdMapM.find(sockPairP);
+    auto i = nscSockPair2ConnIdMapM.find(sockPairP);
     return i == nscSockPair2ConnIdMapM.end() ? nullptr : findAppConn(i->second);
 }
 
@@ -710,7 +710,7 @@ void TCP_NSC::finish()
 
 void TCP_NSC::removeConnection(int connIdP)
 {
-    TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
+    auto i = tcpAppConnMapM.find(connIdP);
     if (i != tcpAppConnMapM.end())
         tcpAppConnMapM.erase(i);
 }
@@ -1057,7 +1057,7 @@ void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, c
 
 void TCP_NSC::do_SEND_all()
 {
-    for (TcpAppConnMap::iterator j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
+    for (auto j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
         TCP_NSC_Connection& conn = j->second;
         conn.do_SEND();
     }

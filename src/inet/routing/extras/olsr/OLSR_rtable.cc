@@ -55,7 +55,7 @@ OLSR_rtable::OLSR_rtable(OLSR_rtable *rtable)
 OLSR_rtable::~OLSR_rtable()
 {
     // Iterates over the routing table deleting each OLSR_rt_entry*.
-    for (rtable_t::iterator it = rt_.begin(); it != rt_.end(); it++)
+    for (auto it = rt_.begin(); it != rt_.end(); it++)
         delete (*it).second;
 }
 
@@ -66,7 +66,7 @@ void
 OLSR_rtable::clear()
 {
     // Iterates over the routing table deleting each OLSR_rt_entry*.
-    for (rtable_t::iterator it = rt_.begin(); it != rt_.end(); it++)
+    for (auto it = rt_.begin(); it != rt_.end(); it++)
         delete (*it).second;
 
     // Cleans routing table.
@@ -94,7 +94,7 @@ OLSR_rt_entry*
 OLSR_rtable::lookup(const nsaddr_t &dest)
 {
     // Get the iterator at "dest" position
-    rtable_t::iterator it = rt_.find(dest);
+    auto it = rt_.find(dest);
     // If there is no route to "dest", return nullptr
     if (it == rt_.end())
         return nullptr;
@@ -157,7 +157,7 @@ OLSR_rtable::add_entry(const nsaddr_t &dest, const nsaddr_t & next, const nsaddr
     }
 
     // Inserts the new entry
-    rtable_t::iterator it = rt_.find(dest);
+    auto it = rt_.find(dest);
     if (it != rt_.end())
         delete (*it).second;
     rt_[dest] = entry;
@@ -183,7 +183,7 @@ OLSR_rtable::add_entry(const nsaddr_t & dest, const nsaddr_t & next, const nsadd
         entry->route.push_back(entryAux->dest_addr());
 
     // Inserts the new entry
-    rtable_t::iterator it = rt_.find(dest);
+    auto it = rt_.find(dest);
     if (it != rt_.end())
         delete (*it).second;
     rt_[dest] = entry;

@@ -133,7 +133,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
              << " streamId=" << sendCommand->getSid() << endl;
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((msg->decapsulate()));
-    SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+    auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += smsg->getBitLength() / 8;
 
     // ------ Prepare SCTPDataMsg -----------------------------------------
@@ -141,7 +141,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
     const uint32 sendUnordered = sendCommand->getSendUnordered();
     const uint32 ppid = sendCommand->getPpid();
     SCTPSendStream *stream = nullptr;
-    SCTPSendStreamMap::iterator associter = sendStreams.find(streamId);
+    auto associter = sendStreams.find(streamId);
     if (associter != sendStreams.end()) {
         stream = associter->second;
     }

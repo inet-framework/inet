@@ -81,9 +81,9 @@ std::ostream& operator<<(std::ostream& out, const PIMSM::Route& route)
 
 PIMSM::~PIMSM()
 {
-    for (RoutingTable::iterator it = gRoutes.begin(); it != gRoutes.end(); ++it)
+    for (auto it = gRoutes.begin(); it != gRoutes.end(); ++it)
         delete it->second;
-    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+    for (auto it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         delete it->second;
     // XXX rt contains references to the deleted route entries
 }
@@ -1590,7 +1590,7 @@ void PIMSM::updateJoinDesired(Route *route)
             // TODO
         }
         else if (route->type == G) {
-            for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it) {
+            for (auto it = sgRoutes.begin(); it != sgRoutes.end(); ++it) {
                 if (it->second->gRoute == route)
                     updateJoinDesired(it->second);
             }
@@ -1716,7 +1716,7 @@ bool PIMSM::deleteMulticastRoute(Route *route)
 
         // unlink
         if (route->type == G) {
-            for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+            for (auto it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
                 if (it->second->gRoute == route)
                     it->second->gRoute = nullptr;
 
@@ -1745,11 +1745,11 @@ void PIMSM::clearRoutes()
     }
 
     // clear local tables
-    for (RoutingTable::iterator it = gRoutes.begin(); it != gRoutes.end(); ++it)
+    for (auto it = gRoutes.begin(); it != gRoutes.end(); ++it)
         delete it->second;
     gRoutes.clear();
 
-    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+    for (auto it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         delete it->second;
     sgRoutes.clear();
 }
@@ -1794,7 +1794,7 @@ PIMSM::Route *PIMSM::addNewRouteG(IPv4Address group, int flags)
     rt->addMulticastRoute(createIPv4Route(newRouteG));
 
     // set (*,G) route in (S,G) and (S,G,rpt) routes
-    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it) {
+    for (auto it = sgRoutes.begin(); it != sgRoutes.end(); ++it) {
         if (it->first.group == group) {
             Route *sgRoute = it->second;
             sgRoute->gRoute = newRouteG;
@@ -1892,7 +1892,7 @@ bool PIMSM::removeRoute(Route *route)
 PIMSM::Route *PIMSM::findRouteG(IPv4Address group)
 {
     SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, group);
-    RoutingTable::iterator it = gRoutes.find(sg);
+    auto it = gRoutes.find(sg);
     return it != gRoutes.end() ? it->second : nullptr;
 }
 
@@ -1900,7 +1900,7 @@ PIMSM::Route *PIMSM::findRouteSG(IPv4Address source, IPv4Address group)
 {
     ASSERT(!source.isUnspecified());
     SourceAndGroup sg(source, group);
-    RoutingTable::iterator it = sgRoutes.find(sg);
+    auto it = sgRoutes.find(sg);
     return it != sgRoutes.end() ? it->second : nullptr;
 }
 
@@ -1941,7 +1941,7 @@ PIMSM::Route::~Route()
     owner->cancelAndDelete(registerStopTimer);
     owner->cancelAndDelete(joinTimer);
     delete upstreamInterface;
-    for (DownstreamInterfaceVector::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
+    for (auto it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
         delete *it;
 }
 

@@ -82,7 +82,7 @@ void PcapRecorder::initialize()
             if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str())) {
                 found = true;
 
-                for (SignalList::iterator s = signalList.begin(); s != signalList.end(); s++) {
+                for (auto s = signalList.begin(); s != signalList.end(); s++) {
                     if (!submod->isSubscribed(s->first, this)) {
                         submod->subscribe(s->first, this);
                         EV << "PcapRecorder " << getFullPath() << " subscribed to "

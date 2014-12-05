@@ -342,8 +342,8 @@ cMessage *WiseRoute::decapsMsg(WiseRouteDatagram *msg)
 WiseRoute::floodTypes WiseRoute::updateFloodTable(bool isFlood, const tFloodTable::key_type& srcAddr, const tFloodTable::key_type& destAddr, unsigned long seqNum)
 {
     if (isFlood) {
-        tFloodTable::iterator pos = floodTable.lower_bound(srcAddr);
-        tFloodTable::iterator posEnd = floodTable.upper_bound(srcAddr);
+        auto pos = floodTable.lower_bound(srcAddr);
+        auto posEnd = floodTable.upper_bound(srcAddr);
 
         while (pos != posEnd) {
             if (seqNum == pos->second)

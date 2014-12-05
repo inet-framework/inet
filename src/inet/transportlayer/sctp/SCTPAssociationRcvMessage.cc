@@ -52,7 +52,7 @@ void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables *chunk)
 
         chunk->countsAsOutstanding = false;
 
-        CounterMap::iterator iterator = qCounter.roomRetransQ.find(lastPath->remoteAddress);
+        auto iterator = qCounter.roomRetransQ.find(lastPath->remoteAddress);
         state->outstandingMessages--;
         if (state->osbWithHeader)
             iterator->second -= ADD_PADDING(chunk->booksize);
@@ -145,19 +145,19 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 authChunk = check_and_cast<SCTPAuthenticationChunk *>(header);
                 if (authChunk->getHMacIdentifier() != 1) {
                     sendHMacError(authChunk->getHMacIdentifier());
-                    SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                    auto it = sctpMain->assocStatMap.find(assocId);
                     it->second.numAuthChunksRejected++;
                     delete authChunk;
                     return true;
                 }
                 if (authChunk->getHMacOk() == false) {
                     delete authChunk;
-                    SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                    auto it = sctpMain->assocStatMap.find(assocId);
                     it->second.numAuthChunksRejected++;
                     return true;
                 }
                 authenticationNecessary = false;
-                SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                auto it = sctpMain->assocStatMap.find(assocId);
                 it->second.numAuthChunksAccepted++;
                 delete authChunk;
                 continue;
@@ -570,7 +570,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
                 state->localAddresses.push_back((*adv.begin()));
             }
             else if (rlevel > 0) {
-                for (AddressVector::iterator i = adv.begin(); i != adv.end(); ++i) {
+                for (auto i = adv.begin(); i != adv.end(); ++i) {
                     if (getAddressLevel((*i)) >= rlevel) {
                         sctpMain->addLocalAddress(this, (*i));
                         state->localAddresses.push_back((*i));
@@ -585,7 +585,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
                 if (!getPath(initchunk->getAddresses(j))) {
                     SCTPPathVariables *path = new SCTPPathVariables(initchunk->getAddresses(j), this, rt);
                     EV_INFO << " get new path for " << initchunk->getAddresses(j) << " ptr=" << path << "\n";
-                    for (AddressVector::iterator k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
+                    for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
                         if (sctpMain->addRemoteAddress(this, (*k), initchunk->getAddresses(j))) {
                             this->remoteAddressList.push_back(initchunk->getAddresses(j));
                         }
@@ -596,7 +596,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
                     qCounter.roomRetransQ[path->remoteAddress] = 0;
                 }
             }
-            SCTPPathMap::iterator ite = sctpPathMap.find(remoteAddr);
+            auto ite = sctpPathMap.find(remoteAddr);
             if (ite == sctpPathMap.end()) {
                 SCTPPathVariables *path = new SCTPPathVariables(remoteAddr, this, rt);
                 EV_INFO << "Get new path for " << remoteAddr << "\n";
@@ -665,7 +665,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
         for (uint32 j = 0; j < initchunk->getAddressesArraySize(); j++) {
             if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                 continue;
-            for (AddressVector::iterator k = remoteAddressList.begin(); k != remoteAddressList.end(); ++k) {
+            for (auto k = remoteAddressList.begin(); k != remoteAddressList.end(); ++k) {
                 if ((*k) == (initchunk->getAddresses(j))) {
                     addressPresent = true;
                     break;
@@ -717,7 +717,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
             for (uint32 j = 0; j < numberOfRemoteAddresses; j++) {
                 if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
-                for (AddressVector::iterator k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
+                for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
                     if (!((*k).isUnspecified())) {
                         EV_INFO << "addPath " << initAckChunk->getAddresses(j) << "\n";
                         if (sctpMain->addRemoteAddress(this, (*k), initAckChunk->getAddresses(j))) {
@@ -727,7 +727,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
                     }
                 }
             }
-            SCTPPathMap::iterator ite = sctpPathMap.find(remoteAddr);
+            auto ite = sctpPathMap.find(remoteAddr);
             if (ite == sctpPathMap.end()) {
                 EV_INFO << " get new path for " << remoteAddr << "\n";
                 SCTPPathVariables *path = new SCTPPathVariables(remoteAddr, this, rt);
@@ -997,7 +997,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
 
     // ====== Print some information =========================================
     EV_DETAIL << "##### SACK Processing: TSNa=" << tsna << " #####" << endl;
-    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
         EV_DETAIL << "Path " << myPath->remoteAddress << ":\t"
                   << "outstanding=" << path->outstandingBytes << "\t"
@@ -1037,7 +1037,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     }
 
     // ====== Initialize some variables ======================================
-    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
         // T.D. 26.03.09: Remember outstanding bytes before this update
         // Values are necessary for updating the congestion window!
@@ -1337,7 +1337,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     pmRttMeasurement(path, rttEstimation);
 
     // ====== Record statistics ==============================================
-    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
         myPath->statisticsPathGapAckedChunksInLastSACK->record(myPath->gapAckedChunksInLastSACK);
         myPath->statisticsPathGapNRAckedChunksInLastSACK->record(myPath->gapNRAckedChunksInLastSACK);
@@ -1402,7 +1402,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
 
     // ======= Update congestion window of each path =========================
     EV_DEBUG << "Before ccUpdateBytesAcked: ";
-    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
         const L3Address& myPathId = myPath->remoteAddress;
 
@@ -1471,7 +1471,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     }
 
     // ====== Need to stop or restart T3 timer? ==============================
-    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
         const L3Address& myPathId = myPath->remoteAddress;
 
@@ -1665,7 +1665,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk *sackChun
                     // ------ DAC algorithm at sender side -----------
                     // Is there a newly acked TSN on another path?
                     bool sawNewAckOnlyOnThisPath = true;
-                    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+                    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
                         const SCTPPathVariables *otherPath = piter->second;
                         if ((otherPath != myChunkLastPath) && (otherPath->sawNewAck)) {
                             sawNewAckOnlyOnThisPath = false;
@@ -1774,9 +1774,9 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk *sackChun
                         }
                         else {
                             myChunk->enqueuedInTransmissionQ = true;
-                            CounterMap::iterator q = qCounter.roomTransQ.find(myChunk->getNextDestination());
+                            auto q = qCounter.roomTransQ.find(myChunk->getNextDestination());
                             q->second += ADD_PADDING(myChunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
-                            CounterMap::iterator qb = qCounter.bookedTransQ.find(myChunk->getNextDestination());
+                            auto qb = qCounter.bookedTransQ.find(myChunk->getNextDestination());
                             qb->second += myChunk->booksize;
                         }
                         myChunkNextPath->requiresRtx = true;
@@ -1810,7 +1810,7 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
     state->sendBuffer -= chunk->len / 8;
 
     // Subtract chunk size from the queue size of its stream
-    SCTPSendStreamMap::iterator streamIterator = sendStreams.find(chunk->sid);
+    auto streamIterator = sendStreams.find(chunk->sid);
     assert(streamIterator != sendStreams.end());
     SCTPSendStream *stream = streamIterator->second;
     assert(stream != nullptr);
@@ -1885,9 +1885,9 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
     if (transmissionQ->getChunk(chunk->tsn)) {
         transmissionQ->removeMsg(chunk->tsn);
         chunk->enqueuedInTransmissionQ = false;
-        CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
+        auto q = qCounter.roomTransQ.find(chunk->getNextDestination());
         q->second -= ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
-        CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
+        auto qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
         qb->second -= chunk->booksize;
     }
 
@@ -1929,9 +1929,9 @@ void SCTPAssociation::renegablyAckChunk(SCTPDataVariables *chunk,
         EV_INFO << "Found TSN " << chunk->tsn << " in transmissionQ -> remote it" << endl;
         transmissionQ->removeMsg(chunk->tsn);
         chunk->enqueuedInTransmissionQ = false;
-        CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
+        auto q = qCounter.roomTransQ.find(chunk->getNextDestination());
         q->second -= ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
-        CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
+        auto qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
         qb->second -= chunk->booksize;
     }
 }
@@ -1960,7 +1960,7 @@ void SCTPAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
 
         sendQueueAbatedIndication->setQueuedForStreamArraySize(sendStreams.size());
         unsigned int streamID = 0;
-        for (SCTPSendStreamMap::iterator iterator = sendStreams.begin();
+        for (auto iterator = sendStreams.begin();
              iterator != sendStreams.end(); ++iterator)
         {
             const SCTPSendStream *stream = iterator->second;
@@ -1989,7 +1989,7 @@ void SCTPAssociation::dequeueAckedChunks(const uint32 tsna,
     rttEstimation = MAXTIME;
 
     // Are there chunks in the retransmission queue ? If Yes -> check for dequeue.
-    SCTPQueue::PayloadQueue::iterator iterator = retransmissionQ->payloadQueue.begin();
+    auto iterator = retransmissionQ->payloadQueue.begin();
     while (iterator != retransmissionQ->payloadQueue.end()) {
         SCTPDataVariables *chunk = iterator->second;
         if (tsnGe(tsna, chunk->tsn)) {
@@ -2031,7 +2031,7 @@ SCTPEventCode SCTPAssociation::processForwardTsnArrived(SCTPForwardTsnChunk *fwC
 
     for (uint32 i = 0; i < fwChunk->getSidArraySize(); i++) {
         if (fwChunk->getSsn(i) != -1) {
-            SCTPReceiveStreamMap::iterator iter = receiveStreams.find(fwChunk->getSid(i));
+            auto iter = receiveStreams.find(fwChunk->getSid(i));
             SCTPReceiveStream *rStream = iter->second;
 
             /* Uncomment the folloing to drop gap-acknowledged messages
@@ -2097,7 +2097,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     state->bytesRcvd += payloadLength;
     EV_DETAIL << "state->bytesRcvd now=" << state->bytesRcvd << endl;
     path->numberOfBytesReceived += payloadLength;
-    SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+    auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.rcvdBytes += dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH;
 
     if (state->stopReceiving) {
@@ -2183,7 +2183,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     // ====== Enqueue new chunk ==============================================
     SCTPEventCode event = SCTP_E_SEND;
     if (state->newChunkReceived) {
-        SCTPReceiveStreamMap::iterator iter = receiveStreams.find(dataChunk->getSid());
+        auto iter = receiveStreams.find(dataChunk->getSid());
         const int ret = iter->second->enqueueNewDataChunk(makeVarFromMsg(dataChunk));
         if (ret > 0) {
             state->queuedReceivedBytes += payloadLength;
@@ -2321,7 +2321,7 @@ void SCTPAssociation::processResetResponseArrived(SCTPStreamResetResponseParamet
             sendSack();
         }
         sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
-        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        auto it = sctpMain->assocStatMap.find(assocId);
         it->second.numResetRequestsPerformed++;
     }
     else {
@@ -2367,7 +2367,7 @@ SCTPEventCode SCTPAssociation::processOutAndResponseArrived(SCTPOutgoingSSNReset
         resetExpectedSsns();
         state->resetPending = false;
         sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
-        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        auto it = sctpMain->assocStatMap.find(assocId);
         it->second.numResetRequestsPerformed++;
     }
     else {
@@ -2486,7 +2486,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
     if (state->auth && state->peerAuth) {
         authChunk = createAuthChunk();
         sctpAsconfAck->addChunk(authChunk);
-        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        auto it = sctpMain->assocStatMap.find(assocId);
         it->second.numAuthChunksSent++;
     }
     if (state->numberAsconfReceived > 0 || (state->numberAsconfReceived == 0 && asconfChunk->getSerialNumber() == initPeerTsn + state->numberAsconfReceived)) {
@@ -2507,7 +2507,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
                         addr = remoteAddr;
                         sendIndicationToApp(SCTP_I_ADDRESS_ADDED);
                     }
-                    for (AddressVector::iterator k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
+                    for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
                         if (sctpMain->addRemoteAddress(this, (*k), addr)) {
                             addPath(addr);
                             EV_INFO << "add remote address " << addr << " to local address " << (*k) << "\n";
@@ -2572,7 +2572,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
                         EV_INFO << "no address specified, add natted address " << remoteAddr << "\n";
                         addr = remoteAddr;
                     }
-                    for (AddressVector::iterator i = remoteAddressList.begin(); i != remoteAddressList.end(); i++) {
+                    for (auto i = remoteAddressList.begin(); i != remoteAddressList.end(); i++) {
                         if ((*i) == addr) {
                             if (getPath(addr)->confirmed == true) {
                                 state->setPrimaryPath(getPath(addr));
@@ -2672,7 +2672,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
                     }
                     addr = delParam->getAddressParam();
                     sctpMain->removeLocalAddressFromAllRemoteAddresses(this, addr, remAddr);
-                    for (AddressVector::iterator j = state->localAddresses.begin(); j != state->localAddresses.end(); j++) {
+                    for (auto j = state->localAddresses.begin(); j != state->localAddresses.end(); j++) {
                         if ((*j) == addr) {
                             EV_DETAIL << "erase address " << (*j) << "\n";
                             state->localAddresses.erase(j);
@@ -2957,7 +2957,7 @@ void SCTPAssociation::process_TIMEOUT_HEARTBEAT(SCTPPathVariables *path)
 
 void SCTPAssociation::stopTimers()
 {
-    for (SCTPPathMap::iterator j = sctpPathMap.begin(); j != sctpPathMap.end(); j++) {
+    for (auto j = sctpPathMap.begin(); j != sctpPathMap.end(); j++) {
         stopTimer(j->second->HeartbeatTimer);
         stopTimer(j->second->HeartbeatIntervalTimer);
     }
@@ -3139,7 +3139,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
         EV_DETAIL << "Still " << retransmissionQ->payloadQueue.size()
                   << " chunks in retransmissionQ" << endl;
 
-        for (SCTPQueue::PayloadQueue::iterator iterator = retransmissionQ->payloadQueue.begin();
+        for (auto iterator = retransmissionQ->payloadQueue.begin();
              iterator != retransmissionQ->payloadQueue.end(); iterator++)
         {
             SCTPDataVariables *chunk = iterator->second;
@@ -3163,7 +3163,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
                 chunk->sendForwardIfAbandoned = true;
 
                 if (!chunk->hasBeenAbandoned) {
-                    SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+                    auto iter = sctpMain->assocStatMap.find(assocId);
                     iter->second.numT3Rtx++;
                 }
 
@@ -3217,9 +3217,9 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables *chunk,
     else {
         chunk->enqueuedInTransmissionQ = true;
         EV_DETAIL << "Inserting TSN " << chunk->tsn << " into transmissionQ" << endl;
-        CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
+        auto q = qCounter.roomTransQ.find(chunk->getNextDestination());
         q->second += ADD_PADDING(chunk->len / 8 + SCTP_DATA_CHUNK_LENGTH);
-        CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
+        auto qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
         qb->second += chunk->booksize;
         state->peerRwnd += (chunk->booksize + state->bytesToAddPerPeerChunk);
         if (state->peerAllowsChunks) {

@@ -233,7 +233,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
                 if (packet->getCiaddr().isUnspecified()) {    // init-reboot
                     // std::cout << "init-reboot" << endl;
                     IPv4Address requestedAddress = packet->getOptions().getRequestedIp();
-                    DHCPLeased::iterator it = leased.find(requestedAddress);
+                    auto it = leased.find(requestedAddress);
                     if (it == leased.end()) {
                         // if DHCP server has no record of the requested IP, then it must remain silent
                         // and may output a warning to the network admin
@@ -255,7 +255,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
                     }
                 }
                 else {    // renewing or rebinding: in this case ciaddr must be filled in with client's IP address
-                    DHCPLeased::iterator it = leased.find(packet->getCiaddr());
+                    auto it = leased.find(packet->getCiaddr());
                     DHCPLease *lease = &it->second;
                     if (it != leased.end()) {
                         EV_INFO << "Request for renewal/rebinding IP " << lease->ip << " to " << lease->mac << "." << endl;
@@ -392,7 +392,7 @@ void DHCPServer::sendOffer(DHCPLease *lease)
 
 DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
 {
-    for (DHCPLeased::iterator it = leased.begin(); it != leased.end(); it++) {
+    for (auto it = leased.begin(); it != leased.end(); it++) {
         // lease exist
         if (it->second.mac == mac) {
             EV_DETAIL << "Found lease for MAC " << mac << "." << endl;

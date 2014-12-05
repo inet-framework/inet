@@ -454,7 +454,7 @@ const IPv6Address& IPv6RoutingTable::lookupDestCache(const IPv6Address& dest, in
 {
     Enter_Method("lookupDestCache(%s)", dest.str().c_str());
 
-    DestCache::iterator it = destCache.find(dest);
+    auto it = destCache.find(dest);
     if (it == destCache.end()) {
         outInterfaceId = -1;
         return IPv6Address::UNSPECIFIED_ADDRESS;
@@ -477,7 +477,7 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
 
-    RouteList::iterator it = routeList.begin();
+    auto it = routeList.begin();
     while (it != routeList.end()) {
         if (dest.matches((*it)->getDestPrefix(), (*it)->getPrefixLength())) {
             if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0) {    //since 0 represents infinity.
@@ -523,7 +523,7 @@ void IPv6RoutingTable::purgeDestCache()
 
 void IPv6RoutingTable::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId)
 {
-    for (DestCache::iterator it = destCache.begin(); it != destCache.end(); ) {
+    for (auto it = destCache.begin(); it != destCache.end(); ) {
         if (it->second.interfaceId == interfaceId && it->second.nextHopAddr == nextHopAddr) {
             // move the iterator past this element before removing it
             destCache.erase(it++);
@@ -538,7 +538,7 @@ void IPv6RoutingTable::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextH
 
 void IPv6RoutingTable::purgeDestCacheForInterfaceID(int interfaceId)
 {
-    for (DestCache::iterator it = destCache.begin(); it != destCache.end(); ) {
+    for (auto it = destCache.begin(); it != destCache.end(); ) {
         if (it->second.interfaceId == interfaceId) {
             // move the iterator past this element before removing it
             destCache.erase(it++);
@@ -556,7 +556,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
 {
     // see if prefix exists in table
     IPv6Route *route = nullptr;
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); it++) {
+    for (auto it = routeList.begin(); it != routeList.end(); it++) {
         if ((*it)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix() == destPrefix && (*it)->getPrefixLength() == prefixLength) {
             route = *it;
             break;
@@ -592,7 +592,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
 
     // see if prefix exists in table
     IPv6Route *route = nullptr;
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); it++) {
+    for (auto it = routeList.begin(); it != routeList.end(); it++) {
         if ((*it)->getSourceType() == IRoute::OWN_ADV_PREFIX && (*it)->getDestPrefix() == destPrefix && (*it)->getPrefixLength() == prefixLength) {
             route = *it;
             break;
@@ -624,7 +624,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
 void IPv6RoutingTable::deleteOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength)
 {
     // scan the routing table for this prefix and remove it
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); it++) {
+    for (auto it = routeList.begin(); it != routeList.end(); it++) {
         if ((*it)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix() == destPrefix && (*it)->getPrefixLength() == prefixLength) {
             internalDeleteRoute(it);
             return;    // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
@@ -729,7 +729,7 @@ void IPv6RoutingTable::internalAddRoute(IPv6Route *route)
 
 IPv6Route *IPv6RoutingTable::internalRemoveRoute(IPv6Route *route)
 {
-    RouteList::iterator i = std::find(routeList.begin(), routeList.end(), route);
+    auto i = std::find(routeList.begin(), routeList.end(), route);
     if (i != routeList.end()) {
         ASSERT(route->getRoutingTable() == this);
         routeList.erase(i);
@@ -752,7 +752,7 @@ IPv6RoutingTable::RouteList::iterator IPv6RoutingTable::internalDeleteRoute(Rout
 
 bool IPv6RoutingTable::deleteRoute(IPv6Route *route)
 {
-    RouteList::iterator it = std::find(routeList.begin(), routeList.end(), route);
+    auto it = std::find(routeList.begin(), routeList.end(), route);
     if (it == routeList.end())
         return false;
 
@@ -807,7 +807,7 @@ void IPv6RoutingTable::deleteDefaultRoutes(int interfaceID)
 
     EV_INFO << "/// Removing default route for interface=" << interfaceID << endl;
 
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); ) {
+    for (auto it = routeList.begin(); it != routeList.end(); ) {
         // default routes have prefix length 0
         if ((*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
             (*it)->getPrefixLength() == 0)
@@ -840,7 +840,7 @@ void IPv6RoutingTable::deletePrefixes(int interfaceID)
 {
     ASSERT(interfaceID >= 0);
 
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); ) {
+    for (auto it = routeList.begin(); it != routeList.end(); ) {
         // "real" prefixes have a length of larger then 0
         if ((*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
             (*it)->getPrefixLength() > 0)
@@ -857,7 +857,7 @@ void IPv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
     bool changed = false;
 
     // delete unicast routes using this interface
-    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); ) {
+    for (auto it = routeList.begin(); it != routeList.end(); ) {
         IPv6Route *route = *it;
         if (route->getInterface() == entry) {
             it = internalDeleteRoute(it);

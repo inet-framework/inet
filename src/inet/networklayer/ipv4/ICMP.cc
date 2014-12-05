@@ -251,7 +251,7 @@ void ICMP::processEchoReply(ICMPMessage *reply)
     payload->setControlInfo(ctrl);
     delete reply;
     long originatorId = payload->getOriginatorId();
-    PingMap::iterator i = pingMap.find(originatorId);
+    auto i = pingMap.find(originatorId);
     if (i != pingMap.end()) {
         EV_INFO << "Sending " << payload << " to upper layer.\n";
         send(payload, "pingOut", i->second);

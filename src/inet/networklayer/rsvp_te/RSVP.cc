@@ -151,7 +151,7 @@ void RSVP::readTrafficFromXML(const cXMLElement *traffic)
     ASSERT(!strcmp(traffic->getTagName(), "sessions"));
     checkTags(traffic, "session");
     cXMLElementList list = traffic->getChildrenByTagName("session");
-    for (cXMLElementList::iterator it = list.begin(); it != list.end(); it++)
+    for (auto it = list.begin(); it != list.end(); it++)
         readTrafficSessionFromXML(*it);
 }
 
@@ -220,7 +220,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
     checkTags(paths, "path");
 
     cXMLElementList list = paths->getChildrenByTagName("path");
-    for (cXMLElementList::iterator it = list.begin(); it != list.end(); it++) {
+    for (auto it = list.begin(); it != list.end(); it++) {
         cXMLElement *path = *it;
         checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
 
@@ -373,7 +373,7 @@ void RSVP::removeHello(HelloState_t *h)
     delete h->timeout;
     delete h->timer;
 
-    for (HelloVector::iterator it = HelloList.begin(); it != HelloList.end(); it++) {
+    for (auto it = HelloList.begin(); it != HelloList.end(); it++) {
         if (it->peer != h->peer)
             continue;
 
@@ -428,7 +428,7 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
 
     // send PATH_ERROR for existing paths
 
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->OutInterface != tedmod->ted[index].local)
             continue;
 
@@ -532,7 +532,7 @@ bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec
 
     double sharedBW = 0.0;
 
-    for (RSBVector::iterator it = RSBList.begin(); it != RSBList.end(); it++) {
+    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (it->Session_Object != session)
             continue;
 
@@ -592,7 +592,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
 
     IPAddressVector phops;
 
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->OutInterface != rsbEle->OI)
             continue;
 
@@ -607,7 +607,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
                 phops.push_back(it->Previous_Hop_Address);
         }
 
-        for (IPAddressVector::iterator it = phops.begin(); it != phops.end(); it++)
+        for (auto it = phops.begin(); it != phops.end(); it++)
             refreshResv(rsbEle, *it);
     }
 }
@@ -627,7 +627,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     hop.Next_Hop_Address = PHOP;
     msg->setHop(hop);
 
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->Previous_Hop_Address != PHOP)
             continue;
 
@@ -677,7 +677,7 @@ void RSVP::preempt(IPv4Address OI, int priority, double bandwidth)
 
     unsigned int index = tedmod->linkIndex(OI);
 
-    for (RSBVector::iterator it = RSBList.begin(); it != RSBList.end(); it++) {
+    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (it->OI != OI)
             continue;
 
@@ -1022,7 +1022,7 @@ void RSVP::removeRSB(ResvStateBlock_t *rsb)
         allocateResource(rsb->OI, rsb->Session_Object, -rsb->Flowspec_Object.req_bandwidth);
     }
 
-    for (RSBVector::iterator it = RSBList.begin(); it != RSBList.end(); it++) {
+    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (it->id != rsb->id)
             continue;
 
@@ -1058,7 +1058,7 @@ void RSVP::removePSB(PathStateBlock_t *psb)
     delete psb->timerMsg;
     delete psb->timeoutMsg;
 
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->id != psb->id)
             continue;
 
@@ -1456,7 +1456,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
     bool modified = false;
 
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->OutInterface.getInt() != (uint32)lspid)
             continue;
 
@@ -1583,7 +1583,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
     // find matching RSB *******************************************************
 
     ResvStateBlock_t *rsb = nullptr;
-    for (RSBVector::iterator it = RSBList.begin(); it != RSBList.end(); it++) {
+    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (!(msg->isInSession(&it->Session_Object)))
             continue;
 
@@ -1627,7 +1627,7 @@ void RSVP::recoveryEvent(IPv4Address peer)
         tedmod->rebuildRoutingTable();
 
     // refresh all paths towards this neighbour
-    for (PSBVector::iterator it = PSBList.begin(); it != PSBList.end(); it++) {
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->OutInterface != tedmod->ted[index].local)
             continue;
 
@@ -1797,7 +1797,7 @@ void RSVP::delSession(const cXMLElement& node)
         if (paths) {
             remove = false;
 
-            for (cXMLElementList::iterator p = pathList.begin(); p != pathList.end(); p++) {
+            for (auto p = pathList.begin(); p != pathList.end(); p++) {
                 if (it->sender.Lsp_Id != getParameterIntValue(*p, "lspid"))
                     continue;
 
@@ -2023,7 +2023,7 @@ RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
 
 RSVP::HelloState_t *RSVP::findHello(IPv4Address peer)
 {
-    for (HelloVector::iterator it = HelloList.begin(); it != HelloList.end(); it++) {
+    for (auto it = HelloList.begin(); it != HelloList.end(); it++) {
         if (it->peer != peer)
             continue;
 

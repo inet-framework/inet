@@ -58,25 +58,25 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
     // structs themselves and not pointers.
 
     //   RATimerList raTimerList;
-    for (RATimerList::iterator it=raTimerList.begin(); it != raTimerList.end(); ++it) {
+    for (auto it =raTimerList.begin(); it != raTimerList.end(); ++it) {
         cancelAndDelete(*it);
         delete (*it);
     }
 
     //   DADList dadList;
-    for (DADList::iterator it=dadList.begin(); it != dadList.end(); ++it) {
+    for (auto it =dadList.begin(); it != dadList.end(); ++it) {
         cancelAndDelete((*it)->timeoutMsg);
         delete (*it);
     }
 
     //   RDList rdList;
-    for (RDList::iterator it=rdList.begin(); it != rdList.end(); ++it) {
+    for (auto it =rdList.begin(); it != rdList.end(); ++it) {
         cancelAndDelete((*it)->timeoutMsg);
         delete (*it);
     }
 
     //   AdvIfList advIfList;
-    for (AdvIfList::iterator it=advIfList.begin(); it != advIfList.end(); ++it) {
+    for (auto it =advIfList.begin(); it != advIfList.end(); ++it) {
         cancelAndDelete((*it)->raTimeoutMsg);
         delete (*it);
     }
@@ -295,7 +295,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
 {
-    for (AdvIfList::iterator it = advIfList.begin(); it != advIfList.end(); it++) {
+    for (auto it = advIfList.begin(); it != advIfList.end(); it++) {
         AdvIfEntry *advIfEntry = (*it);
         if (advIfEntry->interfaceId == ie->getInterfaceId()) {
             return advIfEntry;
@@ -306,7 +306,7 @@ IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(Inte
 
 IPv6NeighbourDiscovery::RDEntry *IPv6NeighbourDiscovery::fetchRDEntry(InterfaceEntry *ie)
 {
-    for (RDList::iterator it = rdList.begin(); it != rdList.end(); it++) {
+    for (auto it = rdList.begin(); it != rdList.end(); it++) {
         RDEntry *rdEntry = (*it);
         if (rdEntry->interfaceId == ie->getInterfaceId()) {
             return rdEntry;
@@ -550,7 +550,7 @@ IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
        it always returns a reachable or a probably reachable router when one is
        available.*/
     DefaultRouterList& defaultRouters = neighbourCache.getDefaultRouterList();
-    for (DefaultRouterList::iterator it = defaultRouters.begin(); it != defaultRouters.end(); ) {
+    for (auto it = defaultRouters.begin(); it != defaultRouters.end(); ) {
         Neighbour& nce = *it;
         if (simTime() > nce.routerExpiryTime) {
             EV_INFO << "Found an expired default router. Deleting entry...\n";
@@ -709,7 +709,7 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
     EV_INFO << "Pending Packets empty:" << pendingPackets.empty() << endl;
 
     while (!pendingPackets.empty()) {
-        MsgPtrVector::iterator i = pendingPackets.begin();
+        auto i = pendingPackets.begin();
         cMessage *msg = (*i);
         IPv6Datagram *ipv6Msg = (IPv6Datagram *)msg;
         //Assume msg is the packet itself. I need the datagram's source addr.
@@ -748,7 +748,7 @@ void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
     MsgPtrVector& pendingPackets = nce->pendingPackets;
 
     while (!pendingPackets.empty()) {    //FIXME: pendingPackets are always empty!!!!
-        MsgPtrVector::iterator i = pendingPackets.begin();
+        auto i = pendingPackets.begin();
         cMessage *msg = (*i);
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
@@ -868,7 +868,7 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     // after the link-local address was verified to be unique
     // we can assign the address and initiate the MIPv6 protocol
     // in case there are any pending entries in the list
-    DADGlobalList::iterator it = dadGlobalList.find(ie);
+    auto it = dadGlobalList.find(ie);
     if (it != dadGlobalList.end()) {
         DADGlobalEntry& entry = it->second;
 
@@ -1665,7 +1665,7 @@ void IPv6NeighbourDiscovery::resetRATimer(InterfaceEntry *ie)
 {    //Not used yet but could be useful later on.-WEI
      //Iterate through all RA timers within the Neighbour Discovery module.
 /*
-    for (RATimerList::iterator it=raTimerList.begin(); it != raTimerList.end(); it++)
+    for (auto it =raTimerList.begin(); it != raTimerList.end(); it++)
     {
         cMessage *msg = (*it);
         InterfaceEntry *msgIE = (InterfaceEntry *)msg->getContextPointer();
@@ -2536,7 +2536,7 @@ void IPv6NeighbourDiscovery::routersUnreachabilityDetection(const InterfaceEntry
     rt6->deleteDefaultRoutes(ie->getInterfaceId());
     rt6->deletePrefixes(ie->getInterfaceId());
 
-    for (IPv6NeighbourCache::iterator it = neighbourCache.begin(); it != neighbourCache.end(); ) {
+    for (auto it = neighbourCache.begin(); it != neighbourCache.end(); ) {
         if ((*it).first.interfaceID == ie->getInterfaceId() && it->second.isDefaultRouter()) {
             // update 14.9.07 - CB
             IPv6Address rtrLnkAddress = (*it).first.address;

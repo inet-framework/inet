@@ -924,7 +924,7 @@ void IPv6::registerHook(int priority, INetfilter::IHook *hook)
 void IPv6::unregisterHook(int priority, INetfilter::IHook *hook)
 {
     Enter_Method("unregisterHook()");
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         if ((iter->first == priority) && (iter->second == hook)) {
             hooks.erase(iter);
             return;
@@ -935,7 +935,7 @@ void IPv6::unregisterHook(int priority, INetfilter::IHook *hook)
 void IPv6::dropQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("dropQueuedDatagram()");
-    for (DatagramQueueForHooks::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             delete datagram;
             queuedDatagramsForHooks.erase(iter);
@@ -947,7 +947,7 @@ void IPv6::dropQueuedDatagram(const INetworkDatagram *datagram)
 void IPv6::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("reinjectDatagram()");
-    for (DatagramQueueForHooks::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             IPv6Datagram *datagram = iter->datagram;
             switch (iter->hookType) {
@@ -985,7 +985,7 @@ void IPv6::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 
 INetfilter::IHook::Result IPv6::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1011,7 +1011,7 @@ INetfilter::IHook::Result IPv6::datagramPreRoutingHook(INetworkDatagram *datagra
 
 INetfilter::IHook::Result IPv6::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1037,7 +1037,7 @@ INetfilter::IHook::Result IPv6::datagramForwardHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv6::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1063,7 +1063,7 @@ INetfilter::IHook::Result IPv6::datagramPostRoutingHook(INetworkDatagram *datagr
 
 INetfilter::IHook::Result IPv6::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalInHook(datagram, inIE);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1089,7 +1089,7 @@ INetfilter::IHook::Result IPv6::datagramLocalInHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv6::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:

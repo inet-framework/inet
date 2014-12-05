@@ -74,7 +74,7 @@ Define_Module(xMIPv6);
  */
 xMIPv6::~xMIPv6()
 {
-    TransmitIfList::iterator it = transmitIfList.begin();
+    auto it = transmitIfList.begin();
 
     while (it != transmitIfList.end()) {
         Key key = it->first;
@@ -628,7 +628,7 @@ xMIPv6::BUTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
     // TODO use STL search algorithm
 
     // update 13.9.07 - CB
-    for (TransmitIfList::iterator it = transmitIfList.begin(); it != transmitIfList.end(); it++) {
+    for (auto it = transmitIfList.begin(); it != transmitIfList.end(); it++) {
         if (dynamic_cast<BUTransmitIfEntry *>(it->second)) {
             BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry *)(it->second);
             if (buIfEntry->ifEntry->getInterfaceId() == ie->getInterfaceId() && buIfEntry->dest == dest) // update 5.9.07 - CB
@@ -1413,7 +1413,7 @@ void xMIPv6::triggerRouteOptimization(const IPv6Address& destAddress, const IPv6
             EV_INFO << "Initialise Route Optimization for: " << destAddress << "\n";
             initReturnRoutability(destAddress, ie);
 
-            CNList::iterator CRiterator = find(cnList.begin(), cnList.end(), destAddress);
+            auto CRiterator = find(cnList.begin(), cnList.end(), destAddress);
             if (CRiterator == cnList.end())
                 cnList.push_back(destAddress);
         }
@@ -1632,7 +1632,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
     Key key(dest, interfaceID, msgType);
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
 
     if (pos == transmitIfList.end())
     {
@@ -1694,7 +1694,7 @@ void xMIPv6::resetBUIfEntry(const IPv6Address& dest, int interfaceID, simtime_t 
 
     Key key(dest, interfaceID, KEY_BU);
 
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
 
     if (pos == transmitIfList.end()) {
         //EV << "### No corresponding TimerIfEntry found! ###\n";
@@ -2199,7 +2199,7 @@ void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beS
 bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
 
     if (pos == transmitIfList.end()) {
         //EV << "### No corresponding TimerIfEntry found! ###\n";
@@ -2226,7 +2226,7 @@ bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int ms
 bool xMIPv6::pendingTimerIfEntry(IPv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
 
     // return true if there is an entry
     // and false otherwise
@@ -2236,7 +2236,7 @@ bool xMIPv6::pendingTimerIfEntry(IPv6Address& dest, int interfaceID, int msgType
 xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
 {
     TimerIfEntry *ifEntry;
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
 
     if (pos != transmitIfList.end()) {
         // there already exists an unACKed retransmission timer for that entry
@@ -2370,9 +2370,9 @@ void xMIPv6::cancelEntries(int interfaceId, IPv6Address& CoA)
     tunneling->destroyTunnel(CoA, HA);
 
     // ...and then for the CNs
-    for (TransmitIfList::iterator it = transmitIfList.begin(); it != transmitIfList.end(); ) {
+    for (auto it = transmitIfList.begin(); it != transmitIfList.end(); ) {
         if ((*it).first.interfaceID == interfaceId) {
-            TransmitIfList::iterator oldIt = it++;
+            auto oldIt = it++;
 
             // destroy tunnel (if we have a BU entry here)
             if ((*oldIt).first.type == KEY_BU)
@@ -2388,7 +2388,7 @@ void xMIPv6::cancelEntries(int interfaceId, IPv6Address& CoA)
 
 void xMIPv6::removeCoAEntries()
 {
-    for (InterfaceCoAList::iterator it = interfaceCoAList.begin(); it != interfaceCoAList.end(); ++it) {
+    for (auto it = interfaceCoAList.begin(); it != interfaceCoAList.end(); ++it) {
         //if (it->first == ie->interfaceId())
         EV_DEBUG << "Cancelling timers for ifID=" << it->first << " and CoA=" << it->second << endl;
         cancelEntries(it->first, it->second);
@@ -2414,7 +2414,7 @@ void xMIPv6::createBRRTimer(const IPv6Address& brDest, InterfaceEntry *ie, const
     Key key(brDest, ie->getInterfaceId(), KEY_BR);
     BRTransmitIfEntry *brIfEntry;
 
-    TransmitIfList::iterator pos = transmitIfList.find(key);
+    auto pos = transmitIfList.find(key);
     if (pos != transmitIfList.end()) {
         // there already exists an unACKed retransmission timer for that entry
         // -> overwrite the old with the new one

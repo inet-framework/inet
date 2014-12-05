@@ -36,7 +36,7 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
 
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
-    for (VideoStreamMap::iterator it = streams.begin(); it != streams.end(); ++it)
+    for (auto it = streams.begin(); it != streams.end(); ++it)
         cancelAndDelete(it->second.timer);
 }
 
@@ -106,7 +106,7 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 
 void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 {
-    VideoStreamMap::iterator it = streams.find(timer->getId());
+    auto it = streams.find(timer->getId());
     if (it == streams.end())
         throw cRuntimeError("Model error: Stream not found for timer");
 
@@ -140,7 +140,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 
 void UDPVideoStreamSvr::clearStreams()
 {
-    for (VideoStreamMap::iterator it = streams.begin(); it != streams.end(); ++it)
+    for (auto it = streams.begin(); it != streams.end(); ++it)
         cancelAndDelete(it->second.timer);
     streams.clear();
 }

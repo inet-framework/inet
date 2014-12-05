@@ -393,7 +393,7 @@ void Batman::scheduleNextEvent()
 
 uint32_t Batman::getRoute(const L3Address &dest, std::vector<L3Address> &add)
 {
-    OrigMap::iterator it = origMap.find(dest);
+    auto it = origMap.find(dest);
     if (it != origMap.end())
     {
         OrigNode *node = it->second;
@@ -404,7 +404,7 @@ uint32_t Batman::getRoute(const L3Address &dest, std::vector<L3Address> &add)
     L3Address apAddr;
     if (getAp(dest,apAddr))
     {
-        OrigMap::iterator it = origMap.find(apAddr);
+        auto it = origMap.find(apAddr);
         if (it != origMap.end())
         {
             OrigNode *node = it->second;
@@ -418,7 +418,7 @@ uint32_t Batman::getRoute(const L3Address &dest, std::vector<L3Address> &add)
 
 bool Batman::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &val)
 {
-    OrigMap::iterator it = origMap.find(dest);
+    auto it = origMap.find(dest);
     if (it != origMap.end())
     {
         OrigNode *node = it->second;
@@ -428,7 +428,7 @@ bool Batman::getNextHop(const L3Address &dest, L3Address &add, int &iface, doubl
     L3Address apAddr;
     if (getAp(dest,apAddr))
     {
-        OrigMap::iterator it = origMap.find(apAddr);
+        auto it = origMap.find(apAddr);
         if (it != origMap.end())
         {
             OrigNode *node = it->second;

@@ -850,7 +850,7 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::IPv4)
         return;
-    PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution completed for " << entry->l3Address << ". Sending " << packetQueue.getLength()
@@ -869,7 +869,7 @@ void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::IPv4)
         return;
-    PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
@@ -925,7 +925,7 @@ void IPv4::registerHook(int priority, INetfilter::IHook *hook)
 void IPv4::unregisterHook(int priority, INetfilter::IHook *hook)
 {
     Enter_Method("unregisterHook()");
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         if ((iter->first == priority) && (iter->second == hook)) {
             hooks.erase(iter);
             return;
@@ -936,7 +936,7 @@ void IPv4::unregisterHook(int priority, INetfilter::IHook *hook)
 void IPv4::dropQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("dropQueuedDatagram()");
-    for (DatagramQueueForHooks::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             delete datagram;
             queuedDatagramsForHooks.erase(iter);
@@ -948,7 +948,7 @@ void IPv4::dropQueuedDatagram(const INetworkDatagram *datagram)
 void IPv4::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("reinjectDatagram()");
-    for (DatagramQueueForHooks::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             IPv4Datagram *datagram = iter->datagram;
             take(datagram);
@@ -985,7 +985,7 @@ void IPv4::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 
 INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1011,7 +1011,7 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagra
 
 INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1037,7 +1037,7 @@ INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv4::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1098,14 +1098,14 @@ void IPv4::flush()
     queue.clear();
 
     EV_DEBUG << "IPv4::flush(): pending packets:\n";
-    for (PendingPackets::iterator it = pendingPackets.begin(); it != pendingPackets.end(); ++it) {
+    for (auto it = pendingPackets.begin(); it != pendingPackets.end(); ++it) {
         EV_DEBUG << "IPv4::flush():    " << it->first << ": " << it->second.info() << endl;
         it->second.clear();
     }
     pendingPackets.clear();
 
     EV_DEBUG << "IPv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (DatagramQueueForHooks::iterator it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
+    for (auto it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
         delete it->datagram;
     }
     queuedDatagramsForHooks.clear();
@@ -1119,7 +1119,7 @@ bool IPv4::isNodeUp()
 
 INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalInHook(datagram, inIE);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
@@ -1149,7 +1149,7 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv4::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:

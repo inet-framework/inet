@@ -196,7 +196,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
 int EtherLLC::findPortForSAP(int dsap)
 {
-    DsapToPortMap::iterator it = dsapToPort.find(dsap);
+    auto it = dsapToPort.find(dsap);
     return (it == dsapToPort.end()) ? -1 : it->second;
 }
 

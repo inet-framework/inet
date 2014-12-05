@@ -133,7 +133,7 @@ OLSROPT::recv_olsr(cMessage* msg)
         {
             // If the message has been considered for forwarding, it should
             // not be retransmitted again
-            for (addr_list_t::iterator it = duplicated->iface_list().begin();
+            for (auto it = duplicated->iface_list().begin();
                     it != duplicated->iface_list().end();
                     it++)
             {
@@ -438,7 +438,7 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
     OLSR_hello& hello = msg.hello();
     bool changedTopology = false;
 
-    for (linkset_t::iterator it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
+    for (auto it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
         OLSR_link_tuple* link_tuple = *it_lt;
         if (get_main_addr(link_tuple->nb_iface_addr()) == msg.orig_addr())

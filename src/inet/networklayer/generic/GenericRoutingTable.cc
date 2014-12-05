@@ -372,7 +372,7 @@ void GenericRoutingTable::internalAddRoute(GenericRoute *route)
 
     // add to tables
     // we keep entries sorted, so that we can stop at the first match when doing the longest prefix matching
-    RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
+    auto pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
     routes.insert(pos, route);
 
     route->setRoutingTable(this);
@@ -380,7 +380,7 @@ void GenericRoutingTable::internalAddRoute(GenericRoute *route)
 
 GenericRoute *GenericRoutingTable::internalRemoveRoute(GenericRoute *route)
 {
-    RouteVector::iterator i = std::find(routes.begin(), routes.end(), route);
+    auto i = std::find(routes.begin(), routes.end(), route);
     if (i != routes.end()) {
         ASSERT(route->getRoutingTableAsGeneric() == this);
         routes.erase(i);

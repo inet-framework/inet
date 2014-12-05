@@ -286,7 +286,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         {
             // If the message has been considered for forwarding, it should
             // not be retransmitted again
-            for (addr_list_t::iterator it = duplicated->iface_list().begin();
+            for (auto it = duplicated->iface_list().begin();
                     it != duplicated->iface_list().end();
                     it++)
             {
@@ -368,7 +368,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
     // N is the subset of neighbors of the node, which are
     // neighbor "of the interface I" and have willigness different
     // from OLSR_ETX_WILL_NEVER
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
         if ((*it)->getStatus() == OLSR_ETX_STATUS_SYM) // I think that we need this check
             N.push_back(*it);
 
@@ -378,7 +378,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>( *it);
 
@@ -410,7 +410,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
 
     // Start with an MPR set made of all members of N with
     // N_willingness equal to WILL_ALWAYS
-    for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+    for (auto it = N.begin(); it != N.end(); it++)
     {
         OLSR_ETX_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() == OLSR_ETX_WILL_ALWAYS)
@@ -423,7 +423,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
     mprset_t foundset;
     std::set<nsaddr_t> deleted_addrs;
     // iterate through all 2 hop neighbors we have
-    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    for (auto it = N2.begin(); it != N2.end();)
     {
         OLSR_ETX_nb2hop_tuple* nb2hop_tuple1 = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
         if (!nb2hop_tuple1)
@@ -434,7 +434,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         // check if this two hop neighbor has more that one hop neighbor in N
         // it would mean that there is more than one node in N that reaches
         // the current 2 hop node
-        mprset_t::iterator pos = foundset.find(nb2hop_tuple1->nb2hop_addr());
+        auto pos = foundset.find(nb2hop_tuple1->nb2hop_addr());
         if (pos != foundset.end())
         {
             it++;
@@ -444,7 +444,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         bool found = false;
         // find the one hop neighbor that provides reachability to the
         // current two hop neighbor.
-        for (nbset_t::iterator it2 = N.begin(); it2 != N.end(); it2++)
+        for (auto it2 = N.begin(); it2 != N.end(); it2++)
         {
             if ((*it2)->nb_main_addr() == nb2hop_tuple1->nb_main_addr())
             {
@@ -462,7 +462,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         found = false;
         // check if there is another one hop neighbor able to provide
         // reachability to the current 2 hop neighbor
-        for (nb2hopset_t::iterator it2 = it + 1; it2 != N2.end(); it2++)
+        for (auto it2 = it + 1; it2 != N2.end(); it2++)
         {
             OLSR_ETX_nb2hop_tuple* nb2hop_tuple2 = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it2);
             if (!nb2hop_tuple2)
@@ -482,7 +482,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
 
             // erase all 2 hop neighbor nodes that are now reached through this
             // newly added MPR
-            for (nb2hopset_t::iterator it2 = it + 1; it2 != N2.end();)
+            for (auto it2 = it + 1; it2 != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple2 = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it2);
                 if (!nb2hop_tuple2)
@@ -499,7 +499,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
             int distanceFromEnd = std::distance(it, N2.end());
             int distance = std::distance(N2.begin(), it);
             int i = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); i < distance; i++) // check now the first section
+            for (auto it2 = N2.begin(); i < distance; i++) // check now the first section
             {
 
                 OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
@@ -523,7 +523,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         for (std::set<nsaddr_t>::iterator it2 = deleted_addrs.begin();
                 it2 != deleted_addrs.end(); it2++)
         {
-            for (nb2hopset_t::iterator it3 = N2.begin(); it3 != N2.end();)
+            for (auto it3 = N2.begin(); it3 != N2.end();)
             {
                 if ((*it3)->nb2hop_addr() == *it2)
                 {
@@ -550,11 +550,11 @@ OLSR_ETX::olsr_r1_mpr_computation()
         // number of nodes in N2 that it can reach
         std::map<int, std::vector<OLSR_ETX_nb_tuple*> > reachability;
         std::set<int> rs;
-        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        for (auto it = N.begin(); it != N.end(); it++)
         {
             OLSR_ETX_nb_tuple* nb_tuple = *it;
             int r = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            for (auto it2 = N2.begin(); it2 != N2.end(); it2++)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it2);
                 if (!nb2hop_tuple)
@@ -661,7 +661,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         {
             state_.insert_mpr_addr(max->nb_main_addr());
             std::set<nsaddr_t> nb2hop_addrs;
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -676,7 +676,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
                 else
                     it++;
             }
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -712,7 +712,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
 
     // N is the subset of neighbors of the node, which are
     // neighbor "of the interface I"
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
         if ((*it)->getStatus() == OLSR_ETX_STATUS_SYM &&
                 (*it)->willingness() != OLSR_ETX_WILL_NEVER) // I think that we need this check
             N.push_back(*it);
@@ -723,7 +723,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
         if (!nb2hop_tuple)
@@ -758,11 +758,11 @@ OLSR_ETX::olsr_r2_mpr_computation()
         // number of nodes in N2 that it can reach
         std::map<int, std::vector<OLSR_ETX_nb_tuple*> > reachability;
         std::set<int> rs;
-        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        for (auto it = N.begin(); it != N.end(); it++)
         {
             OLSR_ETX_nb_tuple* nb_tuple = *it;
             int r = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            for (auto it2 = N2.begin(); it2 != N2.end(); it2++)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it2);
                 if (!nb2hop_tuple)
@@ -881,7 +881,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
         {
             state_.insert_mpr_addr(max->nb_main_addr());
             std::set<nsaddr_t> nb2hop_addrs;
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -896,7 +896,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
                     it++;
 
             }
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -930,7 +930,7 @@ OLSR_ETX::qolsr_mpr_computation()
     nbset_t N; nb2hopset_t N2;
     // N is the subset of neighbors of the node, which are
     // neighbor "of the interface I"
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
         if ((*it)->getStatus() == OLSR_ETX_STATUS_SYM &&
                 (*it)->willingness() != OLSR_ETX_WILL_NEVER) // I think that we need this check
             N.push_back(*it);
@@ -941,7 +941,7 @@ OLSR_ETX::qolsr_mpr_computation()
     // (ii)  the node performing the computation
     // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
     //       link to this node on some interface.
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
         if (!nb2hop_tuple)
@@ -974,11 +974,11 @@ OLSR_ETX::qolsr_mpr_computation()
         // number of nodes in N2 that it can reach
         std::map<int, std::vector<OLSR_ETX_nb_tuple*> > reachability;
         std::set<int> rs;
-        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        for (auto it = N.begin(); it != N.end(); it++)
         {
             OLSR_ETX_nb_tuple* nb_tuple = *it;
             int r = 0;
-            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            for (auto it2 = N2.begin(); it2 != N2.end(); it2++)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it2);
                 if (!nb2hop_tuple)
@@ -1009,7 +1009,7 @@ OLSR_ETX::qolsr_mpr_computation()
 
         // Iterate through all links in nb2hop_set that has the same two hop
         // neighbor as the second point of the link
-        for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); it++)
+        for (auto it = N2.begin(); it != N2.end(); it++)
         {
             OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
             if (!nb2hop_tuple)
@@ -1130,7 +1130,7 @@ OLSR_ETX::qolsr_mpr_computation()
         {
             state_.insert_mpr_addr(max->nb_main_addr());
             std::set<nsaddr_t> nb2hop_addrs;
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -1145,7 +1145,7 @@ OLSR_ETX::qolsr_mpr_computation()
                     it++;
 
             }
-            for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+            for (auto it = N2.begin(); it != N2.end();)
             {
                 OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
                 if (!nb2hop_tuple)
@@ -1178,7 +1178,7 @@ OLSR_ETX::olsrd_mpr_computation()
 
     // Build a MPR set made of all members of N with
     // N_willingness different of WILL_NEVER
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
     {
         OLSR_ETX_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() != OLSR_ETX_WILL_NEVER &&
@@ -1227,7 +1227,7 @@ OLSR_ETX::rtable_dijkstra_computation()
 
     debug("Current node %s:\n", getNodeId(ra_addr()));
     // Iterate through all out 1 hop neighbors
-    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+    for (auto it = nbset().begin(); it != nbset().end(); it++)
     {
         OLSR_ETX_nb_tuple* nb_tuple = *it;
 
@@ -1250,7 +1250,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     // Note: we are not our own two hop neighbor
     std::map<nsaddr_t, std::vector<OLSR_ETX_nb2hop_tuple*> > N;
     std::set<nsaddr_t> N_index;
-    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    for (auto it = nb2hopset().begin(); it != nb2hopset().end(); it++)
     {
         OLSR_ETX_nb2hop_tuple* nb2hop_tuple = dynamic_cast<OLSR_ETX_nb2hop_tuple*>(*it);
         if (!nb2hop_tuple)
@@ -1316,7 +1316,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     }
 
     // here we rely on the fact that in TC messages only the best links are published
-    for (topologyset_t::iterator it = topologyset().begin();
+    for (auto it = topologyset().begin();
             it != topologyset().end(); it++)
     {
         OLSR_ETX_topology_tuple* topology_tuple = dynamic_cast<OLSR_ETX_topology_tuple*>(*it);
@@ -1342,7 +1342,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     // Now all we have to do is inserting routes according to hop count
 #if 1
     std::multimap<int,nsaddr_t> processed_nodes;
-    for (Dijkstra::DijkstraMap::iterator it = dijkstra->dijkstraMap.begin(); it != dijkstra->dijkstraMap.end(); it++)
+    for (auto it = dijkstra->dijkstraMap.begin(); it != dijkstra->dijkstraMap.end(); it++)
     {
         // store the nodes in hop order, the multimap order the values in function of number of hops
         processed_nodes.insert(std::pair<int,nsaddr_t>(it->second.hop_count(), it->first));
@@ -1351,7 +1351,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     {
 
         std::multimap<int,nsaddr_t>::iterator it = processed_nodes.begin();
-        Dijkstra::DijkstraMap::iterator itDij = dijkstra->dijkstraMap.find(it->second);
+        auto itDij = dijkstra->dijkstraMap.find(it->second);
         if (itDij==dijkstra->dijkstraMap.end())
             throw cRuntimeError("node not found in DijkstraMap");
         int hopCount = it->first;
@@ -1429,7 +1429,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     // AND there is no routing entry such that:
     //  R_dest_addr  == I_iface_addr
     // then a route entry is created in the routing table
-    for (ifaceassocset_t::iterator it = ifaceassocset().begin(); it != ifaceassocset().end(); it++)
+    for (auto it = ifaceassocset().begin(); it != ifaceassocset().end(); it++)
     {
         OLSR_ETX_iface_assoc_tuple* tuple = *it;
         OLSR_ETX_rt_entry* entry1 = rtable_.lookup(tuple->main_addr());
@@ -1798,7 +1798,7 @@ OLSR_ETX::send_hello()
 
 
     std::map<uint8_t, int> linkcodes_count;
-    for (linkset_t::iterator it = linkset().begin(); it != linkset().end(); it++)
+    for (auto it = linkset().begin(); it != linkset().end(); it++)
     {
         OLSR_ETX_link_tuple* link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it);
         if (!link_tuple)
@@ -1824,7 +1824,7 @@ OLSR_ETX::send_hello()
             else
             {
                 bool ok = false;
-                for (nbset_t::iterator nb_it = nbset().begin();
+                for (auto nb_it = nbset().begin();
                         nb_it != nbset().end();
                         nb_it++)
                 {
@@ -1937,7 +1937,7 @@ void OLSR_ETX::send_tc()
     {
         case OLSR_ETX_MPR_OLSRD:
             // Report all 1 hop neighbors we have
-            for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+            for (auto it = nbset().begin(); it != nbset().end(); it++)
             {
                 OLSR_nb_tuple* nb_tuple = *it;
                 int count = msg.tc().count;
@@ -1974,7 +1974,7 @@ void OLSR_ETX::send_tc()
             {
                 case OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET:
                     // publish only nodes in mpr sel set (RFC 3626)
-                    for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
+                    for (auto it = mprselset().begin(); it != mprselset().end(); it++)
                     {
                         OLSR_ETX_mprsel_tuple* mprsel_tuple = *it;
                         int count = msg.tc().count;
@@ -2001,7 +2001,7 @@ void OLSR_ETX::send_tc()
 
                 case OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET_PLUS_MPR_SET:
                     // publish nodes in mpr sel set plus nodes in mpr set (RFC 3626)
-                    for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
+                    for (auto it = mprselset().begin(); it != mprselset().end(); it++)
                     {
                         OLSR_mprsel_tuple* mprsel_tuple = *it;
                         int count = msg.tc().count;
@@ -2024,7 +2024,7 @@ void OLSR_ETX::send_tc()
                         }
                     }
 
-                    for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
+                    for (auto it = mprset().begin(); it != mprset().end(); it++)
                     {
                         nsaddr_t mpr_addr = *it;
                         int count = msg.tc().count;
@@ -2051,7 +2051,7 @@ void OLSR_ETX::send_tc()
 
                 case OLSR_ETX_TC_REDUNDANCY_FULL:
                     // publish full neighbor link set (RFC 3626)
-                    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+                    for (auto it = nbset().begin(); it != nbset().end(); it++)
                     {
                         OLSR_ETX_nb_tuple* nb_tuple = *it;
                         int count = msg.tc().count;
@@ -2080,7 +2080,7 @@ void OLSR_ETX::send_tc()
                     break;
                 case OLSR_ETX_TC_REDUNDANCY_MPR_SET:
                     // non-OLSR standard: publish mpr set only
-                    for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
+                    for (auto it = mprset().begin(); it != mprset().end(); it++)
                     {
                         nsaddr_t mpr_addr = *it;
                         int count = msg.tc().count;
@@ -2281,7 +2281,7 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
     //  L_neighbor_iface_addr from a link tuple included in the Link Set with
     //         L_SYM_time >= current time (not expired)
     //  then the 2-hop Neighbor Set SHOULD be updated as follows:
-    for (linkset_t::iterator it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
+    for (auto it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
         OLSR_ETX_link_tuple* link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it_lt);
         if (!link_tuple)
@@ -2733,7 +2733,7 @@ void
 OLSR_ETX::link_quality()
 {
     double now = CURRENT_TIME;
-    for (linkset_t::iterator it = state_.linkset_.begin(); it != state_.linkset_.end(); it++)
+    for (auto it = state_.linkset_.begin(); it != state_.linkset_.end(); it++)
     {
         OLSR_ETX_link_tuple* tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it);
         if (tuple->next_hello() < now)

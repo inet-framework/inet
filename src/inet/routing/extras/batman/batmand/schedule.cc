@@ -80,7 +80,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
 
     batman_if->seqno++;
 
-    for (OrigMap::iterator it = origMap.begin(); it != origMap.end(); ++it)
+    for (auto it = origMap.begin(); it != origMap.end(); ++it)
     {
         orig_node = it->second;
 

@@ -344,7 +344,7 @@ void TurtleMobility::computeMaxSpeed(cXMLElement *nodes)
     // Recursively traverse the whole config file, looking for
     // speed attributes
     cXMLElementList childs = nodes->getChildren();
-    for (cXMLElementList::iterator it = childs.begin(); it != childs.end(); it++)
+    for (auto it = childs.begin(); it != childs.end(); it++)
     {
         const char *speedAttr = (*it)->getAttribute("speed");
         if (speedAttr)

@@ -110,7 +110,7 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
     ASSERT(!strcmp(libtable->getTagName(), "libtable"));
     checkTags(libtable, "libentry");
     cXMLElementList list = libtable->getChildrenByTagName("libentry");
-    for (cXMLElementList::iterator it = list.begin(); it != list.end(); it++) {
+    for (auto it = list.begin(); it != list.end(); it++) {
         const cXMLElement& entry = **it;
 
         checkTags(&entry, "inLabel inInterface outLabel outInterface color");
@@ -122,7 +122,7 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
         newItem.color = getParameterIntValue(&entry, "color", 0);
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
-        for (cXMLElementList::iterator oit = ops.begin(); oit != ops.end(); oit++) {
+        for (auto oit = ops.begin(); oit != ops.end(); oit++) {
             const cXMLElement& op = **oit;
             const char *val = op.getAttribute("value");
             const char *code = op.getAttribute("code");

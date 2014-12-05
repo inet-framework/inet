@@ -249,7 +249,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 delete connectInfo;
                 delete msg;
                 if (par("numPacketsToSendPerClient").longValue() > 0) {
-                    ServerAssocStatMap::iterator i = serverAssocStatMap.find(assocId);
+                    auto i = serverAssocStatMap.find(assocId);
                     numRequestsToSend = i->second.sentPackets;
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend();
@@ -281,7 +281,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                             cmsg->setControlInfo(qinfo);
                             sendOrSchedule(cmsg);
                         }
-                        ServerAssocStatMap::iterator j = serverAssocStatMap.find(assocId);
+                        auto j = serverAssocStatMap.find(assocId);
                         if (j->second.rcvdPackets == 0 && par("waitToClose").doubleValue() > 0) {
                             char as[5];
                             sprintf(as, "%d", assocId);
@@ -338,8 +338,8 @@ void SCTPServer::handleMessage(cMessage *msg)
                 EV_INFO << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
                 id = ind->getAssocId();
-                ServerAssocStatMap::iterator j = serverAssocStatMap.find(id);
-                BytesPerAssoc::iterator k = bytesPerAssoc.find(id);
+                auto j = serverAssocStatMap.find(id);
+                auto k = bytesPerAssoc.find(id);
                 if (j->second.rcvdBytes == 0)
                     j->second.start = simulation.getSimTime();
 
@@ -350,7 +350,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     if (par("numPacketsToReceivePerClient").longValue() > 0) {
                         j->second.rcvdPackets--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-                        EndToEndDelay::iterator m = endToEndDelay.find(id);
+                        auto m = endToEndDelay.find(id);
                         m->second->record(simulation.getSimTime() - smsg->getCreationTime());
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
@@ -380,7 +380,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     SCTPSendCommand *cmd = new SCTPSendCommand("Send6");
                     cmd->setAssocId(id);
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-                    EndToEndDelay::iterator n = endToEndDelay.find(id);
+                    auto n = endToEndDelay.find(id);
                     n->second->record(simulation.getSimTime() - smsg->getCreationTime());
                     cPacket *cmsg = new cPacket("SVData");
                     bytesSent += smsg->getBitLength() / 8;
@@ -404,7 +404,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 id = command->getAssocId();
                 EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-                ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
+                auto i = serverAssocStatMap.find(id);
                 if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").longValue() == 0) {
                     cPacket *cmsg = new cPacket("Request");
                     SCTPInfo *qinfo = new SCTPInfo("Info3");
@@ -501,7 +501,7 @@ void SCTPServer::finish()
 {
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (ServerAssocStatMap::iterator l = serverAssocStatMap.begin(); l != serverAssocStatMap.end(); ++l) {
+    for (auto l = serverAssocStatMap.begin(); l != serverAssocStatMap.end(); ++l) {
         EV_DETAIL << getFullPath() << " Assoc: " << l->first << "\n";
         EV_DETAIL << "\tstart time: " << l->second.start << "\n";
         EV_DETAIL << "\tstop time: " << l->second.stop << "\n";
@@ -518,10 +518,10 @@ void SCTPServer::finish()
 
 SCTPServer::~SCTPServer()
 {
-    for (BytesPerAssoc::iterator i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
+    for (auto i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
         delete i->second;
 
-    for (EndToEndDelay::iterator i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
+    for (auto i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
         delete i->second;
 
     bytesPerAssoc.clear();
