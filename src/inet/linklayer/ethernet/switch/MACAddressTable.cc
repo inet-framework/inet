@@ -91,8 +91,7 @@ MACAddressTable::AddressTable *MACAddressTable::getTableForVid(unsigned int vid)
     if (vid == 0)
         return addressTable;
 
-    MACAddressTable::VlanAddressTable::iterator iter;
-    iter = vlanAddressTable.find(vid);
+    auto iter = vlanAddressTable.find(vid);
     if (iter != vlanAddressTable.end())
         return iter->second;
     return nullptr;

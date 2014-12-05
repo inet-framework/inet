@@ -184,14 +184,13 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     ih->_chksum = 0;
 
     // search unfilled local addr in pcb-s for this connection.
-    TcpAppConnMap::iterator i;
     L3Address laddr = ih->dest.addr;
     L3Address raddr = ih->src.addr;
     u16_t lport = tcpsegP->getDestPort();
     u16_t rport = tcpsegP->getSrcPort();
 
     if (tcpsegP->getSynBit() && tcpsegP->getAckBit()) {
-        for (i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); i++) {
+        for (auto i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); i++) {
             LwipTcpLayer::tcp_pcb *pcb = i->second->pcbM;
             if (pcb) {
                 if ((pcb->state == LwipTcpLayer::SYN_SENT)

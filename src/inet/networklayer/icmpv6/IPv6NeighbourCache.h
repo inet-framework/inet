@@ -132,7 +132,6 @@ class INET_API IPv6NeighbourCache
 
     /** The std::map underlying the Neighbour Cache data structure */
     typedef std::map<Key, Neighbour> NeighbourMap;
-    typedef NeighbourMap::iterator iterator;
 
     // cyclic double-linked list of default routers
     class DefaultRouterList
@@ -188,10 +187,10 @@ class INET_API IPv6NeighbourCache
     DefaultRouterList& getDefaultRouterList() { return defaultRouterList; }
 
     /** For iteration on the internal std::map */
-    iterator begin() { return neighbourMap.begin(); }
+    NeighbourMap::iterator begin() { return neighbourMap.begin(); }
 
     /** For iteration on the internal std::map */
-    iterator end() { return neighbourMap.end(); }
+    NeighbourMap::iterator end() { return neighbourMap.end(); }
 
     /** Creates and initializes a neighbour entry with isRouter=false, state=INCOMPLETE. */
     //TODO merge into next one (using default arg)

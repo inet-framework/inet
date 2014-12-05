@@ -105,8 +105,7 @@ OLSR_Timer::OLSR_Timer() : cOwnedObject("OLSR_Timer")
 
 void OLSR_Timer::removeQueueTimer()
 {
-    TimerQueue::iterator it;
-    for (it=agent_->timerQueuePtr->begin(); it != agent_->timerQueuePtr->end(); it++ )
+    for (auto it=agent_->timerQueuePtr->begin(); it != agent_->timerQueuePtr->end(); it++ )
     {
         if (it->second==this)
         {

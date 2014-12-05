@@ -217,23 +217,18 @@ void ProbabilisticBroadcast::finish()
 
 bool ProbabilisticBroadcast::messageKnown(unsigned int msgId)
 {
-    MsgIdSet::iterator pos;
-
-    pos = knownMsgIds.find(msgId);
+    auto pos = knownMsgIds.find(msgId);
     return pos != knownMsgIds.end();
 }
 
 bool ProbabilisticBroadcast::debugMessageKnown(unsigned int msgId)
 {
-    MsgIdSet::iterator pos;
-
-    pos = debugMsgIdSet.find(msgId);
+    auto pos = debugMsgIdSet.find(msgId);
     return pos != debugMsgIdSet.end();
 }
 
 void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc)
 {
-    TimeMsgMap::iterator pos;
     simtime_t bcastTime = simTime() + bcastDelay;
 
     EV << "PBr: " << simTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
@@ -242,7 +237,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     // insert message ID in ID list.
     knownMsgIds.insert(msgDesc->pkt->getId());
     // insert key value pair <broadcast time, pointer to message> in message queue.
-    pos = msgQueue.insert(make_pair(bcastTime, msgDesc));
+    auto pos = msgQueue.insert(make_pair(bcastTime, msgDesc));
     // if the message has been inserted in the front of the list, it means that it
     // will be the next message to be broadcasted, therefore we have to re-schedule
     // the broadcast timer to the message's broadcast instant.
@@ -255,12 +250,11 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
 
 ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQueue(void)
 {
-    TimeMsgMap::iterator pos;
     tMsgDesc *msgDesc;
 
     // get first message.
     ASSERT(!msgQueue.empty());
-    pos = msgQueue.begin();
+    auto pos = msgQueue.begin();
     msgDesc = pos->second;
     // remove first message from message queue and from ID list
     msgQueue.erase(pos);

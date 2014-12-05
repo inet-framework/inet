@@ -2009,8 +2009,8 @@ void PIMSM::Route::addDownstreamInterface(DownstreamInterface *outInterface)
 {
     ASSERT(outInterface);
 
-    DownstreamInterfaceVector::iterator it;
-    for (it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it) {
+    auto it = downstreamInterfaces.begin();
+    for ( ; it != downstreamInterfaces.end(); ++it) {
         if ((*it)->ie == outInterface->ie)
             break;
     }

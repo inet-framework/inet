@@ -95,8 +95,6 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
 {
     ASSERT(tcpDataP);
 
-    PayloadQueue::iterator i;
-
     TCPSegment *tcpseg = new TCPSegment("tcp-segment");
 
     TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg, false);
@@ -106,7 +104,7 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
     uint32 toSeq = fromSeq + numBytes;
 
     if ((!isValidSeqNoM) && (numBytes > 0)) {
-        for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
+        for (auto i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
             i->endSequenceNo += fromSeq;
         }
 
@@ -121,7 +119,7 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
     EV_DEBUG << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq
              << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
-    for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
+    for (auto i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
         EV_DEBUG << "  buffered msg: endseq=" << i->endSequenceNo
                  << ", length=" << i->msg->getByteLength() << endl;
     }
@@ -130,7 +128,7 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
 
     if (numBytes > 0) {
         // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
-        i = payloadQueueM.begin();
+        auto i = payloadQueueM.begin();
 
         while (i != payloadQueueM.end() && seqLE(i->endSequenceNo, fromSeq))
             ++i;

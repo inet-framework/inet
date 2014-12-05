@@ -47,8 +47,8 @@ void BVHTree::buildHierarchy(std::vector<const PhysicalObject*>& objects, unsign
     }
     else
     {
-        ObjVecIterator s = objects.begin();
-        ObjVecIterator e = s;
+        auto s = objects.begin();
+        auto e = s;
         std::advance(s, start);
         std::advance(e, end + 1);
         sort(s, e, AxisComparator(axis.getCurrentAxis()));

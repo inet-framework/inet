@@ -1546,9 +1546,8 @@ void SCTPAssociation::stateEntered(int32 status)
 
 void SCTPAssociation::removePath()
 {
-    SCTPPathMap::iterator pathIterator;
-
-    while ((pathIterator = sctpPathMap.begin()) != sctpPathMap.end()) {
+    while (!sctpPathMap.empty()) {
+        auto pathIterator = sctpPathMap.begin();
         SCTPPathVariables *path = pathIterator->second;
         for (auto j = remoteAddressList.begin(); j != remoteAddressList.end(); j++) {
             if ((*j) == path->remoteAddress) {

@@ -218,10 +218,8 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
     if (!plainFlooding)
         return true;
 
-    cBroadcastList::iterator it;
-
     //serach the broadcast list of outdated entries and delete them
-    for (it = bcMsgs.begin(); it != bcMsgs.end(); ) {
+    for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
         if (it->delTime < simTime()) {
             it = bcMsgs.erase(it);
         }

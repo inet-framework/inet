@@ -314,8 +314,7 @@ void HttpController::cancelSpecialStatus(const char *www)
     if (specialList.size() == 0)
         return;
     WebServerEntry *en;
-    std::list<WebServerEntry *>::iterator i;
-    for (i = specialList.begin(); i != specialList.end(); i++) {
+    for (auto i = specialList.begin(); i != specialList.end(); i++) {
         en = (*i);
         if (strcmp(en->name.c_str(), www) == 0) {
             pspecial -= en->pvalue;
@@ -348,8 +347,7 @@ HttpController::WebServerEntry *HttpController::selectFromSpecialList()
     if (specialList.size() > 1) {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        std::list<WebServerEntry *>::iterator i;
-        for (i = specialList.begin(); i != specialList.end(); i++) {
+        for (auto i = specialList.begin(); i != specialList.end(); i++) {
             en = (*i);
             pcumulative += en->pvalue;
             if (pcumulative / pspecial > p)
@@ -391,8 +389,7 @@ std::string HttpController::listSpecials()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    std::list<WebServerEntry *>::iterator i;
-    for (i = specialList.begin(); i != specialList.end(); i++) {
+    for (auto i = specialList.begin(); i != specialList.end(); i++) {
         en = (*i);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
@@ -404,8 +401,7 @@ std::string HttpController::listPickOrder()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    std::vector<WebServerEntry *>::iterator i;
-    for (i = pickList.begin(); i != pickList.end(); i++) {
+    for (auto i = pickList.begin(); i != pickList.end(); i++) {
         en = (*i);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;

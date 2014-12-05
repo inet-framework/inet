@@ -469,8 +469,7 @@ SCTPAssociation *SCTP::findAssocForMessage(L3Address srcAddr, L3Address destAddr
     printInfoAssocMap();
 
     // try with fully qualified SockPair
-    SctpAssocMap::iterator i;
-    i = sctpAssocMap.find(key);
+    auto i = sctpAssocMap.find(key);
     if (i != sctpAssocMap.end())
         return i->second;
 

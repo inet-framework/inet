@@ -235,8 +235,8 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
         // rebuild the arp cache
         if (ie->isLoopback())
             return;
-        ARPCache::iterator it;
-        for (it = globalArpCache.begin(); it != globalArpCache.end(); ++it) {
+        auto it = globalArpCache.begin();
+        for ( ; it != globalArpCache.end(); ++it) {
             if (it->second->ie == ie)
                 break;
         }

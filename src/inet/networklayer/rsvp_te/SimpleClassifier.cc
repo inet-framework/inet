@@ -68,8 +68,7 @@ bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outL
 
     // forwarding decision for non-labeled datagrams
 
-    std::vector<FECEntry>::iterator it;
-    for (it = bindings.begin(); it != bindings.end(); it++) {
+    for (auto it = bindings.begin(); it != bindings.end(); it++) {
         if (!it->dest.isUnspecified() && !it->dest.equals(ipdatagram->getDestAddress()))
             continue;
 
@@ -91,8 +90,7 @@ bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outL
 
 void SimpleClassifier::bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel)
 {
-    std::vector<FECEntry>::iterator it;
-    for (it = bindings.begin(); it != bindings.end(); it++) {
+    for (auto it = bindings.begin(); it != bindings.end(); it++) {
         if (it->session != session)
             continue;
 
@@ -200,12 +198,10 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
 std::vector<SimpleClassifier::FECEntry>::iterator SimpleClassifier::findFEC(int fecid)
 {
-    std::vector<FECEntry>::iterator it;
-    for (it = bindings.begin(); it != bindings.end(); it++) {
-        if (it->id != fecid)
-            continue;
-
-        break;
+    auto it = bindings.begin();
+    for ( ; it != bindings.end(); it++) {
+        if (it->id == fecid)
+            break;
     }
     return it;
 }

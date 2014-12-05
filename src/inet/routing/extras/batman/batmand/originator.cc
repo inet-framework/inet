@@ -65,11 +65,11 @@ int choose_orig(void *data, int32_t size) {
 
 
 /* this function finds or creates an originator entry for the given address if it does not exits */
-OrigNode *Batman::get_orig_node(const L3Address &addr) {
+OrigNode *Batman::get_orig_node(const L3Address &addr)
+{
     OrigNode *orig_node;
-    OrigMap::iterator it;
 
-    it = origMap.find(addr);
+    auto it = origMap.find(addr);
 
     if (it != origMap.end())
         return it->second;
@@ -86,7 +86,8 @@ OrigNode *Batman::get_orig_node(const L3Address &addr) {
     return orig_node;
 }
 
-void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
+void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time)
+{
     GwNode *gw_node;
     NeighNode *neigh_node = nullptr, *tmp_neigh_node = nullptr, *best_neigh_node = nullptr;
     uint8_t max_bcast_own = 0, max_tq = 0;
@@ -180,14 +181,13 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address 
 
 void Batman::purge_orig(const simtime_t &curr_time)
 {
-    OrigMap::iterator it;
     OrigNode *orig_node;
     NeighNode *neigh_node, *best_neigh_node;
     GwNode *gw_node;
     uint8_t gw_purged = 0, neigh_purged, max_tq;
 
     /* for all origins... */
-    for (it = origMap.begin(); it != origMap.end();) {
+    for (auto it = origMap.begin(); it != origMap.end();) {
         orig_node = it->second;
 
         if (curr_time > (orig_node->last_valid + (2 * purge_timeout))) {

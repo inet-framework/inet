@@ -277,11 +277,10 @@ void EtherMAC::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTi
     while (!endRxTimeList.empty() && endRxTimeList.front().endTime <= now)
         endRxTimeList.pop_front();
 
-    EndRxTimeList::iterator i;
-
     // remove old entry with same packet tree ID (typically: a frame reception
     // doesn't go through but is canceled by a jam signal)
-    for (i = endRxTimeList.begin(); i != endRxTimeList.end(); i++) {
+    auto i = endRxTimeList.begin();
+    for ( ; i != endRxTimeList.end(); i++) {
         if (i->packetTreeId == packetTreeId) {
             endRxTimeList.erase(i);
             break;

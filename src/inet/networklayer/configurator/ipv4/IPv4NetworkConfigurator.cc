@@ -325,7 +325,7 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (std::map<std::string, std::vector<InterfaceInfo *> >::iterator it = wirelessIdToInterfaceInfosMap.begin(); it != wirelessIdToInterfaceInfosMap.end(); it++) {
+    for (auto it = wirelessIdToInterfaceInfosMap.begin(); it != wirelessIdToInterfaceInfosMap.end(); it++) {
         std::vector<InterfaceInfo *>& interfaceInfos = it->second;
         for (int i = 0; i < (int)interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);

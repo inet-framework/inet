@@ -1319,7 +1319,7 @@ bool DYMO::isClientAddress(const L3Address& address)
     if (routingTable->isLocalAddress(address))
         return true;
     else {
-        for (std::vector<std::pair<L3Address, int> >::iterator it = clientAddressAndPrefixLengthPairs.begin(); it != clientAddressAndPrefixLengthPairs.end(); it++)
+        for (auto it = clientAddressAndPrefixLengthPairs.begin(); it != clientAddressAndPrefixLengthPairs.end(); it++)
             // TODO: check for prefix length too
             if (it->first == address)
                 return true;

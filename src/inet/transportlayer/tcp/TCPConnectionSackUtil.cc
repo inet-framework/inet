@@ -445,13 +445,12 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     uint options_len = 0;
     uint used_options_len = tcpseg->getOptionsArrayLength();
     bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
-    SackList::iterator it, it2;
 
     uint32 start = state->start_seqno;
     uint32 end = state->end_seqno;
 
     // delete old sacks (below rcv_nxt), delete duplicates and print previous status of sacks_array:
-    it = state->sacks_array.begin();
+    auto it = state->sacks_array.begin();
     EV_INFO << "Previous status of sacks_array: \n" << ((it != state->sacks_array.end()) ? "" : "\t EMPTY\n");
 
     while (it != state->sacks_array.end()) {
@@ -546,7 +545,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         for ( ; it != state->sacks_array.end(); it++) {
             ASSERT(!it->empty());
 
-            it2 = it;
+            auto it2 = it;
             it2++;
             while (it2 != state->sacks_array.end()) {
                 if (it->contains(*it2)) {

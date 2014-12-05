@@ -1077,7 +1077,6 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     if (tsnGt(tsna, state->lastTsnAck)) {    // Handle new CumAck
         EV_INFO << "===== Handling new CumAck for TSN " << tsna << " =====" << endl;
 
-        SCTPQueue::PayloadQueue::iterator pay;
         SCTPDataVariables *myChunk = retransmissionQ->getChunk(state->lastTsnAck + 1);
         if ((myChunk != nullptr) && (myChunk->wasPktDropped) &&
             (myChunk->getLastDestinationPath()->fastRecoveryActive))
@@ -2609,7 +2608,6 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
     L3Address addr;
     SCTPAsconfChunk *sctpasconf;
     std::vector<uint32> errorCorrId;
-    std::vector<uint32>::iterator iter;
     bool errorFound = false;
 
     sctpasconf = check_and_cast<SCTPAsconfChunk *>(state->asconfChunk->dup());
@@ -2635,7 +2633,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
                     SCTPAddIPParameter *ipParam;
                     ipParam = check_and_cast<SCTPAddIPParameter *>(sctpParam);
                     if (errorCorrId.size() > 0) {
-                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++)
+                        for (auto iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++)
                             if ((*iter) == ipParam->getRequestCorrelationId()) {
                                 errorFound = true;
                                 break;
@@ -2659,7 +2657,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
                     SCTPDeleteIPParameter *delParam;
                     delParam = check_and_cast<SCTPDeleteIPParameter *>(sctpParam);
                     if (errorCorrId.size() > 0) {
-                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++) {
+                        for (auto iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++) {
                             if ((*iter) == delParam->getRequestCorrelationId()) {
                                 errorFound = true;
                                 break;
@@ -2686,7 +2684,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
                     SCTPSetPrimaryIPParameter *priParam;
                     priParam = check_and_cast<SCTPSetPrimaryIPParameter *>(sctpParam);
                     if (errorCorrId.size() > 0) {
-                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++) {
+                        for (auto iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++) {
                             if ((*iter) == priParam->getRequestCorrelationId()) {
                                 errorFound = true;
                                 break;
@@ -2723,8 +2721,7 @@ bool SCTPAssociation::processPacketDropArrived(SCTPPacketDropChunk *packetDropCh
                     case DATA: {
                         SCTPDataChunk *dataChunk = check_and_cast<SCTPDataChunk *>(chunk);
                         const uint32 tsn = dataChunk->getTsn();
-                        SCTPQueue::PayloadQueue::iterator pq;
-                        pq = retransmissionQ->payloadQueue.find(tsn);
+                        auto pq = retransmissionQ->payloadQueue.find(tsn);
                         if ((pq != retransmissionQ->payloadQueue.end()) &&
                             (!chunkHasBeenAcked(pq->second)))
                         {

@@ -658,10 +658,9 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
             transmissionQueue()->push_back(frame);
         }
         else {
-            std::list<Ieee80211DataOrMgmtFrame *>::iterator p;
             //we don't know if first frame in the queue is in middle of transmission
             //so for sure we placed it on second place
-            p = transmissionQueue()->begin();
+            auto p = transmissionQueue()->begin();
             p++;
             while ((dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr) && (p != transmissionQueue()->end())) // search the first not management frame
                 p++;
@@ -1710,9 +1709,7 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     simtime_t t = 0, time = 0;
     int count = 0;
-    std::list<Ieee80211DataOrMgmtFrame *>::iterator frame;
-
-    frame = transmissionQueue()->begin();
+    auto frame = transmissionQueue()->begin();
     ASSERT(*frame == frameToSend);
     if (!txop && TXOP() > 0 && transmissionQueue()->size() >= 2) {
         //we start packet burst within TXOP time period
@@ -1790,8 +1787,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     else if (!frameToSend->getMoreFragments()) {
         if (txop && transmissionQueue()->size() > 1) {
             // ++ operation is safe because txop is true
-            std::list<Ieee80211DataOrMgmtFrame *>::iterator nextframeToSend;
-            nextframeToSend = transmissionQueue()->begin();
+            auto nextframeToSend = transmissionQueue()->begin();
             nextframeToSend++;
             ASSERT(transmissionQueue()->end() != nextframeToSend);
             double bitRate = bitrate;

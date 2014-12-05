@@ -554,9 +554,7 @@ void Interface::sendDelayedAcknowledgements()
     MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
     long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
-    for (std::map<IPv4Address, std::list<OSPFLSAHeader> >::iterator delayIt = delayedAcknowledgements.begin();
-         delayIt != delayedAcknowledgements.end();
-         delayIt++)
+    for (auto delayIt = delayedAcknowledgements.begin(); delayIt != delayedAcknowledgements.end(); delayIt++)
     {
         int ackCount = delayIt->second.size();
         if (ackCount > 0) {

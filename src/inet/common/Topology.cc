@@ -459,8 +459,8 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
                 src->outPath = dest->inLinks[i];
 
                 // insert src node to ordered list
-                std::list<Node *>::iterator it;
-                for (it = q.begin(); it != q.end(); ++it)
+                auto it = q.begin();
+                for ( ; it != q.end(); ++it)
                     if ((*it)->dist > newdist)
                         break;
 

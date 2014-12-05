@@ -104,16 +104,14 @@ void RSVP::createPath(const SessionObj_t& session, const SenderTemplateObj_t& se
 
     // find entry in traffic database
 
-    std::vector<traffic_session_t>::iterator sit;
-    sit = findSession(session);
+    auto sit = findSession(session);
 
     if (sit == traffic.end()) {
         EV_INFO << "session not found in traffic database, path won't be created" << endl;
         return;
     }
 
-    std::vector<traffic_path_t>::iterator pit;
-    pit = findPath(&(*sit), sender);
+    auto pit = findPath(&(*sit), sender);
 
     if (pit == sit->paths.end()) {
         EV_INFO << "path doesn't belong to this session according to our database, doing nothing" << endl;
@@ -295,12 +293,10 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
 std::vector<RSVP::traffic_path_t>::iterator RSVP::findPath(traffic_session_t *session, const SenderTemplateObj_t& sender)
 {
-    std::vector<traffic_path_t>::iterator it;
-    for (it = session->paths.begin(); it != session->paths.end(); it++) {
-        if (it->sender != sender)
-            continue;
-
-        break;
+    auto it = session->paths.begin();
+    for ( ; it != session->paths.end(); it++) {
+        if (it->sender == sender)
+            break;
     }
     return it;
 }
@@ -374,11 +370,10 @@ void RSVP::removeHello(HelloState_t *h)
     delete h->timer;
 
     for (auto it = HelloList.begin(); it != HelloList.end(); it++) {
-        if (it->peer != h->peer)
-            continue;
-
-        HelloList.erase(it);
-        return;
+        if (it->peer == h->peer) {
+            HelloList.erase(it);
+            return;
+        }
     }
     ASSERT(false);
 }
@@ -429,10 +424,8 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
     // send PATH_ERROR for existing paths
 
     for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface != tedmod->ted[index].local)
-            continue;
-
-        sendPathErrorMessage(&(*it), PATH_ERR_NEXTHOP_FAILED);
+        if (it->OutInterface == tedmod->ted[index].local)
+            sendPathErrorMessage(&(*it), PATH_ERR_NEXTHOP_FAILED);
     }
 }
 
@@ -533,13 +526,8 @@ bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec
     double sharedBW = 0.0;
 
     for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if (it->Session_Object != session)
-            continue;
-
-        if (it->Flowspec_Object.req_bandwidth <= sharedBW)
-            continue;
-
-        sharedBW = it->Flowspec_Object.req_bandwidth;
+        if ((it->Session_Object == session) && (it->Flowspec_Object.req_bandwidth > sharedBW))
+            sharedBW = it->Flowspec_Object.req_bandwidth;
     }
 
     EV_DETAIL << "CACCheck: link=" << OI
@@ -898,10 +886,8 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
 
         // schedule commit of merging backups too...
         for (unsigned int j = 0; j < RSBList.size(); j++) {
-            if (RSBList[j].OI != IPv4Address(lspid))
-                continue;
-
-            scheduleCommitTimer(&RSBList[j]);
+            if (RSBList[j].OI == IPv4Address(lspid))
+                scheduleCommitTimer(&RSBList[j]);
         }
     }
 }
@@ -1023,11 +1009,10 @@ void RSVP::removeRSB(ResvStateBlock_t *rsb)
     }
 
     for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if (it->id != rsb->id)
-            continue;
-
-        RSBList.erase(it);
-        return;
+        if (it->id == rsb->id) {
+            RSBList.erase(it);
+            return;
+        }
     }
     ASSERT(false);
 }
@@ -1059,11 +1044,10 @@ void RSVP::removePSB(PathStateBlock_t *psb)
     delete psb->timeoutMsg;
 
     for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->id != psb->id)
-            continue;
-
-        PSBList.erase(it);
-        return;
+        if (it->id == psb->id) {
+            PSBList.erase(it);
+            return;
+        }
     }
     ASSERT(false);
 }
@@ -1747,14 +1731,11 @@ void RSVP::processPATH_NOTIFY(PathNotifyMsg *msg)
 
 std::vector<RSVP::traffic_session_t>::iterator RSVP::findSession(const SessionObj_t& session)
 {
-    std::vector<traffic_session_t>::iterator it;
-    for (it = traffic.begin(); it != traffic.end(); it++) {
-        if (it->sobj != session)
-            continue;
-
-        break;
+    auto it = traffic.begin();
+    for ( ; it != traffic.end(); it++) {
+        if (it->sobj == session)
+            break;
     }
-
     return it;
 }
 
@@ -1790,21 +1771,18 @@ void RSVP::delSession(const cXMLElement& node)
         pathList = paths->getChildrenByTagName("path");
     }
 
-    std::vector<traffic_path_t>::iterator it;
-    for (it = session->paths.begin(); it != session->paths.end(); it++) {
+    for (auto it = session->paths.begin(); it != session->paths.end(); it++) {
         bool remove;
 
         if (paths) {
             remove = false;
 
             for (auto p = pathList.begin(); p != pathList.end(); p++) {
-                if (it->sender.Lsp_Id != getParameterIntValue(*p, "lspid"))
-                    continue;
-
-                // remove path from session
-
-                remove = true;
-                break;
+                if (it->sender.Lsp_Id == getParameterIntValue(*p, "lspid")) {
+                    // remove path from session
+                    remove = true;
+                    break;
+                }
             }
         }
         else {
@@ -1959,21 +1937,16 @@ void RSVP::scheduleCommitTimer(ResvStateBlock_t *rsbEle)
 
 RSVP::ResvStateBlock_t *RSVP::findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index)
 {
-    RSBVector::iterator it;
-
-    for (it = RSBList.begin(); it != RSBList.end(); it++) {
+    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (it->Session_Object != session)
             continue;
 
-        FlowDescriptorVector::iterator fit;
         index = 0;
-        for (fit = it->FlowDescriptor.begin(); fit != it->FlowDescriptor.end(); fit++) {
-            if ((SenderTemplateObj_t&)fit->Filter_Spec_Object != sender) {
-                ++index;
-                continue;
+        for (auto fit = it->FlowDescriptor.begin(); fit != it->FlowDescriptor.end(); fit++) {
+            if ((SenderTemplateObj_t&)fit->Filter_Spec_Object == sender) {
+                return &(*it);
             }
-
-            return &(*it);
+            ++index;
         }
 
         // don't break here, may be in different (if outInterface is different)
@@ -1983,27 +1956,18 @@ RSVP::ResvStateBlock_t *RSVP::findRSB(const SessionObj_t& session, const SenderT
 
 RSVP::PathStateBlock_t *RSVP::findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender)
 {
-    PSBVector::iterator it;
-    for (it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->Session_Object != session)
-            continue;
-
-        if (it->Sender_Template_Object != sender)
-            continue;
-
-        return &(*it);
+    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
+        if ((it->Session_Object == session) && (it->Sender_Template_Object == sender))
+            return &(*it);
     }
-
     return nullptr;
 }
 
 RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
 {
     for (unsigned int i = 0; i < PSBList.size(); i++) {
-        if (PSBList[i].id != id)
-            continue;
-
-        return &PSBList[i];
+        if (PSBList[i].id == id)
+            return &PSBList[i];
     }
     ASSERT(false);
     return nullptr;    // prevent warning
@@ -2012,10 +1976,8 @@ RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
 RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
 {
     for (unsigned int i = 0; i < RSBList.size(); i++) {
-        if (RSBList[i].id != id)
-            continue;
-
-        return &RSBList[i];
+        if (RSBList[i].id == id)
+            return &RSBList[i];
     }
     ASSERT(false);
     return nullptr;    // prevent warning
@@ -2024,10 +1986,8 @@ RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
 RSVP::HelloState_t *RSVP::findHello(IPv4Address peer)
 {
     for (auto it = HelloList.begin(); it != HelloList.end(); it++) {
-        if (it->peer != peer)
-            continue;
-
-        return &(*it);
+        if (it->peer == peer)
+            return &(*it);
     }
     return nullptr;
 }

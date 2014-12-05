@@ -116,12 +116,11 @@ void Neighbor::reset()
     }
     linkStateRetransmissionList.clear();
 
-    std::list<OSPFLSAHeader *>::iterator it;
-    for (it = databaseSummaryList.begin(); it != databaseSummaryList.end(); it++) {
+    for (auto it = databaseSummaryList.begin(); it != databaseSummaryList.end(); it++) {
         delete (*it);
     }
     databaseSummaryList.clear();
-    for (it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
+    for (auto it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
         delete (*it);
     }
     linkStateRequestList.clear();
@@ -423,8 +422,8 @@ bool Neighbor::needAdjacency()
  */
 void Neighbor::addToRetransmissionList(OSPFLSA *lsa)
 {
-    std::list<OSPFLSA *>::iterator it;
-    for (it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
+    auto it = linkStateRetransmissionList.begin();
+    for ( ; it != linkStateRetransmissionList.end(); it++) {
         if (((*it)->getHeader().getLinkStateID() == lsa->getHeader().getLinkStateID()) &&
             ((*it)->getHeader().getAdvertisingRouter().getInt() == lsa->getHeader().getAdvertisingRouter().getInt()))
         {
@@ -483,7 +482,7 @@ void Neighbor::removeFromRetransmissionList(LSAKeyType lsaKey)
 
 bool Neighbor::isLinkStateRequestListEmpty(LSAKeyType lsaKey) const
 {
-    for (std::list<OSPFLSA *>::const_iterator it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
+    for (auto it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
         const OSPFLSA *lsa = *it;
         if ((lsa->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             (lsa->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))

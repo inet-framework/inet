@@ -281,8 +281,7 @@ void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
     HnaGlobalEntry *hna_global_entry;
     OrigNode *old_orig_node = nullptr;
 
-    std::map<HnaElement,HnaGlobalEntry*>::iterator it;
-    it = hnaMap.find(*hna_element);
+    auto it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
@@ -348,8 +347,7 @@ void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
     HnaGlobalEntry *hna_global_entry;
     OrigNode *orig_ptr = nullptr;
 
-    std::map<HnaElement,HnaGlobalEntry*>::iterator it;
-    it = hnaMap.find(*hna_element);
+    auto it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
@@ -496,8 +494,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
             if ((e->netmask < 1) || (e->netmask > 32))
                 continue;
 
-            std::map<HnaElement,HnaGlobalEntry*>::iterator it;
-            it = hnaMap.find(*e);
+            auto it = hnaMap.find(*e);
 
             /* add the hna node if it does not exist */
             if (it == hnaMap.end())
@@ -603,8 +600,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
         if ((e->netmask < 1) || (e->netmask > 32))
             continue;
 
-        std::map<HnaElement,HnaGlobalEntry*>::iterator it;
-        it = hnaMap.find(*e);
+        auto it = hnaMap.find(*e);
 
         if (it==hnaMap.end())
             continue;

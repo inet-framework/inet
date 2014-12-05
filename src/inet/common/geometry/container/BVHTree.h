@@ -76,7 +76,6 @@ class INET_API BVHTree
                 }
             }
         };
-        typedef std::vector<const PhysicalObject *>::iterator ObjVecIterator;
 
     protected:
         unsigned int leafCapacity;

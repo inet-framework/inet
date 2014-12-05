@@ -289,9 +289,7 @@ void WiseRoute::finish()
 
 void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastHop, double rssi, double ber)
 {
-    tRouteTable::iterator pos;
-
-    pos = routeTable.find(origin);
+    auto pos = routeTable.find(origin);
     receivedRSSI.record(rssi);
     receivedBER.record(ber);
     if (pos == routeTable.end()) {

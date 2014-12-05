@@ -63,8 +63,8 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     //((BatmanPacket *)forw_node_new->pack_buff)->seqno = htons(((BatmanPacket *)forw_node_new->pack_buff)->seqno);
 
 
-    Forwlist::iterator forwListIt;
-    for (forwListIt = forw_list.begin(); forwListIt != forw_list.end(); forwListIt++) {
+    auto forwListIt = forw_list.begin();
+    for ( ; forwListIt != forw_list.end(); forwListIt++) {
         ForwNode *forw_packet_tmp = *forwListIt;
 
         if (forw_packet_tmp->send_time > forw_node_new->send_time) {
@@ -121,8 +121,8 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         send_time = curr_time + par("jitter").doubleValue()/2.0;
 
     /* find position for the packet in the forward queue */
-    Forwlist::iterator  it;
-    for (it=forw_list.begin(); it!=forw_list.end(); it++) {
+    auto it = forw_list.begin();
+    for ( ; it!=forw_list.end(); it++) {
         forw_node_pos = *it;
 
         if (aggregation_enabled) {

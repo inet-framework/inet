@@ -73,8 +73,7 @@ int NS_CLASS nb_remove(nb_t *nb)
 {
     if (!nb)
         return 0;
-    DymoNbList::iterator it;
-    for (it =dymoNbList->begin();it !=dymoNbList->end();it++)
+    for (auto it =dymoNbList->begin();it !=dymoNbList->end();it++)
     {
         if (*it==nb)
         {
@@ -89,8 +88,7 @@ int NS_CLASS nb_remove(nb_t *nb)
 
 nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
 {
-    DymoNbList::iterator it;
-    for (it =dymoNbList->begin();it !=dymoNbList->end();it++)
+    for (auto it =dymoNbList->begin();it !=dymoNbList->end();it++)
     {
         nb_t *nb = *it;
         if (*it==nb)

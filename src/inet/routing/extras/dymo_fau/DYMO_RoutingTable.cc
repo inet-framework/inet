@@ -134,8 +134,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
 //  }
 
     // update DYMO routingTable
-    RouteVector::iterator iter;
-    for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (auto iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         if (entry == *iter)
         {
@@ -157,8 +156,7 @@ void DYMO_RoutingTable::deleteRoute(DYMO_RoutingEntry *entry)
 //=================================================================================================
 void DYMO_RoutingTable::maintainAssociatedRoutingTable()
 {
-    RouteVector::iterator iter;
-    for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (auto iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         maintainAssociatedRoutingEntryFor(*iter);
     }
@@ -170,10 +168,7 @@ void DYMO_RoutingTable::maintainAssociatedRoutingTable()
 //=================================================================================================
 DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
 {
-
-    RouteVector::iterator iter;
-
-    for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (auto iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         DYMO_RoutingEntry *entry = *iter;
 
@@ -192,11 +187,9 @@ DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
 //=================================================================================================
 DYMO_RoutingEntry* DYMO_RoutingTable::getForAddress(IPv4Address addr)
 {
-    RouteVector::iterator iter;
-
     int longestPrefix = 0;
     DYMO_RoutingEntry* longestPrefixEntry = 0;
-    for (iter = routeVector.begin(); iter < routeVector.end(); iter++)
+    for (auto iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         DYMO_RoutingEntry *entry = *iter;
 

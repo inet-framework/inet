@@ -1660,8 +1660,8 @@ void xMIPv6::sendTestInit(cMessage *msg)
    {
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
-    TransmitIfList::iterator pos;
-    for (pos = transmitIfList.begin(); pos != transmitIfList.end(); ++pos)
+    auto pos = transmitIfList.begin();
+    for ( ; pos != transmitIfList.end(); ++pos)
     {
         if (pos->first.type == msgType && pos->first.dest == dest)
             break;
@@ -2318,10 +2318,7 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
 
 xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(IPv6Address& dest, int timerType)
 {
-    //TimerIfEntry* ifEntry;
-    TransmitIfList::iterator pos;
-
-    for (pos = transmitIfList.begin(); pos != transmitIfList.end(); ++pos) {
+    for (auto pos = transmitIfList.begin(); pos != transmitIfList.end(); ++pos) {
         if (pos->first.type == timerType && pos->first.dest == dest)
             return pos->second;
     }

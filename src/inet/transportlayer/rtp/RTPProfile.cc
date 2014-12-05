@@ -49,8 +49,7 @@ void RTPProfile::initialize()
 
 RTPProfile::~RTPProfile()
 {
-    SSRCGateMap::iterator i;
-    for (i = _ssrcGates.begin(); i != _ssrcGates.end(); i++)
+    for (auto i = _ssrcGates.begin(); i != _ssrcGates.end(); i++)
         delete i->second;
 }
 

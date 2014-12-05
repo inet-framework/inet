@@ -157,8 +157,7 @@ CSMA::~CSMA()
     cancelAndDelete(rxAckTimer);
     if (ackMessage)
         delete ackMessage;
-    MacQueue::iterator it;
-    for (it = macQueue.begin(); it != macQueue.end(); ++it) {
+    for (auto it = macQueue.begin(); it != macQueue.end(); ++it) {
         delete (*it);
     }
 }

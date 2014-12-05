@@ -174,8 +174,7 @@ uint32_t TCP_NSC::mapRemote2Nsc(L3Address const& addrP)
 
     // get first free remote NSC IP
     uint32_t ret = remoteFirstInnerIpS.toIPv4().getInt();
-    Nsc2RemoteMap::iterator j;
-    for (j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++) {
+    for (auto j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++) {
         if (j->first > ret)
             break;
         ret = j->first + 1;
@@ -401,10 +400,9 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     pStackM->if_receive_packet(0, data, totalIpLen);
 
     // Attempt to read from sockets
-    TcpAppConnMap::iterator j;
     int changes = 0;
 
-    for (j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
+    for (auto j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
         TCP_NSC_Connection& c = j->second;
 
         if (c.pNscSocketM && c.isListenerM) {

@@ -326,9 +326,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3
     SockPair save = key;
 
     // try with fully qualified SockPair
-    TcpConnMap::iterator i;
-    i = tcpConnMap.find(key);
-
+    auto i = tcpConnMap.find(key);
     if (i != tcpConnMap.end())
         return i->second;
 

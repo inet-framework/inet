@@ -95,8 +95,7 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost()
 
     // Search for a node that was not processed yet and that has
     // the best cost to be reached from the node running dijkstra...
-    NodesSet::iterator it;
-    for (it = nonprocessed_nodes_->begin(); it != nonprocessed_nodes_->end(); it++)
+    for (auto it = nonprocessed_nodes_->begin(); it != nonprocessed_nodes_->end(); it++)
     {
         auto itDij = dijkstraMap.find(*it);
         if (itDij==dijkstraMap.end())

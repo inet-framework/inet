@@ -188,21 +188,18 @@ void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
 {
     ASSERT(outInterface);
 
-    OutInterfaceVector::iterator it;
-    for (it = outInterfaces.begin(); it != outInterfaces.end(); ++it) {
-        if ((*it)->getInterface() == outInterface->getInterface())
-            break;
+    auto it = outInterfaces.begin();
+    for ( ; it != outInterfaces.end(); ++it) {
+        if ((*it)->getInterface() == outInterface->getInterface()) {
+            delete *it;
+            *it = outInterface;
+            changed(F_OUT);
+            return;
+        }
     }
 
-    if (it != outInterfaces.end()) {
-        delete *it;
-        *it = outInterface;
-        changed(F_OUT);
-    }
-    else {
-        outInterfaces.push_back(outInterface);
-        changed(F_OUT);
-    }
+    outInterfaces.push_back(outInterface);
+    changed(F_OUT);
 }
 
 bool IPv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)

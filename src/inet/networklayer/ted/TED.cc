@@ -316,8 +316,7 @@ void TED::rebuildRoutingTable()
 
 IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
 {
-    std::vector<TELinkStateInfo>::iterator it;
-    for (it = ted.begin(); it != ted.end(); it++)
+    for (auto it = ted.begin(); it != ted.end(); it++)
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->local;
 
@@ -328,8 +327,7 @@ IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
 IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
 {
     ASSERT(isLocalPeer(peerIP));
-    std::vector<TELinkStateInfo>::iterator it;
-    for (it = ted.begin(); it != ted.end(); it++)
+    for (auto it = ted.begin(); it != ted.end(); it++)
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->remote;
 
@@ -339,12 +337,11 @@ IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
 
 bool TED::isLocalPeer(IPv4Address inetAddr)
 {
-    std::vector<TELinkStateInfo>::iterator it;
-    for (it = ted.begin(); it != ted.end(); it++)
+    for (auto it = ted.begin(); it != ted.end(); it++)
         if (it->linkid == inetAddr && it->advrouter == routerId)
-            break;
+            return true;
 
-    return it != ted.end();
+    return false;
 }
 
 std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVector& topology,
@@ -406,11 +403,9 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
 
 bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match)
 {
-    std::vector<TELinkStateInfo>::iterator it;
-
     match = nullptr;
 
-    for (it = ted.begin(); it != ted.end(); it++) {
+    for (auto it = ted.begin(); it != ted.end(); it++) {
         if (it->sourceId == link.sourceId && it->messageId == link.messageId && it->timestamp == link.timestamp) {
             // we've already seen this message, ignore it
             return false;

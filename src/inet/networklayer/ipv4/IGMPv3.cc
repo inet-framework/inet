@@ -54,9 +54,8 @@ static IPv4AddressVector set_complement(const IPv4AddressVector& first, const IP
     ASSERT(isSorted(second));
 
     IPv4AddressVector complement(first.size());
-    IPv4AddressVector::iterator it;
 
-    it = set_difference(first.begin(), first.end(), second.begin(), second.end(), complement.begin());
+    auto it = set_difference(first.begin(), first.end(), second.begin(), second.end(), complement.begin());
     complement.resize(it - complement.begin());
     return complement;
 }
@@ -67,9 +66,8 @@ static IPv4AddressVector set_intersection(const IPv4AddressVector& first, const 
     ASSERT(isSorted(second));
 
     IPv4AddressVector intersection(min(first.size(), second.size()));
-    IPv4AddressVector::iterator it;
 
-    it = set_intersection(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
+    auto it = set_intersection(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
     intersection.resize(it - intersection.begin());
     return intersection;
 }
@@ -80,9 +78,8 @@ static IPv4AddressVector set_union(const IPv4AddressVector& first, const IPv4Add
     ASSERT(isSorted(second));
 
     IPv4AddressVector result(first.size() + second.size());
-    IPv4AddressVector::iterator it;
 
-    it = set_union(first.begin(), first.end(), second.begin(), second.end(), result.begin());
+    auto it = set_union(first.begin(), first.end(), second.begin(), second.end(), result.begin());
     result.resize(it - result.begin());
     return result;
 }

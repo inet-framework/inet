@@ -176,9 +176,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     unsigned int channelLoss;
 
     if (finish) {
-        PacketsVector::iterator it;
         unsigned int maxId = 0;
-        for (it = currentTalkspurt.packets.begin(); it != currentTalkspurt.packets.end(); it++)
+        for (auto it = currentTalkspurt.packets.begin(); it != currentTalkspurt.packets.end(); it++)
             maxId = std::max(maxId, (*it).packetID);
         channelLoss = maxId + 1 - currentTalkspurt.packets.size();
     }
