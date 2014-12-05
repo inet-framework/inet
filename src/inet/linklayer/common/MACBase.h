@@ -33,12 +33,12 @@ class InterfaceEntry;
 class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
-    cModule *hostModule;
-    bool isOperational;    // for use in handleMessage()
-    InterfaceEntry *interfaceEntry;    // NULL if no InterfaceTable or node is down
+    cModule *hostModule = nullptr;
+    bool isOperational = false;    // for use in handleMessage()
+    InterfaceEntry *interfaceEntry = nullptr;    // nullptr if no InterfaceTable or node is down
 
   public:
-    MACBase();
+    MACBase() {}
     virtual ~MACBase();
 
   protected:

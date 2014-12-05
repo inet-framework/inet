@@ -30,13 +30,6 @@
 
 namespace inet {
 
-MACBase::MACBase()
-{
-    hostModule = NULL;
-    interfaceEntry = NULL;
-    isOperational = false;
-}
-
 MACBase::~MACBase()
 {
 }
