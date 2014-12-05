@@ -1,0 +1,304 @@
+Alberto Cortés
+alfonso
+Alfonso Ariza
+andras
+Andras Varga
+Benjamin Seregi
+Benmartin92
+Borb�ly Tam�s
+dev
+Florian Meier
+Henrick
+Hornig Rudolf
+Irene Ruengeler
+jlai
+Levente Meszaros
+Levente Mészáros
+Levente M�sz�ros
+levy
+Michael Tüxen
+(no author)
+ProZsolt
+rhornig
+Rudolf Hornig
+ruengeler
+Tamas Borbely
+Tamás Borbély
+tomi
+tuexen
+unknown
+vojta
+Zoltan Bojthe
+Zsolt Prontvai
+-----------------------------------------------------------------------------------------------------------
+Alberto Cortés
+Alfonso Ariza
+andras
+Andras Varga
+avarga
+Benjamin Seregi
+Benmartin92
+dev
+Florian Meier
+Hornig Rudolf
+INET
+jlai
+Levente Meszaros
+Levente Mészáros
+Levente M�sz�ros
+levy
+(no author)
+rhornig
+Rudolf Hornig
+ruengeler
+Tamas Borbely
+Tamás Borbély
+tomi
+tuexen
+unknown
+vojta
+Zoltan Bojthe
+Zsolt Prontvai
+-----------------------------------------------------------------------------------------------------------
+
+1995, 1996, 1997, and 1998 WIDE Project.
+Adriano (University of Pisa)
+Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
+Alfonso Ariza
+Alfonso Ariza  (clean code, fix some errors, new radio model)
+Alfonso Ariza Quintana
+Alfonso Ariza Quintana aarizaq@uma.es              *
+Alfonso Ariza Quintana (global arp)
+Alfonso Ariza Quintana, Universidad de Malaga
+Alfonso Ariza, Universidad de Malaga
+Andras Babos
+Andras Babos and Andras Varga
+Andras Varga
+Andras Varga,
+Andras Varga
+Andras Varga and Levente Meszaros
+Andras Varga and Levente Meszaros (original code)
+Andras Varga and Levente M�sz�ros
+Andras Varga; CTIE, Monash University, Australia
+Andras Varga, Levente Meszaros
+Andras Varga, Levente Meszaros and Lukas Hluze
+ANSA Team
+below.
+below."
+Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
+by
+by Alfonso Ariza
+by Alfonso Ariza                                   *
+by Eduard Hiti (feedback to macho@ehiti.de)
+by Irene Ruengeler
+by Matthias Oppitz
+by Matthias Oppitz,  Ahmed Ayadi
+by Matthias Oppitz, Ahmed Ayadi
+by Matthias Oppitz <Matthias.Oppitz@gmx.de>
+by Thomas Dreibholz
+Centre Suisse d'Electronique et Microtechnique (CSEM) SA
+Christian Dankbar
+Christian Dankbar, Irene Ruengeler, Michael Tuexen
+Christian Dankbar, Irene Ruengeler, Michael Tuexen, Andras Varga
+Christoph Sommer
+Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+Christoph Sommer <christoph.sommer@uibk.ac.at>
+CoCo Communications
+CSEM SA
+CSEM SA, Neuchatel, Switzerland.
+CSEM SA, Neuchâtel, Switzerland.
+CTIE, Monash University
+DLR (http://www.dlr.de/) and contributors
+Electronic Systems group(ES),
+Emin Ilker Cetinbas
+Emin Ilker Cetinbas, Andras Varga
+Eric Wu
+Eric Wu and Steve Woon, Monash University, Melbourne, Australia
+Faqir Zarrar Yousaf
+Florian Meier
+Georg Lutz, Institut fuer Telematik, University of Karlsruhe
+Helene Lageber
+If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+Ingmar Baumgart
+INRIA
+Institute of Telematics, University of Karlsruhe (TH)
+Institut fuer Telematik, Universitaet Karlsruhe
+Irene Ruengeler
+Irene Ruengeler
+Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
+Jan Ringo�, www.ringos.cz
+Jan Ringo, www.ringos.cz
+Johnny Lai, Monash University, Melbourne, Australia
+Juan-Carlos Maureira
+Juan Luis Garrote Molinero
+Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+Levente Meszaros
+Lukáš Hlůže   lukas@hluze.cz (802.11e)
+Lukáš Hlůže (Lukás Hluze) lukas@hluze.cz (802.11e)
+Malaga university
+Malaga University.
+Marcin Kosiba
+Matthias Oppitz
+Matthias Oppitz, Arndt Buschmann
+Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
+Matthias Oppitz <Matthias.Oppitz@gmx.de>
+M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
+Michael Tuexen
+Mohamed Louizi
+Monash University, Australia
+, NetLab, SUPSI, Switzerland.
+of RFC 3517, page 7 ("Once a TCP is in the loss recovery phase the following procedure MUST be used for each arriving ACK")
+Opensim Ltd
+Opensim Ltd.
+OpenSim Ltd
+OpenSim Ltd.
+OpenSim Ltd.
+Peterpaul Klein Haneveld
+Robin Seggelmann
+Sam Jansen, Andras Varga
+Sam Jansen, Andras Varga,
+Sorin    (802.11g)
+src/inet/applications/dhcp/DHCPClient.h:     * e.g., system reboot, or (c) extending the lease on a particular
+src/inet/applications/httptools/common/HttpUtils.cc:inline bool isnotspace(int c) { return !isspace(c); }
+src/inet/common/misc/MessageChecker.cc:#define getFieldStructValuePointer(a, b, c)    getFieldStructPointer((a), (b), (c))
+src/inet/common/misc/MessageChecker.cc:#define getFieldValueAsString(a, b, c)         getFieldAsString((a), (b), (c))
+src/inet/common/PatternMatcher.cc:        c = opp_toupper(c); // set is already uppercase here
+src/inet/common/PatternMatcher.cc:inline bool opp_isdigit(unsigned char c) { return isdigit(c); }
+src/inet/common/PatternMatcher.cc:inline char opp_toupper(unsigned char c) { return toupper(c); }
+src/inet/common/serializer/headers/in.h: * Copyright (c) 1982, 1986, 1990, 1993
+src/inet/common/serializer/headers/in_systm.h: * Copyright (c) 1982, 1986, 1993
+src/inet/common/serializer/ipv4/headers/igmp.h: * Copyright (c) 1988 Stephen Deering.
+src/inet/common/serializer/ipv4/headers/igmp.h: * Copyright (c) 1992, 1993
+src/inet/common/serializer/ipv4/headers/ip.h: * Copyright (c) 1982, 1986, 1993
+src/inet/common/serializer/ipv4/headers/ip_icmp.h: * Copyright (c) 1982, 1986, 1993
+src/inet/common/serializer/ipv6/headers/ip6.h: * Copyright (c) 1982, 1986, 1993
+src/inet/common/serializer/udp/headers/udphdr.h: * Copyright (c) 1982, 1986, 1993
+src/inet/networklayer/common/L3AddressResolver.cc:    if (c)
+src/inet/networklayer/icmpv6/ICMPv6.cc:    // packet cannot be larger than the minimum IPv6 MTU (RFC 4443 2.4. (c)).
+src/inet/routing/ospfv2/interface/OSPFInterface.cc:            if (neighbor == neighboringRouters[i]) {    // (1) (c)
+src/inet/routing/ospfv2/router/OSPFArea.cc:                if (alreadyOnTree) {    // (2) (c)
+src/inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.cc:    _inputFileStream.get(c);
+src/inet/transportlayer/tcp_nsc/TCP_NSC.cc:                sendEstablishedMsg(c);
+Telecommunication Networks Group (TKN) at
+The Boeing Company
+The Institute of Theoretical and Applied Informatics
+Thomas Dreibholz
+Thomas Dreibholz
+Thomas Reschka
+T.U. Eindhoven
+Universidad de Málaga
+Uppsala University
+Uppsala University.
+Uppsala University & Ericsson AB.
+Vincent Oberle (vincent@oberle.com)
+Vojta Janota
+Vojtech Janota
+Vojtech Janota, Andras Varga
+Wei Yang, Ng
+, Willow Garage, Inc.
+Xuan Thang Nguyen
+Zoltan Bojthe
+Zsolt Prontvai
+-----------------------------------------------------------------------------------------------------------
+
+Adam Malik(mailto:towdie13@gmail.com), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+Adriano, Zoltan Bojthe
+alfonso
+Alfonso Ariza
+Alfonso Ariza, <aarizaq@uma.es>
+Alfonso Ariza Quintana
+Alfonso Ariza Quintana.<aarizaq@uma.ea>
+andras
+Andras
+Andras Varga
+Andras Varga, 2004
+Andras Varga (andras@omnetpp.org)
+Andras Varga (generalized, ported to LineSegmentsMobilityBase)
+), Andras Varga, Tamas Borbely
+Andras Varga, Vojta Janota
+Andreas Kuntz
+Anna Foerster
+ANSA Team, Benjamin Martin Seregi
+at the above-mentioned email address for
+Axel Wegener
+be held liable for any damages arising from the
+Benjamin Martin Seregi
+Benjamin Seregi
+Bj�n Wiberg <bjorn.wiberg@home.se>
+Bjoern Hendriks
+Christian
+Christian Frank
+Christoph Sommer
+Christoph Sommer, David Eckhoff
+Christoph Sommer, David Eckhoff, Falko Dressler, Zheng Yao, Tobias Mayer, Alvaro Torres Cortes, Luca Bedogni
+Christoph Sommer, David Eckhoff, Luca Bedogni, Bastian Halmos
+Damien Piguet
+Damien Piguet, Dimitris Kotsakos, Jérôme Rousselot
+Damien Piguet, Jerome Rousselot
+Daniel Krajzewicz
+Daniel Willkomm
+Daniel Willkomm, Andras Varga
+Daniel Willkomm, Andras Varga, Zoltan Bojthe
+Dimitris Kotsakos, George Alyfantis, Damien Piguet
+Emin Ilker Cetinbas
+Emin Ilker Cetinbas, Andras Varga
+Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)
+Erik Nordstr� <erik.nordstrom@it.uu.se>
+Erik Nordstr�, <erik.nordstrom@it.uu.se>
+Erik Nordstr�m, <erik.nordstrom@it.uu.se>
+Erik Nordström, <erikn@it.uu.se>
+Friedemann Wesner
+Gary Pei <guangyu.pei@boeing.com>
+Georg Lutz
+Georg Lutz (georglutz AT gmx DOT de), Institut fuer Telematik,
+Helene Lageber
+hope it will be useful to help understand how
+Irene Ruengeler)
+Isabel Dietrich
+Jan Ringos, http://Tringi.Mx-3.cz
+Jerome Rousselot
+Jerome Rousselot, Amre El-Hoiydi, Marc Loebbers, Yosia Hadisusanto, Andreas Koepke
+Jerome Rousselot <jerome.rousselot@csem.ch>
+Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
+Jerome Rousselot, Marc Loebbers
+Jia Pan */
+Jirka Klaue
+Jochen Reber
+Jochen Reber, Andras Varga
+Juan Luis Garrote Molinero
+Karl Wess
+Karl Wessel
+Karl Wessel (port for MiXiM)
+Konrad Polys, Krzysztof Grochla
+Kristjan V. Jonsson
+Kristjan V. Jonsson (kristjanvj@gmail.com)
+Kristjan V. Jonsson (LDSS) <kristjanvj@gmail.com>
+Levente Meszaros
+Levente Meszaros)
+Levente Meszaros (levy@omnetpp.org)
+Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
+Majid Nabi
+Majid Nabi <m.nabi@tue.nl>
+Marcin Kosiba
+Marcin Kosiba marcin.kosiba@gmail.com
+Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
+Michael Behrisch
+= "M. Nabi and M. Geilen and T. Basten.",
+of this model, Andras Babos
+Oliver Graute
+Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+Peterpaul Klein Haneveld
+Steffen Sroka
+Steffen Sroka, Marc Loebbers, Daniel Willkomm
+Tamas Borbely
+that he should implement reuse of ephemeral ports!!!)");
+Thimor Bohn
+Tino Morenz
+Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+Veronika Rybova, Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+Vincent Oberle
+Vincent Oberle, Jan-March 2001
+Zoltan Bojthe
+Zsolt Prontvai
