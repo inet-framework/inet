@@ -159,7 +159,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     if (frame->getSrc().isUnspecified())
         frame->setSrc(address);
 
-    bool isPauseFrame = (dynamic_cast<EtherPauseFrame *>(frame) != NULL);
+    bool isPauseFrame = (dynamic_cast<EtherPauseFrame *>(frame) != nullptr);
 
     if (!isPauseFrame) {
         numFramesFromHL++;
@@ -167,7 +167,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     }
 
     if (txQueue.extQueue) {
-        ASSERT(curTxFrame == NULL);
+        ASSERT(curTxFrame == nullptr);
         curTxFrame = frame;
     }
     else {
@@ -221,7 +221,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
     }
 
     if (!dropFrameNotForUs(frame)) {
-        if (dynamic_cast<EtherPauseFrame *>(frame) != NULL) {
+        if (dynamic_cast<EtherPauseFrame *>(frame) != nullptr) {
             int pauseUnits = ((EtherPauseFrame *)frame)->getPauseTime();
             delete frame;
             numPauseFramesRcvd++;
@@ -252,12 +252,12 @@ void EtherMACFullDuplex::handleEndTxPeriod()
     if (transmitState != TRANSMITTING_STATE)
         throw cRuntimeError("End of transmission, and incorrect state detected");
 
-    if (NULL == curTxFrame)
+    if (nullptr == curTxFrame)
         throw cRuntimeError("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    if (dynamic_cast<EtherPauseFrame *>(curTxFrame) != NULL) {
+    if (dynamic_cast<EtherPauseFrame *>(curTxFrame) != nullptr) {
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, ((EtherPauseFrame *)curTxFrame)->getPauseTime());
     }
@@ -270,7 +270,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
     delete curTxFrame;
-    curTxFrame = NULL;
+    curTxFrame = nullptr;
     lastTxFinishTime = simTime();
     getNextFrameFromQueue();
 

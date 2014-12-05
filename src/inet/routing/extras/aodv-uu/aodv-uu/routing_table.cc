@@ -94,7 +94,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
     {
         DEBUG(LOG_INFO, 0, "%s already exist in routing table!",
               ip_to_str(dest_addr));
-        return NULL;
+        return nullptr;
     }
 
     L3Address apAdd;
@@ -114,7 +114,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
                     e->cost != cost &&
                     e->hopfix != hopfix)
                 rt_table_update(e, next,hops,  seqno,life,  state, flags, ifindex, cost, hopfix);
-            return NULL;
+            return nullptr;
         }
         else
             rt = rt_table_insert(dest_addrAux, next,hops,  seqno,life,  state, flags, ifindex, cost, hopfix);
@@ -122,7 +122,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
     }
 
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == NULL)
+    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -227,7 +227,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
 {
 
     if (aodvRtTableMap.empty())
-        return NULL;
+        return nullptr;
 
     /* Check if we already have an entry for dest_addr */
     AodvRtTableMap::iterator it = aodvRtTableMap.find(dest_addr.s_addr);
@@ -243,14 +243,14 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
             if (it != aodvRtTableMap.end())
                 return it->second;
         }
-        return NULL;
+        return nullptr;
     }
-    return NULL;
+    return nullptr;
 }
 
 rt_table_t *NS_CLASS rt_table_find_gateway()
 {
-    rt_table_t *gw = NULL;
+    rt_table_t *gw = nullptr;
     for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
         rt_table_t *rt = it->second;
@@ -291,9 +291,9 @@ int NS_CLASS rt_table_invalidate(rt_table_t * rt)
 {
     struct timeval now;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
-    if (rt == NULL)
+    if (rt == nullptr)
         return -1;
 
     /* If the route is already invalidated, do nothing... */
@@ -501,7 +501,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     DEBUG(LOG_INFO, 0, "modifyAODVTables");
     /* Check if we already have an entry for dest_addr */
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == NULL)
+    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -611,7 +611,7 @@ void NS_CLASS rt_table_init()
 void NS_CLASS rt_table_destroy()
 {
     int i;
-    list_t *tmp = NULL, *pos = NULL;
+    list_t *tmp = nullptr, *pos = nullptr;
 
     for (i = 0; i < RT_TABLESIZE; i++)
     {
@@ -662,11 +662,11 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
         {
             DEBUG(LOG_INFO, 0, "%s already exist in routing table!",
                   ip_to_str(dest_addr));
-            return NULL;
+            return nullptr;
         }
     }
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == NULL)
+    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -792,7 +792,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
 
     dest = dest_addr;
     if (rt_tbl.num_entries == 0)
-        return NULL;
+        return nullptr;
 
     /* Calculate index */
     index = hashing(&dest, &hash);
@@ -809,12 +809,12 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
             return rt;
 
     }
-    return NULL;
+    return nullptr;
 }
 
 rt_table_t *NS_CLASS rt_table_find_gateway()
 {
-    rt_table_t *gw = NULL;
+    rt_table_t *gw = nullptr;
     int i;
 
     for (i = 0; i < RT_TABLESIZE; i++)
@@ -867,9 +867,9 @@ int NS_CLASS rt_table_invalidate(rt_table_t * rt)
 {
     struct timeval now;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
-    if (rt == NULL)
+    if (rt == nullptr)
         return -1;
 
     /* If the route is already invalidated, do nothing... */
@@ -1051,7 +1051,7 @@ void NS_CLASS precursor_add(rt_table_t * rt, struct in_addr addr)
             return;
     }
 
-    if ((pr = (precursor_t *) malloc(sizeof(precursor_t))) == NULL)
+    if ((pr = (precursor_t *) malloc(sizeof(precursor_t))) == nullptr)
     {
         perror("Could not allocate memory for precursor node!!\n");
         exit(-1);
@@ -1148,11 +1148,11 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
         {
             DEBUG(LOG_INFO, 0, "%s already exist in routing table!",
                   ip_to_str(dest_addr));
-            return NULL;
+            return nullptr;
         }
     }
 
-    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == NULL)
+    if ((rt = (rt_table_t *) malloc(sizeof(rt_table_t))) == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -1373,7 +1373,7 @@ NS_INLINE rt_table_t *NS_CLASS rt_table_update_timeout(rt_table_t * rt,
         u_int32_t lifetime)
 {
     if (!rt)
-        return NULL;
+        return nullptr;
 
     if (rt->state == IMMORTAL)
     {
@@ -1397,7 +1397,7 @@ NS_INLINE rt_table_t *NS_CLASS rt_table_update_timeout(rt_table_t * rt,
             timer_set_timeout(&rt->rt_timer, lifetime);
 #else
         struct timeval new_timeout;
-        gettimeofday(&new_timeout, NULL);
+        gettimeofday(&new_timeout, nullptr);
         timeval_add_msec(&new_timeout, lifetime);
         if (timeval_diff(&rt->rt_timer.timeout, &new_timeout) < 0)
             timer_set_timeout(&rt->rt_timer, lifetime);
@@ -1413,7 +1413,7 @@ NS_INLINE rt_table_t *NS_CLASS rt_table_update_timeout(rt_table_t * rt,
 void NS_CLASS rt_table_update_route_timeouts(rt_table_t * fwd_rt,
         rt_table_t * rev_rt)
 {
-    rt_table_t *next_hop_rt = NULL;
+    rt_table_t *next_hop_rt = nullptr;
 
     /* When forwarding a packet, we update the lifetime of the
        destination's routing table entry, as well as the entry for the
@@ -1455,7 +1455,7 @@ void NS_CLASS rt_table_update_route_timeouts(rt_table_t * fwd_rt,
         /*  if (!llfeedback && next_hop_rt->hello_timer.used) { */
         /*      struct timeval now; */
 
-        /*      gettimeofday(&now, NULL); */
+        /*      gettimeofday(&now, nullptr); */
         /*      hello_update_timeout(next_hop_rt, &now,  */
         /*               ALLOWED_HELLO_LOSS * HELLO_INTERVAL); */
         /*  } */

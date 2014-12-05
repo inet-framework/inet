@@ -30,8 +30,8 @@ Define_Module(RSTP);
 
 RSTP::RSTP()
 {
-    helloTimer = NULL;
-    upgradeTimer = NULL;
+    helloTimer = nullptr;
+    upgradeTimer = nullptr;
 }
 
 RSTP::~RSTP()
@@ -59,25 +59,25 @@ void RSTP::initialize(int stage)
 void RSTP::scheduleNextUpgrade()
 {
     cancelEvent(upgradeTimer);
-    Ieee8021dInterfaceData *nextInterfaceData = NULL;
+    Ieee8021dInterfaceData *nextInterfaceData = nullptr;
     for (unsigned int i = 0; i < numPorts; i++) {
         if (getPortInterfaceEntry(i)->hasCarrier()) {
             Ieee8021dInterfaceData *iPort = getPortInterfaceData(i);
             if (iPort->getRole() == Ieee8021dInterfaceData::NOTASSIGNED) {
-                if (nextInterfaceData == NULL)
+                if (nextInterfaceData == nullptr)
                     nextInterfaceData = iPort;
                 else if (iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
                     nextInterfaceData = iPort;
             }
             else if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
                 if (iPort->getState() == Ieee8021dInterfaceData::DISCARDING) {
-                    if (nextInterfaceData == NULL)
+                    if (nextInterfaceData == nullptr)
                         nextInterfaceData = iPort;
                     else if (iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
                         nextInterfaceData = iPort;
                 }
                 else if (iPort->getState() == Ieee8021dInterfaceData::LEARNING) {
-                    if (nextInterfaceData == NULL)
+                    if (nextInterfaceData == nullptr)
                         nextInterfaceData = iPort;
                     else if (iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
                         nextInterfaceData = iPort;
@@ -85,7 +85,7 @@ void RSTP::scheduleNextUpgrade()
             }
         }
     }
-    if (nextInterfaceData != NULL)
+    if (nextInterfaceData != nullptr)
         scheduleAt(nextInterfaceData->getNextUpgrade(), upgradeTimer);
 }
 

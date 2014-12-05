@@ -121,7 +121,7 @@ class Interface
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool floodLSA(OSPFLSA *lsa, Interface *intf = NULL, Neighbor *neighbor = NULL);
+    bool floodLSA(OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
     void addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader);
     void sendDelayedAcknowledgements();
     void ageTransmittedLSALists();

@@ -222,7 +222,7 @@ void EtherAppCli::receivePacket(cPacket *msg)
 void EtherAppCli::finish()
 {
     cancelAndDelete(timerMsg);
-    timerMsg = NULL;
+    timerMsg = nullptr;
 }
 
 } // namespace inet

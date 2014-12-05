@@ -120,7 +120,7 @@ bool PIMBase::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
-    helloTimer = NULL;
+    helloTimer = nullptr;
     return true;
 }
 
@@ -128,7 +128,7 @@ void PIMBase::handleNodeCrash()
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
-    helloTimer = NULL;
+    helloTimer = nullptr;
 }
 
 void PIMBase::processHelloTimer(cMessage *timer)

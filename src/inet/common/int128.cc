@@ -241,7 +241,7 @@ Int128 Int128::div(const Int128& divisor, Int128& remainder) const
     if (!divisor)
         return 1u / (unsigned int)divisor.lo;
     // or RaiseException (EXCEPTION_INT_DIVIDE_BY_ZERO,
-    //                    EXCEPTION_NONCONTINUABLE, 0, NULL);
+    //                    EXCEPTION_NONCONTINUABLE, 0, nullptr);
 
     Int128 ds = (divisor < 0) ? -divisor : divisor;
     Int128 dd = (*this < 0) ? -*this : *this;

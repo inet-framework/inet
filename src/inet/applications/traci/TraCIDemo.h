@@ -55,7 +55,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
     virtual void handlePositionUpdate();
 
   public:
-    TraCIDemo() { traci = NULL; }
+    TraCIDemo() { traci = nullptr; }
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 

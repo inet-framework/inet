@@ -74,15 +74,15 @@ void DSRPkt::clean()
         delete [] this->options;
     if (costVectorSize>0)
         delete [] costVector;
-    this->options = NULL;
+    this->options = nullptr;
     this->costVectorSize = 0;
 }
 
 DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram(m)
 {
 
-    costVector = NULL;
-    options = NULL;
+    costVector = nullptr;
+    options = nullptr;
     costVectorSize = 0;
     copy(m);
 }
@@ -123,8 +123,8 @@ void DSRPkt::copy(const DSRPkt& m)
 DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 {
     costVectorSize = 0;
-    costVector = NULL;
-    options = NULL;
+    costVector = nullptr;
+    options = nullptr;
 
 
     setEncapProtocol((IPProtocolId)0);
@@ -162,7 +162,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
         if (dp->payload)
         {
             encapsulate(dp->payload);
-            dp->payload = NULL;
+            dp->payload = nullptr;
             setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
 
         }
@@ -180,7 +180,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
         if (dp->costVectorSize>0)
         {
             setCostVector(dp->costVector, dp->costVectorSize);
-            dp->costVector = NULL;
+            dp->costVector = nullptr;
             dp->costVectorSize = 0;
         }
     }
@@ -211,7 +211,7 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
         opth = dp->dh.opth;
         int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
 
-        if (options != NULL)
+        if (options != nullptr)
             delete [] options;
 
         options = (dsr_opt_hdr *)new char[dsr_opts_len];
@@ -225,7 +225,7 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
             if (msg)
                 delete msg;
             encapsulate(dp->payload);
-            dp->payload = NULL;
+            dp->payload = nullptr;
             setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
 
         }
@@ -246,12 +246,12 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
         if (costVectorSize>0)
             delete [] costVector;
         costVectorSize = 0;
-        costVector = NULL;
+        costVector = nullptr;
 
         if (dp->costVectorSize>0)
         {
             setCostVector(dp->costVector, dp->costVectorSize);
-            dp->costVector = NULL;
+            dp->costVector = nullptr;
             dp->costVectorSize = 0;
         }
 
@@ -371,7 +371,7 @@ void DSRPkt::setCostVector(EtxCost &cost, int size)
     {
         setBitLength(getBitLength()-(costVectorSize*SIZE_COST_BITS));
         delete [] costVector;
-        costVector = NULL;
+        costVector = nullptr;
         costVectorSize = 0;
     }
 
@@ -394,7 +394,7 @@ void DSRPkt::setCostVector(EtxCost *cost, int size)
         delete [] costVector;
     }
 
-    costVector = NULL;
+    costVector = nullptr;
     costVectorSize = 0;
 
     if (size>0)
@@ -435,7 +435,7 @@ void DSRPkt::setCostVectorSize(unsigned n)
     {
         setBitLength(getBitLength()-(costVectorSize*SIZE_COST_BITS));
         delete [] costVector;
-        costVector = NULL;
+        costVector = nullptr;
         costVectorSize = 0;
         return;
     }
@@ -469,7 +469,7 @@ void DSRPkt::setCostVectorSize(u_int32_t addr, double cost)
 
 void DSRPkt::resetCostVector()
 {
-    costVector = NULL;
+    costVector = nullptr;
     setBitLength(getBitLength()-(costVectorSize*SIZE_COST_BITS));
     costVectorSize = 0;
 }
@@ -494,7 +494,7 @@ void DSRPktExt::copy(const DSRPktExt& msg)
     size = msg.size;
     if (size==0)
     {
-        extension = NULL;
+        extension = nullptr;
         return;
     }
     extension = new EtxList[size];
@@ -521,7 +521,7 @@ EtxList * DSRPktExt::addExtension(int len)
     EtxList * extension_aux;
     if (len<0)
     {
-        return NULL;
+        return nullptr;
     }
     extension_aux = new EtxList [size+len];
     memcpy(extension_aux, extension, size*sizeof(EtxList));
@@ -537,12 +537,12 @@ EtxList * DSRPktExt::delExtension(int len)
     EtxList * extension_aux;
     if (len<0)
     {
-        return NULL;
+        return nullptr;
     }
     if (size-len<=0)
     {
         delete [] extension;
-        extension = NULL;
+        extension = nullptr;
         size = 0;
         return extension;
     }

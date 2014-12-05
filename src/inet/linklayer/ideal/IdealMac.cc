@@ -36,10 +36,10 @@ simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
 IdealMac::IdealMac()
 {
-    queueModule = NULL;
-    radio = NULL;
-    lastSentPk = NULL;
-    ackTimeoutMsg = NULL;
+    queueModule = nullptr;
+    radio = nullptr;
+    lastSentPk = nullptr;
+    ackTimeoutMsg = nullptr;
 }
 
 IdealMac::~IdealMac()
@@ -227,7 +227,7 @@ void IdealMac::handleSelfMessage(cMessage *message)
         // packet lost
         emit(NF_LINK_BREAK, lastSentPk);
         delete lastSentPk;
-        lastSentPk = NULL;
+        lastSentPk = nullptr;
         getNextMsgFromHL();
     }
     else {
@@ -245,7 +245,7 @@ void IdealMac::acked(IdealMacFrame *frame)
         EV_DEBUG << "accepted\n";
         cancelEvent(ackTimeoutMsg);
         delete lastSentPk;
-        lastSentPk = NULL;
+        lastSentPk = nullptr;
         getNextMsgFromHL();
     }
     else

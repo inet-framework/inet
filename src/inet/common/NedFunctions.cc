@@ -31,7 +31,7 @@ namespace utils {
 
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
-    return classes.getInstance()->lookup(argv[0].stringValue()) != NULL;
+    return classes.getInstance()->lookup(argv[0].stringValue()) != nullptr;
 }
 
 Define_NED_Function2(nedf_haveClass,

@@ -36,7 +36,7 @@ class INET_API PIMHello : public PIMHello_Base
     bool operator==(const PIMHello&);
 
   public:
-    PIMHello(const char *name = NULL, int kind = 0);
+    PIMHello(const char *name = nullptr, int kind = 0);
     PIMHello(const PIMHello& other);
     virtual ~PIMHello();
     PIMHello& operator=(const PIMHello& other);

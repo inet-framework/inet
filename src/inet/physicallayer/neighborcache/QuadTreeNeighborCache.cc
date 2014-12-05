@@ -25,9 +25,9 @@ namespace physicallayer {
 Define_Module(QuadTreeNeighborCache);
 
 QuadTreeNeighborCache::QuadTreeNeighborCache() :
-    quadTree(NULL),
-    radioMedium(NULL),
-    rebuildQuadTreeTimer(NULL),
+    quadTree(nullptr),
+    radioMedium(nullptr),
+    rebuildQuadTreeTimer(nullptr),
     constraintAreaMax(Coord::NIL),
     constraintAreaMin(Coord::NIL),
     maxNumOfPointsPerQuadrant(0),
@@ -47,7 +47,7 @@ void QuadTreeNeighborCache::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         constraintAreaMax = radioMedium->getConstraintAreaMax();
         constraintAreaMin = radioMedium->getConstraintAreaMin();
-        quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
+        quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, nullptr);
         maxSpeed = radioMedium->getMaxSpeed().get();
         rebuildQuadTree();
         scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
@@ -135,7 +135,7 @@ void QuadTreeNeighborCache::fillQuadTreeWithRadios()
 void QuadTreeNeighborCache::rebuildQuadTree()
 {
     delete quadTree;
-    quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
+    quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, nullptr);
     fillQuadTreeWithRadios();
 }
 

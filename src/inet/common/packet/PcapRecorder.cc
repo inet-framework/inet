@@ -133,21 +133,21 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     bool hasBitError = false;
 
 #ifdef WITH_IPv4
-    IPv4Datagram *ip4Packet = NULL;
+    IPv4Datagram *ip4Packet = nullptr;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-    IPv6Datagram *ip6Packet = NULL;
+    IPv6Datagram *ip6Packet = nullptr;
 #endif // ifdef WITH_IPv6
     while (msg) {
         if (msg->hasBitError())
             hasBitError = true;
 #ifdef WITH_IPv4
-        if (NULL != (ip4Packet = dynamic_cast<IPv4Datagram *>(msg))) {
+        if (nullptr != (ip4Packet = dynamic_cast<IPv4Datagram *>(msg))) {
             break;
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (NULL != (ip6Packet = dynamic_cast<IPv6Datagram *>(msg))) {
+        if (nullptr != (ip6Packet = dynamic_cast<IPv6Datagram *>(msg))) {
             break;
         }
 #endif // ifdef WITH_IPv6

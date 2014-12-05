@@ -29,10 +29,10 @@ Define_Module(IPv4NodeConfigurator);
 
 IPv4NodeConfigurator::IPv4NodeConfigurator()
 {
-    nodeStatus = NULL;
-    interfaceTable = NULL;
-    routingTable = NULL;
-    networkConfigurator = NULL;
+    nodeStatus = nullptr;
+    interfaceTable = nullptr;
+    routingTable = nullptr;
+    networkConfigurator = nullptr;
 }
 
 void IPv4NodeConfigurator::initialize(int stage)
@@ -49,7 +49,7 @@ void IPv4NodeConfigurator::initialize(int stage)
         routingTable = L3AddressResolver().findIPv4RoutingTableOf(node);
 
         if (!networkConfiguratorPath[0])
-            networkConfigurator = NULL;
+            networkConfigurator = nullptr;
         else {
             cModule *module = getModuleByPath(networkConfiguratorPath);
             if (!module)

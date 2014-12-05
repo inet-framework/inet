@@ -51,7 +51,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     {
       public:
         /**
-         * The radio frame that was sent to the receiver or NULL.
+         * The radio frame that was sent to the receiver or nullptr.
          */
         const IRadioFrame *frame;
         const IArrival *arrival;
@@ -78,7 +78,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          */
         simtime_t interferenceEndTime;
         /**
-         * The radio frame that was created by the transmitter is never NULL.
+         * The radio frame that was created by the transmitter is never nullptr.
          */
         const IRadioFrame *frame;
         /**
@@ -112,23 +112,23 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Parameters that control the behavior of the radio medium. */
     //@{
     /**
-     * The propagation model of the medium is never NULL.
+     * The propagation model of the medium is never nullptr.
      */
     const IPropagation *propagation;
     /**
-     * The path loss model of the medium is never NULL.
+     * The path loss model of the medium is never nullptr.
      */
     const IPathLoss *pathLoss;
     /**
-     * The obstacle loss model of the medium or NULL if unused.
+     * The obstacle loss model of the medium or nullptr if unused.
      */
     const IObstacleLoss *obstacleLoss;
     /**
-     * The analog model of the medium is never NULL.
+     * The analog model of the medium is never nullptr.
      */
     const IAnalogModel *analogModel;
     /**
-     * The background noise model or NULL if unused.
+     * The background noise model or nullptr if unused.
      */
     const IBackgroundNoise *backgroundNoise;
     /**
@@ -267,14 +267,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     int baseTransmissionId;
     /**
-     * Caches neighbors for all radios or NULL if turned off.
+     * Caches neighbors for all radios or nullptr if turned off.
      */
     mutable INeighborCache *neighborCache;
     /**
      * Caches pre-computed information for transmissions. The outer vector is
      * indexed by transmission id (offset with base transmission id) and the
      * inner vector is indexed by radio id. Values that are no longer needed are
-     * removed from the beginning only. May contain NULL values for not yet
+     * removed from the beginning only. May contain nullptr values for not yet
      * pre-computed information.
      */
     mutable std::vector<TransmissionCacheEntry> transmissionCache;

@@ -35,8 +35,8 @@ void DSDV_2::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         sequencenumber = 0;
-        ift = NULL;
-        rt = NULL;
+        ift = nullptr;
+        rt = nullptr;
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -54,7 +54,7 @@ void DSDV_2::initialize(int stage)
         {
             ie = ift->getInterface(i);
             name = ie->getName();
-            if (strstr(name, "wlan")!=NULL)
+            if (strstr(name, "wlan")!=nullptr)
             {
                 i_face = ie;
                 num_80211++;
@@ -76,7 +76,7 @@ void DSDV_2::initialize(int stage)
             {
                 entry = rt->getRoute(i);
                 const InterfaceEntry *ie = entry->getInterface();
-                if (strstr(ie->getName(), "wlan")!=NULL)
+                if (strstr(ie->getName(), "wlan")!=nullptr)
                 {
                     rt->deleteRoute(entry);
                 }
@@ -101,23 +101,23 @@ void DSDV_2::initialize(int stage)
 
 DSDV_2::forwardHello::~forwardHello()
 {
-    if (this->event!=NULL) delete this->event;
-    if (this->hello!=NULL) delete this->hello;
+    if (this->event!=nullptr) delete this->event;
+    if (this->hello!=nullptr) delete this->hello;
 }
 
 DSDV_2::forwardHello::forwardHello()
 {
-    this->event = NULL;
-    this->hello = NULL;
+    this->event = nullptr;
+    this->hello = nullptr;
 }
 
 
 DSDV_2::DSDV_2()
 {
-    // Set the pointer to NULL, so that the destructor won't crash
+    // Set the pointer to nullptr, so that the destructor won't crash
     // even if initialize() doesn't get called because of a runtime
     // error or user cancellation during the startup process.
-    event = NULL;
+    event = nullptr;
 }
 
 DSDV_2::~DSDV_2()
@@ -131,8 +131,8 @@ DSDV_2::~DSDV_2()
             cancelAndDelete(fh->event);
         if (fh->hello)
             cancelAndDelete(fh->hello);
-        fh->event = NULL;
-        fh->hello = NULL;
+        fh->event = nullptr;
+        fh->hello = nullptr;
         forwardList->pop_front();
         delete fh;
     }
@@ -143,7 +143,7 @@ DSDV_2::~DSDV_2()
 void DSDV_2::handleMessage(cMessage *msg)
 {
 
-    DSDV_HelloMessage * recHello = NULL;
+    DSDV_HelloMessage * recHello = nullptr;
     // When DSDV module receives selfmessage (scheduled event)
     // it means that it's time for Hello message broadcast event
     // i.e. Brodcast Hello messages to other nodes when selfmessage=event
@@ -166,7 +166,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             // count non-loopback interfaces
             // int numIntf = 0;
-            // InterfaceEntry *ie = NULL;
+            // InterfaceEntry *ie = nullptr;
             //for (int k=0; k<ift->getNumInterfaces(); k++)
             //  if (!ift->getInterface(k)->isLoopback())
             //  {ie = ift->getInterface(k); numIntf++;}
@@ -203,7 +203,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             //broadcast to other nodes the hello message
             send(Hello, "to_ip");
-            Hello = NULL;
+            Hello = nullptr;
 
             //schedule new brodcast hello message event
             scheduleAt(simTime()+hellomsgperiod_DSDV+broadcastDelay->doubleValue(), event);
@@ -218,12 +218,12 @@ void DSDV_2::handleMessage(cMessage *msg)
                     try
                     {
                         EV << "Vou mandar forward do " << (*it)->hello->getSrcIPAddress() << endl; // todo
-                        if ( (*it)->hello->getControlInfo() == NULL )
+                        if ( (*it)->hello->getControlInfo() == nullptr )
                             throw cRuntimeError("Apanhei-o a nulo no for");
                         send((*it)->hello, "to_ip");
-                        (*it)->hello = NULL;
+                        (*it)->hello = nullptr;
                         delete (*it)->event;
-                        (*it)->event = NULL;
+                        (*it)->event = nullptr;
                         delete (*it);
                         forwardList->erase(it);
                     }
@@ -244,15 +244,15 @@ void DSDV_2::handleMessage(cMessage *msg)
         // but only if it's useful/up-to-date. If not the DSDV module ignores the message.
         try
         {
-            if (msg->getControlInfo() != NULL )
+            if (msg->getControlInfo() != nullptr )
                 delete msg->removeControlInfo();
             IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
             controlInfo->setDestAddr(IPv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
 
             // int numIntf = 0;
-            if (ift!=NULL)
+            if (ift!=nullptr)
                 ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-            //InterfaceEntry *ie = NULL;
+            //InterfaceEntry *ie = nullptr;
             //for (int k=0; k<ift->getNumInterfaces(); k++)
             //  if (!ift->getInterface(k)->isLoopback())
             //  {ie = ift->getInterface(k); numIntf++;}
@@ -271,7 +271,7 @@ void DSDV_2::handleMessage(cMessage *msg)
             fhp->hello = (DSDV_HelloMessage *) (dynamic_cast<DSDV_HelloMessage *>(msg))->dup();
             fhp->hello = dynamic_cast<DSDV_HelloMessage *>(msg);
             fhp->hello->setControlInfo(controlInfo);
-            if ( fhp->hello->getControlInfo() == NULL )
+            if ( fhp->hello->getControlInfo() == nullptr )
                 throw cRuntimeError("Nulo quando copiei");
 #endif
         }
@@ -340,7 +340,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 #endif
             // count non-loopback interfaces
             //int numIntf = 0;
-            //InterfaceEntry *ie = NULL;
+            //InterfaceEntry *ie = nullptr;
             //for (int k=0; k<ift->getNumInterfaces(); k++)
             //  if (!ift->getInterface(k)->isLoopback())
             //  {ie = ift->getInterface(k); numIntf++;}
@@ -354,13 +354,13 @@ void DSDV_2::handleMessage(cMessage *msg)
             DSDVIPv4Route *entrada_routing = dynamic_cast<DSDVIPv4Route *>(_entrada_routing);
 
             //Tests if the DSDV hello message that arrived is useful
-            if (_entrada_routing == NULL
-                    || (_entrada_routing != NULL && _entrada_routing->getNetmask() != IPv4Address::ALLONES_ADDRESS)
-                    || (entrada_routing != NULL && (msgsequencenumber>(entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
+            if (_entrada_routing == nullptr
+                    || (_entrada_routing != nullptr && _entrada_routing->getNetmask() != IPv4Address::ALLONES_ADDRESS)
+                    || (entrada_routing != nullptr && (msgsequencenumber>(entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
             {
 
                 //remove old entry
-                if (entrada_routing != NULL)
+                if (entrada_routing != nullptr)
                     rt->deleteRoute(entrada_routing);
 
                 //adds new information to routing table according to information in hello message
@@ -382,7 +382,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                 numHops++;
                 recHello->setHopdistance(numHops);
                 //send(HelloForward, "to_ip");//
-                //HelloForward=NULL;//
+                //HelloForward=nullptr;//
                 double waitTime = intuniform(1, 50);
                 waitTime = waitTime/100;
                 EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
@@ -397,7 +397,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     numHops++;
                     fhp->hello->setHopdistance(numHops);
                     //send(HelloForward, "to_ip");//
-                    //HelloForward=NULL;//
+                    //HelloForward=nullptr;//
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";

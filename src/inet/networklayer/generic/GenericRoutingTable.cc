@@ -44,7 +44,7 @@ std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
 
 GenericRoutingTable::GenericRoutingTable()
 {
-    ift = NULL;
+    ift = nullptr;
 }
 
 GenericRoutingTable::~GenericRoutingTable()
@@ -133,7 +133,7 @@ void GenericRoutingTable::routeChanged(GenericRoute *entry, int fieldCode)
 {
     if (fieldCode == IRoute::F_DESTINATION || fieldCode == IRoute::F_PREFIX_LENGTH || fieldCode == IRoute::F_METRIC) {    // our data structures depend on these fields
         entry = internalRemoveRoute(entry);
-        ASSERT(entry != NULL);    // failure means inconsistency: route was not found in this routing table
+        ASSERT(entry != nullptr);    // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
 
         //invalidateCache();
@@ -162,7 +162,7 @@ void GenericRoutingTable::configureRouterId()
 //    {
 //        // if there is no interface with routerId yet, assign it to the loopback address;
 //        // TODO find out if this is a good practice, in which situations it is useful etc.
-//        if (getInterfaceByAddress(routerId)==NULL)
+//        if (getInterfaceByAddress(routerId)==nullptr)
 //        {
 //            InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
 //            lo0->getGenericNetworkProtocolData()->setAddress(routerId);
@@ -265,7 +265,7 @@ InterfaceEntry *GenericRoutingTable::getInterfaceByAddress(const L3Address& addr
         if (interfaceAddr == address)
             return ie;
     }
-    return NULL;
+    return nullptr;
 }
 
 GenericRoute *GenericRoutingTable::findBestMatchingRoute(const L3Address& dest) const
@@ -274,7 +274,7 @@ GenericRoute *GenericRoutingTable::findBestMatchingRoute(const L3Address& dest) 
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
-    GenericRoute *bestRoute = NULL;
+    GenericRoute *bestRoute = nullptr;
     for (RouteVector::const_iterator i = routes.begin(); i != routes.end(); ++i) {
         GenericRoute *e = *i;
         if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength())) {
@@ -290,7 +290,7 @@ InterfaceEntry *GenericRoutingTable::getOutputInterfaceForDestination(const L3Ad
     //TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     const IRoute *e = findBestMatchingRoute(dest);
-    return e ? e->getInterface() : NULL;
+    return e ? e->getInterface() : nullptr;
 }
 
 L3Address GenericRoutingTable::getNextHopForDestination(const L3Address& dest) const
@@ -308,7 +308,7 @@ bool GenericRoutingTable::isLocalMulticastAddress(const L3Address& dest) const
 
 IMulticastRoute *GenericRoutingTable::findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const
 {
-    return NULL;    //TODO
+    return nullptr;    //TODO
 }
 
 int GenericRoutingTable::getNumRoutes() const
@@ -327,7 +327,7 @@ IRoute *GenericRoutingTable::getDefaultRoute() const
     // if there is a default route entry, it is the last valid entry
     for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getPrefixLength() == 0; ++i)
         return *i;
-    return NULL;
+    return nullptr;
 }
 
 void GenericRoutingTable::addRoute(IRoute *route)
@@ -338,7 +338,7 @@ void GenericRoutingTable::addRoute(IRoute *route)
 
     // check that the interface exists
     if (!entry->getInterface())
-        throw cRuntimeError("addRoute(): interface cannot be NULL");
+        throw cRuntimeError("addRoute(): interface cannot be nullptr");
 
     internalAddRoute(entry);
 
@@ -363,12 +363,12 @@ bool GenericRoutingTable::deleteRoute(IRoute *entry)
 {
     IRoute *route = removeRoute(entry);
     delete route;
-    return route != NULL;
+    return route != nullptr;
 }
 
 void GenericRoutingTable::internalAddRoute(GenericRoute *route)
 {
-    ASSERT(route->getRoutingTableAsGeneric() == NULL);
+    ASSERT(route->getRoutingTableAsGeneric() == nullptr);
 
     // add to tables
     // we keep entries sorted, so that we can stop at the first match when doing the longest prefix matching
@@ -384,10 +384,10 @@ GenericRoute *GenericRoutingTable::internalRemoveRoute(GenericRoute *route)
     if (i != routes.end()) {
         ASSERT(route->getRoutingTableAsGeneric() == this);
         routes.erase(i);
-        route->setRoutingTable(NULL);
+        route->setRoutingTable(nullptr);
         return route;
     }
-    return NULL;
+    return nullptr;
 }
 
 int GenericRoutingTable::getNumMulticastRoutes() const
@@ -397,7 +397,7 @@ int GenericRoutingTable::getNumMulticastRoutes() const
 
 IMulticastRoute *GenericRoutingTable::getMulticastRoute(int k) const
 {
-    return NULL;    //TODO
+    return nullptr;    //TODO
 }
 
 void GenericRoutingTable::addMulticastRoute(IMulticastRoute *entry)
@@ -407,7 +407,7 @@ void GenericRoutingTable::addMulticastRoute(IMulticastRoute *entry)
 
 IMulticastRoute *GenericRoutingTable::removeMulticastRoute(IMulticastRoute *entry)
 {
-    return NULL;    //TODO
+    return nullptr;    //TODO
 }
 
 bool GenericRoutingTable::deleteMulticastRoute(IMulticastRoute *entry)

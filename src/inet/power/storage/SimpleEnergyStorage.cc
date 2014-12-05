@@ -30,12 +30,12 @@ SimpleEnergyStorage::SimpleEnergyStorage() :
     residualCapacity(J(sNaN)),
     printCapacityStep(J(sNaN)),
     lastResidualCapacityUpdate(-1),
-    timer(NULL),
+    timer(nullptr),
     nodeShutdownCapacity(J(sNaN)),
     nodeStartCapacity(J(sNaN)),
-    lifecycleController(NULL),
-    node(NULL),
-    nodeStatus(NULL)
+    lifecycleController(nullptr),
+    node(nullptr),
+    nodeStatus(nullptr)
 {
 }
 

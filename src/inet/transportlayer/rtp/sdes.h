@@ -135,7 +135,7 @@ class INET_API SDESChunk : public cArray
     /**
      * Default constructor.
      */
-    SDESChunk(const char *name = NULL, uint32 ssrc = 0);
+    SDESChunk(const char *name = nullptr, uint32 ssrc = 0);
 
     /**
      * Copy constructor.

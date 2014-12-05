@@ -143,7 +143,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                 ackFlags.lsaIsDuplicate = false;
                 ackFlags.impliedAcknowledgement = false;
                 ackFlags.lsaReachedMaxAge = (lsAge == MAX_AGE);
-                ackFlags.noLSAInstanceInDatabase = (lsaInDatabase == NULL);
+                ackFlags.noLSAInstanceInDatabase = (lsaInDatabase == nullptr);
                 ackFlags.anyNeighborInExchangeOrLoadingState = router->hasAnyNeighborInStates(Neighbor::EXCHANGE_STATE | Neighbor::LOADING_STATE);
 
                 if ((ackFlags.lsaReachedMaxAge) && (ackFlags.noLSAInstanceInDatabase) && (!ackFlags.anyNeighborInExchangeOrLoadingState)) {
@@ -175,9 +175,9 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                     ackFlags.lsaIsDuplicate = (operator==(lsaInDatabase->getHeader(), currentLSA->getHeader()));
                 }
                 if ((ackFlags.noLSAInstanceInDatabase) || (ackFlags.lsaIsNewer)) {
-                    LSATrackingInfo *info = (!ackFlags.noLSAInstanceInDatabase) ? dynamic_cast<LSATrackingInfo *>(lsaInDatabase) : NULL;
+                    LSATrackingInfo *info = (!ackFlags.noLSAInstanceInDatabase) ? dynamic_cast<LSATrackingInfo *>(lsaInDatabase) : nullptr;
                     if ((!ackFlags.noLSAInstanceInDatabase) &&
-                        (info != NULL) &&
+                        (info != nullptr) &&
                         (info->getSource() == LSATrackingInfo::FLOODED) &&
                         (info->getInstallTime() < MIN_LS_ARRIVAL))
                     {
@@ -250,7 +250,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                 }
                 if (!neighbor->isOnTransmittedLSAList(lsaKey)) {
                     OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsaInDatabase);
-                    if (updatePacket != NULL) {
+                    if (updatePacket != nullptr) {
                         int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
                         if (intf->getType() == Interface::BROADCAST) {

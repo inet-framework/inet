@@ -51,7 +51,7 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
 
   public:
     LifecycleOperation() :
-        rootModule(NULL), currentStage(0), insideInitiateOperation(false), operationCompletionCallback(NULL) {}
+        rootModule(nullptr), currentStage(0), insideInitiateOperation(false), operationCompletionCallback(nullptr) {}
 
     /**
      * Initialize the operation using the parameters provided in the

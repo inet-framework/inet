@@ -71,7 +71,7 @@ void STPTester::depthFirstSearch()
 
     for (int i = 0; i < graph.getNumNodes(); i++) {
         color[graph.getNode(i)] = WHITE;
-        parent[graph.getNode(i)] = NULL;
+        parent[graph.getNode(i)] = nullptr;
     }
 
     /* Use this for testing loop-freeness in all connected components.
@@ -152,7 +152,7 @@ bool STPTester::isForwarding(Topology::Node *node, unsigned int portNum)
     IInterfaceTable *ifTable = dynamic_cast<IInterfaceTable *>(tmpIfTable);
 
     // EtherHost has no InterfaceTable
-    if (ifTable == NULL)
+    if (ifTable == nullptr)
         return true;
 
     cGate *gate = node->getModule()->gate("ethg$o", portNum);
@@ -161,7 +161,7 @@ bool STPTester::isForwarding(Topology::Node *node, unsigned int portNum)
 
     // If portData does not exist, then it implies that
     // the node is not a switch
-    if (portData == NULL)
+    if (portData == nullptr)
         return true;
 
     return portData->isForwarding();

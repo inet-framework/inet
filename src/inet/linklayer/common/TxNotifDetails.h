@@ -29,7 +29,7 @@ class InterfaceEntry;
  * Details class for the NF_PP_TX_BEGIN, NF_PP_TX_END and NF_PP_RX_END
  * notifications (normally triggered from PPP).
  */
-//XXX also used by Ieee80211 to signal that a msg has been acked (must use an ID to identify msg!!!), and that channel was switched (msg==NULL then)
+//XXX also used by Ieee80211 to signal that a msg has been acked (must use an ID to identify msg!!!), and that channel was switched (msg==nullptr then)
 class TxNotifDetails : public cObject
 {
   protected:
@@ -37,7 +37,7 @@ class TxNotifDetails : public cObject
     InterfaceEntry *ie;
 
   public:
-    TxNotifDetails() { msg = NULL; ie = NULL; }
+    TxNotifDetails() { msg = nullptr; ie = nullptr; }
 
     cPacket *getPacket() const { return msg; }
     InterfaceEntry *getInterfaceEntry() const { return ie; }

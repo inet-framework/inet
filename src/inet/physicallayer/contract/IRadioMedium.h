@@ -64,37 +64,37 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual double getMaxAntennaGain() const = 0;
 
     /**
-     * Returns the material of the radio medium. This function never returns NULL.
+     * Returns the material of the radio medium. This function never returns nullptr.
      */
     virtual const Material *getMaterial() const = 0;
 
     /**
      * Returns the radio signal propagation model of this radio medium. This
-     * function never returns NULL.
+     * function never returns nullptr.
      */
     virtual const IPropagation *getPropagation() const = 0;
 
     /**
      * Returns the radio signal path loss model of this radio medium. This
-     * function never returns NULL.
+     * function never returns nullptr.
      */
     virtual const IPathLoss *getPathLoss() const = 0;
 
     /**
      * Returns the radio signal path loss model of this radio medium. This
-     * function may return NULL.
+     * function may return nullptr.
      */
     virtual const IObstacleLoss *getObstacleLoss() const = 0;
 
     /**
      * Returns the radio signal analog model of this radio medium. This
-     * function never returns NULL.
+     * function never returns nullptr.
      */
     virtual const IAnalogModel *getAnalogModel() const = 0;
 
     /**
      * Returns the background noise model of this radio medium. This function
-     * may return NULL.
+     * may return nullptr.
      */
     virtual const IBackgroundNoise *getBackgroundNoise() const = 0;
 
@@ -141,35 +141,35 @@ class INET_API IRadioMedium : public IPrintableObject
 
     /**
      * Returns the space and time coordinates of the transmission arriving at
-     * the provided receiver. This function never returns NULL as long as the
+     * the provided receiver. This function never returns nullptr as long as the
      * transmission is live on the radio medium.
      */
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the reception of the transmission arriving at the provided receiver.
-     * This function never returns NULL as long as the transmission is live on
+     * This function never returns nullptr as long as the transmission is live on
      * the radio medium.
      */
     virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the interference of the transmission arriving at the provided receiver.
-     * This function never returns NULL as long as the transmission is live on
+     * This function never returns nullptr as long as the transmission is live on
      * the radio medium.
      */
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the total noise computed from the interference of the transmission
-     * arriving at the provided receiver. This function never returns NULL as
+     * arriving at the provided receiver. This function never returns nullptr as
      * long as the transmission is live on the radio medium.
      */
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the signal to noise and interference ratio of the transmission
-     * arriving at the provided receiver. This function never returns NULL as
+     * arriving at the provided receiver. This function never returns nullptr as
      * long as the transmission is live on the radio medium.
      */
     virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;

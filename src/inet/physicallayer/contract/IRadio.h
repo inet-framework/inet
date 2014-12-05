@@ -231,35 +231,35 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
     /**
      * Returns the antenna used by the transceiver of this radio. This function
-     * never returns NULL.
+     * never returns nullptr.
      */
     virtual const IAntenna *getAntenna() const = 0;
 
     /**
-     * Returns the transmitter part of this radio. This function never returns NULL.
+     * Returns the transmitter part of this radio. This function never returns nullptr.
      */
     virtual const ITransmitter *getTransmitter() const = 0;
 
     /**
-     * Returns the receiver part of this radio. This function never returns NULL.
+     * Returns the receiver part of this radio. This function never returns nullptr.
      */
     virtual const IReceiver *getReceiver() const = 0;
 
     /**
      * Returns the radio medium where this radio is transmitting and receiving
-     * radio signals. This function never returns NULL.
+     * radio signals. This function never returns nullptr.
      */
     virtual const IRadioMedium *getMedium() const = 0;
 
     /**
      * Returns the ongoing transmission that the transmitter is currently
-     * transmitting or NULL.
+     * transmitting or nullptr.
      */
     virtual const ITransmission *getTransmissionInProgress() const = 0;
 
     /**
      * Returns the ongoing reception that the receiver is currently receiving
-     * or NULL.
+     * or nullptr.
      */
     virtual const ITransmission *getReceptionInProgress() const = 0;
 

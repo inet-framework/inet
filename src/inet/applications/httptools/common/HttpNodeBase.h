@@ -73,7 +73,7 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
      * a random delay object may be specified. Those delays add to the total used to submit the message to the
      * OMNeT++ direct message passing mechanism.
      */
-    void sendDirectToModule(HttpNodeBase *receiver, cPacket *packet, simtime_t constdelay = 0.0, rdObject *rd = NULL);
+    void sendDirectToModule(HttpNodeBase *receiver, cPacket *packet, simtime_t constdelay = 0.0, rdObject *rd = nullptr);
 
     /*
      * Calculate the transmission delay for the packet

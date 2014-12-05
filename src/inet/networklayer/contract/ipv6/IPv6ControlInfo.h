@@ -43,7 +43,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     void clean();
 
   public:
-    IPv6ControlInfo() : IPv6ControlInfo_Base() { dgram = NULL; }
+    IPv6ControlInfo() : IPv6ControlInfo_Base() { dgram = nullptr; }
     virtual ~IPv6ControlInfo();
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);

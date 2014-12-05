@@ -54,11 +54,11 @@ struct DYMO_element : public cPacket
     uint8_t blockAddressGroup;
     bool previousStatic;
 
-    //explicit AODV_msg(const char *name="AodvMgs") : cMessage(name) {extensionsize=0;extension=NULL;}
+    //explicit AODV_msg(const char *name="AodvMgs") : cMessage(name) {extensionsize=0;extension=nullptr;}
 #ifdef STATIC_BLOCK
-    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; memset(extension, 0, STATIC_BLOCK_SIZE); blockAddressGroup = 0; previousStatic = false;}
+    explicit DYMO_element(const char *name = nullptr) : cPacket(name) {setBitLength(0); extensionsize = 0; memset(extension, 0, STATIC_BLOCK_SIZE); blockAddressGroup = 0; previousStatic = false;}
 #else
-    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; extension = NULL; blockAddressGroup = 0; previousStatic = false;}
+    explicit DYMO_element(const char *name = nullptr) : cPacket(name) {setBitLength(0); extensionsize = 0; extension = nullptr; blockAddressGroup = 0; previousStatic = false;}
 #endif
     ~DYMO_element();
     DYMO_element(const DYMO_element  &m);

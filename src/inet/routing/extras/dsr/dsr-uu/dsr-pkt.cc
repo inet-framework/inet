@@ -32,10 +32,10 @@ namespace inetmanet {
 char *dsr_pkt_alloc_opts(struct dsr_pkt *dp, int len)
 {
     if (!dp)
-        return NULL;
+        return nullptr;
     dp->dh.raw = (char *)MALLOC(len + DEFAULT_TAILROOM, GFP_ATOMIC);
     if (!dp->dh.raw)
-        return NULL;
+        return nullptr;
 
     dp->dh.tail = dp->dh.raw + len;
     dp->dh.end = dp->dh.tail + DEFAULT_TAILROOM;
@@ -49,7 +49,7 @@ char *dsr_pkt_alloc_opts_expand(struct dsr_pkt *dp, int len)
     int old_len;
 
     if (!dp || !dp->dh.raw)
-        return NULL;
+        return nullptr;
 
     if (dsr_pkt_tailroom(dp) > len)
     {
@@ -62,7 +62,7 @@ char *dsr_pkt_alloc_opts_expand(struct dsr_pkt *dp, int len)
     old_len = dsr_pkt_opts_len(dp);
 
     if (!dsr_pkt_alloc_opts(dp, old_len + len))
-        return NULL;
+        return nullptr;
 
     memcpy(dp->dh.raw, tmp, old_len);
 
@@ -82,9 +82,9 @@ int dsr_pkt_free_opts(struct dsr_pkt *dp)
 
     FREE(dp->dh.raw);
 
-    dp->dh.raw = dp->dh.end = dp->dh.tail = NULL;
-    dp->srt_opt = NULL;
-    dp->rreq_opt = NULL;
+    dp->dh.raw = dp->dh.end = dp->dh.tail = nullptr;
+    dp->srt_opt = nullptr;
+    dp->rreq_opt = nullptr;
     memset(dp->rrep_opt, 0, sizeof(struct dsr_rrep_opt *) * MAX_RREP_OPTS);
     memset(dp->rerr_opt, 0, sizeof(struct dsr_rerr_opt *) * MAX_RERR_OPTS);
     memset(dp->ack_opt, 0, sizeof(struct dsr_ack_opt *) * MAX_ACK_OPTS);
@@ -104,7 +104,7 @@ struct dsr_pkt *dsr_pkt_alloc(Packet * p)
     dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
 
     if (!dp)
-        return NULL;
+        return nullptr;
 
     memset(dp, 0, sizeof(struct dsr_pkt));
 
@@ -132,7 +132,7 @@ struct dsr_pkt *dsr_pkt_alloc(Packet * p)
             if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
             {
                 FREE(dp);
-                return NULL;
+                return nullptr;
             }
 
             memcpy(dp->dh.raw, (char *)opth, dsr_opts_len);
@@ -165,7 +165,7 @@ struct dsr_pkt *dsr_pkt_alloc(struct sk_buff *skb)
     dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
 
     if (!dp)
-        return NULL;
+        return nullptr;
 
     memset(dp, 0, sizeof(struct dsr_pkt));
 
@@ -192,7 +192,7 @@ struct dsr_pkt *dsr_pkt_alloc(struct sk_buff *skb)
             if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
             {
                 FREE(dp);
-                return NULL;
+                return nullptr;
             }
 
             memcpy(dp->dh.raw, (char *)opth, dsr_opts_len);
@@ -243,7 +243,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
 
 
     // dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
-    if (DSRUU::lifoDsrPkt!=NULL)
+    if (DSRUU::lifoDsrPkt!=nullptr)
     {
         dp=DSRUU::lifoDsrPkt;
         DSRUU::lifoDsrPkt = dp->next;
@@ -253,7 +253,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         dp = new dsr_pkt;
 
     if (!dp)
-        return NULL;
+        return nullptr;
     memset(dp, 0, sizeof(dsr_pkt));
     if (p)
     {
@@ -261,7 +261,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
         cObject * ctrl = dgram->removeControlInfo();
-        if (ctrl!=NULL)
+        if (ctrl!=nullptr)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
             ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
@@ -300,7 +300,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         //if (dgram->getFragmentOffset()==0 && !dgram->getMoreFragments())
         dp->payload = p->decapsulate();
         //else
-        //  dp->payload = NULL;
+        //  dp->payload = nullptr;
         dp->encapsulate_protocol = 0;
 
         if (dp->nh.iph->protocol == IP_PROT_DSR)
@@ -316,7 +316,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
                 if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
                 {
                     FREE(dp);
-                    return NULL;
+                    return nullptr;
                 }
                 if (dp->payload)
                     dp->encapsulate_protocol=dsrpkt->getEncapProtocol();
@@ -328,7 +328,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
                 dp->costVector = dsrpkt->getCostVector();
                 dp->costVectorSize = dsrpkt->getCostVectorSize();
                 dsrpkt->resetCostVector();
-                p=NULL;
+                p=nullptr;
             }
         }
         else
@@ -346,7 +346,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
     if (p)
     {
         delete p;
-        p = NULL;
+        p = nullptr;
     }
     return dp;
 }
@@ -359,7 +359,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
 
 
     // dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
-    if (DSRUU::lifoDsrPkt!=NULL)
+    if (DSRUU::lifoDsrPkt!=nullptr)
     {
         dp=DSRUU::lifoDsrPkt;
         DSRUU::lifoDsrPkt = dp->next;
@@ -369,7 +369,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
         dp = new dsr_pkt;
 
     if (!dp)
-        return NULL;
+        return nullptr;
     memset(dp, 0, sizeof(dsr_pkt));
     if (p)
     {
@@ -391,7 +391,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
         if (dgram->getDontFragment())
             dp->nh.iph->frag_off |= 0x4000;
 
-        if (ctrl!=NULL)
+        if (ctrl!=nullptr)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
             ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
@@ -424,7 +424,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
                 if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
                 {
                     FREE(dp);
-                    return NULL;
+                    return nullptr;
                 }
                 if (dp->payload)
                     dp->encapsulate_protocol=dsrpkt->getEncapProtocol();
@@ -470,7 +470,7 @@ void dsr_pkt_free(dsr_pkt *dp)
         delete dp;
 
 
-    dp=NULL;
+    dp=nullptr;
     return;
 
 }

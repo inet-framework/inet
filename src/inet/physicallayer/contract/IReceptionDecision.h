@@ -35,7 +35,7 @@ class INET_API IReceptionDecision : public IPrintableObject
   public:
     /**
      * Returns the corresponding reception that also specifies the receiver
-     * and the received transmission. This function never returns NULL.
+     * and the received transmission. This function never returns nullptr.
      */
     virtual const IReception *getReception() const = 0;
 

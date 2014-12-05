@@ -868,7 +868,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
     /**
      * @brief This method isn't supported by an interpolated mapping.
      */
-    virtual const Argument& getNextPosition() const { assert(false); return *((Argument *)NULL); }
+    virtual const Argument& getNextPosition() const { assert(false); return *((Argument *)nullptr); }
 };
 
 /**
@@ -920,7 +920,7 @@ class INET_API LinearIntplMapping : public Mapping
      * @brief Initializes the LinearIntplMapping with the passed left and right
      * Mapping to interpolate by the passed interpolation value.
      */
-    LinearIntplMapping(const ConstMapping *const left = NULL, const ConstMapping *const right = NULL, argument_value_cref_t f = Argument::MappedZero) :
+    LinearIntplMapping(const ConstMapping *const left = nullptr, const ConstMapping *const right = nullptr, argument_value_cref_t f = Argument::MappedZero) :
         Mapping(), left(left), right(right), factor(f) {}
 
     virtual ~LinearIntplMapping() {}
@@ -1519,7 +1519,7 @@ class MultiDimMappingIterator : public MappingIterator
     MultiDimMappingIterator(MultiDimMapping<Interpolator>& pMapping) :
         MappingIterator(), mapping(pMapping),
         valueIt(pMapping.entries.beginIntpl()),
-        subMapping(0), subIterator(NULL),
+        subMapping(0), subIterator(nullptr),
         position(), nextPosition()
     {
         subMapping = valueIt.getValue();
@@ -1543,7 +1543,7 @@ class MultiDimMappingIterator : public MappingIterator
     MultiDimMappingIterator(MultiDimMapping<Interpolator>& pMapping, const Argument& pos) :
         MappingIterator(), mapping(pMapping),
         valueIt(pMapping.entries.beginIntpl()    /*pMapping.entries.findIntpl(pos.getArgValue(pMapping.myDimension))*/),    //ATTENTION: pMapping.entries.findIntpl(...) results in GCC-Crash at -O2
-        subMapping(0), subIterator(NULL),
+        subMapping(0), subIterator(nullptr),
         position(pos), nextPosition()
     {
         // valueIt was not initialized with pMapping.entries.findIntpl(...), so we need the jumpTo-call
@@ -1560,7 +1560,7 @@ class MultiDimMappingIterator : public MappingIterator
     MultiDimMappingIterator(const MultiDimMappingIterator& o) :
         MappingIterator(o), mapping(o.mapping),
         valueIt(o.valueIt),
-        subMapping(o.subMapping), subIterator(NULL),
+        subMapping(o.subMapping), subIterator(nullptr),
         position(o.position), nextPosition(o.nextPosition)
     {
         // valueIt was not initialized with pMapping.entries.findIntpl(...), so we need the jumpTo-call
@@ -2521,7 +2521,7 @@ class ConcatConstMapping : public ConstMapping
     ConcatConstMapping(const ConcatConstMapping& o)
         : ConstMapping(o)
         , mappings(o.mappings)
-        , refMapping(NULL)
+        , refMapping(nullptr)
         , continueOutOfRange(o.continueOutOfRange)
         , oorValue(o.oorValue)
         , op()

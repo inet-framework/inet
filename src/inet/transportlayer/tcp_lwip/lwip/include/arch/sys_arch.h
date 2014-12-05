@@ -9,8 +9,8 @@ typedef void* sys_sem_t;
 typedef void* sys_mbox_t;
 typedef void* sys_thread_t;
 
-#define SYS_SEM_NULL NULL
-#define SYS_MBOX_NULL NULL
+#define SYS_SEM_NULL nullptr
+#define SYS_MBOX_NULL nullptr
 
 } // namespace tcp
 

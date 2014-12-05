@@ -56,7 +56,7 @@ class INET_API IPassiveQueue
 
     /**
      * Returns a packet directly from the queue, bypassing the primary,
-     * send-on-request mechanism. Returns NULL if the queue is empty.
+     * send-on-request mechanism. Returns nullptr if the queue is empty.
      */
     virtual cMessage *pop() = 0;
 

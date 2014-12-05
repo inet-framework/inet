@@ -134,7 +134,7 @@ void NS_CLASS rerr_process(RERR *rerr,struct in_addr src, u_int32_t ifindex)
         dlog(LOG_WARNING, 0, __FUNCTION__, "malformed RERR received");
 #ifdef OMNETPP
         delete rerr;
-        rerr=NULL;
+        rerr=nullptr;
 #endif
         return;
     }
@@ -199,7 +199,7 @@ void NS_CLASS rerr_process(RERR *rerr,struct in_addr src, u_int32_t ifindex)
     else
     {
         delete rerr;
-        rerr=NULL;
+        rerr=nullptr;
     }
 #endif
 }
@@ -222,7 +222,7 @@ void NS_CLASS rerr_forward(RERR *rerr)
     if (numInterfacesActive==0)
     {
         delete rerr;
-        rerr=NULL;
+        rerr=nullptr;
         return;
     }
     dest_addr.s_addr = L3Address(IPv4Address(DYMO_BROADCAST));
@@ -316,7 +316,7 @@ void NS_CLASS rerr_forward(RERR *rerr,struct in_addr dest_addr)
     if (numInterfacesActive==0)
     {
         delete rerr;
-        rerr=NULL;
+        rerr=nullptr;
         return;
     }
     // Send RE over all enabled interfaces

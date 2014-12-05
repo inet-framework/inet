@@ -66,7 +66,7 @@ extern "C" {
 #ifdef IP_HDRINCL
 #undef IP_HDRINCL
 #endif /* IP_HDRINCL */
-#define IP_HDRINCL  NULL
+#define IP_HDRINCL  nullptr
 
 #if LWIP_NETIF_HWADDRHINT
 #define IP_PCB_ADDRHINT ;u8_t addr_hint
@@ -203,11 +203,11 @@ err_t ip_output_if_opt(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest
 #endif /* IP_OPTIONS_SEND */
 /** Get the interface that received the current packet.
  * This function must only be called from a receive callback (udp_recv,
- * raw_recv, tcp_accept). It will return NULL otherwise. */
+ * raw_recv, tcp_accept). It will return nullptr otherwise. */
 #define ip_current_netif()  (current_netif)
 /** Get the IP header of the current packet.
  * This function must only be called from a receive callback (udp_recv,
- * raw_recv, tcp_accept). It will return NULL otherwise. */
+ * raw_recv, tcp_accept). It will return nullptr otherwise. */
 #define ip_current_header() (current_header)
 #if IP_DEBUG
 void ip_debug_print(struct pbuf *p);

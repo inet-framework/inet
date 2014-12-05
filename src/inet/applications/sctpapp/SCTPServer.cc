@@ -55,7 +55,7 @@ void SCTPServer::initialize(int stage)
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         lastStream = 0;
-        //abort = NULL;
+        //abort = nullptr;
         //abortSent = false;
         timeoutMsg = new cMessage("SrvAppTimer");
         delayTimer = new cMessage("delayTimer");
@@ -535,10 +535,10 @@ SCTPServer::~SCTPServer()
 
 SCTPServer::SCTPServer()
 {
-    timeoutMsg = NULL;
-    socket = NULL;
-    delayFirstReadTimer = NULL;
-    delayTimer = NULL;
+    timeoutMsg = nullptr;
+    socket = nullptr;
+    delayFirstReadTimer = nullptr;
+    delayTimer = nullptr;
 }
 
 } // namespace inet

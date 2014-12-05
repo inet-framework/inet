@@ -335,7 +335,7 @@ rdObject *rdObjectFactory::create(cXMLAttributeMap attributes)
     else if (typeName == "zipf")
         dt = dt_zipf;
     else
-        return NULL;
+        return nullptr;
 
     switch (dt) {
         case dt_normal:
@@ -357,7 +357,7 @@ rdObject *rdObjectFactory::create(cXMLAttributeMap attributes)
             return new rdZipf(attributes);
 
         default:
-            return NULL;
+            return nullptr;
     }
 }
 

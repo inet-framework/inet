@@ -72,7 +72,7 @@ int NS_CLASS packet_queue_garbage_collect(void)
     list_t *pos, *tmp;
     struct timeval now;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     list_foreach_safe(pos, tmp, &PQ.head)
     {
@@ -122,7 +122,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     qp = (struct q_pkt *) malloc(sizeof(struct q_pkt));
 
-    if (qp == NULL)
+    if (qp == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -131,7 +131,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     qp->p = p;
     qp->dest_addr = dest_addr;
 
-    gettimeofday(&qp->q_time, NULL);
+    gettimeofday(&qp->q_time, nullptr);
 
     list_add_tail(&PQ.head, &qp->l);
 
@@ -144,7 +144,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 {
     int count = 0;
-    rt_table_t *rt, *next_hop_rt, *inet_rt = NULL;
+    rt_table_t *rt, *next_hop_rt, *inet_rt = nullptr;
     list_t *pos, *tmp;
     struct in_addr gw_addr;
 
@@ -300,7 +300,7 @@ int NS_CLASS packet_queue_garbage_collect(void)
     int count = 0;
     struct timeval now;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     for (unsigned int i=0; i < PQ.pkQueue.size();)
     {
@@ -343,7 +343,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     qp = (struct q_pkt *) malloc(sizeof(struct q_pkt));
 
-    if (qp == NULL)
+    if (qp == nullptr)
     {
         fprintf(stderr, "Malloc failed!\n");
         exit(-1);
@@ -351,7 +351,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     qp->p = p;
     qp->dest_addr = dest_addr;
 
-    gettimeofday(&qp->q_time, NULL);
+    gettimeofday(&qp->q_time, nullptr);
     PQ.pkQueue.push_back(qp);
 
     DEBUG(LOG_INFO, 0, "buffered pkt to %s qlen=%u",
@@ -361,7 +361,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 {
     int count = 0;
-    rt_table_t *rt, *next_hop_rt, *inet_rt = NULL;
+    rt_table_t *rt, *next_hop_rt, *inet_rt = nullptr;
     struct in_addr gw_addr;
 
     double delay = 0;

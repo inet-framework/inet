@@ -35,13 +35,13 @@ class INET_API IReception : public IPrintableObject
   public:
     /**
      * Returns the receiver that received the corresponding transmission
-     * from the radio medium. This function never returns NULL.
+     * from the radio medium. This function never returns nullptr.
      */
     virtual const IRadio *getReceiver() const = 0;
 
     /**
      * Returns the transmission that corresponds to this reception at the
-     * receiver. This function never returns NULL.
+     * receiver. This function never returns nullptr.
      */
     virtual const ITransmission *getTransmission() const = 0;
 

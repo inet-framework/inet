@@ -355,7 +355,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
             ospf::OSPFRouting *ospf = findModuleFromPar<ospf::OSPFRouting>(par("ospfRoutingModule"), this);
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
-                throw cRuntimeError("Model error: interface entry is NULL");
+                throw cRuntimeError("Model error: interface entry is nullptr");
             ospf->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
             simulation.setContext(this);
         }
@@ -585,7 +585,7 @@ void BGPRouting::loadConfigFromXML(cXMLElement *bgpConfig)
     // load bgp timer parameters informations
     simtime_t delayTab[NB_TIMERS];
     cXMLElement *paramNode = bgpConfig->getElementByPath("TimerParams");
-    if (paramNode == NULL)
+    if (paramNode == nullptr)
         throw cRuntimeError("BGP Error: No configuration for BGP timer parameters");
 
     cXMLElementList timerConfig = paramNode->getChildren();
@@ -610,7 +610,7 @@ void BGPRouting::loadConfigFromXML(cXMLElement *bgpConfig)
 
     cXMLElement *ASNode = bgpConfig->getElementByPath(ASXPath);
     std::vector<const char *> routerInSameASList;
-    if (ASNode == NULL)
+    if (ASNode == nullptr)
         throw cRuntimeError("BGP Error:  No configuration for AS ID: %d", _myAS);
 
     cXMLElementList ASConfig = ASNode->getChildren();

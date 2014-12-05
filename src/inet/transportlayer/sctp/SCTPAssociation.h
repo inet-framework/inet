@@ -414,7 +414,7 @@ class INET_API SCTPDataVariables : public cObject
 
     inline const L3Address& getInitialDestination() const
     {
-        if (initialDestination != NULL) {
+        if (initialDestination != nullptr) {
             return initialDestination->remoteAddress;
         }
         return zeroAddress;
@@ -432,7 +432,7 @@ class INET_API SCTPDataVariables : public cObject
 
     inline const L3Address& getLastDestination() const
     {
-        if (lastDestination != NULL) {
+        if (lastDestination != nullptr) {
             return lastDestination->remoteAddress;
         }
         return zeroAddress;
@@ -450,7 +450,7 @@ class INET_API SCTPDataVariables : public cObject
 
     inline const L3Address& getNextDestination() const
     {
-        if (nextDestination != NULL) {
+        if (nextDestination != nullptr) {
             return nextDestination->remoteAddress;
         }
         return zeroAddress;
@@ -529,7 +529,7 @@ class INET_API SCTPStateVariables : public cObject
 
     inline const L3Address& getPrimaryPathIndex() const
     {
-        if (primaryPath != NULL) {
+        if (primaryPath != nullptr) {
             return primaryPath->remoteAddress;
         }
         return SCTPDataVariables::zeroAddress;
@@ -989,7 +989,7 @@ class INET_API SCTPAssociation : public cObject
         if (iterator != sctpPathMap.end()) {
             return iterator->second;
         }
-        return NULL;
+        return nullptr;
     }
 
     void printSctpPathMap() const;
@@ -1140,7 +1140,7 @@ class INET_API SCTPAssociation : public cObject
     inline const L3Address& getNextAddress(const SCTPPathVariables *oldPath) const
     {
         const SCTPPathVariables *nextPath = getNextPath(oldPath);
-        if (nextPath != NULL) {
+        if (nextPath != nullptr) {
             return nextPath->remoteAddress;
         }
         return SCTPDataVariables::zeroAddress;

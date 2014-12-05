@@ -97,7 +97,7 @@ class INET_API EtherMACBase : public MACBase
         static int packetCompare(cObject *a, cObject *b);    // PAUSE frames have higher priority
 
       public:
-        InnerQueue(const char *name = NULL, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
+        InnerQueue(const char *name = nullptr, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
         void insertFrame(cObject *obj) { queue.insert(obj); }
         cObject *pop() { return queue.pop(); }
         bool empty() const { return queue.empty(); }
@@ -117,9 +117,9 @@ class INET_API EtherMACBase : public MACBase
         ~MacQueue() { delete innerQueue; };
         bool isEmpty() { return innerQueue ? innerQueue->empty() : extQueue->isEmpty(); }
         void setExternalQueue(IPassiveQueue *_extQueue)
-        { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
-        void setInternalQueue(const char *name = NULL, int limit = 0)
-        { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
+        { delete innerQueue; innerQueue = nullptr; extQueue = _extQueue; };
+        void setInternalQueue(const char *name = nullptr, int limit = 0)
+        { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = nullptr; };
     };
 
     // MAC constants for bitrates and modes

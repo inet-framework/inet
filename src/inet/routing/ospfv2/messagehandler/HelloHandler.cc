@@ -85,7 +85,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                     neighbor = intf->getNeighborByID(helloPacket->getRouterID());
                 }
 
-                if (neighbor != NULL) {
+                if (neighbor != nullptr) {
                     router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
                     IPv4Address designatedAddress = neighbor->getDesignatedRouter().ipInterfaceAddress;
@@ -197,17 +197,17 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                         Neighbor *designated = intf->getNeighborByAddress(designatedAddress);
                         Neighbor *backup = intf->getNeighborByAddress(backupAddress);
 
-                        if (designated != NULL) {
+                        if (designated != nullptr) {
                             dRouterID.routerID = designated->getNeighborID();
                             dRouterID.ipInterfaceAddress = designated->getAddress();
                             neighbor->setDesignatedRouter(dRouterID);
                         }
-                        if (backup != NULL) {
+                        if (backup != nullptr) {
                             dRouterID.routerID = backup->getNeighborID();
                             dRouterID.ipInterfaceAddress = backup->getAddress();
                             neighbor->setBackupDesignatedRouter(dRouterID);
                         }
-                        if ((designated != NULL) && (backup != NULL)) {
+                        if ((designated != nullptr) && (backup != nullptr)) {
                             neighbor->setupDesignatedRouters(true);
                         }
                     }
@@ -230,7 +230,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                     Neighbor *designated = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
                     // Get the Designated Router ID from the corresponding Neighbor Object.
-                    if (designated != NULL) {
+                    if (designated != nullptr) {
                         if (designated->getNeighborID() != dRouterID.routerID) {
                             dRouterID.routerID = designated->getNeighborID();
                         }
@@ -244,7 +244,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                     Neighbor *backup = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
                     // Get the Backup Designated Router ID from the corresponding Neighbor Object.
-                    if (backup != NULL) {
+                    if (backup != nullptr) {
                         if (backup->getNeighborID() != dRouterID.routerID) {
                             dRouterID.routerID = backup->getNeighborID();
                         }
@@ -309,7 +309,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                     if (neighborsDRStateChanged) {
                         RouterLSA *routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
 
-                        if (routerLSA != NULL) {
+                        if (routerLSA != nullptr) {
                             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
                             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                                 routerLSA->getHeader().setLsAge(MAX_AGE);

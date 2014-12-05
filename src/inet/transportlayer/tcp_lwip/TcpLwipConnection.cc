@@ -72,14 +72,14 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIn
     :
     connIdM(connIdP),
     appGateIndexM(gateIndexP),
-    pcbM(NULL),
+    pcbM(nullptr),
     sendQueueM(tcpLwipP.createSendQueue(dataTransferModeP)),
     receiveQueueM(tcpLwipP.createReceiveQueue(dataTransferModeP)),
     tcpLwipM(tcpLwipP),
     totalSentM(0),
     isListenerM(false),
     onCloseM(false),
-    statsM(NULL)
+    statsM(nullptr)
 {
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_new();       //FIXME memory leak
     ASSERT(pcbM);
@@ -105,7 +105,7 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP,
     totalSentM(0),
     isListenerM(false),
     onCloseM(false),
-    statsM(NULL)
+    statsM(nullptr)
 {
     pcbM = pcbP;
     pcbM->callback_arg = this;
@@ -120,7 +120,7 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP,
 TcpLwipConnection::~TcpLwipConnection()
 {
     if (pcbM)
-        pcbM->callback_arg = NULL;
+        pcbM->callback_arg = nullptr;
     //FIXME memory leak, who will free pcbM?
 
     delete receiveQueueM;
@@ -211,12 +211,12 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo& statusInfo)
 void TcpLwipConnection::listen(L3Address& localAddr, unsigned short localPort)
 {
     onCloseM = false;
-    tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, NULL, localPort);
+    tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, nullptr, localPort);
     // The next returns a tcp_pcb: need to do some research on how
     // it works; does it actually accept a connection as well? It
     // shouldn't, as there is a tcp_accept
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
-    pcbM = NULL;    // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
+    pcbM = nullptr;    // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_listen(pcb);
     totalSentM = 0;
 }
@@ -230,7 +230,7 @@ void TcpLwipConnection::connect(L3Address& localAddr, unsigned short localPort,
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;
     tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, &src_addr, localPort);
-    tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, NULL);
+    tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, nullptr);
     totalSentM = 0;
 }
 

@@ -72,7 +72,7 @@ class INET_API InterfaceProtocolData : public cObject
     InterfaceProtocolData() { }
 
     /**
-     * Returns the InterfaceEntry that contains this data object, or NULL
+     * Returns the InterfaceEntry that contains this data object, or nullptr
      */
     InterfaceEntry *getInterfaceEntry() const { return ownerp; }
 };
@@ -103,8 +103,8 @@ class INET_API InterfaceEntry : public cNamedObject
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
 
   protected:
-    IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or NULL
-    cModule *interfaceModule = nullptr;    ///< interface module, or NULL
+    IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
+    cModule *interfaceModule = nullptr;    ///< interface module, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
     int nwLayerGateIndex = -1;    ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
@@ -163,7 +163,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual std::string getFullPath() const;
 
     /**
-     * Returns the IInterfaceTable this interface is in, or NULL
+     * Returns the IInterfaceTable this interface is in, or nullptr
      */
     IInterfaceTable *getInterfaceTable() const { return ownerp; }
 

@@ -582,7 +582,7 @@ class INET_API Argument
      *
      * See "operator<" for definition of smaller, equal and bigger.
      */
-    int compare(const Argument& o, const DimensionSet *const dims = NULL) const;
+    int compare(const Argument& o, const DimensionSet *const dims = nullptr) const;
 
     /**
      * @brief Returns the dimensions this argument is defined over
@@ -999,7 +999,7 @@ class INET_API ConstMapping
             argument_value_cref_t lTimeScale = argument_value_t(1),
             argument_value_cref_t lLeftColScale = Argument::MappedOne,
             const std::string& sTableHead = std::string("o\\ms"),
-            const Dimension *const pOnlyDim = NULL) const
+            const Dimension *const pOnlyDim = nullptr) const
     {
         const ConstMapping& m = *this;
         DimensionSet::value_type otherDim;
@@ -1015,7 +1015,7 @@ class INET_API ConstMapping
             if (*it != Dimension::time) {
                 if (pOnlyDim && *it == *pOnlyDim) {
                     otherDim = *it;
-                    bOnlyDimFound = pOnlyDim != NULL;
+                    bOnlyDimFound = pOnlyDim != nullptr;
                 }
                 else if (!pOnlyDim) {
                     otherDim = *it;
@@ -1101,7 +1101,7 @@ class INET_API ConstMapping
         delete it;
 
         if (!bIs2Dim && !bOnlyDimFound) {
-            if (!bOnlyDimFound && pOnlyDim != NULL) {
+            if (!bOnlyDimFound && pOnlyDim != nullptr) {
                 out << "map contains no " << pOnlyDim->getName() << " dimension!" << endl;
                 return out;
             }

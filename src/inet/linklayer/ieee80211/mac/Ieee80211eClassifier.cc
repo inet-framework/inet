@@ -55,7 +55,7 @@ int Ieee80211eClassifier::getNumQueues()
 int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 {
     ASSERT(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame));
-    cPacket *ipData = NULL;    // must be initialized in case neither IPv4 nor IPv6 is present
+    cPacket *ipData = nullptr;    // must be initialized in case neither IPv4 nor IPv6 is present
 
     // if this is a management type, use a pre-configured default class
     if (dynamic_cast<Ieee80211ManagementFrame *>(frame))

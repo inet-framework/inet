@@ -113,7 +113,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         cMessage *prunePendingTimer;
 
         DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
-            : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL) {}
+            : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(nullptr) {}
         virtual ~DownstreamInterface();
 
         int getInterfaceId() const { return ie->getInterfaceId(); }
@@ -174,7 +174,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         cMessage *registerStopTimer;
 
         // interface specific state
-        UpstreamInterface *upstreamInterface;    // may be NULL at RP and at DR
+        UpstreamInterface *upstreamInterface;    // may be nullptr at RP and at DR
         DownstreamInterfaceVector downstreamInterfaces;    ///< Out interfaces (downstream)
 
       public:

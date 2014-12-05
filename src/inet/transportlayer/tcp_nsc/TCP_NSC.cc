@@ -142,17 +142,17 @@ static std::ostream& operator<<(std::ostream& osP, const TCP_NSC_Connection::Soc
 }
 
 TCP_NSC::TCP_NSC()
-    : pStackM(NULL),
-    pNsiTimerM(NULL),
+    : pStackM(nullptr),
+    pNsiTimerM(nullptr),
     isAliveM(false),
     curAddrCounterM(0),
-    curConnM(NULL),
+    curConnM(nullptr),
 
     // statistics:
-    sndNxtVector(NULL),
-    sndAckVector(NULL),
-    rcvSeqVector(NULL),
-    rcvAckVector(NULL)
+    sndNxtVector(nullptr),
+    sndAckVector(nullptr),
+    rcvSeqVector(nullptr),
+    rcvAckVector(nullptr)
 {
     // statistics:
     if (true) {    // (getTcpMain()->recordStatistics)
@@ -311,7 +311,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     inetSockPair.localM.ipAddrM = controlInfo->getDestinationAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL) {
+    if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
         {
             // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
             //       with IP header size difference
@@ -411,7 +411,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
             // accepting socket
             EV_DETAIL << this << ": NSC: attempting to accept:\n";
 
-            INetStreamSocket *sock = NULL;
+            INetStreamSocket *sock = nullptr;
             int err;
 
             err = c.pNscSocketM->accept(&sock);
@@ -492,7 +492,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
             if (hasData) {
                 cPacket *dataMsg;
 
-                while (NULL != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
+                while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
                     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
                     tcpConnectInfo->setConnId(c.connIdM);
                     tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
@@ -611,7 +611,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->tcpNscM = this;
         conn->connIdM = connId;
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
-        conn->pNscSocketM = NULL;    // will be filled in within processAppCommand()
+        conn->pNscSocketM = nullptr;    // will be filled in within processAppCommand()
 
         TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
@@ -688,19 +688,19 @@ void TCP_NSC::updateDisplayString()
 TCP_NSC_Connection *TCP_NSC::findAppConn(int connIdP)
 {
     TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
-    return i == tcpAppConnMapM.end() ? NULL : &(i->second);
+    return i == tcpAppConnMapM.end() ? nullptr : &(i->second);
 }
 
 TCP_NSC_Connection *TCP_NSC::findConnByInetSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
     SockPair2ConnIdMap::iterator i = inetSockPair2ConnIdMapM.find(sockPairP);
-    return i == inetSockPair2ConnIdMapM.end() ? NULL : findAppConn(i->second);
+    return i == inetSockPair2ConnIdMapM.end() ? nullptr : findAppConn(i->second);
 }
 
 TCP_NSC_Connection *TCP_NSC::findConnByNscSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
     SockPair2ConnIdMap::iterator i = nscSockPair2ConnIdMapM.find(sockPairP);
-    return i == nscSockPair2ConnIdMapM.end() ? NULL : findAppConn(i->second);
+    return i == nscSockPair2ConnIdMapM.end() ? nullptr : findAppConn(i->second);
 }
 
 void TCP_NSC::finish()
@@ -723,8 +723,8 @@ void TCP_NSC::printConnBrief(TCP_NSC_Connection& connP)
 
 void TCP_NSC::loadStack(const char *stacknameP, int bufferSizeP)
 {
-    void *handle = NULL;
-    FCreateStack create = NULL;
+    void *handle = nullptr;
+    FCreateStack create = nullptr;
 
     EV_DETAIL << this << ": Loading stack " << stacknameP << "\n";
 
@@ -740,7 +740,7 @@ void TCP_NSC::loadStack(const char *stacknameP, int bufferSizeP)
         throw cRuntimeError("The '%s' NSC stack creation unsuccessful: %s", stacknameP, dlerror());
     }
 
-    pStackM = create(this, this, NULL);
+    pStackM = create(this, this, nullptr);
 
     EV_DETAIL << "TCP_NSC " << this << " has stack " << pStackM << "\n";
 
@@ -989,7 +989,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     ASSERT(!curConnM);
     curConnM = &connP;
     connP.connect(*pStackM, inetSockPair, nscSockPair);
-    curConnM = NULL;
+    curConnM = nullptr;
 
     // and add to map:
     // TODO sendToIp already set the addresses.
@@ -1037,7 +1037,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     ASSERT(!curConnM);
     curConnM = &connP;
     connP.listen(*pStackM, inetSockPair, nscSockPair);
-    curConnM = NULL;
+    curConnM = nullptr;
 
     changeAddresses(connP, inetSockPair, nscSockPair);
 

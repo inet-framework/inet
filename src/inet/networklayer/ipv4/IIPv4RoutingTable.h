@@ -61,7 +61,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     virtual void configureInterfaceForIPv4(InterfaceEntry *ie) = 0;
 
     /**
-     * Returns an interface given by its address. Returns NULL if not found.
+     * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const IPv4Address& address) const = 0;
     //@}
@@ -109,7 +109,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
 
     /**
      * The routing function. Performs longest prefix match for the given
-     * destination address, and returns the resulting route. Returns NULL
+     * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
     virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const = 0;
@@ -118,7 +118,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * Convenience function based on findBestMatchingRoute().
      *
      * Returns the output interface for the packets with dest as destination
-     * address, or NULL if the destination is not in routing table.
+     * address, or nullptr if the destination is not in routing table.
      */
     virtual InterfaceEntry *getInterfaceForDestAddr(const IPv4Address& dest) const = 0;
 
@@ -161,7 +161,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     virtual IPv4Route *getRoute(int k) const = 0;
 
     /**
-     * Finds and returns the default route, or NULL if it doesn't exist
+     * Finds and returns the default route, or nullptr if it doesn't exist
      */
     virtual IPv4Route *getDefaultRoute() const = 0;
 
@@ -174,7 +174,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4Route *removeRoute(IPv4Route *entry) = 0;
 
@@ -204,7 +204,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4MulticastRoute *removeMulticastRoute(IPv4MulticastRoute *entry) = 0;
 

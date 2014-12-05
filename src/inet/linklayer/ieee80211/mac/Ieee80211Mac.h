@@ -361,7 +361,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     IPassiveQueue *queueModule;
 
     /**
-     * The last change channel message received and not yet sent to the physical layer, or NULL.
+     * The last change channel message received and not yet sent to the physical layer, or nullptr.
      * The message will be sent down when the state goes to IDLE or DEFER next time.
      */
     cMessage *pendingRadioConfigMsg;

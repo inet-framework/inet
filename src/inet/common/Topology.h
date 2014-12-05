@@ -52,7 +52,7 @@ namespace inet {
  */
 
 //TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
-//TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be NULL)
+//TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be nullptr)
 //TODO make more methods virtual
 //TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
 //TODO weight: how to compute automatically from link datarate?
@@ -86,7 +86,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Constructor
          */
-        Node(int moduleId = -1) { this->moduleId = moduleId; weight = 0; enabled = true; dist = INFINITY; outPath = NULL; }
+        Node(int moduleId = -1) { this->moduleId = moduleId; weight = 0; enabled = true; dist = INFINITY; outPath = nullptr; }
         virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
@@ -199,7 +199,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Constructor.
          */
-        Link(double weight = 1) { srcNode = destNode = NULL; srcGateId = destGateId = -1; this->weight = weight; enabled = true; }
+        Link(double weight = 1) { srcNode = destNode = nullptr; srcGateId = destGateId = -1; this->weight = weight; enabled = true; }
         virtual ~Link() {}
 
         /**
@@ -347,7 +347,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Constructor.
      */
-    explicit Topology(const char *name = NULL);
+    explicit Topology(const char *name = nullptr);
 
     /**
      * Copy constructor.
@@ -410,7 +410,7 @@ class INET_API Topology : public cOwnedObject
      * parameter may take any value you like, and it is passed back to selfunc()
      * in its second argument.
      */
-    void extractFromNetwork(bool (*selfunc)(cModule *, void *), void *userdata = NULL);
+    void extractFromNetwork(bool (*selfunc)(cModule *, void *), void *userdata = nullptr);
 
     /**
      * The type safe, object-oriented equivalent of extractFromNetwork(selfunc, userdata).
@@ -444,7 +444,7 @@ class INET_API Topology : public cOwnedObject
      * Extracts model topology by a module property. All modules get included
      * that have a property with the given name and the given value
      * (more precisely, the first value of its default key being the specified
-     * value). If value is NULL, the property's value may be anything except
+     * value). If value is nullptr, the property's value may be anything except
      * "false" (i.e. the first value of the default key may not be "false").
      *
      * For example, <tt>topo.extractByProperty("node");</tt> would extract
@@ -458,15 +458,15 @@ class INET_API Topology : public cOwnedObject
      * </pre>
      *
      */
-    void extractByProperty(const char *propertyName, const char *value = NULL);
+    void extractByProperty(const char *propertyName, const char *value = nullptr);
 
     /**
      * Extracts model topology by a module parameter. All modules get included
      * that have a parameter with the given name, and the parameter's str()
-     * method returns the paramValue string. If paramValue is NULL, only the
+     * method returns the paramValue string. If paramValue is nullptr, only the
      * parameter's existence is checked but not its value.
      */
-    void extractByParameter(const char *paramName, const char *paramValue = NULL);
+    void extractByParameter(const char *paramName, const char *paramValue = nullptr);
 
     /**
      * Deletes the topology stored in the object.
@@ -530,7 +530,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Returns the graph node which corresponds to the given module in the
      * network. If no graph node corresponds to the module, the method returns
-     * NULL. This method assumes that the topology corresponds to the
+     * nullptr. This method assumes that the topology corresponds to the
      * network, that is, it was probably created with one of the
      * extract...() functions.
      */

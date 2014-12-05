@@ -122,7 +122,7 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
         if (!done) {
             callback->init(this, operation, submodule);
             operation->pendingList.push_back(callback);
-            spareCallback = NULL;
+            spareCallback = nullptr;
         }
         else
             spareCallback = callback;

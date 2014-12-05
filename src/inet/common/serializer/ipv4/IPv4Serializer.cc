@@ -164,7 +164,7 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
 
     dest->setByteLength(IP_HEADER_BYTES);
 
-    cPacket *encapPacket = NULL;
+    cPacket *encapPacket = nullptr;
     unsigned int encapLength = std::min(totalLength, bufsize) - headerLength;
 
     switch (dest->getTransportProtocol()) {

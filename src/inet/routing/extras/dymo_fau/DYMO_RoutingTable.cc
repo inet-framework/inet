@@ -107,7 +107,7 @@ DYMO_RoutingEntry* DYMO_RoutingTable::getRoute(int k)
     if (k < (int)routeVector.size())
         return routeVector[k];
     else
-        return NULL;
+        return nullptr;
 }
 
 //=================================================================================================

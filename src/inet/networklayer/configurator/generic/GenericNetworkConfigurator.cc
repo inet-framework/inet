@@ -101,7 +101,7 @@ Topology::LinkOut *GenericNetworkConfigurator::findLinkOut(Node *node, int gateI
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
 
-    return NULL;
+    return nullptr;
 }
 
 GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::findInterfaceInfo(Node *node, InterfaceEntry *ie)
@@ -110,7 +110,7 @@ GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::findInter
         if (node->interfaceInfos.at(i)->interfaceEntry == ie)
             return node->interfaceInfos.at(i);
 
-    return NULL;
+    return nullptr;
 }
 
 void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
@@ -321,11 +321,11 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
 
 /**
  * If this link has exactly one node that connects to other links as well, we can assume
- * it is a "gateway" and return that (we'll use it in routing); otherwise return NULL.
+ * it is a "gateway" and return that (we'll use it in routing); otherwise return nullptr.
  */
 GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::determineGatewayForLink(LinkInfo *linkInfo)
 {
-    InterfaceInfo *gatewayInterfaceInfo = NULL;
+    InterfaceInfo *gatewayInterfaceInfo = nullptr;
     for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
@@ -341,7 +341,7 @@ GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::determine
         if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
-                return NULL; // we already found one gateway, this makes it ambiguous! report "no gateway"
+                return nullptr; // we already found one gateway, this makes it ambiguous! report "no gateway"
             else
                 gatewayInterfaceInfo = interfaceInfo; // remember gateway
         }
@@ -458,8 +458,8 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
             // determine next hop interface
             // find next hop interface (the last IP interface on the path that is not in the source node)
             Node *node = destinationNode;
-            Link *link = NULL;
-            InterfaceEntry *nextHopInterfaceEntry = NULL;
+            Link *link = nullptr;
+            InterfaceEntry *nextHopInterfaceEntry = nullptr;
             while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
                 if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getGenericNetworkProtocolData())

@@ -40,19 +40,19 @@ class INET_API IAnalogModel : public IPrintableObject
     /**
      * Returns the reception for the provided transmission at the receiver.
      * The result incorporates all modeled attenuation. This function never
-     * returns NULL.
+     * returns nullptr.
      */
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the total noise summing up all the interfering receptions and
-     * noises. This function never returns NULL.
+     * noises. This function never returns nullptr.
      */
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
 
     /**
      * Returns the signal to noise and interference ratio. This function never
-     * returns NULL.
+     * returns nullptr.
      */
     virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 };

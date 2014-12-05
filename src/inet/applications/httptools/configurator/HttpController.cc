@@ -25,7 +25,7 @@ Define_Module(HttpController);
 
 
 HttpController::HttpController() :
-    rdServerSelection(NULL)
+    rdServerSelection(nullptr)
 {
 }
 
@@ -48,7 +48,7 @@ void HttpController::initialize(int stage)
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if (rootelement == NULL)
+        if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
@@ -56,11 +56,11 @@ void HttpController::initialize(int stage)
         // Initialize the random object for random site selection
         rdObjectFactory rdFactory;
         element = rootelement->getFirstChildWithTag("serverPopularityDistribution");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Server popularity distribution parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdServerSelection = rdFactory.create(attributes);
-        if (rdServerSelection == NULL)
+        if (rdServerSelection == nullptr)
             throw cRuntimeError("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
@@ -143,7 +143,7 @@ void HttpController::registerServer(const char *objectName, const char *wwwName,
     en->pamortize = 0.0;
     en->accessCount = 0;
 
-    if (en->module == NULL)
+    if (en->module == nullptr)
         throw cRuntimeError("Server %s does not have a WWW module", wwwName);
 
     webSiteList[en->name] = en;
@@ -179,7 +179,7 @@ cModule *HttpController::getServerModule(const char *wwwName)
 
     if (webSiteList.find(serverUrl) == webSiteList.end()) {    // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
-        return NULL;
+        return nullptr;
     }
 
     WebServerEntry *en = webSiteList[serverUrl];
@@ -188,7 +188,7 @@ cModule *HttpController::getServerModule(const char *wwwName)
     totalLookups++;
     en->accessCount++;
 
-    if (en->module == NULL)
+    if (en->module == nullptr)
         EV_ERROR << "Undefined module for " << wwwName << endl;
     return en->module;
 }
@@ -199,12 +199,12 @@ cModule *HttpController::getAnyServerModule()
 
     if (webSiteList.size() == 0) {
         EV_WARN << "No modules registered. Cannot select a random module" << endl;
-        return NULL;
+        return nullptr;
     }
 
     if (pickList.size() == 0) {
         EV_ERROR << "No modules currently in the picklist. Cannot select a random module" << endl;
-        return NULL;
+        return nullptr;
     }
 
     EV_DEBUG << "Getting a random server module with pspecial=" << pspecial << endl;
@@ -274,7 +274,7 @@ cModule *HttpController::getTcpApp(std::string node)
 {
     int pos = node.find("[");
     int rpos = node.rfind("]");
-    cModule *receiverModule = NULL;
+    cModule *receiverModule = nullptr;
     if (pos > -1 && rpos > -1) {
         std::string id = node.substr(pos + 1, pos - rpos - 1);
         std::string name = node.substr(0, pos);
@@ -340,7 +340,7 @@ HttpController::WebServerEntry *HttpController::selectFromSpecialList()
 
     if (specialList.empty()) {
         EV_ERROR << "No entries in special list. Cannot select server with special probability" << endl;
-        return NULL;
+        return nullptr;
     }
 
     WebServerEntry *en = specialList.front();
@@ -485,7 +485,7 @@ HttpController::WebServerEntry *HttpController::__getRandomServerInfo()
             // Pick from the probability distribution which applies to the general population.
             selected = (int)rdServerSelection->draw();
             en = pickList[selected];
-            if (en == NULL)
+            if (en == nullptr)
                 throw cRuntimeError("Invalid node selected at index %d", selected);
             EV_DEBUG << "Selecting from normal list. Got node " << en->name << endl;
         }

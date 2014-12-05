@@ -59,24 +59,24 @@ Define_Module(TCP_lwIP);
 
 TCP_lwIP::TCP_lwIP()
     :
-    pLwipFastTimerM(NULL),
-    pLwipTcpLayerM(NULL),
+    pLwipFastTimerM(nullptr),
+    pLwipTcpLayerM(nullptr),
     isAliveM(false),
-    pCurTcpSegM(NULL)
+    pCurTcpSegM(nullptr)
 {
     netIf.gw.addr = L3Address();
     netIf.flags = 0;
-    netIf.input = NULL;
+    netIf.input = nullptr;
     netIf.ip_addr.addr = L3Address();
-    netIf.linkoutput = NULL;
+    netIf.linkoutput = nullptr;
     netIf.mtu = 1500;
     netIf.name[0] = 'T';
     netIf.name[1] = 'C';
     netIf.netmask.addr = L3Address();
     netIf.next = 0;
     netIf.num = 0;
-    netIf.output = NULL;
-    netIf.state = NULL;
+    netIf.output = nullptr;
+    netIf.state = nullptr;
 }
 
 void TCP_lwIP::initialize(int stage)
@@ -207,12 +207,12 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
         }
     }
 
-    ASSERT(pCurTcpSegM == NULL);
+    ASSERT(pCurTcpSegM == nullptr);
     pCurTcpSegM = tcpsegP;
     // receive msg from network
     pLwipTcpLayerM->if_receive_packet(interfaceId, data, totalIpLen);
     // lwip call back the notifyAboutIncomingSegmentProcessing() for store incoming messages
-    pCurTcpSegM = NULL;
+    pCurTcpSegM = nullptr;
 
     // LwipTcpLayer will call the tcp_event_recv() / tcp_event_err() and/or send a packet to sender
 
@@ -223,7 +223,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
 void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
         const void *dataptr, int len)
 {
-    TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
+    TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
     if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
@@ -238,7 +238,7 @@ void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
 void TCP_lwIP::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)(pcb->callback_arg);
-    if (conn != NULL) {
+    if (conn != nullptr) {
         if (conn->pcbM == pcb) {
             // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
             removeConnection(*conn);
@@ -250,7 +250,7 @@ err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)arg;
-    ASSERT(conn != NULL);
+    ASSERT(conn != nullptr);
 
     switch (event) {
         case LwipTcpLayer::LWIP_EVENT_ACCEPT:
@@ -312,10 +312,10 @@ err_t TCP_lwIP::tcp_event_sent(TcpLwipConnection& conn, u16_t size)
 
 err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err)
 {
-    if (p == NULL) {
+    if (p == nullptr) {
         // Received FIN:
         EV_DETAIL << this << ": tcp_event_recv(" << conn.connIdM
-                  << ", pbuf[NULL], " << (int)err << "):FIN\n";
+                  << ", pbuf[nullptr], " << (int)err << "):FIN\n";
         TcpStatusInd ind = (conn.pcbM->state == LwipTcpLayer::TIME_WAIT) ? TCP_I_CLOSED : TCP_I_PEER_CLOSED;
         EV_INFO << "Connection " << conn.connIdM << ((ind == TCP_I_CLOSED) ? " closed" : "closed by peer") << endl;
         conn.sendIndicationToApp(ind);
@@ -355,8 +355,8 @@ err_t TCP_lwIP::tcp_event_conn(TcpLwipConnection& conn, err_t err)
 
 void TCP_lwIP::removeConnection(TcpLwipConnection& conn)
 {
-    conn.pcbM->callback_arg = NULL;
-    conn.pcbM = NULL;
+    conn.pcbM->callback_arg = nullptr;
+    conn.pcbM = nullptr;
     tcpAppConnMapM.erase(conn.connIdM);
     delete &conn;
 }
@@ -467,7 +467,7 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
     }
 
     if (!pLwipFastTimerM->isScheduled()) {    // lwip fast timer
-        if (NULL != pLwipTcpLayerM->tcp_active_pcbs || NULL != pLwipTcpLayerM->tcp_tw_pcbs)
+        if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
             scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
 
@@ -491,7 +491,7 @@ void TCP_lwIP::updateDisplayString()
     for (TcpAppConnMap::iterator i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); ++i) {
         LwipTcpLayer::tcp_pcb *pcb = (*i).second->pcbM;
 
-        if (NULL == pcb) {
+        if (nullptr == pcb) {
             numINIT++;
         }
         else {
@@ -578,7 +578,7 @@ void TCP_lwIP::updateDisplayString()
 TcpLwipConnection *TCP_lwIP::findAppConn(int connIdP)
 {
     TcpAppConnMap::iterator i = tcpAppConnMapM.find(connIdP);
-    return i == tcpAppConnMapM.end() ? NULL : (i->second);
+    return i == tcpAppConnMapM.end() ? nullptr : (i->second);
 }
 
 void TCP_lwIP::finish()
@@ -594,7 +594,7 @@ void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
 void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         L3Address const& destP, void *dataP, int lenP)
 {
-    TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
+    TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
 
     TCPSegment *tcpseg;
 

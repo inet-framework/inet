@@ -35,7 +35,7 @@ class WRRScheduler : public SchedulerBase
     int *buckets;    // array of tokens in buckets (has numInputs elements)
 
   public:
-    WRRScheduler() : numInputs(0), weights(NULL), buckets(NULL) {}
+    WRRScheduler() : numInputs(0), weights(nullptr), buckets(nullptr) {}
 
   protected:
     virtual ~WRRScheduler();

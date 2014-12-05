@@ -55,7 +55,7 @@ INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
  * Find the node containing the given module.
- * Returns NULL, if no containing node.
+ * Returns nullptr, if no containing node.
  */
 INET_API cModule *findContainingNode(cModule *from);
 
@@ -67,14 +67,14 @@ INET_API cModule *getContainingNode(cModule *from);
 
 /**
  * Find the ancestor module under the node containing the given module.
- * Returns NULL, if no such node found.
+ * Returns nullptr, if no such node found.
  */
 INET_API cModule *findModuleUnderContainingNode(cModule *from);
 
 /**
  * Finds a module in the module tree, given by its absolute or relative path
  * defined by 'par' parameter.
- * Returns NULL if the 'par' parameter is empty.
+ * Returns nullptr if the 'par' parameter is empty.
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
@@ -91,7 +91,7 @@ INET_API T *findModuleFromPar(cPar& par, cModule *from)
             throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
         return m;
     }
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -128,7 +128,7 @@ class INET_API ModuleAccess
     T *p;
 
   public:
-    ModuleAccess(const char *n) { name = n; p = NULL; }
+    ModuleAccess(const char *n) { name = n; p = nullptr; }
     virtual ~ModuleAccess() {}
 
     virtual T *get()
@@ -154,7 +154,7 @@ class INET_API ModuleAccess
 
     virtual T *getIfExists(cModule *from)
     {
-        if (!from) throw cRuntimeError("Invalid argument: module must not be NULL");
+        if (!from) throw cRuntimeError("Invalid argument: module must not be nullptr");
         cModule *m = findModuleWhereverInNode(name, from);
         return dynamic_cast<T *>(m);
     }

@@ -45,9 +45,9 @@ simsignal_t SCTPPeer::rcvdPkSignal = registerSignal("rcvdPk");
 
 SCTPPeer::SCTPPeer()
 {
-    timeoutMsg = NULL;
-    timeMsg = NULL;
-    connectTimer = NULL;
+    timeoutMsg = nullptr;
+    timeMsg = nullptr;
+    connectTimer = nullptr;
 }
 
 SCTPPeer::~SCTPPeer()

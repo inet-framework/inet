@@ -59,7 +59,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     static simsignal_t dropConfirmSignal;
 
   public:
-    Ieee80211AgentSTA() : myIface(NULL) {}
+    Ieee80211AgentSTA() : myIface(nullptr) {}
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

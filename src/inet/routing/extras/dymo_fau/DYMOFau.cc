@@ -49,13 +49,13 @@ const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are dela
 
 DYMOFau::DYMOFau()
 {
-    dymo_routingTable = NULL;
-    timerMsg = NULL;
-    ownSeqNumLossTimeout = NULL;
-    ownSeqNumLossTimeoutMax = NULL;
-    queuedDataPackets = NULL;
-    rateLimiterRREQ = NULL;
-    DYMO_INTERFACES = NULL;
+    dymo_routingTable = nullptr;
+    timerMsg = nullptr;
+    ownSeqNumLossTimeout = nullptr;
+    ownSeqNumLossTimeoutMax = nullptr;
+    queuedDataPackets = nullptr;
+    rateLimiterRREQ = nullptr;
+    DYMO_INTERFACES = nullptr;
 }
 
 void DYMOFau::initialize(int stage)
@@ -171,20 +171,20 @@ void DYMOFau::finish()
     outstandingRREQList.delAll();
 
     delete ownSeqNumLossTimeout;
-    ownSeqNumLossTimeout = NULL;
+    ownSeqNumLossTimeout = nullptr;
     delete ownSeqNumLossTimeoutMax;
-    ownSeqNumLossTimeoutMax = NULL;
+    ownSeqNumLossTimeoutMax = nullptr;
 
     delete rateLimiterRREQ;
-    rateLimiterRREQ = NULL;
+    rateLimiterRREQ = nullptr;
 
     // IPv4* ipLayer = queuedDataPackets->getIpLayer();
     delete queuedDataPackets;
-    queuedDataPackets = NULL;
+    queuedDataPackets = nullptr;
     // ipLayer->unregisterHook(0, this);
 
     cancelAndDelete(timerMsg);
-    timerMsg = NULL;
+    timerMsg = nullptr;
 }
 
 DYMOFau::~DYMOFau()
@@ -213,8 +213,8 @@ void DYMOFau::rescheduleTimer()
 void DYMOFau::handleMessage(cMessage* apMsg)
 {
 
-    cMessage * msg_aux = NULL;
-    UDPPacket* udpPacket = NULL;
+    cMessage * msg_aux = nullptr;
+    UDPPacket* udpPacket = nullptr;
 
     if (apMsg->isSelfMessage())
     {
@@ -274,7 +274,7 @@ void DYMOFau::handleMessage(cMessage* apMsg)
         if (udpPacket)
         {
             delete udpPacket;
-            udpPacket = NULL;
+            udpPacket = nullptr;
         }
 
         if (!dynamic_cast<DYMO_PacketBBMessage  *>(msg_aux))
@@ -362,7 +362,7 @@ void DYMOFau::handleLowerRM(DYMO_RM *routingMsg)
     statsDYMORcvd++;
 
     /** routing message  preprocessing and updating routes from routing blocks **/
-    if (updateRoutes(routingMsg) == NULL)
+    if (updateRoutes(routingMsg) == nullptr)
     {
         EV_INFO << "dropping received message" << endl;
         delete routingMsg;
@@ -402,7 +402,7 @@ uint32_t DYMOFau::getNextHopAddress(DYMO_RM *routingMsg)
 InterfaceEntry* DYMOFau::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 {
 
-    if (!pkt) throw cRuntimeError("getNextHopInterface called with NULL packet");
+    if (!pkt) throw cRuntimeError("getNextHopInterface called with nullptr packet");
 
     INetworkProtocolControlInfo* controlInfo = check_and_cast_nullable<INetworkProtocolControlInfo *>(pkt->removeControlInfo());
     if (!controlInfo) throw cRuntimeError("received packet did not have INetworkProtocolControlInfo attached");
@@ -410,7 +410,7 @@ InterfaceEntry* DYMOFau::getNextHopInterface(DYMO_PacketBBMessage* pkt)
     int interfaceId = controlInfo->getInterfaceId();
     if (interfaceId == -1) throw cRuntimeError("received packet's UDPControlInfo did not have information on interfaceId");
 
-    InterfaceEntry* srcIf = NULL;
+    InterfaceEntry* srcIf = nullptr;
 
     for (int i = 0; i < getNumWlanInterfaces(); i++)
     {
@@ -697,7 +697,7 @@ void DYMOFau::handleSelfMsg(cMessage* apMsg)
 
         // Maybe it's a outstanding RREQ
         DYMO_OutstandingRREQ* outstandingRREQ;
-        while ((outstandingRREQ = outstandingRREQList.getExpired()) != NULL )
+        while ((outstandingRREQ = outstandingRREQList.getExpired()) != nullptr )
             handleRREQTimeout(*outstandingRREQ);
 
         if (!hasActive)
@@ -1136,13 +1136,13 @@ DYMO_RM* DYMOFau::updateRoutes(DYMO_RM * pkt)
     uint32_t nextHopAddress = getNextHopAddress(pkt);
     InterfaceEntry* nextHopInterface = getNextHopInterface(pkt);
 
-    if (pkt->getOrigNode().getAddress()==myAddr) return NULL;
+    if (pkt->getOrigNode().getAddress()==myAddr) return nullptr;
     bool origNodeEntryWasSuperior = updateRoutesFromAddressBlock(pkt->getOrigNode(), isRREQ, nextHopAddress, nextHopInterface);
 
     for (unsigned int i = 0; i < additional_nodes.size(); i++)
     {
         // TODO: not specified in draft, but seems to make sense
-        if (additional_nodes[i].getAddress()==myAddr) return NULL;
+        if (additional_nodes[i].getAddress()==myAddr) return nullptr;
 
         if (updateRoutesFromAddressBlock(additional_nodes[i], isRREQ, nextHopAddress, nextHopInterface))
         {
@@ -1158,7 +1158,7 @@ DYMO_RM* DYMOFau::updateRoutes(DYMO_RM * pkt)
     if (!origNodeEntryWasSuperior)
     {
         EV_INFO << "OrigNode AddressBlock had no valid information -> deleting received routing message" << endl;
-        return NULL;
+        return nullptr;
     }
 
     pkt->setAdditionalNodes(new_additional_nodes);

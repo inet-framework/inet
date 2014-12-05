@@ -80,8 +80,8 @@ std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
 
 IPv6InterfaceData::IPv6InterfaceData()
 {
-    hostMcastData = NULL;
-    routerMcastData = NULL;
+    hostMcastData = nullptr;
+    routerMcastData = nullptr;
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();
 #endif /* WITH_xMIPv6 */
@@ -478,7 +478,7 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
 
     changed1(F_MULTICAST_ADDRESSES);
 
-    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
     if (m) {
         IPv6MulticastGroupInfo info(ownerp, multicastAddress);
         m->emit(NF_IPv6_MCAST_JOIN, &info);
@@ -500,7 +500,7 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
 
                 changed1(F_MULTICAST_ADDRESSES);
 
-                cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+                cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
                 if (m) {
                     IPv6MulticastGroupInfo info(ownerp, multicastAddress);
                     m->emit(NF_IPv6_MCAST_LEAVE, &info);

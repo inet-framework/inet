@@ -481,8 +481,8 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "Received " << mac << " is not for us, dropping frame." << endl;
                     delete msg;
-                    msg = NULL;
-                    mac = NULL;
+                    msg = nullptr;
+                    mac = nullptr;
                 }
 
                 cancelEvent(data_timeout);

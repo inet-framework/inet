@@ -71,7 +71,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
 
         // Locate the socket for the incoming message. One should definitely exist.
         TCPSocket *socket = sockCollection.findSocketFor(msg);
-        if (socket == NULL) {
+        if (socket == nullptr) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
             delete msg;
@@ -153,7 +153,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 
     socketsOpened++;
 
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         EV_ERROR << "SocketEstablished failure. Null pointer" << endl;
         return;
     }
@@ -182,7 +182,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << connId << ": " << msg->getName() << endl;
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
         return;
     }
@@ -207,7 +207,7 @@ void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *
 void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
 {
     EV_DEBUG << "Socket " << connId << " closed by peer" << endl;
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         EV_ERROR << "socketPeerClosed failure. Null pointer" << endl;
         return;
     }
@@ -226,7 +226,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "Socket " << connId << " closed" << endl;
 
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         EV_ERROR << "socketClosed failure. Null pointer" << endl;
         return;
     }
@@ -242,7 +242,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         EV_ERROR << "socketFailure failure. Null pointer" << endl;
         return;
     }
@@ -260,7 +260,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
 
 void HttpBrowser::socketDeleted(int connId, void *yourPtr)
 {
-    if (yourPtr == NULL) {
+    if (yourPtr == nullptr) {
         throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
     }
 

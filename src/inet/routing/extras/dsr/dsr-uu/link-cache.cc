@@ -195,7 +195,7 @@ static inline int do_init(void *pos, void *addr)
     {
         n->cost = LC_COST_INF;
         n->hops = LC_HOPS_INF;
-        n->pred = NULL;
+        n->pred = nullptr;
     }
     return 0;
 }
@@ -248,13 +248,13 @@ static inline struct lc_node *lc_node_create(struct in_addr addr)
     n = (struct lc_node *)MALLOC(sizeof(struct lc_node), GFP_ATOMIC);
 
     if (!n)
-        return NULL;
+        return nullptr;
 
     memset(n, 0, sizeof(struct lc_node));
     n->addr = addr;
     n->links = 0;
     n->cost = LC_COST_INF;
-    n->pred = NULL;
+    n->pred = nullptr;
 
     return n;
 };
@@ -396,7 +396,7 @@ int NSCLASS lc_link_del(struct in_addr src, struct in_addr dst)
 
     __lc_link_del(&LC, link);
 out:
-    LC.src = NULL;
+    LC.src = nullptr;
     DSR_WRITE_UNLOCK(&LC.lock);
 
     return res;
@@ -410,7 +410,7 @@ __dijkstra_init_single_source(struct tbl *t, struct in_addr src)
 
 static inline struct lc_node *__dijkstra_find_lowest_cost_node(struct tbl *t)
 {
-    struct cheapest_node cn = { NULL };
+    struct cheapest_node cn = { nullptr };
 
     __tbl_do_for_each(t, &cn, do_lowest_cost);
 
@@ -478,11 +478,11 @@ void NSCLASS __dijkstra(struct in_addr src)
 
 struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
 {
-    struct dsr_srt *srt = NULL;
+    struct dsr_srt *srt = nullptr;
     struct lc_node *dst_node;
 
     if (src.s_addr == dst.s_addr)
-        return NULL;
+        return nullptr;
 
     DSR_WRITE_LOCK(&LC.lock);
 
@@ -523,9 +523,9 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
         srt->cost=(unsigned int*)aux;
         aux +=size_cost;
         srt->addrs=(struct in_addr*)(aux);
-        if (srt->cost==NULL)
+        if (srt->cost==nullptr)
         {
-            srt->cost=NULL;
+            srt->cost=nullptr;
             srt->cost_size=0;
         }
         else
@@ -591,7 +591,7 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
             DEBUG("hop count ERROR i+1=%d hops=%d!!!\n", i + 1,
                   dst_node->hops);
             FREE(srt);
-            srt = NULL;
+            srt = nullptr;
         }
     }
 out:
@@ -714,10 +714,10 @@ void NSCLASS lc_flush(void)
         del_timer(&LC.timer);
 #endif
 #endif
-    tbl_flush(&LC.links, NULL);
-    tbl_flush(&LC.nodes, NULL);
+    tbl_flush(&LC.links, nullptr);
+    tbl_flush(&LC.nodes, nullptr);
 
-    LC.src = NULL;
+    LC.src = nullptr;
 
     DSR_WRITE_UNLOCK(&LC.lock);
 }
@@ -825,7 +825,7 @@ int __init NSCLASS lc_init(void)
     INIT_TBL(&LC.links, LC_LINKS_MAX);
     INIT_TBL(&LC.nodes, LC_NODES_MAX);
 
-    LC.src = NULL;
+    LC.src = nullptr;
 
 #ifdef __KERNEL__
     LC.lock = RW_LOCK_UNLOCKED;

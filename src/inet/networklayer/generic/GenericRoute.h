@@ -48,8 +48,8 @@ class INET_API GenericRoute : public cObject, public IRoute
     void changed(int fieldCode);
 
   public:
-    GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), sourceType(IRoute::MANUAL),
-        source(NULL), protocolData(NULL), metric(0) {}
+    GenericRoute() : owner(nullptr), prefixLength(0), interface(nullptr), sourceType(IRoute::MANUAL),
+        source(nullptr), protocolData(nullptr), metric(0) {}
     virtual ~GenericRoute() { delete protocolData; }
 
     virtual std::string info() const;
@@ -67,7 +67,7 @@ class INET_API GenericRoute : public cObject, public IRoute
     virtual void setMetric(int metric) { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
     virtual void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
 
-    /** The routing table in which this route is inserted, or NULL. */
+    /** The routing table in which this route is inserted, or nullptr. */
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
 
     /** Destination address prefix to match */
@@ -136,7 +136,7 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     virtual void setSource(cObject *source) { this->source = source; }
     virtual void setMetric(int metric) { this->metric = metric; }
 
-    /** The routing table in which this route is inserted, or NULL. */
+    /** The routing table in which this route is inserted, or nullptr. */
     virtual IRoutingTable *getRoutingTableAsGeneric() { return owner; }
 
     /** Disabled entries are ignored by routing until the became enabled again. */

@@ -164,7 +164,7 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
     }
     else {
         delete timeoutMsg;
-        timeoutMsg = NULL;
+        timeoutMsg = nullptr;
     }
 }
 

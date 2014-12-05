@@ -68,7 +68,7 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     class Connection
     {
       public:
-        Connection() : offline(true), oc(NULL), fmt(NULL), audio_st(NULL), decCtx(NULL), pCodecDec(NULL) {}
+        Connection() : offline(true), oc(nullptr), fmt(nullptr), audio_st(nullptr), decCtx(nullptr), pCodecDec(nullptr) {}
         void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);

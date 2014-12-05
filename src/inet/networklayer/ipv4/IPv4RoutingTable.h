@@ -181,7 +181,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     virtual void configureInterfaceForIPv4(InterfaceEntry *ie);
 
     /**
-     * Returns an interface given by its address. Returns NULL if not found.
+     * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const IPv4Address& address) const;
     //@}
@@ -229,7 +229,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
 
     /**
      * The routing function. Performs longest prefix match for the given
-     * destination address, and returns the resulting route. Returns NULL
+     * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
     virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const;
@@ -238,7 +238,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
      * Convenience function based on findBestMatchingRoute().
      *
      * Returns the output interface for the packets with dest as destination
-     * address, or NULL if the destination is not in routing table.
+     * address, or nullptr if the destination is not in routing table.
      */
     virtual InterfaceEntry *getInterfaceForDestAddr(const IPv4Address& dest) const;
 
@@ -282,7 +282,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     virtual IPv4Route *getRoute(int k) const;
 
     /**
-     * Finds and returns the default route, or NULL if it doesn't exist
+     * Finds and returns the default route, or nullptr if it doesn't exist
      */
     virtual IPv4Route *getDefaultRoute() const;
 
@@ -295,7 +295,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4Route *removeRoute(IPv4Route *entry);
 
@@ -314,7 +314,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     /**
      * Returns the kth multicast route.
      */
-    virtual IPv4MulticastRoute *getMulticastRoute(int k) const { return k < (int)multicastRoutes.size() ? multicastRoutes[k] : NULL; }
+    virtual IPv4MulticastRoute *getMulticastRoute(int k) const { return k < (int)multicastRoutes.size() ? multicastRoutes[k] : nullptr; }
 
     /**
      * Adds a multicast route to the routing table. Routes are allowed to be modified
@@ -325,7 +325,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4MulticastRoute *removeMulticastRoute(IPv4MulticastRoute *entry);
 

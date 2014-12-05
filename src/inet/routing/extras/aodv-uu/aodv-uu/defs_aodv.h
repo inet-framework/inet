@@ -167,7 +167,7 @@ static inline struct dev_info *devfromsock(int sock)
         if (this_host.devs[i].sock == sock)
             return &this_host.devs[i];
     }
-    return NULL;
+    return nullptr;
 }
 
 static inline int name2index(char *name)

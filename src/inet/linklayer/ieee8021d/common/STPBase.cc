@@ -29,10 +29,10 @@ static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
 STPBase::STPBase()
 {
-    switchModule = NULL;
-    macTable = NULL;
-    ifTable = NULL;
-    ie = NULL;
+    switchModule = nullptr;
+    macTable = nullptr;
+    ifTable = nullptr;
+    ie = nullptr;
 }
 
 void STPBase::initialize(int stage)
@@ -84,7 +84,7 @@ void STPBase::stop()
     for (unsigned int i = 0; i < numPorts; i++)
         colorLink(i, false);
     switchModule->getDisplayString().setTagArg("i", 1, "");
-    ie = NULL;
+    ie = nullptr;
 }
 
 void STPBase::colorLink(unsigned int i, bool forwarding)
@@ -92,10 +92,10 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
     if (ev.isGUI() && visualize) {
         cGate *inGate = switchModule->gate("ethg$i", i);
         cGate *outGate = switchModule->gate("ethg$o", i);
-        cGate *outGateNext = outGate ? outGate->getNextGate() : NULL;
-        cGate *outGatePrev = outGate ? outGate->getPreviousGate() : NULL;
-        cGate *inGatePrev = inGate ? inGate->getPreviousGate() : NULL;
-        cGate *inGatePrev2 = inGatePrev ? inGatePrev->getPreviousGate() : NULL;
+        cGate *outGateNext = outGate ? outGate->getNextGate() : nullptr;
+        cGate *outGatePrev = outGate ? outGate->getPreviousGate() : nullptr;
+        cGate *inGatePrev = inGate ? inGate->getPreviousGate() : nullptr;
+        cGate *inGatePrev2 = inGatePrev ? inGatePrev->getPreviousGate() : nullptr;
 
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2) {
             if (forwarding) {
@@ -130,7 +130,7 @@ void STPBase::updateDisplay()
 
             // label ethernet interface with port status and role
             cModule *nicModule = switchModule->getSubmodule("eth", i);
-            if (nicModule != NULL) {
+            if (nicModule != nullptr) {
                 char buf[32];
                 sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
                 nicModule->getDisplayString().setTagArg("t", 0, buf);
@@ -158,10 +158,10 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int portNum)
 {
     cGate *gate = switchModule->gate("ethg$o", portNum);
     if (!gate)
-        throw cRuntimeError("gate is NULL");
+        throw cRuntimeError("gate is nullptr");
     InterfaceEntry *gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
     if (!gateIfEntry)
-        throw cRuntimeError("gate's Interface is NULL");
+        throw cRuntimeError("gate's Interface is nullptr");
 
     return gateIfEntry;
 }
@@ -188,7 +188,7 @@ InterfaceEntry *STPBase::chooseInterface()
             return current;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

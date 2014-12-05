@@ -34,7 +34,7 @@ SDESItem::SDESItem() : cObject()
 
 SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
 {
-    if (NULL == content)
+    if (nullptr == content)
         throw cRuntimeError("The content parameter must be a valid pointer.");
     _type = type;
     _content = content;

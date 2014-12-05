@@ -61,7 +61,7 @@ cSocketRTScheduler::~cSocketRTScheduler()
 
 void cSocketRTScheduler::startRun()
 {
-    gettimeofday(&baseTime, NULL);
+    gettimeofday(&baseTime, nullptr);
 
 #ifdef HAVE_PCAP
     // Enabling sending makes no sense when we can't receive...
@@ -99,7 +99,7 @@ void cSocketRTScheduler::endRun()
 
 void cSocketRTScheduler::executionResumed()
 {
-    gettimeofday(&baseTime, NULL);
+    gettimeofday(&baseTime, nullptr);
     baseTime = timeval_substract(baseTime, sim->getSimTime().dbl());
 }
 
@@ -113,11 +113,11 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     int32 headerLength;
 
     if (!mod || !dev || !filter)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): arguments must be non-NULL");
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): arguments must be non-nullptr");
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
-    if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
+    if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == nullptr)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot open pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
         EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
@@ -199,7 +199,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // signalize new incoming packet to the interface via cMessage
     EV << "Captured " << hdr->caplen - headerLength << " bytes for an IP packet.\n";
     timeval curTime;
-    gettimeofday(&curTime, NULL);
+    gettimeofday(&curTime, nullptr);
     curTime = timeval_substract(curTime, cSocketRTScheduler::baseTime);
     simtime_t t = curTime.tv_sec + curTime.tv_usec * 1e-6;
     // TBD assert that it's somehow not smaller than previous event's time
@@ -235,7 +235,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
             maxfd = fd[i];
         FD_SET(fd[i], &rdfds);
     }
-    if (select(maxfd + 1, &rdfds, NULL, NULL, &timeout) < 0) {
+    if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0) {
         return found;
     }
 #endif // ifdef LINUX
@@ -251,10 +251,10 @@ bool cSocketRTScheduler::receiveWithTimeout()
     }
 #ifndef LINUX
     if (!found)
-        select(0, NULL, NULL, NULL, &timeout);
+        select(0, nullptr, nullptr, nullptr, &timeout);
 #endif // ifndef LINUX
 #else // ifdef HAVE_PCAP
-    select(0, NULL, NULL, NULL, &timeout);
+    select(0, nullptr, nullptr, nullptr, &timeout);
 #endif // ifdef HAVE_PCAP
     return found;
 }
@@ -264,13 +264,13 @@ int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
     // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
-    gettimeofday(&curTime, NULL);
+    gettimeofday(&curTime, nullptr);
     while (timeval_greater(targetTime, curTime)) {
         if (receiveWithTimeout())
             return 1;
         if (ev.idle())
             return -1;
-        gettimeofday(&curTime, NULL);
+        gettimeofday(&curTime, nullptr);
     }
     return 0;
 }
@@ -300,11 +300,11 @@ cMessage * cSocketRTScheduler::getNextEvent()
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
-    gettimeofday(&curTime, NULL);
+    gettimeofday(&curTime, nullptr);
     if (timeval_greater(targetTime, curTime)) {
         int32 status = receiveUntil(targetTime);
         if (status == -1)
-            return NULL; // interrupted by user
+            return nullptr; // interrupted by user
         if (status == 1)
             event = sim->msgQueue.peekFirst(); // received something
     }

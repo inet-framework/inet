@@ -76,7 +76,7 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
         if (e->rt_dest_addr.s_addr == dest_addr.s_addr)
             return e;
     }
-    return NULL;
+    return nullptr;
 }
 
 rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
@@ -94,7 +94,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 
     // Create the new entry
     if ((entry = (rtable_entry_t *) malloc(sizeof(rtable_entry_t)))
-            == NULL)
+            == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "malloc() failed");
         exit(EXIT_FAILURE);
@@ -376,7 +376,7 @@ void NS_CLASS rtable_destroy()
 rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
 {
     if (dymoRoutingTable->empty())
-        return NULL;
+        return nullptr;
     DymoRoutingTable::iterator it = dymoRoutingTable->find(dest_addr.s_addr);
     if (it != dymoRoutingTable->end())
     {
@@ -390,7 +390,7 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
             return it->second;
         }
         else
-            throw cRuntimeError("Dymo routing data base error, NULL entry");
+            throw cRuntimeError("Dymo routing data base error, nullptr entry");
     }
     else
     {
@@ -410,12 +410,12 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
                     return it->second;
                 }
                 else
-                    throw cRuntimeError("Dymo routing data base error, NULL entry AP");
+                    throw cRuntimeError("Dymo routing data base error, nullptr entry AP");
             }
         }
-        return NULL;
+        return nullptr;
     }
-    return NULL;
+    return nullptr;
 }
 
 rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
@@ -462,7 +462,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     }
 
     // Create the new entry
-    if ((entry = new rtable_entry_t)== NULL)
+    if ((entry = new rtable_entry_t)== nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "malloc() failed");
         exit(EXIT_FAILURE);

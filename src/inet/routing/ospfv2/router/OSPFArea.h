@@ -91,7 +91,7 @@ class Area : public cObject
 
     bool containsAddress(IPv4Address address) const;
     bool hasAddressRange(IPv4AddressRange addressRange) const;
-    IPv4AddressRange getContainingAddressRange(IPv4AddressRange addressRange, bool *advertise = NULL) const;
+    IPv4AddressRange getContainingAddressRange(IPv4AddressRange addressRange, bool *advertise = nullptr) const;
     void addInterface(Interface *intf);
     Interface *getInterface(unsigned char ifIndex);
     Interface *getInterface(IPv4Address address);
@@ -111,7 +111,7 @@ class Area : public cObject
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool floodLSA(OSPFLSA *lsa, Interface *intf = NULL, Neighbor *neighbor = NULL);
+    bool floodLSA(OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
     bool isLocalAddress(IPv4Address address) const;
     RouterLSA *originateRouterLSA();
     NetworkLSA *originateNetworkLSA(const Interface *intf);

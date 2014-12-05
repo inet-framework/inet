@@ -33,8 +33,8 @@ PhysicalEnvironment::PhysicalEnvironment() :
     temperature(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
-    objectCache(NULL),
-    objectsLayer(NULL)
+    objectCache(nullptr),
+    objectsLayer(nullptr)
 {
 }
 
@@ -85,7 +85,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
     for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         cXMLElement *element = *it;
-        ShapeBase *shape = NULL;
+        ShapeBase *shape = nullptr;
         // id
         const char *idAttribute = element->getAttribute("id");
         int id = -1;
@@ -247,7 +247,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 orientation.gamma = math::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
-        const ShapeBase *shape = NULL;
+        const ShapeBase *shape = nullptr;
         const char *shapeAttribute = element->getAttribute("shape");
         if (!shapeAttribute)
             throw cRuntimeError("Missing shape attribute of object");
@@ -575,7 +575,7 @@ const PhysicalObject *PhysicalEnvironment::getObjectById(int id) const
 {
     std::map<int, const PhysicalObject *>::const_iterator it = idToObjectMap.find(id);
     if (it == idToObjectMap.end())
-        return NULL;
+        return nullptr;
     else
         return it->second;
 }

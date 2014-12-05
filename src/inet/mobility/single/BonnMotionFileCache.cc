@@ -27,7 +27,7 @@ const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
     LineList::const_iterator it = lines.begin();
     for (int i = 0; i < nodeId && it != lines.end(); i++)
         it++;
-    return (it == lines.end()) ? NULL : &(*it);
+    return (it == lines.end()) ? nullptr : &(*it);
 }
 
 BonnMotionFileCache *BonnMotionFileCache::inst;
@@ -43,7 +43,7 @@ void BonnMotionFileCache::deleteInstance()
 {
     if (inst) {
         delete inst;
-        inst = NULL;
+        inst = nullptr;
     }
 }
 

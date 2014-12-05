@@ -272,7 +272,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
             else
                 state->v_worried = 0;
         }
-    }    // Closes if v_sendtime != NULL
+    }    // Closes if v_sendtime != nullptr
 
     state->regions.clearTo(state->snd_una);
 

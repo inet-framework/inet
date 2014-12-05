@@ -78,7 +78,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
         }
     }
     else
-        throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "NULL");
+        throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
 }
 
 void PIMSplitter::processPIMPacket(PIMPacket *pkt)

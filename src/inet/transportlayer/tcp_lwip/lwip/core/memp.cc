@@ -163,9 +163,9 @@ memp_sanity(void)
   struct memp *m, *n;
 
   for (i = 0; i < MEMP_MAX; i++) {
-    for (m = memp_tab[i]; m != NULL; m = m->next) {
+    for (m = memp_tab[i]; m != nullptr; m = m->next) {
       c = 1;
-      for (n = memp_tab[i]; n != NULL; n = n->next) {
+      for (n = memp_tab[i]; n != nullptr; n = n->next) {
         if (n == m && --c < 0) {
           return 0;
         }
@@ -276,7 +276,7 @@ memp_init(void)
   memp = LWIP_MEM_ALIGN(memp_memory);
   /* for every pool: */
   for (i = 0; i < MEMP_MAX; ++i) {
-    memp_tab[i] = NULL;
+    memp_tab[i] = nullptr;
     /* create a linked list of memp elements */
     for (j = 0; j < memp_num[i]; ++j) {
       memp->next = memp_tab[i];
@@ -304,7 +304,7 @@ memp_init(void)
  * @param file file name calling this function
  * @param line number of line where this function is called
  *
- * @return a pointer to the allocated memory or a NULL pointer on error
+ * @return a pointer to the allocated memory or a nullptr pointer on error
  */
 void *
 #if !MEMP_OVERFLOW_CHECK
@@ -316,7 +316,7 @@ memp_malloc_fn(memp_t type, const char* file, const int line)
   struct memp *memp;
   SYS_ARCH_DECL_PROTECT(old_level);
 
-  LWIP_ERROR("memp_malloc: type < MEMP_MAX", (type < MEMP_MAX), return NULL;);
+  LWIP_ERROR("memp_malloc: type < MEMP_MAX", (type < MEMP_MAX), return nullptr;);
 
   SYS_ARCH_PROTECT(old_level);
 #if MEMP_OVERFLOW_CHECK >= 2
@@ -325,10 +325,10 @@ memp_malloc_fn(memp_t type, const char* file, const int line)
 
   memp = memp_tab[type];
 
-  if (memp != NULL) {
+  if (memp != nullptr) {
     memp_tab[type] = memp->next;
 #if MEMP_OVERFLOW_CHECK
-    memp->next = NULL;
+    memp->next = nullptr;
     memp->file = file;
     memp->line = line;
 #endif /* MEMP_OVERFLOW_CHECK */
@@ -358,7 +358,7 @@ memp_free(memp_t type, void *mem)
   struct memp *memp;
   SYS_ARCH_DECL_PROTECT(old_level);
 
-  if (mem == NULL) {
+  if (mem == nullptr) {
     return;
   }
   LWIP_ASSERT("memp_free: mem properly aligned",

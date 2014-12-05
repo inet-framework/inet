@@ -54,16 +54,16 @@ Define_Module(MoBANCoordinator);
 MoBANCoordinator::MoBANCoordinator() :
         speed(0),
         maxSpeed(0),
-        logfile(NULL),
+        logfile(nullptr),
         numPostures(0),
-        currentPosture(NULL),
+        currentPosture(nullptr),
         useMobilityPattern(false),
-        mobilityPattern(NULL),
+        mobilityPattern(nullptr),
         patternLength(0),
         currentPattern(-1),
-        markovMatrix(NULL),
+        markovMatrix(nullptr),
         postureSelStrategy(MoBANCoordinator::posture_sel_type(-1)),
-        transitions(NULL)
+        transitions(nullptr)
 {
 }
 
@@ -301,7 +301,7 @@ bool MoBANCoordinator::readMobilityPatternFile()
 
     sprintf(file_name, "%s", par("mobilityPatternFile").stringValue());
     FILE *fp = fopen(file_name, "r");
-    if (fp == NULL)
+    if (fp == nullptr)
         return false;
 
     // count number of patterns (lines in the input file)
@@ -533,7 +533,7 @@ bool MoBANCoordinator::readConfigurationFile()
         int i = 0, j = 0;
         bool thisDefault = false;
 
-        if ((*matrixTag)->getAttribute("type") != NULL) {
+        if ((*matrixTag)->getAttribute("type") != nullptr) {
             sstr = (*matrixTag)->getAttribute("type");
             if (sstr == "Default" || sstr == "default") {
                 if (setDefault)
@@ -685,17 +685,17 @@ bool MoBANCoordinator::readConfigurationFile()
         for (cXMLElementList::const_iterator aComb = combList.begin(); aComb != combList.end(); aComb++) {
             std::string areaName, timeName, matrixName;
 
-            if ((*aComb)->getAttribute("areaType") != NULL)
+            if ((*aComb)->getAttribute("areaType") != nullptr)
                 areaName = (*aComb)->getAttribute("areaType");
             else
                 areaName.clear();
 
-            if ((*aComb)->getAttribute("timeDomain") != NULL)
+            if ((*aComb)->getAttribute("timeDomain") != nullptr)
                 timeName = (*aComb)->getAttribute("timeDomain");
             else
                 timeName.clear();
 
-            if ((*aComb)->getAttribute("matrix") != NULL)
+            if ((*aComb)->getAttribute("matrix") != nullptr)
                 matrixName = (*aComb)->getAttribute("matrix");
             else
                 throw cRuntimeError("No transition matrix is specified for a combination");

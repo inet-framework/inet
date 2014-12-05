@@ -31,7 +31,7 @@ PolyhedronFace::PolyhedronFace(PolyhedronPoint *p1, PolyhedronPoint *p2, Polyhed
     PolyhedronEdge *edge3 = new PolyhedronEdge(p3, p1, this);
     edge1->setNextEdge(edge2);
     edge2->setNextEdge(edge3);
-    edge3->setNextEdge(NULL);
+    edge3->setNextEdge(nullptr);
     edge1->setPrevEdge(edge3);
     edge2->setPrevEdge(edge1);
     edge3->setPrevEdge(edge2);
@@ -94,7 +94,7 @@ PolyhedronEdge* PolyhedronFace::findEdge(PolyhedronEdge* edge)
         if (*currEdge == *edge)
             return currEdge;
     }
-    return NULL;
+    return nullptr;
 }
 
 } /* namespace inet */

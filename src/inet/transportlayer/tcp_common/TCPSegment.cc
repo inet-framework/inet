@@ -199,7 +199,7 @@ void TCPSegment::addPayloadMessage(cPacket *msg, uint32 endSequenceNo)
 cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
 {
     if (payloadList.empty())
-        return NULL;
+        return nullptr;
 
     cPacket *msg = payloadList.front().msg;
     endSequenceNo = payloadList.front().endSequenceNo;

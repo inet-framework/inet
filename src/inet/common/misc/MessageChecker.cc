@@ -24,16 +24,16 @@ Define_Module(MessageChecker);
 #if OMNETPP_VERSION < 0x0500
 //cClassDescriptor compatibility
 #define getFieldValueAsString(a, b, c)         getFieldAsString((a), (b), (c))
-#define getFieldProperty(a, b)                 getFieldProperty(NULL, (a), (b))
-#define getFieldName(a)                        getFieldName(NULL, (a))
-#define getFieldIsCObject(a)                   getFieldIsCObject(NULL, (a))
-#define getFieldCount()                        getFieldCount(NULL)
-#define getFieldTypeString(a)                  getFieldTypeString(NULL, (a))
-#define getFieldIsArray(a)                     getFieldIsArray(NULL, (a))
+#define getFieldProperty(a, b)                 getFieldProperty(nullptr, (a), (b))
+#define getFieldName(a)                        getFieldName(nullptr, (a))
+#define getFieldIsCObject(a)                   getFieldIsCObject(nullptr, (a))
+#define getFieldCount()                        getFieldCount(nullptr)
+#define getFieldTypeString(a)                  getFieldTypeString(nullptr, (a))
+#define getFieldIsArray(a)                     getFieldIsArray(nullptr, (a))
 #define getFieldArraySize(a, b)                getArraySize((a), (b))
 #define getFieldStructValuePointer(a, b, c)    getFieldStructPointer((a), (b), (c))
-#define getFieldTypeFlags(a)                   getFieldTypeFlags(NULL, (a))
-#define getFieldStructName(a)                  getFieldStructName(NULL, (a))
+#define getFieldTypeFlags(a)                   getFieldTypeFlags(nullptr, (a))
+#define getFieldStructName(a)                  getFieldStructName(nullptr, (a))
 
 #endif    // OMNETPP_VERSION < 0x0500
 

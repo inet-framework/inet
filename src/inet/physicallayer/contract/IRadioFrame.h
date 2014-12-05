@@ -33,25 +33,25 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
   public:
     /**
      * Returns the radio signal transmission that this radio frame represents.
-     * This function never returns NULL.
+     * This function never returns nullptr.
      */
     virtual const ITransmission *getTransmission() const = 0;
 
     /**
      * TODO: fill in the background?
-     * This function may return NULL if this is not yet computed.
+     * This function may return nullptr if this is not yet computed.
      */
     // virtual const IArrival *getArrival() const = 0;
 
     /**
      * TODO: fill in the background?
-     * This function may return NULL if this is not yet computed.
+     * This function may return nullptr if this is not yet computed.
      */
     // virtual const IReception *getReception() const = 0;
 
     /**
      * TODO: fill in the background?
-     * This function may return NULL if this is not yet computed.
+     * This function may return nullptr if this is not yet computed.
      */
     // virtual const IReceptionDecision *getReceptionDecision() const = 0;
 };

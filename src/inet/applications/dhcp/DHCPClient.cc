@@ -93,11 +93,11 @@ InterfaceEntry *DHCPClient::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = NULL;
+    InterfaceEntry *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->getInterfaceByName(interfaceName);
-        if (ie == NULL)
+        if (ie == nullptr)
             throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
     else {
@@ -331,7 +331,7 @@ void DHCPClient::bindLease()
     EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
             << this->getParentModule()->getFullName() << "." << endl;
 
-    IPv4Route *iroute = NULL;
+    IPv4Route *iroute = nullptr;
     for (int i = 0; i < irt->getNumRoutes(); i++) {
         IPv4Route *e = irt->getRoute(i);
         if (routeMatches(e, IPv4Address(), IPv4Address(), lease->gateway, 0, ie->getName())) {
@@ -339,7 +339,7 @@ void DHCPClient::bindLease()
             break;
         }
     }
-    if (iroute == NULL) {
+    if (iroute == nullptr) {
         // create gateway route
         route = new IPv4Route();
         route->setDestination(IPv4Address());
@@ -392,7 +392,7 @@ void DHCPClient::initRebootedClient()
 
 void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
 {
-    ASSERT(isOperational && ie != NULL);
+    ASSERT(isOperational && ie != nullptr);
 
     if (msg->getOp() != BOOTREPLY) {
         EV_WARN << "Client received a non-BOOTREPLY message, dropping." << endl;
@@ -705,14 +705,14 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             stopApp();
             isOperational = false;
-            ie = NULL;
+            ie = nullptr;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             stopApp();
             isOperational = false;
-            ie = NULL;
+            ie = nullptr;
         }
     }
     else

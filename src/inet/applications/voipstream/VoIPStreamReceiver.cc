@@ -159,7 +159,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     curConn.lastPacketFinish = simTime() + playoutDelay;
 
     curConn.pCodecDec = avcodec_find_decoder(curConn.codec);
-    if (curConn.pCodecDec == NULL)
+    if (curConn.pCodecDec == nullptr)
         throw cRuntimeError("Codec %d not found", curConn.codec);
 
     curConn.decCtx = avcodec_alloc_context3(curConn.pCodecDec);
@@ -168,7 +168,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     curConn.decCtx->channels = 1;
     curConn.decCtx->bits_per_coded_sample = curConn.sampleBits;
 
-    int ret = avcodec_open2(curConn.decCtx, curConn.pCodecDec, NULL);
+    int ret = avcodec_open2(curConn.decCtx, curConn.pCodecDec, nullptr);
     if (ret < 0)
         throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, ret);
 

@@ -42,7 +42,7 @@ static struct dsr_rerr_opt *dsr_rerr_opt_add(char *buf, int len,
     struct dsr_rerr_opt *rerr_opt;
 
     if (!buf || len < (int)DSR_RERR_HDR_LEN)
-        return NULL;
+        return nullptr;
 
     rerr_opt = (struct dsr_rerr_opt *)buf;
 
@@ -58,7 +58,7 @@ static struct dsr_rerr_opt *dsr_rerr_opt_add(char *buf, int len,
     {
     case NODE_UNREACHABLE:
         if (len < (int)(DSR_RERR_HDR_LEN + sizeof(struct in_addr)))
-            return NULL;
+            return nullptr;
         rerr_opt->length += sizeof(struct in_addr);
         memcpy(rerr_opt->info, &unreach_addr, sizeof(struct in_addr));
         break;
@@ -95,7 +95,7 @@ int NSCLASS dsr_rerr_send(struct dsr_pkt *dp_trigg, struct in_addr unr_addr)
     else
         dst.s_addr = dp_trigg->srt_opt->addrs[1];
 
-    dp = dsr_pkt_alloc(NULL);
+    dp = dsr_pkt_alloc(nullptr);
 
     if (!dp)
     {

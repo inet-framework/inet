@@ -26,9 +26,9 @@ Define_Module(AlternatingEnergyGenerator);
 AlternatingEnergyGenerator::AlternatingEnergyGenerator() :
     isSleeping(false),
     energyGeneratorId(-1),
-    energySink(NULL),
+    energySink(nullptr),
     powerGeneration(W(sNaN)),
-    timer(NULL)
+    timer(nullptr)
 {
 }
 

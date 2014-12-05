@@ -28,7 +28,7 @@ UDPSocket::UDPSocket()
     // don't allow user-specified sockIds because they may conflict with
     // automatically assigned ones.
     sockId = generateSocketId();
-    gateToUdp = NULL;
+    gateToUdp = nullptr;
 }
 
 int UDPSocket::generateSocketId()

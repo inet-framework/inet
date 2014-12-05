@@ -222,7 +222,7 @@ bool DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket *
             OSPFLSA *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
-            if ((lsaInDatabase == NULL) || (lsaInDatabase->getHeader() < currentHeader)) {
+            if ((lsaInDatabase == nullptr) || (lsaInDatabase->getHeader() < currentHeader)) {
                 EV_DETAIL << " (newer)";
                 neighbor->addToRequestList(&currentHeader);
             }

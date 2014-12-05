@@ -89,7 +89,7 @@ class INET_API TCP_NSC_SendQueue : public cObject
     /**
      * Ctor.
      */
-    TCP_NSC_SendQueue() : connM(NULL) {}
+    TCP_NSC_SendQueue() : connM(nullptr) {}
 
     /**
      * Virtual dtor.
@@ -163,7 +163,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
     /**
      * Ctor.
      */
-    TCP_NSC_ReceiveQueue() : connM(NULL) {};
+    TCP_NSC_ReceiveQueue() : connM(nullptr) {};
 
     /**
      * Virtual dtor.
@@ -195,8 +195,8 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
      * including) the given sequence no (usually rcv_nxt).
-     * It should return NULL if there's no more data to be passed up --
-     * this method is called several times until it returns NULL.
+     * It should return nullptr if there's no more data to be passed up --
+     * this method is called several times until it returns nullptr.
      *
      * called after socket->read_data() successfull
      */

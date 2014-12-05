@@ -90,7 +90,7 @@ class INET_API IPv4FragBuf
     /**
      * Takes a fragment and inserts it into the reassembly buffer.
      * If this fragment completes a datagram, the full reassembled
-     * datagram is returned, otherwise NULL.
+     * datagram is returned, otherwise nullptr.
      */
     IPv4Datagram *addFragment(IPv4Datagram *datagram, simtime_t now);
 

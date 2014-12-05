@@ -88,7 +88,7 @@ OrigNode *Batman::get_orig_node(const L3Address &addr) {
 
 void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
     GwNode *gw_node;
-    NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
+    NeighNode *neigh_node = nullptr, *tmp_neigh_node = nullptr, *best_neigh_node = nullptr;
     uint8_t max_bcast_own = 0, max_tq = 0;
 
     EV_INFO << "update_originator(): Searching and updating originator entry of received packet,  \n";
@@ -113,7 +113,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address 
         }
     }
 
-    if (neigh_node == NULL) {
+    if (neigh_node == nullptr) {
         neigh_node = new NeighNode(orig_node, get_orig_node(neigh), neigh, if_incoming, num_words, global_win_size);
     } else {
         EV_INFO << "Updating existing last-hop neighbour of originator\n";
@@ -148,14 +148,14 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address 
     hna_global_check_tq(orig_node);
 
     /* restart gateway selection if we have more packets and fast or late switching enabled */
-    if ((routing_class > 2) && (orig_node->gwflags != 0) && (curr_gateway != NULL)) {
+    if ((routing_class > 2) && (orig_node->gwflags != 0) && (curr_gateway != nullptr)) {
         /* if the node is not our current gateway and
            we have preferred gateray disabled and a better tq value or we found our preferred gateway */
         if ((curr_gateway->orig_node != orig_node) &&
                    ((pref_gateway.isUnspecified() && (orig_node->router->tq_avg > curr_gateway->orig_node->router->tq_avg)) || (pref_gateway == orig_node->orig))) {
             /* it is our preferred gateway or we have fast switching or the tq is $routing_class better than our old tq */
             if ((pref_gateway == orig_node->orig) || (routing_class == 3) || (orig_node->router->tq_avg - curr_gateway->orig_node->router->tq_avg >= routing_class)) {
-                gw_node = NULL;
+                gw_node = nullptr;
 
                 for (unsigned int list_pos = 0; list_pos < gw_list.size(); list_pos++) {
                     gw_node = gw_list[list_pos];
@@ -163,11 +163,11 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address 
                     if (gw_node->orig_node == orig_node)
                         break;
 
-                    gw_node = NULL;
+                    gw_node = nullptr;
                 }
 
                 /* if this gateway had not a gateway failure within the last 30 seconds */
-                if ((gw_node != NULL) && (curr_time > (gw_node->last_failure + 30.000))) {
+                if ((gw_node != nullptr) && (curr_time > (gw_node->last_failure + 30.000))) {
                     EV_INFO << "Gateway client - restart gateway selection: better gateway found (tq curr: " << curr_gateway->orig_node->router->tq_avg << ", tq new: " << orig_node->router->tq_avg << ") \n";
 
                     del_default_route();
@@ -208,7 +208,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 NeighNode *node = orig_node->neigh_list.back();
 
                 orig_node->neigh_list.pop_back();
-                node->owner_node = NULL;
+                node->owner_node = nullptr;
                 delete node;
             }
 
@@ -229,12 +229,12 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 }
             }
 
-            update_routes(orig_node, NULL, NULL, 0);
+            update_routes(orig_node, nullptr, nullptr, 0);
 
             delete orig_node;
             continue;
         } else {
-            best_neigh_node = NULL;
+            best_neigh_node = nullptr;
             max_tq = neigh_purged = 0;
 
             /* for all neighbours towards this originator ... */
@@ -251,17 +251,17 @@ void Batman::purge_orig(const simtime_t &curr_time)
                         add_del_route(orig_node->orig, 32, orig_node->router->addr, orig_node->batmanIf->if_index, orig_node->batmanIf->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
 
                         /* if the neighbour is the route towards our gateway */
-                        if ((curr_gateway != NULL) && (curr_gateway->orig_node == orig_node))
+                        if ((curr_gateway != nullptr) && (curr_gateway->orig_node == orig_node))
                             del_default_route();
 
-                        orig_node->router = NULL;
+                        orig_node->router = nullptr;
                     }
 
-                    neigh_node->owner_node = NULL;
+                    neigh_node->owner_node = nullptr;
                     orig_node->neigh_list.erase(orig_node->neigh_list.begin()+j);
                     delete neigh_node;
                 } else {
-                    if ((best_neigh_node == NULL) || (neigh_node->tq_avg > max_tq)) {
+                    if ((best_neigh_node == nullptr) || (neigh_node->tq_avg > max_tq)) {
                         best_neigh_node = neigh_node;
                         max_tq = neigh_node->tq_avg;
                     }
@@ -270,7 +270,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 }
             }
 
-            if ((neigh_purged) && ((best_neigh_node == NULL) || (orig_node->router == NULL) || (max_tq > orig_node->router->tq_avg)))
+            if ((neigh_purged) && ((best_neigh_node == nullptr) || (orig_node->router == nullptr) || (max_tq > orig_node->router->tq_avg)))
             {
                 HnaElement * buffer = new HnaElement[orig_node->hna_buff.size()];
                 for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
@@ -304,8 +304,8 @@ OrigNode::OrigNode()
 
 void OrigNode::clear()
 {
-    router = NULL;
-    batmanIf = NULL;
+    router = nullptr;
+    batmanIf = nullptr;
     totalRec = 0;
     for (unsigned int i=0; i<bcast_own.size(); i++)
        bcast_own[i] = 0;
@@ -342,7 +342,7 @@ std::string OrigNode::info() const
     out << "num_hops:" << num_hops;
     out << " \n neig info: \n";
 
-    NeighNode *neigh_node = NULL;
+    NeighNode *neigh_node = nullptr;
     for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
         NeighNode * tmp_neigh_node = neigh_list[i];
@@ -359,7 +359,7 @@ std::string OrigNode::info() const
         out << "list neig :" << neigh_list[i]->addr << " ";
     }
 
-    out << "\n router info:"; if (router==NULL) out << "*  "; else out << router->info() << "  ";
+    out << "\n router info:"; if (router==nullptr) out << "*  "; else out << router->info() << "  ";
     return out.str();
 }
 
@@ -390,7 +390,7 @@ OrigNode::OrigNode(const OrigNode &other)
     tq_asym_penalty=other.tq_asym_penalty;
     last_valid=other.last_valid;
     gwflags=other.gwflags;
-    hna_buff=NULL;
+    hna_buff=nullptr;
     last_real_seqno=0;
     last_ttl=0;
     neigh_list = other.neigh_list;
@@ -399,8 +399,8 @@ OrigNode::OrigNode(const OrigNode &other)
 
 OrigNode::~OrigNode()
 {
-    router = NULL;
-    batmanIf = NULL;
+    router = nullptr;
+    batmanIf = nullptr;
     bcast_own.clear();
     bcast_own_sum.clear();
     hna_buff.clear();
@@ -409,7 +409,7 @@ OrigNode::~OrigNode()
     {
         NeighNode *node = neigh_list.back();
         neigh_list.pop_back();
-        node->owner_node = NULL;
+        node->owner_node = nullptr;
         delete node;
     }
 
@@ -429,9 +429,9 @@ void NeighNode::clear()
     last_valid = 0;            /* when last packet via this neighbour was received */
     for (unsigned int i=0; i<real_bits.size(); i++)
         real_bits[i] = 0;
-    orig_node = NULL;
-    owner_node = NULL;
-    if_incoming = NULL;
+    orig_node = nullptr;
+    owner_node = nullptr;
+    if_incoming = nullptr;
 }
 
 

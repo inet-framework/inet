@@ -87,7 +87,7 @@ template<class T, class P>
 T check_and_cast(P *p)
 {
     if (!p)
-        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'", opp_typename(typeid(T)));
+        throw cRuntimeError("check_and_cast(): cannot cast nullptr pointer to type '%s'", opp_typename(typeid(T)));
     T ret = dynamic_cast<T>(p);
     if (!ret) {
         const cObject *o = dynamic_cast<const cObject *>(p);
@@ -107,7 +107,7 @@ template<class T, class P>
 T check_and_cast(const P *p)
 {
     if (!p)
-        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'", opp_typename(typeid(T)));
+        throw cRuntimeError("check_and_cast(): cannot cast nullptr pointer to type '%s'", opp_typename(typeid(T)));
     T ret = dynamic_cast<T>(p);
     if (!ret) {
         const cObject *o = dynamic_cast<const cObject *>(p);
@@ -123,7 +123,7 @@ template<class T, class P>
 T check_and_cast_nullable(P *p)
 {
     if (!p)
-        return NULL;
+        return nullptr;
     return check_and_cast<T>(p);
 }
 

@@ -23,7 +23,7 @@ Register_Class(ThruputMeteringChannel);
 
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)
 {
-    fmt = NULL;
+    fmt = nullptr;
     batchSize = 10;    // packets
     maxInterval = 0.1;    // seconds
 

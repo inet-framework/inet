@@ -40,8 +40,8 @@ class INET_API PolyhedronEdge
 
     public:
         PolyhedronEdge(PolyhedronPoint *point1, PolyhedronPoint *point2, PolyhedronFace *parentFace) :
-             point1(point1), point2(point2), parentFace(parentFace), jointFace(NULL),
-             jointEdge(NULL), next(NULL), prev(NULL) {};
+             point1(point1), point2(point2), parentFace(parentFace), jointFace(nullptr),
+             jointEdge(nullptr), next(nullptr), prev(nullptr) {};
         PolyhedronPoint *getP1() { return point1; }
         PolyhedronPoint *getP2() { return point2; }
         const PolyhedronPoint *getP1() const { return point1; }

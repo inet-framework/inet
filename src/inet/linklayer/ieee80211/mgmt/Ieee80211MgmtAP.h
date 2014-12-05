@@ -81,7 +81,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     cMessage *beaconTimer;
 
   public:
-    Ieee80211MgmtAP() : beaconTimer(NULL) {}
+    Ieee80211MgmtAP() : beaconTimer(nullptr) {}
     virtual ~Ieee80211MgmtAP();
 
   protected:
@@ -100,7 +100,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
 
-    /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
+    /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
     virtual STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);
 
     /** Utility function: set fields in the given frame and send it out to the address */

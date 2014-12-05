@@ -27,7 +27,7 @@ Register_Class(SCTPAlg);
 
 SCTPAlg::SCTPAlg() : SCTPAlgorithm()
 {
-    state = NULL;
+    state = nullptr;
 }
 
 SCTPAlg::~SCTPAlg()
@@ -38,7 +38,7 @@ SCTPAlg::~SCTPAlg()
 
 SCTPStateVariables *SCTPAlg::createStateVariables()
 {
-    ASSERT(state == NULL);
+    ASSERT(state == nullptr);
     state = new SCTPAlgStateVariables();
     return state;
 }

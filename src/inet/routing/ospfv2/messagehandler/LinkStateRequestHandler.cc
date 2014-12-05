@@ -63,7 +63,7 @@ void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf,
 
             OSPFLSA *lsaInDatabase = router->findLSA(static_cast<LSAType>(request.lsType), lsaKey, intf->getArea()->getAreaID());
 
-            if (lsaInDatabase != NULL) {
+            if (lsaInDatabase != nullptr) {
                 lsas.push_back(lsaInDatabase);
             }
             else {
@@ -80,7 +80,7 @@ void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf,
 
             for (int j = 0; j < updatesCount; j++) {
                 OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsas[j]);
-                if (updatePacket != NULL) {
+                if (updatePacket != nullptr) {
                     if (intf->getType() == Interface::BROADCAST) {
                         if ((intf->getState() == Interface::DESIGNATED_ROUTER_STATE) ||
                             (intf->getState() == Interface::BACKUP_STATE) ||

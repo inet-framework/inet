@@ -194,36 +194,36 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
         AreaID areaID = packet->getAreaID();
         Area *area = router->getAreaByID(areaID);
 
-        if (area != NULL) {
+        if (area != nullptr) {
             // packet Area ID must either match the Area ID of the receiving interface or...
             Interface *intf = area->getInterface(interfaceId);
 
-            if (intf == NULL) {
+            if (intf == nullptr) {
                 // it must be the backbone area and...
                 if (areaID == BACKBONE_AREAID) {
                     if (router->getAreaCount() > 1) {
                         // it must be a virtual link and the source router's router ID must be the endpoint of this virtual link and...
                         intf = area->findVirtualLink(packet->getRouterID());
 
-                        if (intf != NULL) {
+                        if (intf != nullptr) {
                             Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaID());
 
-                            if (virtualLinkTransitArea != NULL) {
+                            if (virtualLinkTransitArea != nullptr) {
                                 // the receiving interface must attach to the virtual link's configured transit area
                                 Interface *virtualLinkInterface = virtualLinkTransitArea->getInterface(interfaceId);
 
-                                if (virtualLinkInterface == NULL) {
-                                    intf = NULL;
+                                if (virtualLinkInterface == nullptr) {
+                                    intf = nullptr;
                                 }
                             }
                             else {
-                                intf = NULL;
+                                intf = nullptr;
                             }
                         }
                     }
                 }
             }
-            if (intf != NULL) {
+            if (intf != nullptr) {
                 IPv4Address destinationAddress = controlInfo->getDestAddr();
                 IPv4Address allDRouters = IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
@@ -242,7 +242,7 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                     // packet authentication
                     if (authenticatePacket(packet)) {
                         OSPFPacketType packetType = static_cast<OSPFPacketType>(packet->getType());
-                        Neighbor *neighbor = NULL;
+                        Neighbor *neighbor = nullptr;
 
                         // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
                         if (packetType != HELLO_PACKET) {
@@ -268,25 +268,25 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                                 break;
 
                             case DATABASE_DESCRIPTION_PACKET:
-                                if (neighbor != NULL) {
+                                if (neighbor != nullptr) {
                                     ddHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_REQUEST_PACKET:
-                                if (neighbor != NULL) {
+                                if (neighbor != nullptr) {
                                     lsRequestHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_UPDATE_PACKET:
-                                if (neighbor != NULL) {
+                                if (neighbor != nullptr) {
                                     lsUpdateHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_ACKNOWLEDGEMENT_PACKET:
-                                if (neighbor != NULL) {
+                                if (neighbor != nullptr) {
                                     lsAckHandler.processPacket(packet, intf, neighbor);
                                 }
                                 break;
@@ -374,20 +374,20 @@ void MessageHandler::startTimer(cMessage *timer, simtime_t delay)
     ospfModule->scheduleAt(simTime() + delay, timer);
 }
 
-void MessageHandler::printEvent(const char *eventString, const Interface *onInterface, const Neighbor *forNeighbor    /*= NULL*/) const
+void MessageHandler::printEvent(const char *eventString, const Interface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const
 {
     EV_DETAIL << eventString;
-    if ((onInterface != NULL) || (forNeighbor != NULL)) {
+    if ((onInterface != nullptr) || (forNeighbor != nullptr)) {
         EV_DETAIL << ": ";
     }
-    if (forNeighbor != NULL) {
+    if (forNeighbor != nullptr) {
         EV_DETAIL << "neighbor["
                   << forNeighbor->getNeighborID()
                   << "] (state: "
                   << forNeighbor->getStateString(forNeighbor->getState())
                   << "); ";
     }
-    if (onInterface != NULL) {
+    if (onInterface != nullptr) {
         EV_DETAIL << "interface["
                   << static_cast<short>(onInterface->getIfIndex())
                   << "] ";

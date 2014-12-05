@@ -30,7 +30,7 @@ namespace inet {
 class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDatagram_Base, public INetworkDatagram
 {
   public:
-    ProbabilisticBroadcastDatagram(const char *name = NULL, int kind = 0) : ProbabilisticBroadcastDatagram_Base(name, kind) {}
+    ProbabilisticBroadcastDatagram(const char *name = nullptr, int kind = 0) : ProbabilisticBroadcastDatagram_Base(name, kind) {}
     ProbabilisticBroadcastDatagram(const ProbabilisticBroadcastDatagram& other) : ProbabilisticBroadcastDatagram_Base(other) {}
     ProbabilisticBroadcastDatagram& operator=(const ProbabilisticBroadcastDatagram& other) { ProbabilisticBroadcastDatagram_Base::operator=(other); return *this; }
 

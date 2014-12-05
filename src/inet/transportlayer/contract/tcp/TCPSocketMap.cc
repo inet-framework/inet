@@ -30,7 +30,7 @@ TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
     int connId = ind->getConnId();
     SocketMap::iterator i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
-    return (i == socketMap.end()) ? NULL : i->second;
+    return (i == socketMap.end()) ? nullptr : i->second;
 }
 
 void TCPSocketMap::addSocket(TCPSocket *socket)

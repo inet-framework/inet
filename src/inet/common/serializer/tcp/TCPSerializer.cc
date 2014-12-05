@@ -126,7 +126,7 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
     }    // if options present
 
     // write data
-    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=NULL
+    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
         unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
         char *tcpData = (char *)options + lengthCounter;
 

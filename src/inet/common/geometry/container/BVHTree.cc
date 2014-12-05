@@ -29,8 +29,8 @@ bool BVHTree::isLeaf() const
 
 BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
 {
-    this->left = NULL;
-    this->right = NULL;
+    this->left = nullptr;
+    this->right = nullptr;
     this->boundingMin = boundingMin;
     this->boundingMax = boundingMax;
     this->center = (boundingMax - boundingMin) / 2 + boundingMin;

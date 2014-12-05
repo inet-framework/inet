@@ -176,7 +176,7 @@ static struct maint_entry *maint_entry_create(struct dsr_pkt *dp,
                                      GFP_ATOMIC);
 
     if (!m)
-        return NULL;
+        return nullptr;
 
     m->nxt_hop = dp->nxt_hop;
     gettime(&m->tx_time);
@@ -194,7 +194,7 @@ static struct maint_entry *maint_entry_create(struct dsr_pkt *dp,
     m->dp = dsr_pkt_alloc(skb_copy(dp->skb, GFP_ATOMIC));
 #endif
 #else
-    m->dp = NULL;
+    m->dp = nullptr;
 
     if (dp->payload || (!dp->moreFragments || dp->fragmentOffset!=0))
     {
@@ -255,13 +255,13 @@ static struct maint_entry *maint_entry_create(struct dsr_pkt *dp,
         {
             delete m->dp->ip_pkt;
         }
-        m->dp->ip_pkt = NULL;
+        m->dp->ip_pkt = nullptr;
     }
 #endif
     if (!m->dp)
     {
         FREE(m);
-        return NULL;
+        return nullptr;
     }
     m->dp->nxt_hop = dp->nxt_hop;
     return m;
@@ -281,7 +281,7 @@ int NSCLASS maint_buf_salvage(struct dsr_pkt *dp)
     {
         DEBUG("old internal source route exists\n");
         FREE(dp->srt);
-        dp->srt=NULL;
+        dp->srt=nullptr;
     }
 
 
@@ -503,7 +503,7 @@ void NSCLASS maint_buf_timeout(unsigned long data)
 #else
                 if (m->dp->payload)
                     drop(m->dp->payload, -1);
-                m->dp->payload = NULL;
+                m->dp->payload = nullptr;
 
 #endif
                 dsr_pkt_free(m->dp);
@@ -524,7 +524,7 @@ void NSCLASS maint_buf_timeout(unsigned long data)
 #else
                     if (m2->dp->payload)
                         drop(m2->dp->payload, -1);
-                    m2->dp->payload = NULL;
+                    m2->dp->payload = nullptr;
 #endif
                     dsr_pkt_free(m2->dp);
                 }
@@ -547,7 +547,7 @@ void NSCLASS maint_buf_timeout(unsigned long data)
 #else
                 if (m->dp->payload)
                     drop(m->dp->payload, -1);
-                m->dp->payload = NULL;
+                m->dp->payload = nullptr;
 #endif
 
                 dsr_pkt_free(m->dp);
@@ -591,7 +591,7 @@ void NSCLASS maint_buf_set_timeout(void)
 
     DSR_WRITE_LOCK(&maint_buf.lock);
     /* Get first packet in maintenance buffer */
-    m = (struct maint_entry *)__tbl_find(&maint_buf, NULL,
+    m = (struct maint_entry *)__tbl_find(&maint_buf, nullptr,
                                          crit_ack_req_sent);
 
     if (!m)
@@ -631,7 +631,7 @@ int NSCLASS maint_buf_add(struct dsr_pkt *dp)
 
     if (!dp)
     {
-        DEBUG("dp is NULL!?\n");
+        DEBUG("dp is nullptr!?\n");
         return -1;
     }
 
@@ -694,7 +694,7 @@ int NSCLASS maint_buf_del_all(struct in_addr nxt_hop)
     struct maint_buf_query q;
     int n;
 
-    q.id = NULL;
+    q.id = nullptr;
     q.nxt_hop = &nxt_hop;
     q.rtt = 0;
 
@@ -742,7 +742,7 @@ int NSCLASS maint_buf_del_addr(struct in_addr nxt_hop)
     struct maint_buf_query q;
     int n;
 
-    q.id = NULL;
+    q.id = nullptr;
     q.nxt_hop = &nxt_hop;
     q.rtt = 0;
 
@@ -862,7 +862,7 @@ void NSCLASS maint_buf_cleanup(void)
 #else
         if (m->dp->payload)
             drop(m->dp->payload, -1);
-        m->dp->payload = NULL;
+        m->dp->payload = nullptr;
 #endif
         dsr_pkt_free(m->dp);
 

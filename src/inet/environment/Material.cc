@@ -65,7 +65,7 @@ const Material *Material::getMaterial(const char *name)
         addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));
     }
     std::map<const std::string, const Material *>::iterator it = materials.find(name);
-    return it != materials.end() ? it->second : NULL;
+    return it != materials.end() ? it->second : nullptr;
 }
 
 } // namespace inet

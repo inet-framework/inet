@@ -31,7 +31,7 @@ namespace inet {
 class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagram
 {
   public:
-    FloodDatagram(const char *name = NULL, int kind = 0) : FloodDatagram_Base(name, kind) {}
+    FloodDatagram(const char *name = nullptr, int kind = 0) : FloodDatagram_Base(name, kind) {}
     FloodDatagram(const FloodDatagram& other) : FloodDatagram_Base(other) {}
     FloodDatagram& operator=(const FloodDatagram& other) { FloodDatagram_Base::operator=(other); return *this; }
 

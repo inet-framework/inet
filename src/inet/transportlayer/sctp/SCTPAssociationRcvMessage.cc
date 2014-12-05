@@ -110,7 +110,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
         fsm->getState() != SCTP_S_COOKIE_ECHOED &&
         fsm->getState() != SCTP_S_SHUTDOWN_ACK_SENT &&
         simTime() > state->lastAssocThroughputTime + state->throughputInterval &&
-        assocThroughputVector != NULL)
+        assocThroughputVector != nullptr)
     {
         assocThroughputVector->record(state->assocThroughput / (simTime() - state->lastAssocThroughputTime) / 1000);
         state->lastAssocThroughputTime = simTime();
@@ -546,14 +546,14 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
             state->localAddresses.clear();
             if (localAddressList.front().isUnspecified()) {
                 for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
-                    if (ift->getInterface(i)->ipv4Data() != NULL) {
+                    if (ift->getInterface(i)->ipv4Data() != nullptr) {
 #ifdef WITH_IPv4
                         adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
 #else // ifdef WITH_IPv4
                         throw cRuntimeError("INET was compiled without IPv4 support");
 #endif // ifdef WITH_IPv4
                     }
-                    else if (ift->getInterface(i)->ipv6Data() != NULL) {
+                    else if (ift->getInterface(i)->ipv6Data() != nullptr) {
 #ifdef WITH_IPv6
                         adv.push_back(ift->getInterface(i)->ipv6Data()->getAddress(0));
 #else // ifdef WITH_IPv6
@@ -1079,7 +1079,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
 
         SCTPQueue::PayloadQueue::iterator pay;
         SCTPDataVariables *myChunk = retransmissionQ->getChunk(state->lastTsnAck + 1);
-        if ((myChunk != NULL) && (myChunk->wasPktDropped) &&
+        if ((myChunk != nullptr) && (myChunk->wasPktDropped) &&
             (myChunk->getLastDestinationPath()->fastRecoveryActive))
         {
             dropFilledGap = true;
@@ -1239,7 +1239,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
                 SCTPDataVariables *myChunk = retransmissionQ->getChunk(pos);
                 if (myChunk) {
                     SCTPPathVariables *myChunkLastPath = myChunk->getLastDestinationPath();
-                    assert(myChunkLastPath != NULL);
+                    assert(myChunkLastPath != nullptr);
                     // T.D. 22.11.09: CUCv2 - chunk is *not* acked
                     cucProcessGapReports(myChunk, myChunkLastPath, false);
                 }
@@ -1255,7 +1255,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk) == false) {
                         SCTPPathVariables *myChunkLastPath = myChunk->getLastDestinationPath();
-                        assert(myChunkLastPath != NULL);
+                        assert(myChunkLastPath != nullptr);
                         // CUCv2 - chunk is acked
                         cucProcessGapReports(myChunk, myChunkLastPath, true);
                         // This chunk has been acked newly.
@@ -1289,11 +1289,11 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
                     bool chunkFirstTime = false;
                     SCTPDataVariables *myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
                     if (myChunk) {
-                        // myChunk != NULL -> R-acked before, but not NR-acked
+                        // myChunk != nullptr -> R-acked before, but not NR-acked
                         handleChunkReportedAsAcked(highestNewAck, rttEstimation, myChunk,
                                 path    /* i.e. the SACK path for RTT measurement! */,
                                 sackGapList.tsnIsNonRevokable(myChunk->tsn));
-                        // All NR-acked chunks have chunkMap->getChunk(pos) == NULL!
+                        // All NR-acked chunks have chunkMap->getChunk(pos) == nullptr!
                     }
                 }
             }
@@ -1747,7 +1747,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk *sackChun
                     }
                     myChunk->hasBeenMoved = false;    // Just trigger *one* fast RTX ...
                     // ====== Add chunk to transmission queue ========
-                    if (transmissionQ->getChunk(myChunk->tsn) == NULL) {
+                    if (transmissionQ->getChunk(myChunk->tsn) == nullptr) {
                         if (!chunkMustBeAbandoned(myChunk, sackPath)) {
                             SCTP::AssocStat *assocStat = sctpMain->getAssocStat(assocId);
                             if (assocStat) {
@@ -1763,7 +1763,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk *sackChun
 
                         myChunk->setNextDestination(getNextDestination(myChunk));
                         SCTPPathVariables *myChunkNextPath = myChunk->getNextDestinationPath();
-                        assert(myChunkNextPath != NULL);
+                        assert(myChunkNextPath != nullptr);
 
                         if (myChunk->countsAsOutstanding) {
                             decreaseOutstandingBytes(myChunk);
@@ -1803,7 +1803,7 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
         SCTP::AssocStat *assocStat)
 {
     SCTPPathVariables *lastPath = chunk->getLastDestinationPath();
-    assert(lastPath != NULL);
+    assert(lastPath != nullptr);
 
     // ====== Bookkeeping ====================================================
     // Subtract chunk size from sender buffer size
@@ -1813,9 +1813,9 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
     SCTPSendStreamMap::iterator streamIterator = sendStreams.find(chunk->sid);
     assert(streamIterator != sendStreams.end());
     SCTPSendStream *stream = streamIterator->second;
-    assert(stream != NULL);
+    assert(stream != nullptr);
     cPacketQueue *streamQ = (chunk->ordered == false) ? stream->getUnorderedStreamQ() : stream->getStreamQ();
-    assert(streamQ != NULL);
+    assert(streamQ != nullptr);
 
     if (chunk->priority > 0) {
         state->queuedDroppableBytes -= chunk->len / 8;
@@ -1837,7 +1837,7 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
     assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
     chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
-    chunk->queuedOnPath = NULL;
+    chunk->queuedOnPath = nullptr;
 
     assert(state->queuedSentBytes >= chunk->booksize);
     state->queuedSentBytes -= chunk->booksize;
@@ -1893,7 +1893,7 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
 
     // ====== Remove chunk from retransmission queue =========================
     chunk = retransmissionQ->getAndExtractChunk(chunk->tsn);
-    if (chunk->userData != NULL) {
+    if (chunk->userData != nullptr) {
         delete chunk->userData;
     }
     delete chunk;
@@ -2712,7 +2712,7 @@ bool SCTPAssociation::processPacketDropArrived(SCTPPacketDropChunk *packetDropCh
 
     if (packetDropChunk->getMFlag() == false) {
         EV_TRACE << "processPacketDropArrived" << endl;
-        if (packetDropChunk->getEncapsulatedPacket() != NULL) {
+        if (packetDropChunk->getEncapsulatedPacket() != nullptr) {
             SCTPMessage *sctpmsg = (SCTPMessage *)(packetDropChunk->decapsulate());
             const uint32 numberOfChunks = sctpmsg->getChunksArraySize();
             EV_DETAIL << "numberOfChunks=" << numberOfChunks << endl;
@@ -2785,7 +2785,7 @@ bool SCTPAssociation::processPacketDropArrived(SCTPPacketDropChunk *packetDropCh
                         break;
 
                     case FORWARD_TSN: {
-                        if (peekAbandonedChunk(getPath(remoteAddr)) != NULL) {
+                        if (peekAbandonedChunk(getPath(remoteAddr)) != nullptr) {
                             SCTPMessage *sctpmsg = new SCTPMessage();
                             sctpmsg->setBitLength(SCTP_COMMON_HEADER * 8);
                             SCTPForwardTsnChunk *forwardChunk = createForwardTsnChunk(remoteAddr);
@@ -3111,7 +3111,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
             path->activePath = false;
             if (path->remoteAddress == state->getPrimaryPathIndex()) {
                 SCTPPathVariables *nextPath = getNextPath(path);
-                if (nextPath != NULL) {
+                if (nextPath != nullptr) {
                     state->setPrimaryPath(nextPath);
                 }
             }
@@ -3143,7 +3143,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
              iterator != retransmissionQ->payloadQueue.end(); iterator++)
         {
             SCTPDataVariables *chunk = iterator->second;
-            assert(chunk != NULL);
+            assert(chunk != nullptr);
 
             // ====== Insert chunks into TransmissionQ ============================
             // Only insert chunks that were sent to the path that has timed out

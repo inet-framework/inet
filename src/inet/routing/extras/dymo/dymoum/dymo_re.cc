@@ -172,7 +172,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
         dlog(LOG_WARNING, 0, __FUNCTION__, "malformed RE received");
 #ifdef OMNETPP
         delete re;
-        re=NULL;
+        re=nullptr;
 #endif
         return;
     }
@@ -184,7 +184,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
              "previous hop (%s) is blacklisted", ip2str(ip_src.s_addr));
 #ifdef OMNETPP
         delete re;
-        re=NULL;
+        re=nullptr;
 #endif
         return;
     }
@@ -253,7 +253,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
             {
 #ifdef OMNETPP
                 delete re;
-                re=NULL;
+                re=nullptr;
 #endif
                 return;
             }
@@ -391,7 +391,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
                 send(msg,"to_ip");
         }
         delete re;
-        re=NULL;
+        re=nullptr;
 #endif
     }
     else if (isBroadcast(re->target_addr) && re->a) // proactive RREQ
@@ -399,7 +399,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
         if (!propagateProactive)
         {
             delete re;
-            re = NULL;
+            re = nullptr;
             return;
         }
         node_addr.s_addr = re->re_blocks[0].re_node_addr;
@@ -443,7 +443,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
         else
         {
             delete re;
-            re = NULL;
+            re = nullptr;
         }
     }
     // Otherwise the RE is considered to be forwarded
@@ -490,7 +490,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
     else
     {
         delete re;
-        re=NULL;
+        re=nullptr;
     }
 #endif
 
@@ -637,7 +637,7 @@ void NS_CLASS __re_send(RE *re)
         else
             delete re;
     }
-    re=NULL;
+    re=nullptr;
 }
 
 void NS_CLASS re_send_rrep(RE *rrep)
@@ -708,7 +708,7 @@ void NS_CLASS re_forward_rreq_path_acc(RE *rreq, int blindex)
     if (numInterfacesActive==0)
     {
         delete rreq;
-        rreq=NULL;
+        rreq=nullptr;
         return;
     }
     int numDup = numInterfacesActive-1;
@@ -728,7 +728,7 @@ void NS_CLASS re_forward_rreq_path_acc(RE *rreq, int blindex)
         }
     }
     // delete rreq;
-    rreq=NULL;
+    rreq=nullptr;
 #else
     for (i = 0; i < DYMO_MAX_NR_INTERFACES; i++)
     {

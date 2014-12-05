@@ -171,7 +171,7 @@ void EtherHub::handleMessage(cMessage *msg)
             send(msg2, ogate);
 
             if (isLast)
-                msg = NULL; // msg sent, do not delete it.
+                msg = nullptr; // msg sent, do not delete it.
         }
     }
     delete msg;

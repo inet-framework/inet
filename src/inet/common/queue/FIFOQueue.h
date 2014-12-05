@@ -40,7 +40,7 @@ class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
     static simsignal_t queueLengthSignal;
 
   public:
-    FIFOQueue() : outGate(NULL), byteLength(0) {}
+    FIFOQueue() : outGate(nullptr), byteLength(0) {}
 
   protected:
     virtual void initialize();

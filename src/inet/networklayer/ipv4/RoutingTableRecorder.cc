@@ -146,7 +146,7 @@ void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *
     // moduleId, ifname, address
     std::stringstream content;
     content << host->getId() << " " << interface->getName() << " ";
-    content << (interface->ipv4Data() != NULL ? interface->ipv4Data()->getIPAddress().str() : IPv4Address().str());
+    content << (interface->ipv4Data() != nullptr ? interface->ipv4Data()->getIPAddress().str() : IPv4Address().str());
 
     if (signalID == NF_INTERFACE_CREATED) {
         envir->customCreatedEntry("IT", interfaceKey, content.str().c_str());
@@ -213,7 +213,7 @@ Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENA
 
 RoutingTableRecorder::RoutingTableRecorder()
 {
-    routingLogFile = NULL;
+    routingLogFile = nullptr;
 }
 
 RoutingTableRecorder::~RoutingTableRecorder()
@@ -252,7 +252,7 @@ void RoutingTableRecorder::hookListeners()
 
 void RoutingTableRecorder::ensureRoutingLogFileOpen()
 {
-    if (routingLogFile == NULL) {
+    if (routingLogFile == nullptr) {
         // hack to ensure that results/ folder is created
         simulation.getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
 
@@ -279,7 +279,7 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID)
 {
-    // Note: ie->getInterfaceTable() may be NULL (entry already removed from its table)
+    // Note: ie->getInterfaceTable() may be nullptr (entry already removed from its table)
 
     const char *tag;
 
@@ -302,14 +302,14 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
             SIMTIME_STR(simTime()),
             host->getId(),
             ie->getName(),
-            (ie->ipv4Data() != NULL ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
+            (ie->ipv4Data() != nullptr ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
             );
     fflush(routingLogFile);
 }
 
 void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID)
 {
-    IRoutingTable *rt = route->getRoutingTableAsGeneric();    // may be NULL! (route already removed from its routing table)
+    IRoutingTable *rt = route->getRoutingTableAsGeneric();    // may be nullptr! (route already removed from its routing table)
 
     const char *tag;
     if (signalID == NF_ROUTE_ADDED)

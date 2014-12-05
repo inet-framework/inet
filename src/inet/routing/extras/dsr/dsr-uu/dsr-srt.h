@@ -88,7 +88,7 @@ static inline char *print_srt(struct dsr_srt *srt)
     unsigned int i, len;
 
     if (!srt)
-        return NULL;
+        return nullptr;
 
     len = sprintf(buf, "%s<->", print_ip(srt->src));
 

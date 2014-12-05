@@ -47,8 +47,8 @@ void NS_CLASS hello_init(void)
     if (hello_timer.used || hello_ival <= 0)
         return;
 
-    timer_init(&hello_timer, &NS_CLASS hello_send, NULL);
-    hello_send(NULL);
+    timer_init(&hello_timer, &NS_CLASS hello_send, nullptr);
+    hello_send(nullptr);
 }
 
 void NS_CLASS hello_fini(void)
@@ -130,7 +130,7 @@ void NS_CLASS hello_process(HELLO *hello,struct in_addr ip_src, u_int32_t ifinde
         nb_update(nb);
 #ifdef OMNETPP
     delete hello;
-    hello=NULL;
+    hello=nullptr;
 #endif
 }
 

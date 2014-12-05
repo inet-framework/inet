@@ -35,8 +35,8 @@ Define_Module(DHCPServer);
 
 DHCPServer::DHCPServer()
 {
-    ie = NULL;
-    startTimer = NULL;
+    ie = nullptr;
+    startTimer = nullptr;
 }
 
 DHCPServer::~DHCPServer()
@@ -107,11 +107,11 @@ InterfaceEntry *DHCPServer::chooseInterface()
 {
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
-    InterfaceEntry *ie = NULL;
+    InterfaceEntry *ie = nullptr;
 
     if (strlen(interfaceName) > 0) {
         ie = ift->getInterfaceByName(interfaceName);
-        if (ie == NULL)
+        if (ie == nullptr)
             throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
     else {
@@ -157,7 +157,7 @@ void DHCPServer::handleSelfMessages(cMessage *msg)
 
 void DHCPServer::processDHCPMessage(DHCPMessage *packet)
 {
-    ASSERT(isOperational && ie != NULL);
+    ASSERT(isOperational && ie != nullptr);
 
     // check that the packet arrived on the interface we are supposed to serve
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
@@ -180,7 +180,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
             if (!lease) {
                 // MAC not registered, create offering a new lease to the client
                 lease = getAvailableLease(packet->getOptions().getRequestedIp(), packet->getChaddr());
-                if (lease != NULL) {
+                if (lease != nullptr) {
                     // std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = packet->getChaddr();
                     lease->xid = packet->getXid();
@@ -207,7 +207,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
                 // otherwise the msg is a request to extend an existing lease (e. g. INIT-REBOOT)
 
                 DHCPLease *lease = getLeaseByMac(packet->getChaddr());
-                if (lease != NULL) {
+                if (lease != nullptr) {
                     if (lease->ip != packet->getOptions().getRequestedIp()) {
                         EV_ERROR << "The 'requested IP address' must be filled in with the 'yiaddr' value from the chosen DHCPOFFER." << endl;
                         sendNAK(packet);
@@ -402,7 +402,7 @@ DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
     EV_DETAIL << "Lease not found for MAC " << mac << "." << endl;
 
     // lease does not exist
-    return NULL;
+    return nullptr;
 }
 
 DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddress& clientMAC)
@@ -441,7 +441,7 @@ DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddres
         }
     }
     // no lease available
-    return NULL;
+    return nullptr;
 }
 
 void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort)
@@ -463,7 +463,7 @@ void DHCPServer::startApp()
 void DHCPServer::stopApp()
 {
     leased.clear();
-    ie = NULL;
+    ie = nullptr;
     cancelEvent(startTimer);
     // socket.close(); TODO:
 }

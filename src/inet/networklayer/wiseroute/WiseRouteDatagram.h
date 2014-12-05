@@ -30,7 +30,7 @@ namespace inet {
 class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetworkDatagram
 {
   public:
-    WiseRouteDatagram(const char *name = NULL, int kind = 0) : WiseRouteDatagram_Base(name, kind) {}
+    WiseRouteDatagram(const char *name = nullptr, int kind = 0) : WiseRouteDatagram_Base(name, kind) {}
     WiseRouteDatagram(const WiseRouteDatagram& other) : WiseRouteDatagram_Base(other) {}
     WiseRouteDatagram& operator=(const WiseRouteDatagram& other) { WiseRouteDatagram_Base::operator=(other); return *this; }
 

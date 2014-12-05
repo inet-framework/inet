@@ -115,7 +115,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     const char *soundFile;    // input audio file name
     int repeatCount;
 
-    const char *traceFileName;    // name of the output trace file, NULL or empty to turn off recording
+    const char *traceFileName;    // name of the output trace file, nullptr or empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters

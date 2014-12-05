@@ -27,7 +27,7 @@ Register_Class(SCTPQueue);
 
 SCTPQueue::SCTPQueue()
 {
-    assoc = NULL;
+    assoc = nullptr;
 }
 
 SCTPQueue::~SCTPQueue()
@@ -66,7 +66,7 @@ SCTPDataVariables *SCTPQueue::extractMessage()
         payloadQueue.erase(iterator);
         return chunk;
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPDataVariables *SCTPQueue::getAndExtractChunk(const uint32 tsn)
@@ -77,7 +77,7 @@ SCTPDataVariables *SCTPQueue::getAndExtractChunk(const uint32 tsn)
         payloadQueue.erase(iterator);
         return chunk;
     }
-    return NULL;
+    return nullptr;
 }
 
 void SCTPQueue::printQueue() const
@@ -114,7 +114,7 @@ cMessage *SCTPQueue::getMsg(const uint32 tsn) const
         cMessage *msg = check_and_cast<cMessage *>(chunk->userData);
         return msg;
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPDataVariables *SCTPQueue::getChunk(const uint32 tsn) const
@@ -124,7 +124,7 @@ SCTPDataVariables *SCTPQueue::getChunk(const uint32 tsn) const
         SCTPDataVariables *chunk = iterator->second;
         return chunk;
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPDataVariables *SCTPQueue::getChunkFast(const uint32 tsn, bool& firstTime)
@@ -148,7 +148,7 @@ SCTPDataVariables *SCTPQueue::getChunkFast(const uint32 tsn, bool& firstTime)
         return chunk;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void SCTPQueue::removeMsg(const uint32 tsn)
@@ -195,7 +195,7 @@ SCTPDataVariables *SCTPQueue::dequeueChunkBySSN(const uint16 ssn)
             return chunk;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 uint16 SCTPQueue::getFirstSsnInQueue(const uint16 sid)

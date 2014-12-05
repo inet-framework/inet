@@ -21,7 +21,7 @@ void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 {
     if (length != data_arraysize) {
         delete[] data_var;
-        data_var = length ? new char[length] : NULL;
+        data_var = length ? new char[length] : nullptr;
         data_arraysize = length;
     }
     if (length)
@@ -73,7 +73,7 @@ void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
 
     if ((truncleft || truncright)) {
         unsigned int nlength = data_arraysize - (truncleft + truncright);
-        char *ndata_var = NULL;
+        char *ndata_var = nullptr;
         if (nlength) {
             ndata_var = new char[nlength];
             memcpy(ndata_var, data_var + truncleft, nlength);

@@ -138,7 +138,7 @@ void AODVRouting::handleMessage(cMessage *msg)
         UDPPacket *udpPacket = dynamic_cast<UDPPacket *>(msg);
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
         INetworkProtocolControlInfo *udpProtocolCtrlInfo = dynamic_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
-        ASSERT(udpProtocolCtrlInfo != NULL);
+        ASSERT(udpProtocolCtrlInfo != nullptr);
         L3Address sourceAddr = udpProtocolCtrlInfo->getSourceAddress();
         unsigned int arrivalPacketTTL = udpProtocolCtrlInfo->getHopLimit();
 
@@ -177,7 +177,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
     else {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute *route = routingTable->findBestMatchingRoute(destAddr);
-        AODVRouteData *routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
+        AODVRouteData *routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : nullptr;
         bool isActive = routeData && routeData->isActive();
         if (isActive && !route->getNextHopAsGeneric().isUnspecified()) {
             EV_INFO << "Active route found: " << route << endl;
@@ -224,17 +224,17 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
 
 AODVRouting::AODVRouting()
 {
-    interfaceTable = NULL;
-    host = NULL;
-    routingTable = NULL;
+    interfaceTable = nullptr;
+    host = nullptr;
+    routingTable = nullptr;
     isOperational = false;
-    networkProtocol = NULL;
-    addressType = NULL;
-    helloMsgTimer = NULL;
-    expungeTimer = NULL;
-    blacklistTimer = NULL;
-    rrepAckTimer = NULL;
-    jitterPar = NULL;
+    networkProtocol = nullptr;
+    addressType = nullptr;
+    helloMsgTimer = nullptr;
+    expungeTimer = nullptr;
+    blacklistTimer = nullptr;
+    rrepAckTimer = nullptr;
+    jitterPar = nullptr;
 }
 
 bool AODVRouting::hasOngoingRouteDiscovery(const L3Address& target)
@@ -283,7 +283,7 @@ void AODVRouting::sendRREQ(AODVRREQ *rreq, const L3Address& destAddr, unsigned i
     }
 
     std::map<L3Address, WaitForRREP *>::iterator rrepTimer = waitForRREPTimers.find(rreq->getDestAddr());
-    WaitForRREP *rrepTimerMsg = NULL;
+    WaitForRREP *rrepTimerMsg = nullptr;
     if (rrepTimer != waitForRREPTimers.end()) {
         rrepTimerMsg = rrepTimer->second;
         unsigned int lastTTL = rrepTimerMsg->getLastTTL();
@@ -505,7 +505,7 @@ AODVRREP *AODVRouting::createRREP(AODVRREQ *rreq, IRoute *destRoute, IRoute *ori
 
 AODVRREP *AODVRouting::createGratuitousRREP(AODVRREQ *rreq, IRoute *originatorRoute)
 {
-    ASSERT(originatorRoute != NULL);
+    ASSERT(originatorRoute != nullptr);
     AODVRREP *grrep = new AODVRREP("AODV-GRREP");
     AODVRouteData *routeData = check_and_cast<AODVRouteData *>(originatorRoute->getProtocolData());
 
@@ -571,7 +571,7 @@ void AODVRouting::handleRREP(AODVRREP *rrep, const L3Address& sourceAddr)
     // already exist.
 
     IRoute *destRoute = routingTable->findBestMatchingRoute(rrep->getDestAddr());
-    AODVRouteData *destRouteData = NULL;
+    AODVRouteData *destRouteData = nullptr;
     simtime_t lifeTime = rrep->getLifeTime();
     unsigned int destSeqNum = rrep->getDestSeqNum();
 
@@ -705,7 +705,7 @@ void AODVRouting::updateRoutingTable(IRoute *route, const L3Address& nextHop, un
     route->setMetric(hopCount);
 
     AODVRouteData *routingData = check_and_cast<AODVRouteData *>(route->getProtocolData());
-    ASSERT(routingData != NULL);
+    ASSERT(routingData != nullptr);
 
     routingData->setLifeTime(lifeTime);
     routingData->setDestSeqNum(destSeqNum);
@@ -875,7 +875,7 @@ void AODVRouting::handleRREQ(AODVRREQ *rreq, const L3Address& sourceAddr, unsign
     // gratuitous RREP to the destination node.
 
     IRoute *destRoute = routingTable->findBestMatchingRoute(rreq->getDestAddr());
-    AODVRouteData *destRouteData = destRoute ? dynamic_cast<AODVRouteData *>(destRoute->getProtocolData()) : NULL;
+    AODVRouteData *destRouteData = destRoute ? dynamic_cast<AODVRouteData *>(destRoute->getProtocolData()) : nullptr;
 
     // check (i)
     if (rreq->getDestAddr() == getSelfIPAddress()) {
@@ -998,7 +998,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         EV_DETAIL << "Received link break signal" << endl;
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
         cPacket *frame = check_and_cast<cPacket *>(obj);
-        INetworkDatagram *datagram = NULL;
+        INetworkDatagram *datagram = nullptr;
         if (false
 #ifdef WITH_IEEE80211
             || dynamic_cast<ieee80211::Ieee80211Frame *>(frame)
@@ -1142,7 +1142,7 @@ void AODVRouting::handleRERR(AODVRERR *rerr, const L3Address& sourceAddr)
 
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
-        AODVRouteData *routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
+        AODVRouteData *routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : nullptr;
 
         if (!routeData)
             continue;
@@ -1422,7 +1422,7 @@ void AODVRouting::expungeRoutes()
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
             AODVRouteData *routeData = check_and_cast<AODVRouteData *>(route->getProtocolData());
-            ASSERT(routeData != NULL);
+            ASSERT(routeData != nullptr);
             if (routeData->getLifeTime() <= simTime()) {
                 if (routeData->isActive()) {
                     EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and set to inactive. It will be deleted after DELETE_PERIOD time" << endl;
@@ -1459,7 +1459,7 @@ void AODVRouting::scheduleExpungeRoutes()
 
         if (route->getSource() == this) {
             AODVRouteData *routeData = check_and_cast<AODVRouteData *>(route->getProtocolData());
-            ASSERT(routeData != NULL);
+            ASSERT(routeData != nullptr);
 
             if (routeData->getLifeTime() < nextExpungeTime)
                 nextExpungeTime = routeData->getLifeTime();
@@ -1503,7 +1503,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram *dat
     // TODO: IMPLEMENT: check if the datagram is a data packet or we take control packets as data packets
 
     IRoute *routeDest = routingTable->findBestMatchingRoute(destAddr);
-    AODVRouteData *routeDestData = routeDest ? dynamic_cast<AODVRouteData *>(routeDest->getProtocolData()) : NULL;
+    AODVRouteData *routeDestData = routeDest ? dynamic_cast<AODVRouteData *>(routeDest->getProtocolData()) : nullptr;
 
     // Each time a route is used to forward a data packet, its Active Route
     // Lifetime field of the source, destination and the next hop on the
@@ -1565,7 +1565,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
     node.addr = unreachableAddr;
 
     IRoute *unreachableRoute = routingTable->findBestMatchingRoute(unreachableAddr);
-    AODVRouteData *unreachableRouteData = unreachableRoute ? dynamic_cast<AODVRouteData *>(unreachableRoute->getProtocolData()) : NULL;
+    AODVRouteData *unreachableRouteData = unreachableRoute ? dynamic_cast<AODVRouteData *>(unreachableRoute->getProtocolData()) : nullptr;
 
     if (unreachableRouteData && unreachableRouteData->hasValidDestNum())
         node.seqNum = unreachableRouteData->getDestSeqNum();

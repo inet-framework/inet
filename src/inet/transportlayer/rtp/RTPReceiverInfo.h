@@ -80,7 +80,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
 
     /**
      * Returns a ReceptionReport if this RTP end system is a sender,
-     * NULL otherwise.
+     * nullptr otherwise.
      */
     virtual ReceptionReport *receptionReport(simtime_t now);
 

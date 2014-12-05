@@ -121,7 +121,7 @@ static inline struct path *path_create()
     n = (struct path *)MALLOC(sizeof(struct path), GFP_ATOMIC);
 
     if (!n)
-        return NULL;
+        return nullptr;
     memset(n, 0, sizeof(struct path));
     return n;
 };
@@ -132,7 +132,7 @@ static inline struct node_cache *node_cache_create(struct in_addr addr)
     n = (struct node_cache *)MALLOC(sizeof(struct node_cache), GFP_ATOMIC);
 
     if (!n)
-        return NULL;
+        return nullptr;
     memset(n, 0, sizeof(struct node_cache));
     INIT_TBL(&n->paths,64);
     n->addr=addr;
@@ -159,13 +159,13 @@ static int __ph_route_tbl_add(struct path_table *rt_t,
     struct timeval now;
     long diff;
     int size;
-    rt_aux2=NULL;
+    rt_aux2=nullptr;
     dsr_list_t *pos;
 
     size = sizeof(struct in_addr)*(num_hops-1);
     n = __node_cache_find(rt_t,dst);
 
-    if (n==NULL)
+    if (n==nullptr)
     {
         n=node_cache_create(dst);
         struct tbl *aux = GET_HASH(rt_t,(uint32_t)dst.s_addr);
@@ -276,20 +276,20 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
     int i;
     double cost = 1.0/0.0;
     bool find;
-    struct dsr_srt *srt = NULL;
+    struct dsr_srt *srt = nullptr;
     struct in_addr myAddr = my_addr();
 
     struct node_cache *dst_node = __node_cache_find(&PCH,dst);
-    if (dst_node==NULL)
-        return NULL;
+    if (dst_node==nullptr)
+        return nullptr;
 
 
     if (tbl_empty(&dst_node->paths))
-        return NULL;
+        return nullptr;
 
 
     gettime(&now);
-    route=NULL;
+    route=nullptr;
     list_for_each_safe(pos,tmp,&dst_node->paths.head)
     {
         rt = (struct path * ) pos;
@@ -318,7 +318,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
                 continue;
         }
 
-        if (route==NULL && rt->status==VALID)
+        if (route==nullptr && rt->status==VALID)
         {
             num_hop= rt->num_hop;
             status= rt->status;
@@ -354,7 +354,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
     if (!route && num_hop!=1)
     {
         DEBUG("%s not found\n", print_ip(dst));
-        return NULL;
+        return nullptr;
     }
 
     /*  lc_print(&LC, lc_print_buf); */
@@ -383,7 +383,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
 
     if (vector_cost<=0)
     {
-        srt->cost=NULL;
+        srt->cost=nullptr;
         srt->cost_size=0;
     }
     else
@@ -410,7 +410,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
     if (!srt)
     {
         DEBUG("Could not allocate source route!!!\n");
-        return NULL;
+        return nullptr;
     }
 
 
@@ -441,7 +441,7 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
     unsigned int init_cost = INT_MAX;
     bool is_first,is_last;
     int size_cost=0;
-    unsigned int *cost_vector=NULL;
+    unsigned int *cost_vector=nullptr;
 
 
     if (!srt)
@@ -493,7 +493,7 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
         }
 #endif
         size_cost = 0;
-        cost_vector=NULL;
+        cost_vector=nullptr;
 
         for (i = j; i < n; i++)
         {
@@ -524,7 +524,7 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
             addr2 = srt->dst;
             cost = n+1-j;
             size_cost = 0;
-            cost_vector=NULL;
+            cost_vector=nullptr;
 #ifdef OMNETPP
             if (etxActive)
             {
@@ -550,7 +550,7 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
     if (srt->flags & SRT_BIDIR&flags)
     {
         j=0;
-        cost_vector = NULL;
+        cost_vector = nullptr;
         size_cost=0;
         if (!is_first)
         {
@@ -648,7 +648,7 @@ ph_srt_add_node(struct in_addr node, usecs_t timeout, unsigned short flags,unsig
     }
     else
     {
-        srt->cost=NULL;
+        srt->cost=nullptr;
         srt->cost_size=0;
     }
 #endif

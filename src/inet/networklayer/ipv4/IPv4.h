@@ -177,7 +177,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     /**
      * Broadcasts the datagram on the specified interface.
-     * When destIE is NULL, the datagram is broadcasted on each interface.
+     * When destIE is nullptr, the datagram is broadcasted on each interface.
      */
     virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, const InterfaceEntry *destIE);
 

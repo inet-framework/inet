@@ -34,11 +34,11 @@ simsignal_t EtherTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
 
 EtherTrafGen::EtherTrafGen()
 {
-    sendInterval = NULL;
-    numPacketsPerBurst = NULL;
-    packetLength = NULL;
-    timerMsg = NULL;
-    nodeStatus = NULL;
+    sendInterval = nullptr;
+    numPacketsPerBurst = nullptr;
+    packetLength = nullptr;
+    timerMsg = nullptr;
+    nodeStatus = nullptr;
 }
 
 EtherTrafGen::~EtherTrafGen()
@@ -206,7 +206,7 @@ void EtherTrafGen::receivePacket(cPacket *msg)
 void EtherTrafGen::finish()
 {
     cancelAndDelete(timerMsg);
-    timerMsg = NULL;
+    timerMsg = nullptr;
 }
 
 } // namespace inet

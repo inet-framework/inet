@@ -111,7 +111,7 @@ int NS_CLASS timer_set_timeout(struct timer *t, long msec)
     if (!t || msec < 0)
         return -1;
 
-    gettimeofday(&t->timeout, NULL);
+    gettimeofday(&t->timeout, nullptr);
 
     t->timeout.tv_usec += msec * 1000;
     t->timeout.tv_sec += t->timeout.tv_usec / 1000000;
@@ -127,7 +127,7 @@ void NS_CLASS timer_timeout(struct timeval *now)
     {
         struct timer * t = dymoTimerList->begin()->second;
         dymoTimerList->erase(dymoTimerList->begin());
-        if (t==NULL)
+        if (t==nullptr)
             opp_error ("timer ower is bad");
         else
         {
@@ -142,12 +142,12 @@ struct timeval *NS_CLASS timer_age_queue()
     struct timer *t;
     static struct timeval remaining;
     struct timeval now;
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     while (!dymoTimerList->empty())
     {
         t = dymoTimerList->begin()->second;
-        if (t==NULL)
+        if (t==nullptr)
             opp_error ("timer ower is bad");
         if (timeval_diff(&(t->timeout), &now)>0)
             break;
@@ -157,7 +157,7 @@ struct timeval *NS_CLASS timer_age_queue()
     }
 
     if (dymoTimerList->empty())
-        return NULL;
+        return nullptr;
 
     t = dymoTimerList->begin()->second;
     if (timeval_diff(&(dymoTimerList->begin()->second->timeout), &now)<=0)
@@ -277,7 +277,7 @@ int NS_CLASS timer_set_timeout(struct timer *t, long msec)
     if (!t || msec < 0)
         return -1;
 
-    gettimeofday(&t->timeout, NULL);
+    gettimeofday(&t->timeout, nullptr);
 
     t->timeout.tv_usec += msec * 1000;
     t->timeout.tv_sec += t->timeout.tv_usec / 1000000;
@@ -301,7 +301,7 @@ void NS_CLASS timer_timeout(struct timeval *now)
             t->used = 0;
 #ifdef OMNETPP
             timer_elem--;
-            //if (t->list_head.next==NULL)
+            //if (t->list_head.next==nullptr)
 //              (this->*t->handler)(t->data);
 #endif
 
@@ -323,15 +323,15 @@ struct timeval *NS_CLASS timer_age_queue()
     struct timeval now;
     struct timer *t;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     if (dlist_empty(&TQ))
-        return NULL;
+        return nullptr;
 
     timer_timeout(&now);
 
     if (dlist_empty(&TQ))
-        return NULL;
+        return nullptr;
 
     t = (struct timer *) TQ.next;
     remaining.tv_usec   = (t->timeout.tv_usec - now.tv_usec);

@@ -175,7 +175,7 @@ void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
 
 cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    cPacket *msg = NULL;
+    cPacket *msg = nullptr;
     Region *reg = extractTo(seq);
 
     if (reg) {
@@ -191,13 +191,13 @@ TCPVirtualDataRcvQueue::Region *TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     ASSERT(seqLE(seq, rcv_nxt));
 
     if (regionList.empty())
-        return NULL;
+        return nullptr;
 
     Region *reg = regionList.front();
     uint32 beg = reg->getBegin();
 
     if (seqLE(seq, beg))
-        return NULL;
+        return nullptr;
 
     if (seqGE(seq, reg->getEnd())) {
         regionList.pop_front();

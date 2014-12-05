@@ -69,7 +69,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
         bool isAuthenticated;
         int authSeqExpected;    // valid while authenticating; values: 1,3,5...
-        cMessage *authTimeoutMsg;    // if non-NULL: authentication is in progress
+        cMessage *authTimeoutMsg;    // if non-nullptr: authentication is in progress
 
         APInfo()
         {
@@ -77,7 +77,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
             beaconInterval = rxPower = 0;
             authSeqExpected = -1;
             isAuthenticated = false;
-            authTimeoutMsg = NULL;
+            authTimeoutMsg = nullptr;
         }
     };
 
@@ -89,7 +89,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
         int receiveSequence;
         cMessage *beaconTimeoutMsg;
 
-        AssociatedAPInfo() : APInfo() { receiveSequence = 0; beaconTimeoutMsg = NULL; }
+        AssociatedAPInfo() : APInfo() { receiveSequence = 0; beaconTimeoutMsg = nullptr; }
     };
 
   protected:
@@ -111,11 +111,11 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
     // associated Access Point
     bool isAssociated;
-    cMessage *assocTimeoutMsg;    // if non-NULL: association is in progress
+    cMessage *assocTimeoutMsg;    // if non-nullptr: association is in progress
     AssociatedAPInfo assocAP;
 
   public:
-    Ieee80211MgmtSTA() : host(NULL), interfaceTable(NULL), myIface(NULL), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(NULL) {}
+    Ieee80211MgmtSTA() : host(nullptr), interfaceTable(nullptr), myIface(nullptr), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(nullptr) {}
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -142,7 +142,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     /** Utility function: sends association request */
     virtual void startAssociation(APInfo *ap, simtime_t timeout);
 
-    /** Utility function: looks up AP in our AP list. Returns NULL if not found. */
+    /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
     virtual APInfo *lookupAP(const MACAddress& address);
 
     /** Utility function: clear the AP list, and cancel any pending authentications. */

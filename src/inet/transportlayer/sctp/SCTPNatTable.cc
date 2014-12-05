@@ -55,7 +55,7 @@ SCTPNatEntry *SCTPNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Add
         {
             return *i;
         }
-    return NULL;
+    return nullptr;
 }
 
 SCTPNatEntry *SCTPNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
@@ -70,7 +70,7 @@ SCTPNatEntry *SCTPNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3A
         {
             return *i;
         }
-    return NULL;
+    return nullptr;
 }
 
 SCTPNatEntry *SCTPNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt)
@@ -86,7 +86,7 @@ SCTPNatEntry *SCTPNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalP
             return *i;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPNatEntry *SCTPNatTable::getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt)
@@ -99,7 +99,7 @@ SCTPNatEntry *SCTPNatTable::getLocalInitEntry(L3Address globalAddr, uint16 local
         {
             return *i;
         }
-    return NULL;
+    return nullptr;
 }
 
 SCTPNatEntry *SCTPNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
@@ -112,7 +112,7 @@ SCTPNatEntry *SCTPNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt,
         {
             return *i;
         }
-    return NULL;
+    return nullptr;
 }
 
 void SCTPNatTable::removeEntry(SCTPNatEntry *entry)

@@ -88,7 +88,7 @@ class INET_API TCPSendQueue : public cObject
     /**
      * Ctor.
      */
-    TCPSendQueue() { conn = NULL; }
+    TCPSendQueue() { conn = nullptr; }
 
     /**
      * Virtual dtor.

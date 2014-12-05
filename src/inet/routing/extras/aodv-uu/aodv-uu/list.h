@@ -44,7 +44,7 @@ typedef struct list_t
 } while (0)
 
 #define INIT_LIST_ELM(le) do { \
-    (le)->next = NULL; (le)->prev = NULL; \
+    (le)->next = nullptr; (le)->prev = nullptr; \
 } while (0)
 
 int list_detach(list_t * le);
@@ -63,7 +63,7 @@ int list_add(list_t * head, list_t * le);
 
 #define list_first(head) ((head)->next)
 
-#define list_unattached(le) ((le)->next == NULL && (le)->prev == NULL)
+#define list_unattached(le) ((le)->next == nullptr && (le)->prev == nullptr)
 #else
 
 int list_empty(list_t*);

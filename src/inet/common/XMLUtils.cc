@@ -22,7 +22,7 @@ const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *n
     else if (list.size() == 1)
         return *list.begin();
     else
-        return NULL;
+        return nullptr;
 }
 
 bool parseBool(const char *text)
@@ -57,7 +57,7 @@ void checkTags(const cXMLElement *node, const char *allowed)
 
     cStringTokenizer st(allowed, " ");
     const char *nt;
-    while ((nt = st.nextToken()) != NULL)
+    while ((nt = st.nextToken()) != nullptr)
         tags.push_back(nt);
 
     for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling()) {
@@ -136,7 +136,7 @@ double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double 
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
-        return strtod(xvalue->getNodeValue(), NULL);
+        return strtod(xvalue->getNodeValue(), nullptr);
     else
         return def;
 }
@@ -144,7 +144,7 @@ double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double 
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name)
 {
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
-    return strtod(xvalue->getNodeValue(), NULL);
+    return strtod(xvalue->getNodeValue(), nullptr);
 }
 
 const char *getRequiredAttribute(const cXMLElement& node, const char *attr)

@@ -56,7 +56,7 @@ class INET_API IPv4Route : public cObject, public IRoute
     };
 
   private:
-    IIPv4RoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
+    IIPv4RoutingTable *rt;    ///< the routing table in which this route is inserted, or nullptr
     IPv4Address dest;    ///< Destination
     IPv4Address netmask;    ///< Route mask
     IPv4Address gateway;    ///< Next hop
@@ -76,8 +76,8 @@ class INET_API IPv4Route : public cObject, public IRoute
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
-        metric(0), source(NULL), protocolData(NULL) {}
+    IPv4Route() : rt(nullptr), interfacePtr(nullptr), sourceType(MANUAL), adminDist(dUnknown),
+        metric(0), source(nullptr), protocolData(nullptr) {}
     virtual ~IPv4Route();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -166,7 +166,7 @@ class INET_API IPv4Route : public cObject, public IRoute
 class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
 {
   private:
-    IIPv4RoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
+    IIPv4RoutingTable *rt;    ///< the routing table in which this route is inserted, or nullptr
     IPv4Address origin;    ///< Source network
     IPv4Address originNetmask;    ///< Source network mask
     IPv4Address group;    ///< Multicast group, if unspecified then matches any
@@ -189,7 +189,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     IPv4MulticastRoute& operator=(const IPv4MulticastRoute& obj);
 
   public:
-    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), sourceType(MANUAL), source(NULL), metric(0) {}
+    IPv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
     virtual ~IPv4MulticastRoute();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;

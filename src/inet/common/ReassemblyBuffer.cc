@@ -28,7 +28,7 @@ ReassemblyBuffer::ReassemblyBuffer()
 {
     main.beg = main.end = 0;
     main.islast = false;
-    fragments = NULL;
+    fragments = nullptr;
 }
 
 ReassemblyBuffer::~ReassemblyBuffer()

@@ -31,25 +31,25 @@ namespace tcp {
 
 LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     stackIf(stackIfP),
-    tcp_input_pcb(NULL),
+    tcp_input_pcb(nullptr),
     tcp_ticks(0),
-    tcp_active_pcbs(NULL),
-    tcp_tw_pcbs(NULL),
-    tcp_tmp_pcb(NULL),
-    tcphdr(NULL),
-    iphdr(NULL),
+    tcp_active_pcbs(nullptr),
+    tcp_tw_pcbs(nullptr),
+    tcp_tmp_pcb(nullptr),
+    tcphdr(nullptr),
+    iphdr(nullptr),
     seqno(0),
     ackno(0),
     flags(0),
     tcplen(0),
     recv_flags(0),
-    recv_data(NULL),
-    tcp_bound_pcbs(NULL),
+    recv_data(nullptr),
+    tcp_bound_pcbs(nullptr),
     port(TCP_LOCAL_PORT_RANGE_START),
     iss(6510),
     tcp_timer(0)
 {
-    tcp_listen_pcbs.pcbs = NULL;
+    tcp_listen_pcbs.pcbs = nullptr;
     memset(&inseg, 0, sizeof(inseg));
 }
 
@@ -58,7 +58,7 @@ void LwipTcpLayer::if_receive_packet(int interfaceId, void *data, int datalen)
     struct pbuf *p = pbuf_alloc(PBUF_RAW, datalen, PBUF_RAM);
     memcpy(p->payload, data, datalen);
 
-    tcp_input(p, NULL    /*interface*/);
+    tcp_input(p, nullptr    /*interface*/);
 }
 
 /**
@@ -114,7 +114,7 @@ err_t LwipTcpLayer::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 
 void LwipTcpLayer::memp_free(memp_t type, void *ptr)
 {
-    if ((ptr != NULL) && ((type == MEMP_TCP_PCB) || (type == MEMP_TCP_PCB_LISTEN)))
+    if ((ptr != nullptr) && ((type == MEMP_TCP_PCB) || (type == MEMP_TCP_PCB_LISTEN)))
         stackIf.lwip_free_pcb_event((LwipTcpLayer::tcp_pcb *)ptr);
 
     inet::tcp::memp_free(type, ptr);

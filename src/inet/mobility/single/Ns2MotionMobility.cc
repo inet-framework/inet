@@ -35,7 +35,7 @@ Define_Module(Ns2MotionMobility);
 Ns2MotionMobility::Ns2MotionMobility()
 {
     vecpos = 0;
-    ns2File = NULL;
+    ns2File = nullptr;
     nodeId = 0;
     scrollX = 0;
     scrollY = 0;

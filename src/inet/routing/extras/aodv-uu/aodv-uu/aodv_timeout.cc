@@ -70,7 +70,7 @@ void NS_CLASS route_discovery_timeout(void *arg)
     if (!seek_entry)
         return;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     DEBUG(LOG_DEBUG, 0, "%s", ip_to_str(seek_entry->dest_addr));
 
@@ -153,7 +153,7 @@ void NS_CLASS local_repair_timeout(void *arg)
 {
     rt_table_t *rt;
     struct in_addr rerr_dest;
-    RERR *rerr = NULL;
+    RERR *rerr = nullptr;
 
     rt = (rt_table_t *) arg;
 
@@ -238,7 +238,7 @@ void NS_CLASS route_expire_timeout(void *arg)
 
     if (!rt)
     {
-        alog(LOG_WARNING, 0, __FUNCTION__, "arg was NULL, ignoring timeout!");
+        alog(LOG_WARNING, 0, __FUNCTION__, "arg was nullptr, ignoring timeout!");
         return;
     }
 
@@ -305,7 +305,7 @@ void NS_CLASS hello_timeout(void *arg)
     }
 
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     DEBUG(LOG_DEBUG, 0, "LINK/HELLO FAILURE %s last HELLO: %d",
           ip_to_str(rt->dest_addr), timeval_diff(&now, &rt->last_hello_time));

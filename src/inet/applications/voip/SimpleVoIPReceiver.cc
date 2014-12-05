@@ -62,7 +62,7 @@ void SimpleVoIPReceiver::TalkspurtInfo::addPacket(SimpleVoIPPacket *pk)
 
 SimpleVoIPReceiver::SimpleVoIPReceiver()
 {
-    selfTalkspurtFinished = NULL;
+    selfTalkspurtFinished = nullptr;
 }
 
 SimpleVoIPReceiver::~SimpleVoIPReceiver()
@@ -120,7 +120,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
     }
 
     SimpleVoIPPacket *packet = dynamic_cast<SimpleVoIPPacket *>(msg);
-    if (packet == NULL) {
+    if (packet == nullptr) {
         // TODO: throw exception instead?
         EV_ERROR << "VoIPReceiver: Unknown incoming message: " << msg->getClassName() << endl;
         delete msg;

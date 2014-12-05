@@ -35,7 +35,7 @@
 //  private:
 //    InterfaceEntry *ie; // the interface to be operated on
 //  public:
-//    InterfaceOperation() : ie(NULL) {}
+//    InterfaceOperation() : ie(nullptr) {}
 //    virtual void initialize(cModule *module, StringMap& params);
 //    virtual int getNumStages() const {return STAGE_LAST+1;}
 //    InterfaceEntry *getInterface() const {return ie;}

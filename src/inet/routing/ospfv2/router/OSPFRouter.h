@@ -98,21 +98,21 @@ class Router
 
     /**
      * Returns the pointer to the Area identified by the input areaID, if it's on the Area list,
-     * NULL otherwise.
+     * nullptr otherwise.
      * @param areaID [in] The Area identifier.
      */
     Area *getAreaByID(AreaID areaID);
 
     /**
      * Returns the Area pointer from the Area list which contains the input IPv4 address,
-     * NULL if there's no such area connected to the Router.
+     * nullptr if there's no such area connected to the Router.
      * @param address [in] The IPv4 address whose containing Area we're looking for.
      */
     Area *getAreaByAddr(IPv4Address address);
 
     /**
      * Returns the pointer of the physical Interface identified by the input interface index,
-     * NULL if the Router doesn't have such an interface.
+     * nullptr if the Router doesn't have such an interface.
      * @param ifIndex [in] The interface index to look for.
      */
     Interface *getNonVirtualInterface(unsigned char ifIndex);
@@ -133,7 +133,7 @@ class Router
      * @param lsaKey  [in] Look for the LSA which is identified by this key.
      * @param areaID  [in] In case of Router, Network and Summary LSAs, look in the Area's database
      *                     identified by this parameter.
-     * @return The pointer to the LSA if it was found, NULL otherwise.
+     * @return The pointer to the LSA if it was found, nullptr otherwise.
      */
     OSPFLSA *findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
 
@@ -174,7 +174,7 @@ class Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = NULL, Neighbor *neighbor = NULL);
+    bool floodLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input IPv4 address falls into any of the Router's Areas' configured
@@ -197,13 +197,13 @@ class Router
     bool isDestinationUnreachable(OSPFLSA *lsa) const;
 
     /**
-     * Do a lookup in either the input OSPF routing table, or if it's NULL then in the Router's own routing table.
+     * Do a lookup in either the input OSPF routing table, or if it's nullptr then in the Router's own routing table.
      * @sa RFC2328 Section 11.1.
      * @param destination [in] The destination to look up in the routing table.
      * @param table       [in] The routing table to do the lookup in.
      * @return The RoutingTableEntry describing the input destination if there's one, false otherwise.
      */
-    RoutingTableEntry *lookup(IPv4Address destination, std::vector<RoutingTableEntry *> *table = NULL) const;
+    RoutingTableEntry *lookup(IPv4Address destination, std::vector<RoutingTableEntry *> *table = nullptr) const;
 
     /**
      * Rebuilds the routing table from scratch(based on the LSA database).
@@ -220,7 +220,7 @@ class Router
      * @return The containing preconfigured address range if found,
      *         NULL_IPV4ADDRESSRANGE otherwise.
      */
-    IPv4AddressRange getContainingAddressRange(const IPv4AddressRange& addressRange, bool *advertise = NULL) const;
+    IPv4AddressRange getContainingAddressRange(const IPv4AddressRange& addressRange, bool *advertise = nullptr) const;
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
@@ -257,14 +257,14 @@ class Router
      * @param skipSelfOriginated [in] Whether to disregard this LSA if it was
      *                                self-originated.
      * @param fromRoutingTable   [in] The Routing Table from which to select the
-     *                                preferred RoutingTableEntry. If it is NULL
+     *                                preferred RoutingTableEntry. If it is nullptr
      *                                then the router's current routing table is
      *                                used instead.
-     * @return The preferred RoutingTableEntry, or NULL if no such entry exists.
+     * @return The preferred RoutingTableEntry, or nullptr if no such entry exists.
      * @sa RFC2328 Section 16.4. points(1) through(3)
      * @sa Area::originateSummaryLSA
      */
-    RoutingTableEntry *getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = NULL);
+    RoutingTableEntry *getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = nullptr);
 
   private:
     /**
@@ -279,14 +279,14 @@ class Router
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
-     * @return The pointer to the AS External LSA if it was found, NULL otherwise.
+     * @return The pointer to the AS External LSA if it was found, nullptr otherwise.
      */
     ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
-     * @return The const pointer to the AS External LSA if it was found, NULL otherwise.
+     * @return The const pointer to the AS External LSA if it was found, nullptr otherwise.
      */
     const ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey) const;
 
@@ -366,7 +366,7 @@ class Router
      * Selects the least cost RoutingTableEntry from the input std::vector of
      * RoutingTableEntries.
      * @param entries [in] The RoutingTableEntries to choose the least cost one from.
-     * @return The least cost entry or NULL if entries is empty.
+     * @return The least cost entry or nullptr if entries is empty.
      */
     RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<RoutingTableEntry *>& entries) const;
 };

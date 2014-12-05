@@ -99,7 +99,7 @@ L3Address UDPBasicApp::chooseDestAddr()
     if (destAddresses[k].isLinkLocal()) {    // KLUDGE for IPv6
         const char *destAddrs = par("destAddresses");
         cStringTokenizer tokenizer(destAddrs);
-        const char *token = NULL;
+        const char *token = nullptr;
 
         for (int i = 0; i <= k; ++i)
             token = tokenizer.nextToken();
@@ -132,7 +132,7 @@ void UDPBasicApp::processStart()
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
 
-    while ((token = tokenizer.nextToken()) != NULL) {
+    while ((token = tokenizer.nextToken()) != nullptr) {
         L3Address result;
         L3AddressResolver().tryResolve(token, result);
         if (result.isUnspecified())

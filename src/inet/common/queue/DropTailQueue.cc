@@ -49,14 +49,14 @@ cMessage *DropTailQueue::enqueue(cMessage *msg)
     else {
         queue.insert(msg);
         emit(queueLengthSignal, queue.length());
-        return NULL;
+        return nullptr;
     }
 }
 
 cMessage *DropTailQueue::dequeue()
 {
     if (queue.empty())
-        return NULL;
+        return nullptr;
 
     cMessage *msg = (cMessage *)queue.pop();
 

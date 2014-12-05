@@ -27,7 +27,7 @@ inline bool _isNetworkNode(cModule *mod)
 
 bool isNetworkNode(cModule *mod)
 {
-    return (mod != NULL) ? _isNetworkNode(mod) : false;
+    return (mod != nullptr) ? _isNetworkNode(mod) : false;
 }
 
 static cModule *findSubmodRecursive(cModule *curmod, const char *name)
@@ -40,12 +40,12 @@ static cModule *findSubmodRecursive(cModule *curmod, const char *name)
         if (foundmod)
             return foundmod;
     }
-    return NULL;
+    return nullptr;
 }
 
 cModule *findModuleWherever(const char *name, cModule *from)
 {
-    cModule *mod = NULL;
+    cModule *mod = nullptr;
     for (cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
         mod = findSubmodRecursive(curmod, name);
     return mod;
@@ -53,7 +53,7 @@ cModule *findModuleWherever(const char *name, cModule *from)
 
 cModule *findModuleWhereverInNode(const char *name, cModule *from)
 {
-    cModule *mod = NULL;
+    cModule *mod = nullptr;
     for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
         mod = findSubmodRecursive(curmod, name);
         if (mod || _isNetworkNode(curmod))
@@ -64,7 +64,7 @@ cModule *findModuleWhereverInNode(const char *name, cModule *from)
 
 cModule *findModuleSomewhereUp(const char *name, cModule *from)
 {
-    cModule *mod = NULL;
+    cModule *mod = nullptr;
     for (cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
         mod = curmod->getSubmodule(name);
     return mod;
@@ -76,7 +76,7 @@ cModule *findContainingNode(cModule *from)
         if (_isNetworkNode(curmod))
             return curmod;
     }
-    return NULL;
+    return nullptr;
 }
 
 cModule *getContainingNode(cModule *from)
@@ -89,13 +89,13 @@ cModule *getContainingNode(cModule *from)
 
 cModule *findModuleUnderContainingNode(cModule *from)
 {
-    cModule *prevmod = NULL;
+    cModule *prevmod = nullptr;
     for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
         if (_isNetworkNode(curmod))
             return prevmod;
         prevmod = curmod;
     }
-    return NULL;
+    return nullptr;
 }
 
 } // namespace inet

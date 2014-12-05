@@ -35,7 +35,7 @@ class IPSocket
     void sendToIP(cMessage *message);
 
   public:
-    IPSocket(cGate *gateToIP = NULL) { this->gateToIP = gateToIP; }
+    IPSocket(cGate *gateToIP = nullptr) { this->gateToIP = gateToIP; }
     virtual ~IPSocket() {}
 
     /**

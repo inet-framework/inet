@@ -31,8 +31,8 @@ namespace physicallayer {
 
 NarrowbandReceiverBase::NarrowbandReceiverBase() :
     SNIRReceiverBase(),
-    modulation(NULL),
-    errorModel(NULL),
+    modulation(nullptr),
+    errorModel(nullptr),
     energyDetection(W(sNaN)),
     sensitivity(W(sNaN)),
     carrierFrequency(Hz(sNaN)),

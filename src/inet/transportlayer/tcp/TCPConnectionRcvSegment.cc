@@ -44,7 +44,7 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcA
     // This segment doesn't belong to any connection, so this object
     // must be a temp object created solely for the purpose of calling us
 
-    ASSERT(state == NULL);
+    ASSERT(state == nullptr);
 
     EV_INFO << "Segment doesn't belong to any existing connection\n";
 
@@ -541,7 +541,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     //
                     cPacket *msg;
 
-                    while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != NULL) {
+                    while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
                         msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                         TCPCommand *cmd = new TCPCommand();
                         cmd->setConnId(connId);

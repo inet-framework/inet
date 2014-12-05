@@ -117,7 +117,7 @@ void NS_CLASS rrep_ack_process(RREP_ack * rrep_ack, int rrep_acklen,
 #ifdef OMNETPP
     totalRrepAckRec++;
 #endif
-    if (rt == NULL)
+    if (rt == nullptr)
     {
         DEBUG(LOG_WARNING, 0, "No RREP_ACK expected for %s", ip_to_str(ip_src));
 
@@ -132,10 +132,10 @@ void NS_CLASS rrep_ack_process(RREP_ack * rrep_ack, int rrep_acklen,
 AODV_ext *NS_CLASS rrep_add_ext(RREP * rrep, int type, unsigned int offset,
                                 int len, char *data)
 {
-    AODV_ext *ext = NULL;
+    AODV_ext *ext = nullptr;
 #ifndef OMNETPP
     if (offset < RREP_SIZE)
-        return NULL;
+        return nullptr;
 
     ext = (AODV_ext *) ((char *) rrep + offset);
 
@@ -157,7 +157,7 @@ void NS_CLASS rrep_send(RREP * rrep, rt_table_t * rev_rt,
 
     if (!rev_rt)
     {
-        DEBUG(LOG_WARNING, 0, "Can't send RREP, rev_rt = NULL!");
+        DEBUG(LOG_WARNING, 0, "Can't send RREP, rev_rt = nullptr!");
         return;
     }
 
@@ -229,7 +229,7 @@ void NS_CLASS rrep_forward(RREP * rrep, int size, rt_table_t * rev_rt,
     /* Sanity checks... */
     if (!fwd_rt || !rev_rt)
     {
-        DEBUG(LOG_WARNING, 0, "Could not forward RREP because of NULL route!");
+        DEBUG(LOG_WARNING, 0, "Could not forward RREP because of nullptr route!");
         return;
     }
 

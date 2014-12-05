@@ -44,7 +44,7 @@ OLSR_state::find_mprsel_tuple(const nsaddr_t &main_addr)
         if (tuple->main_addr() == main_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -98,7 +98,7 @@ OLSR_state::find_nb_tuple(const nsaddr_t & main_addr)
         if (tuple->nb_main_addr() == main_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 OLSR_nb_tuple*
@@ -110,7 +110,7 @@ OLSR_state::find_sym_nb_tuple(const nsaddr_t & main_addr)
         if (tuple->nb_main_addr() == main_addr && tuple->getStatus() == OLSR_STATUS_SYM)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 OLSR_nb_tuple*
@@ -122,7 +122,7 @@ OLSR_state::find_nb_tuple(const nsaddr_t & main_addr, uint8_t willingness)
         if (tuple->nb_main_addr() == main_addr && tuple->willingness() == willingness)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -169,7 +169,7 @@ OLSR_state::find_nb2hop_tuple(const nsaddr_t & nb_main_addr, const nsaddr_t & nb
         if (tuple->nb_main_addr() == nb_main_addr && tuple->nb2hop_addr() == nb2hop_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -265,7 +265,7 @@ OLSR_state::find_dup_tuple(const nsaddr_t & addr, uint16_t seq_num)
         if (tuple->getAddr() == addr && tuple->seq_num() == seq_num)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -298,7 +298,7 @@ OLSR_state::find_link_tuple(const nsaddr_t & iface_addr)
         if (tuple->nb_iface_addr() == iface_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 OLSR_link_tuple*
@@ -315,7 +315,7 @@ OLSR_state::find_sym_link_tuple(const nsaddr_t & iface_addr, double now)
                 break;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -348,7 +348,7 @@ OLSR_state::find_topology_tuple(const nsaddr_t & dest_addr, const nsaddr_t & las
         if (tuple->dest_addr() == dest_addr && tuple->last_addr() == last_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 OLSR_topology_tuple*
@@ -360,7 +360,7 @@ OLSR_state::find_newer_topology_tuple(const nsaddr_t &last_addr, uint16_t ansn)
         if (tuple->last_addr() == last_addr && tuple->seq() > ansn)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -444,7 +444,7 @@ OLSR_state::find_ifaceassoc_tuple(const nsaddr_t & iface_addr)
         if (tuple->iface_addr() == iface_addr)
             return tuple;
     }
-    return NULL;
+    return nullptr;
 }
 
 void

@@ -60,9 +60,9 @@ namespace inetmanet {
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-/// Defines NULL as zero, used for pointers.
-#ifndef NULL
-#define NULL 0
+/// Defines nullptr as zero, used for pointers.
+#ifndef nullptr
+#define nullptr 0
 #endif
 
 #define IP_BROADCAST     ((uint32_t) 0xffffffff)

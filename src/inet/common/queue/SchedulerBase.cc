@@ -23,7 +23,7 @@
 namespace inet {
 
 SchedulerBase::SchedulerBase()
-    : packetsRequestedFromUs(0), packetsToBeRequestedFromInputs(0), outGate(NULL)
+    : packetsRequestedFromUs(0), packetsToBeRequestedFromInputs(0), outGate(nullptr)
 {
 }
 
@@ -117,7 +117,7 @@ cMessage *SchedulerBase::pop()
         if (!(*it)->isEmpty())
             return (*it)->pop();
 
-    return NULL;
+    return nullptr;
 }
 
 void SchedulerBase::addListener(IPassiveQueueListener *listener)

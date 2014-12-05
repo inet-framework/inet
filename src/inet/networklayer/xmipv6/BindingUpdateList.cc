@@ -114,7 +114,7 @@ void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Addres
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
     // if it is not yet existing, create it
-    if (entry == NULL) {
+    if (entry == nullptr) {
         /*bindingUpdateList[dest].destAddress = dest;
            entry = & bindingUpdateList[dest];
            initializeBUValues(*entry);*/
@@ -177,7 +177,7 @@ void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Addres
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
     // if it is not yet existing, create it
-    if (entry == NULL) {
+    if (entry == nullptr) {
         bindingUpdateList[dest].destAddress = dest;
         entry = &bindingUpdateList[dest];
         initializeBUValues(*entry);
@@ -199,14 +199,14 @@ BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::lookup(const IPv6A
 {
     BindingUpdateList6::iterator i = bindingUpdateList.find(dest);
 
-    return (i == bindingUpdateList.end()) ? NULL : &(i->second);
+    return (i == bindingUpdateList.end()) ? nullptr : &(i->second);
 }
 
 BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::fetch(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL)
+    if (entry == nullptr)
         return createBULEntry(dest);
     else
         return entry;
@@ -234,7 +234,7 @@ int BindingUpdateList::generateBAuthData(const IPv6Address& dest, const IPv6Addr
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL) {
+    if (entry == nullptr) {
         EV_WARN << "Impossible to generate Binding Authorization Data as CN is not existing in BUL!\n";
         return 0;
     }
@@ -262,7 +262,7 @@ int BindingUpdateList::generateCareOfToken(const IPv6Address& CoA, int nonce)
 void BindingUpdateList::resetHomeToken(const IPv6Address& dest, const IPv6Address& hoa)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     entry->tokenH = UNDEFINED_TOKEN;
     //entry->sentHoTI = 0;
@@ -271,7 +271,7 @@ void BindingUpdateList::resetHomeToken(const IPv6Address& dest, const IPv6Addres
 void BindingUpdateList::resetCareOfToken(const IPv6Address& dest, const IPv6Address& hoa)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     entry->tokenC = UNDEFINED_TOKEN;
     //entry->sentCoTI = 0;
@@ -280,7 +280,7 @@ void BindingUpdateList::resetCareOfToken(const IPv6Address& dest, const IPv6Addr
 bool BindingUpdateList::isHomeTokenAvailable(const IPv6Address& dest, InterfaceEntry *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     return entry->tokenH != UNDEFINED_TOKEN &&
            (entry->sentHoTI + ie->ipv6Data()->_getMaxTokenLifeTime()) > simTime();
@@ -289,7 +289,7 @@ bool BindingUpdateList::isHomeTokenAvailable(const IPv6Address& dest, InterfaceE
 bool BindingUpdateList::isCareOfTokenAvailable(const IPv6Address& dest, InterfaceEntry *ie)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     return entry->tokenC != UNDEFINED_TOKEN &&
            (entry->sentCoTI + ie->ipv6Data()->_getMaxTokenLifeTime()) > simTime();
@@ -305,7 +305,7 @@ uint BindingUpdateList::getSequenceNumber(const IPv6Address& dest)
     // search for entry
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL)
+    if (entry == nullptr)
         return 0;
 
     return entry->sequenceNumber;
@@ -316,7 +316,7 @@ const IPv6Address& BindingUpdateList::getCoA(const IPv6Address& dest)
     // search for entry
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     return entry->careOfAddress;
 }
@@ -335,7 +335,7 @@ bool BindingUpdateList::isValidBinding(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL)
+    if (entry == nullptr)
         return false;
 
     return entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(simTime()));
@@ -345,7 +345,7 @@ bool BindingUpdateList::isBindingAboutToExpire(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL)
+    if (entry == nullptr)
         return true;
 
     return entry->bindingLifetime < SIMTIME_DBL(simTime()) - PRE_BINDING_EXPIRY;
@@ -355,7 +355,7 @@ bool BindingUpdateList::sentBindingUpdate(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    if (entry == NULL)
+    if (entry == nullptr)
         return false;
 
     return (entry->BAck || (entry->tokenH != UNDEFINED_TOKEN && entry->tokenC != UNDEFINED_TOKEN))
@@ -366,7 +366,7 @@ void BindingUpdateList::removeBinding(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     if ((entry->tokenH != UNDEFINED_TOKEN) || (entry->tokenC != UNDEFINED_TOKEN))
         // for CNs, we just delete all entries
@@ -380,7 +380,7 @@ void BindingUpdateList::suspendBinding(const IPv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     entry->BAck = false;
 }
@@ -389,7 +389,7 @@ bool BindingUpdateList::recentlySentCOTI(const IPv6Address& dest, InterfaceEntry
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     return entry->sentCoTI + ie->ipv6Data()->_getMaxTokenLifeTime() / 3 > simTime();
 }
@@ -398,7 +398,7 @@ bool BindingUpdateList::recentlySentHOTI(const IPv6Address& dest, InterfaceEntry
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
 
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     return entry->sentHoTI + ie->ipv6Data()->_getMaxTokenLifeTime() / 3 > simTime();
 }

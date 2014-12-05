@@ -363,7 +363,7 @@ int RTP::resolveMTU()
     IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
     const InterfaceEntry *rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 
-    if (rtie == NULL)
+    if (rtie == nullptr)
         throw cRuntimeError("No interface for remote address %s found!", _destinationAddress.str().c_str());
 
     int pmtu = rtie->getMTU();
@@ -373,7 +373,7 @@ int RTP::resolveMTU()
 void RTP::createProfile(const char *profileName)
 {
     cModuleType *moduleType = cModuleType::find(profileName);
-    if (moduleType == NULL)
+    if (moduleType == nullptr)
         throw cRuntimeError("Profile type `%s' not found", profileName);
 
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));

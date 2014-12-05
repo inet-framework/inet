@@ -34,8 +34,8 @@ StateBasedEnergyConsumer::StateBasedEnergyConsumer() :
     receiverReceivingPowerConsumption(W(sNaN)),
     transmitterIdlePowerConsumption(W(sNaN)),
     transmitterTransmittingPowerConsumption(W(sNaN)),
-    radio(NULL),
-    energySource(NULL),
+    radio(nullptr),
+    energySource(nullptr),
     energyConsumerId(-1)
 {
 }

@@ -312,7 +312,7 @@ void RSVP::setupHello()
 
     cStringTokenizer tokenizer(par("peers"));
     const char *token;
-    while ((token = tokenizer.nextToken()) != NULL) {
+    while ((token = tokenizer.nextToken()) != nullptr) {
         ASSERT(ift->getInterfaceByName(token));
 
         IPv4Address peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
@@ -1143,10 +1143,10 @@ RSVP::PathStateBlock_t *RSVP::createPSB(RSVPPathMsg *msg)
     IPv4Address OI;
 
     if (!evalNextHopInterface(destAddr, ERO, OI))
-        return NULL;
+        return nullptr;
 
     if (tedmod->isLocalAddress(OI) && !doCACCheck(msg->getSession(), msg->getSenderTspec(), OI))
-        return NULL; // not enough resources
+        return nullptr; // not enough resources
 
     PathStateBlock_t psbEle;
 
@@ -1191,10 +1191,10 @@ RSVP::PathStateBlock_t *RSVP::createIngressPSB(const traffic_session_t& session,
     IPv4Address OI;
 
     if (!evalNextHopInterface(session.sobj.DestAddress, ERO, OI))
-        return NULL;
+        return nullptr;
 
     if (!doCACCheck(session.sobj, path.tspec, OI))
-        return NULL;
+        return nullptr;
 
     EV_INFO << "CACCheck passed, creating PSB" << endl;
 
@@ -1582,7 +1582,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
 
     // find matching RSB *******************************************************
 
-    ResvStateBlock_t *rsb = NULL;
+    ResvStateBlock_t *rsb = nullptr;
     for (RSBVector::iterator it = RSBList.begin(); it != RSBList.end(); it++) {
         if (!(msg->isInSession(&it->Session_Object)))
             continue;
@@ -1978,7 +1978,7 @@ RSVP::ResvStateBlock_t *RSVP::findRSB(const SessionObj_t& session, const SenderT
 
         // don't break here, may be in different (if outInterface is different)
     }
-    return NULL;
+    return nullptr;
 }
 
 RSVP::PathStateBlock_t *RSVP::findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender)
@@ -1994,7 +1994,7 @@ RSVP::PathStateBlock_t *RSVP::findPSB(const SessionObj_t& session, const SenderT
         return &(*it);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
@@ -2006,7 +2006,7 @@ RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
         return &PSBList[i];
     }
     ASSERT(false);
-    return NULL;    // prevent warning
+    return nullptr;    // prevent warning
 }
 
 RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
@@ -2018,7 +2018,7 @@ RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
         return &RSBList[i];
     }
     ASSERT(false);
-    return NULL;    // prevent warning
+    return nullptr;    // prevent warning
 }
 
 RSVP::HelloState_t *RSVP::findHello(IPv4Address peer)
@@ -2029,7 +2029,7 @@ RSVP::HelloState_t *RSVP::findHello(IPv4Address peer)
 
         return &(*it);
     }
-    return NULL;
+    return nullptr;
 }
 
 bool operator==(const SessionObj_t& a, const SessionObj_t& b)

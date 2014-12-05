@@ -49,7 +49,7 @@ int EnergySourceBase::addEnergyConsumer(const IEnergyConsumer *energyConsumer)
 void EnergySourceBase::removeEnergyConsumer(int energyConsumerId)
 {
     energyConsumers[energyConsumerId].consumedPower = W(0);
-    energyConsumers[energyConsumerId].energyConsumer = NULL;
+    energyConsumers[energyConsumerId].energyConsumer = nullptr;
     totalConsumedPower = computeTotalConsumedPower();
 }
 

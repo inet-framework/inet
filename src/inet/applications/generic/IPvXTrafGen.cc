@@ -34,10 +34,10 @@ simsignal_t IPvXTrafGen::sentPkSignal = registerSignal("sentPk");
 
 IPvXTrafGen::IPvXTrafGen()
 {
-    timer = NULL;
-    nodeStatus = NULL;
-    packetLengthPar = NULL;
-    sendIntervalPar = NULL;
+    timer = nullptr;
+    nodeStatus = nullptr;
+    packetLengthPar = nullptr;
+    sendIntervalPar = nullptr;
 }
 
 IPvXTrafGen::~IPvXTrafGen()
@@ -96,7 +96,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
             const char *destAddrs = par("destAddresses");
             cStringTokenizer tokenizer(destAddrs);
             const char *token;
-            while ((token = tokenizer.nextToken()) != NULL) {
+            while ((token = tokenizer.nextToken()) != nullptr) {
                 L3Address result;
                 L3AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
@@ -207,7 +207,7 @@ void IPvXTrafGen::printPacket(cPacket *msg)
     int protocol = -1;
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-    if (ctrl != NULL) {
+    if (ctrl != nullptr) {
         src = ctrl->getSourceAddress();
         dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();

@@ -88,9 +88,9 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
         L3Address::getInstance().get_subnetaddr(DEV_NR(NS_DEV_NR).ipaddr.s_addr);
     DEBUG(LOG_DEBUG, 0, "myaddr=%d, dest=%d dstnet=%s subnet=%s",
           DEV_NR(NS_DEV_NR).ipaddr.s_addr, dest.s_addr, dstnet, subnet);
-    if (subnet != NULL)
+    if (subnet != nullptr)
     {
-        if (dstnet != NULL)
+        if (dstnet != nullptr)
         {
             if (strcmp(dstnet, subnet) != 0)
             {
@@ -101,7 +101,7 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
         }
         delete[]subnet;
     }
-    assert(dstnet == NULL);
+    assert(dstnet == nullptr);
     return HOST_UNKNOWN;
 #else
     InterfaceEntry *   ie;

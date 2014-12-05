@@ -183,7 +183,7 @@ static inline void *__tbl_find(struct tbl *t, void *id, criteria_t crit)
         if (crit(pos, id))
             return pos;
     }
-    return NULL;
+    return nullptr;
 }
 
 static inline void *__tbl_detach(struct tbl *t, dsr_list_t * l)
@@ -191,7 +191,7 @@ static inline void *__tbl_detach(struct tbl *t, dsr_list_t * l)
     //int len;
 
     if (TBL_EMPTY(t))
-        return NULL;
+        return nullptr;
 
     list_del(l);
 
@@ -267,7 +267,7 @@ static inline void *tbl_find_detach(struct tbl *t, void *id, criteria_t crit)
     if (!e)
     {
         DSR_WRITE_UNLOCK(&t->lock);
-        return NULL;
+        return nullptr;
     }
     list_del(e);
     t->len--;
@@ -296,7 +296,7 @@ static inline void *tbl_detach_first(struct tbl *t)
     if (TBL_EMPTY(t))
     {
         DSR_WRITE_UNLOCK(&t->lock);
-        return NULL;
+        return nullptr;
     }
 
     e = TBL_FIRST(t);
@@ -409,7 +409,7 @@ static inline void tbl_flush(struct tbl *t, do_t at_flush)
         list_del(pos);
 
         if (at_flush)
-            at_flush(pos, NULL);
+            at_flush(pos, nullptr);
 
         t->len--;
         FREE(pos);

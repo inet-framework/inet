@@ -62,7 +62,7 @@ void HttpServerBase::initialize(int stage)
         httpProtocol = par("httpProtocol");
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if (rootelement == NULL)
+        if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 
         // Initialize the distribution objects for random browsing
@@ -72,65 +72,65 @@ void HttpServerBase::initialize(int stage)
 
         // The reply delay
         cXMLElement *element = rootelement->getFirstChildWithTag("replyDelay");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Reply delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReplyDelay = rdFactory.create(attributes);
-        if (rdReplyDelay == NULL)
+        if (rdReplyDelay == nullptr)
             throw cRuntimeError("Reply delay random object could not be created");
 
         // HTML page size
         element = rootelement->getFirstChildWithTag("htmlPageSize");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("HTML page size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdHtmlPageSize = rdFactory.create(attributes);
-        if (rdHtmlPageSize == NULL)
+        if (rdHtmlPageSize == nullptr)
             throw cRuntimeError("HTML page size random object could not be created");
 
         // Text resource size
         element = rootelement->getFirstChildWithTag("textResourceSize");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Text resource size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdTextResourceSize = rdFactory.create(attributes);
-        if (rdTextResourceSize == NULL)
+        if (rdTextResourceSize == nullptr)
             throw cRuntimeError("Text resource size random object could not be created");
 
         // Image resource size
         element = rootelement->getFirstChildWithTag("imageResourceSize");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Image resource size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdImageResourceSize = rdFactory.create(attributes);
-        if (rdImageResourceSize == NULL)
+        if (rdImageResourceSize == nullptr)
             throw cRuntimeError("Image resource size random object could not be created");
 
         // Number of resources per page
         element = rootelement->getFirstChildWithTag("numResources");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Number of resources parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdNumResources = rdFactory.create(attributes);
-        if (rdNumResources == NULL)
+        if (rdNumResources == nullptr)
             throw cRuntimeError("Number of resources random object could not be created");
 
         // Text/Image resources ratio
         element = rootelement->getFirstChildWithTag("textImageResourceRatio");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Text/image resource ratio parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdTextImageResourceRatio = rdFactory.create(attributes);
-        if (rdTextImageResourceRatio == NULL)
+        if (rdTextImageResourceRatio == nullptr)
             throw cRuntimeError("Text/image resource ratio random object could not be created");
 
         // Error message size
         element = rootelement->getFirstChildWithTag("errorMessageSize");
-        if (element == NULL)
+        if (element == nullptr)
             throw cRuntimeError("Error message size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdErrorMsgSize = rdFactory.create(attributes);
-        if (rdErrorMsgSize == NULL)
+        if (rdErrorMsgSize == nullptr)
             throw cRuntimeError("Error message size random object could not be created");
 
         activationTime = par("activationTime");
@@ -204,7 +204,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
 cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
-    if (request == NULL)
+    if (request == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
@@ -214,7 +214,7 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
     if (extractServerName(request->targetUrl()) != hostName) {
         // This should never happen but lets check
         throw cRuntimeError("Received message intended for '%s'", request->targetUrl());    // TODO: DEBUG HERE
-        return NULL;
+        return nullptr;
     }
 
     HttpReplyMessage *replymsg;
@@ -242,7 +242,7 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
         replymsg = generateErrorReply(request, 400);
     }
 
-    if (replymsg != NULL)
+    if (replymsg != nullptr)
         logResponse(replymsg);
 
     return replymsg;
@@ -399,7 +399,7 @@ void HttpServerBase::registerWithController()
 {
     // Find controller object and register
     HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
-    if (controller == NULL)
+    if (controller == nullptr)
         throw cRuntimeError("Controller module not found");
     controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }

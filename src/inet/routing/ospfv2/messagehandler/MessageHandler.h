@@ -49,13 +49,13 @@ class MessageHandler : public IMessageHandler
     void messageReceived(cMessage *message);
     void handleTimer(cMessage *timer);
 
-    void processPacket(OSPFPacket *packet, Interface *unused1 = NULL, Neighbor *unused2 = NULL);
+    void processPacket(OSPFPacket *packet, Interface *unused1 = nullptr, Neighbor *unused2 = nullptr);
 
     void sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl = 1);
     void clearTimer(cMessage *timer);
     void startTimer(cMessage *timer, simtime_t delay);
 
-    void printEvent(const char *eventString, const Interface *onInterface = NULL, const Neighbor *forNeighbor = NULL) const;
+    void printEvent(const char *eventString, const Interface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
     void printHelloPacket(const OSPFHelloPacket *helloPacket, IPv4Address destination, int outputIfIndex) const;
     void printDatabaseDescriptionPacket(const OSPFDatabaseDescriptionPacket *ddPacket, IPv4Address destination, int outputIfIndex) const;
     void printLinkStateRequestPacket(const OSPFLinkStateRequestPacket *requestPacket, IPv4Address destination, int outputIfIndex) const;

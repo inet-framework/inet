@@ -262,7 +262,7 @@ const char *IPv6Address::scopeName(Scope scope)
 
 void IPv6Address::constructMask(int prefixLength, uint32 *mask)
 {
-    ASSERT(prefixLength >= 0 && prefixLength <= 128 && mask != NULL);
+    ASSERT(prefixLength >= 0 && prefixLength <= 128 && mask != nullptr);
 
     // create a mask based on the prefix length.
     if (prefixLength == 0) {

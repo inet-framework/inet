@@ -214,8 +214,8 @@ static inline int set_confval(enum confval cv, unsigned int val)
 static inline void dsr_node_init(struct dsr_node *dn, char *ifname)
 {
     int i;
-    dn->slave_indev = NULL;
-    dn->slave_dev = NULL;
+    dn->slave_indev = nullptr;
+    dn->slave_dev = nullptr;
     memcpy(dn->slave_ifname, ifname, IFNAMSIZ);
 
     spin_lock_init(&dn->lock);

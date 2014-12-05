@@ -65,7 +65,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
 
     rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
-    if (rtie == NULL) {
+    if (rtie == nullptr) {
         throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
@@ -248,7 +248,7 @@ const L3Address SCTPDataVariables::zeroAddress = L3Address();
 
 SCTPDataVariables::SCTPDataVariables()
 {
-    userData = NULL;
+    userData = nullptr;
     ordered = true;
     len = 0;
     tsn = 0;
@@ -268,17 +268,17 @@ SCTPDataVariables::SCTPDataVariables()
     hasBeenFastRetransmitted = false;
     countsAsOutstanding = false;
     ibit = false;
-    queuedOnPath = NULL;
-    ackedOnPath = NULL;
+    queuedOnPath = nullptr;
+    ackedOnPath = nullptr;
     hasBeenMoved = false;
     hasBeenTimerBasedRtxed = false;
     wasDropped = false;
     wasPktDropped = false;
     firstSendTime = 0;
     sendForwardIfAbandoned = false;
-    lastDestination = NULL;
-    nextDestination = NULL;
-    initialDestination = NULL;
+    lastDestination = nullptr;
+    nextDestination = nullptr;
+    initialDestination = nullptr;
     numberOfTransmissions = 0;
     numberOfRetransmissions = 0;
     booksize = 0;
@@ -322,15 +322,15 @@ SCTPStateVariables::SCTPStateVariables()
     peerPktDrop = false;
     appSendAllowed = true;
     noMoreOutstanding = false;
-    primaryPath = NULL;
-    lastDataSourcePath = NULL;
-    resetChunk = NULL;
-    asconfChunk = NULL;
-    shutdownChunk = NULL;
-    initChunk = NULL;
-    cookieChunk = NULL;
-    sctpmsg = NULL;
-    sctpMsg = NULL;
+    primaryPath = nullptr;
+    lastDataSourcePath = nullptr;
+    resetChunk = nullptr;
+    asconfChunk = nullptr;
+    shutdownChunk = nullptr;
+    initChunk = nullptr;
+    cookieChunk = nullptr;
+    sctpmsg = nullptr;
+    sctpMsg = nullptr;
     bytesToRetransmit = 0;
     initRexmitTimeout = SCTP_TIMEOUT_INIT_REXMIT;
     localRwnd = SCTP_DEFAULT_ARWND;
@@ -425,15 +425,15 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     inboundStreams = SCTP_DEFAULT_INBOUND_STREAMS;
     outboundStreams = SCTP_DEFAULT_OUTBOUND_STREAMS;
     // queues and algorithm will be created on active or passive open
-    transmissionQ = NULL;
-    retransmissionQ = NULL;
-    sctpAlgorithm = NULL;
-    state = NULL;
+    transmissionQ = nullptr;
+    retransmissionQ = nullptr;
+    sctpAlgorithm = nullptr;
+    state = nullptr;
     sackPeriod = SACK_DELAY;
 
-    cumTsnAck = NULL;
-    sendQueue = NULL;
-    numGapBlocks = NULL;
+    cumTsnAck = nullptr;
+    sendQueue = nullptr;
+    numGapBlocks = nullptr;
 
     qCounter.roomSumSendStreams = 0;
     qCounter.bookedSumSendStreams = 0;
@@ -659,10 +659,10 @@ SCTPAssociation::~SCTPAssociation()
     delete EndToEndDelay;
 
     int i = 0;
-    while (streamThroughputVectors[i] != NULL) {
+    while (streamThroughputVectors[i] != nullptr) {
         delete streamThroughputVectors[i++];
     }
-    if (assocThroughputVector != NULL)
+    if (assocThroughputVector != nullptr)
         delete assocThroughputVector;
     if (FairStartTimer)
         delete cancelEvent(FairStartTimer);
@@ -679,7 +679,7 @@ SCTPAssociation::~SCTPAssociation()
 
 bool SCTPAssociation::processTimer(cMessage *msg)
 {
-    SCTPPathVariables *path = NULL;
+    SCTPPathVariables *path = nullptr;
 
     EV_INFO << msg->getName() << " timer expired at " << simulation.getSimTime() << "\n";
 
@@ -711,16 +711,16 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         sendAbort();
         sctpMain->removeAssociation(this);
     }
-    else if (path != NULL && msg == path->HeartbeatIntervalTimer) {
+    else if (path != nullptr && msg == path->HeartbeatIntervalTimer) {
         process_TIMEOUT_HEARTBEAT_INTERVAL(path, path->forceHb);
     }
-    else if (path != NULL && msg == path->HeartbeatTimer) {
+    else if (path != nullptr && msg == path->HeartbeatTimer) {
         process_TIMEOUT_HEARTBEAT(path);
     }
-    else if (path != NULL && msg == path->T3_RtxTimer) {
+    else if (path != nullptr && msg == path->T3_RtxTimer) {
         process_TIMEOUT_RTX(path);
     }
-    else if (path != NULL && msg == path->CwndTimer) {
+    else if (path != nullptr && msg == path->CwndTimer) {
         (this->*ccFunctions.ccUpdateAfterCwndTimeout)(path);
     }
     else if (strcmp(msg->getName(), "StartTesting") == 0) {
@@ -731,10 +731,10 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         //}
         // todo: testing was removed.
     }
-    else if (path != NULL && msg == path->ResetTimer) {
+    else if (path != nullptr && msg == path->ResetTimer) {
         process_TIMEOUT_RESET(path);
     }
-    else if (path != NULL && msg == path->AsconfTimer) {
+    else if (path != nullptr && msg == path->AsconfTimer) {
         process_TIMEOUT_ASCONF(path);
     }
     else if (msg == StartAddIP) {
@@ -1236,7 +1236,7 @@ void SCTPAssociation::stateEntered(int32 status)
             }
 
             if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "normal") == 0) {
-                state->cmtSendAllComparisonFunction = NULL;
+                state->cmtSendAllComparisonFunction = nullptr;
             }
             else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "smallestLastTransmission") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapSmallestLastTransmission;
@@ -1405,7 +1405,7 @@ void SCTPAssociation::stateEntered(int32 status)
                 SCTPPathMap::iterator pathIterator = sctpPathMap.begin();
                 while (pathIterator != sctpPathMap.end()) {
                     const char *token = pathGroupsTokenizer.nextToken();
-                    if (token == NULL) {
+                    if (token == nullptr) {
                         throw cRuntimeError("Too few cmtCCGroup values to cover all paths!");
                     }
                     SCTPPathVariables *path = pathIterator->second;

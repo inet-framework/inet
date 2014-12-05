@@ -69,7 +69,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
         delete frame;
         return;
     }
-    cPacket *outFrame = NULL;
+    cPacket *outFrame = nullptr;
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
@@ -118,7 +118,7 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     // encapsulate the payload in there
     cPacket *payload = frame->decapsulate();
     delete frame;
-    ASSERT(payload != NULL);
+    ASSERT(payload != nullptr);
     ethframe->encapsulate(payload);
     if (ethframe->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         ethframe->setByteLength(MIN_ETHERNET_FRAME_BYTES);
@@ -199,7 +199,7 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
             throw cRuntimeError("Unknown encapDecap value: %d", encapDecap);
             break;
     }
-    return NULL;
+    return nullptr;
 }
 
 } // namespace ieee80211

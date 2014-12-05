@@ -90,7 +90,7 @@ class INET_API PIMBase : public OperationalBase
 
         Interface(RouteEntry *owner, InterfaceEntry *ie)
             : owner(owner), ie(ie), flags(0),
-            assertState(NO_ASSERT_INFO), assertTimer(NULL)
+            assertState(NO_ASSERT_INFO), assertTimer(nullptr)
         { ASSERT(owner), ASSERT(ie); }
         virtual ~Interface() { owner->owner->cancelAndDelete(assertTimer); }
 
@@ -101,7 +101,7 @@ class INET_API PIMBase : public OperationalBase
 
         void startAssertTimer(double assertTime)
         {
-            ASSERT(assertTimer == NULL);
+            ASSERT(assertTimer == nullptr);
             assertTimer = new cMessage("PimAssertTimer", AssertTimer);
             assertTimer->setContextPointer(this);
             owner->owner->scheduleAt(simTime() + assertTime, assertTimer);
@@ -112,7 +112,7 @@ class INET_API PIMBase : public OperationalBase
             assertState = NO_ASSERT_INFO;
             winnerMetric = AssertMetric::INFINITE;
             owner->owner->cancelAndDelete(assertTimer);
-            assertTimer = NULL;
+            assertTimer = nullptr;
         }
     };
 

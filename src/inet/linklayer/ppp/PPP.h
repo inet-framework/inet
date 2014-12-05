@@ -38,12 +38,12 @@ class INET_API PPP : public MACBase
 {
   protected:
     long txQueueLimit = -1;
-    cGate *physOutGate = NULL;
-    cChannel *datarateChannel = NULL;    // NULL if we're not connected
+    cGate *physOutGate = nullptr;
+    cChannel *datarateChannel = nullptr;    // nullptr if we're not connected
 
     cQueue txQueue;
-    cMessage *endTransmissionEvent = NULL;
-    IPassiveQueue *queueModule = NULL;
+    cMessage *endTransmissionEvent = nullptr;
+    IPassiveQueue *queueModule = nullptr;
 
     TxNotifDetails notifDetails;
 

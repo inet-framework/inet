@@ -62,7 +62,7 @@ class PcapDump
     /**
      * Returns true if the pcap file is currently open.
      */
-    bool isOpen() const { return dumpfile != NULL; }
+    bool isOpen() const { return dumpfile != nullptr; }
 
     /**
      * Records the given packet into the output file if it is open,

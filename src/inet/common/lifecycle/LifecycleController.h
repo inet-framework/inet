@@ -82,7 +82,7 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
     virtual void moduleOperationStageCompleted(Callback *callback);    // invoked from the callback
 
   public:
-    LifecycleController() : spareCallback(NULL) {}
+    LifecycleController() : spareCallback(nullptr) {}
     ~LifecycleController() { delete spareCallback; }
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -99,7 +99,7 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
      * parameter, you will be notified via the callback when the operation
      * completes.
      */
-    virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback = NULL);
+    virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback = nullptr);
 };
 
 } // namespace inet

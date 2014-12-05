@@ -47,7 +47,7 @@ void Ieee80211AgentSTA::initialize(int stage)
         associationTimeout = par("associationTimeout");
         cStringTokenizer tokenizer(par("channelsToScan"));
         const char *token;
-        while ((token = tokenizer.nextToken()) != NULL)
+        while ((token = tokenizer.nextToken()) != nullptr)
             channelsToScan.push_back(atoi(token));
 
         cModule *host = getContainingNode(this);
@@ -62,7 +62,7 @@ void Ieee80211AgentSTA::initialize(int stage)
             startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
         scheduleAt(simTime() + startingTime, new cMessage("startUp", MK_STARTUP));
 
-        myIface = NULL;
+        myIface = nullptr;
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -110,7 +110,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     else if (ctrl)
         throw cRuntimeError("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
-        throw cRuntimeError("handleResponse(): control info is NULL");
+        throw cRuntimeError("handleResponse(): control info is nullptr");
     delete ctrl;
 }
 

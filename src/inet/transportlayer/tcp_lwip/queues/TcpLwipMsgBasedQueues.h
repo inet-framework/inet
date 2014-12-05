@@ -166,8 +166,8 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
      * including) the given sequence no (usually rcv_nxt).
-     * It should return NULL if there's no more data to be passed up --
-     * this method is called several times until it returns NULL.
+     * It should return nullptr if there's no more data to be passed up --
+     * this method is called several times until it returns nullptr.
      *
      * called after socket->read_data() successful
      */

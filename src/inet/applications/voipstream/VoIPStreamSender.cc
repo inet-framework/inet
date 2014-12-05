@@ -34,15 +34,15 @@ simsignal_t VoIPStreamSender::sentPkSignal = registerSignal("sentPk");
 
 VoIPStreamSender::VoIPStreamSender()
 {
-    codec = NULL;
-    soundFile = NULL;
-    pFormatCtx = NULL;
-    pCodecCtx = NULL;
-    pCodec = NULL;
-    pReSampleCtx = NULL;
-    pEncoderCtx = NULL;
-    pCodecEncoder = NULL;
-    timer = NULL;
+    codec = nullptr;
+    soundFile = nullptr;
+    pFormatCtx = nullptr;
+    pCodecCtx = nullptr;
+    pCodec = nullptr;
+    pReSampleCtx = nullptr;
+    pEncoderCtx = nullptr;
+    pCodecEncoder = nullptr;
+    timer = nullptr;
 }
 
 VoIPStreamSender::~VoIPStreamSender()
@@ -56,7 +56,7 @@ VoIPStreamSender::~VoIPStreamSender()
 }
 
 VoIPStreamSender::Buffer::Buffer() :
-    samples(NULL),
+    samples(nullptr),
     bufferSize(0),
     readOffset(0),
     writeOffset(0)
@@ -101,7 +101,7 @@ void VoIPStreamSender::initialize(int stage)
         repeatCount = par("repeatCount");
         traceFileName = par("traceFileName").stringValue();
 
-        pReSampleCtx = NULL;
+        pReSampleCtx = nullptr;
         localPort = par("localPort");
         destPort = par("destPort");
     }
@@ -191,7 +191,7 @@ void VoIPStreamSender::finish()
 #else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         audio_resample_close(pReSampleCtx);
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-        pReSampleCtx = NULL;
+        pReSampleCtx = nullptr;
     }
 
     if (pFormatCtx) {
@@ -203,11 +203,11 @@ void VoIPStreamSender::openSoundFile(const char *name)
 {
     int ret;
 
-    ret = avformat_open_input(&pFormatCtx, name, NULL, NULL);
+    ret = avformat_open_input(&pFormatCtx, name, nullptr, nullptr);
     if (ret < 0)
         throw cRuntimeError("Audiofile '%s' open error: %d", name, ret);
 
-    ret = avformat_find_stream_info(pFormatCtx, NULL);
+    ret = avformat_find_stream_info(pFormatCtx, nullptr);
     if (ret < 0)
         throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: %d", name, ret);
 
@@ -230,12 +230,12 @@ void VoIPStreamSender::openSoundFile(const char *name)
     if (!pCodec)
         throw cRuntimeError("Audiofile '%s' avcodec_find_decoder() error: decoder not found", name);
 
-    ret = avcodec_open2(pCodecCtx, pCodec, NULL);
+    ret = avcodec_open2(pCodecCtx, pCodec, nullptr);
     if (ret < 0)
         throw cRuntimeError("avcodec_open() error on file '%s': %d", name, ret);
 
     //allocate encoder
-    pEncoderCtx = avcodec_alloc_context3(NULL);
+    pEncoderCtx = avcodec_alloc_context3(nullptr);
     if (!pEncoderCtx)
         throw cRuntimeError("error occured in avcodec_alloc_context3()");
     //set bitrate:
@@ -250,14 +250,14 @@ void VoIPStreamSender::openSoundFile(const char *name)
 
     pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt;    // FIXME hack!
 
-    if (avcodec_open2(pEncoderCtx, pCodecEncoder, NULL) < 0)
+    if (avcodec_open2(pEncoderCtx, pCodecEncoder, nullptr) < 0)
         throw cRuntimeError("could not open %s encoding codec!", codec);
 
     if (pCodecCtx->sample_rate == sampleRate
         && pCodecCtx->sample_fmt == pEncoderCtx->sample_fmt
         && pCodecCtx->channels == 1)
     {
-        pReSampleCtx = NULL;
+        pReSampleCtx = nullptr;
     }
     else {
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
@@ -311,7 +311,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
     readFrame();
 
     if (sampleBuffer.empty())
-        return NULL;
+        return nullptr;
 
     short int bytesPerInSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
     int samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
@@ -321,7 +321,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
 
     AVPacket opacket;
     av_init_packet(&opacket);
-    opacket.data = NULL;
+    opacket.data = nullptr;
     opacket.size = 0;
     AVFrame *frame = av_frame_alloc();
 
@@ -459,10 +459,10 @@ void VoIPStreamSender::readFrame()
             continue;
 
         AVPacket avpkt;
-        avpkt.data = NULL;
+        avpkt.data = nullptr;
         avpkt.size = 0;
         av_init_packet(&avpkt);
-        ASSERT(avpkt.data == NULL && avpkt.size == 0);
+        ASSERT(avpkt.data == nullptr && avpkt.size == 0);
         avpkt.data = packet.data;
         avpkt.size = packet.size;
 
@@ -480,7 +480,7 @@ void VoIPStreamSender::readFrame()
 
             if (!pReSampleCtx) {
                 // copy frame to sampleBuffer
-                int dataSize = av_samples_get_buffer_size(NULL, pCodecCtx->channels, frame->nb_samples, pCodecCtx->sample_fmt, 1);
+                int dataSize = av_samples_get_buffer_size(nullptr, pCodecCtx->channels, frame->nb_samples, pCodecCtx->sample_fmt, 1);
                 memcpy(sampleBuffer.writePtr(), frame->data[0], dataSize);
                 sampleBuffer.notifyWrote(dataSize);
             }

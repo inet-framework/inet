@@ -51,7 +51,7 @@ void DYMO_element::copy(const DYMO_element& msg)
 #else
     if (extensionsize==0)
     {
-        extension = NULL;
+        extension = nullptr;
         return;
     }
     extension = new char[extensionsize];
@@ -85,7 +85,7 @@ char * DYMO_element::addExtension(int len)
     char * extension_aux;
     if (len<0)
     {
-        return NULL;
+        return nullptr;
     }
 #ifndef STATIC_BLOCK
     extension_aux = new char [extensionsize+len];
@@ -106,7 +106,7 @@ char * DYMO_element::delExtension(int len)
     char * extension_aux;
     if (len<0)
     {
-        return NULL;
+        return nullptr;
     }
 #ifndef STATIC_BLOCK
     extension_aux = new char [extensionsize-len];
@@ -306,10 +306,10 @@ std::string DYMO_element::detailedInfo() const
     std::stringstream out;
 
 
-    Dymo_RE *re_type = NULL;
-    Dymo_UERR *uerr_type = NULL;
-    Dymo_RERR *rerr_type = NULL;
-    Dymo_HELLO *hello_type = NULL;
+    Dymo_RE *re_type = nullptr;
+    Dymo_UERR *uerr_type = nullptr;
+    Dymo_RERR *rerr_type = nullptr;
+    Dymo_HELLO *hello_type = nullptr;
     switch (type)
     {
     case DYMO_RE_TYPE:

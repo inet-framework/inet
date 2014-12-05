@@ -99,7 +99,7 @@ cObject *createOneIfClassIsKnown(const char *className, const char *defaultNames
         if (ret)
             return ret;
     } while (!ns.empty());
-    return NULL;
+    return nullptr;
 }
 
 cObject *createOne(const char *className, const char *defaultNamespace)

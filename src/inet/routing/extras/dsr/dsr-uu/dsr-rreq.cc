@@ -116,7 +116,7 @@ static inline int crit_delete_tbl_enty(void *pos, void *data)
     {
         list_del(p);
         struct id_entry_route *id_e = (struct id_entry_route *)p;
-        if (id_e->add!=NULL)
+        if (id_e->add!=nullptr)
             FREE (id_e->add);
         e->rreq_id_tbl_routes.len--;
         FREE(p);
@@ -128,7 +128,7 @@ static inline int crit_delete_tbl_enty(void *pos, void *data)
 static inline int crit_duplicate_path(struct id_entry *e, struct rreq_tbl_query *q)
 {
     dsr_list_t *p;
-    id_entry_route *worst=NULL;
+    id_entry_route *worst=nullptr;
     list_for_each(p, &e->rreq_id_tbl_routes.head)
     {
         struct id_entry_route *id_e = (struct id_entry_route *)p;
@@ -136,7 +136,7 @@ static inline int crit_duplicate_path(struct id_entry *e, struct rreq_tbl_query 
             return 1;
         if (id_e->length==*(q->length) && memcmp(id_e->add,*(q->addrs),id_e->length)==0)
             return 1;
-        if (worst==NULL)
+        if (worst==nullptr)
             worst = id_e;
         else
         {
@@ -329,7 +329,7 @@ struct rreq_tbl_entry *NSCLASS __rreq_tbl_entry_create(struct in_addr node_addr)
                                         GFP_ATOMIC);
 
     if (!e)
-        return NULL;
+        return nullptr;
 
     memset(e, 0, sizeof(struct rreq_tbl_entry));
     e->state = STATE_IDLE;
@@ -337,7 +337,7 @@ struct rreq_tbl_entry *NSCLASS __rreq_tbl_entry_create(struct in_addr node_addr)
     e->ttl = 0;
     memset(&e->tx_time, 0, sizeof(struct timeval));
     e->num_rexmts = 0;
-    e->timer=NULL;
+    e->timer=nullptr;
 #ifndef OMNETPP
 #ifdef NS2
     e->timer = new DSRUUTimer(this, "RREQTblTimer");
@@ -350,7 +350,7 @@ struct rreq_tbl_entry *NSCLASS __rreq_tbl_entry_create(struct in_addr node_addr)
     if (!e->timer)
     {
         FREE(e);
-        return NULL;
+        return nullptr;
     }
     init_timer(e->timer);
 
@@ -370,7 +370,7 @@ struct rreq_tbl_entry *NSCLASS __rreq_tbl_add(struct in_addr node_addr)
     e = __rreq_tbl_entry_create(node_addr);
 
     if (!e)
-        return NULL;
+        return nullptr;
 
     if (TBL_FULL(&rreq_tbl))
     {
@@ -390,7 +390,7 @@ struct rreq_tbl_entry *NSCLASS __rreq_tbl_add(struct in_addr node_addr)
 #else
         delete f->timer;
 #endif
-        tbl_flush(&f->rreq_id_tbl, NULL);
+        tbl_flush(&f->rreq_id_tbl, nullptr);
 
         FREE(f);
     }
@@ -405,7 +405,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
 {
     struct rreq_tbl_entry *e;
     struct id_entry *id_e;
-    struct id_entry *id_entry=NULL;
+    struct id_entry *id_entry=nullptr;
     int exist=1;
     dsr_list_t *pos;
     struct id_entry_route *id_r;
@@ -464,7 +464,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
             if (length>0)
                 id_r->add = (char*)MALLOC(length, GFP_ATOMIC);
             else
-                id_r->add =NULL;
+                id_r->add =nullptr;
             id_r->length=length;
             id_r->cost=cost;
             memcpy(id_r->add,addr,length);
@@ -493,7 +493,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
             if (length>0)
                 id_r->add = (char*)MALLOC(length, GFP_ATOMIC);
             else
-                id_r->add =NULL;
+                id_r->add =nullptr;
             id_r->length=length;
             id_r->cost=cost;
             memcpy(id_r->add,addr,length);
@@ -629,7 +629,7 @@ static struct dsr_rreq_opt *dsr_rreq_opt_add(char *buf, unsigned int len,
     struct dsr_rreq_opt *rreq_opt;
 
     if (!buf || len < DSR_RREQ_HDR_LEN)
-        return NULL;
+        return nullptr;
 
     rreq_opt = (struct dsr_rreq_opt *)buf;
 
@@ -647,7 +647,7 @@ int NSCLASS dsr_rreq_send(struct in_addr target, int ttl)
     char *buf;
     int len = DSR_OPT_HDR_LEN + DSR_RREQ_HDR_LEN;
 
-    dp = dsr_pkt_alloc(NULL);
+    dp = dsr_pkt_alloc(nullptr);
 
     if (!dp)
     {
@@ -835,7 +835,7 @@ int NSCLASS dsr_rreq_opt_recv(struct dsr_pkt *dp, struct dsr_rreq_opt *rreq_opt)
 
     /* TODO: Check Blacklist */
 
-    srt_rc = NULL;
+    srt_rc = nullptr;
     if (ConfVal(RREPDestinationOnly)==0)
     {
 #ifdef OMNETPP

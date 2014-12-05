@@ -25,8 +25,8 @@ namespace physicallayer {
 Define_Module(NeighborListNeighborCache);
 
 NeighborListNeighborCache::NeighborListNeighborCache() :
-    radioMedium(NULL),
-    updateNeighborListsTimer(NULL),
+    radioMedium(nullptr),
+    updateNeighborListsTimer(nullptr),
     refillPeriod(sNaN),
     range(sNaN),
     maxSpeed(sNaN)

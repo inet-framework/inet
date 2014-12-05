@@ -38,7 +38,7 @@ struct dsr_opt_hdr *dsr_opt_hdr_add(char *buf, unsigned int len,
     struct dsr_opt_hdr *opt_hdr;
 
     if (len < DSR_OPT_HDR_LEN)
-        return NULL;
+        return nullptr;
 
     opt_hdr = (struct dsr_opt_hdr *)buf;
 
@@ -102,7 +102,7 @@ struct dsr_opt *dsr_opt_find_opt(struct dsr_pkt *dp, int type)
         l += dopt->length + 2;
         dopt = DSR_GET_NEXT_OPT(dopt);
     }
-    return NULL;
+    return nullptr;
 }
 
 int NSCLASS dsr_opt_remove(struct dsr_pkt *dp)
@@ -144,8 +144,8 @@ int dsr_opt_parse(struct dsr_pkt *dp)
 
     dp->num_rrep_opts = dp->num_rerr_opts = dp->num_rreq_opts = dp->num_ack_opts = 0;
 
-    dp->srt_opt = NULL;
-    dp->ack_req_opt = NULL;
+    dp->srt_opt = nullptr;
+    dp->ack_req_opt = nullptr;
 
     while (l < dsr_len && (dsr_len - l) > 2)
     {

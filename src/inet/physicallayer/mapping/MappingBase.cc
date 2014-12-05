@@ -239,10 +239,10 @@ bool Argument::operator<(const Argument& o) const
     return compare(o) < 0;
 }
 
-int Argument::compare(const Argument& o, const DimensionSet *const dims    /*= NULL*/) const
+int Argument::compare(const Argument& o, const DimensionSet *const dims    /*= nullptr*/) const
 {
     DimensionSet::const_iterator DimItLast;
-    if (dims != NULL)
+    if (dims != nullptr)
         DimItLast = dims->end();
     const DimensionSet::const_iterator DimItEnd = DimItLast;
 
@@ -256,7 +256,7 @@ int Argument::compare(const Argument& o, const DimensionSet *const dims    /*= N
     for (container_type::const_reverse_iterator rIt = values.rbegin(); rIt != rItEnd; ++rIt) {
         bool bMissedDimsEntry = false;
 
-        if (dims != NULL) {
+        if (dims != nullptr) {
             DimensionSet::const_iterator DimItCurr = dims->find(rIt->first);
             if (DimItCurr == DimItEnd) {
                 continue;
@@ -279,7 +279,7 @@ int Argument::compare(const Argument& o, const DimensionSet *const dims    /*= N
         if (rIt->second != itO->second)
             return (rIt->second < itO->second) ? -1 : 1;
     }
-    if (dims == NULL || (dims->find(Dimension::time) != DimItEnd || (!bDidCompare && !dims->empty()))) {
+    if (dims == nullptr || (dims->find(Dimension::time) != DimItEnd || (!bDidCompare && !dims->empty()))) {
         if (time == o.time)
             return 0;
         return (time < o.time) ? -1 : 1;

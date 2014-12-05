@@ -799,7 +799,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             errorc->cause_code = htons(error->getErrorCauseType());
                             errorc->length = htons(error->getByteLength() - 8);
                             parPtr += 4;
-                            if (check_and_cast<SCTPParameter *>(error->getEncapsulatedPacket()) != NULL) {
+                            if (check_and_cast<SCTPParameter *>(error->getEncapsulatedPacket()) != nullptr) {
                                 SCTPParameter *encParameter = check_and_cast<SCTPParameter *>(error->getEncapsulatedPacket());
                                 switch (encParameter->getParameterType()) {
                                     case ADD_IP_ADDRESS: {
@@ -883,7 +883,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             SCTPSimpleErrorCauseParameter *ecp = check_and_cast<SCTPSimpleErrorCauseParameter *>(parameter);
                             struct error_cause *errorc = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk));
                             errorc->cause_code = htons(ecp->getParameterType());
-                            if (check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()) != NULL) {
+                            if (check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()) != nullptr) {
                                 IPv4Serializer().serialize(check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()),
                                         ((unsigned char *)error) + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
                             }

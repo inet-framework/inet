@@ -55,7 +55,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         std::vector<InterfaceInfo *> interfaceInfos;
 
       public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
+        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; routingTable = nullptr; }
     };
 
     /**
@@ -68,7 +68,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         InterfaceInfo *destinationInterfaceInfo;
 
       public:
-        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
     };
 
     /**
@@ -103,9 +103,9 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
       public:
         bool isWireless;
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
-        InterfaceInfo *gatewayInterfaceInfo;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
+        InterfaceInfo *gatewayInterfaceInfo;    // non-nullptr if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
-        LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = NULL; }
+        LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = nullptr; }
         ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 

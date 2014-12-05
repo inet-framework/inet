@@ -110,7 +110,7 @@ void NS_CLASS uerr_process(UERR *e, struct in_addr ip_src, u_int32_t ifindex)
 {
 #ifndef OMNETPP
     delete e;
-    e = NULL;
+    e = nullptr;
 #endif
 }
 

@@ -465,7 +465,7 @@ IIPv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
         rt = dynamic_cast<IIPv4RoutingTable *>(host->getModuleByPath(".routingTable.ipv4"));
     return rt;
 #else // ifdef WITH_IPv4
-    return NULL;
+    return nullptr;
 #endif // ifdef WITH_IPv4
 }
 
@@ -478,7 +478,7 @@ IPv6RoutingTable *L3AddressResolver::findIPv6RoutingTableOf(cModule *host)
         rt = dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".routingTable.ipv6"));
     return rt;
 #else // ifdef WITH_IPv6
-    return NULL;
+    return nullptr;
 #endif // ifdef WITH_IPv6
 }
 
@@ -491,14 +491,14 @@ GenericRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
         rt = dynamic_cast<GenericRoutingTable *>(host->getModuleByPath(".routingTable.generic"));
     return rt;
 #else // ifdef WITH_GENERIC
-    return NULL;
+    return nullptr;
 #endif // ifdef WITH_GENERIC
 }
 
 cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 {
     if (add.isUnspecified() || add.isMulticast())
-        return NULL;
+        return nullptr;
 
     cTopology topo("topo");
     topo.extractByProperty("node");
@@ -508,7 +508,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
     for (int i = 0; i < topo.getNumNodes(); i++) {
         cModule *mod = topo.getNode(i)->getModule();
         IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
-        if (itable != NULL) {
+        if (itable != nullptr) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
                 InterfaceEntry *entry = itable->getInterface(i);
                 switch (add.getType()) {
@@ -533,7 +533,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 } // namespace inet

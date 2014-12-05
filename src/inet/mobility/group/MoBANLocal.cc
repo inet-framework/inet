@@ -48,7 +48,7 @@ Define_Module(MoBANLocal);
 
 MoBANLocal::MoBANLocal()
 {
-    coordinator = NULL;
+    coordinator = nullptr;
     referencePosition = Coord::ZERO;
     radius = 0;
     speed = 0;

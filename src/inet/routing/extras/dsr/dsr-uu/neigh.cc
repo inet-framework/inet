@@ -178,7 +178,7 @@ static inline int rto_calc(void *pos, void *query)
 /* TODO: Implement neighbor table garbage collection */
 void NSCLASS neigh_tbl_garbage_timeout(unsigned long data)
 {
-    /* tbl_for_each_del(&neigh_tbl, NULL, crit_garbage); */
+    /* tbl_for_each_del(&neigh_tbl, nullptr, crit_garbage); */
 
     /*  if (!tbl_empty(&neigh_tbl)) { */
     /*      garbage_timer.expires = TimeNow +  */
@@ -196,7 +196,7 @@ static struct neighbor *neigh_tbl_create(struct in_addr addr,
     neigh = (struct neighbor *)MALLOC(sizeof(struct neighbor), GFP_ATOMIC);
 
     if (!neigh)
-        return NULL;
+        return nullptr;
 
     memset(neigh, 0, sizeof(struct neighbor));
 
@@ -229,7 +229,7 @@ int NSCLASS neigh_tbl_add(struct in_addr neigh_addr, struct ethhdr *ethh)
     struct neighbor_query q;
 
     q.addr = &neigh_addr;
-    q.info = NULL;
+    q.info = nullptr;
 
     if (in_tbl(&neigh_tbl, &q, crit_addr))
         return 0;

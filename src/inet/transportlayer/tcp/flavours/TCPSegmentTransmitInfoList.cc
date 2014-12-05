@@ -81,7 +81,7 @@ const TCPSegmentTransmitInfoList::Item *TCPSegmentTransmitInfoList::get(uint32_t
         if (seqLE(i->beg, seq) && seqLess(seq, i->end))
             return &(*i);
     }
-    return NULL;
+    return nullptr;
 }
 
 void TCPSegmentTransmitInfoList::clearTo(uint32_t endseq)

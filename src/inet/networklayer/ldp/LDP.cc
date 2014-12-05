@@ -65,7 +65,7 @@ std::ostream& operator<<(std::ostream& os, const LDP::peer_info& p)
 {
     os << "peerIP=" << p.peerIP << "  interface=" << p.linkInterface
        << "  activeRole=" << (p.activeRole ? "true" : "false")
-       << "  socket=" << (p.socket ? TCPSocket::stateName(p.socket->getState()) : "NULL");
+       << "  socket=" << (p.socket ? TCPSocket::stateName(p.socket->getState()) : "nullptr");
     return os;
 }
 
@@ -87,7 +87,7 @@ std::ostream& operator<<(std::ostream& os, const FEC_TLV& a)
 
 LDP::LDP()
 {
-    sendHelloMsg = NULL;
+    sendHelloMsg = nullptr;
 }
 
 LDP::~LDP()
@@ -251,7 +251,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
     FecBindVector::iterator dit = findFecEntry(fecDown, oldItem.fecid, oldItem.nextHop);
 
     // is next hop our LDP peer?
-    bool ER = findPeerSocket(oldItem.nextHop) == NULL;
+    bool ER = findPeerSocket(oldItem.nextHop) == nullptr;
 
     ASSERT(!(ER && dit != fecDown.end()));    // can't be egress and have mapping at the same time
 
@@ -553,7 +553,7 @@ void LDP::processLDPHello(LDPHello *msg)
     info.peerIP = peerAddr;
     info.linkInterface = ift->getInterfaceById(interfaceId)->getName();
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
-    info.socket = NULL;
+    info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
     scheduleAt(simTime() + holdTime, info.timeout);
     myPeers.push_back(info);
@@ -1175,7 +1175,7 @@ TCPSocket *LDP::findPeerSocket(IPv4Address peerAddr)
     // find peer in table and return its socket
     int i = findPeer(peerAddr);
     if (i == -1 || !(myPeers[i].socket) || myPeers[i].socket->getState() != TCPSocket::CONNECTED)
-        return NULL; // we don't have an LDP session to this peer
+        return nullptr; // we don't have an LDP session to this peer
     return myPeers[i].socket;
 }
 

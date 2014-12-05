@@ -112,7 +112,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
     const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     state->regions.clearTo(state->snd_una);
 
-    if (found != NULL) {
+    if (found != nullptr) {
         simtime_t currentTime = simTime();
         simtime_t newRTT = currentTime - found->getFirstSentTime();
 
@@ -133,7 +133,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
             cumul_ack = 2 * state->snd_mss;
 
         recalculateBWE(cumul_ack);
-    }    // Closes if w_sendtime != NULL
+    }    // Closes if w_sendtime != nullptr
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
@@ -209,7 +209,7 @@ void TCPWestwood::receivedDuplicateAck()
         // BWE calculation: dupack counts 1
         uint32 cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
-    }    // Closes if w_sendtime != NULL
+    }    // Closes if w_sendtime != nullptr
 
     if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         EV_DETAIL << "Westwood on dupAcks == DUPTHRESH(=3): Faster Retransmit \n";

@@ -28,7 +28,7 @@ class INET_API TrailFigure : public cGroupFigure
     int maxCount;
 
   public:
-    TrailFigure(int maxCount, const char *name = NULL);
+    TrailFigure(int maxCount, const char *name = nullptr);
 
     virtual void addFigure(cFigure *figure);
 };

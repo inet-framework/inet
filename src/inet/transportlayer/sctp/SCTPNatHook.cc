@@ -14,7 +14,7 @@ Define_Module(SCTPNatHook);
 
 SCTPNatHook::SCTPNatHook()
 {
-    ipLayer = NULL;
+    ipLayer = nullptr;
 }
 
 SCTPNatHook::~SCTPNatHook()
@@ -81,10 +81,10 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
     else {
         EV << "other chunkType: " << (chunk->getChunkType() == COOKIE_ECHO ? "Cookie_Echo" : "other") << ", VTag=" << sctpMsg->getTag() << "\n";
         entry = natTable->findNatEntry(dgram->getSrcAddress(), sctpMsg->getSrcPort(), dgram->getDestAddress(), sctpMsg->getDestPort(), sctpMsg->getTag());
-        if (entry == NULL) {
+        if (entry == nullptr) {
             EV << "no entry found\n";
             entry = natTable->findNatEntry(dgram->getSrcAddress(), sctpMsg->getSrcPort(), dgram->getDestAddress(), sctpMsg->getDestPort(), 0);
-            if (entry == NULL) {
+            if (entry == nullptr) {
                 EV << "send back error message dgram=" << dgram << "\n";
                 sendBackError(dgram);
                 nextHopAddr = dgram->getDestAddress();
@@ -133,7 +133,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
         entry = natTable->getEntry(dgram->getSrcAddress(), sctpMsg->getSrcPort(), dgram->getDestAddress(), sctpMsg->getDestPort(), sctpMsg->getTag());
         EV << "getEntry for " << dgram->getSrcAddress() << ":" << sctpMsg->getSrcPort() << " to " << dgram->getDestAddress() << ":" << sctpMsg->getDestPort() << " peerVTag=" << sctpMsg->getTag() << "\n";
         uint32 numberOfChunks = sctpMsg->getChunksArraySize();
-        if (entry == NULL) {
+        if (entry == nullptr) {
             EV << "no entry found\n";
             if (numberOfChunks == 1)
                 chunk = (SCTPChunk *)(sctpMsg->peekFirstChunk());
@@ -142,7 +142,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
             if (chunk->getChunkType() == INIT || chunk->getChunkType() == ASCONF) {
                 EV << "could be an Init collision\n";
                 entry = natTable->getSpecialEntry(dgram->getSrcAddress(), sctpMsg->getSrcPort(), dgram->getDestAddress(), sctpMsg->getDestPort());
-                if (entry != NULL) {
+                if (entry != nullptr) {
                     if (chunk->getChunkType() == INIT) {
                         SCTPInitChunk *initChunk = check_and_cast<SCTPInitChunk *>(chunk);
                         entry->setLocalVTag(initChunk->getInitTag());
@@ -189,7 +189,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
         if (chunk->getChunkType() == INIT) {
             EV << "getLocALEntry for " << dgram->getSrcAddress() << ":" << sctpMsg->getSrcPort() << " to " << dgram->getDestAddress() << ":" << sctpMsg->getDestPort() << " peerVTag=" << sctpMsg->getTag() << "\n";
             entry = natTable->getLocalInitEntry(dgram->getDestAddress(), sctpMsg->getSrcPort(), sctpMsg->getDestPort());
-            if (entry == NULL) {
+            if (entry == nullptr) {
                 entry = new SCTPNatEntry();
                 entry->setLocalAddress(dgram->getSrcAddress());
                 entry->setLocalPort(sctpMsg->getSrcPort());
@@ -227,7 +227,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
         else {
             EV << "no INIT: destAddr=" << dgram->getDestAddress() << " destPort=" << sctpMsg->getDestPort() << " srcPort=" << sctpMsg->getSrcPort() << " vTag=" << sctpMsg->getTag() << "\n";
             entry = natTable->getLocalEntry(dgram->getDestAddress(), sctpMsg->getSrcPort(), sctpMsg->getDestPort(), sctpMsg->getTag());
-            if (entry != NULL) {
+            if (entry != nullptr) {
                 dgram->setDestAddress(entry->getLocalAddress().toIPv4());
                 sctpMsg->setDestPort(entry->getLocalPort());
                 dgram->setSrcAddress(entry->getGlobalAddress().toIPv4());
@@ -295,7 +295,7 @@ void SCTPNatHook::finish()
 {
     if (ipLayer)
         ipLayer->unregisterHook(0, this);
-    ipLayer = NULL;
+    ipLayer = nullptr;
     delete natTable;
     std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }

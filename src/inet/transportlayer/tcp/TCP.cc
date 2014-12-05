@@ -356,7 +356,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3
         return i->second;
 
     // given up
-    return NULL;
+    return nullptr;
 }
 
 TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
@@ -366,7 +366,7 @@ TCPConnection *TCP::findConnForApp(int appGateIndex, int connId)
     key.connId = connId;
 
     TcpAppConnMap::iterator i = tcpAppConnMap.find(key);
-    return i == tcpAppConnMap.end() ? NULL : i->second;
+    return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
 ushort TCP::getEphemeralPort()

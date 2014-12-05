@@ -30,7 +30,7 @@ Define_Module(STP);
 const double STP::tickInterval = 1;
 
 STP::STP() :
-    tick(NULL)
+    tick(nullptr)
 {
 }
 

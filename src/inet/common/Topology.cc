@@ -48,7 +48,7 @@ Topology::LinkOut *Topology::Node::getLinkOut(int i)
 
 Topology::Topology(const char *name) : cOwnedObject(name)
 {
-    target = NULL;
+    target = nullptr;
 }
 
 Topology::Topology(const Topology& topo) : cOwnedObject(topo)
@@ -141,7 +141,7 @@ static bool selectByParameter(cModule *mod, void *data)
         const char *value;
     };
     PropertyData *d = (PropertyData *)data;
-    return mod->hasPar(d->name) && (d->value == NULL || mod->par(d->name).str() == std::string(d->value));
+    return mod->hasPar(d->name) && (d->value == nullptr || mod->par(d->name).str() == std::string(d->value));
 }
 
 //---
@@ -370,7 +370,7 @@ Topology::Node *Topology::getNodeFor(cModule *mod)
     Node tmpNode(mod->getId());
     std::vector<Node *>::iterator it = std::lower_bound(nodes.begin(), nodes.end(), &tmpNode, lessByModuleId);
 //TODO: this does not compile with VC9 (VC10 is OK): std::vector<Node*>::iterator it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
-    return it == nodes.end() || (*it)->moduleId != mod->getId() ? NULL : *it;
+    return it == nodes.end() || (*it)->moduleId != mod->getId() ? nullptr : *it;
 }
 
 void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
@@ -378,12 +378,12 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
     // multiple paths not supported :-(
 
     if (!_target)
-        throw cRuntimeError(this, "..ShortestPathTo(): target node is NULL");
+        throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
     target = _target;
 
     for (int i = 0; i < (int)nodes.size(); i++) {
         nodes[i]->dist = INFINITY;
-        nodes[i]->outPath = NULL;
+        nodes[i]->outPath = nullptr;
     }
     target->dist = 0;
 
@@ -416,13 +416,13 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
 void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
 {
     if (!_target)
-        throw cRuntimeError(this, "..ShortestPathTo(): target node is NULL");
+        throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
     target = _target;
 
     // clean path infos
     for (int i = 0; i < (int)nodes.size(); i++) {
         nodes[i]->dist = INFINITY;
-        nodes[i]->outPath = NULL;
+        nodes[i]->outPath = nullptr;
     }
 
     target->dist = 0;

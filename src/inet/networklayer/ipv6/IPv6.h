@@ -98,7 +98,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
         const IPv6Address& getSrcAddress() {return datagram->getSrcAddress(); }
         const MACAddress& getMACAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
-        IPv6Datagram *removeDatagram() { IPv6Datagram *ret = datagram; datagram = NULL; return ret; }
+        IPv6Datagram *removeDatagram() { IPv6Datagram *ret = datagram; datagram = nullptr; return ret; }
     };
 #endif /* WITH_xMIPv6 */
 

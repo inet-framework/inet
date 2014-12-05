@@ -233,7 +233,7 @@ class INET_API UDPSocket
      * Sends a data packet to the given address and port.
      * Additional options can be passed in a SendOptions struct.
      */
-    void sendTo(cPacket *msg, L3Address destAddr, int destPort, const SendOptions *options = NULL);
+    void sendTo(cPacket *msg, L3Address destAddr, int destPort, const SendOptions *options = nullptr);
 
     /**
      * Sends a data packet to the address and port specified previously

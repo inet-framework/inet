@@ -51,7 +51,7 @@ void NS_CLASS route_valid_timeout(void *arg)
     if (!entry)
     {
         dlog(LOG_WARNING, 0, __FUNCTION__,
-             "NULL routing table entry, ignoring timeout");
+             "nullptr routing table entry, ignoring timeout");
         return;
     }
 
@@ -65,7 +65,7 @@ void NS_CLASS route_del_timeout(void *arg)
     if (!entry)
     {
         dlog(LOG_WARNING, 0, __FUNCTION__,
-             "NULL routing table entry, ignoring timeout");
+             "nullptr routing table entry, ignoring timeout");
         return;
     }
 
@@ -80,7 +80,7 @@ void NS_CLASS blacklist_timeout(void *arg)
     if (!entry)
     {
         dlog(LOG_WARNING, 0, __FUNCTION__,
-             "NULL blacklist entry, ignoring timeout");
+             "nullptr blacklist entry, ignoring timeout");
         return;
     }
 
@@ -94,7 +94,7 @@ void NS_CLASS route_discovery_timeout(void *arg)
     if (!entry)
     {
         dlog(LOG_WARNING, 0, __FUNCTION__,
-             "NULL pending route discovery list entry,"
+             "nullptr pending route discovery list entry,"
              " ignoring timeout");
         return;
     }
@@ -148,7 +148,7 @@ void NS_CLASS nb_timeout(void *arg)
     if (!nb)
     {
         dlog(LOG_WARNING, 0, __FUNCTION__,
-             "NULL nblist entry, ignoring timeout");
+             "nullptr nblist entry, ignoring timeout");
         return;
     }
 

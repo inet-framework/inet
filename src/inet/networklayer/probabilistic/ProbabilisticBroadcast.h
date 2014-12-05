@@ -46,7 +46,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
         , maxFirstBcastBackoff(0)
         , timeInQueueAfterDeath(0)
         , headerLength(0)
-        , broadcastTimer(NULL)
+        , broadcastTimer(nullptr)
         , knownMsgIds()
         , msgQueue()
         , debugMsgIdSet()

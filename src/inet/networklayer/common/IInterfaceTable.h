@@ -76,14 +76,14 @@ class INET_API IInterfaceTable
     virtual bool isNeighborAddress(const L3Address& address) const = 0;
 
     /**
-     * Returns an interface given by its address. Returns NULL if not found.
+     * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *findInterfaceByAddress(const L3Address& address) const = 0;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used
      * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),
-     * and getNodeInputGateId() in InterfaceEntry. It should be NULL if this is
+     * and getNodeInputGateId() in InterfaceEntry. It should be nullptr if this is
      * a virtual interface (e.g. loopback).
      */
     virtual void addInterface(InterfaceEntry *entry) = 0;
@@ -113,7 +113,7 @@ class INET_API IInterfaceTable
 
     /**
      * Returns an interface by its Id. Ids are guaranteed to be invariant
-     * to interface deletions/additions. Returns NULL if there is no such
+     * to interface deletions/additions. Returns nullptr if there is no such
      * interface (This allows detecting stale IDs without raising an error.)
      */
     virtual InterfaceEntry *getInterfaceById(int id) = 0;
@@ -125,36 +125,36 @@ class INET_API IInterfaceTable
 
     /**
      * Returns an interface given by its getNodeOutputGateId().
-     * Returns NULL if not found.
+     * Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id) = 0;
 
     /**
      * Returns an interface given by its getNodeInputGateId().
-     * Returns NULL if not found.
+     * Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) = 0;
 
     /**
      * Returns an interface given by its getNetworkLayerGateIndex().
-     * Returns NULL if not found.
+     * Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index) = 0;
 
     /**
      * Returns an interface by one of its component module (e.g. PPP).
-     * Returns NULL if not found.
+     * Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) = 0;
 
     /**
-     * Returns an interface given by its name. Returns NULL if not found.
+     * Returns an interface given by its name. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByName(const char *name) = 0;
 
     /**
      * Returns the first interface with the isLoopback flag set.
-     * (If there's no loopback, it returns NULL -- but this
+     * (If there's no loopback, it returns nullptr -- but this
      * should never happen because InterfaceTable itself registers a
      * loopback interface on startup.)
      */
@@ -162,7 +162,7 @@ class INET_API IInterfaceTable
 
     /**
      * Returns the first multicast capable interface.
-     * If there is no such interface, then returns NULL.
+     * If there is no such interface, then returns nullptr.
      */
     virtual InterfaceEntry *getFirstMulticastInterface() = 0;
 

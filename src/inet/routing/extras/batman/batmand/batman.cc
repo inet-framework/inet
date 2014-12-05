@@ -66,12 +66,12 @@ uint8_t routing_class = 0;
 
 int16_t originator_interval = 1000;   /* originator message interval in miliseconds */
 
-GwNode *curr_gateway = NULL;
+GwNode *curr_gateway = nullptr;
 pthread_t curr_gateway_thread_id = 0;
 
 uint32_t pref_gateway = 0;
 
-char *policy_routing_script = NULL;
+char *policy_routing_script = nullptr;
 int policy_routing_pipe = 0;
 pid_t policy_routing_script_pid;
 
@@ -93,7 +93,7 @@ struct vis_if vis_if;
 struct unix_if unix_if;
 struct debug_clients debug_clients;
 
-unsigned char *vis_packet = NULL;
+unsigned char *vis_packet = nullptr;
 uint16_t vis_packet_size = 0;
 
 uint64_t batman_clock_ticks = 0;
@@ -199,12 +199,12 @@ BatmanIf *Batman::is_batman_if(InterfaceEntry *dev)
             return batman_if;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void Batman::choose_gw(void)
 {
-    GwNode *gw_node, *tmp_curr_gw = NULL;
+    GwNode *gw_node, *tmp_curr_gw = nullptr;
     uint8_t max_gw_class = 0, max_tq = 0;
     simtime_t current_time;
     uint32_t max_gw_factor = 0, tmp_gw_factor = 0;
@@ -216,7 +216,7 @@ void Batman::choose_gw(void)
     }
 
     if (gw_list.empty()) {
-        if (curr_gateway != NULL) {
+        if (curr_gateway != nullptr) {
             EV_DETAIL << "Removing default route - no gateway in range\n";
 
             del_default_route();
@@ -234,7 +234,7 @@ void Batman::choose_gw(void)
                 continue;
         }
 
-        if (gw_node->orig_node->router == NULL)
+        if (gw_node->orig_node->router == nullptr)
             continue;
 
         if (SIMTIME_RAW(gw_node->deleted))
@@ -279,8 +279,8 @@ void Batman::choose_gw(void)
     }
 
     if (curr_gateway != tmp_curr_gw) {
-        if (curr_gateway != NULL) {
-            if (tmp_curr_gw != NULL)
+        if (curr_gateway != nullptr) {
+            if (tmp_curr_gw != nullptr)
                 EV_INFO << "Removing default route - better gateway found\n";
             else
                 EV_INFO << "Removing default route - no gateway in range\n";
@@ -291,7 +291,7 @@ void Batman::choose_gw(void)
         curr_gateway = tmp_curr_gw;
 
         /* may be the last gateway is now gone */
-        if ((curr_gateway != NULL) && (!is_aborted())) {
+        if ((curr_gateway != nullptr) && (!is_aborted())) {
 //            addr_to_string(curr_gateway->orig_node->orig, orig_str, ADDR_STR_LEN);
             EV_INFO << "Adding default route to " << curr_gateway->orig_node->orig << " (gw_flags: " << (unsigned)(max_gw_class) << ", tq: " << (unsigned)(max_tq) << ", gw_product: " << max_gw_factor << ")\n";
 
@@ -307,9 +307,9 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
 
     old_router = orig_node->router;
 
-    /* also handles orig_node->router == NULL and neigh_node == NULL */
-    if ((orig_node != NULL) && (orig_node->router != neigh_node)) {
-        if ((orig_node != NULL) && (neigh_node != NULL)) {
+    /* also handles orig_node->router == nullptr and neigh_node == nullptr */
+    if ((orig_node != nullptr) && (orig_node->router != neigh_node)) {
+        if ((orig_node != nullptr) && (neigh_node != nullptr)) {
         //    addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
         //    addr_to_string(neigh_node->addr, next_str, ADDR_STR_LEN);
             EV_DETAIL << "Route to " << orig_node->orig << " via " << neigh_node->addr << "\n";
@@ -318,7 +318,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
         /* adds duplicated code but makes it more readable */
 
         /* new route added */
-        if ((orig_node->router == NULL) && (neigh_node != NULL)) {
+        if ((orig_node->router == nullptr) && (neigh_node != nullptr)) {
             EV_DETAIL << "Adding new route\n";
 
             add_del_route(orig_node->orig, 32, neigh_node->addr,
@@ -331,7 +331,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
             hna_global_add(orig_node, hna_recv_buff, hna_buff_len);
 
         /* route deleted */
-        } else if ((orig_node->router != NULL) && (neigh_node == NULL)) {
+        } else if ((orig_node->router != nullptr) && (neigh_node == nullptr)) {
             EV_DETAIL << "Deleting previous route\n";
 
             /* remove old announced network(s) */
@@ -372,7 +372,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
         }
 
         orig_node->router = neigh_node;
-    } else if (orig_node != NULL) {
+    } else if (orig_node != nullptr) {
         hna_global_update(orig_node, hna_recv_buff, hna_buff_len, old_router);
     }
     // Sanity check
@@ -486,7 +486,7 @@ unsigned char Batman::get_gw_class(int down, int up)
 
 int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node, BatmanPacket *in, const simtime_t &recv_time, BatmanIf *if_incoming)
 {
-    NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL;
+    NeighNode *neigh_node = nullptr, *tmp_neigh_node = nullptr;
     uint8_t total_count;
 
     if (orig_node == orig_neigh_node) {
@@ -496,7 +496,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
                 neigh_node = tmp_neigh_node;
         }
 
-        if (neigh_node == NULL)
+        if (neigh_node == nullptr)
             neigh_node = create_neighbor(orig_node, orig_neigh_node, orig_neigh_node->orig, if_incoming);
 
         neigh_node->last_valid = recv_time;
@@ -509,7 +509,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
                 neigh_node = tmp_neigh_node;
         }
 
-        if (neigh_node == NULL)
+        if (neigh_node == nullptr)
             neigh_node = create_neighbor(orig_neigh_node, orig_neigh_node, orig_neigh_node->orig, if_incoming);
     }
 
@@ -556,15 +556,15 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
 #if 0
 static void generate_vis_packet(void)
 {
-    struct hash_it_t *hashit = NULL;
+    struct hash_it_t *hashit = nullptr;
     OrigNode *orig_node;
     struct vis_data *vis_data;
     struct list_head *list_pos;
     BatmanIf *batman_if;
 
-    if (vis_packet != NULL) {
+    if (vis_packet != nullptr) {
         delete vis_packet;
-        vis_packet = NULL;
+        vis_packet = nullptr;
         vis_packet_size = 0;
     }
 
@@ -578,11 +578,11 @@ static void generate_vis_packet(void)
     ((struct vis_packet *)vis_packet)->tq_max = TQ_MAX_VALUE;
 
     /* neighbor list */
-    while (NULL != (hashit = hash_iterate(orig_hash, hashit))) {
+    while (nullptr != (hashit = hash_iterate(orig_hash, hashit))) {
         orig_node = hashit->bucket->data;
 
         /* we interested in 1 hop neighbours only */
-        if ((orig_node->router != NULL) && (orig_node->orig == orig_node->router->addr) &&
+        if ((orig_node->router != nullptr) && (orig_node->orig == orig_node->router->addr) &&
             (orig_node->router->tq_avg > 0)) {
             vis_packet_size += sizeof(struct vis_data);
 
@@ -623,7 +623,7 @@ static void generate_vis_packet(void)
 
     if (vis_packet_size == sizeof(struct vis_packet)) {
         delete vis_packet;
-        vis_packet = NULL;
+        vis_packet = nullptr;
         vis_packet_size = 0;
     }
 }
@@ -632,8 +632,8 @@ static void send_vis_packet(void)
 {
     generate_vis_packet();
 
-    if (vis_packet != NULL)
-        send_udp_packet(vis_packet, vis_packet_size, &vis_if.addr, vis_if.sock, NULL);
+    if (vis_packet != nullptr)
+        send_udp_packet(vis_packet, vis_packet_size, &vis_if.addr, vis_if.sock, nullptr);
 }
 #endif
 
@@ -695,7 +695,7 @@ int8_t batman(void)
 
     debug_timeout = vis_timeout = getTime();
 
-    if (NULL == (orig_hash = hash_new(128, compare_orig, choose_orig)))
+    if (nullptr == (orig_hash = hash_new(128, compare_orig, choose_orig)))
         return(-1);
 
     /* for profiling the functions */
@@ -771,8 +771,8 @@ void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, BatmanP
         //addr_to_string(neigh, neigh_str, sizeof(neigh_str));
         //addr_to_string(if_incoming->addr.sin_addr.s_addr, ifaddr_str, sizeof(ifaddr_str));
 
-        cPacket *next_packet = NULL;
-        for ( ; bat_packet; bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : NULL) {
+        cPacket *next_packet = nullptr;
+        for ( ; bat_packet; bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : nullptr) {
             next_packet = bat_packet->decapsulate();
 
             EV_INFO << "packet receive from :" << bat_packet->getOrig() << endl;
@@ -795,7 +795,7 @@ void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, BatmanP
 
             hna_buff_len = bat_packet->getHnaMsgArraySize() * BATMAN_HNA_MSG_SIZE;
             unsigned int  hnaLen = bat_packet->getHnaMsgArraySize();
-            hna_recv_buff = hnaLen > 0 ? &bat_packet->getHnaMsg(0) : NULL;
+            hna_recv_buff = hnaLen > 0 ? &bat_packet->getHnaMsg(0) : nullptr;
 
             {
 
@@ -882,7 +882,7 @@ void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, BatmanP
             orig_neigh_node = (bat_packet->getOrig() == neigh ? orig_node : get_orig_node(neigh));
 
             /* drop packet if sender is not a direct neighbor and if we no route towards it */
-            if ((bat_packet->getOrig() != neigh) && (orig_neigh_node->router == NULL)) {
+            if ((bat_packet->getOrig() != neigh) && (orig_neigh_node->router == nullptr)) {
                 EV_INFO << "Drop packet: OGM via unknown neighbor! \n";
                 delete bat_packet;
                 continue;
@@ -925,7 +925,7 @@ void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, BatmanP
 
             schedule_forward_packet(orig_node, bat_packet, neigh, 0, hna_buff_len, if_incoming, curr_time);
             delete bat_packet;
-            bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : NULL;
+            bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : nullptr;
         }
         delete next_packet;
     }

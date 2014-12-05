@@ -42,7 +42,7 @@ class INET_API ITransmitter : public IPrintableObject
 
     /**
      * Returns a transmission which describes the radio signal corresponding
-     * to the provided mac frame. This function never returns NULL.
+     * to the provided mac frame. This function never returns nullptr.
      */
     virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
 };

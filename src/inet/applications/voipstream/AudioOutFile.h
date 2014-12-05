@@ -37,7 +37,7 @@ namespace inet {
 class AudioOutFile
 {
   public:
-    AudioOutFile() : opened(false), audio_st(NULL), oc(NULL) {};
+    AudioOutFile() : opened(false), audio_st(nullptr), oc(nullptr) {};
     ~AudioOutFile();
 
     void open(const char *resultFile, int sampleRate, short int sampleBits);

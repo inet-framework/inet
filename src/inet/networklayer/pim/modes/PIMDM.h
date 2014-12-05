@@ -50,7 +50,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         };
 
         enum GraftPruneState {
-            FORWARDING,    // oiflist != NULL
+            FORWARDING,    // oiflist != nullptr
             PRUNED,    // olist is empty
             ACK_PENDING    // waiting for a Graft Ack
         };
@@ -73,8 +73,8 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
         UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address neighbor, bool isSourceDirectlyConnected)
             : Interface(owner, ie), nextHop(neighbor),
-            graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
-            originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
+            graftPruneState(FORWARDING), graftRetryTimer(nullptr), overrideTimer(nullptr), lastPruneSentTime(0.0),
+            originatorState(NOT_ORIGINATOR), sourceActiveTimer(nullptr), stateRefreshTimer(nullptr), maxTtlSeen(0)
         { ASSERT(owner); ASSERT(ie); setFlag(SOURCE_DIRECTLY_CONNECTED, isSourceDirectlyConnected); }
         virtual ~UpstreamInterface();
         Route *route() const { return check_and_cast<Route *>(owner); }
@@ -111,7 +111,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
         DownstreamInterface(Route *owner, InterfaceEntry *ie)
             : Interface(owner, ie),
-            pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL)
+            pruneState(NO_INFO), pruneTimer(nullptr), prunePendingTimer(nullptr)
         { ASSERT(owner), ASSERT(ie); }
         ~DownstreamInterface();
         Route *route() const { return check_and_cast<Route *>(owner); }
@@ -131,7 +131,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         std::vector<DownstreamInterface *> downstreamInterfaces;
 
         Route(PIMDM *owner, IPv4Address source, IPv4Address group)
-            : RouteEntry(owner, source, group), upstreamInterface(NULL) {}
+            : RouteEntry(owner, source, group), upstreamInterface(nullptr) {}
         virtual ~Route();
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
         DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);

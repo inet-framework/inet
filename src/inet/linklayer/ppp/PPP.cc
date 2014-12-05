@@ -66,7 +66,7 @@ void PPP::initialize(int stage)
         emit(txStateSignal, 0L);
 
         // find queueModule
-        queueModule = NULL;
+        queueModule = nullptr;
 
         if (par("queueModule").stringValue()[0]) {
             cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
@@ -84,7 +84,7 @@ void PPP::initialize(int stage)
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
         // if we're connected, get the gate with transmission rate
-        datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
+        datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // register our interface entry in IInterfaceTable
@@ -103,7 +103,7 @@ void PPP::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         // display string stuff
         if (ev.isGUI()) {
-            if (datarateChannel) {    // not NULL if connected
+            if (datarateChannel) {    // not nullptr if connected
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
             }
             else {
@@ -124,7 +124,7 @@ InterfaceEntry *PPP::createInterfaceEntry()
     e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
-    bool connected = datarateChannel != NULL;
+    bool connected = datarateChannel != nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
     e->setDatarate(datarate);
     e->setCarrier(connected);
@@ -203,7 +203,7 @@ void PPP::refreshOutGateConnection(bool connected)
 
     cChannel *oldChannel = datarateChannel;
     // if we're connected, get the gate with transmission rate
-    datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
+    datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
 
     if (datarateChannel && !oldChannel)
@@ -276,7 +276,7 @@ void PPP::handleMessage(cMessage *msg)
             displayIdle();
 
         // fire notification
-        notifDetails.setPacket(NULL);
+        notifDetails.setPacket(nullptr);
         emit(NF_PP_TX_END, &notifDetails);
 
         if (!txQueue.empty()) {
@@ -318,7 +318,7 @@ void PPP::handleMessage(cMessage *msg)
     }
     else {    // arrived on gate "netwIn"
         EV_INFO << "Received " << msg << " from upper layer.\n";
-        if (datarateChannel == NULL) {
+        if (datarateChannel == nullptr) {
             EV_WARN << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
             emit(dropPkIfaceDownSignal, msg);
@@ -379,7 +379,7 @@ void PPP::updateDisplayString()
         // speed up things
         getDisplayString().setTagArg("t", 0, "");
     }
-    else if (datarateChannel != NULL) {
+    else if (datarateChannel != nullptr) {
         char datarateText[40];
 
         double datarate = datarateChannel->getNominalDatarate();
@@ -429,7 +429,7 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 
 void PPP::flushQueue()
 {
-    // code would look slightly nicer with a pop() function that returns NULL if empty
+    // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (queueModule) {
         while (!queueModule->isEmpty()) {
             cMessage *msg = queueModule->pop();
@@ -450,7 +450,7 @@ void PPP::flushQueue()
 
 void PPP::clearQueue()
 {
-    // code would look slightly nicer with a pop() function that returns NULL if empty
+    // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (queueModule) {
         queueModule->clear();    // clear request count
         queueModule->requestPacket();

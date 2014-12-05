@@ -40,9 +40,9 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     void clean();
 
   public:
-    IPv4ControlInfo() : IPv4ControlInfo_Base() { dgram = NULL; }
+    IPv4ControlInfo() : IPv4ControlInfo_Base() { dgram = nullptr; }
     virtual ~IPv4ControlInfo();
-    IPv4ControlInfo(const IPv4ControlInfo& other) : IPv4ControlInfo_Base(other) { dgram = NULL; copy(other); }
+    IPv4ControlInfo(const IPv4ControlInfo& other) : IPv4ControlInfo_Base(other) { dgram = nullptr; copy(other); }
     IPv4ControlInfo& operator=(const IPv4ControlInfo& other);
     virtual IPv4ControlInfo *dup() const { return new IPv4ControlInfo(*this); }
 

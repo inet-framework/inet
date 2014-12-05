@@ -25,7 +25,7 @@ Define_Module(EtherFrameClassifier);
 
 void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<EtherPauseFrame *>(msg) != NULL)
+    if (dynamic_cast<EtherPauseFrame *>(msg) != nullptr)
         send(msg, "pauseOut");
     else
         send(msg, "defaultOut");

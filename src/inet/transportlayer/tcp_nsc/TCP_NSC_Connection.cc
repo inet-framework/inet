@@ -63,15 +63,15 @@ TCP_NSC_Connection::TCP_NSC_Connection()
     :
     connIdM(-1),
     appGateIndexM(-1),
-    pNscSocketM(NULL),
+    pNscSocketM(nullptr),
     sentEstablishedM(false),
     onCloseM(false),
     disconnectCalledM(false),
     isListenerM(false),
     tcpWinSizeM(65536),
-    tcpNscM(NULL),
-    receiveQueueM(NULL),
-    sendQueueM(NULL)
+    tcpNscM(nullptr),
+    receiveQueueM(nullptr),
+    sendQueueM(nullptr)
 {
 }
 
@@ -85,7 +85,7 @@ TCP_NSC_Connection::~TCP_NSC_Connection()
 cMessage *TCP_NSC_Connection::createEstablishedMsg()
 {
     if (sentEstablishedM)
-        return NULL;
+        return nullptr;
 
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);

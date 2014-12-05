@@ -32,7 +32,7 @@
 #ifndef __LWIP_DEF_H__
 #define __LWIP_DEF_H__
 
-/* this might define NULL already */
+/* this might define nullptr already */
 #include "lwip/arch.h"
 
 namespace inet {
@@ -41,11 +41,6 @@ namespace tcp {
 
 #define LWIP_MAX(x , y)  (((x) > (y)) ? (x) : (y))
 #define LWIP_MIN(x , y)  (((x) < (y)) ? (x) : (y))
-
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
-
 
 } // namespace tcp
 

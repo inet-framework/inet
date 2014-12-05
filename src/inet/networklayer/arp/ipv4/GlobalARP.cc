@@ -55,8 +55,8 @@ GlobalARP::GlobalARP()
             throw cRuntimeError("Global ARP cache not empty, model error in previous run?");
     }
 
-    ift = NULL;
-    rt = NULL;
+    ift = nullptr;
+    rt = nullptr;
 }
 
 void GlobalARP::initialize(int stage)
@@ -96,7 +96,7 @@ void GlobalARP::initialize(int stage)
             entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         }
         cModule *host = findContainingNode(this);
-        if (host != NULL)
+        if (host != nullptr)
             host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
     }
 }
@@ -240,7 +240,7 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             if (it->second->ie == ie)
                 break;
         }
-        ARPCacheEntry *entry = NULL;
+        ARPCacheEntry *entry = nullptr;
         if (it == globalArpCache.end()) {
             if (!ie->ipv4Data() || ie->ipv4Data()->getIPAddress().isUnspecified())
                 return; // if the address is not defined it isn't included in the global cache

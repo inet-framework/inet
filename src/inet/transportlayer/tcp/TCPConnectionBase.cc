@@ -172,15 +172,15 @@ TCPConnection::TCPConnection()
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
     transferMode = TCP_TRANSFER_BYTECOUNT;
-    sendQueue = NULL;
-    rexmitQueue = NULL;
-    receiveQueue = NULL;
-    tcpAlgorithm = NULL;
-    state = NULL;
-    the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = NULL;
+    sendQueue = nullptr;
+    rexmitQueue = nullptr;
+    receiveQueue = nullptr;
+    tcpAlgorithm = nullptr;
+    state = nullptr;
+    the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = nullptr;
     sndWndVector = rcvWndVector = rcvAdvVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector =
                                     dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector = rcvNASegVector =
-                                                        tcpRcvQueueBytesVector = tcpRcvQueueDropsVector = pipeVector = sackedBytesVector = NULL;
+                                                        tcpRcvQueueBytesVector = tcpRcvQueueDropsVector = pipeVector = sackedBytesVector = nullptr;
 }
 
 //
@@ -202,11 +202,11 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
 
     transferMode = TCP_TRANSFER_UNDEFINED;
     // queues and algorithm will be created on active or passive open
-    sendQueue = NULL;
-    rexmitQueue = NULL;
-    receiveQueue = NULL;
-    tcpAlgorithm = NULL;
-    state = NULL;
+    sendQueue = nullptr;
+    rexmitQueue = nullptr;
+    receiveQueue = nullptr;
+    tcpAlgorithm = nullptr;
+    state = nullptr;
 
     the2MSLTimer = new cMessage("2MSL");
     connEstabTimer = new cMessage("CONN-ESTAB");
@@ -219,24 +219,24 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     synRexmitTimer->setContextPointer(this);
 
     // statistics
-    sndWndVector = NULL;
-    rcvWndVector = NULL;
-    rcvAdvVector = NULL;
-    sndNxtVector = NULL;
-    sndAckVector = NULL;
-    rcvSeqVector = NULL;
-    rcvAckVector = NULL;
-    unackedVector = NULL;
+    sndWndVector = nullptr;
+    rcvWndVector = nullptr;
+    rcvAdvVector = nullptr;
+    sndNxtVector = nullptr;
+    sndAckVector = nullptr;
+    rcvSeqVector = nullptr;
+    rcvAckVector = nullptr;
+    unackedVector = nullptr;
 
-    dupAcksVector = NULL;
-    sndSacksVector = NULL;
-    rcvSacksVector = NULL;
-    rcvOooSegVector = NULL;
-    rcvNASegVector = NULL;
-    tcpRcvQueueBytesVector = NULL;
-    tcpRcvQueueDropsVector = NULL;
-    pipeVector = NULL;
-    sackedBytesVector = NULL;
+    dupAcksVector = nullptr;
+    sndSacksVector = nullptr;
+    rcvSacksVector = nullptr;
+    rcvOooSegVector = nullptr;
+    rcvNASegVector = nullptr;
+    tcpRcvQueueBytesVector = nullptr;
+    tcpRcvQueueDropsVector = nullptr;
+    pipeVector = nullptr;
+    sackedBytesVector = nullptr;
 
     if (getTcpMain()->recordStatistics) {
         sndWndVector = new cOutVector("send window");
@@ -768,7 +768,7 @@ void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
             // we're in ESTABLISHED, these timers are no longer needed
             delete cancelEvent(connEstabTimer);
             delete cancelEvent(synRexmitTimer);
-            connEstabTimer = synRexmitTimer = NULL;
+            connEstabTimer = synRexmitTimer = nullptr;
             // TCP_I_ESTAB notification moved inside event processing
             break;
 

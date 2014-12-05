@@ -84,7 +84,7 @@ void ScenarioManager::processCommand(cXMLElement *node)
 static bool parseIndexedName(const char *s, std::string& name, int& index)
 {
     const char *b;
-    if ((b = strchr(s, '[')) == NULL || s[strlen(s) - 1] != ']') {
+    if ((b = strchr(s, '[')) == nullptr || s[strlen(s) - 1] != ']') {
         name = s;
         index = -1;
         return false;
@@ -243,7 +243,7 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
 
     // process <connect-channel> command
     const char *channelTypeName = node->getAttribute("channel-type");
-    cChannelType *channelType = channelTypeName ? cChannelType::get(channelTypeName) : NULL;
+    cChannelType *channelType = channelTypeName ? cChannelType::get(channelTypeName) : nullptr;
     cXMLElementList paramList;
 
     if (channelTypeName)

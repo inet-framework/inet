@@ -126,7 +126,7 @@ extern const struct ip_addr ip_addr_broadcast;
                                 (u32_t)((d) & 0xff))
 
 #define ip_addr_set(dest, src) (dest)->addr = \
-                               ((src) == NULL ? L3Address() : \
+                               ((src) == nullptr ? L3Address() : \
                                (src)->addr)
 /**
  * Determine if two address are on the same network.
@@ -142,7 +142,7 @@ extern const struct ip_addr ip_addr_broadcast;
                                               (mask)->addr))
 #define ip_addr_cmp(addr1, addr2) ((addr1)->addr == (addr2)->addr)
 
-#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr.isUnspecified())
+#define ip_addr_isany(addr1) ((addr1) == nullptr || (addr1)->addr.isUnspecified())
 
 u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 
@@ -154,13 +154,13 @@ u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 
 #define ip_addr_debug_print(debug, ipaddr) \
   LWIP_DEBUGF(debug, ("%" U16_F ".%" U16_F ".%" U16_F ".%" U16_F,              \
-                      ipaddr != NULL ?                                  \
+                      ipaddr != nullptr ?                                  \
                       (u16_t)(ntohl((ipaddr)->addr) >> 24) & 0xff : 0,  \
-                      ipaddr != NULL ?                                  \
+                      ipaddr != nullptr ?                                  \
                       (u16_t)(ntohl((ipaddr)->addr) >> 16) & 0xff : 0,  \
-                      ipaddr != NULL ?                                  \
+                      ipaddr != nullptr ?                                  \
                       (u16_t)(ntohl((ipaddr)->addr) >> 8) & 0xff : 0,   \
-                      ipaddr != NULL ?                                  \
+                      ipaddr != nullptr ?                                  \
                       (u16_t)ntohl((ipaddr)->addr) & 0xff : 0))
 
 /* These are cast to u16_t, with the intent that they are often arguments
@@ -173,7 +173,7 @@ u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 /**
  * Same as inet_ntoa() but takes a struct ip_addr*
  */
-#define ip_ntoa(addr)  ((addr != NULL) ? inet_ntoa(*((struct in_addr*)(addr))) : "NULL")
+#define ip_ntoa(addr)  ((addr != nullptr) ? inet_ntoa(*((struct in_addr*)(addr))) : "nullptr")
 
 #ifdef __cplusplus
 //}

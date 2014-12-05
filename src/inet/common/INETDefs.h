@@ -51,7 +51,7 @@ typedef unsigned long ulong;
 
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()
-// from crashing if something in between returns NULL.
+// from crashing if something in between returns nullptr.
 // The above expression should be changed to
 //    CHK(CHK(gate("out"))->getToGate())->getToGate()
 // which is uglier but doesn't crash, just stops with a nice
@@ -61,7 +61,7 @@ template<class T>
 T *__checknull(T *p, const char *expr, const char *file, int line)
 {
     if (!p)
-        throw cRuntimeError("Expression %s returned NULL at %s:%d", expr, file, line);
+        throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
     return p;
 }
 

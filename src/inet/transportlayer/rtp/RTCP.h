@@ -158,7 +158,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Returns the RTPParticipantInfo object used for storing information
      * about the RTP end system with this ssrc identifier.
-     * Returns NULL if this end system is unknown.
+     * Returns nullptr if this end system is unknown.
      */
     virtual RTPParticipantInfo *findParticipantInfo(uint32 ssrc);
 

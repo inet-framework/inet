@@ -66,7 +66,7 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference);
-    const ReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : NULL;
+    const ReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : nullptr;
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

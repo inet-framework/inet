@@ -30,7 +30,7 @@ namespace inet {
 class INET_API Delayer : public cSimpleModule
 {
   public:
-    Delayer() { delayPar = NULL; }
+    Delayer() { delayPar = nullptr; }
 
   protected:
     virtual void initialize();

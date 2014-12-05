@@ -71,7 +71,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
     /**
      * Returns a SenderReport for this rtp endsystem.
      * If it hasn't sent rtp data packets during the
-     * last 2 rtcp intervals, it returns NULL.
+     * last 2 rtcp intervals, it returns nullptr.
      */
     virtual SenderReport *senderReport(simtime_t now);
 

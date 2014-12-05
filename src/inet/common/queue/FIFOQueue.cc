@@ -39,13 +39,13 @@ cMessage *FIFOQueue::enqueue(cMessage *msg)
     queue.insert(packet);
     byteLength += packet->getByteLength();
     emit(queueLengthSignal, queue.length());
-    return NULL;
+    return nullptr;
 }
 
 cMessage *FIFOQueue::dequeue()
 {
     if (queue.empty())
-        return NULL;
+        return nullptr;
 
     cPacket *packet = check_and_cast<cPacket *>(queue.pop());
     byteLength -= packet->getByteLength();

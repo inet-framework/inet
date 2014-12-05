@@ -41,7 +41,7 @@ class LwipTcpStackIf
 
     /**
      * TCP layer send a packet to IP layer
-     * @param pcb:    the lwip pcb or NULL (tipically when send a RESET )
+     * @param pcb:    the lwip pcb or nullptr (tipically when send a RESET )
      * @param src:    the source IP addr
      * @param dest:   the destination IP addr
      * @param tcpseg: pointer to TCP segment (message)

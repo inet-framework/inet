@@ -27,7 +27,7 @@ typedef struct list
 } while (0)
 
 #define INIT_LIST_ELM(le) do { \
-    (le)->next = NULL; (le)->prev = NULL; \
+    (le)->next = nullptr; (le)->prev = nullptr; \
 } while (0)
 
 static inline int listelm_detach(dsr_list_t * prev, dsr_list_t * next)
@@ -77,7 +77,7 @@ static inline int list_detach(dsr_list_t * le)
 
     listelm_detach(le->prev, le->next);
 
-    le->next = le->prev = NULL;
+    le->next = le->prev = nullptr;
 
     return LIST_SUCCESS;
 }
@@ -93,7 +93,7 @@ static inline int list_detach(dsr_list_t * le)
 
 #define list_first(head) ((head)->next)
 
-#define list_unattached(le) ((le)->next == NULL && (le)->prev == NULL)
+#define list_unattached(le) ((le)->next == nullptr && (le)->prev == nullptr)
 
 #define list_del(le) list_detach(le)
 

@@ -478,7 +478,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Searches for a transmitEntry with the given destination address which is of type
      * timerType.
-     * Returns NULL if no such entry exists.
+     * Returns nullptr if no such entry exists.
      */
     TimerIfEntry *searchTimerIfEntry(IPv6Address& dest, int timerType);
 

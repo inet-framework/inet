@@ -252,7 +252,7 @@ void SCTP::handleMessage(cMessage *msg)
 
             if (strcmp(msg->getName(), "PassiveOPEN") == 0 || strcmp(msg->getName(), "Associate") == 0) {
                 if (assocList.size() > 0) {
-                    assoc = NULL;
+                    assoc = nullptr;
                     SCTPOpenCommand *open = check_and_cast<SCTPOpenCommand *>(controlInfo);
                     EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
                     for (std::list<SCTPAssociation *>::iterator iter = assocList.begin(); iter != assocList.end(); iter++) {
@@ -263,7 +263,7 @@ void SCTP::handleMessage(cMessage *msg)
                         }
                     }
                 }
-                if (assocList.size() == 0 || assoc == NULL) {
+                if (assocList.size() == 0 || assoc == nullptr) {
                     assoc = new SCTPAssociation(this, appGateIndex, assocId, rt, ift);
 
                     AppAssocKey key;
@@ -453,7 +453,7 @@ SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uin
                 && i->second.remotePort == remotePort))
             return getAssoc(i->first);
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPAssociation *SCTP::findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
@@ -505,7 +505,7 @@ SCTPAssociation *SCTP::findAssocForMessage(L3Address srcAddr, L3Address destAddr
     // given up
 
     EV_INFO << "giving up on trying to find assoc for localAddr=" << srcAddr << " remoteAddr=" << destAddr << " localPort=" << srcPort << " remotePort=" << destPort << "\n";
-    return NULL;
+    return nullptr;
 }
 
 SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
@@ -515,7 +515,7 @@ SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
     key.assocId = assocId;
     EV_INFO << "findAssoc for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
     SctpAppAssocMap::iterator i = sctpAppAssocMap.find(key);
-    return (i == sctpAppAssocMap.end()) ? NULL : i->second;
+    return (i == sctpAppAssocMap.end()) ? nullptr : i->second;
 }
 
 uint16 SCTP::getEphemeralPort()
@@ -733,7 +733,7 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
                 for (SctpAssocMap::iterator sctpAssocMapIterator = sctpAssocMap.begin();
                      sctpAssocMapIterator != sctpAssocMap.end(); sctpAssocMapIterator++)
                 {
-                    if (sctpAssocMapIterator->second != NULL) {
+                    if (sctpAssocMapIterator->second != nullptr) {
                         SCTPAssociation *myAssoc = sctpAssocMapIterator->second;
                         if (myAssoc->assocId == assoc->assocId) {
                             if (myAssoc->T1_InitTimer) {
@@ -838,7 +838,7 @@ SCTPAssociation *SCTP::getAssoc(int32 assocId)
         if (i->first.assocId == assocId)
             return i->second;
     }
-    return NULL;
+    return nullptr;
 }
 
 void SCTP::finish()

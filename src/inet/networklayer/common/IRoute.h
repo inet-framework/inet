@@ -76,7 +76,7 @@ class INET_API IRoute
 
     virtual ~IRoute() {}
 
-    /** The routing table in which this route is inserted, or NULL. */
+    /** The routing table in which this route is inserted, or nullptr. */
     virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
     virtual void setDestination(const L3Address& dest) = 0;
@@ -195,7 +195,7 @@ class INET_API IMulticastRoute
 
     virtual ~IMulticastRoute() {}
 
-    /** The routing table in which this route is inserted, or NULL. */
+    /** The routing table in which this route is inserted, or nullptr. */
     virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
     virtual void setEnabled(bool enabled) = 0;

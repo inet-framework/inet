@@ -111,7 +111,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     /**
      * This method is intended to be overwritten by subclasses. It
      * should return a receiver report if there have been received
-     * RTP packets from that endsystem and NULL otherwise.
+     * RTP packets from that endsystem and nullptr otherwise.
      */
     virtual ReceptionReport *receptionReport(simtime_t now);
 
@@ -119,8 +119,8 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * This method is intended to be overwritten by subclasses which
      * are used for storing information about itself.
      * It should return a sender report if there have been sent RTP
-     * packets recently or NULL otherwise.
-     * The implementation for this class always returns NULL.
+     * packets recently or nullptr otherwise.
+     * The implementation for this class always returns nullptr.
      */
     virtual SenderReport *senderReport(simtime_t now);
 

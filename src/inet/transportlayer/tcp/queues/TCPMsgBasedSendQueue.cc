@@ -77,7 +77,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
-    TCPSegment *tcpseg = new TCPSegment(NULL);
+    TCPSegment *tcpseg = new TCPSegment(nullptr);
 
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
@@ -89,7 +89,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
         ++i;
 
     uint32 toSeq = fromSeq + numBytes;
-    const char *payloadName = NULL;
+    const char *payloadName = nullptr;
 
     while (i != payloadQueue.end() && seqLE(i->endSequenceNo, toSeq)) {
         if (!payloadName)

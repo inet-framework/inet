@@ -48,7 +48,7 @@ RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     _inactiveIntervals = 0;
     _startOfInactivity = 0.0;
     _itemsReceived = 0;
-    packetSequenceLostLogFile = NULL;
+    packetSequenceLostLogFile = nullptr;
 }
 
 RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo(receiverInfo)
@@ -117,7 +117,7 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arri
             {
                 //std::cout << "id = "<< id <<" SequeceNumber loss = "<<i<<endl;
                 packetSequenceLostLogFile = fopen ("PacketLossLog.log","+w");
-                if (packetSequenceLostLogFile != NULL)
+                if (packetSequenceLostLogFile != nullptr)
                 {
                     //sprintf (line, "id = %d SequeceNumber loss = %f ", id,i);
                     fputs (i, packetSequenceLostLogFile);
@@ -219,7 +219,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         return receptionReport;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 void RTPReceiverInfo::nextInterval(simtime_t now)

@@ -84,7 +84,7 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
 
     IPv4Datagram *ret = dgram;
     drop(dgram);
-    dgram = NULL;
+    dgram = nullptr;
     return ret;
 #else // ifdef WITH_IPv4
     throw cRuntimeError(this, "INET was compiled without IPv4 support");

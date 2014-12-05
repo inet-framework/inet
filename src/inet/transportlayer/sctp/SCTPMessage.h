@@ -41,7 +41,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base
     void clean();
 
   public:
-    SCTPMessage(const char *name = NULL, int32 kind = 0) : SCTPMessage_Base(name, kind) {}
+    SCTPMessage(const char *name = nullptr, int32 kind = 0) : SCTPMessage_Base(name, kind) {}
     SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other) { copy(other); }
     ~SCTPMessage();
     SCTPMessage& operator=(const SCTPMessage& other);
@@ -83,7 +83,7 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
     void clean();
 
   public:
-    SCTPErrorChunk(const char *name = NULL, int32 kind = 0) : SCTPErrorChunk_Base(name, kind) {};
+    SCTPErrorChunk(const char *name = nullptr, int32 kind = 0) : SCTPErrorChunk_Base(name, kind) {};
     SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other) { copy(other); };
     SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
     ~SCTPErrorChunk();
@@ -116,7 +116,7 @@ class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
     std::list<cPacket *> parameterList;
 
   public:
-    SCTPStreamResetChunk(const char *name = NULL, int32 kind = 0) : SCTPStreamResetChunk_Base(name, kind) {};
+    SCTPStreamResetChunk(const char *name = nullptr, int32 kind = 0) : SCTPStreamResetChunk_Base(name, kind) {};
     SCTPStreamResetChunk(const SCTPStreamResetChunk& other) : SCTPStreamResetChunk_Base(other.getName()) { operator=(other); };
     SCTPStreamResetChunk& operator=(const SCTPStreamResetChunk& other);
 
@@ -149,7 +149,7 @@ class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
     std::list<cPacket *> parameterList;
 
   public:
-    SCTPAsconfChunk(const char *name = NULL, int32 kind = 0) : SCTPAsconfChunk_Base(name, kind) {};
+    SCTPAsconfChunk(const char *name = nullptr, int32 kind = 0) : SCTPAsconfChunk_Base(name, kind) {};
     SCTPAsconfChunk(const SCTPAsconfChunk& other) : SCTPAsconfChunk_Base(other.getName()) { operator=(other); };
     SCTPAsconfChunk& operator=(const SCTPAsconfChunk& other);
 
@@ -182,7 +182,7 @@ class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
     std::list<cPacket *> parameterList;
 
   public:
-    SCTPAsconfAckChunk(const char *name = NULL, int32 kind = 0) : SCTPAsconfAckChunk_Base(name, kind) {};
+    SCTPAsconfAckChunk(const char *name = nullptr, int32 kind = 0) : SCTPAsconfAckChunk_Base(name, kind) {};
     SCTPAsconfAckChunk(const SCTPAsconfAckChunk& other) : SCTPAsconfAckChunk_Base(other.getName()) { operator=(other); };
     SCTPAsconfAckChunk& operator=(const SCTPAsconfAckChunk& other);
 

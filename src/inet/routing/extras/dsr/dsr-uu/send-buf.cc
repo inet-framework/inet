@@ -105,7 +105,7 @@ void NSCLASS send_buf_timeout(unsigned long data)
 
     DSR_READ_LOCK(&send_buf.lock);
     /* Get first packet in maintenance buffer */
-    e = (struct send_buf_entry *)__tbl_find(&send_buf, NULL, crit_none);
+    e = (struct send_buf_entry *)__tbl_find(&send_buf, nullptr, crit_none);
 
     if (!e)
     {
@@ -133,7 +133,7 @@ static struct send_buf_entry *  send_buf_entry_create(struct dsr_pkt *dp,xmit_fc
     e = (struct send_buf_entry *)MALLOC(sizeof(*e), GFP_ATOMIC);
 
     if (!e)
-        return NULL;
+        return nullptr;
 
     e->dp = dp;
     e->okfn = okfn;
@@ -277,7 +277,7 @@ static inline int send_buf_flush(struct tbl *t)
     int pkts = 0;
     /* Flush send buffer */
     while ((e =
-                (struct send_buf_entry *)tbl_find_detach(t, NULL, crit_none)))
+                (struct send_buf_entry *)tbl_find_detach(t, nullptr, crit_none)))
     {
         dsr_pkt_free(e->dp);
         FREE(e);

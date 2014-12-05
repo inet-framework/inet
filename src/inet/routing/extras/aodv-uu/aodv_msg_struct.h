@@ -37,8 +37,8 @@ struct AODV_msg : public cPacket
     /* NS_PORT: Additions for the AODVUU packet type in ns-2 */
 
   public:
-    //explicit AODV_msg(const char *name="AodvMgs") : cPacket(name) {extensionsize=0;extension=NULL;}
-    explicit AODV_msg(const char *name=NULL) : cPacket(name) {extensionsize=0; extension=NULL;}
+    //explicit AODV_msg(const char *name="AodvMgs") : cPacket(name) {extensionsize=0;extension=nullptr;}
+    explicit AODV_msg(const char *name=nullptr) : cPacket(name) {extensionsize=0; extension=nullptr;}
     ~AODV_msg ();
     AODV_msg (const AODV_msg  &m);
     AODV_msg &  operator= (const AODV_msg &m);
@@ -91,7 +91,7 @@ struct RERR : public AODV_msg
         n = 0;
         res2 = 0;
         dest_count = 0;
-        _udest = NULL;
+        _udest = nullptr;
         setBitLength(12*8);
     }
     ~RERR ();

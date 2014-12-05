@@ -219,7 +219,7 @@ static struct dsr_rrep_opt *dsr_rrep_opt_add(char *buf, int len,
     struct dsr_rrep_opt *rrep_opt;
 
     if (!buf || !srt || (unsigned int)len < DSR_RREP_OPT_LEN(srt))
-        return NULL;
+        return nullptr;
 
     rrep_opt = (struct dsr_rrep_opt *)buf;
 
@@ -236,14 +236,14 @@ static struct dsr_rrep_opt *dsr_rrep_opt_add(char *buf, int len,
 
 int NSCLASS dsr_rrep_send(struct dsr_srt *srt, struct dsr_srt *srt_to_me)
 {
-    struct dsr_pkt *dp = NULL;
+    struct dsr_pkt *dp = nullptr;
     char *buf;
     int len, ttl, n;
 
     if (!srt || !srt_to_me)
         return -1;
 
-    dp = dsr_pkt_alloc(NULL);
+    dp = dsr_pkt_alloc(nullptr);
 
     if (!dp)
     {
@@ -414,7 +414,7 @@ int __init NSCLASS grat_rrep_tbl_init(void)
 
 void __exit NSCLASS grat_rrep_tbl_cleanup(void)
 {
-    tbl_flush(&grat_rrep_tbl, NULL);
+    tbl_flush(&grat_rrep_tbl, nullptr);
 
     del_timer_sync(&grat_rrep_tbl_timer);
 

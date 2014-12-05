@@ -97,7 +97,7 @@ void IPv4Address::set(const char *text)
 {
     unsigned char buf[4];
     if (!text)
-        throw cRuntimeError("IPv4 address string is NULL");
+        throw cRuntimeError("IPv4 address string is nullptr");
 
     bool ok = parseIPAddress(text, buf);
     if (!ok)

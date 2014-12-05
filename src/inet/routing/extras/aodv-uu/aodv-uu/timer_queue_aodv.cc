@@ -90,12 +90,12 @@ NS_STATIC void NS_CLASS timer_add(struct timer *t)
     /* Sanity checks: */
     if (!t)
     {
-        perror("NULL timer!!!\n");
+        perror("nullptr timer!!!\n");
         exit(-1);
     }
     if (!t->handler)
     {
-        perror("NULL handler!!!\n");
+        perror("nullptr handler!!!\n");
         exit(-1);
     }
 
@@ -234,12 +234,12 @@ NS_STATIC void NS_CLASS timer_add(struct timer *t)
 
     if (!t)
     {
-        perror("NULL timer!!!\n");
+        perror("nullptr timer!!!\n");
         exit(-1);
     }
     if (!t->handler)
     {
-        perror("NULL handler!!!\n");
+        perror("nullptr handler!!!\n");
         exit(-1);
     }
 
@@ -320,7 +320,7 @@ void NS_CLASS timer_set_timeout(struct timer *t, long msec)
         timer_remove(t);
     }
 
-    gettimeofday(&t->timeout, NULL);
+    gettimeofday(&t->timeout, nullptr);
 
     if (msec < 0)
         DEBUG(LOG_WARNING, 0, "Negative timeout!!!");
@@ -340,7 +340,7 @@ long timer_left(struct timer *t)
     if (!t)
         return -1;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     return timeval_diff(&now, &t->timeout);
 }
@@ -352,19 +352,19 @@ struct timeval *NS_CLASS timer_age_queue()
     struct timer *t;
     static struct timeval remaining;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     fflush(stdout);
 
     if (list_empty(&TQ))
-        return NULL;
+        return nullptr;
 
     timer_timeout(&now);
 
     /* Check emptyness again since the list might have been updated by a
      * timeout */
     if (list_empty(&TQ))
-        return NULL;
+        return nullptr;
 
     t = (struct timer *) TQ.next;
 
@@ -387,7 +387,7 @@ void NS_CLASS printTQ(list_t * l)
     int n = 0;
     list_t *pos;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     fprintf(stderr, "================\n");
     fprintf(stderr, "%-12s %-4s %lu\n", "left", "n", (unsigned long) l);

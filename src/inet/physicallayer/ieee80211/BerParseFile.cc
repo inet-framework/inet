@@ -89,8 +89,8 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
 {
     BerList *berlist;
     berlist = &berTable[getTablePosition(speed)];
-    LongBer *pre = NULL;
-    LongBer *pos = NULL;
+    LongBer *pre = nullptr;
+    LongBer *pos = nullptr;
     unsigned int j;
     for (j = 0; j < berlist->size(); j++) {
         pos = *(berlist->begin() + j);
@@ -99,7 +99,7 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
         }
     }
     if (j == 0)
-        pre = NULL;
+        pre = nullptr;
     else {
         if (j == berlist->size())
             pre = *(berlist->begin() + j - 2);
@@ -146,7 +146,7 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
         }
     }
 
-    if (pre == NULL)
+    if (pre == nullptr)
         pre = pos;
     if (tsnr > pre->snrlist[pre->snrlist.size() - 1].snr) {
         snrdata3 = pre->snrlist[pre->snrlist.size() - 1];

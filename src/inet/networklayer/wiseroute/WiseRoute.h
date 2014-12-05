@@ -68,7 +68,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
         , rssiThreshold(0)
         , routeFloodsInterval(0)
         , floodSeqNumber(0)
-        , routeFloodTimer(NULL)
+        , routeFloodTimer(nullptr)
         , nbDataPacketsForwarded(0)
         , nbDataPacketsReceived(0)
         , nbDataPacketsSent(0)

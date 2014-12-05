@@ -185,7 +185,7 @@ void Flood::handleLowerPacket(cPacket *m)
                 msg->setTtl(msg->getTtl() - 1);
                 // needs to set the next hop address again to broadcast
                 cObject *const pCtrlInfo = msg->removeControlInfo();
-                if (pCtrlInfo != NULL)
+                if (pCtrlInfo != nullptr)
                     delete pCtrlInfo;
                 setDownControlInfo(msg, MACAddress::BROADCAST_ADDRESS);
                 sendDown(msg);
@@ -274,7 +274,7 @@ FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
     pkt->setTransportProtocol(cInfo->getTransportProtocol());
     pkt->setBitLength(headerLength);
 
-    if (cInfo == NULL) {
+    if (cInfo == nullptr) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();

@@ -82,7 +82,7 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
 INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
@@ -90,8 +90,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkData
 INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "NULL")
-            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
+            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
             << " nextHop=" << nextHopAddr
             << endl;
     return INetfilter::IHook::ACCEPT;
@@ -100,8 +100,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagra
 INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "NULL")
-            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
+            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
             << " nextHop=" << nextHopAddr
             << endl;
     return INetfilter::IHook::ACCEPT;
@@ -110,7 +110,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDat
 INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL IN: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
@@ -118,7 +118,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(INetworkDatagra
 INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
             << endl;
     return INetfilter::IHook::ACCEPT;
 }

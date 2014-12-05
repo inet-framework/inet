@@ -60,7 +60,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    TraCITestApp() { traci = NULL; }
+    TraCITestApp() { traci = nullptr; }
 };
 
 } // namespace inet

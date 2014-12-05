@@ -56,7 +56,7 @@ class TCPSegmentTransmitInfoList
   public:
     void set(uint32_t beg, uint32_t end, simtime_t sentTime);    // [beg,end)
 
-    /// returns pointer to Item, or NULL if not found
+    /// returns pointer to Item, or nullptr if not found
     const Item *get(uint32_t seq) const;
 
     void clearTo(uint32_t endseg);

@@ -372,11 +372,11 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
         for (int i = 0; i < CAPPROBE_MAX_ARRAY; i++)
             recv1_ [i] = recv2_ [i] = -1;
     }
-    OLSR_ETX_link_tuple() {asocTimer = NULL;}
+    OLSR_ETX_link_tuple() {asocTimer = nullptr;}
     OLSR_ETX_link_tuple(OLSR_ETX_link_tuple * e)
     {
         memcpy(this, e, sizeof(OLSR_ETX_link_tuple));
-        asocTimer = NULL;
+        asocTimer = nullptr;
     }
     virtual OLSR_ETX_link_tuple *dup() {return new OLSR_ETX_link_tuple(this);}
 
@@ -456,11 +456,11 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
     }
     inline double&  time()    { return time_; }
 
-    OLSR_ETX_nb2hop_tuple() {asocTimer = NULL;}
+    OLSR_ETX_nb2hop_tuple() {asocTimer = nullptr;}
     OLSR_ETX_nb2hop_tuple(OLSR_ETX_nb2hop_tuple * e)
     {
         memcpy(this, e, sizeof(OLSR_ETX_nb2hop_tuple));
-        asocTimer = NULL;
+        asocTimer = nullptr;
     }
     virtual OLSR_ETX_nb2hop_tuple *dup() {return new OLSR_ETX_nb2hop_tuple(this);}
 
@@ -550,11 +550,11 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
     inline uint16_t&  seq()    { return seq_; }
     inline double&    time()    { return time_; }
 
-    OLSR_ETX_topology_tuple() {asocTimer = NULL;}
+    OLSR_ETX_topology_tuple() {asocTimer = nullptr;}
     OLSR_ETX_topology_tuple(OLSR_ETX_topology_tuple * e)
     {
         memcpy(this, e, sizeof(OLSR_ETX_topology_tuple));
-        asocTimer = NULL;
+        asocTimer = nullptr;
     }
     virtual OLSR_ETX_topology_tuple *dup() {return new OLSR_ETX_topology_tuple(this);}
 

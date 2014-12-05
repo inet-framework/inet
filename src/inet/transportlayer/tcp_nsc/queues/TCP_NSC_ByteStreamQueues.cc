@@ -133,7 +133,7 @@ cPacket *TCP_NSC_ByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
-    ByteArrayMessage *dataMsg = NULL;
+    ByteArrayMessage *dataMsg = nullptr;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
     if (bytesInQueue) {

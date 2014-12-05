@@ -80,7 +80,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     // look at all interface table entries
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
-    while ((ifname = interfaceTokenizer.nextToken()) != NULL) {
+    while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
         InterfaceEntry *ie = ift->getInterfaceByName(ifname);
         if (!ie)
             throw cRuntimeError("No such interface '%s'", ifname);
@@ -104,7 +104,7 @@ void HostAutoConfigurator::setupNetworkLayer()
         // associate interface with specified multicast groups
         cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
         const char *mcastGroup_s;
-        while ((mcastGroup_s = interfaceTokenizer.nextToken()) != NULL) {
+        while ((mcastGroup_s = interfaceTokenizer.nextToken()) != nullptr) {
             IPv4Address mcastGroup(mcastGroup_s);
             ie->ipv4Data()->joinMulticastGroup(mcastGroup);
         }

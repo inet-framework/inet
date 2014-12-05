@@ -157,8 +157,8 @@ IPv4InterfaceData::IPv4InterfaceData()
 {
     netmask = IPv4Address::ALLONES_ADDRESS;
     metric = 0;
-    hostData = NULL;
-    routerData = NULL;
+    hostData = nullptr;
+    routerData = nullptr;
 }
 
 IPv4InterfaceData::~IPv4InterfaceData()
@@ -265,7 +265,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
     if (changed) {
         changed1(F_MULTICAST_ADDRESSES);
 
-        cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+        cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
         if (m) {
             IPv4MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
             m->emit(NF_IPv4_MCAST_CHANGE, &info);
@@ -273,7 +273,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
 
         // Legacy notifications
         if (oldFilterMode != newFilterMode && oldSourceList.empty() && newSourceList.empty()) {
-            cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+            cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
             if (m) {
                 IPv4MulticastGroupInfo info2(ownerp, multicastAddress);
                 m->emit(newFilterMode == MCAST_EXCLUDE_SOURCES ? NF_IPv4_MCAST_JOIN : NF_IPv4_MCAST_LEAVE, &info2);
@@ -329,7 +329,7 @@ IPv4InterfaceData::RouterMulticastGroupData *IPv4InterfaceData::findRouterGroupD
         if ((*it)->multicastGroup == multicastAddress)
             return *it;
 
-    return NULL;
+    return nullptr;
 }
 
 bool IPv4InterfaceData::removeRouterGroupData(IPv4Address multicastAddress)
@@ -471,7 +471,7 @@ IPv4InterfaceData::HostMulticastGroupData *IPv4InterfaceData::findHostGroupData(
         if ((*it)->multicastGroup == multicastAddress)
             return *it;
 
-    return NULL;
+    return nullptr;
 }
 
 bool IPv4InterfaceData::removeHostGroupData(IPv4Address multicastAddress)

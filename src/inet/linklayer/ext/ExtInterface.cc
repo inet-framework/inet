@@ -43,7 +43,7 @@ void ExtInterface::initialize(int stage)
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
-        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL) {
+        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != nullptr) {
             rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
             //device = ev.config()->getAsString("Capture", "device", "lo0");
             device = par("device");
@@ -100,7 +100,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         return;
     }
 
-    if (dynamic_cast<ExtFrame *>(msg) != NULL) {
+    if (dynamic_cast<ExtFrame *>(msg) != nullptr) {
         // incoming real packet from wire (captured by pcap)
         uint32 packetLength;
         ExtFrame *rawPacket = check_and_cast<ExtFrame *>(msg);

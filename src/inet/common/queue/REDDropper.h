@@ -38,7 +38,7 @@ class REDDropper : public AlgorithmicDropperBase
     double avg;
 
   public:
-    REDDropper() : wq(0), minths(NULL), maxths(NULL), maxps(NULL), avg(0.0) {}
+    REDDropper() : wq(0), minths(nullptr), maxths(nullptr), maxps(nullptr), avg(0.0) {}
 
   protected:
     virtual ~REDDropper();

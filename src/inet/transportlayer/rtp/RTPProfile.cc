@@ -159,7 +159,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     sprintf(moduleName, "%sRTP%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
     cModuleType *moduleType = cModuleType::find(moduleName);
-    if (moduleType == NULL)
+    if (moduleType == nullptr)
         throw cRuntimeError("RTPProfile: payload sender module '%s' not found", moduleName);
 
     RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
@@ -219,7 +219,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
                 pkgPrefix, _profileName, packet->getPayloadType());
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
-        if (moduleType == NULL)
+        if (moduleType == nullptr)
             throw cRuntimeError("Receiver module type %s not found", payloadReceiverName);
         else {
             RTPPayloadReceiver *receiverModule =
@@ -278,7 +278,7 @@ RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
 {
     SSRCGateMap::iterator objectIndex = _ssrcGates.find(ssrc);
     if (objectIndex == _ssrcGates.end())
-        return NULL;
+        return nullptr;
     return objectIndex->second;
 }
 

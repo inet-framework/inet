@@ -212,7 +212,7 @@ void IPv6RoutingTable::routeChanged(IPv6Route *entry, int fieldCode)
 {
     if (fieldCode == IPv6Route::F_DESTINATION || fieldCode == IPv6Route::F_PREFIX_LENGTH || fieldCode == IPv6Route::F_METRIC) {    // our data structures depend on these fields
         entry = internalRemoveRoute(entry);
-        ASSERT(entry != NULL);    // failure means inconsistency: route was not found in this routing table
+        ASSERT(entry != nullptr);    // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
 
         // invalidateCache();
@@ -408,14 +408,14 @@ InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const IPv6Address& addr)
     Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
 
     if (addr.isUnspecified())
-        return NULL;
+        return nullptr;
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv6Data()->hasAddress(addr))
             return ie;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool IPv6RoutingTable::isLocalAddress(const IPv6Address& dest) const
@@ -493,7 +493,7 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
             ++it;
     }
     // FIXME todo: if we selected an expired route, throw it out and select again!
-    return NULL;
+    return nullptr;
 }
 
 bool IPv6RoutingTable::isPrefixPresent(const IPv6Address& prefix) const
@@ -555,7 +555,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
         int interfaceId, simtime_t expiryTime)
 {
     // see if prefix exists in table
-    IPv6Route *route = NULL;
+    IPv6Route *route = nullptr;
     for (RouteList::iterator it = routeList.begin(); it != routeList.end(); it++) {
         if ((*it)->getSourceType() == IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix() == destPrefix && (*it)->getPrefixLength() == prefixLength) {
             route = *it;
@@ -563,7 +563,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
         }
     }
 
-    if (route == NULL) {
+    if (route == nullptr) {
         // create new route object
         IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::ROUTER_ADVERTISEMENT);
         route->setInterface(ift->getInterfaceById(interfaceId));
@@ -591,7 +591,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     // FIXME this is very similar to the one above -- refactor!!
 
     // see if prefix exists in table
-    IPv6Route *route = NULL;
+    IPv6Route *route = nullptr;
     for (RouteList::iterator it = routeList.begin(); it != routeList.end(); it++) {
         if ((*it)->getSourceType() == IRoute::OWN_ADV_PREFIX && (*it)->getDestPrefix() == destPrefix && (*it)->getPrefixLength() == prefixLength) {
             route = *it;
@@ -599,7 +599,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
         }
     }
 
-    if (route == NULL) {
+    if (route == nullptr) {
         // create new route object
         IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::OWN_ADV_PREFIX);
         route->setInterface(ift->getInterfaceById(interfaceId));
@@ -717,7 +717,7 @@ IPv6Route *IPv6RoutingTable::removeRoute(IPv6Route *route)
 
 void IPv6RoutingTable::internalAddRoute(IPv6Route *route)
 {
-    ASSERT(route->getRoutingTable() == NULL);
+    ASSERT(route->getRoutingTable() == nullptr);
 
     routeList.push_back(route);
     route->setRoutingTable(this);
@@ -733,10 +733,10 @@ IPv6Route *IPv6RoutingTable::internalRemoveRoute(IPv6Route *route)
     if (i != routeList.end()) {
         ASSERT(route->getRoutingTable() == this);
         routeList.erase(i);
-        route->setRoutingTable(NULL);
+        route->setRoutingTable(nullptr);
         return route;
     }
-    return NULL;
+    return nullptr;
 }
 
 IPv6RoutingTable::RouteList::iterator IPv6RoutingTable::internalDeleteRoute(RouteList::iterator it)

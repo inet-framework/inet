@@ -65,7 +65,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
 
     // LwipTcpStackIf functions:
 
-    // sometime pcb is NULL (tipically when send a RESET )
+    // sometime pcb is nullptr (tipically when send a RESET )
     virtual void ip_output(LwipTcpLayer::tcp_pcb *pcb,
             L3Address const& src, L3Address const& dest, void *tcpseg, int len);
 

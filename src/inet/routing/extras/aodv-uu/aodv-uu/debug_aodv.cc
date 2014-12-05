@@ -110,7 +110,7 @@ void NS_CLASS log_init()
 
 void NS_CLASS log_rt_table_init()
 {
-    timer_init(&rt_log_timer, &NS_CLASS print_rt_table, NULL);
+    timer_init(&rt_log_timer, &NS_CLASS print_rt_table, nullptr);
     timer_set_timeout(&rt_log_timer, rt_log_interval);
 }
 
@@ -195,7 +195,7 @@ void NS_CLASS alog(int type, int errnum, const char *function, const char *forma
     if (!debug && !log_to_file)
         goto syslog;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
 #ifdef NS_PORT
     time = gmtime(&now.tv_sec);
@@ -388,7 +388,7 @@ void NS_CLASS print_rt_table(void *arg)
     if (rt_tbl.num_entries == 0)
         goto schedule;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
 #ifdef NS_PORT
     time = gmtime(&now.tv_sec);
@@ -524,7 +524,7 @@ void NS_CLASS print_rt_table(void *arg)
     if (rt_tbl.num_entries == 0)
         goto schedule;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
 #ifdef NS_PORT
     time = gmtime(&now.tv_sec);

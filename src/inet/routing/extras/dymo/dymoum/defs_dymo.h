@@ -57,10 +57,6 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif  /* MIN */
 
-#ifndef NULL
-#define NULL ((void *) 0)
-#endif  /* NULL */
-
 #ifndef IFNAMSIZ
 #define IFNAMSIZ 16
 #endif  /* IFNAMSIZ */
@@ -151,7 +147,7 @@ static inline struct dev_info *devfromsock(int sock)
         if (this_host.devs[i].sock == sock)
             return &this_host.devs[i];
 
-    return NULL;
+    return nullptr;
 }
 
 /* Given an ICMP socket descriptor, returns the corresponding dev_info
@@ -164,7 +160,7 @@ static inline struct dev_info *devfromicmpsock(int icmp_sock)
         if (this_host.devs[i].icmp_sock == icmp_sock)
             return &this_host.devs[i];
 
-    return NULL;
+    return nullptr;
 }
 
 #endif  /* NS_PORT */

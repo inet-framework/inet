@@ -87,7 +87,7 @@ OLSR_rtable::rm_entry(const nsaddr_t &dest)
 ///
 /// \brief Looks up an entry for the specified destination address.
 /// \param dest destination address.
-/// \return the routing table entry for that destination address, or NULL
+/// \return the routing table entry for that destination address, or nullptr
 ///     if such an entry does not exist
 ///
 OLSR_rt_entry*
@@ -95,9 +95,9 @@ OLSR_rtable::lookup(const nsaddr_t &dest)
 {
     // Get the iterator at "dest" position
     rtable_t::iterator it = rt_.find(dest);
-    // If there is no route to "dest", return NULL
+    // If there is no route to "dest", return nullptr
     if (it == rt_.end())
-        return NULL;
+        return nullptr;
 
     // Returns the rt entry (second element of the pair)
     return (*it).second;
@@ -116,14 +116,14 @@ OLSR_rtable::lookup(const nsaddr_t &dest)
 /// \param entry    the routing table entry which indicates the destination node
 ///         we are interested in.
 /// \return     the appropiate routing table entry which indicates the next
-///         hop which must be used for forwarding a data packet, or NULL
+///         hop which must be used for forwarding a data packet, or nullptr
 ///         if there is no such entry.
 ///
 OLSR_rt_entry*
 OLSR_rtable::find_send_entry(OLSR_rt_entry* entry)
 {
     OLSR_rt_entry* e = entry;
-    while (e != NULL && e->dest_addr() != e->next_addr())
+    while (e != nullptr && e->dest_addr() != e->next_addr())
         e = lookup(e->next_addr());
     return e;
 }

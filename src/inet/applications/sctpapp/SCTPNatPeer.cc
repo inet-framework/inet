@@ -40,8 +40,8 @@ Define_Module(SCTPNatPeer);
 
 SCTPNatPeer::SCTPNatPeer()
 {
-    timeMsg = NULL;
-    timeoutMsg = NULL;
+    timeMsg = nullptr;
+    timeoutMsg = nullptr;
 }
 
 SCTPNatPeer::~SCTPNatPeer()

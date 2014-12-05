@@ -26,9 +26,9 @@ Define_Module(MassMobility);
 
 MassMobility::MassMobility()
 {
-    changeIntervalParameter = NULL;
-    changeAngleByParameter = NULL;
-    speedParameter = NULL;
+    changeIntervalParameter = nullptr;
+    changeAngleByParameter = nullptr;
+    speedParameter = nullptr;
     angle = 0;
 }
 

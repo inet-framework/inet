@@ -26,9 +26,9 @@ Define_Module(AlternatingEnergyConsumer);
 AlternatingEnergyConsumer::AlternatingEnergyConsumer() :
     isSleeping(false),
     energyConsumerId(-1),
-    energySource(NULL),
+    energySource(nullptr),
     powerConsumption(W(sNaN)),
-    timer(NULL)
+    timer(nullptr)
 {
 }
 

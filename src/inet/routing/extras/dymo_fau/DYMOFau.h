@@ -55,7 +55,7 @@ namespace inetmanet {
 class QueueElement : public cPacket
 {
   public:
-    QueueElement() { seqNum = 0; destAddr = 0; srcAddr = 0; obj = NULL; };
+    QueueElement() { seqNum = 0; destAddr = 0; srcAddr = 0; obj = nullptr; };
 
     QueueElement(unsigned int seqNum, unsigned int destAddr, unsigned int srcAddr, DYMO_Packet* obj)
     {

@@ -39,8 +39,8 @@ namespace DiffservUtil {
 using namespace utils;
 
 // cached enums
-cEnum *dscpEnum = NULL;
-cEnum *protocolEnum = NULL;
+cEnum *dscpEnum = nullptr;
+cEnum *protocolEnum = nullptr;
 
 const char *getRequiredAttribute(cXMLElement *element, const char *attrName)
 {
@@ -195,7 +195,7 @@ std::string colorToString(int color)
 
 double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule)
 {
-    InterfaceEntry *ie = ift ? ift->getInterfaceByInterfaceModule(interfaceModule) : NULL;
+    InterfaceEntry *ie = ift ? ift->getInterfaceByInterfaceModule(interfaceModule) : nullptr;
     return ie ? ie->getDatarate() : -1;
 }
 
@@ -212,7 +212,7 @@ cPacket *findIPDatagramInPacket(cPacket *packet)
 #endif // ifdef WITH_IPv6
     }
 
-    return NULL;
+    return nullptr;
 }
 
 class ColorAttribute : public cObject

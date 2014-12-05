@@ -136,7 +136,7 @@ void NS_CLASS generic_process_message(DYMO_element *e,struct in_addr src, u_int3
         }
 #ifdef OMNETPP
         delete e;
-        e=NULL;
+        e=nullptr;
 #endif
     }
 }

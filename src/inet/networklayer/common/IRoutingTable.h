@@ -55,7 +55,7 @@ class INET_API IRoutingTable
     virtual bool isLocalAddress(const L3Address& dest) const = 0;    //XXX maybe into InterfaceTable?
 
     /**
-     * Returns an interface given by its address. Returns NULL if not found.
+     * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const = 0;    //XXX should be find..., see next one
     //@}
@@ -64,7 +64,7 @@ class INET_API IRoutingTable
     //@{
     /**
      * The routing function. Performs longest prefix match for the given
-     * destination address, and returns the resulting route. Returns NULL
+     * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const = 0;
@@ -73,7 +73,7 @@ class INET_API IRoutingTable
      * Convenience function based on findBestMatchingRoute().
      *
      * Returns the output interface for the packets with dest as destination
-     * address, or NULL if the destination is not in routing table.
+     * address, or nullptr if the destination is not in routing table.
      */
     virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const = 0;    //XXX redundant
 
@@ -116,7 +116,7 @@ class INET_API IRoutingTable
     virtual IRoute *getRoute(int k) const = 0;
 
     /**
-     * Finds and returns the default route, or NULL if it doesn't exist
+     * Finds and returns the default route, or nullptr if it doesn't exist
      */
     virtual IRoute *getDefaultRoute() const = 0;    //XXX is this a universal concept?
 
@@ -129,7 +129,7 @@ class INET_API IRoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned if the route was not in the routing table.
+     * nullptr is returned if the route was not in the routing table.
      */
     virtual IRoute *removeRoute(IRoute *entry) = 0;
 
@@ -159,7 +159,7 @@ class INET_API IRoutingTable
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) = 0;
 

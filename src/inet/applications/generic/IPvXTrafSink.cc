@@ -85,7 +85,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
 
-    if (ctrl != NULL) {
+    if (ctrl != nullptr) {
         src = ctrl->getSourceAddress();
         dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();
@@ -94,7 +94,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     EV_INFO << msg << endl;
     EV_INFO << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
-    if (ctrl != NULL)
+    if (ctrl != nullptr)
         EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << endl;
 }
 

@@ -91,27 +91,27 @@ class INET_API PacketDump
      * Dumps info about the given IPv4 datagram. The l2r parameter denotes the
      * direction of the packet.
      */
-    void dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment = NULL);
+    void dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment = nullptr);
 
-    void dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment = NULL);
+    void dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment = nullptr);
 
     /**
      * Dumps info about the given IPv6 datagram. The l2r parameter denotes
      * the direction of the packet.
      */
-    void dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const char *comment = NULL);
+    void dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const char *comment = nullptr);
 
     /**
      * Dumps info about the given SCTP message.
      */
     void sctpDump(const char *label, sctp::SCTPMessage *sctpmsg, const std::string& srcAddr,
-            const std::string& destAddr, const char *comment = NULL);
+            const std::string& destAddr, const char *comment = nullptr);
 
     /**
      * Dumps info about the given TCP segment.
      */
     void tcpDump(bool l2r, const char *label, tcp::TCPSegment *tcpseg, const std::string& srcAddr,
-            const std::string& destAddr, const char *comment = NULL);
+            const std::string& destAddr, const char *comment = nullptr);
 
     /**
      * Dumps info about the given UDP packet.

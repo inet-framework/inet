@@ -51,7 +51,7 @@ pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t se
           return entry;
     entry = new pending_rreq_t;
 
-    if (entry== NULL)
+    if (entry== nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -107,7 +107,7 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
             throw cRuntimeError("Error in dymoPendingRreq table");
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #else
@@ -115,7 +115,7 @@ pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t se
 {
     pending_rreq_t *entry;
 
-    if ((entry = (pending_rreq_t *)malloc(sizeof(pending_rreq_t))) == NULL)
+    if ((entry = (pending_rreq_t *)malloc(sizeof(pending_rreq_t))) == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -154,7 +154,7 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
             return entry;
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 

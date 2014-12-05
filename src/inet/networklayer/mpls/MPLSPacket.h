@@ -36,7 +36,7 @@ class INET_API MPLSPacket : public cPacket
 
   public:
     /* constructors*/
-    MPLSPacket(const char *name = NULL);
+    MPLSPacket(const char *name = nullptr);
     MPLSPacket(const MPLSPacket& p);
 
     /* assignment operator*/

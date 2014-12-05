@@ -79,7 +79,7 @@ OLSROPT::recv_olsr(cMessage* msg)
     // so we check it.
 
     op = check_packet(PK(msg), src_addr, index);
-    if (op==NULL)
+    if (op==nullptr)
         return;
 
     // If the packet contains no messages must be silently discarded.
@@ -109,7 +109,7 @@ OLSROPT::recv_olsr(cMessage* msg)
         // processed again
         bool do_forwarding = true;
         OLSR_dup_tuple* duplicated = state_.find_dup_tuple(msg.orig_addr(), msg.msg_seq_num());
-        if (duplicated == NULL)
+        if (duplicated == nullptr)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG){
@@ -210,7 +210,7 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
     // 1. If the sender interface of this message is not in the symmetric
     // 1-hop neighborhood of this node, the message MUST be discarded.
     OLSR_link_tuple* link_tuple = state_.find_sym_link_tuple(sender_iface, now);
-    if (link_tuple == NULL)
+    if (link_tuple == nullptr)
         return false;
 
     // 2. If there exist some tuple in the topology set where:
@@ -220,7 +220,7 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
     // performed.
     OLSR_topology_tuple* topology_tuple =
         state_.find_newer_topology_tuple(msg.orig_addr(), tc.ansn());
-    if (topology_tuple != NULL)
+    if (topology_tuple != nullptr)
         return false;
       return update_topology_tuples(msg, index);
 }
@@ -337,7 +337,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
     bool created = false;
 
     OLSR_link_tuple* link_tuple = state_.find_link_tuple(sender_iface);
-    if (link_tuple == NULL)
+    if (link_tuple == nullptr)
     {
         // We have to create a new tuple
         link_tuple = new OLSR_link_tuple;
@@ -397,7 +397,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
         updated_link_tuple(link_tuple, hello.willingness());
 
     // Schedules link tuple deletion
-    if (created && link_tuple != NULL)
+    if (created && link_tuple != nullptr)
     {
         OLSR_LinkTupleTimer* link_timer =
             new OLSR_LinkTupleTimer(this, link_tuple);
@@ -418,7 +418,7 @@ OLSROPT::populate_nbset(OLSR_msg& msg)
     OLSR_hello& hello = msg.hello();
 
     OLSR_nb_tuple* nb_tuple = state_.find_nb_tuple(msg.orig_addr());
-    if (nb_tuple != NULL){ // it was already present
+    if (nb_tuple != nullptr){ // it was already present
         nb_tuple->willingness() = hello.willingness();
     }
     return true; // added a new neighbor
@@ -467,7 +467,7 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
                                 // Otherwise, a 2-hop tuple is created
                                 OLSR_nb2hop_tuple* nb2hop_tuple =
                                     state_.find_nb2hop_tuple(msg.orig_addr(), nb2hop_addr);
-                                if (nb2hop_tuple == NULL)
+                                if (nb2hop_tuple == nullptr)
                                 {
                                     nb2hop_tuple =
                                         new OLSR_nb2hop_tuple;

@@ -54,9 +54,9 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 
 InterfaceTable::InterfaceTable()
 {
-    host = NULL;
+    host = nullptr;
     tmpNumInterfaces = -1;
-    tmpInterfaceList = NULL;
+    tmpInterfaceList = nullptr;
 }
 
 InterfaceTable::~InterfaceTable()
@@ -113,7 +113,7 @@ cModule *InterfaceTable::getHostModule()
 
 bool InterfaceTable::isLocalAddress(const L3Address& address) const
 {
-    return findInterfaceByAddress(address) != NULL;
+    return findInterfaceByAddress(address) != nullptr;
 }
 
 InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address) const
@@ -164,7 +164,7 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool InterfaceTable::isNeighborAddress(const L3Address& address) const
@@ -218,7 +218,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 int InterfaceTable::getNumInterfaces()
 {
     if (tmpNumInterfaces == -1) {
-        // count non-NULL elements
+        // count non-nullptr elements
         int n = 0;
         int maxId = idToInterface.size();
         for (int i = 0; i < maxId; i++)
@@ -238,7 +238,7 @@ InterfaceEntry *InterfaceTable::getInterface(int pos)
         throw cRuntimeError("getInterface(): interface index %d out of range 0..%d", pos, n - 1);
 
     if (!tmpInterfaceList) {
-        // collect non-NULL elements into tmpInterfaceList[]
+        // collect non-nullptr elements into tmpInterfaceList[]
         tmpInterfaceList = new InterfaceEntry *[n];
         int k = 0;
         int maxId = idToInterface.size();
@@ -254,7 +254,7 @@ InterfaceEntry *InterfaceTable::getInterface(int pos)
 InterfaceEntry *InterfaceTable::getInterfaceById(int id)
 {
     id -= INTERFACEIDS_START;
-    return (id < 0 || id >= (int)idToInterface.size()) ? NULL : idToInterface[id];
+    return (id < 0 || id >= (int)idToInterface.size()) ? nullptr : idToInterface[id];
 }
 
 int InterfaceTable::getBiggestInterfaceId()
@@ -267,7 +267,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
     if (!host)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
-    if (getInterfaceByName(entry->getName()) != NULL)
+    if (getInterfaceByName(entry->getName()) != nullptr)
         throw cRuntimeError("addInterface(): interface '%s' already registered", entry->getName());
 
     // insert
@@ -289,7 +289,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
         return; // virtual interface
 
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
-    ASSERT(host != NULL);
+    ASSERT(host != nullptr);
     while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
@@ -306,7 +306,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     //
 
     // find gates connected to host / network layer
-    cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL;    // ifIn[] and ifOut[] gates in the network layer
+    cGate *nwlayerInGate = nullptr, *nwlayerOutGate = nullptr;    // ifIn[] and ifOut[] gates in the network layer
     for (GateIterator i(ifmod); !i.end(); i++) {
         cGate *g = i();
         if (!g)
@@ -349,7 +349,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 
     emit(NF_INTERFACE_DELETED, entry);    // actually, only going to be deleted
 
-    idToInterface[id - INTERFACEIDS_START] = NULL;
+    idToInterface[id - INTERFACEIDS_START] = nullptr;
     delete entry;
     invalidateTmpInterfaceList();
 }
@@ -358,7 +358,7 @@ void InterfaceTable::invalidateTmpInterfaceList()
 {
     tmpNumInterfaces = -1;
     delete[] tmpInterfaceList;
-    tmpInterfaceList = NULL;
+    tmpInterfaceList = nullptr;
 }
 
 void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details)
@@ -375,7 +375,7 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
 {
     int outputGateId = entry->getNodeOutputGateId();
     if (outputGateId != -1) {
-        ASSERT(host != NULL);
+        ASSERT(host != nullptr);
         cGate *outputGate = host->gate(outputGateId);
         if (!outputGate->getChannel())
             return;
@@ -407,7 +407,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
         if (idToInterface[i] && idToInterface[i]->getNodeOutputGateId() == id)
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
@@ -419,7 +419,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
         if (idToInterface[i] && idToInterface[i]->getNodeInputGateId() == id)
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
@@ -431,13 +431,13 @@ InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
         if (idToInterface[i] && idToInterface[i]->getNetworkLayerGateIndex() == index)
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
-    ASSERT(host != NULL);
+    ASSERT(host != nullptr);
     cModule *_ifmod = ifmod;
     while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
@@ -457,7 +457,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
             nodeInputGateId = g->getPreviousGate()->getId();
     }
 
-    InterfaceEntry *ie = NULL;
+    InterfaceEntry *ie = nullptr;
     if (nodeInputGateId >= 0)
         ie = getInterfaceByNodeInputGateId(nodeInputGateId);
     if (!ie && nodeOutputGateId >= 0)
@@ -471,13 +471,13 @@ InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
 {
     Enter_Method_Silent();
     if (!name)
-        return NULL;
+        return nullptr;
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
         if (idToInterface[i] && !strcmp(name, idToInterface[i]->getName()))
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
@@ -488,7 +488,7 @@ InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
         if (idToInterface[i] && idToInterface[i]->isLoopback())
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
@@ -499,7 +499,7 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
         if (idToInterface[i] && idToInterface[i]->isMulticast() && !idToInterface[i]->isLoopback())
             return idToInterface[i];
 
-    return NULL;
+    return nullptr;
 }
 
 bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

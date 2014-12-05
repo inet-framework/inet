@@ -74,7 +74,7 @@ static struct cmsghdr *__cmsg_nxthdr_fix(void *__ctl, size_t __size,
     __ptr = (struct cmsghdr *) (((unsigned char *) __cmsg) +
                                 CMSG_ALIGN(__cmsg->cmsg_len));
     if ((unsigned long) ((char *) (__ptr + 1) - (char *) __ctl) > __size)
-        return NULL;
+        return nullptr;
 
     return __ptr;
 }
@@ -361,7 +361,7 @@ static void aodv_socket_read(int fd)
     src.s_addr = src_addr.sin_addr.s_addr;
 
     /* Get the ttl and destination address from the control message */
-    for (cmsg = CMSG_FIRSTHDR(&msgh); cmsg != NULL;
+    for (cmsg = CMSG_FIRSTHDR(&msgh); cmsg != nullptr;
             cmsg = CMSG_NXTHDR_FIX(&msgh, cmsg))
     {
         if (cmsg->cmsg_level == SOL_IP)
@@ -506,7 +506,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     if (ratelimit)
     {
 
-        gettimeofday(&now, NULL);
+        gettimeofday(&now, nullptr);
 
         switch (aodv_msg->type)
         {
@@ -600,7 +600,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     L3Address destAdd;
     if (dst.s_addr == L3Address(IPv4Address(AODV_BROADCAST)))
     {
-        gettimeofday(&this_host.bcast_time, NULL);
+        gettimeofday(&this_host.bcast_time, nullptr);
         if (!this->isInMacLayer())
             destAdd = L3Address(IPv4Address::ALLONES_ADDRESS);
         else
@@ -629,7 +629,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
        to prevent unnecessary broadcasts of HELLO msg's */
     if (dst.s_addr == L3Address(IPv4Address(AODV_BROADCAST)))
     {
-        gettimeofday(&this_host.bcast_time, NULL);
+        gettimeofday(&this_host.bcast_time, nullptr);
 
 #ifdef NS_PORT
         ch->addr_type() = NS_AF_NONE;

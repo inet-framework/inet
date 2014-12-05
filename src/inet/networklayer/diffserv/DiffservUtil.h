@@ -30,7 +30,7 @@ namespace DiffservUtil {
 enum Color { GREEN, YELLOW, RED };
 
 /**
- * Returns true, if the string is empty (NULL or "");
+ * Returns true, if the string is empty (nullptr or "");
  */
 inline bool isEmpty(const char *str) { return !str || !(*str); }
 
@@ -97,7 +97,7 @@ double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule
 /**
  * Returns the IP datagram encapsulated inside packet, or
  * the packet itself if it is an IPv4/IPv6 datagram.
- * Returns NULL, if there is no IP datagram in the packet.
+ * Returns nullptr, if there is no IP datagram in the packet.
  */
 cPacket *findIPDatagramInPacket(cPacket *packet);
 

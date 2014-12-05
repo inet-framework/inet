@@ -222,7 +222,7 @@ class INET_API SCTP : public cSimpleModule
         if (found != assocStatMap.end()) {
             return &found->second;
         }
-        return NULL;
+        return nullptr;
     }
 
     /**

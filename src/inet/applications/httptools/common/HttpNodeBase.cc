@@ -29,10 +29,10 @@ HttpNodeBase::HttpNodeBase()
 
 void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay)
 {
-    if (pckt == NULL)
+    if (pckt == nullptr)
         return;
     simtime_t delay = constdelay + transmissionDelay(pckt);
-    if (rdDelay != NULL)
+    if (rdDelay != nullptr)
         delay += rdDelay->draw();
     EV_DEBUG << "Sending " << pckt->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
     sendDirect(pckt, receiver, "httpIn");
@@ -96,7 +96,7 @@ std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage *httpR
 
     std::string originatorStr = "";
     cModule *originator = httpRequest->getSenderModule();
-    if (originator != NULL && originator->getParentModule() != NULL)
+    if (originator != nullptr && originator->getParentModule() != nullptr)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";
@@ -113,7 +113,7 @@ std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage *httpRe
 
     std::string originatorStr = "";
     cModule *originator = httpResponse->getSenderModule();
-    if (originator != NULL && originator->getParentModule() != NULL)
+    if (originator != nullptr && originator->getParentModule() != nullptr)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";

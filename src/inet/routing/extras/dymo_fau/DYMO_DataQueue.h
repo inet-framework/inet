@@ -74,7 +74,7 @@ class DYMO_DataQueue : public cObject
     void queuePacket(const IPv4Datagram* datagram);
 
     void dequeuePacketsTo(IPv4Address destAddr, int prefix);
-    void dropPacketsTo(IPv4Address destAddr, int prefix, std::list<IPv4Datagram*>* datagrams = NULL);
+    void dropPacketsTo(IPv4Address destAddr, int prefix, std::list<IPv4Datagram*>* datagrams = nullptr);
 
   protected:
     cSimpleModule *moduleOwner;
@@ -84,7 +84,7 @@ class DYMO_DataQueue : public cObject
     int BUFFER_SIZE_PACKETS; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
     int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
-    void reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict, std::list<IPv4Datagram*> *datagrams = NULL);
+    void reinjectDatagramsTo(IPv4Address destAddr, int prefix, Result verdict, std::list<IPv4Datagram*> *datagrams = nullptr);
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o);

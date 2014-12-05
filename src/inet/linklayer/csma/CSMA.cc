@@ -66,7 +66,7 @@ void CSMA::initialize(int stage)
         aTurnaroundTime = par("aTurnaroundTime").doubleValue();
         bitrate = par("bitrate");
         ackLength = par("ackLength");
-        ackMessage = NULL;
+        ackMessage = nullptr;
 
         //init parameters for backoff method
         std::string backoffMethodStr = par("backoffMethod").stdstringValue();
@@ -592,7 +592,7 @@ void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
             sendDown(ackMessage);
             nbTxAcks++;
             //		sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
-            ackMessage = NULL;
+            ackMessage = nullptr;
             break;
 
         case EV_TIMER_BACKOFF:
@@ -734,7 +734,7 @@ void CSMA::updateMacState(t_mac_states newMacState)
 void CSMA::fsmError(t_mac_event event, cMessage *msg)
 {
     EV << "FSM Error ! In state " << macState << ", received unknown event:" << event << "." << endl;
-    if (msg != NULL)
+    if (msg != nullptr)
         delete msg;
 }
 
@@ -862,7 +862,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
 
 //				nbRxFrames++;
 
-                if (ackMessage != NULL)
+                if (ackMessage != nullptr)
                     delete ackMessage;
                 ackMessage = new CSMAFrame("CSMA-Ack");
                 ackMessage->setSrcAddr(address);

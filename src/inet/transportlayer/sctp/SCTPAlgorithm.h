@@ -44,7 +44,7 @@ class INET_API SCTPAlgorithm : public cObject
     /**
      * Ctor.
      */
-    SCTPAlgorithm() { assoc = NULL; transmissionQ = NULL; retransmissionQ = NULL; }
+    SCTPAlgorithm() { assoc = nullptr; transmissionQ = nullptr; retransmissionQ = nullptr; }
 
     /**
      * Virtual dtor.

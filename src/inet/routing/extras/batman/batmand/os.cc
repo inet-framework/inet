@@ -31,7 +31,7 @@ namespace inetmanet {
 
 int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, const L3Address & destAdd, int32_t send_sock, BatmanIf *batman_if)
 {
-    if ((batman_if != NULL) && (!batman_if->if_active))
+    if ((batman_if != nullptr) && (!batman_if->if_active))
     {
         delete packet_buff;
         return 0;
@@ -84,7 +84,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
     {
         InterfaceEntry *ifr = getInterfaceEntry(i);
 
-        if (ifr->ipv4Data()==NULL) // no ipv4
+        if (ifr->ipv4Data()==nullptr) // no ipv4
             continue;
         if (ifr->isLoopback())      //FIXME What would be the correct conditions here? The isLoopback() used below.
             continue;
@@ -101,7 +101,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         L3Address ZERO;
         add_del_route(netaddr.getAddress(), mask, ZERO, 0, ifr, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, rule_action);
 
-        if ((batman_if = is_batman_if(ifr))==NULL)
+        if ((batman_if = is_batman_if(ifr))==nullptr)
             continue;
 
         add_del_rule(netaddr.getAddress(), mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);

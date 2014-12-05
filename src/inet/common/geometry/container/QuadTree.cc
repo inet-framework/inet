@@ -100,7 +100,7 @@ void QuadTree::splitPoints()
 void QuadTree::setToLeaf()
 {
     for (unsigned int i = 0; i < 4; i++)
-        quadrants[i] = NULL;
+        quadrants[i] = nullptr;
 }
 
 void QuadTree::rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
@@ -163,7 +163,7 @@ bool QuadTree::remove(const cObject *point)
     else
         return false;
     QuadTree *quadrant = searchQuadrant(lastPos);
-    if (quadrant == NULL)
+    if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point: (%f, %f, %f)", lastPos.x, lastPos.y, lastPos.z);
     Points::iterator it = find(quadrant->points.begin(), quadrant->points.end(), point);
     // If we find the object then we erase it from the quadrant's vector and lastPosition map
@@ -189,15 +189,15 @@ QuadTree *QuadTree::searchQuadrant(const Coord& lastPos)
         for (int i = 0; i < 4; i++)
             if (quadrants[i]->isInRectangleRange(lastPos))
                 return quadrants[i]->searchQuadrant(lastPos);
-        return NULL;
+        return nullptr;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 bool QuadTree::hasChild() const
 {
-    return quadrants[0] != NULL;
+    return quadrants[0] != nullptr;
 }
 
 void QuadTree::tryToJoinChildQuadrants()
@@ -236,7 +236,7 @@ bool QuadTree::move(const cObject *point, const Coord& newPos)
     QuadTree *quadrant = searchQuadrant(newPos);
     // It is an error! Our QuadTree must find an appropriate quadrant since the root node
     // boundary coordinates equal to the constraint area coordinates.
-    if (quadrant == NULL)
+    if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point (%f %f %f)", newPos.x, newPos.y, newPos.z);
     Points::iterator it = find(quadrant->points.begin(), quadrant->points.end(), point);
     // If we search for a quadrant with the object's current position and then we find
@@ -256,10 +256,10 @@ QuadTree::QuadTree(const Coord& boundaryMin, const Coord& boundaryMax, unsigned 
     this->parent = parent;
     setToLeaf();
     // lastPosition containing information for all subtrees in a QuadTree
-    // so we only create it when we create a root (indicated by parent == NULL)
+    // so we only create it when we create a root (indicated by parent == nullptr)
     // node. Each subtree inherits this pointer and use its global
     // information
-    if (parent == NULL)
+    if (parent == nullptr)
         lastPosition = new std::map<const cObject *, Coord>;
     else
         lastPosition = parent->lastPosition;
@@ -271,7 +271,7 @@ QuadTree::~QuadTree()
         delete quadrants[i];
     // We clear lastPosition if and only if we delete the whole tree
     // Take a look at the constructor to see why we do this!
-    if (parent == NULL)
+    if (parent == nullptr)
         delete lastPosition;
 }
 

@@ -29,7 +29,7 @@ Define_Module(CloudDelayerBase);
 
 CloudDelayerBase::CloudDelayerBase()
 {
-    ipv4Layer = NULL;
+    ipv4Layer = nullptr;
 }
 
 CloudDelayerBase::~CloudDelayerBase()
@@ -54,7 +54,7 @@ void CloudDelayerBase::finish()
 {
     if (ipv4Layer)
         ipv4Layer->unregisterHook(0, this);
-    ipv4Layer = NULL;
+    ipv4Layer = nullptr;
 }
 
 void CloudDelayerBase::handleMessage(cMessage *msg)

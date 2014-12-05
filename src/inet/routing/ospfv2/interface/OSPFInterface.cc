@@ -49,10 +49,10 @@ Interface::Interface(Interface::OSPFInterfaceType ifType) :
     retransmissionInterval(5),
     acknowledgementDelay(1),
     authenticationType(NULL_TYPE),
-    parentArea(NULL)
+    parentArea(nullptr)
 {
     state = new InterfaceStateDown;
-    previousState = NULL;
+    previousState = nullptr;
     helloTimer = new cMessage();
     helloTimer->setKind(INTERFACE_HELLO_TIMER);
     helloTimer->setContextPointer(this);
@@ -77,7 +77,7 @@ Interface::~Interface()
     delete waitTimer;
     messageHandler->clearTimer(acknowledgementTimer);
     delete acknowledgementTimer;
-    if (previousState != NULL) {
+    if (previousState != nullptr) {
         delete previousState;
     }
     delete state;
@@ -100,7 +100,7 @@ void Interface::setIfIndex(IInterfaceTable *ift, int index)
 
 void Interface::changeState(InterfaceState *newState, InterfaceState *currentState)
 {
-    if (previousState != NULL) {
+    if (previousState != nullptr) {
         delete previousState;
     }
     state = newState;
@@ -202,7 +202,7 @@ Neighbor *Interface::getNeighborByID(RouterID neighborID)
         return neighborIt->second;
     }
     else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -215,7 +215,7 @@ Neighbor *Interface::getNeighborByAddress(IPv4Address address)
         return neighborIt->second;
     }
     else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -333,7 +333,7 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
             }
             if (neighboringRouters[i]->getState() < Neighbor::FULL_STATE) {    // (1) (b)
                 OSPFLSAHeader *requestLSAHeader = neighboringRouters[i]->findOnRequestList(lsaKey);
-                if (requestLSAHeader != NULL) {
+                if (requestLSAHeader != nullptr) {
                     // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
                     if (lsa->getHeader() < (*requestLSAHeader)) {
                         continue;
@@ -353,14 +353,14 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
         }
         if (lsaAddedToRetransmissionList) {    // (2)
             if ((intf != this) ||
-                ((neighbor != NULL) &&
+                ((neighbor != nullptr) &&
                  (neighbor->getNeighborID() != designatedRouter.routerID) &&
                  (neighbor->getNeighborID() != backupDesignatedRouter.routerID)))    // (3)
             {
                 if ((intf != this) || (getState() != Interface::BACKUP_STATE)) {    // (4)
                     OSPFLinkStateUpdatePacket *updatePacket = createUpdatePacket(lsa);    // (5)
 
-                    if (updatePacket != NULL) {
+                    if (updatePacket != nullptr) {
                         int ttl = (interfaceType == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
                         MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
 
@@ -381,13 +381,13 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
                                 messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
                                 Neighbor *dRouter = getNeighborByID(designatedRouter.routerID);
                                 Neighbor *backupDRouter = getNeighborByID(backupDesignatedRouter.routerID);
-                                if (dRouter != NULL) {
+                                if (dRouter != nullptr) {
                                     dRouter->addToTransmittedLSAList(lsaKey);
                                     if (!dRouter->isUpdateRetransmissionTimerActive()) {
                                         dRouter->startUpdateRetransmissionTimer();
                                     }
                                 }
-                                if (backupDRouter != NULL) {
+                                if (backupDRouter != nullptr) {
                                     backupDRouter->addToTransmittedLSAList(lsaKey);
                                     if (!backupDRouter->isUpdateRetransmissionTimerActive()) {
                                         backupDRouter->startUpdateRetransmissionTimer();
@@ -433,16 +433,16 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
 OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
 {
     LSAType lsaType = static_cast<LSAType>(lsa->getHeader().getLsType());
-    OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA *>(lsa) : NULL;
-    OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA *>(lsa) : NULL;
+    OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA *>(lsa) : nullptr;
+    OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA *>(lsa) : nullptr;
     OSPFSummaryLSA *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
-                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OSPFSummaryLSA *>(lsa) : NULL;
-    OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA *>(lsa) : NULL;
+                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OSPFSummaryLSA *>(lsa) : nullptr;
+    OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA *>(lsa) : nullptr;
 
-    if (((lsaType == ROUTERLSA_TYPE) && (routerLSA != NULL)) ||
-        ((lsaType == NETWORKLSA_TYPE) && (networkLSA != NULL)) ||
-        (((lsaType == SUMMARYLSA_NETWORKS_TYPE) || (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) && (summaryLSA != NULL)) ||
-        ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != NULL)))
+    if (((lsaType == ROUTERLSA_TYPE) && (routerLSA != nullptr)) ||
+        ((lsaType == NETWORKLSA_TYPE) && (networkLSA != nullptr)) ||
+        (((lsaType == SUMMARYLSA_NETWORKS_TYPE) || (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) && (summaryLSA != nullptr)) ||
+        ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != nullptr)))
     {
         OSPFLinkStateUpdatePacket *updatePacket = new OSPFLinkStateUpdatePacket();
         long packetLength = OSPF_HEADER_LENGTH + sizeof(uint32_t);    // OSPF header + place for number of advertisements
@@ -523,7 +523,7 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
 
         return updatePacket;
     }
-    return NULL;
+    return nullptr;
 }
 
 void Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)

@@ -41,9 +41,9 @@ simsignal_t SCTPClient::echoedPkSignal = registerSignal("echoedPk");
 
 SCTPClient::SCTPClient()
 {
-    timeMsg = NULL;
-    stopTimer = NULL;
-    primaryChangeTimer = NULL;
+    timeMsg = nullptr;
+    stopTimer = nullptr;
+    primaryChangeTimer = nullptr;
 }
 
 SCTPClient::~SCTPClient()
@@ -78,8 +78,8 @@ void SCTPClient::initialize(int stage)
         sendAllowed = true;
         bufferSize = 0;
         timer = false;
-        stopTimer = NULL;
-        primaryChangeTimer = NULL;
+        stopTimer = nullptr;
+        primaryChangeTimer = nullptr;
 
         WATCH(numSessions);
         WATCH(numBroken);
@@ -513,7 +513,7 @@ void SCTPClient::socketClosed(int, void *)
     if (primaryChangeTimer) {
         cancelEvent(primaryChangeTimer);
         delete primaryChangeTimer;
-        primaryChangeTimer = NULL;
+        primaryChangeTimer = nullptr;
     }
 }
 

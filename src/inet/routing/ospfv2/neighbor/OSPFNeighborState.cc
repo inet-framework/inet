@@ -37,7 +37,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
         RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
         RouterLSA *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
-        if (routerLSA != NULL) {
+        if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                 routerLSA->getHeader().setLsAge(MAX_AGE);
@@ -58,7 +58,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
         if (neighbor->getInterface()->getState() == Interface::DESIGNATED_ROUTER_STATE) {
             NetworkLSA *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
-            if (networkLSA != NULL) {
+            if (networkLSA != nullptr) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                     networkLSA->getHeader().setLsAge(MAX_AGE);
@@ -68,7 +68,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
                 else {
                     NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
-                    if (newLSA != NULL) {
+                    if (newLSA != nullptr) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;

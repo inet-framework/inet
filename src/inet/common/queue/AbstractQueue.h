@@ -68,7 +68,7 @@ class INET_API AbstractQueue : public cSimpleModule
      * empty. The message doesn't need to be enqueued in this case,
      * it can start service immediately. This method may:
      *  -# simply return the the same pointer (usual behaviour), or
-     *  -# discard the message and return NULL pointer (the effect being
+     *  -# discard the message and return nullptr pointer (the effect being
      *   this message being ignored)
      *  -# or modify the message, wrap in into another message etc, and
      *   return the (new) message's pointer.
@@ -94,7 +94,7 @@ class INET_API AbstractQueue : public cSimpleModule
 
     /**
      * If a message is under service, aborts its service and returns the
-     * message. Returns NULL if no message is being serviced. The caller
+     * message. Returns nullptr if no message is being serviced. The caller
      * is free to delete the message, reinsert it into the queue, or handle
      * it otherwise.
      */

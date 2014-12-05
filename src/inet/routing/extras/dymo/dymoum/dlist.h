@@ -43,7 +43,7 @@ typedef struct dlist_head
     struct dlist_head name = DLIST_HEAD_INIT(name)
 
 #define INIT_DLIST_ELEM(e) do { \
-    (e)->prev = NULL; (e)->next = NULL; \
+    (e)->prev = nullptr; (e)->next = nullptr; \
 } while (0)
 
 #define INIT_DLIST_HEAD(h) do { \
@@ -86,17 +86,17 @@ static inline int dlist_add_tail(struct dlist_head *n, struct dlist_head *head)
 /* Isn't the element attached to a list? */
 static inline int dlist_unattached(struct dlist_head *head)
 {
-    return (head->prev == NULL && head->next == NULL);
+    return (head->prev == nullptr && head->next == nullptr);
 }
 
 /* Internal use only */
 static inline void __dlist_del(struct dlist_head * prev, struct dlist_head * next)
 {
 #ifdef OMNETPP
-    if (next == (dlist_head *)NULL)
-        throw cRuntimeError(" __dlist_del next == NULL");
-    if (prev == (dlist_head *)NULL)
-        throw cRuntimeError(" __dlist_del prev == NULL");
+    if (next == (dlist_head *)nullptr)
+        throw cRuntimeError(" __dlist_del next == nullptr");
+    if (prev == (dlist_head *)nullptr)
+        throw cRuntimeError(" __dlist_del prev == nullptr");
 #endif
     next->prev = prev;
     prev->next = next;
@@ -108,8 +108,8 @@ static inline int dlist_del(struct dlist_head *entry)
     if (entry)
     {
         __dlist_del(entry->prev, entry->next);
-        entry->next = (dlist_head *)NULL;
-        entry->prev = (dlist_head *)NULL;
+        entry->next = (dlist_head *)nullptr;
+        entry->prev = (dlist_head *)nullptr;
         return DLIST_SUCCESS;
     }
     return DLIST_FAILURE;

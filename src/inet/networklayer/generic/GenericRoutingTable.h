@@ -103,7 +103,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     virtual bool isLocalAddress(const L3Address& dest) const;    //XXX maybe into InterfaceTable?
 
     /**
-     * Returns an interface given by its address. Returns NULL if not found.
+     * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const;    //XXX should be find..., see next one
 
@@ -119,7 +119,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     //@{
     /**
      * The routing function. Performs longest prefix match for the given
-     * destination address, and returns the resulting route. Returns NULL
+     * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
     virtual GenericRoute *findBestMatchingRoute(const L3Address& dest) const;    //TODO make coveriant return types everywhere
@@ -128,7 +128,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Convenience function based on findBestMatchingRoute().
      *
      * Returns the output interface for the packets with dest as destination
-     * address, or NULL if the destination is not in routing table.
+     * address, or nullptr if the destination is not in routing table.
      */
     virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const;    //XXX redundant
 
@@ -171,7 +171,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     virtual IRoute *getRoute(int k) const;
 
     /**
-     * Finds and returns the default route, or NULL if it doesn't exist
+     * Finds and returns the default route, or nullptr if it doesn't exist
      */
     virtual IRoute *getDefaultRoute() const;    //XXX is this a universal concept?
 
@@ -184,7 +184,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned if the route was not in the routing table.
+     * nullptr is returned if the route was not in the routing table.
      */
     virtual IRoute *removeRoute(IRoute *entry);
 
@@ -214,7 +214,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
     /**
      * Removes the given route from the routing table, and returns it.
-     * NULL is returned of the route was not in the routing table.
+     * nullptr is returned of the route was not in the routing table.
      */
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry);
 

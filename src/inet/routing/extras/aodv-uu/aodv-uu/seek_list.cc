@@ -65,7 +65,7 @@ seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
 {
     seek_list_t *entry;
 
-    if ((entry = (seek_list_t *) malloc(sizeof(seek_list_t))) == NULL)
+    if ((entry = (seek_list_t *) malloc(sizeof(seek_list_t))) == nullptr)
     {
         fprintf(stderr, "Failed malloc\n");
         exit(-1);
@@ -115,7 +115,7 @@ seek_list_t *NS_CLASS seek_list_find(struct in_addr dest_addr)
         if (entry->dest_addr.s_addr == dest_addr.s_addr)
             return entry;
     }
-    return NULL;
+    return nullptr;
 }
 
 #ifdef SEEK_LIST_DEBUG
@@ -140,7 +140,7 @@ seek_list_t * NS_CLASS seek_list_insert(struct in_addr dest_addr,
     seek_list_t *entry;
 
     entry = new seek_list_t;
-    if (entry == NULL)
+    if (entry == nullptr)
     {
         fprintf(stderr, "Failed malloc\n");
         exit(-1);
@@ -191,7 +191,7 @@ seek_list_t *NS_CLASS seek_list_find(struct in_addr dest_addr)
     SeekHead::iterator it =seekhead.find(dest_addr.s_addr);
     if (it != seekhead.end())
         return it->second;
-    return NULL;
+    return nullptr;
 }
 
 #ifdef SEEK_LIST_DEBUG

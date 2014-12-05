@@ -68,7 +68,7 @@ struct pcaprec_hdr
 
 PcapDump::PcapDump()
 {
-    dumpfile = NULL;
+    dumpfile = nullptr;
 }
 
 PcapDump::~PcapDump()
@@ -160,7 +160,7 @@ void PcapDump::closePcap()
 {
     if (dumpfile) {
         fclose(dumpfile);
-        dumpfile = NULL;
+        dumpfile = nullptr;
     }
 }
 

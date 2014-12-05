@@ -23,7 +23,7 @@ namespace inet {
 namespace physicallayer {
 
 NarrowbandTransmitterBase::NarrowbandTransmitterBase() :
-    modulation(NULL),
+    modulation(nullptr),
     headerBitLength(-1),
     carrierFrequency(Hz(sNaN)),
     bandwidth(Hz(sNaN)),

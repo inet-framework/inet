@@ -108,7 +108,7 @@ void PingTestApp::handleMessage(cMessage *msg)
                 cStringTokenizer tokenizer(destAddrs);
                 const char *token;
 
-                while ((token = tokenizer.nextToken()) != NULL) {
+                while ((token = tokenizer.nextToken()) != nullptr) {
                     L3Address addr = L3AddressResolver().resolve(token);
                     destAddresses.push_back(addr);
                 }

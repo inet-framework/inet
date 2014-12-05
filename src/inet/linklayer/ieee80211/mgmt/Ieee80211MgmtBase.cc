@@ -112,13 +112,13 @@ void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
 
 cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
 {
-    ASSERT(dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg) != NULL);
-    bool isDataFrame = dynamic_cast<Ieee80211DataFrame *>(msg) != NULL;
+    ASSERT(dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg) != nullptr);
+    bool isDataFrame = dynamic_cast<Ieee80211DataFrame *>(msg) != nullptr;
 
     if (!isDataFrame) {
         // management frames are inserted into mgmtQueue
         mgmtQueue.insert(msg);
-        return NULL;
+        return nullptr;
     }
     else if (frameCapacity && dataQueue.length() >= frameCapacity) {
         EV << "Queue full, dropping packet.\n";
@@ -127,7 +127,7 @@ cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
     else {
         dataQueue.insert(msg);
         emit(dataQueueLenSignal, dataQueue.length());
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -147,7 +147,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
 
     // return a data frame if we have one
     if (dataQueue.empty())
-        return NULL;
+        return nullptr;
 
     cMessage *pk = (cMessage *)dataQueue.pop();
 

@@ -23,8 +23,8 @@ namespace inet {
 
 AbstractQueue::AbstractQueue()
 {
-    msgServiced = NULL;
-    endServiceMsg = NULL;
+    msgServiced = nullptr;
+    endServiceMsg = nullptr;
 }
 
 AbstractQueue::~AbstractQueue()
@@ -35,7 +35,7 @@ AbstractQueue::~AbstractQueue()
 
 void AbstractQueue::initialize()
 {
-    msgServiced = NULL;
+    msgServiced = nullptr;
     endServiceMsg = new cMessage("end-service");
     queue.setName("queue");
 }
@@ -70,7 +70,7 @@ void AbstractQueue::doEndService()
 {
     endService(msgServiced);
     if (queue.empty()) {
-        msgServiced = NULL;
+        msgServiced = nullptr;
     }
     else {
         msgServiced = queue.pop();
@@ -81,11 +81,11 @@ void AbstractQueue::doEndService()
 cPacket *AbstractQueue::cancelService()
 {
     if (!msgServiced)
-        return NULL;
+        return nullptr;
     else {
         cancelEvent(endServiceMsg);
         cPacket *ret = msgServiced;
-        msgServiced = NULL;
+        msgServiced = nullptr;
         return ret;
     }
 }

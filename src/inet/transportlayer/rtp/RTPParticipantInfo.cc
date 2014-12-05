@@ -112,12 +112,12 @@ bool RTPParticipantInfo::isSender() const
 
 ReceptionReport *RTPParticipantInfo::receptionReport(simtime_t now)
 {
-    return NULL;
+    return nullptr;
 }
 
 SenderReport *RTPParticipantInfo::senderReport(simtime_t now)
 {
-    return NULL;
+    return nullptr;
 }
 
 void RTPParticipantInfo::nextInterval(simtime_t now)

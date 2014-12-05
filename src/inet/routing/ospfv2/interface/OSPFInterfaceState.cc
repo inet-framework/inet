@@ -55,7 +55,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
     {
         RouterLSA *routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
-        if (routerLSA != NULL) {
+        if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
                 routerLSA->getHeader().setLsAge(MAX_AGE);
@@ -72,7 +72,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
                 intf->getArea()->floodLSA(routerLSA);
             }
         }
-        else {    // (lsa == NULL) -> This must be the first time any interface is up...
+        else {    // (lsa == nullptr) -> This must be the first time any interface is up...
             RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
             shouldRebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
@@ -87,7 +87,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
 
     if (nextState == Interface::DESIGNATED_ROUTER_STATE) {
         NetworkLSA *newLSA = intf->getArea()->originateNetworkLSA(intf);
-        if (newLSA != NULL) {
+        if (newLSA != nullptr) {
             shouldRebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
             intf->getArea()->floodLSA(newLSA);
@@ -96,7 +96,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
         else {    // no neighbors on the network -> old NetworkLSA must be flushed
             NetworkLSA *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
-            if (oldLSA != NULL) {
+            if (oldLSA != nullptr) {
                 oldLSA->getHeader().setLsAge(MAX_AGE);
                 intf->getArea()->floodLSA(oldLSA);
                 oldLSA->incrementInstallTime();
@@ -107,7 +107,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
     if (oldState == Interface::DESIGNATED_ROUTER_STATE) {
         NetworkLSA *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
-        if (networkLSA != NULL) {
+        if (networkLSA != nullptr) {
             networkLSA->getHeader().setLsAge(MAX_AGE);
             intf->getArea()->floodLSA(networkLSA);
             networkLSA->incrementInstallTime();

@@ -75,7 +75,7 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
         if (routeInfo->enabled && !((destination ^ routeInfo->destination) & routeInfo->netmask))
             return const_cast<RouteInfo *>(routeInfo);
     }
-    return NULL;
+    return nullptr;
 }
 
 void IPv4NetworkConfigurator::initialize(int stage)
@@ -451,7 +451,7 @@ Topology::LinkOut *IPv4NetworkConfigurator::findLinkOut(Node *node, int gateId)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
 
-    return NULL;
+    return nullptr;
 }
 
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
@@ -460,7 +460,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceIn
         if (node->interfaceInfos.at(i)->interfaceEntry == interfaceEntry)
             return node->interfaceInfos.at(i);
 
-    return NULL;
+    return nullptr;
 }
 
 double IPv4NetworkConfigurator::getChannelWeight(cChannel *transmissionChannel)
@@ -522,11 +522,11 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
 
 /**
  * If this link has exactly one node that connects to other links as well, we can assume
- * it is a "gateway" and return that (we'll use it in routing); otherwise return NULL.
+ * it is a "gateway" and return that (we'll use it in routing); otherwise return nullptr.
  */
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::determineGatewayForLink(LinkInfo *linkInfo)
 {
-    InterfaceInfo *gatewayInterfaceInfo = NULL;
+    InterfaceInfo *gatewayInterfaceInfo = nullptr;
     for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
@@ -542,7 +542,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::determineGatewa
         if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
-                return NULL; // we already found one gateway, this makes it ambiguous! report "no gateway"
+                return nullptr; // we already found one gateway, this makes it ambiguous! report "no gateway"
             else
                 gatewayInterfaceInfo = interfaceInfo; // remember gateway
         }
@@ -1480,7 +1480,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                     std::string hostFullPath = node->module->getFullPath();
                     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
                     if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
-                        InterfaceEntry *parent = NULL;
+                        InterfaceEntry *parent = nullptr;
                         if (!isEmpty(parentAttr)) {
                             parent = node->interfaceTable->getInterfaceByName(parentAttr);
                             if (!parent)
@@ -1504,7 +1504,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(groups[j]);
-                            route->setInInterface(parent ? new IPv4MulticastRoute::InInterface(parent) : NULL);
+                            route->setInInterface(parent ? new IPv4MulticastRoute::InInterface(parent) : nullptr);
                             if (isNotEmpty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (int k = 0; k < (int)children.size(); ++k)
@@ -1526,7 +1526,7 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
 {
     // resolve interface name
     if (isEmpty(interfaceAttr)) {
-        outIE = NULL;
+        outIE = nullptr;
     }
     else {
         outIE = node->interfaceTable->getInterfaceByName(interfaceAttr);
@@ -1579,7 +1579,7 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     // gatewayAttr may be an IP address, or a module name, or modulename+interfacename
     // in a syntax accepted by L3AddressResolver. If the gatewayAttr is a concrete IP address
     // or contains a gateway interface name (L3AddressResolver accepts it after a "/"), we're done
-    if (IPv4Address::isWellFormed(gatewayAttr) || strchr(gatewayAttr, '/') != NULL)
+    if (IPv4Address::isWellFormed(gatewayAttr) || strchr(gatewayAttr, '/') != nullptr)
         return;
 
     // At this point, gatewayAttr must be a modulename string, so we can freely pick the
@@ -1606,7 +1606,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOn
         if (interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule() == node)
             return interfaceInfo;
     }
-    return NULL;
+    return nullptr;
 }
 
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, IPv4Address address)
@@ -1624,7 +1624,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOn
                 return interfaceInfo;
 
     }
-    return NULL;
+    return nullptr;
 }
 
 IPv4NetworkConfigurator::LinkInfo *IPv4NetworkConfigurator::findLinkOfInterface(IPv4Topology& topology, InterfaceEntry *ie)
@@ -1636,7 +1636,7 @@ IPv4NetworkConfigurator::LinkInfo *IPv4NetworkConfigurator::findLinkOfInterface(
                 return linkInfo;
 
     }
-    return NULL;
+    return nullptr;
 }
 
 bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& routes, IPv4Route *route)
@@ -1707,8 +1707,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                 // determine next hop interface
                 // find next hop interface (the last IP interface on the path that is not in the source node)
                 Node *node = destinationNode;
-                Link *link = NULL;
-                InterfaceInfo *nextHopInterfaceInfo = NULL;
+                Link *link = nullptr;
+                InterfaceInfo *nextHopInterfaceInfo = nullptr;
                 while (node != sourceNode) {
                     link = (Link *)node->getPath(0);
                     if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)

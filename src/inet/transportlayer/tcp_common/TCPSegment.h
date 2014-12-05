@@ -67,7 +67,7 @@ class INET_API TCPSegment : public TCPSegment_Base
     void clean();
 
   public:
-    TCPSegment(const char *name = NULL, int kind = 0) : TCPSegment_Base(name, kind) {}
+    TCPSegment(const char *name = nullptr, int kind = 0) : TCPSegment_Base(name, kind) {}
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other) { copy(other); }
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);

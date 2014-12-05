@@ -102,7 +102,7 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now)
         return senderReport;
     }
     else {
-        return NULL;
+        return nullptr;
     }
 }
 

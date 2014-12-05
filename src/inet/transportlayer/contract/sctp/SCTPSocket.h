@@ -256,7 +256,7 @@ class INET_API SCTPSocket
      * in that case you don't have to look it up by assocId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
 
     /**
      * Examines the message (which should have arrived from SCTPMain),

@@ -32,7 +32,7 @@ Define_Module(LinkStateRouting);
 
 LinkStateRouting::LinkStateRouting()
 {
-    announceMsg = NULL;
+    announceMsg = nullptr;
 }
 
 LinkStateRouting::~LinkStateRouting()
@@ -59,7 +59,7 @@ void LinkStateRouting::initialize(int stage)
         cStringTokenizer tokenizer(par("peers"));
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         const char *token;
-        while ((token = tokenizer.nextToken()) != NULL) {
+        while ((token = tokenizer.nextToken()) != nullptr) {
             ASSERT(ift->getInterfaceByName(token));
             peerIfAddrs.push_back(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
         }
@@ -77,7 +77,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
 {
     if (msg == announceMsg) {
         delete announceMsg;
-        announceMsg = NULL;
+        announceMsg = nullptr;
         sendToPeers(tedmod->ted, true, IPv4Address());
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {

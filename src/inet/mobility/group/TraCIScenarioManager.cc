@@ -397,9 +397,9 @@ void TraCIScenarioManager::init_traci()
 void TraCIScenarioManager::finish()
 {
     cancelAndDelete(executeOneTimestepTrigger);
-    executeOneTimestepTrigger = NULL;
+    executeOneTimestepTrigger = nullptr;
     cancelAndDelete(connectAndStartTrigger);
-    connectAndStartTrigger = NULL;
+    connectAndStartTrigger = nullptr;
     if (socketPtr) {
         closesocket(MYSOCKET);
         delete &MYSOCKET;

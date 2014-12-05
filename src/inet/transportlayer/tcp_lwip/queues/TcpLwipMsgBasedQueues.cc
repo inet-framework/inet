@@ -126,7 +126,7 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
                  << ", length=" << i->msg->getByteLength() << endl;
     }
 
-    const char *payloadName = NULL;
+    const char *payloadName = nullptr;
 
     if (numBytes > 0) {
         // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
@@ -221,7 +221,7 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegmen
     uint32 endSeqNo;
 
     PayloadList::iterator i = payloadListM.begin();
-    while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != NULL) {
+    while ((msg = tcpsegP->removeFirstPayloadMessage(endSeqNo)) != nullptr) {
         if (seqLess(seqNoP, endSeqNo) && seqLE(endSeqNo, lastSeqNo)
             && (!isValidSeqNoM || seqLess(lastExtractedSeqNoM, endSeqNo)))
         {
@@ -253,7 +253,7 @@ cPacket *TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
-    cPacket *dataMsg = NULL;
+    cPacket *dataMsg = nullptr;
 
     if (!isValidSeqNoM) {
         isValidSeqNoM = true;

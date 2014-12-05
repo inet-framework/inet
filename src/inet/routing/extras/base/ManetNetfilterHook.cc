@@ -56,7 +56,7 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramPreRoutingHook(INetworkDat
         if (!inIE->isLoopback() && !datagram->getDestinationAddress().isMulticast())
             sendRouteUpdateMessageToManet(datagram);
 
-        if (checkPacketUnroutable(datagram, NULL))
+        if (checkPacketUnroutable(datagram, nullptr))
         {
             delete dynamic_cast<cPacket *>(datagram)->removeControlInfo();
             sendNoRouteMessageToManet(datagram);
@@ -155,7 +155,7 @@ void ManetNetfilterHook::sendToManet(cPacket *packet)
 
 bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const InterfaceEntry* outIE)
 {
-    if (outIE != NULL)
+    if (outIE != nullptr)
         return false;
 
     L3Address destAddr = datagram->getDestinationAddress();
@@ -166,7 +166,7 @@ bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const
     if (rt->isLocalAddress(destAddr))
         return false;
 
-    return (rt->findBestMatchingRoute(destAddr) == NULL);
+    return (rt->findBestMatchingRoute(destAddr) == nullptr);
 }
 
 } // namespace inetmanet

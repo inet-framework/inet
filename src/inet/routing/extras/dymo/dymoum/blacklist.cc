@@ -45,11 +45,11 @@ namespace inetmanet {
 blacklist_t *NS_CLASS blacklist_add(struct in_addr addr)
 {
     blacklist_t *entry =blacklist_find(addr);
-    if (entry==NULL)
+    if (entry==nullptr)
         entry = new blacklist_t;
     else
         return entry;
-    if (entry  == NULL)
+    if (entry  == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -91,7 +91,7 @@ blacklist_t *NS_CLASS blacklist_find(struct in_addr addr)
         else
             dymoBlackList->erase(it);
     }
-    return NULL;
+    return nullptr;
 }
 
 void NS_CLASS blacklist_erase()
@@ -111,7 +111,7 @@ blacklist_t *NS_CLASS blacklist_add(struct in_addr addr)
 {
     blacklist_t *entry;
 
-    if ((entry = (blacklist_t *)malloc(sizeof(blacklist_t))) == NULL)
+    if ((entry = (blacklist_t *)malloc(sizeof(blacklist_t))) == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -147,7 +147,7 @@ blacklist_t *NS_CLASS blacklist_find(struct in_addr addr)
             return entry;
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 

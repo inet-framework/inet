@@ -32,7 +32,7 @@ namespace inet {
 
 void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
 {
-    AVStream *st = avformat_new_stream(oc, NULL);
+    AVStream *st = avformat_new_stream(oc, nullptr);
 
     if (!st)
         throw cRuntimeError("Could not alloc stream\n");
@@ -56,10 +56,10 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     opened = true;
 
     // auto detect the output format from the name. default is WAV
-    AVOutputFormat *fmt = av_guess_format(NULL, resultFile, NULL);
+    AVOutputFormat *fmt = av_guess_format(nullptr, resultFile, nullptr);
     if (!fmt) {
         EV_WARN << "Could not deduce output format from file extension: using WAV.\n";
-        fmt = av_guess_format("wav", NULL, NULL);
+        fmt = av_guess_format("wav", nullptr, nullptr);
     }
     if (!fmt) {
         throw cRuntimeError("Could not find suitable output format for filename '%s'", resultFile);
@@ -74,7 +74,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     snprintf(oc->filename, sizeof(oc->filename), "%s", resultFile);
 
     // add the audio stream using the default format codecs and initialize the codecs
-    audio_st = NULL;
+    audio_st = nullptr;
     if (fmt->audio_codec != AV_CODEC_ID_NONE)
         addAudioStream(fmt->audio_codec, sampleRate, sampleBits);
 
@@ -91,7 +91,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
             throw cRuntimeError("Codec %d not found", c->codec_id);
 
         /* open it */
-        if (avcodec_open2(c, avcodec, NULL) < 0)
+        if (avcodec_open2(c, avcodec, nullptr) < 0)
             throw cRuntimeError("Could not open codec %d", c->codec_id);
     }
 
@@ -102,7 +102,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     }
 
     // write the stream header
-    avformat_write_header(oc, NULL);
+    avformat_write_header(oc, nullptr);
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
@@ -115,7 +115,7 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
 
     AVPacket pkt;
     av_init_packet(&pkt);
-    pkt.data = NULL;
+    pkt.data = nullptr;
     pkt.size = 0;
     AVFrame *frame = av_frame_alloc();
 
@@ -171,7 +171,7 @@ bool AudioOutFile::close()
 
     /* free the stream */
     avformat_free_context(oc);
-    oc = NULL;
+    oc = nullptr;
     return true;
 }
 

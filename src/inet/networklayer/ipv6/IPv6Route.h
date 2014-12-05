@@ -79,16 +79,16 @@ class INET_API IPv6Route : public cObject, public IRoute
      */
     IPv6Route(IPv6Address destPrefix, int prefixLength, SourceType sourceType)
     {
-        _rt = NULL;
+        _rt = nullptr;
         _destPrefix = destPrefix;
         _prefixLength = prefixLength;
         _sourceType = sourceType;
-        _interfacePtr = NULL;
+        _interfacePtr = nullptr;
         _expiryTime = 0;
         _metric = 0;
         _adminDist = dUnknown;
-        _source = NULL;
-        _protocolData = NULL;
+        _source = nullptr;
+        _protocolData = nullptr;
     }
 
     virtual ~IPv6Route() { delete _protocolData; }

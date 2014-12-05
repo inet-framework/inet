@@ -30,7 +30,7 @@ inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
 
 EtherBus::EtherBus() :
     propagationSpeed(NaN),
-    tap(NULL),
+    tap(nullptr),
     numTaps(-1),
     inputGateBaseId(-1),
     outputGateBaseId(-1),

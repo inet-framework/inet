@@ -222,11 +222,11 @@ void NS_CLASS initialize(int stage)
         INIT_LIST_HEAD(&TQ);
 #endif
         /* Initialize data structures */
-        worb_timer.data = NULL;
+        worb_timer.data = nullptr;
         worb_timer.used = 0;
-        hello_timer.data = NULL;
+        hello_timer.data = nullptr;
         hello_timer.used = 0;
-        rt_log_timer.data = NULL;
+        rt_log_timer.data = nullptr;
         rt_log_timer.used = 0;
         isRoot = par("isRoot");
         costStatic = par("costStatic");
@@ -236,7 +236,7 @@ void NS_CLASS initialize(int stage)
 
         if (isRoot)
         {
-            timer_init(&proactive_rreq_timer,&NS_CLASS rreq_proactive, NULL);
+            timer_init(&proactive_rreq_timer,&NS_CLASS rreq_proactive, nullptr);
             timer_set_timeout(&proactive_rreq_timer, par("startRreqProactive").longValue());
         }
 
@@ -264,7 +264,7 @@ NS_CLASS ~ AODVUU()
         aodvRtTableMap.erase(aodvRtTableMap.begin());
     }
 #else
-    list_t *tmp = NULL, *pos = NULL;
+    list_t *tmp = nullptr, *pos = nullptr;
     for (int i = 0; i < RT_TABLESIZE; i++)
     {
         list_foreach_safe(pos, tmp, &rt_tbl.tbl[i])
@@ -388,7 +388,7 @@ void NS_CLASS packetFailed(IPv4Datagram *dgram)
         //  /* Mark the route to be repaired */
         rt_next_hop->flags |= RT_REPAIR;
         neighbor_link_break(rt_next_hop);
-        rreq_local_repair(rt, src_addr, NULL);
+        rreq_local_repair(rt, src_addr, nullptr);
     }
     else
     {
@@ -465,7 +465,7 @@ void NS_CLASS packetFailedMac(Ieee80211DataFrame *dgram)
         //  /* Mark the route to be repaired */
         rt_next_hop->flags |= RT_REPAIR;
         neighbor_link_break(rt_next_hop);
-        rreq_local_repair(rt, src_addr, NULL);
+        rreq_local_repair(rt, src_addr, nullptr);
     }
     else
     {
@@ -482,9 +482,9 @@ void NS_CLASS packetFailedMac(Ieee80211DataFrame *dgram)
 /* Entry-level packet reception */
 void NS_CLASS handleMessage (cMessage *msg)
 {
-    AODV_msg *aodvMsg=NULL;
-    IPv4Datagram * ipDgram=NULL;
-    UDPPacket * udpPacket=NULL;
+    AODV_msg *aodvMsg=nullptr;
+    IPv4Datagram * ipDgram=nullptr;
+    UDPPacket * udpPacket=nullptr;
 
     cMessage *msg_aux;
     struct in_addr src_addr;
@@ -579,7 +579,7 @@ void NS_CLASS handleMessage (cMessage *msg)
             rt_table_t * rev_rt = rt_table_find(src_addr);
             rt_table_update_route_timeouts(fwd_rt, rev_rt);
             /* When forwarding data, make sure we are sending HELLO messages */
-            gettimeofday(&this_host.fwd_time, NULL);
+            gettimeofday(&this_host.fwd_time, nullptr);
         }
         delete msg;
         scheduleNextEvent();
@@ -587,7 +587,7 @@ void NS_CLASS handleMessage (cMessage *msg)
     }
     else if (dynamic_cast<UDPPacket *>(msg) || dynamic_cast<AODV_msg  *>(msg))
     {
-        udpPacket = NULL;
+        udpPacket = nullptr;
         if (!isInMacLayer())
         {
             udpPacket = check_and_cast<UDPPacket*>(msg);
@@ -640,7 +640,7 @@ void NS_CLASS handleMessage (cMessage *msg)
     if (isLocalAddress(src_addr.s_addr))
     {
         delete aodvMsg;
-        aodvMsg=NULL;
+        aodvMsg=nullptr;
         scheduleNextEvent();
         return;
     }
@@ -765,7 +765,7 @@ IPv4Datagram *NS_CLASS pkt_decapsulate(IPv4Datagram *p)
         delete p;
         return datagram;
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -893,7 +893,7 @@ void NS_CLASS processMacPacket(cPacket * p, const L3Address &dest, const L3Addre
 {
     struct in_addr dest_addr, src_addr;
     bool isLocal = false;
-    struct ip_data *ipd = NULL;
+    struct ip_data *ipd = nullptr;
     u_int8_t rreq_flags = 0;
 
     dest_addr.s_addr = dest;
@@ -990,7 +990,7 @@ void NS_CLASS processMacPacket(cPacket * p, const L3Address &dest, const L3Addre
 
         send(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
-        //gettimeofday(&this_host.fwd_time, NULL);
+        //gettimeofday(&this_host.fwd_time, nullptr);
         if (!llfeedback && optimized_hellos)
             hello_start();
     }
@@ -1002,11 +1002,11 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
     rt_table_t *fwd_rt, *rev_rt;
     struct in_addr dest_addr, src_addr;
     u_int8_t rreq_flags = 0;
-    struct ip_data *ipd = NULL;
+    struct ip_data *ipd = nullptr;
 
 
-    fwd_rt = NULL;      /* For broadcast we provide no next hop */
-    ipd = NULL;         /* No ICMP messaging */
+    fwd_rt = nullptr;      /* For broadcast we provide no next hop */
+    ipd = nullptr;         /* No ICMP messaging */
 
     bool isLocal=true;
 
@@ -1050,7 +1050,7 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
 
         p = pkt_encapsulate(p, *gateWayAddress);
 
-        if (p == NULL)
+        if (p == nullptr)
         {
             DEBUG(LOG_ERR, 0, "IP Encapsulation failed!");
             return;
@@ -1145,7 +1145,7 @@ route_discovery:
         /* DEBUG(LOG_DEBUG, 0, "Sending pkt uid=%d", ch->uid()); */
         send(p,"to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
-        gettimeofday(&this_host.fwd_time, NULL);
+        gettimeofday(&this_host.fwd_time, nullptr);
 
         if (!llfeedback && optimized_hellos)
             hello_start();
@@ -1176,7 +1176,7 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 
 void NS_CLASS processLinkBreak(const cPolymorphic *details)
 {
-    IPv4Datagram  *dgram=NULL;
+    IPv4Datagram  *dgram=nullptr;
     if (llfeedback)
     {
         if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
@@ -1287,7 +1287,7 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
         if (!isReverse)
         {
             if (route &&(route->next_hop.s_addr==nextHop))
-                 rt_table_update_route_timeouts(route, NULL);
+                 rt_table_update_route_timeouts(route, nullptr);
         }
 
 
@@ -1301,7 +1301,7 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
             rt_table_insert(node_addr, ip_src,0,0, ACTIVE_ROUTE_TIMEOUT, VALID, 0,NS_DEV_NR,0xFFFFFFF,100);
         }
         else if (route && (route->next_hop.s_addr == nextHop))
-            rt_table_update_route_timeouts(NULL, route);
+            rt_table_update_route_timeouts(nullptr, route);
 
     }
     else
@@ -1309,7 +1309,7 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
         if (!isReverse)
         {
             if (route)
-                 rt_table_update_route_timeouts(route, NULL);
+                 rt_table_update_route_timeouts(route, nullptr);
         }
 
 
@@ -1323,7 +1323,7 @@ void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & ne
             rt_table_insert(node_addr, ip_src,0,0, ACTIVE_ROUTE_TIMEOUT, VALID, 0,NS_DEV_NR,0xFFFFFFF,100);
         }
         else if (route)
-            rt_table_update_route_timeouts(NULL, route);
+            rt_table_update_route_timeouts(nullptr, route);
 
     }
 
@@ -1406,7 +1406,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const int &i
     if (!delEntry && ifaceIndex<getNumInterfaces())
     {
         fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,(uint32_t) SIMTIME_DBL(simTime()), 0xFFFF,IMMORTAL,0, ifaceIndex);
-        status = (fwd_rt!=NULL);
+        status = (fwd_rt!=nullptr);
 
     }
 
@@ -1474,7 +1474,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const char  
     if (!delEntry && index<getNumInterfaces())
     {
         fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,(uint32_t) SIMTIME_DBL(simTime()), 0xFFFF,IMMORTAL,0, index);
-        status = (fwd_rt!=NULL);
+        status = (fwd_rt!=nullptr);
     }
 
 
@@ -1531,7 +1531,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const int &i
     if (!delEntry && ifaceIndex<getNumInterfaces())
     {
         fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,(uint32_t) SIMTIME_DBL(simTime()), 0xFFFF,IMMORTAL,0, ifaceIndex);
-        status = (fwd_rt!=NULL);
+        status = (fwd_rt!=nullptr);
 
     }
 
@@ -1592,7 +1592,7 @@ bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const char  
     if (!delEntry && index<getNumInterfaces())
     {
         fwd_rt = modifyAODVTables(destAddr,nextAddr,hops,(uint32_t) SIMTIME_DBL(simTime()), 0xFFFF,IMMORTAL,0, index);
-        status = (fwd_rt!=NULL);
+        status = (fwd_rt!=nullptr);
     }
 
 

@@ -80,7 +80,7 @@ void PassiveQueueBase::requestPacket()
     Enter_Method("requestPacket()");
 
     cMessage *msg = dequeue();
-    if (msg == NULL) {
+    if (msg == nullptr) {
         packetRequested++;
     }
     else {
@@ -94,7 +94,7 @@ void PassiveQueueBase::clear()
 {
     cMessage *msg;
 
-    while (NULL != (msg = dequeue()))
+    while (nullptr != (msg = dequeue()))
         delete msg;
 
     packetRequested = 0;

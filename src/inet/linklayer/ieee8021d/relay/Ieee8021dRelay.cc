@@ -27,9 +27,9 @@ Define_Module(Ieee8021dRelay);
 
 Ieee8021dRelay::Ieee8021dRelay()
 {
-    ifTable = NULL;
-    macTable = NULL;
-    ie = NULL;
+    ifTable = nullptr;
+    macTable = nullptr;
+    ie = nullptr;
 }
 
 void Ieee8021dRelay::initialize(int stage)
@@ -240,7 +240,7 @@ Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int portNu
 
         return portData;
     }
-    return NULL;
+    return nullptr;
 }
 
 void Ieee8021dRelay::start()
@@ -261,7 +261,7 @@ void Ieee8021dRelay::stop()
     isOperational = false;
 
     macTable->clearTable();
-    ie = NULL;
+    ie = nullptr;
 }
 
 InterfaceEntry *Ieee8021dRelay::chooseInterface()
@@ -277,7 +277,7 @@ InterfaceEntry *Ieee8021dRelay::chooseInterface()
             return current;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void Ieee8021dRelay::finish()

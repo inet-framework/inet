@@ -27,7 +27,7 @@ Define_Module(PIMNeighborTable);
 using namespace std;
 
 PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
-    : nt(NULL), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
+    : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
 
@@ -143,7 +143,7 @@ bool PIMNeighborTable::deleteNeighbor(PIMNeighbor *neighbor)
 
             emit(NF_PIM_NEIGHBOR_DELETED, neighbor);
 
-            neighbor->nt = NULL;
+            neighbor->nt = nullptr;
             cancelEvent(neighbor->getLivenessTimer());
             delete neighbor;
 
@@ -169,7 +169,7 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
                 return *it;
 
     }
-    return NULL;
+    return nullptr;
 }
 
 int PIMNeighborTable::getNumNeighbors(int interfaceId)
@@ -181,7 +181,7 @@ int PIMNeighborTable::getNumNeighbors(int interfaceId)
 PIMNeighbor *PIMNeighborTable::getNeighbor(int interfaceId, int index)
 {
     InterfaceToNeighborsMap::iterator it = neighbors.find(interfaceId);
-    return it != neighbors.end() ? it->second.at(index) : NULL;
+    return it != neighbors.end() ? it->second.at(index) : nullptr;
 }
 }    // namespace inet
 

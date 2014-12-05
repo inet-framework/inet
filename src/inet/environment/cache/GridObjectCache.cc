@@ -23,8 +23,8 @@ namespace inet {
 Define_Module(GridObjectCache);
 
 GridObjectCache::GridObjectCache() :
-    physicalEnvironment(NULL),
-    grid(NULL)
+    physicalEnvironment(nullptr),
+    grid(nullptr)
 {
 }
 

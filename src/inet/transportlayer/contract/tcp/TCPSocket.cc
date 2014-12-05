@@ -27,10 +27,10 @@ TCPSocket::TCPSocket()
     sockstate = NOT_BOUND;
 
     localPrt = remotePrt = -1;
-    cb = NULL;
-    yourPtr = NULL;
+    cb = nullptr;
+    yourPtr = nullptr;
 
-    gateToTcp = NULL;
+    gateToTcp = nullptr;
     dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
@@ -45,10 +45,10 @@ TCPSocket::TCPSocket(cMessage *msg)
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
-    cb = NULL;
-    yourPtr = NULL;
+    cb = nullptr;
+    yourPtr = nullptr;
     dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
-    gateToTcp = NULL;
+    gateToTcp = nullptr;
 
     if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always

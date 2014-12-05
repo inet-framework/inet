@@ -283,7 +283,7 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
         strcpy(chunkscopy, chunks);
         char *token;
         token = strtok((char *)chunkscopy, ",");
-        while (token != NULL) {
+        while (token != nullptr) {
             if (chunkToInt(token) == ASCONF)
                 asc = true;
             if (chunkToInt(token) == ASCONF_ACK)
@@ -291,7 +291,7 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
             if (!typeInOwnChunkList(chunkToInt(token))) {
                 this->state->chunkList.push_back(chunkToInt(token));
             }
-            token = strtok(NULL, ",");
+            token = strtok(nullptr, ",");
         }
         if ((bool)sctpMain->par("addIP")) {
             if (!asc && !typeInOwnChunkList(ASCONF))
@@ -447,13 +447,13 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
         strcpy(chunkscopy, chunks);
         char *token;
         token = strtok((char *)chunkscopy, ",");
-        while (token != NULL) {
+        while (token != nullptr) {
             if (chunkToInt(token) == ASCONF)
                 asc = true;
             if (chunkToInt(token) == ASCONF_ACK)
                 asca = true;
             this->state->chunkList.push_back(chunkToInt(token));
-            token = strtok(NULL, ",");
+            token = strtok(nullptr, ",");
         }
         if ((bool)sctpMain->par("addIP")) {
             if (!asc)
@@ -502,13 +502,13 @@ void SCTPAssociation::sendInit()
     if (localAddressList.front().isUnspecified()) {
         for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
 #ifdef WITH_IPv4
-            if (ift->getInterface(i)->ipv4Data() != NULL) {
+            if (ift->getInterface(i)->ipv4Data() != nullptr) {
                 adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
             }
             else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-            if (ift->getInterface(i)->ipv6Data() != NULL) {
+            if (ift->getInterface(i)->ipv6Data() != nullptr) {
                 for (int32 j = 0; j < ift->getInterface(i)->ipv6Data()->getNumAddresses(); j++) {
                     EV_DETAIL << "add address " << ift->getInterface(i)->ipv6Data()->getAddress(j) << "\n";
                     adv.push_back(ift->getInterface(i)->ipv6Data()->getAddress(j));
@@ -2012,7 +2012,7 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
                 queue = receiveStream->getOrderedQ();    // Look in ordered queue
             }
             SCTPDataVariables *chunk = queue->getChunk(tryTSN);
-            if (chunk == NULL) {    // 12.06.08
+            if (chunk == nullptr) {    // 12.06.08
                 EV_DETAIL << tryTSN << " not found in orderedQ. Try deliveryQ" << endl;
                 // Chunk is already in delivery queue.
                 queue = receiveStream->getDeliveryQ();
@@ -2020,7 +2020,7 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
             }
 
             // ====== A chunk has been found -> drop it ========================
-            if (chunk != NULL) {
+            if (chunk != nullptr) {
                 sum += chunk->len;
                 if (queue->deleteMsg(tryTSN)) {
                     EV_INFO << tryTSN << " found and deleted" << endl;
@@ -2157,7 +2157,7 @@ SCTPDataVariables *SCTPAssociation::getOutboundDataChunk(const SCTPPathVariables
         }
     }
     EV_INFO << "no chunk found in transmissionQ\n";
-    return NULL;
+    return nullptr;
 }
 
 bool SCTPAssociation::chunkMustBeAbandoned(SCTPDataVariables *chunk, SCTPPathVariables *sackPath)
@@ -2199,7 +2199,7 @@ bool SCTPAssociation::chunkMustBeAbandoned(SCTPDataVariables *chunk, SCTPPathVar
 
 SCTPDataVariables *SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables *path)
 {
-    SCTPDataVariables *retChunk = NULL;
+    SCTPDataVariables *retChunk = nullptr;
 
     if (state->prMethod != 0 && !retransmissionQ->payloadQueue.empty()) {
         for (SCTPQueue::PayloadQueue::iterator it = retransmissionQ->payloadQueue.begin();
@@ -2251,8 +2251,8 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
         const int32 availableSpace,
         const int32 availableCwnd)
 {
-    SCTPDataMsg *datMsg = NULL;
-    cPacketQueue *streamQ = NULL;
+    SCTPDataMsg *datMsg = nullptr;
+    cPacketQueue *streamQ = nullptr;
     int32 nextStream = -1;
 
     EV_INFO << "dequeueOutboundDataMsg: " << availableSpace << " bytes left to be sent" << endl;
@@ -2263,14 +2263,14 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
         nextStream = (this->*ssFunctions.ssGetNextSid)(path, false);
 
     if (nextStream == -1)
-        return NULL;
+        return nullptr;
 
     EV_INFO << "dequeueOutboundDataMsg: now stream " << nextStream << endl;
 
     for (SCTPSendStreamMap::iterator iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
         if ((int32)iter->first == nextStream) {
             SCTPSendStream *stream = iter->second;
-            streamQ = NULL;
+            streamQ = nullptr;
 
             if (!stream->getUnorderedStreamQ()->empty()) {
                 streamQ = stream->getUnorderedStreamQ();
@@ -2289,7 +2289,7 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
                     /* START FRAGMENTATION */
                     SCTPDataMsg *datMsgQueued = (SCTPDataMsg *)streamQ->pop();
                     cPacket *datMsgQueuedEncMsg = datMsgQueued->getEncapsulatedPacket();
-                    SCTPDataMsg *datMsgLastFragment = NULL;
+                    SCTPDataMsg *datMsgLastFragment = nullptr;
                     uint32 offset = 0;
                     uint32 msgbytes = state->assocPmtu - IP_HEADER_LENGTH - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH;
                     const uint16 fullSizedPackets = (uint16)(datMsgQueued->getByteLength() / msgbytes);
@@ -2337,8 +2337,8 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
 
                         SCTPSimpleMessage *datMsgQueuedSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgQueuedEncMsg);
                         SCTPSimpleMessage *datMsgFragmentSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgFragmentEncMsg);
-                        if ((datMsgQueuedSimple != NULL) &&
-                            (datMsgFragmentSimple != NULL) &&
+                        if ((datMsgQueuedSimple != nullptr) &&
+                            (datMsgFragmentSimple != nullptr) &&
                             (datMsgQueuedSimple->getDataArraySize() >= msgbytes + offset))
                         {
                             datMsgFragmentSimple->setDataArraySize(msgbytes);
@@ -2384,7 +2384,7 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
                             qCounter.roomSumSendStreams -= ADD_PADDING(datMsgQueued->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
                             qCounter.bookedSumSendStreams -= datMsgQueued->getBooksize();
                             delete datMsgQueued;
-                            datMsgQueued = NULL;
+                            datMsgQueued = nullptr;
                             state->queuedMessages--;
                         }
                     }
@@ -2420,7 +2420,7 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
             break;
         }
     }
-    if (datMsg != NULL) {
+    if (datMsg != nullptr) {
         qCounter.roomSumSendStreams -= ADD_PADDING(datMsg->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
         qCounter.bookedSumSendStreams -= datMsg->getBooksize();
     }
@@ -2444,7 +2444,7 @@ bool SCTPAssociation::nextChunkFitsIntoPacket(SCTPPathVariables *path, int32 byt
     stream = sendStreams.find(nextStream)->second;
 
     if (stream) {
-        cPacketQueue *streamQ = NULL;
+        cPacketQueue *streamQ = nullptr;
 
         if (!stream->getUnorderedStreamQ()->empty())
             streamQ = stream->getUnorderedStreamQ();
@@ -2498,7 +2498,7 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 SCTPPathVariables *SCTPAssociation::getNextDestination(SCTPDataVariables *chunk) const
@@ -2507,7 +2507,7 @@ SCTPPathVariables *SCTPAssociation::getNextDestination(SCTPDataVariables *chunk)
 
     EV_DEBUG << "Running getNextDestination()" << endl;
     if (chunk->numberOfTransmissions == 0) {
-        if (chunk->getInitialDestinationPath() == NULL) {
+        if (chunk->getInitialDestinationPath() == nullptr) {
             next = state->getPrimaryPath();
         }
         else {
@@ -2523,7 +2523,7 @@ SCTPPathVariables *SCTPAssociation::getNextDestination(SCTPDataVariables *chunk)
         // If this is a retransmission, we should choose another, active path.
         SCTPPathVariables *last = chunk->getLastDestinationPath();
         next = getNextPath(last);
-        if ((next == NULL) || (next->confirmed == false)) {
+        if ((next == nullptr) || (next->confirmed == false)) {
             next = last;
         }
     }

@@ -105,7 +105,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
 
                     Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
 
-                    Node *childNode = NULL;
+                    Node *childNode = nullptr;
 
                     if (linkOut) {
                         childNode = (Node *)linkOut->getRemoteNode();
@@ -243,7 +243,7 @@ Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
             return node->getLinkOut(i);
 
 
-    return NULL;
+    return nullptr;
 }
 
 bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher,
@@ -251,7 +251,7 @@ bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *curren
 {
     Node *childNode = currentInfo->childNode;
 
-    if (childNode == NULL)
+    if (childNode == nullptr)
         return false;
 
     cModule *hostModule = childNode->module;

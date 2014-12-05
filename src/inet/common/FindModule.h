@@ -19,7 +19,7 @@ class FindModule
      * @brief Returns a pointer to a sub module of the passed module with
      * the type of this template.
      *
-     * Returns NULL if no matching submodule could be found.
+     * Returns nullptr if no matching submodule could be found.
      */
     static T findSubModule(const cModule *const top)
     {
@@ -27,21 +27,21 @@ class FindModule
             cModule *const sub = i();
             // this allows also a return type of read only pointer: const cModule *const
             T dCastRet = dynamic_cast<T>(sub);
-            if (dCastRet != NULL)
+            if (dCastRet != nullptr)
                 return dCastRet;
             // this allows also a return type of read only pointer: const cModule *const
             T recFnd = findSubModule(sub);
-            if (recFnd != NULL)
+            if (recFnd != nullptr)
                 return recFnd;
         }
-        return NULL;
+        return nullptr;
     }
 
     /**
      * @brief Returns a pointer to the module with the type of this
      * template.
      *
-     * Returns NULL if no module of this type could be found.
+     * Returns nullptr if no module of this type could be found.
      */
     static T findGlobalModule()
     {
@@ -56,11 +56,11 @@ class FindModule
      */
     static cModule *findHost(cModule *const m)
     {
-        cModule *parent = m != NULL ? m->getParentModule() : NULL;
+        cModule *parent = m != nullptr ? m->getParentModule() : nullptr;
         cModule *node = m;
 
         // all nodes should be a sub module of the simulation which has no parent module!!!
-        while (parent != NULL && parent->getParentModule() != NULL) {
+        while (parent != nullptr && parent->getParentModule() != nullptr) {
             node = parent;
             parent = node->getParentModule();
         }
@@ -77,11 +77,11 @@ class FindModule
     // the constness version
     static const cModule *findHost(const cModule *const m)
     {
-        const cModule *parent = m != NULL ? m->getParentModule() : NULL;
+        const cModule *parent = m != nullptr ? m->getParentModule() : nullptr;
         const cModule *node = m;
 
         // all nodes should be a sub module of the simulation which has no parent module!!!
-        while (parent != NULL && parent->getParentModule() != NULL) {
+        while (parent != nullptr && parent->getParentModule() != nullptr) {
             node = parent;
             parent = node->getParentModule();
         }
@@ -117,7 +117,7 @@ class AccessModuleWrap
 
   public:
     AccessModuleWrap() :
-        pModule(NULL)
+        pModule(nullptr)
     {
     }
 
@@ -127,11 +127,11 @@ class AccessModuleWrap
 
     ;
 
-    T *get(cModule *const from = NULL)
+    T *get(cModule *const from = nullptr)
     {
         if (!pModule) {
             pModule = FindModule<T *>::findSubModule(
-                        FindModule<>::findHost(from != NULL ? from : simulation.getContextModule()));
+                        FindModule<>::findHost(from != nullptr ? from : simulation.getContextModule()));
         }
         return pModule;
     }

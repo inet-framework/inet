@@ -86,7 +86,7 @@ void NS_CLASS rerr_add_udest(RERR * rerr,struct in_addr udest,
 void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                            struct in_addr ip_dst)
 {
-    RERR *new_rerr = NULL;
+    RERR *new_rerr = nullptr;
     RERR_udest *udest;
     rt_table_t *rt;
     u_int32_t rerr_dest_seqno;
@@ -160,7 +160,7 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                     u_int8_t rreq_flags = 0;
                     if (par("targetOnlyRreq").boolValue())
                         rreq_flags |= RREQ_DEST_ONLY;
-                    rreq_route_discovery(udest_addr, rreq_flags, NULL);
+                    rreq_route_discovery(udest_addr, rreq_flags, nullptr);
                 }
             }
 #endif

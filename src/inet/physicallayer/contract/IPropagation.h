@@ -43,7 +43,7 @@ class INET_API IPropagation : public IPrintableObject
      * Returns the time and space coordinates when the transmission arrives
      * at the object that moves with the provided mobility. The result might
      * be an approximation only, because there's a tradeoff between precision
-     * and performance. This function never returns NULL.
+     * and performance. This function never returns nullptr.
      */
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const = 0;
 };

@@ -96,7 +96,7 @@ PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement
 {
     const char *modeAttr = config->getAttribute("mode");
     if (!modeAttr)
-        return NULL;
+        return nullptr;
 
     PIMInterface::PIMMode mode;
     if (strcmp(modeAttr, "dense") == 0)
@@ -118,7 +118,7 @@ PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
         if (interfaceId == getInterface(i)->getInterfaceId())
             return getInterface(i);
 
-    return NULL;
+    return nullptr;
 }
 
 void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)

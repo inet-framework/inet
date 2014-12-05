@@ -50,7 +50,7 @@ class INET_API TCPSocketMap
     /**
      * Finds the socket (by connId) for the given message. The message
      * must have arrived from TCP, and must contain a TCPCommand
-     * control info object. The method returns NULL if the socket was
+     * control info object. The method returns nullptr if the socket was
      * not found, and throws an error if the message doesn't contain
      * a TCPCommand.
      */

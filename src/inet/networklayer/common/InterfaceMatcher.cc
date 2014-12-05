@@ -128,7 +128,7 @@ static cGate *findRemoteGate(cGate *startGate)
         if (isNetworkNode(gate->getOwnerModule()))
             return gate;
 
-    return NULL;
+    return nullptr;
 }
 
 bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const

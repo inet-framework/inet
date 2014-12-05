@@ -24,7 +24,7 @@ namespace tcp {
 
 TCPSACKRexmitQueue::TCPSACKRexmitQueue()
 {
-    conn = NULL;
+    conn = nullptr;
     begin = end = 0;
 }
 

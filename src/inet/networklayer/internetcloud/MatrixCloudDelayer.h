@@ -75,7 +75,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         simtime_t lastSent;
 
       public:
-        Descriptor() : delayPar(NULL), dataratePar(NULL), dropPar(NULL), lastSent(SIMTIME_ZERO) {}
+        Descriptor() : delayPar(nullptr), dataratePar(nullptr), dropPar(nullptr), lastSent(SIMTIME_ZERO) {}
     };
 
     typedef std::pair<int, int> IDPair;

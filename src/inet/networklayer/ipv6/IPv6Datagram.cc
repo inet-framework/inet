@@ -57,7 +57,7 @@ IPv6ExtensionHeaderPtr& IPv6Datagram::getExtensionHeader(unsigned int k)
 {
     static IPv6ExtensionHeaderPtr null;
     if (k >= extensionHeaders.size())
-        return null = NULL;
+        return null = nullptr;
     return extensionHeaders[k];
 }
 
@@ -70,7 +70,7 @@ IPv6ExtensionHeader *IPv6Datagram::findExtensionHeaderByType(IPProtocolId extens
             else
                 index--;
         }
-    return NULL;
+    return nullptr;
 }
 
 void IPv6Datagram::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
@@ -184,7 +184,7 @@ int IPv6Datagram::calculateFragmentLength() const
 IPv6ExtensionHeader *IPv6Datagram::removeFirstExtensionHeader()
 {
     if (extensionHeaders.empty())
-        return NULL;
+        return nullptr;
     IPv6ExtensionHeader *eh = extensionHeaders.front();
     extensionHeaders.erase(extensionHeaders.begin());
     return eh;
@@ -199,7 +199,7 @@ IPv6ExtensionHeader *IPv6Datagram::removeExtensionHeader(IPProtocolId extensionT
             return eh;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 IPv6Datagram::~IPv6Datagram()

@@ -74,7 +74,7 @@ class TCPStatusInfo;
  * };
  *
  * void MyModule::initialize() {
- *     socket.setCallbackObject(this,NULL);
+ *     socket.setCallbackObject(this,nullptr);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
@@ -111,7 +111,7 @@ class TCPStatusInfo;
  *     // not yet in socketMap, must be new incoming connection: add to socketMap
  *     socket = new TCPSocket(msg);
  *     socket->setOutputGate(gate("tcpOut"));
- *     socket->setCallbackObject(this, NULL);
+ *     socket->setCallbackObject(this, nullptr);
  *     socketMap.addSocket(socket);
  * }
  * // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
@@ -250,7 +250,7 @@ class INET_API TCPSocket
     /**
      * Convert a string to TCPDataTransferMode enum.
      * Returns TCP_TRANSFER_UNDEFINED when string has an invalid value
-     * Generate runtime error, when string is NULL;
+     * Generate runtime error, when string is nullptr;
      */
     static TCPDataTransferMode convertStringToDataTransferMode(const char *transferMode);
 
@@ -384,7 +384,7 @@ class INET_API TCPSocket
      * in that case you don't have to look it up by connId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = NULL);
+    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
 
     /**
      * Examines the message (which should have arrived from TCP),

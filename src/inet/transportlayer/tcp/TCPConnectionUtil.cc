@@ -596,7 +596,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
-    TCPSegment *tcpseg_temp = createTCPSegment(NULL);
+    TCPSegment *tcpseg_temp = createTCPSegment(nullptr);
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tcpseg_temp);
     uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20

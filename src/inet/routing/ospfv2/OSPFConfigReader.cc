@@ -109,7 +109,7 @@ void OSPFConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaID areaI
     areaXPath += "']";
 
     cXMLElement *areaConfig = asConfig.getElementByPath(areaXPath.c_str());
-    if (areaConfig == NULL) {
+    if (areaConfig == nullptr) {
         throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
     }
     else {
@@ -294,7 +294,7 @@ void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     }
     // add the interface to it's Area
     Area *area = ospfRouter->getAreaByID(areaID);
-    if (area != NULL) {
+    if (area != nullptr) {
         area->addInterface(intf);
         intf->processEvent(Interface::INTERFACE_UP);    // notification should come from the blackboard...
     }
@@ -345,7 +345,7 @@ void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
     long externalRouteTagVal = 0;    // default value
     const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
     if (externalRouteTag && *externalRouteTag) {
-        char *endp = NULL;
+        char *endp = nullptr;
         externalRouteTagVal = strtol(externalRouteTag, &endp, 0);
         if (*endp)
             throw cRuntimeError("Invalid externalRouteTag='%s' at %s", externalRouteTag, externalRouteConfig.getSourceLocation());
@@ -376,7 +376,7 @@ void OSPFConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 
     // add the host route to the OSPF data structure.
     Area *area = ospfRouter->getAreaByID(hostArea);
-    if (area != NULL) {
+    if (area != nullptr) {
         area->addHostRoute(hostParameters);
     }
     else {
@@ -412,7 +412,7 @@ void OSPFConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     Area *transitArea = ospfRouter->getAreaByID(intf->getAreaID());
     Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
 
-    if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
+    if ((backbone != nullptr) && (transitArea != nullptr) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);
     }
     else {
@@ -436,7 +436,7 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
 
     // load information on this router
     cXMLElementList routers = asConfig->getElementsByTagName("Router");
-    cXMLElement *routerNode = NULL;
+    cXMLElement *routerNode = nullptr;
     for (cXMLElementList::iterator routerIt = routers.begin(); routerIt != routers.end(); routerIt++) {
         const char *nodeName = getRequiredAttribute(*(*routerIt), "name");
         inet::PatternMatcher pattern(nodeName, true, true, true);
@@ -445,7 +445,7 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
             break;
         }
     }
-    if (routerNode == NULL) {
+    if (routerNode == nullptr) {
         throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
     }
 

@@ -25,10 +25,10 @@ namespace physicallayer {
 Define_Module(TracingObstacleLoss);
 
 TracingObstacleLoss::TracingObstacleLoss() :
-    medium(NULL),
-    environment(NULL),
+    medium(nullptr),
+    environment(nullptr),
     leaveIntersectionTrail(false),
-    intersectionTrail(NULL),
+    intersectionTrail(nullptr),
     intersectionComputationCount(0),
     intersectionCount(0)
 {

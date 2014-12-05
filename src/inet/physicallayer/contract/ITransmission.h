@@ -50,13 +50,13 @@ class INET_API ITransmission : public IPrintableObject
 
     /**
      * Returns the transmitter that transmitted this radio signal on the radio
-     * channel. This function never returns NULL.
+     * channel. This function never returns nullptr.
      */
     virtual const IRadio *getTransmitter() const = 0;
 
     /**
      * Returns the mac frame corresponding to this transmission. This function
-     * never returns NULL.
+     * never returns nullptr.
      */
     virtual const cPacket *getMacFrame() const = 0;
 

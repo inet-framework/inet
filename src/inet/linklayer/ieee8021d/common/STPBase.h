@@ -80,13 +80,13 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
 
     /**
      * @brief Gets Ieee8021dInterfaceData for port number.
-     * @return The port's Ieee8021dInterfaceData, or NULL if it doesn't exist.
+     * @return The port's Ieee8021dInterfaceData, or nullptr if it doesn't exist.
      */
     Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
 
     /**
      * @brief Gets InterfaceEntry for port number.
-     * @return The port's InterfaceEntry, or NULL if it doesn't exist.
+     * @return The port's InterfaceEntry, or nullptr if it doesn't exist.
      */
     InterfaceEntry *getPortInterfaceEntry(unsigned int portNum);
 

@@ -53,8 +53,8 @@ Define_Module(ARP);
 
 ARP::ARP()
 {
-    ift = NULL;
-    rt = NULL;
+    ift = nullptr;
+    rt = nullptr;
 }
 
 void ARP::initialize(int stage)
@@ -164,7 +164,7 @@ void ARP::flush()
         ARPCache::iterator i = arpCache.begin();
         ARPCacheEntry *entry = i->second;
         cancelAndDelete(entry->timer);
-        entry->timer = NULL;
+        entry->timer = nullptr;
         delete entry;
         arpCache.erase(i);
     }
@@ -276,7 +276,7 @@ bool ARP::addressRecognized(IPv4Address destAddr, InterfaceEntry *ie)
         // respond to Proxy ARP request: if we can route this packet (and the
         // output port is different from this one), say yes
         InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
-        return rtie != NULL && rtie != ie;
+        return rtie != nullptr && rtie != ie;
     }
     else {
         return false;
@@ -363,7 +363,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 entry->ie = ie;
 
                 entry->pending = false;
-                entry->timer = NULL;
+                entry->timer = nullptr;
                 entry->numRetries = 0;
             }
             updateARPCache(entry, srcMACAddress);
@@ -424,7 +424,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     if (entry->pending) {
         entry->pending = false;
         delete cancelEvent(entry->timer);
-        entry->timer = NULL;
+        entry->timer = nullptr;
         entry->numRetries = 0;
     }
     entry->macAddress = macAddress;

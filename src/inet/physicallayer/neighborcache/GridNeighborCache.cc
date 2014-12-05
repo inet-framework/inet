@@ -25,11 +25,11 @@ namespace physicallayer {
 Define_Module(GridNeighborCache);
 
 GridNeighborCache::GridNeighborCache() :
-    grid(NULL),
-    radioMedium(NULL),
+    grid(nullptr),
+    radioMedium(nullptr),
     constraintAreaMin(Coord::NIL),
     constraintAreaMax(Coord::NIL),
-    refillCellsTimer(NULL),
+    refillCellsTimer(nullptr),
     refillPeriod(NaN),
     maxSpeed(NaN),
     cellSize(Coord::NIL)

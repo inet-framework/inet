@@ -88,7 +88,7 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
 
     IPv6Datagram *ret = dgram;
     drop(dgram);
-    dgram = NULL;
+    dgram = nullptr;
     return ret;
 #else // ifdef WITH_IPv6
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
@@ -135,7 +135,7 @@ void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
 IPv6ExtensionHeader *IPv6ControlInfo::removeFirstExtensionHeader()
 {
     if (extensionHeaders.empty())
-        return NULL;
+        return nullptr;
 
 #ifdef WITH_IPv6
     ExtensionHeaders::iterator first = extensionHeaders.begin();

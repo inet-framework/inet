@@ -73,7 +73,7 @@ class DSRPkt : public IPv4Datagram
     void clean();
 
   public:
-    explicit DSRPkt(const char *name=NULL) : IPv4Datagram(name) {costVector=NULL; options=NULL; costVectorSize=0; dsr_ttl=0;}
+    explicit DSRPkt(const char *name=nullptr) : IPv4Datagram(name) {costVector=nullptr; options=nullptr; costVectorSize=0; dsr_ttl=0;}
     ~DSRPkt ();
     DSRPkt (const DSRPkt  &m);
     DSRPkt (struct dsr_pkt *dp,int interface_id);
@@ -100,12 +100,12 @@ class DSRPkt : public IPv4Datagram
     void setNextAddress(const IPv4Address address_var) {next = address_var;}
 #endif
     struct dsr_opt_hdr * getOptions() const {return options;}
-    void  setOptions(dsr_opt_hdr * op) {if (options !=NULL) free(options);  options=op;}
+    void  setOptions(dsr_opt_hdr * op) {if (options !=nullptr) free(options);  options=op;}
     virtual std::string detailedInfo() const;
 
     void resetCostVector();
     virtual void getCostVector(EtxCost &cost,int &size); // Copy
-    virtual EtxCost* getCostVector() {return ((costVectorSize>0)?costVector:NULL);}
+    virtual EtxCost* getCostVector() {return ((costVectorSize>0)?costVector:nullptr);}
 
     virtual void setCostVector(EtxCost &cost, int size);
     virtual void setCostVector(EtxCost *cost,int size);
@@ -135,7 +135,7 @@ class DSRPktExt: public IPv4Datagram
     void clean() { clearExtension(); }
 
   public:
-    explicit DSRPktExt(const char *name=NULL) : IPv4Datagram(name) {size=0; extension=NULL;}
+    explicit DSRPktExt(const char *name=nullptr) : IPv4Datagram(name) {size=0; extension=nullptr;}
     ~DSRPktExt ();
     DSRPktExt (const DSRPktExt  &m);
     DSRPktExt &     operator= (const DSRPktExt &m);

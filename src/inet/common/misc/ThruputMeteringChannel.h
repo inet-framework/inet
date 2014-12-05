@@ -77,7 +77,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Constructor.
      */
-    explicit ThruputMeteringChannel(const char *name = NULL);
+    explicit ThruputMeteringChannel(const char *name = nullptr);
 
     /**
      * Copy constructor.

@@ -44,7 +44,7 @@ class INET_API ManetNetfilterHook : public INetfilter::IHook
     bool isReactive;    // true if it's a reactive routing
 
   public:
-    ManetNetfilterHook() : module(NULL), ipLayer(NULL), isReactive(false) {}
+    ManetNetfilterHook() : module(nullptr), ipLayer(nullptr), isReactive(false) {}
 
   protected:
     void initHook(cModule* module);

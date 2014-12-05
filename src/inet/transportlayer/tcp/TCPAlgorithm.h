@@ -52,7 +52,7 @@ class INET_API TCPAlgorithm : public cObject
     /**
      * Ctor.
      */
-    TCPAlgorithm() { state = NULL; conn = NULL; }
+    TCPAlgorithm() { state = nullptr; conn = nullptr; }
 
     /**
      * Virtual dtor.

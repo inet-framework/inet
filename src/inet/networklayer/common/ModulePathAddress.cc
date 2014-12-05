@@ -25,7 +25,7 @@ namespace inet {
 
 namespace {
 
-// copied the cModule::getModuleByRelativePath(), but returns NULL instead throw cRuntimeError
+// copied the cModule::getModuleByRelativePath(), but returns nullptr instead throw cRuntimeError
 cModule *getModuleByRelativePath(cModule *modp, const char *path)
 {
     // match components of the path
@@ -33,18 +33,18 @@ cModule *getModuleByRelativePath(cModule *modp, const char *path)
     char *token = strtok(pathbuf.buffer(), ".");
     while (token && modp) {
         char *lbracket;
-        if ((lbracket = strchr(token, '[')) == NULL)
+        if ((lbracket = strchr(token, '[')) == nullptr)
             modp = modp->getSubmodule(token); // no index given
         else {
             if (token[strlen(token) - 1] != ']')
-                return NULL;
+                return nullptr;
             int index = atoi(lbracket + 1);
             *lbracket = '\0';    // cut off [index]
             modp = modp->getSubmodule(token, index);
         }
-        token = strtok(NULL, ".");
+        token = strtok(nullptr, ".");
     }
-    return modp;    // NULL if not found
+    return modp;    // nullptr if not found
 }
 
 } // namespace
@@ -57,9 +57,9 @@ bool ModulePathAddress::tryParse(const char *addr)
         if (isNetworkNode(module))
             return false;
         IInterfaceTable *ift = L3AddressResolver().findInterfaceTableOf(findContainingNode(module));
-        if (ift == NULL)
+        if (ift == nullptr)
             return false;
-        if (ift->getInterfaceByInterfaceModule(module) == NULL)
+        if (ift->getInterfaceByInterfaceModule(module) == nullptr)
             return false;
         id = module->getId();
         return true;

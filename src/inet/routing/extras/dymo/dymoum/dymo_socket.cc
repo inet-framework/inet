@@ -259,11 +259,11 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     ih->dport() = RT_PORT;
     ih->ttl()   = DYMO_IPTTL;
 #else
-    if (send_buf==NULL)
+    if (send_buf==nullptr)
         return;
     DYMO_element *p = send_buf;
     RE * rePkt=dynamic_cast<RE*>(p);
-    send_buf = NULL;
+    send_buf = nullptr;
     totalSend++;
     if (this->isStaticNode())
     {
@@ -318,7 +318,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
 #endif  /* NS_PORT */
 
     // Rate limit stuff
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
     if (num_dymo_msgs == DYMO_RATELIMIT - 1)
     {
         if (timeval_diff(&now, &dymo_rate[0]) < 1000)

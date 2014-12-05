@@ -113,7 +113,7 @@ class INET_API PIMNeighborTable : public cSimpleModule
 
     /**
      * Returns the neighbor that is identified by the given (interfaceId,addr),
-     * or NULL if no such neighbor.
+     * or nullptr if no such neighbor.
      */
     virtual PIMNeighbor *findNeighbor(int interfaceId, IPv4Address addr);
 

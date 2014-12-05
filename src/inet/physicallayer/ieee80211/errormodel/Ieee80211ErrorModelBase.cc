@@ -32,7 +32,7 @@ using namespace ieee80211;
 Ieee80211ErrorModelBase::Ieee80211ErrorModelBase() :
     opMode('\0'),
     autoHeaderSize(false),
-    berTableFile(NULL)
+    berTableFile(nullptr)
 {
 }
 

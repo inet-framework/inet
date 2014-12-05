@@ -41,7 +41,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     int getExtensionHeaderOrder(IPv6ExtensionHeader *eh);
 
   public:
-    IPv6Datagram(const char *name = NULL, int kind = 0) : IPv6Datagram_Base(name, kind) {}
+    IPv6Datagram(const char *name = nullptr, int kind = 0) : IPv6Datagram_Base(name, kind) {}
     IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other) { copy(other); }
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();
@@ -86,7 +86,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
 
     /**
      * Returns the extension header of the specified type,
-     * or NULL. If index is 0, then the first, if 1 then the
+     * or nullptr. If index is 0, then the first, if 1 then the
      * second extension is returned. (The datagram might
      * contain two Destination Options extension.)
      */

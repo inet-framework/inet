@@ -127,8 +127,8 @@ void UDPBasicBurst::processStart()
 
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-    while ((token = tokenizer.nextToken()) != NULL) {
-        if (strstr(token, "Broadcast") != NULL)
+    while ((token = tokenizer.nextToken()) != nullptr) {
+        if (strstr(token, "Broadcast") != nullptr)
             destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
         else {
             L3Address addr = L3AddressResolver().resolve(token);

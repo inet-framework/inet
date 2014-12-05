@@ -249,7 +249,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     //Neighbor Cache for link-layer information about that neighbor.
     Neighbour *nce = neighbourCache.lookup(nextHopAddr, nextHopIfID);
 
-    if (nce == NULL) {
+    if (nce == nullptr) {
         EV_INFO << "No Entry exists in the Neighbour Cache.\n";
         InterfaceEntry *ie = ift->getInterfaceById(nextHopIfID);
         if (ie->isPointToPoint()) {
@@ -301,7 +301,7 @@ IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(Inte
             return advIfEntry;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 IPv6NeighbourDiscovery::RDEntry *IPv6NeighbourDiscovery::fetchRDEntry(InterfaceEntry *ie)
@@ -312,7 +312,7 @@ IPv6NeighbourDiscovery::RDEntry *IPv6NeighbourDiscovery::fetchRDEntry(InterfaceE
             return rdEntry;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 const MACAddress& IPv6NeighbourDiscovery::resolveNeighbour(const IPv6Address& nextHop, int interfaceId)
@@ -354,11 +354,11 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
 
     cMessage *msg = nce->nudTimeoutEvent;
-    if (msg != NULL) {
+    if (msg != nullptr) {
         EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
         bubble("Reachability Confirmed via NUD.");
         cancelAndDelete(msg);
-        nce->nudTimeoutEvent = NULL;
+        nce->nudTimeoutEvent = nullptr;
     }
 
     // TODO (see header file for description)
@@ -424,7 +424,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(const IPv6Address& destAddr
     EV_INFO << "Find out if supplied dest addr is on-link or off-link.\n";
     const IPv6Route *route = rt6->doLongestPrefixMatch(destAddr);
 
-    if (route != NULL) {
+    if (route != nullptr) {
         expiryTime = route->getExpiryTime();
         outIfID = route->getInterface() ? route->getInterface()->getInterfaceId() : -1;
 
@@ -484,8 +484,8 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     Neighbour *nce = (Neighbour *)timeoutMsg->getContextPointer();
 
     const Key *nceKey = nce->nceKey;
-    if (nceKey == NULL)
-        throw cRuntimeError("The nceKey is NULL at nce->MAC=%s, isRouter=%d",
+    if (nceKey == nullptr)
+        throw cRuntimeError("The nceKey is nullptr at nce->MAC=%s, isRouter=%d",
                 nce->macAddress.str().c_str(), nce->isRouter);
 
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
@@ -578,7 +578,7 @@ IPv6Address IPv6NeighbourDiscovery::selectDefaultRouter(int& outIfID)
        packet to a router, and the selected router will be probed for reachability
        as a side effect.*/
     Neighbour *defaultRouter = defaultRouters.getHead();
-    if (defaultRouter != NULL) {
+    if (defaultRouter != nullptr) {
         EV_INFO << "Found a router in the neighbour cache (default router list).\n";
         defaultRouters.setHead(*defaultRouter->nextDefaultRouter);
         outIfID = defaultRouter->nceKey->interfaceID;
@@ -1005,14 +1005,14 @@ void IPv6NeighbourDiscovery::cancelRouterDiscovery(InterfaceEntry *ie)
 {
     //Next we retrieve the rdEntry with the Interface Entry.
     RDEntry *rdEntry = fetchRDEntry(ie);
-    if (rdEntry != NULL) {
-        EV_DETAIL << "rdEntry is not NULL, RD cancelled!" << endl;
+    if (rdEntry != nullptr) {
+        EV_DETAIL << "rdEntry is not nullptr, RD cancelled!" << endl;
         cancelAndDelete(rdEntry->timeoutMsg);
         rdList.erase(rdEntry);
         delete rdEntry;
     }
     else
-        EV_DETAIL << "rdEntry is NULL, not cancelling RD!" << endl;
+        EV_DETAIL << "rdEntry is nullptr, not cancelling RD!" << endl;
 }
 
 void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
@@ -1267,7 +1267,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv
         return ra;
     }
 
-    return NULL;    //XXX is this OK?
+    return nullptr;    //XXX is this OK?
 }
 
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
@@ -1355,10 +1355,10 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     Neighbour *neighbour = neighbourCache.lookup(raSrcAddr, ifID);
 
 #ifdef WITH_xMIPv6
-    // update 3.9.07 - CB // if (neighbour == NULL && (ra->homeAgentFlag() == true)) //the RA is from a Router acting as a Home Agent as well
+    // update 3.9.07 - CB // if (neighbour == nullptr && (ra->homeAgentFlag() == true)) //the RA is from a Router acting as a Home Agent as well
 #endif /* WITH_xMIPv6 */
 
-    if (neighbour == NULL) {
+    if (neighbour == nullptr) {
         EV_INFO << "Neighbour Cache Entry does not contain RA's source address\n";
         if (ra->getRouterLifetime() != 0) {
             EV_INFO << "RA's router lifetime is non-zero, creating an entry in the "
@@ -1957,7 +1957,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicita
     //Look for the Neighbour Cache Entry
     Neighbour *entry = neighbourCache.lookup(nsCtrlInfo->getSrcAddr(), ifID);
 
-    if (entry == NULL) {
+    if (entry == nullptr) {
         /*If an entry does not already exist, the node SHOULD create a new one
            and set its reachability state to STALE as specified in Section 7.3.3.*/
         EV_INFO << "Neighbour Entry not found. Create a Neighbour Cache Entry.\n";
@@ -2158,7 +2158,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
     //Logic as defined in Section 7.2.5
     Neighbour *neighbourEntry = neighbourCache.lookup(naTargetAddr, ie->getInterfaceId());
 
-    if (neighbourEntry == NULL) {
+    if (neighbourEntry == nullptr) {
         EV_INFO << "NA received. Target Address not found in Neighbour Cache\n";
         EV_INFO << "Dropping NA packet.\n";
         delete naCtrlInfo;
@@ -2260,7 +2260,7 @@ void IPv6NeighbourDiscovery::processNAForIncompleteNCEState(IPv6NeighbourAdverti
         //  resolution.
         sendQueuedPacketsToIPv6Module(nce);
         cancelAndDelete(nce->arTimer);
-        nce->arTimer = NULL;
+        nce->arTimer = nullptr;
     }
 }
 
@@ -2323,12 +2323,12 @@ void IPv6NeighbourDiscovery::processNAForOtherNCEStates(IPv6NeighbourAdvertiseme
             //We have to cancel the NUD self timer message if there is one.
 
             cMessage *msg = nce->nudTimeoutEvent;
-            if (msg != NULL) {
+            if (msg != nullptr) {
                 EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
                 nce->reachabilityExpires = simTime() + ie->ipv6Data()->_getReachableTime();
                 cancelAndDelete(msg);
-                nce->nudTimeoutEvent = NULL;
+                nce->nudTimeoutEvent = nullptr;
             }
         }
         else {
@@ -2571,7 +2571,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
     // check if this interface is directly connected to an AccessPoint.
     cModule *node = getContainingNode(this);
     cGate *gate = node->gate(ie->getNodeOutputGateId());
-    ASSERT(gate != NULL);
+    ASSERT(gate != nullptr);
     cGate *connectedGate = gate->getPathEndGate();
     if (connectedGate != gate) {
         cModule *connectedNode = getContainingNode(connectedGate->getOwnerModule());

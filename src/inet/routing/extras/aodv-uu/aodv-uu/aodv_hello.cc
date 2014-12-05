@@ -79,12 +79,12 @@ void NS_CLASS hello_start()
     if (hello_timer.used)
         return;
 
-    gettimeofday(&this_host.fwd_time, NULL);
+    gettimeofday(&this_host.fwd_time, nullptr);
 
     DEBUG(LOG_DEBUG, 0, "Starting to send HELLOs!");
-    timer_init(&hello_timer, &NS_CLASS hello_send, NULL);
+    timer_init(&hello_timer, &NS_CLASS hello_send, nullptr);
 
-    hello_send(NULL);
+    hello_send(nullptr);
 }
 
 void NS_CLASS hello_stop()
@@ -100,7 +100,7 @@ void NS_CLASS hello_stop()
 void NS_CLASS hello_send(void *arg)
 {
     RREP *rrep;
-    AODV_ext *ext = NULL;
+    AODV_ext *ext = nullptr;
     u_int8_t flags = 0;
     struct in_addr dest;
     long time_diff, jitter;
@@ -112,7 +112,7 @@ void NS_CLASS hello_send(void *arg)
 
     buffer_ptr = buffer;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     if (optimized_hellos &&
             timeval_diff(&now, &this_host.fwd_time) > ACTIVE_ROUTE_TIMEOUT)
@@ -265,7 +265,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
     u_int8_t state, flags = 0;
     struct in_addr ext_neighbor, hello_dest;
     rt_table_t *rt;
-    AODV_ext *ext = NULL;
+    AODV_ext *ext = nullptr;
     struct timeval now;
 
     uint32_t cost;
@@ -281,7 +281,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
     if (this->isStaticNode())
         fixhop++;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     hello_dest.s_addr = hello->dest_addr;
     hello_seqno = ntohl(hello->dest_seqno);
@@ -344,10 +344,10 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
         default:
             alog(LOG_WARNING, 0, __FUNCTION__,
                  "Bad extension!! type=%d, length=%d", ext->type, ext->length);
-            ext = NULL;
+            ext = nullptr;
             break;
         }
-        if (ext == NULL)
+        if (ext == nullptr)
             break;
 
         rreplen -= AODV_EXT_SIZE(ext);

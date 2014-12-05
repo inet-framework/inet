@@ -105,7 +105,7 @@ std::string TCPByteStreamRcvQueue::info() const
 
 cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
 {
-    cPacket *msg = NULL;
+    cPacket *msg = nullptr;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
     if (reg) {
         msg = new ByteArrayMessage("data");

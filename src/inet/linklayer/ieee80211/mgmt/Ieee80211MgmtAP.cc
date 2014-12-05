@@ -124,7 +124,7 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
 Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(Ieee80211ManagementFrame *frame)
 {
     STAList::iterator it = staList.find(frame->getTransmitterAddress());
-    return it == staList.end() ? NULL : &(it->second);
+    return it == staList.end() ? nullptr : &(it->second);
 }
 
 void Ieee80211MgmtAP::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& destAddr)

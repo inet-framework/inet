@@ -33,23 +33,23 @@ simsignal_t Radio::symbolErrorRateSignal = cComponent::registerSignal("symbolErr
 
 Radio::Radio() :
     id(nextId++),
-    antenna(NULL),
-    transmitter(NULL),
-    receiver(NULL),
-    medium(NULL),
+    antenna(nullptr),
+    transmitter(nullptr),
+    receiver(nullptr),
+    medium(nullptr),
     displayCommunicationRange(false),
     displayInterferenceRange(false),
-    upperLayerOut(NULL),
-    upperLayerIn(NULL),
-    radioIn(NULL),
+    upperLayerOut(nullptr),
+    upperLayerIn(nullptr),
+    radioIn(nullptr),
     radioMode(RADIO_MODE_OFF),
     nextRadioMode(RADIO_MODE_OFF),
     previousRadioMode(RADIO_MODE_OFF),
     receptionState(RECEPTION_STATE_UNDEFINED),
     transmissionState(TRANSMISSION_STATE_UNDEFINED),
-    endTransmissionTimer(NULL),
-    endReceptionTimer(NULL),
-    endSwitchTimer(NULL)
+    endTransmissionTimer(nullptr),
+    endReceptionTimer(nullptr),
+    endSwitchTimer(nullptr)
 {
 }
 
@@ -176,7 +176,7 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
 {
     EV_DETAIL << "Radio mode changed from " << getRadioModeName(previousRadioMode) << " to " << getRadioModeName(newRadioMode) << endl;
     if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
-        endReceptionTimer = NULL;
+        endReceptionTimer = nullptr;
     }
     else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
         if (endTransmissionTimer->isScheduled()) {
@@ -192,7 +192,7 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
 const ITransmission *Radio::getTransmissionInProgress() const
 {
     if (!endTransmissionTimer->isScheduled())
-        return NULL;
+        return nullptr;
     else
         return static_cast<RadioFrame *>(endTransmissionTimer->getControlInfo())->getTransmission();
 }
@@ -200,7 +200,7 @@ const ITransmission *Radio::getTransmissionInProgress() const
 const ITransmission *Radio::getReceptionInProgress() const
 {
     if (!endReceptionTimer)
-        return NULL;
+        return nullptr;
     else
         return static_cast<RadioFrame *>(endReceptionTimer->getControlInfo())->getTransmission();
 }
@@ -331,7 +331,7 @@ void Radio::endReception(cMessage *message)
         if (!isNaN(indication->getSymbolErrorRate()))
             emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
         send(macFrame, upperLayerOut);
-        endReceptionTimer = NULL;
+        endReceptionTimer = nullptr;
     }
     delete message;
     updateTransceiverState();

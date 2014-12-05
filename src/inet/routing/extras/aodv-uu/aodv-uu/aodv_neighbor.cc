@@ -50,12 +50,12 @@ void NS_CLASS neighbor_add(AODV_msg * aodv_msg, struct in_addr source,
                            unsigned int ifindex)
 {
     struct timeval now;
-    rt_table_t *rt = NULL;
+    rt_table_t *rt = nullptr;
     u_int32_t seqno = 0;
     uint32_t cost;
     uint8_t fixhop;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     rt = rt_table_find(source);
 
@@ -102,7 +102,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
 {
     /* If hopcount = 1, this is a direct neighbor and a link break has
        occured. Send a RERR with the incremented sequence number */
-    RERR *rerr = NULL;
+    RERR *rerr = nullptr;
     rt_table_t *rt_u;
     struct in_addr rerr_unicast_dest;
     int i;
@@ -242,7 +242,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
 {
     /* If hopcount = 1, this is a direct neighbor and a link break has
        occured. Send a RERR with the incremented sequence number */
-    RERR *rerr = NULL;
+    RERR *rerr = nullptr;
     rt_table_t *rt_u;
     struct in_addr rerr_unicast_dest;
     int i;

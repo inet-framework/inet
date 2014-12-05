@@ -61,7 +61,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
         std::vector<IPv4MulticastRoute *> staticMulticastRoutes;
 
       public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
+        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; routingTable = nullptr; }
         ~Node() {
             for (int i = 0; i < (int)staticRoutes.size(); i++) delete staticRoutes[i];
             for (int i = 0; i < (int)staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
@@ -78,7 +78,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
         InterfaceInfo *destinationInterfaceInfo;
 
       public:
-        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
     };
 
     /**
@@ -118,10 +118,10 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public L3AddressR
     {
       public:
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
-        InterfaceInfo *gatewayInterfaceInfo;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
+        InterfaceInfo *gatewayInterfaceInfo;    // non-nullptr if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
       public:
-        LinkInfo() { gatewayInterfaceInfo = NULL; }
+        LinkInfo() { gatewayInterfaceInfo = nullptr; }
         ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 

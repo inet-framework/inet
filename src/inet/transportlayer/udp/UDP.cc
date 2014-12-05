@@ -121,9 +121,9 @@ UDP::SockDesc::~SockDesc()
 UDP::UDP()
 {
     isOperational = false;
-    ift = NULL;
-    icmp = NULL;
-    icmpv6 = NULL;
+    ift = nullptr;
+    icmp = nullptr;
+    icmpv6 = nullptr;
 }
 
 UDP::~UDP()
@@ -141,8 +141,8 @@ void UDP::initialize(int stage)
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        icmp = NULL;
-        icmpv6 = NULL;
+        icmp = nullptr;
+        icmpv6 = nullptr;
 
         numSent = 0;
         numPassedUp = 0;
@@ -171,7 +171,7 @@ void UDP::handleMessage(cMessage *msg)
 
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
-        if (dynamic_cast<UDPPacket *>(msg) != NULL)
+        if (dynamic_cast<UDPPacket *>(msg) != nullptr)
             processUDPPacket((UDPPacket *)msg);
         else
             processICMPError(PK(msg)); // assume it's an ICMP error
@@ -352,7 +352,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     unsigned char tos;
 
     cObject *ctrl = udpPacket->removeControlInfo();
-    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL) {
+    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
         srcAddr = ctrl4->getSrcAddr();
         destAddr = ctrl4->getDestAddr();
@@ -362,7 +362,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrl4->getDestAddr().isMulticast();
         isBroadcast = ctrl4->getDestAddr().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL) {
+    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         srcAddr = ctrl6->getSrcAddr();
         destAddr = ctrl6->getDestAddr();
@@ -372,7 +372,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrl6->getDestAddr().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
-    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != NULL) {
+    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
         GenericNetworkProtocolControlInfo *ctrlGeneric = (GenericNetworkProtocolControlInfo *)ctrl;
         srcAddr = ctrlGeneric->getSourceAddress();
         destAddr = ctrlGeneric->getDestinationAddress();
@@ -382,7 +382,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrlGeneric->getDestinationAddress().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
-    else if (ctrl == NULL) {
+    else if (ctrl == nullptr) {
         throw cRuntimeError("(%s)%s arrived from lower layer without control info",
                 udpPacket->getClassName(), udpPacket->getName());
     }
@@ -491,7 +491,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
-    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != NULL) {
+    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
         if (!icmp)
@@ -501,7 +501,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         delete udpPacket;
 #endif // ifdef WITH_IPv4
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL) {
+    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
 #ifdef WITH_IPv6
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         if (!icmpv6)
@@ -511,10 +511,10 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         delete udpPacket;
 #endif // ifdef WITH_IPv6
     }
-    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != NULL) {
+    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
         delete udpPacket;
     }
-    else if (ctrl == NULL) {
+    else if (ctrl == nullptr) {
         throw cRuntimeError("(%s)%s arrived from lower layer without control info",
                 udpPacket->getClassName(), udpPacket->getName());
     }
@@ -533,12 +533,12 @@ void UDP::bind(int sockId, int gateIndex, const L3Address& localAddr, int localP
         throw cRuntimeError("bind: invalid local port number %d", localPort);
 
     SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
-    SockDesc *sd = it != socketsByIdMap.end() ? it->second : NULL;
+    SockDesc *sd = it != socketsByIdMap.end() ? it->second : nullptr;
 
     // to allow two sockets to bind to the same address/port combination
     // both of them must have reuseAddr flag set
     SockDesc *existing = findFirstSocketByLocalAddress(localAddr, localPort);
-    if (existing != NULL && (!sd || !sd->reuseAddr || !existing->reuseAddr))
+    if (existing != nullptr && (!sd || !sd->reuseAddr || !existing->reuseAddr))
         throw cRuntimeError("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
 
     if (sd) {
@@ -653,7 +653,7 @@ UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const L3Address& localAddr, us
 {
     SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
-        return NULL;
+        return nullptr;
 
     SockDescList& list = it->second;
     for (SockDescList::iterator it = list.begin(); it != list.end(); ++it) {
@@ -661,18 +661,18 @@ UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const L3Address& localAddr, us
         if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
             return sd;
     }
-    return NULL;
+    return nullptr;
 }
 
 UDP::SockDesc *UDP::findSocketForUnicastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
 {
     SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
-        return NULL;
+        return nullptr;
 
     // select the socket bound to ANY_ADDR only if there is no socket bound to localAddr
     SockDescList& list = it->second;
-    SockDesc *socketBoundToAnyAddress = NULL;
+    SockDesc *socketBoundToAnyAddress = nullptr;
     for (SockDescList::reverse_iterator it = list.rbegin(); it != list.rend(); ++it) {
         SockDesc *sd = *it;
         if (sd->onlyLocalPortIsSet || (
@@ -1138,24 +1138,24 @@ bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
-            icmp = NULL;
-            icmpv6 = NULL;
+            icmp = nullptr;
+            icmpv6 = nullptr;
             isOperational = true;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
             clearAllSockets();
-            icmp = NULL;
-            icmpv6 = NULL;
+            icmp = nullptr;
+            icmpv6 = nullptr;
             isOperational = false;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
             clearAllSockets();
-            icmp = NULL;
-            icmpv6 = NULL;
+            icmp = nullptr;
+            icmpv6 = nullptr;
             isOperational = false;
         }
     }
@@ -1204,7 +1204,7 @@ UDP::MulticastMembership *UDP::SockDesc::findMulticastMembership(const L3Address
     if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress && (*it)->interfaceId == interfaceId)
         return *it;
     else
-        return NULL;
+        return nullptr;
 }
 
 void UDP::SockDesc::addMulticastMembership(MulticastMembership *membership)

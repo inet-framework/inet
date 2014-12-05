@@ -133,7 +133,7 @@ struct netif {
   struct autoip *autoip;
 #endif
 #if LWIP_NETIF_HOSTNAME
-  /* the hostname for this netif, NULL is a valid value */
+  /* the hostname for this netif, nullptr is a valid value */
   char*  hostname;
 #endif /* LWIP_NETIF_HOSTNAME */
   /** maximum transfer unit (in bytes) */

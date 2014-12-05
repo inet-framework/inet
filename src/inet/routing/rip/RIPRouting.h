@@ -42,7 +42,7 @@ struct RIPRoute : public cObject
 
   private:
     RouteType type;    // the type of the route
-    IRoute *route;    // the route in the host routing table that is associated with this route, may be NULL if deleted
+    IRoute *route;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
     L3Address dest;    // destination of the route
     int prefixLength;    // prefix length of the destination
     L3Address nextHop;    // next hop of the route

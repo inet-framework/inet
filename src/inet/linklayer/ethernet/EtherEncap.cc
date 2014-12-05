@@ -96,7 +96,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 
     IMACProtocolControlInfo *controlInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(controlInfo);
-    EtherFrame *frame = NULL;
+    EtherFrame *frame = nullptr;
 
     if (useSNAP) {
         EtherFrameWithSNAP *snapFrame = new EtherFrameWithSNAP(msg->getName());
@@ -138,9 +138,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
-    if (dynamic_cast<EthernetIIFrame *>(frame) != NULL)
+    if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
-    else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != NULL)
+    else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
         etherctrl->setEtherType(((EtherFrameWithSNAP *)frame)->getLocalcode());
     higherlayermsg->setControlInfo(etherctrl);
 

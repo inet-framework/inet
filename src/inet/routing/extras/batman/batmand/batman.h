@@ -175,7 +175,7 @@ class GwNode
     simtime_t last_failure;
     simtime_t deleted;
   public:
-    GwNode() : orig_node(NULL), gw_port(0), gw_failure(0), last_failure(0), deleted(0) {}
+    GwNode() : orig_node(nullptr), gw_port(0), gw_failure(0), last_failure(0), deleted(0) {}
 };
 
 class GwClient
@@ -214,7 +214,7 @@ class HnaGlobalEntry
     short unsigned int netmask;
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;
-    HnaGlobalEntry() { curr_orig_node = NULL; }
+    HnaGlobalEntry() { curr_orig_node = nullptr; }
     ~HnaGlobalEntry() { orig_list.clear(); }
 
   private:     // noncopyable

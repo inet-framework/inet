@@ -162,7 +162,7 @@ std::string InterfaceEntry::detailedInfo() const
 
 std::string InterfaceEntry::getFullPath() const
 {
-    return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
+    return ownerp == nullptr ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
 }
 
 void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
@@ -178,7 +178,7 @@ void InterfaceEntry::resetInterface()
 #ifdef WITH_IPv4
     if (ipv4data && ipv4data->ownerp == this)
         delete ipv4data;
-    ipv4data = NULL;
+    ipv4data = nullptr;
 #else // ifdef WITH_IPv4
     if (ipv4data)
         throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
@@ -186,7 +186,7 @@ void InterfaceEntry::resetInterface()
 #ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
         delete ipv6data;
-    ipv6data = NULL;
+    ipv6data = nullptr;
 #else // ifdef WITH_IPv6
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
@@ -194,20 +194,20 @@ void InterfaceEntry::resetInterface()
 #ifdef WITH_GENERIC
     if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
         delete genericNetworkProtocolData;
-    genericNetworkProtocolData = NULL;
+    genericNetworkProtocolData = nullptr;
 #else // ifdef WITH_GENERIC
     if (genericNetworkProtocolData)
         throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
 #endif // ifdef WITH_GENERIC
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
-    isisdata = NULL;
+    isisdata = nullptr;
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
         delete (InterfaceProtocolData *)trilldata;
-    trilldata = NULL;
+    trilldata = nullptr;
     if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this)
         delete (InterfaceProtocolData *)ieee8021ddata;
-    ieee8021ddata = NULL;
+    ieee8021ddata = nullptr;
 }
 
 void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p)
@@ -297,9 +297,9 @@ bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess
 {
     ASSERT(position >= 0);
     if (estimateCostProcessArray.size() <= (size_t)position) {
-        estimateCostProcessArray.resize(position + 1, NULL);
+        estimateCostProcessArray.resize(position + 1, nullptr);
     }
-    if (estimateCostProcessArray[position] != NULL)
+    if (estimateCostProcessArray[position] != nullptr)
         return false;
     estimateCostProcessArray[position] = p;
     return true;
@@ -311,7 +311,7 @@ MacEstimateCostProcess *InterfaceEntry::getEstimateCostProcess(int position)
     if ((size_t)position < estimateCostProcessArray.size()) {
         return estimateCostProcessArray[position];
     }
-    return NULL;
+    return nullptr;
 }
 
 void InterfaceEntry::joinMulticastGroup(const L3Address& address) const

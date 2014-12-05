@@ -64,7 +64,7 @@ void Ieee80211Radio::setBitrate(bps newBitrate)
 {
     NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
     narrowbandTransmitter->setBitrate(newBitrate);
-    endReceptionTimer = NULL;
+    endReceptionTimer = nullptr;
 }
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
@@ -77,7 +77,7 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
         narrowbandReceiver->setCarrierFrequency(carrierFrequency);
         EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";
         channelNumber = newChannelNumber;
-        endReceptionTimer = NULL;
+        endReceptionTimer = nullptr;
         emit(radioChannelChangedSignal, newChannelNumber);
         emit(listeningChangedSignal, 0);
     }

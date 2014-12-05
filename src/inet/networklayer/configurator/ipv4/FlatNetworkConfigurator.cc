@@ -66,7 +66,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     nodeInfo.resize(topo.getNumNodes());
     for (int i = 0; i < topo.getNumNodes(); i++) {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = L3AddressResolver().findIPv4RoutingTableOf(mod) != NULL && L3AddressResolver().findInterfaceTableOf(mod) != NULL;
+        nodeInfo[i].isIPNode = L3AddressResolver().findIPv4RoutingTableOf(mod) != nullptr && L3AddressResolver().findInterfaceTableOf(mod) != nullptr;
         if (nodeInfo[i].isIPNode) {
             nodeInfo[i].ift = L3AddressResolver().interfaceTableOf(mod);
             nodeInfo[i].rt = L3AddressResolver().routingTableOf(mod);
@@ -121,7 +121,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
 
         // count non-loopback interfaces
         int numIntf = 0;
-        InterfaceEntry *ie = NULL;
+        InterfaceEntry *ie = nullptr;
         for (int k = 0; k < ift->getNumInterfaces(); k++)
             if (!ift->getInterface(k)->isLoopback()) {
                 ie = ift->getInterface(k);

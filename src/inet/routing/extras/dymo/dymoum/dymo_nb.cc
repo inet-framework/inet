@@ -49,7 +49,7 @@ nb_t *NS_CLASS nb_insert(struct in_addr nb_addr, u_int32_t ifindex)
     if (nb)
         return nb;
     nb=new nb_t;
-    if (nb == NULL)
+    if (nb == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -102,7 +102,7 @@ nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 #else
 
@@ -110,7 +110,7 @@ nb_t *NS_CLASS nb_insert(struct in_addr nb_addr, u_int32_t ifindex)
 {
     nb_t *nb;
 
-    if ((nb = (nb_t *) malloc(sizeof(nb_t))) == NULL)
+    if ((nb = (nb_t *) malloc(sizeof(nb_t))) == nullptr)
     {
         dlog(LOG_ERR, errno, __FUNCTION__, "failed malloc()");
         exit(EXIT_FAILURE);
@@ -158,7 +158,7 @@ nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 

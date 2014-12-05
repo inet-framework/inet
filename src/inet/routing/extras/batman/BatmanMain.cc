@@ -40,7 +40,7 @@ Batman::Batman()
     nat_tool_avail = 0;
     disable_client_nat = 0;
 
-    curr_gateway = NULL;
+    curr_gateway = nullptr;
 
     found_ifs = 0;
     active_ifs = 0;
@@ -67,7 +67,7 @@ Batman::Batman()
     local_win_size = TQ_LOCAL_WINDOW_SIZE;
     num_words = (TQ_LOCAL_WINDOW_SIZE / WORD_BIT_SIZE);
     aggregation_enabled = true;
-    timer = NULL;
+    timer = nullptr;
 
     hna_list.clear();
     hna_chg_list.clear();
@@ -218,7 +218,7 @@ void Batman::initialize(int stage)
         const char *announcedNetworks = par("announcedNetworks");
         cStringTokenizer tokenizer(announcedNetworks);
         const char *token;
-        while ((token = tokenizer.nextToken()) != NULL)
+        while ((token = tokenizer.nextToken()) != nullptr)
         {
             std::vector<std::string> addrPair = cStringTokenizer(token, "/").asVector();
             if (addrPair.size() != 2)
@@ -264,7 +264,7 @@ void Batman::initialize(int stage)
 
 void Batman::handleMessage(cMessage *msg)
 {
-    BatmanIf *if_incoming = NULL;
+    BatmanIf *if_incoming = nullptr;
     L3Address neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
 
@@ -305,9 +305,9 @@ void Batman::handleMessage(cMessage *msg)
     }
 
     if (!if_incoming)
-        throw cRuntimeError("model error: if_incoming is NULL");
+        throw cRuntimeError("model error: if_incoming is nullptr");
 
-    BatmanPacket *bat_packet = NULL;
+    BatmanPacket *bat_packet = nullptr;
     UDPPacket *udpPacket = dynamic_cast<UDPPacket*>(msg);
     if (udpPacket)
     {
@@ -353,7 +353,7 @@ void Batman::sendPackets(const simtime_t &curr_time)
         debug_timeout = curr_time;
         purge_orig( curr_time );
         //check_inactive_interfaces();
-        if ( ( routing_class != 0 ) && ( curr_gateway == NULL ) )
+        if ( ( routing_class != 0 ) && ( curr_gateway == nullptr ) )
             choose_gw();
 #if 0
         if ((vis_if.sock) && ((int)(curr_time - (vis_timeout + 10000)) > 0)) {
@@ -441,7 +441,7 @@ bool Batman::getNextHop(const L3Address &dest, L3Address &add, int &iface, doubl
 
 void Batman::appendPacket(cPacket *oldPacket, cPacket *packetToAppend)
 {
-    if (oldPacket->getEncapsulatedPacket()==NULL)
+    if (oldPacket->getEncapsulatedPacket()==nullptr)
     {
         oldPacket->encapsulate(packetToAppend);
         return;

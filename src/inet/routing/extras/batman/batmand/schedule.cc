@@ -30,7 +30,7 @@ namespace inetmanet {
 
 void Batman::schedule_own_packet(BatmanIf *batman_if)
 {
-    ForwNode *forw_node_new = NULL;
+    ForwNode *forw_node_new = nullptr;
     OrigNode *orig_node;
 
     EV_DEBUG << "schedule_own_packet(): " << batman_if->dev << "\n";
@@ -72,7 +72,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
             break;
         }
 
-//        forw_packet_tmp = NULL;
+//        forw_packet_tmp = nullptr;
     }
 
     if (forwListIt == forw_list.end())
@@ -102,7 +102,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
 
 void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time)
 {
-    ForwNode *forw_node_new = NULL, *forw_node_aggregate = NULL, *forw_node_pos = NULL;
+    ForwNode *forw_node_new = nullptr, *forw_node_aggregate = nullptr, *forw_node_pos = nullptr;
     //struct list_head *list_pos = forw_list.next, *prev_list_head = (struct list_head *)&forw_list;
     BatmanPacket *bat_packet;
     uint8_t tq_avg = 0;
@@ -158,7 +158,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
             }
 
             /* could not find packet to aggregate with */
-            forw_node_aggregate = NULL;
+            forw_node_aggregate = nullptr;
         }
 
         if (forw_node_pos->send_time > send_time)
@@ -169,7 +169,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     delete bat_packet->decapsulate();
 
     /* nothing to aggregate with - either aggregation disabled or no suitable aggregation packet found */
-    if (forw_node_aggregate == NULL) {
+    if (forw_node_aggregate == nullptr) {
         forw_node_new = new ForwNode();
         forw_node_new->pack_buff = bat_packet;
 
@@ -196,7 +196,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     bat_packet->setPrevSender(neigh);
 
     /* rebroadcast tq of our best ranking neighbor to ensure the rebroadcast of our best tq value */
-    if ((orig_node->router != NULL) && (orig_node->router->tq_avg != 0)) {
+    if ((orig_node->router != nullptr) && (orig_node->router->tq_avg != 0)) {
         /* rebroadcast ogm of best ranking neighbor as is */
         if (orig_node->router->addr != neigh) {
             bat_packet->setTq(orig_node->router->tq_avg);
@@ -221,7 +221,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         bat_packet->setFlags(bat_packet->getFlags()&(~DIRECTLINK));
 
     /* if the packet was not aggregated */
-    if (forw_node_aggregate == NULL) {
+    if (forw_node_aggregate == nullptr) {
         /* if the packet should go somewhere in the queue */
         if (it != forw_list.end())
             forw_list.insert(it, forw_node_new);
@@ -255,7 +255,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
 
         directlink = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
 
-        if (forw_node->if_incoming == NULL) {
+        if (forw_node->if_incoming == nullptr) {
             EV_ERROR << "Error - can't forward packet: incoming iface not specified \n";
             delete forw_node->pack_buff;
             delete forw_node;
@@ -281,7 +281,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
             bat_packet = forw_node->pack_buff->dup();
             BatmanPacket *bat_packetAux = bat_packet;
 
-            while (bat_packetAux != NULL) {
+            while (bat_packetAux != nullptr) {
                 if ((forw_node->direct_link_flags & (1 << curr_packet_num)) && (forw_node->if_incoming == batman_if))
                     bat_packetAux->setFlags(bat_packetAux->getFlags() | DIRECTLINK);
                 else

@@ -126,7 +126,7 @@ cPacket *TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
-    cPacket *dataMsg = NULL;
+    cPacket *dataMsg = nullptr;
 
     if (bytesInQueueM) {
         dataMsg = new cPacket("DATA");

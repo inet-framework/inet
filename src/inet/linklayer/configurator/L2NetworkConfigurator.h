@@ -37,7 +37,7 @@ namespace inet {
 class L2NetworkConfigurator : public cSimpleModule
 {
   public:
-    L2NetworkConfigurator() { rootNode = NULL; }
+    L2NetworkConfigurator() { rootNode = nullptr; }
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
 
   protected:
@@ -54,7 +54,7 @@ class L2NetworkConfigurator : public cSimpleModule
         std::vector<InterfaceInfo *> interfaceInfos;
 
       public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; }
+        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
         ~Node() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 
@@ -95,7 +95,7 @@ class L2NetworkConfigurator : public cSimpleModule
         InterfaceInfo *destinationInterfaceInfo;
 
       public:
-        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
     };
 
     class L2Topology : public Topology

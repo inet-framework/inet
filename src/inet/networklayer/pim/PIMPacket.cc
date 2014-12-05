@@ -60,7 +60,7 @@ void PIMHello::copy(const PIMHello& other)
         delete options_var[i];
     delete[] options_var;
 
-    this->options_var = (other.options_arraysize == 0) ? NULL : new HelloOptionPtr[other.options_arraysize];
+    this->options_var = (other.options_arraysize == 0) ? nullptr : new HelloOptionPtr[other.options_arraysize];
     options_arraysize = other.options_arraysize;
     for (unsigned int i = 0; i < options_arraysize; i++)
         this->options_var[i] = other.options_var[i]->dup();
@@ -97,7 +97,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
             doUnpacking(b, type);
             switch (type) {
                 case 0:
-                    options_var[i] = NULL;
+                    options_var[i] = nullptr;
                     break;
 
                 case Holdtime:
@@ -129,9 +129,9 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
 
 void PIMHello::setOptionsArraySize(unsigned int size)
 {
-    HelloOptionPtr *options_var2 = (size == 0) ? NULL : new HelloOptionPtr[size];
+    HelloOptionPtr *options_var2 = (size == 0) ? nullptr : new HelloOptionPtr[size];
     for (unsigned int i = 0; i < size; i++)
-        options_var2[i] = i < options_arraysize ? options_var[i] : NULL;
+        options_var2[i] = i < options_arraysize ? options_var[i] : nullptr;
     for (unsigned int i = size; i < options_arraysize; i++)
         delete options_var[i];
     options_arraysize = size;

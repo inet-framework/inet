@@ -151,7 +151,7 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     /** Utility: return socket for given peer. Throws error if there's no TCP connection */
     virtual TCPSocket *getPeerSocket(IPv4Address peerAddr);
 
-    /** Utility: return socket for given peer, and NULL if session doesn't exist */
+    /** Utility: return socket for given peer, and nullptr if session doesn't exist */
     virtual TCPSocket *findPeerSocket(IPv4Address peerAddr);
 
     virtual void sendToPeer(IPv4Address dest, cMessage *msg);

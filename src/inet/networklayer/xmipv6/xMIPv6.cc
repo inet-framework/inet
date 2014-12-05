@@ -129,11 +129,11 @@ void xMIPv6::initialize(int stage)
 
         if (rt6->isMobileNode()) {
             bul = getModuleFromPar<BindingUpdateList>(par("bindingUpdateListModule"), this);    // Zarrar Yousaf 31.07.07
-            bc = NULL;
+            bc = nullptr;
         }
         else {
             bc = getModuleFromPar<BindingCache>(par("bindingCacheModule"), this);    // Zarrar Yousaf 31.07.07
-            bul = NULL;
+            bul = nullptr;
         }
 
         WATCH_VECTOR(cnList);
@@ -262,7 +262,7 @@ void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA)
     for (itCNList = cnList.begin(); itCNList != cnList.end(); itCNList++) {    // run an iterator through the CN map
         IPv6Address cn = *(itCNList);
         BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->fetch(cn);    // CB, 10.10.08
-        ASSERT(bulEntry != NULL);    // CB, 10.10.08
+        ASSERT(bulEntry != nullptr);    // CB, 10.10.08
         //bul->resetBindingCacheEntry(*bulEntry, HoA);
         bul->removeBinding(cn);
         // care-of token becomes invalid with new CoA
@@ -308,7 +308,7 @@ void xMIPv6::returningHome(const IPv6Address& CoA, InterfaceEntry *ie)
             IPv6Address cn = *(itCNList);
             //createDeregisterBUTimer(*(itCNList), ie);
             BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(cn);
-            ASSERT(bulEntry != NULL);
+            ASSERT(bulEntry != nullptr);
             bulEntry->state = BindingUpdateList::DEREGISTER;
             checkForBUtoCN(*bulEntry, ie);
         }
@@ -326,7 +326,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie)
     cancelTimerIfEntry(buDest, ie->getInterfaceId(), KEY_BUL_EXP);
 
     BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->fetch(buDest);    // CB, 10.10.08
-    ASSERT(bulEntry != NULL);    // CB, 10.10.08
+    ASSERT(bulEntry != nullptr);    // CB, 10.10.08
 
     if (bulEntry->state != BindingUpdateList::DEREGISTER)
         bulEntry->state = BindingUpdateList::REGISTER;
@@ -336,7 +336,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie)
     if (buDest == ie->ipv6Data()->getHomeAgentAddress()) // update 12.06.08 - CB
         createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHABindingLifeTime(), true);
     else {
-        if (bulEntry != NULL && bulEntry->state == BindingUpdateList::DEREGISTER) // CB, 10.10.08
+        if (bulEntry != nullptr && bulEntry->state == BindingUpdateList::DEREGISTER) // CB, 10.10.08
             createDeregisterBUTimer(buDest, ie); // CB, 10.10.08
         else
             createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRRBindingLifeTime(), false);
@@ -610,7 +610,7 @@ void xMIPv6::updateBUL(BindingUpdate *bu, const IPv6Address& dest, const IPv6Add
     // to point to the struct where i am globally recording the startisitcs for sent time and next sent time for the BU:
     BUTransmitIfEntry *buIfEntry = fetchBUTransmitIfEntry(ie, dest);
 
-    if (buIfEntry == NULL) {
+    if (buIfEntry == nullptr) {
         EV_WARN << "No scheduled BU entry available!\n";
         return;
     }
@@ -635,7 +635,7 @@ xMIPv6::BUTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
                 return buIfEntry;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
@@ -1219,7 +1219,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlI
                 // moved the code below from sendBU(), 21.9.07 - CB
                 // retrieve the appropriate BUL entry
                 BindingUpdateList::BindingUpdateListEntry *entry = bul->lookup(ctrlInfo->getSrcAddr());
-                ASSERT(entry != NULL);
+                ASSERT(entry != nullptr);
 
                 // establish tunnel, but only if we have not already acked the BU before
                 if (entry->BAck == false && entry->destAddress == ie->ipv6Data()->getHomeAgentAddress()) {    // BA from HA
@@ -1256,7 +1256,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlI
                     /*statVectorBAfromCN.record(1);*/
 
                     // fire event to MIH subscribers
-                    emit(NF_MIPv6_RO_COMPLETED, (cObject *)NULL);
+                    emit(NF_MIPv6_RO_COMPLETED, (cObject *)nullptr);
                 }
 
                 // set BAck flag in BUL
@@ -1445,7 +1445,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry *ie
 
     /*A Home Test Init message MUST be created as described in Section
        6.1.3.*/
-    //if (cnEntry != NULL)
+    //if (cnEntry != nullptr)
     //{
     // if there exists an entry in the BUL, check whether we already
     // have valid home and care-of tokens
@@ -1469,7 +1469,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry *ie
     //else
     //    delete CoTI;
 
-    if (!sendHoTI && !sendCoTI) {    // cnEntry can not be NULL as a consequence of the other two flag's values
+    if (!sendHoTI && !sendCoTI) {    // cnEntry can not be nullptr as a consequence of the other two flag's values
         // we already had a valid home and care-of token
         // -> no need for sending HoTI/CoTI; we can
         // immediately continue with sending a BU
@@ -1795,7 +1795,7 @@ void xMIPv6::processHoTMessage(HomeTest *HoT, IPv6ControlInfo *ctrlInfo)
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
 
         BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(srcAddr);
-        ASSERT(bulEntry != NULL);
+        ASSERT(bulEntry != nullptr);
 
         // cancel the existing HoTI retransmission timer
         cancelTimerIfEntry(srcAddr, interfaceID, KEY_HI);
@@ -1834,7 +1834,7 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo *ctrl
        state indicating that return routability procedure is in progress.
        Note that there may be multiple such entries. */
     BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(srcAddr);
-    if (bulEntry == NULL) {
+    if (bulEntry == nullptr) {
         EV_WARN << "Invalid HoT: No entry in BUL" << endl;
         return false;    // no entry in BUL
     }
@@ -1882,7 +1882,7 @@ void xMIPv6::processCoTMessage(CareOfTest *CoT, IPv6ControlInfo *ctrlInfo)
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
 
         BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(srcAddr);
-        ASSERT(bulEntry != NULL);
+        ASSERT(bulEntry != nullptr);
 
         // cancel the existing CoTI retransmission timer
         cancelTimerIfEntry(srcAddr, interfaceID, KEY_CI);
@@ -1927,7 +1927,7 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo *ct
        state indicating that return routability procedure is in progress.
        Note that there may be multiple such entries. */
     BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(srcAddr);
-    if (bulEntry == NULL) {
+    if (bulEntry == nullptr) {
         EV_WARN << "Invalid CoT: No entry in BUL" << endl;
         return false;    // no entry in BUL
     }
@@ -2037,7 +2037,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
        // The createBU method requires information on the interface. This is not available in the
        // bul entry though. Hence we just fetch a token expiry timer to retrieve this information.
        TimerIfEntry* transmitEntry = searchTimerIfEntry(bulEntry.destAddress,     KEY_HTOKEN_EXP); // we could also use a care-of keygen token of course...
-       ASSERT(transmitEntry!=NULL);
+       ASSERT(transmitEntry!=nullptr);
        InterfaceEntry* ie = transmitEntry->ifEntry;*/
 
     if (bulEntry.state != BindingUpdateList::DEREGISTER)
@@ -2152,7 +2152,7 @@ void xMIPv6::processHoAOpt(IPv6Datagram *datagram, HomeAddressOption *hoaOpt)
        the same home address as appears in the Home Address destination
        option, and the currently registered care-of address MUST be equal to
        the source address of the packet.*/
-    ASSERT(bc != NULL);
+    ASSERT(bc != nullptr);
 
     if (bc->isInBindingCache(HoA, CoA)) {
         datagram->setSrcAddress(HoA);
@@ -2212,7 +2212,7 @@ bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int ms
         delete ((TestInitTransmitIfEntry *)entry)->testInitMsg;
 
     cancelAndDelete(entry->timer);    // cancels the retransmission timer
-    entry->timer = NULL;
+    entry->timer = nullptr;
 
     transmitIfList.erase(key);    // remove entry from list
 
@@ -2245,7 +2245,7 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
             TestInitTransmitIfEntry *testInitIfEntry = (TestInitTransmitIfEntry *)pos->second;
             cancelAndDelete(testInitIfEntry->timer);    // delete the corresponding timer
             delete testInitIfEntry->testInitMsg;    // delete old HoTI/CoTI, 21.9.07 - CB
-            testInitIfEntry->testInitMsg = NULL;
+            testInitIfEntry->testInitMsg = nullptr;
 
             ifEntry = testInitIfEntry;
         }
@@ -2270,14 +2270,14 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
         else if (dynamic_cast<TokenExpiryIfEntry *>(pos->second)) {
             TokenExpiryIfEntry *tokenExpIfEntry = (TokenExpiryIfEntry *)pos->second;
             cancelAndDelete(tokenExpIfEntry->timer);    // delete the corresponding timer
-            tokenExpIfEntry->timer = NULL;
+            tokenExpIfEntry->timer = nullptr;
 
             ifEntry = tokenExpIfEntry;
         }
         else
             throw cRuntimeError("Expected a subclass of TimerIfEntry!");
 
-        ifEntry->timer = NULL;
+        ifEntry->timer = nullptr;
     }
     else {
         // we do not yet have an entry -> create a new one
@@ -2307,8 +2307,8 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
                 break;
         }
 
-        ifEntry->timer = NULL;
-        ifEntry->ifEntry = NULL;
+        ifEntry->timer = nullptr;
+        ifEntry->ifEntry = nullptr;
 
         transmitIfList.insert(std::make_pair(key, ifEntry));
     }
@@ -2326,7 +2326,7 @@ xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(IPv6Address& dest, int timerTyp
             return pos->second;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void xMIPv6::removeTimerEntries(const IPv6Address& dest, int interfaceId)
@@ -2566,11 +2566,11 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
        Binding Update to it well before the expiration of this period, even
        if it is not changing its primary care-of address.*/
     BULExpiryIfEntry *bulExpIfEntry = (BULExpiryIfEntry *)msg->getContextPointer();    //detaching the corresponding bulExpIfEntry pointer
-    ASSERT(bulExpIfEntry != NULL);
+    ASSERT(bulExpIfEntry != nullptr);
 
     // we fetch the BUL entry that belongs to this expiration timer
     BindingUpdateList::BindingUpdateListEntry *entry = bul->lookup(bulExpIfEntry->dest);
-    ASSERT(entry != NULL);
+    ASSERT(entry != nullptr);
 
     // A timer usually can appear for two times:
     // 1. Entry is shortly before expiration -> send new BU
@@ -2655,7 +2655,7 @@ void xMIPv6::handleBCExpiry(cMessage *msg)
     EV_INFO << "BC entry has expired - removing entry and associated structures..." << endl;
 
     BCExpiryIfEntry *bcExpIfEntry = (BCExpiryIfEntry *)msg->getContextPointer();    //detaching the corresponding bulExpIfEntry pointer
-    ASSERT(bcExpIfEntry != NULL);
+    ASSERT(bcExpIfEntry != nullptr);
 
     // remove binding from BC
     bc->deleteEntry(bcExpIfEntry->HoA);
@@ -2695,7 +2695,7 @@ void xMIPv6::createTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry *ie
 void xMIPv6::handleTokenExpiry(cMessage *msg)
 {
     TokenExpiryIfEntry *tokenExpIfEntry = (TokenExpiryIfEntry *)msg->getContextPointer();    //detaching the corresponding tokenExpIfEntry pointer
-    ASSERT(tokenExpIfEntry != NULL);
+    ASSERT(tokenExpIfEntry != nullptr);
 
     if (tokenExpIfEntry->tokenType == KEY_CTOKEN_EXP) {
         EV_INFO << "Care-of keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";

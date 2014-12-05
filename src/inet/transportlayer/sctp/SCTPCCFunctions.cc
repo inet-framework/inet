@@ -198,7 +198,7 @@ static uint32 updateMPTCP(const uint32 w,
 
 void SCTPAssociation::recordCwndUpdate(SCTPPathVariables *path)
 {
-    if (path == NULL) {
+    if (path == nullptr) {
         uint32 totalSsthresh = 0.0;
         uint32 totalCwnd = 0.0;
         double totalBandwidth = 0.0;

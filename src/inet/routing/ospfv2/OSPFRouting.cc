@@ -39,7 +39,7 @@ Define_Module(OSPFRouting);
 OSPFRouting::OSPFRouting()
 {
     isUp = false;
-    ospfRouter = NULL;
+    ospfRouter = nullptr;
 }
 
 OSPFRouting::~OSPFRouting()
@@ -98,7 +98,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            ASSERT(ospfRouter == NULL);
+            ASSERT(ospfRouter == nullptr);
             isUp = true;
             createOspfRouter();
         }
@@ -108,7 +108,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
             ASSERT(ospfRouter);
             isUp = false;
             delete ospfRouter;
-            ospfRouter = NULL;
+            ospfRouter = nullptr;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
@@ -116,7 +116,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
             ASSERT(ospfRouter);
             isUp = false;
             delete ospfRouter;
-            ospfRouter = NULL;
+            ospfRouter = nullptr;
         }
     }
     else {

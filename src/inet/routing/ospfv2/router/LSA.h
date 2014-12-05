@@ -43,7 +43,7 @@ class RoutingInfo
     OSPFLSA *parent;
 
   public:
-    RoutingInfo() : distance(0), parent(NULL) {}
+    RoutingInfo() : distance(0), parent(nullptr) {}
     RoutingInfo(const RoutingInfo& routingInfo) : nextHops(routingInfo.nextHops), distance(routingInfo.distance), parent(routingInfo.parent) {}
     virtual ~RoutingInfo() {}
 

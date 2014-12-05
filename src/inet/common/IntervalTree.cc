@@ -62,19 +62,19 @@ IntervalTree::IntervalTree()
     nil->left = nil->right = nil->parent = nil;
     nil->red = false;
     nil->key = nil->high = nil->max_high = -SimTime::getMaxTime(); //-std::numeric_limits<double>::max();
-    nil->stored_interval = NULL;
+    nil->stored_interval = nullptr;
 
     root = new IntervalTreeNode;
     root->parent = root->left = root->right = nil;
     root->key = root->high = root->max_high = SimTime::getMaxTime(); // std::numeric_limits<double>::max();
     root->red = false;
-    root->stored_interval = NULL;
+    root->stored_interval = nullptr;
 
     /// the following are used for the query function
     recursion_node_stack_size = 128;
     recursion_node_stack = (it_recursion_node*) malloc(recursion_node_stack_size * sizeof(it_recursion_node));
     recursion_node_stack_top = 1;
-    recursion_node_stack[0].start_node = NULL;
+    recursion_node_stack[0].start_node = nullptr;
 }
 
 IntervalTree::~IntervalTree()
@@ -311,17 +311,17 @@ void IntervalTreeNode::print(IntervalTreeNode* nil, IntervalTreeNode* root) cons
     std::cout << ", k = " << key << ", h = " << high << ", mH = " << max_high;
     std::cout << "  l->key = ";
     if (left == nil)
-        std::cout << "NULL";
+        std::cout << "nullptr";
     else
         std::cout << left->key;
     std::cout << "  r->key = ";
     if (right == nil)
-        std::cout << "NULL";
+        std::cout << "nullptr";
     else
         std::cout << right->key;
     std::cout << "  p->key = ";
     if (parent == root)
-        std::cout << "NULL";
+        std::cout << "nullptr";
     else
         std::cout << parent->key;
     std::cout << "  red = " << (int) red << std::endl;
@@ -534,7 +534,7 @@ std::deque<Interval*> IntervalTree::query(simtime_t low, simtime_t high)
                 recursion_node_stack_size *= 2;
                 recursion_node_stack = (it_recursion_node *) realloc(recursion_node_stack,
                         recursion_node_stack_size * sizeof(it_recursion_node));
-                if (recursion_node_stack == NULL)
+                if (recursion_node_stack == nullptr)
                     exit(1);
             }
             recursion_node_stack[recursion_node_stack_top].start_node = x;

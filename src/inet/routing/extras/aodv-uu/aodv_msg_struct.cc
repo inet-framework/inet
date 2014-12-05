@@ -42,7 +42,7 @@ void AODV_msg::copy(const AODV_msg& m)
     extensionsize = m.extensionsize;
     if (extensionsize==0)
     {
-        extension = NULL;
+        extension = nullptr;
         return;
     }
     extension = new AODV_ext [extensionsize];
@@ -67,7 +67,7 @@ void AODV_msg:: clearExtension()
     }
     delete [] extension;
     extensionsize = 0;
-    extension = NULL;
+    extension = nullptr;
 }
 
 AODV_msg::~AODV_msg()
@@ -80,7 +80,7 @@ AODV_ext * AODV_msg::addExtension(int type, int len, char *data)
     AODV_ext* extension_aux;
     if (len<0)
     {
-        return NULL;
+        return nullptr;
     }
     extension_aux =   new AODV_ext [extensionsize+1];
     for (int i=0; i < extensionsize; i++)
@@ -107,7 +107,7 @@ AODV_ext * AODV_msg::getNexExtension(AODV_ext* aodv_ext)
     if ((&extension[extensionsize-1]>aodv_ext+1) && (aodv_ext >= extension))
         return aodv_ext+1;
     else
-        return NULL;
+        return nullptr;
 }
 
 //=== registration
@@ -174,17 +174,17 @@ RERR_udest * RERR::getUdest(int i)
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
 void RERR::clearUdest()
 {
-    if (_udest!=NULL)
+    if (_udest!=nullptr)
     {
         delete []  _udest;
     }
-    _udest = NULL;
+    _udest = nullptr;
 }
 
 

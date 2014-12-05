@@ -32,7 +32,7 @@ namespace inet {
 class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDatagram
 {
   public:
-    GenericDatagram(const char *name = NULL, int kind = 0) : GenericDatagram_Base(name, kind) {}
+    GenericDatagram(const char *name = nullptr, int kind = 0) : GenericDatagram_Base(name, kind) {}
     GenericDatagram(const GenericDatagram& other) : GenericDatagram_Base(other.getName()) { operator=(other); }
     GenericDatagram& operator=(const GenericDatagram& other) { GenericDatagram_Base::operator=(other); return *this; }
     virtual GenericDatagram *dup() const { return new GenericDatagram(*this); }

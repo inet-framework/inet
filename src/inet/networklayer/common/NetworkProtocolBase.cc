@@ -21,7 +21,7 @@
 namespace inet {
 
 NetworkProtocolBase::NetworkProtocolBase() :
-    interfaceTable(NULL)
+    interfaceTable(nullptr)
 {
 }
 

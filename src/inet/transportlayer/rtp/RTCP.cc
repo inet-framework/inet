@@ -39,7 +39,7 @@ simsignal_t RTCP::rcvdPkSignal = registerSignal("rcvdPk");
 
 RTCP::RTCP()
 {
-    _senderInfo = NULL;
+    _senderInfo = nullptr;
 }
 
 void RTCP::initialize(int stage)
@@ -245,7 +245,7 @@ void RTCP::chooseSSRC()
     bool ssrcConflict = false;
     do {
         ssrc = intrand(0x7fffffff);
-        ssrcConflict = findParticipantInfo(ssrc) != NULL;
+        ssrcConflict = findParticipantInfo(ssrc) != nullptr;
     } while (ssrcConflict);
 
     EV_INFO << "chooseSSRC" << ssrc;
@@ -279,7 +279,7 @@ void RTCP::createPacket()
             RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos.get(i));
             if (participantInfo->getSsrc() != _senderInfo->getSsrc()) {
                 ReceptionReport *report = ((RTPReceiverInfo *)participantInfo)->receptionReport(simTime());
-                if (report != NULL) {
+                if (report != nullptr) {
                     reportPacket->addReceptionReport(report);
                 }
             }
@@ -334,7 +334,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int 
     bool good = false;
     uint32 ssrc = packet->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-    if (participantInfo == NULL) {
+    if (participantInfo == nullptr) {
         participantInfo = new RTPParticipantInfo(ssrc);
         participantInfo->setAddress(address);
         participantInfo->setRTPPort(port);
@@ -408,7 +408,7 @@ void RTCP::processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSen
     uint32 ssrc = rtcpSenderReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
-    if (participantInfo == NULL) {
+    if (participantInfo == nullptr) {
         participantInfo = new RTPReceiverInfo(ssrc);
         participantInfo->setAddress(address);
         participantInfo->setRTCPPort(port);
@@ -444,7 +444,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtc
 {
     uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-    if (participantInfo == NULL) {
+    if (participantInfo == nullptr) {
         participantInfo = new RTPReceiverInfo(ssrc);
         participantInfo->setAddress(address);
         participantInfo->setRTCPPort(port);
@@ -487,7 +487,7 @@ void RTCP::processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Add
             //sdesChunk->setOwner(this);
             uint32 ssrc = sdesChunk->getSsrc();
             RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
-            if (participantInfo == NULL) {
+            if (participantInfo == nullptr) {
                 participantInfo = new RTPReceiverInfo(ssrc);
                 participantInfo->setAddress(address);
                 participantInfo->setRTCPPort(port);
@@ -506,7 +506,7 @@ void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Addres
     uint32 ssrc = rtcpByePacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
 
-    if (participantInfo != NULL && participantInfo != _senderInfo) {
+    if (participantInfo != nullptr && participantInfo != _senderInfo) {
         _participantInfos.remove(participantInfo);
 
         delete participantInfo;

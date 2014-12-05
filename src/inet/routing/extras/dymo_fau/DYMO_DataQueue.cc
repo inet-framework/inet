@@ -123,7 +123,7 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Resul
                     moduleOwner->send(qd.datagram, "to_ip");
                     delay += ARP_DELAY;
                 }
-                else if (verdict==DROP && datagrams != NULL)
+                else if (verdict==DROP && datagrams != nullptr)
                     datagrams->push_back( qd.datagram );
                 else if (verdict==DROP)
                     delete qd.datagram;

@@ -69,11 +69,11 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     FILE *fp;
     int charpointer;
     char *file = new char[MAX_FILESIZE];
-    char *ifconfigFile = NULL;
-    char *routeFile = NULL;
+    char *ifconfigFile = nullptr;
+    char *routeFile = nullptr;
 
     fp = fopen(filename, "r");
-    if (fp == NULL)
+    if (fp == nullptr)
         throw cRuntimeError("Error opening routing table file `%s'", filename);
 
     // read the whole into the file[] char-array
@@ -159,7 +159,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
     char buf[MAX_ENTRY_STRING_SIZE];
     int charpointer = 0;
-    InterfaceEntry *ie = NULL;
+    InterfaceEntry *ie = nullptr;
 
     // parsing of entries in interface definition
     while (ifconfigFile[charpointer] != '\0') {
@@ -275,7 +275,7 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
     // Parse string (IPv4 addresses separated by colons)
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;
-    while ((token = tokenizer.nextToken()) != NULL)
+    while ((token = tokenizer.nextToken()) != nullptr)
         itf->ipv4Data()->joinMulticastGroup(IPv4Address(token));
 }
 

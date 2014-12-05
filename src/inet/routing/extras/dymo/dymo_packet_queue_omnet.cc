@@ -73,7 +73,7 @@ int NS_CLASS packet_queue_garbage_collect(void)
     dlist_head_t *pos, *tmp;
     struct timeval now;
 
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
 
     dlist_for_each_safe(pos, tmp, &PQ.head)
     {
@@ -129,7 +129,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     qp = (struct q_pkt *) malloc(sizeof(struct q_pkt));
 
-    if (qp == NULL)
+    if (qp == nullptr)
     {
         throw cRuntimeError("Dymo packet queue, Malloc failed!\n");
         exit(-1);
@@ -140,7 +140,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     qp->dest_addr = dest_addr;
     qp->inTransit = false;
 
-    gettimeofday(&qp->q_time, NULL);
+    gettimeofday(&qp->q_time, nullptr);
     INIT_DLIST_ELEM(&qp->l);
     dlist_add_tail(&qp->l, &PQ.head);
     PQ.len++;
@@ -238,7 +238,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     }
     /* Update rt timeouts. must be in Dymo?*/
     /*
-    rtable_entry_t *next_hop_rt, *inet_rt = NULL;
+    rtable_entry_t *next_hop_rt, *inet_rt = nullptr;
     if (rt && rt->state == VALID && (verdict == PQ_SEND || verdict == PQ_ENC_SEND)) {
         if (dest_addr.s_addr != DEV_IFINDEX(rt->ifindex).ipaddr.s_addr) {
             if (verdict == PQ_ENC_SEND && inet_rt)
@@ -290,7 +290,7 @@ int NS_CLASS packet_queue_garbage_collect(void)
 {
     int count = 0;
     struct timeval now;
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
     for (unsigned int i = 0; i < PQ.pkQueue.size();)
     {
         struct q_pkt *qp = PQ.pkQueue[i];
@@ -337,7 +337,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     qp = (struct q_pkt *) malloc(sizeof(struct q_pkt));
 
-    if (qp == NULL)
+    if (qp == nullptr)
     {
         throw cRuntimeError("Dymo packet queue, Malloc failed!\n");
         exit(-1);
@@ -348,7 +348,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     qp->dest_addr = dest_addr;
     qp->inTransit = false;
 
-    gettimeofday(&qp->q_time, NULL);
+    gettimeofday(&qp->q_time, nullptr);
     PQ.pkQueue.push_back(qp);
 
 }
@@ -472,7 +472,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     }
         /* Update rt timeouts. must be in Dymo?*/
     /*
-    rtable_entry_t *next_hop_rt, *inet_rt = NULL;
+    rtable_entry_t *next_hop_rt, *inet_rt = nullptr;
     if (rt && rt->state == VALID && (verdict == PQ_SEND || verdict == PQ_ENC_SEND)) {
         if (dest_addr.s_addr != DEV_IFINDEX(rt->ifindex).ipaddr.s_addr) {
             if (verdict == PQ_ENC_SEND && inet_rt)

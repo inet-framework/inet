@@ -64,12 +64,12 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 
     /**
      * Inserts packet into the queue or the priority queue, or drops it
-     * (or another packet). Returns NULL if successful, or the pointer of the dropped packet.
+     * (or another packet). Returns nullptr if successful, or the pointer of the dropped packet.
      */
     virtual cMessage *enqueue(cMessage *msg) = 0;
 
     /**
-     * Returns a packet from the queue, or NULL if the queue is empty.
+     * Returns a packet from the queue, or nullptr if the queue is empty.
      */
     virtual cMessage *dequeue() = 0;
 

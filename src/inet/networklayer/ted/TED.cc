@@ -35,8 +35,8 @@ Define_Module(TED);
 
 TED::TED()
 {
-    rt = NULL;
-    ift = NULL;
+    rt = nullptr;
+    ift = nullptr;
 }
 
 TED::~TED()
@@ -92,7 +92,7 @@ void TED::initializeTED()
         double linkBandwidth = g->getChannel()->getNominalDatarate();
 
         // find destination node for current interface
-        cModule *destNode = NULL;
+        cModule *destNode = nullptr;
         while (g) {
             g = g->getNextGate();
             cModule *mod = g->getOwnerModule();
@@ -408,7 +408,7 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match)
 {
     std::vector<TELinkStateInfo>::iterator it;
 
-    match = NULL;
+    match = nullptr;
 
     for (it = ted.begin(); it != ted.end(); it++) {
         if (it->sourceId == link.sourceId && it->messageId == link.messageId && it->timestamp == link.timestamp) {

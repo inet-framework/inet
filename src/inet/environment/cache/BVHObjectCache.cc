@@ -23,10 +23,10 @@ namespace inet {
 Define_Module(BVHObjectCache);
 
 BVHObjectCache::BVHObjectCache() :
-    physicalEnvironment(NULL),
+    physicalEnvironment(nullptr),
     leafCapacity(0),
-    axisOrder(NULL),
-    bvhTree(NULL)
+    axisOrder(nullptr),
+    bvhTree(nullptr)
 {
 }
 
@@ -49,7 +49,7 @@ bool BVHObjectCache::insertObject(const PhysicalObject *object)
 {
     if (bvhTree) {
         delete bvhTree;
-        bvhTree = NULL;
+        bvhTree = nullptr;
     }
     objects.push_back(object);
     return true;

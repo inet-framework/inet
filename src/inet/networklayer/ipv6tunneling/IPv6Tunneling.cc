@@ -57,8 +57,8 @@ Define_Module(IPv6Tunneling);
 
 IPv6Tunneling::IPv6Tunneling()
 {
-    ift = NULL;
-    rt = NULL;
+    ift = nullptr;
+    rt = nullptr;
 }
 
 void IPv6Tunneling::initialize(int stage)

@@ -24,7 +24,7 @@ MACProtocolBase::MACProtocolBase() :
     upperLayerOutGateId(-1),
     lowerLayerInGateId(-1),
     lowerLayerOutGateId(-1),
-    interfaceEntry(NULL)
+    interfaceEntry(nullptr)
 {
 }
 
@@ -41,7 +41,7 @@ void MACProtocolBase::initialize(int stage)
 
 void MACProtocolBase::registerInterface()
 {
-    ASSERT(interfaceEntry == NULL);
+    ASSERT(interfaceEntry == nullptr);
     IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceTable) {
         interfaceEntry = createInterfaceEntry();

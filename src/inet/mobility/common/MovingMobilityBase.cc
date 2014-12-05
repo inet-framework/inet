@@ -26,14 +26,14 @@
 namespace inet {
 
 MovingMobilityBase::MovingMobilityBase() :
-    moveTimer(NULL),
+    moveTimer(nullptr),
     updateInterval(0),
     stationary(false),
     lastSpeed(Coord::ZERO),
     lastUpdate(0),
     nextChange(-1),
     leaveMovementTrail(false),
-    movementTrail(NULL)
+    movementTrail(nullptr)
 {
 }
 

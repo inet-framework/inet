@@ -28,7 +28,7 @@ Define_Module(RTPPayloadSender);
 
 RTPPayloadSender::RTPPayloadSender()
 {
-    _reminderMessage = NULL;
+    _reminderMessage = nullptr;
 }
 
 RTPPayloadSender::~RTPPayloadSender()
@@ -48,14 +48,14 @@ void RTPPayloadSender::initialize()
     _timeStamp = _timeStampBase;
     _sequenceNumberBase = intrand(0x7fffffff);
     _sequenceNumber = _sequenceNumberBase;
-    _reminderMessage = NULL;
+    _reminderMessage = nullptr;
 }
 
 void RTPPayloadSender::handleMessage(cMessage *msg)
 {
     if (msg == _reminderMessage) {
         delete msg;
-        _reminderMessage = NULL;
+        _reminderMessage = nullptr;
         if (!sendPacket()) {
             endOfFile();
         }
@@ -164,7 +164,7 @@ void RTPPayloadSender::playUntilByte(int position)
 void RTPPayloadSender::pause()
 {
     cancelAndDelete(_reminderMessage);
-    _reminderMessage = NULL;
+    _reminderMessage = nullptr;
     _status = STOPPED;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PAUSED)");
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
@@ -186,7 +186,7 @@ void RTPPayloadSender::seekByte(int position)
 void RTPPayloadSender::stop()
 {
     cancelAndDelete(_reminderMessage);
-    _reminderMessage = NULL;
+    _reminderMessage = nullptr;
     _status = STOPPED;
     RTPSenderStatusMessage *rssm = new RTPSenderStatusMessage("STOPPED");
     rssm->setStatus(RTP_SENDER_STATUS_STOPPED);

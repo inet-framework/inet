@@ -107,7 +107,7 @@ void Polyhedron::createInitialTetrahedron()
     Points tetrahedronPoints;
     tetrahedronPoints.push_back(p1);
     tetrahedronPoints.push_back(p2);
-    PolyhedronPoint *p3 = NULL;
+    PolyhedronPoint *p3 = nullptr;
     it++;
     while (it != points.end() && !p3)
     {
@@ -121,7 +121,7 @@ void Polyhedron::createInitialTetrahedron()
         throw cRuntimeError("All points lie on the same line");
     p3->setToSelected();
     tetrahedronPoints.push_back(p3);
-    PolyhedronPoint *p4 = NULL;
+    PolyhedronPoint *p4 = nullptr;
     it++;
     while (it != points.end() && !p4)
     {

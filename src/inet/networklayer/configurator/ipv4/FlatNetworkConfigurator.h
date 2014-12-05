@@ -39,7 +39,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
   protected:
     struct NodeInfo
     {
-        NodeInfo() { isIPNode = false; ift = NULL; rt = NULL; usesDefaultRoute = false; }
+        NodeInfo() { isIPNode = false; ift = nullptr; rt = nullptr; usesDefaultRoute = false; }
         bool isIPNode;
         IInterfaceTable *ift;
         IIPv4RoutingTable *rt;

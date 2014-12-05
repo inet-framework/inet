@@ -23,7 +23,7 @@ namespace inet {
 namespace physicallayer {
 
 AntennaBase::AntennaBase() :
-    mobility(NULL)
+    mobility(nullptr)
 {
 }
 

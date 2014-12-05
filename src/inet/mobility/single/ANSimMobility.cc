@@ -75,7 +75,7 @@ ANSimMobility::ANSimMobility()
 {
     maxSpeed = 0;
     nodeId = -1;
-    nextPositionChange = NULL;
+    nextPositionChange = nullptr;
 }
 
 void ANSimMobility::initialize(int stage)

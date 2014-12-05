@@ -49,7 +49,7 @@ int EnergySinkBase::addEnergyGenerator(const IEnergyGenerator *energyGenerator)
 void EnergySinkBase::removeEnergyGenerator(int energyGeneratorId)
 {
     energyGenerators[energyGeneratorId].generatedPower = W(0);
-    energyGenerators[energyGeneratorId].energyGenerator = NULL;
+    energyGenerators[energyGeneratorId].energyGenerator = nullptr;
     totalGeneratedPower = computeTotalGeneratedPower();
 }
 

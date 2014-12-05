@@ -125,7 +125,7 @@ cModule *getPayloadOwner(cPacket *msg)
     if (msg->hasPar("owner"))
         return simulation.getModule(msg->par("owner"));
     else
-        return NULL;
+        return nullptr;
 }
 
 /*

@@ -91,14 +91,14 @@ err_t netifapi_netif_common    ( struct netif *netif,
                                  void  (* voidfunc)(struct netif *netif),
                                  err_t (* errtfunc)(struct netif *netif) );
 
-#define netifapi_netif_remove(n)      netifapi_netif_common(n, netif_remove, NULL)
-#define netifapi_netif_set_up(n)      netifapi_netif_common(n, netif_set_up, NULL)
-#define netifapi_netif_set_down(n)    netifapi_netif_common(n, netif_set_down, NULL)
-#define netifapi_netif_set_default(n) netifapi_netif_common(n, netif_set_default, NULL)
-#define netifapi_dhcp_start(n)        netifapi_netif_common(n, NULL, dhcp_start)
-#define netifapi_dhcp_stop(n)         netifapi_netif_common(n, dhcp_stop, NULL)
-#define netifapi_autoip_start(n)      netifapi_netif_common(n, NULL, autoip_start)
-#define netifapi_autoip_stop(n)       netifapi_netif_common(n, NULL, autoip_stop)
+#define netifapi_netif_remove(n)      netifapi_netif_common(n, netif_remove, nullptr)
+#define netifapi_netif_set_up(n)      netifapi_netif_common(n, netif_set_up, nullptr)
+#define netifapi_netif_set_down(n)    netifapi_netif_common(n, netif_set_down, nullptr)
+#define netifapi_netif_set_default(n) netifapi_netif_common(n, netif_set_default, nullptr)
+#define netifapi_dhcp_start(n)        netifapi_netif_common(n, nullptr, dhcp_start)
+#define netifapi_dhcp_stop(n)         netifapi_netif_common(n, dhcp_stop, nullptr)
+#define netifapi_autoip_start(n)      netifapi_netif_common(n, nullptr, autoip_start)
+#define netifapi_autoip_stop(n)       netifapi_netif_common(n, nullptr, autoip_stop)
 
 #ifdef __cplusplus
 }

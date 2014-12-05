@@ -76,19 +76,19 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     /** @name Parameters that determine the behavior of the radio. */
     //@{
     /**
-     * The radio antenna model is never NULL.
+     * The radio antenna model is never nullptr.
      */
     const IAntenna *antenna;
     /**
-     * The transmitter model is never NULL.
+     * The transmitter model is never nullptr.
      */
     const ITransmitter *transmitter;
     /**
-     * The receiver model is never NULL.
+     * The receiver model is never nullptr.
      */
     const IReceiver *receiver;
     /**
-     * The radio medium model is never NULL.
+     * The radio medium model is never nullptr.
      */
     IRadioMedium *medium;
     /**
@@ -147,7 +147,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     cMessage *endTransmissionTimer;
     /**
      * The timer that is scheduled to the end of the current reception.
-     * If this timer is NULL then no attempted reception is in progress but
+     * If this timer is nullptr then no attempted reception is in progress but
      * there still may be incoming receptions which are not attempted.
      */
     cMessage *endReceptionTimer;

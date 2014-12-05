@@ -144,7 +144,7 @@ IGMPv2::HostGroupData::HostGroupData(IGMPv2 *owner, const IPv4Address& group)
 
     state = IGMP_HGS_NON_MEMBER;
     flag = false;
-    timer = NULL;
+    timer = nullptr;
 }
 
 IGMPv2::HostGroupData::~HostGroupData()
@@ -162,9 +162,9 @@ IGMPv2::RouterGroupData::RouterGroupData(IGMPv2 *owner, const IPv4Address& group
     ASSERT(groupAddr.isMulticast());
 
     state = IGMP_RGS_NO_MEMBERS_PRESENT;
-    timer = NULL;
-    rexmtTimer = NULL;
-    // v1HostTimer = NULL;
+    timer = nullptr;
+    rexmtTimer = nullptr;
+    // v1HostTimer = nullptr;
 }
 
 IGMPv2::RouterGroupData::~RouterGroupData()
@@ -202,7 +202,7 @@ IGMPv2::RouterInterfaceData::RouterInterfaceData(IGMPv2 *owner)
     ASSERT(owner);
 
     igmpRouterState = IGMP_RS_INITIAL;
-    igmpQueryTimer = NULL;
+    igmpQueryTimer = nullptr;
 }
 
 IGMPv2::RouterInterfaceData::~RouterInterfaceData()
@@ -271,14 +271,14 @@ IGMPv2::HostGroupData *IGMPv2::getHostGroupData(InterfaceEntry *ie, const IPv4Ad
 {
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     GroupToHostDataMap::iterator it = interfaceData->groups.find(group);
-    return it != interfaceData->groups.end() ? it->second : NULL;
+    return it != interfaceData->groups.end() ? it->second : nullptr;
 }
 
 IGMPv2::RouterGroupData *IGMPv2::getRouterGroupData(InterfaceEntry *ie, const IPv4Address& group)
 {
     RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
     GroupToRouterDataMap::iterator it = interfaceData->groups.find(group);
-    return it != interfaceData->groups.end() ? it->second : NULL;
+    return it != interfaceData->groups.end() ? it->second : nullptr;
 }
 
 void IGMPv2::deleteHostInterfaceData(int interfaceId)
