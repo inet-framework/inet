@@ -362,7 +362,9 @@ void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
                 router->getMessageHandler()->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
             }
             else {
-                router->getMessageHandler()->sendPacket(ackPacket, intf->getNeighborByID(lsaSource)->getAddress(), intf->getIfIndex(), ttl);
+                Neighbor *neighbor = intf->getNeighborByID(lsaSource);
+                ASSERT(neighbor);
+                router->getMessageHandler()->sendPacket(ackPacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
             }
         }
     }
