@@ -93,7 +93,6 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     /* The current session parameters */
     int reqInCurSession = 0;    // The number of requests made so far in the current session
     int reqNoInCurSession = 0;    // The total number of requests to be made in the current session
-    double activityPeriodLength = NaN;    // The length of the currently active activity period
     simtime_t acitivityPeriodEnd;    // The end in simulation time of the current activity period
 
     /* The random objects */

@@ -217,7 +217,7 @@ void HttpBrowserBase::handleSelfActivityStart()
     eventTimer->setKind(MSGKIND_START_SESSION);
     messagesInCurrentSession = 0;
     reqNoInCurSession = 0;
-    activityPeriodLength = rdActivityLength->draw();    // Get the length of the activity period
+    double activityPeriodLength = rdActivityLength->draw();    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << activityPeriodLength / 3600 << " hours." << endl;
     scheduleAt(simTime() + (simtime_t)rdInterSessionInterval->draw() / 2, eventTimer);
