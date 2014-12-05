@@ -202,11 +202,11 @@ void OSPFConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLEleme
 
     std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
     AuthenticationKeyType keyValue;
-    memset(keyValue.bytes, 0, 8 * sizeof(char));
+    memset(keyValue.bytes, 0, sizeof(keyValue.bytes));
     int keyLength = key.length();
     if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
         for (int i = keyLength; (i > 2); i -= 2) {
-            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
+            keyValue.bytes[(i - 2) / 2 - 1] = hexPairToByte(key[i - 1], key[i]);
         }
     }
     intf->setAuthenticationKey(keyValue);
