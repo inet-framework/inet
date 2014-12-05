@@ -39,20 +39,22 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     // parameters
     simtime_t stopTime;
     simtime_t packetizationInterval;
-    int localPort, destPort;
-    int talkPacketSize;
+    int localPort = -1;
+    int destPort = -1;
+    int talkPacketSize = 0;
     L3Address destAddress;
 
     // state
-    cMessage *selfSender;    // timer for sending packets
-    cMessage *selfSource;    // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
+    cMessage *selfSender = nullptr;    // timer for sending packets
+    cMessage *selfSource = nullptr;    // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
     simtime_t silenceDuration;
     simtime_t talkspurtDuration;
-    int packetID;
-    int talkspurtID;
-    int talkspurtNumPackets;
-    bool isTalk;
+    int packetID = -1;
+    int talkspurtID = -1;
+    int talkspurtNumPackets = 0;
+    bool isTalk = false;
 
+  protected:
     void talkspurt(simtime_t dur);
     void selectPeriodTime();
     void sendVoIPPacket();

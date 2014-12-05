@@ -21,7 +21,10 @@
 
 #include <string.h>
 #include <list>
+
+
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -40,7 +43,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     class VoIPPacketInfo
     {
       public:
-        unsigned int packetID;
+        unsigned int packetID = 0;
         simtime_t creationTime;
         simtime_t arrivalTime;
         simtime_t playoutTime;
@@ -57,14 +60,14 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
             ACTIVE,
             FINISHED
         };
-        Status status;
-        unsigned int talkspurtID;
-        unsigned int talkspurtNumPackets;
+        Status status = EMPTY;
+        unsigned int talkspurtID = -1;
+        unsigned int talkspurtNumPackets = 0;
         simtime_t voiceDuration;
         PacketsVector packets;
 
       public:
-        TalkspurtInfo() : status(EMPTY), talkspurtID(-1) {}
+        TalkspurtInfo() {}
         void startTalkspurt(SimpleVoIPPacket *pk);
         void finishTalkspurt() { status = FINISHED; packets.clear(); }
         bool checkPacket(SimpleVoIPPacket *pk);
@@ -73,17 +76,17 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     };
 
     // parameters
-    double emodelRo;
-    unsigned int bufferSpace;
-    int emodelIe;
-    int emodelBpl;
-    int emodelA;
+    double emodelRo = NaN;
+    unsigned int bufferSpace = 0;
+    int emodelIe = -1;
+    int emodelBpl = -1;
+    int emodelA = -1;
     simtime_t playoutDelay;
     simtime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
 
     // state
     UDPSocket socket;
-    cMessage *selfTalkspurtFinished;
+    cMessage *selfTalkspurtFinished = nullptr;
     TalkspurtInfo currentTalkspurt;
 
     static simsignal_t packetLossRateSignal;

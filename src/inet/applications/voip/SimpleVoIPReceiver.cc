@@ -62,7 +62,6 @@ void SimpleVoIPReceiver::TalkspurtInfo::addPacket(SimpleVoIPPacket *pk)
 
 SimpleVoIPReceiver::SimpleVoIPReceiver()
 {
-    selfTalkspurtFinished = nullptr;
 }
 
 SimpleVoIPReceiver::~SimpleVoIPReceiver()

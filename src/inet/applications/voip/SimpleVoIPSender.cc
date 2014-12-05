@@ -29,8 +29,6 @@ Define_Module(SimpleVoIPSender);
 
 SimpleVoIPSender::SimpleVoIPSender()
 {
-    selfSender = nullptr;
-    selfSource = nullptr;
 }
 
 SimpleVoIPSender::~SimpleVoIPSender()
