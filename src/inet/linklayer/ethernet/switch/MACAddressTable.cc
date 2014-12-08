@@ -277,8 +277,7 @@ void MACAddressTable::readAddressTable(const char *fileName)
     //  Each iteration of the loop reads in an entire line i.e. up to '\n' or EOF characters
     //  and uses strtok to extract tokens from the resulting string
     char *line;
-    int lineno = 0;
-    while ((line = fgetline(fp)) != nullptr) {
+    for (int lineno = 0; (line = fgetline(fp)) != nullptr; delete [] line) {
         lineno++;
 
         // lines beginning with '#' are treated as comments
@@ -310,9 +309,6 @@ void MACAddressTable::readAddressTable(const char *fileName)
         }
 
         (*table)[MACAddress(hexaddress)] = entry;
-
-        // Garbage collection before next iteration
-        delete[] line;
     }
     fclose(fp);
 }
