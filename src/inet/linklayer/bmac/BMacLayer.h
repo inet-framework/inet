@@ -66,27 +66,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     BMacLayer& operator=(const BMacLayer&);
 
   public:
-    BMacLayer()
-        : MACProtocolBase()
-        , macQueue()
-        , radio(nullptr)
-        , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
-        , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
-        , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
-        , macState(INIT)
-        , resend_data(nullptr), ack_timeout(nullptr), start_bmac(nullptr), wakeup(nullptr)
-        , send_ack(nullptr), cca_timeout(nullptr), ack_tx_over(nullptr), send_preamble(nullptr), stop_preambles(nullptr)
-        , data_tx_over(nullptr), data_timeout(nullptr)
-        , lastDataPktSrcAddr()
-        , lastDataPktDestAddr()
-        , txAttempts(0)
-        , queueLength(0)
-        , animation(false)
-        , slotDuration(0), headerLength(0), bitrate(0), checkInterval(0)
-        , useMacAcks(0)
-        , maxTxAttempts(0)
-        , stats(false)
-    {}
+    BMacLayer() {}
     virtual ~BMacLayer();
 
     /** @brief Initialization of the module and some variables*/
@@ -119,19 +99,19 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     MacQueue macQueue;
 
     /** @brief The radio. */
-    IRadio *radio;
-    IRadio::TransmissionState transmissionState;
+    IRadio *radio = nullptr;
+    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     /** @name Different tracked statistics.*/
     /*@{*/
-    long nbTxDataPackets;
-    long nbTxPreambles;
-    long nbRxDataPackets;
-    long nbRxPreambles;
-    long nbMissedAcks;
-    long nbRecvdAcks;
-    long nbDroppedDataPackets;
-    long nbTxAcks;
+    long nbTxDataPackets = 0;
+    long nbTxPreambles = 0;
+    long nbRxDataPackets = 0;
+    long nbRxPreambles = 0;
+    long nbMissedAcks = 0;
+    long nbRecvdAcks = 0;
+    long nbDroppedDataPackets = 0;
+    long nbTxAcks = 0;
     /*@}*/
 
     /** @brief MAC states
@@ -191,27 +171,27 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     };
 
     // messages used in the FSM
-    cMessage *resend_data;
-    cMessage *ack_timeout;
-    cMessage *start_bmac;
-    cMessage *wakeup;
-    cMessage *send_ack;
-    cMessage *cca_timeout;
-    cMessage *ack_tx_over;
-    cMessage *send_preamble;
-    cMessage *stop_preambles;
-    cMessage *data_tx_over;
-    cMessage *data_timeout;
+    cMessage *resend_data = nullptr;
+    cMessage *ack_timeout = nullptr;
+    cMessage *start_bmac = nullptr;
+    cMessage *wakeup = nullptr;
+    cMessage *send_ack = nullptr;
+    cMessage *cca_timeout = nullptr;
+    cMessage *ack_tx_over = nullptr;
+    cMessage *send_preamble = nullptr;
+    cMessage *stop_preambles = nullptr;
+    cMessage *data_tx_over = nullptr;
+    cMessage *data_timeout = nullptr;
 
     /** @name Help variables for the acknowledgment process. */
     /*@{*/
     MACAddress lastDataPktSrcAddr;
     MACAddress lastDataPktDestAddr;
-    int txAttempts;
+    int txAttempts = 0;
     /*@}*/
 
     /** @brief The maximum length of the queue */
-    unsigned int queueLength;
+    unsigned int queueLength = 0;
     /** @brief Animate (colorize) the nodes.
      *
      * The color of the node reflects its basic status (not the exact state!)
@@ -219,20 +199,20 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
      * GREEN - node is receiving
      * YELLOW - node is sending
      */
-    bool animation;
+    bool animation = false;
     /** @brief The duration of the slot in secs. */
-    double slotDuration;
+    double slotDuration = 0;
     /** @brief Length of the header*/
-    int headerLength;
+    int headerLength = 0;
     /** @brief The bitrate of transmission */
-    double bitrate;
+    double bitrate = 0;
     /** @brief The duration of CCA */
-    double checkInterval;
+    double checkInterval = 0;
     /** @brief Use MAC level acks or not */
-    bool useMacAcks;
+    bool useMacAcks = false;
     /** @brief Maximum transmission attempts per data packet, when ACKs are
      * used */
-    int maxTxAttempts;
+    int maxTxAttempts = 0;
     /** @brief Gather stats at the end of the simulation */
     bool stats;
 

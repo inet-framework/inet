@@ -23,7 +23,7 @@
 
 namespace inet {
 
-Define_Module(BMacLayer)
+Define_Module(BMacLayer);
 
 void BMacLayer::initialize(int stage)
 {
