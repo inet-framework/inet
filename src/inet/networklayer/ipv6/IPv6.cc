@@ -45,17 +45,7 @@ namespace inet {
 Define_Module(IPv6);
 
 IPv6::IPv6() :
-        ift(nullptr),
-        rt(nullptr),
-        nd(nullptr),
-        icmp(nullptr),
-        tunneling(nullptr),
-        curFragmentId(0),
-        numMulticast(0),
-        numLocalDeliver(0),
-        numDropped(0),
-        numUnroutable(0),
-        numForwarded(0)
+        curFragmentId(0)
 {
 }
 

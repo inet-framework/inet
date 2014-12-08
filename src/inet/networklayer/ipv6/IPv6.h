@@ -52,33 +52,33 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
             datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
-        IPv6Datagram *datagram;
-        const InterfaceEntry *inIE;
-        const InterfaceEntry *outIE;
+        IPv6Datagram *datagram = nullptr;
+        const InterfaceEntry *inIE = nullptr;
+        const InterfaceEntry *outIE = nullptr;
         IPv6Address nextHopAddr;
-        const IHook::Type hookType;
+        const IHook::Type hookType = (IHook::Type)-1;
     };
 
   protected:
-    IInterfaceTable *ift;
-    IPv6RoutingTable *rt;
-    IPv6NeighbourDiscovery *nd;
-    ICMPv6 *icmp;
+    IInterfaceTable *ift = nullptr;
+    IPv6RoutingTable *rt = nullptr;
+    IPv6NeighbourDiscovery *nd = nullptr;
+    ICMPv6 *icmp = nullptr;
 
-    IPv6Tunneling *tunneling;
+    IPv6Tunneling *tunneling = nullptr;
 
     // working vars
-    unsigned int curFragmentId;    // counter, used to assign unique fragmentIds to datagrams
+    unsigned int curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     IPv6FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
 
     // statistics
-    int numMulticast;
-    int numLocalDeliver;
-    int numDropped;
-    int numUnroutable;
-    int numForwarded;
+    int numMulticast = 0;
+    int numLocalDeliver = 0;
+    int numDropped = 0;
+    int numUnroutable = 0;
+    int numForwarded = 0;
 
 #ifdef WITH_xMIPv6
     // 28.9.07 - CB
@@ -87,10 +87,10 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     class ScheduledDatagram : public cPacket
     {
       protected:
-        IPv6Datagram *datagram;
-        const InterfaceEntry *ie;
+        IPv6Datagram *datagram = nullptr;
+        const InterfaceEntry *ie = nullptr;
         MACAddress macAddr;
-        bool fromHL;
+        bool fromHL = false;
       public:
         ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
