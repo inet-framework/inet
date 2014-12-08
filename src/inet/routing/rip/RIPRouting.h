@@ -41,16 +41,16 @@ struct RIPRoute : public cObject
     };
 
   private:
-    RouteType type;    // the type of the route
-    IRoute *route;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
+    RouteType type = (RouteType)-1;    // the type of the route
+    IRoute *route = nullptr;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
     L3Address dest;    // destination of the route
-    int prefixLength;    // prefix length of the destination
+    int prefixLength = 0;    // prefix length of the destination
     L3Address nextHop;    // next hop of the route
-    InterfaceEntry *ie;    // outgoing interface of the route
+    InterfaceEntry *ie = nullptr;    // outgoing interface of the route
     L3Address from;    // only for RTE routes
-    int metric;    // the metric of this route, or infinite (16) if invalid
-    uint16 tag;    // route tag, only for REDISTRIBUTE routes
-    bool changed;    // true if the route has changed since the update
+    int metric = 0;    // the metric of this route, or infinite (16) if invalid
+    uint16 tag = 0;    // route tag, only for REDISTRIBUTE routes
+    bool changed = false;    // true if the route has changed since the update
     simtime_t lastUpdateTime;    // time of the last change, only for RTE routes
 
   public:
@@ -101,9 +101,9 @@ enum RIPMode {
  */
 struct RIPInterfaceEntry
 {
-    const InterfaceEntry *ie;    // the associated interface entry
-    int metric;    // metric of this interface
-    RIPMode mode;    // RIP mode of this interface
+    const InterfaceEntry *ie = nullptr;    // the associated interface entry
+    int metric = 0;    // metric of this interface
+    RIPMode mode = NO_RIP;    // RIP mode of this interface
 
     RIPInterfaceEntry(const InterfaceEntry *ie);
     void configure(cXMLElement *config);
@@ -138,26 +138,26 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
     typedef std::vector<RIPRoute *> RouteVector;
     // environment
-    cModule *host;    // the host module that owns this module
-    IInterfaceTable *ift;    // interface table of the host
-    IRoutingTable *rt;    // routing table from which routes are imported and to which learned routes are added
-    IL3AddressType *addressType;    // address type of the routing table
+    cModule *host = nullptr;    // the host module that owns this module
+    IInterfaceTable *ift = nullptr;    // interface table of the host
+    IRoutingTable *rt = nullptr;    // routing table from which routes are imported and to which learned routes are added
+    IL3AddressType *addressType = nullptr;    // address type of the routing table
     // state
     InterfaceVector ripInterfaces;    // interfaces on which RIP is used
     RouteVector ripRoutes;    // all advertised routes (imported or learned)
     UDPSocket socket;    // bound to the RIP port (see udpPort parameter)
-    cMessage *updateTimer;    // for sending unsolicited Response messages in every ~30 seconds.
-    cMessage *triggeredUpdateTimer;    // scheduled when there are pending changes
-    cMessage *startupTimer;    // timer for delayed startup
-    cMessage *shutdownTimer;    // scheduled at shutdown
+    cMessage *updateTimer = nullptr;    // for sending unsolicited Response messages in every ~30 seconds.
+    cMessage *triggeredUpdateTimer = nullptr;    // scheduled when there are pending changes
+    cMessage *startupTimer = nullptr;    // timer for delayed startup
+    cMessage *shutdownTimer = nullptr;    // scheduled at shutdown
     // parameters
-    Mode mode;
-    int ripUdpPort;    // UDP port RIP routers (usually 520)
+    Mode mode = (Mode)-1;
+    int ripUdpPort = -1;    // UDP port RIP routers (usually 520)
     simtime_t updateInterval;    // time between regular updates
     simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
     simtime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
     simtime_t shutdownTime;    // time of shutdown processing
-    bool isOperational;
+    bool isOperational = false;
 
     // signals
     static simsignal_t sentRequestSignal;

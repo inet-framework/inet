@@ -164,15 +164,6 @@ std::ostream& operator<<(std::ostream& os, const RIPInterfaceEntry& e)
 
 RIPRouting::RIPRouting()
 {
-    host = nullptr;
-    ift = nullptr;
-    rt = nullptr;
-    addressType = nullptr;
-    updateTimer = nullptr;
-    triggeredUpdateTimer = nullptr;
-    startupTimer = nullptr;
-    shutdownTimer = nullptr;
-    isOperational = false;
 }
 
 RIPRouting::~RIPRouting()
