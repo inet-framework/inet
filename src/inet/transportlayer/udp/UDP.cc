@@ -882,7 +882,6 @@ void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multic
         membership->interfaceId = interfaceId;
         membership->multicastAddress = multicastAddr;
         membership->filterMode = UDP_EXCLUDE_MCAST_SOURCES;
-        membership->sourceList.clear();
         sd->addMulticastMembership(membership);
 
         // add the multicast address to the selected interface or all interfaces
