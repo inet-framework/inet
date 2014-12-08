@@ -34,7 +34,6 @@ class INET_API ProtocolMapping
         int protocolNumber;
         int outGateIndex;
 
-        Entry() {}
         Entry(int protocolNumber, int outGateIndex) { this->protocolNumber = protocolNumber; this->outGateIndex = outGateIndex; }
     };
     // we use vector because it's probably faster: we'll hit 1st or 2nd entry

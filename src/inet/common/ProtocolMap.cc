@@ -27,7 +27,7 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
         s++;
 
     while (*s) {
-        Entry entry;
+        Entry entry(-1, -1);
 
         if (!isdigit(*s))
             throw cRuntimeError("Syntax error: protocol number expected");
