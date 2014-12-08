@@ -35,6 +35,8 @@ module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
         pathLoss.l02 = 58.5;
         pathLoss.alpha2 = 3.3;
         
-        backgroundNoise.power = default(-110dBm);
+        // Reflects the thermal noise for the receiver sensitivity
+        // TODO couple with sensitivity
+        backgroundNoise.power = default(-96.616dBm);
         backgroundNoise.dimensions = default("time");
 }

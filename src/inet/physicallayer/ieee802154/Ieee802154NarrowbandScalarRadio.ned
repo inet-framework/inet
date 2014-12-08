@@ -32,16 +32,19 @@ module Ieee802154NarrowbandScalarRadio extends Radio
         // 802.15.4-2006 (page 28)
         *.bitrate = default(250 kbps);
         
+        // B_20dB ATmega256RFR2 (page 564)
+        // *.bandwidth = default(2.8 MHz);
+        // what is meant by bandwidth here?
+        // the B_20dB bandwidth would lead to far too low BERs
+        *.bandwidth = default(0.25 MHz);
+        
         // PHY Header, 802.15.4-2006 (page 43)
         // 4 octets Preamble
         // 1 octet SFD
         // 7 bit Frame length
         // 1 bit Reserved
         *.headerBitLength = (4*8 + 1*8 + 7 + 1) * 1 b;
-        
-        // B_20dB ATmega256RFR2 (page 564)
-        *.bandwidth = default(2.8 MHz);
-        
+                
         // RSSI sensitivity (ATmega256RFR2, page 566)
         receiver.energyDetection = default(-90dBm);
    
