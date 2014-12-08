@@ -380,6 +380,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // add entry
         rt->addRoute(e);
     }
+    delete [] str;
 }
 
 } // namespace inet
