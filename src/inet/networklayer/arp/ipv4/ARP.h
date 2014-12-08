@@ -52,37 +52,37 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     class ARPCacheEntry
     {
       public:
-        ARP *owner;    // owner ARP module of this cache entry
-        const InterfaceEntry *ie;    // NIC to send the packet to
-        bool pending;    // true if resolution is pending
+        ARP *owner = nullptr;    // owner ARP module of this cache entry
+        const InterfaceEntry *ie = nullptr;    // NIC to send the packet to
+        bool pending = false;    // true if resolution is pending
         MACAddress macAddress;    // MAC address
         simtime_t lastUpdate;    // entries should time out after cacheTimeout
-        int numRetries;    // if pending==true: 0 after first ARP request, 1 after second, etc.
-        cMessage *timer;    // if pending==true: request timeout msg
+        int numRetries = 0;    // if pending==true: 0 after first ARP request, 1 after second, etc.
+        cMessage *timer = nullptr;    // if pending==true: request timeout msg
         ARPCache::iterator myIter;    // iterator pointing to this entry
     };
 
   protected:
     simtime_t retryTimeout;
-    int retryCount;
+    int retryCount = 0;
     simtime_t cacheTimeout;
-    bool respondToProxyARP;
+    bool respondToProxyARP = false;
 
-    bool isUp;
+    bool isUp = false;
 
-    long numResolutions;
-    long numFailedResolutions;
-    long numRequestsSent;
-    long numRepliesSent;
+    long numResolutions = 0;
+    long numFailedResolutions= 0;
+    long numRequestsSent = 0;
+    long numRepliesSent = 0;
 
     static simsignal_t sentReqSignal;
     static simsignal_t sentReplySignal;
 
     ARPCache arpCache;
 
-    cGate *netwOutGate;
+    cGate *netwOutGate = nullptr;
 
-    IInterfaceTable *ift;
+    IInterfaceTable *ift = nullptr;
     IIPv4RoutingTable *rt;    // for answering ProxyARP requests
 
   protected:

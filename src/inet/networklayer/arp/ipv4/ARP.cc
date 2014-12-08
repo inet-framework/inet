@@ -53,8 +53,6 @@ Define_Module(ARP);
 
 ARP::ARP()
 {
-    ift = nullptr;
-    rt = nullptr;
 }
 
 void ARP::initialize(int stage)
