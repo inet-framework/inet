@@ -511,6 +511,7 @@ void RIPRouting::handleMessage(cMessage *msg)
             throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
         EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
         delete msg;
+        return;
     }
 
     if (msg->isSelfMessage()) {
