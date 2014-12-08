@@ -53,21 +53,21 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     class ARPCacheEntry
     {
       public:
-        GlobalARP *owner;    // owner ARP module of this cache entry
-        const InterfaceEntry *ie;    // NIC to send the packet to
+        GlobalARP *owner = nullptr;    // owner ARP module of this cache entry
+        const InterfaceEntry *ie = nullptr;    // NIC to send the packet to
         MACAddress macAddress;    // MAC address
         simtime_t lastUpdate;    // entries should time out after cacheTimeout
         ARPCache::iterator myIter;    // iterator pointing to this entry
     };
 
   protected:
-    bool isUp;
+    bool isUp = false;
 
     static ARPCache globalArpCache;
     static int globalArpCacheRefCnt;
 
-    IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;    // for answering ProxyARP requests
+    IInterfaceTable *ift = nullptr;
+    IIPv4RoutingTable *rt = nullptr;    // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.

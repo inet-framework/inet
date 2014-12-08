@@ -31,7 +31,7 @@
 
 namespace inet {
 
-static std::ostream& operator<<(std::ostream& out, cMessage *msg)
+static std::ostream& operator<<(std::ostream& out, const cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();
     return out;
