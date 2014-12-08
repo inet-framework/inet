@@ -1028,6 +1028,7 @@ void UDP::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multi
         membership->interfaceId = ie->getInterfaceId();
         membership->multicastAddress = multicastAddress;
         membership->filterMode = UDP_INCLUDE_MCAST_SOURCES;
+        sd->addMulticastMembership(membership);
     }
 
     if (membership->filterMode == UDP_EXCLUDE_MCAST_SOURCES)
@@ -1096,6 +1097,7 @@ void UDP::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
         membership->interfaceId = ie->getInterfaceId();
         membership->multicastAddress = multicastAddress;
         membership->filterMode = UDP_INCLUDE_MCAST_SOURCES;
+        sd->addMulticastMembership(membership);
     }
 
     bool changed = membership->filterMode != filterMode ||
