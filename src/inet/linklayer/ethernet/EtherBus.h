@@ -41,23 +41,23 @@ class INET_API EtherBus : public cSimpleModule, cListener
      */
     struct BusTap
     {
-        int id;    // which tap is this
-        double position;    // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
+        int id = -1;    // which tap is this
+        double position = NaN;    // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
         simtime_t propagationDelay[2];    // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
     };
 
     // configuration
-    double propagationSpeed;    // propagation speed of electrical signals through copper
-    BusTap *tap;    // array of BusTaps: physical locations taps where that connect stations to the bus
-    int numTaps;    // number of tap points on the bus
-    int inputGateBaseId;    // gate id of ethg$i[0]
-    int outputGateBaseId;    // gate id of ethg$o[0]
+    double propagationSpeed = NaN;    // propagation speed of electrical signals through copper
+    BusTap *tap = nullptr;    // array of BusTaps: physical locations taps where that connect stations to the bus
+    int numTaps = -1;    // number of tap points on the bus
+    int inputGateBaseId = -1;    // gate id of ethg$i[0]
+    int outputGateBaseId = -1;    // gate id of ethg$o[0]
 
     // state
-    bool dataratesDiffer;
+    bool dataratesDiffer = false;
 
     // statistics
-    long numMessages;    // number of messages handled
+    long numMessages = 0;    // number of messages handled
 
   public:
     EtherBus();

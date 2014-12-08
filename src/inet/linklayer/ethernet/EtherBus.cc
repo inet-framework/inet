@@ -28,14 +28,7 @@ inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
     return os;
 }
 
-EtherBus::EtherBus() :
-    propagationSpeed(NaN),
-    tap(nullptr),
-    numTaps(-1),
-    inputGateBaseId(-1),
-    outputGateBaseId(-1),
-    dataratesDiffer(false),
-    numMessages(-1)
+EtherBus::EtherBus()
 {
 }
 
