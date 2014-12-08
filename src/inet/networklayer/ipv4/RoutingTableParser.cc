@@ -71,27 +71,24 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     char *file = new char[MAX_FILESIZE];
     char *ifconfigFile = nullptr;
     char *routeFile = nullptr;
+    int c;
 
     fp = fopen(filename, "r");
     if (fp == nullptr)
         throw cRuntimeError("Error opening routing table file `%s'", filename);
 
     // read the whole into the file[] char-array
-    for (charpointer = 0;
-         (file[charpointer] = getc(fp)) != EOF;
-         charpointer++)
-        ;
+    for (charpointer = 0; (c = getc(fp)) != EOF; charpointer++)
+        file[charpointer] = c;
 
-    charpointer++;
     for ( ; charpointer < MAX_FILESIZE; charpointer++)
         file[charpointer] = '\0';
-    //    file[++charpointer] = '\0';
 
     fclose(fp);
 
     // copy file into specialized, filtered char arrays
     for (charpointer = 0;
-         (charpointer < MAX_FILESIZE) && (file[charpointer] != EOF);
+         (charpointer < MAX_FILESIZE) && (file[charpointer] != '\0');
          charpointer++)
     {
         // check for tokens at beginning of file or line
