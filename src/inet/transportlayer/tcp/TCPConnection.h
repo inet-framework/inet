@@ -321,62 +321,62 @@ class INET_API TCPConnection
 {
   public:
     // connection identification by apps: appgateIndex+connId
-    int appGateIndex;    // application gate index
-    int connId;    // identifies connection within the app
+    int appGateIndex = -1;    // application gate index
+    int connId = -1;    // identifies connection within the app
 
     // socket pair
     L3Address localAddr;
     L3Address remoteAddr;
-    int localPort;
-    int remotePort;
+    int localPort = -1;
+    int remotePort = -1;
 
   protected:
-    TCP *tcpMain;    // TCP module
+    TCP *tcpMain = nullptr;    // TCP module
 
     // TCP state machine
     cFSM fsm;
 
     // variables associated with TCP state
-    TCPStateVariables *state;
+    TCPStateVariables *state = nullptr;
 
     // TCP queues
-    TCPSendQueue *sendQueue;
-    TCPReceiveQueue *receiveQueue;
-    TCPDataTransferMode transferMode;    // TCP transfer mode: bytecount, object, bytestream
+    TCPSendQueue *sendQueue = nullptr;
+    TCPReceiveQueue *receiveQueue = nullptr;
+    TCPDataTransferMode transferMode = TCP_TRANSFER_UNDEFINED;    // TCP transfer mode: bytecount, object, bytestream
 
   public:
-    TCPSACKRexmitQueue *rexmitQueue;
+    TCPSACKRexmitQueue *rexmitQueue = nullptr;
 
   protected:
     // TCP behavior in data transfer state
-    TCPAlgorithm *tcpAlgorithm;
+    TCPAlgorithm *tcpAlgorithm = nullptr;
 
     // timers
-    cMessage *the2MSLTimer;
-    cMessage *connEstabTimer;
-    cMessage *finWait2Timer;
-    cMessage *synRexmitTimer;    // for retransmitting SYN and SYN+ACK
+    cMessage *the2MSLTimer = nullptr;
+    cMessage *connEstabTimer = nullptr;
+    cMessage *finWait2Timer = nullptr;
+    cMessage *synRexmitTimer = nullptr;    // for retransmitting SYN and SYN+ACK
 
     // statistics
-    cOutVector *sndWndVector;    // snd_wnd
-    cOutVector *rcvWndVector;    // rcv_wnd
-    cOutVector *rcvAdvVector;    // current advertised window (=rcv_adv)
-    cOutVector *sndNxtVector;    // sent seqNo
-    cOutVector *sndAckVector;    // sent ackNo
-    cOutVector *rcvSeqVector;    // received seqNo
-    cOutVector *rcvAckVector;    // received ackNo (=snd_una)
-    cOutVector *unackedVector;    // number of bytes unacknowledged
+    cOutVector *sndWndVector = nullptr;    // snd_wnd
+    cOutVector *rcvWndVector = nullptr;    // rcv_wnd
+    cOutVector *rcvAdvVector = nullptr;    // current advertised window (=rcv_adv)
+    cOutVector *sndNxtVector = nullptr;    // sent seqNo
+    cOutVector *sndAckVector = nullptr;    // sent ackNo
+    cOutVector *rcvSeqVector = nullptr;    // received seqNo
+    cOutVector *rcvAckVector = nullptr;    // received ackNo (=snd_una)
+    cOutVector *unackedVector = nullptr;    // number of bytes unacknowledged
 
-    cOutVector *dupAcksVector;    // current number of received dupAcks
-    cOutVector *pipeVector;    // current sender's estimate of bytes outstanding in the network
-    cOutVector *sndSacksVector;    // number of sent Sacks
-    cOutVector *rcvSacksVector;    // number of received Sacks
-    cOutVector *rcvOooSegVector;    // number of received out-of-order segments
-    cOutVector *rcvNASegVector;    // number of received not acceptable segments
+    cOutVector *dupAcksVector = nullptr;    // current number of received dupAcks
+    cOutVector *pipeVector = nullptr;    // current sender's estimate of bytes outstanding in the network
+    cOutVector *sndSacksVector = nullptr;    // number of sent Sacks
+    cOutVector *rcvSacksVector = nullptr;    // number of received Sacks
+    cOutVector *rcvOooSegVector = nullptr;    // number of received out-of-order segments
+    cOutVector *rcvNASegVector = nullptr;    // number of received not acceptable segments
 
-    cOutVector *sackedBytesVector;    // current number of received sacked bytes
-    cOutVector *tcpRcvQueueBytesVector;    // current amount of used bytes in tcp receive queue
-    cOutVector *tcpRcvQueueDropsVector;    // number of drops in tcp receive queue
+    cOutVector *sackedBytesVector = nullptr;    // current number of received sacked bytes
+    cOutVector *tcpRcvQueueBytesVector = nullptr;    // current amount of used bytes in tcp receive queue
+    cOutVector *tcpRcvQueueDropsVector = nullptr;    // number of drops in tcp receive queue
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

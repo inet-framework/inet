@@ -172,15 +172,6 @@ TCPConnection::TCPConnection()
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
     transferMode = TCP_TRANSFER_BYTECOUNT;
-    sendQueue = nullptr;
-    rexmitQueue = nullptr;
-    receiveQueue = nullptr;
-    tcpAlgorithm = nullptr;
-    state = nullptr;
-    the2MSLTimer = connEstabTimer = finWait2Timer = synRexmitTimer = nullptr;
-    sndWndVector = rcvWndVector = rcvAdvVector = sndNxtVector = sndAckVector = rcvSeqVector = rcvAckVector = unackedVector =
-                                    dupAcksVector = sndSacksVector = rcvSacksVector = rcvOooSegVector = rcvNASegVector =
-                                                        tcpRcvQueueBytesVector = tcpRcvQueueDropsVector = pipeVector = sackedBytesVector = nullptr;
 }
 
 //
@@ -193,20 +184,12 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     appGateIndex = _appGateIndex;
     connId = _connId;
 
-    localPort = remotePort = -1;
-
     char fsmname[24];
     sprintf(fsmname, "fsm-%d", connId);
     fsm.setName(fsmname);
     fsm.setState(TCP_S_INIT);
 
-    transferMode = TCP_TRANSFER_UNDEFINED;
     // queues and algorithm will be created on active or passive open
-    sendQueue = nullptr;
-    rexmitQueue = nullptr;
-    receiveQueue = nullptr;
-    tcpAlgorithm = nullptr;
-    state = nullptr;
 
     the2MSLTimer = new cMessage("2MSL");
     connEstabTimer = new cMessage("CONN-ESTAB");
@@ -219,25 +202,6 @@ TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _connId)
     synRexmitTimer->setContextPointer(this);
 
     // statistics
-    sndWndVector = nullptr;
-    rcvWndVector = nullptr;
-    rcvAdvVector = nullptr;
-    sndNxtVector = nullptr;
-    sndAckVector = nullptr;
-    rcvSeqVector = nullptr;
-    rcvAckVector = nullptr;
-    unackedVector = nullptr;
-
-    dupAcksVector = nullptr;
-    sndSacksVector = nullptr;
-    rcvSacksVector = nullptr;
-    rcvOooSegVector = nullptr;
-    rcvNASegVector = nullptr;
-    tcpRcvQueueBytesVector = nullptr;
-    tcpRcvQueueDropsVector = nullptr;
-    pipeVector = nullptr;
-    sackedBytesVector = nullptr;
-
     if (getTcpMain()->recordStatistics) {
         sndWndVector = new cOutVector("send window");
         rcvWndVector = new cOutVector("receive window");
