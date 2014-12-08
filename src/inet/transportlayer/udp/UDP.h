@@ -48,11 +48,16 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 {
   public:
 
+    enum PortRange {
+        EPHEMERAL_PORTRANGE_START = 1024,
+        EPHEMERAL_PORTRANGE_END   = 5000
+    };
+
     struct MulticastMembership
     {
         L3Address multicastAddress;
-        int interfaceId;    // -1 = all
-        UDPSourceFilterMode filterMode;
+        int interfaceId = -1;    // -1 = all
+        UDPSourceFilterMode filterMode = (UDPSourceFilterMode)0;
         std::vector<L3Address> sourceList;
 
         bool isSourceAllowed(L3Address sourceAddr);
@@ -66,20 +71,20 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     {
         SockDesc(int sockId, int appGateIndex);
         ~SockDesc();
-        int sockId;
-        int appGateIndex;
-        bool isBound;
-        bool onlyLocalPortIsSet;
-        bool reuseAddr;
+        int sockId = -1;
+        int appGateIndex = -1;
+        bool isBound = false;
+        bool onlyLocalPortIsSet = false;
+        bool reuseAddr = false;
         L3Address localAddr;
         L3Address remoteAddr;
-        int localPort;
-        int remotePort;
-        bool isBroadcast;
-        int multicastOutputInterfaceId;
-        bool multicastLoop;
-        int ttl;
-        unsigned char typeOfService;
+        int localPort = -1;
+        int remotePort = -1;
+        bool isBroadcast = false;
+        int multicastOutputInterfaceId = -1;
+        bool multicastLoop = DEFAULT_MULTICAST_LOOP;
+        int ttl = -1;
+        unsigned char typeOfService = 0;
         MulticastMembershipTable multicastMembershipTable;
 
         MulticastMembershipTable::iterator findFirstMulticastMembership(const L3Address& multicastAddress);
@@ -98,18 +103,18 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     SocketsByPortMap socketsByPortMap;
 
     // other state vars
-    ushort lastEphemeralPort;
-    IInterfaceTable *ift;
-    ICMP *icmp;
-    ICMPv6 *icmpv6;
+    ushort lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+    IInterfaceTable *ift = nullptr;
+    ICMP *icmp = nullptr;
+    ICMPv6 *icmpv6 = nullptr;
 
     // statistics
-    int numSent;
-    int numPassedUp;
-    int numDroppedWrongPort;
-    int numDroppedBadChecksum;
+    int numSent = 0;
+    int numPassedUp = 0;
+    int numDroppedWrongPort = 0;
+    int numDroppedBadChecksum = 0;
 
-    bool isOperational;
+    bool isOperational = false;
 
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;

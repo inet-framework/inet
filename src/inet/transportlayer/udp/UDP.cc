@@ -48,9 +48,6 @@
 
 namespace inet {
 
-#define EPHEMERAL_PORTRANGE_START    1024
-#define EPHEMERAL_PORTRANGE_END      5000
-
 Define_Module(UDP);
 
 simsignal_t UDP::rcvdPkSignal = registerSignal("rcvdPk");
@@ -98,15 +95,6 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_)
 {
     sockId = sockId_;
     appGateIndex = appGateIndex_;
-    onlyLocalPortIsSet = false;    // for now
-    reuseAddr = false;
-    localPort = -1;
-    remotePort = -1;
-    isBroadcast = false;
-    multicastOutputInterfaceId = -1;
-    multicastLoop = DEFAULT_MULTICAST_LOOP;
-    ttl = -1;
-    typeOfService = 0;
 }
 
 UDP::SockDesc::~SockDesc()
@@ -120,10 +108,6 @@ UDP::SockDesc::~SockDesc()
 //--------
 UDP::UDP()
 {
-    isOperational = false;
-    ift = nullptr;
-    icmp = nullptr;
-    icmpv6 = nullptr;
 }
 
 UDP::~UDP()
