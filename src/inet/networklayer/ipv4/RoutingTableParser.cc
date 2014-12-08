@@ -167,12 +167,16 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
             ie = ift->getInterfaceByName(name);
             if (!ie)
                 throw cRuntimeError("Error in routing file: interface name `%s' not registered by any L2 module", name);
+            if (!ie->ipv4Data())
+                throw cRuntimeError("Error in routing file: interface name `%s' doesn't have IPv4 data fields", name);
 
             continue;
         }
 
         // encap entry
         if (streq(ifconfigFile + charpointer, "encap:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             // ignore encap
             parseEntry(ifconfigFile, "encap:", charpointer, buf);
             continue;
@@ -180,6 +184,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // HWaddr entry
         if (streq(ifconfigFile + charpointer, "HWaddr:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             // ignore hwAddr
             parseEntry(ifconfigFile, "HWaddr:", charpointer, buf);
             continue;
@@ -187,12 +193,16 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // inet_addr entry
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->ipv4Data()->setIPAddress(IPv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
             continue;
         }
 
         // Broadcast address entry
         if (streq(ifconfigFile + charpointer, "Bcast:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             // ignore Bcast
             parseEntry(ifconfigFile, "Bcast:", charpointer, buf);
             continue;
@@ -200,12 +210,16 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // Mask entry
         if (streq(ifconfigFile + charpointer, "Mask:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->ipv4Data()->setNetmask(IPv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
             continue;
         }
 
         // Multicast groups entry
         if (streq(ifconfigFile + charpointer, "Groups:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             char *grStr = parseEntry(ifconfigFile, "Groups:", charpointer, buf);
             parseMulticastGroups(grStr, ie);
             continue;
@@ -213,18 +227,24 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // MTU entry
         if (streq(ifconfigFile + charpointer, "MTU:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->setMtu(atoi(parseEntry(ifconfigFile, "MTU:", charpointer, buf)));
             continue;
         }
 
         // Metric entry
         if (streq(ifconfigFile + charpointer, "Metric:")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->ipv4Data()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer, buf)));
             continue;
         }
 
         // BROADCAST Flag
         if (streq(ifconfigFile + charpointer, "BROADCAST")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->setBroadcast(true);
             charpointer += strlen("BROADCAST");
             skipBlanks(ifconfigFile, charpointer);
@@ -233,6 +253,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // MULTICAST Flag
         if (streq(ifconfigFile + charpointer, "MULTICAST")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->setMulticast(true);
             charpointer += strlen("MULTICAST");
             skipBlanks(ifconfigFile, charpointer);
@@ -241,6 +263,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 
         // POINTTOPOINT Flag
         if (streq(ifconfigFile + charpointer, "POINTTOPOINT")) {
+            if (!ie)
+                throw cRuntimeError("Error in routing file: missing the `name:' entry");
             ie->setPointToPoint(true);
             charpointer += strlen("POINTTOPOINT");
             skipBlanks(ifconfigFile, charpointer);
