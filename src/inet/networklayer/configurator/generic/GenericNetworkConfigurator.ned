@@ -20,14 +20,15 @@
 
 package inet.networklayer.configurator.generic;
 
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 
 //
 // TODO
 //
-simple GenericNetworkConfigurator like INetworkConfigurator
+simple GenericNetworkConfigurator extends NetworkConfiguratorBase
 {
     parameters:
+        @class(GenericNetworkConfigurator);
         @display("i=block/cogwheel_s");
         xml config = default(xml("<config/>")); // XML configuration parameters
         bool addStaticRoutes = default(true);  // add static routes to the routing tables of all nodes to route to all destination interfaces (only where applicable; turn off when config file contains manual routes)

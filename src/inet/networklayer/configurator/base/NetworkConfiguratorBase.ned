@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2004 Eric Wu
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -16,24 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.networklayer.configurator.ipv6;
+package inet.networklayer.configurator.base;
 
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
-//
-// Configures IPv6 addresses and routing tables for a "flat" network,
-// "flat" meaning that all hosts and routers will have the same
-// network address and will only differ in the host part.
-//
-// FIXME: add documentation!
-//
-// @see ~FlatNetworkConfigurator
-//
-simple FlatNetworkConfigurator6 like INetworkConfigurator
+simple NetworkConfiguratorBase like INetworkConfigurator
 {
-    parameters:
-        @display("i=block/cogwheel");
-        @labels(node);
 }
-

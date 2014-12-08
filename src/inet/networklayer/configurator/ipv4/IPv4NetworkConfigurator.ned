@@ -20,7 +20,7 @@
 
 package inet.networklayer.configurator.ipv4;
 
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 
 //
 // This module assigns IP addresses and sets up static routing for an IPv4 network.
@@ -357,9 +357,10 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //      Incoming multicast datagrams are forwarded to each child interface except the
 //      one they arrived in.
 //
-simple IPv4NetworkConfigurator like INetworkConfigurator
+simple IPv4NetworkConfigurator extends NetworkConfiguratorBase
 {
     parameters:
+        @class(IPv4NetworkConfigurator);
         @display("i=block/cogwheel_s");
         xml config = default(xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")); // XML configuration parameters for IP address assignment and adding manual routes
         bool assignAddresses = default(true); // assign IP addresses to all interfaces in the network

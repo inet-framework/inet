@@ -69,6 +69,13 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 #define PK(msg)    check_and_cast<cPacket *>(msg)    /*XXX temp def*/
 
+inline void printElapsedTime(const char *name, long startTime)
+{
+    EV_DEBUG << "Time spent in " << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
+}
+
+#define TIME(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
+
 } // namespace inet
 
 #endif // ifndef __INET_INETDEFS_H

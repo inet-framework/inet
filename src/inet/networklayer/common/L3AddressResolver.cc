@@ -452,8 +452,7 @@ IPv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
 
 IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
 {
-    cModule *mod = host->getSubmodule("interfaceTable");
-    return dynamic_cast<IInterfaceTable *>(mod);
+    return dynamic_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
 }
 
 IIPv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
