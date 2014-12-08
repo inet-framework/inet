@@ -126,6 +126,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                 LSAProcessingMarker marker(currentLSAIndex++);
                 EV_DETAIL << "    " << currentLSA->getHeader() << "\n";
 
+                //FIXME area maybe nullptr
                 if ((lsaType == AS_EXTERNAL_LSA_TYPE) && (!area->getExternalRoutingCapability())) {
                     continue;
                 }
