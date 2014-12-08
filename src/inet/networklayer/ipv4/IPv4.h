@@ -54,34 +54,34 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
             datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
-        IPv4Datagram *datagram;
-        const InterfaceEntry *inIE;
-        const InterfaceEntry *outIE;
+        IPv4Datagram *datagram = nullptr;
+        const InterfaceEntry *inIE = nullptr;
+        const InterfaceEntry *outIE = nullptr;
         IPv4Address nextHopAddr;
-        const IHook::Type hookType;
+        const IHook::Type hookType = (IHook::Type)-1;
     };
     typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
 
   protected:
-    IIPv4RoutingTable *rt;
-    IInterfaceTable *ift;
-    IARP *arp;
-    ICMP *icmp;
-    cGate *arpInGate;
-    cGate *arpOutGate;
-    int transportInGateBaseId;
-    int queueOutGateBaseId;
+    IIPv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
+    IARP *arp = nullptr;
+    ICMP *icmp = nullptr;
+    cGate *arpInGate = nullptr;
+    cGate *arpOutGate = nullptr;
+    int transportInGateBaseId = -1;
+    int queueOutGateBaseId = -1;
 
     // config
-    int defaultTimeToLive;
-    int defaultMCTimeToLive;
+    int defaultTimeToLive = -1;
+    int defaultMCTimeToLive = -1;
     simtime_t fragmentTimeoutTime;
-    bool forceBroadcast;
-    bool useProxyARP;
+    bool forceBroadcast = false;
+    bool useProxyARP = false;
 
     // working vars
-    bool isUp;
-    long curFragmentId;    // counter, used to assign unique fragmentIds to datagrams
+    bool isUp = false;
+    long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     IPv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
@@ -90,11 +90,11 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     PendingPackets pendingPackets;    // map indexed with IPv4Address for outbound packets waiting for ARP resolution
 
     // statistics
-    int numMulticast;
-    int numLocalDeliver;
-    int numDropped;    // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
-    int numUnroutable;
-    int numForwarded;
+    int numMulticast = 0;
+    int numLocalDeliver = 0;
+    int numDropped = 0;    // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
+    int numUnroutable = 0;
+    int numForwarded = 0;
 
     // hooks
     typedef std::multimap<int, IHook *> HookList;

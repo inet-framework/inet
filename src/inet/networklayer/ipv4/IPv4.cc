@@ -44,25 +44,7 @@ Define_Module(IPv4);
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
 IPv4::IPv4() :
-    rt(nullptr),
-    ift(nullptr),
-    arp(nullptr),
-    icmp(nullptr),
-    arpInGate(nullptr),
-    arpOutGate(nullptr),
-    transportInGateBaseId(-1),
-    queueOutGateBaseId(-1),
-    defaultTimeToLive(-1),
-    defaultMCTimeToLive(-1),
-    forceBroadcast(false),
-    useProxyARP(false),
-    isUp(true),
-    curFragmentId(-1),
-    numMulticast(0),
-    numLocalDeliver(0),
-    numDropped(0),
-    numUnroutable(0),
-    numForwarded(0)
+    isUp(true)
 {
 }
 
