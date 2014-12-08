@@ -51,22 +51,22 @@ class IPv6RoutingTable;
 class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift;    // cached pointer
+    IInterfaceTable *ift = nullptr;    // cached pointer
 
-    bool isrouter;
-    bool multicastForward;    //If node is forwarding multicast info
+    bool isrouter = false;
+    bool multicastForward = false;    //If node is forwarding multicast info
 
 #ifdef WITH_xMIPv6
-    bool ishome_agent;    //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
-    bool ismobile_node;    //added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
-    bool mipv6Support;    // 4.9.07 - CB
+    bool ishome_agent = false;    //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
+    bool ismobile_node = false;    //added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
+    bool mipv6Support = false;    // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
     // Destination Cache maps dest address to next hop and interfaceId.
     // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
     struct DestCacheEntry
     {
-        int interfaceId;
+        int interfaceId = -1;
         IPv6Address nextHopAddr;
         simtime_t expiryTime;
         // more destination specific data may be added here, e.g. path MTU
