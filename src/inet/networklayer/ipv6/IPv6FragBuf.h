@@ -57,7 +57,7 @@ class INET_API IPv6FragBuf
     struct DatagramBuffer
     {
         ReassemblyBuffer buf;    // reassembly buffer
-        IPv6Datagram *datagram;    // the actual datagram
+        IPv6Datagram *datagram = nullptr;    // the actual datagram
         simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
@@ -68,7 +68,7 @@ class INET_API IPv6FragBuf
     Buffers bufs;
 
     // needed for TIME_EXCEEDED errors
-    ICMPv6 *icmpModule;
+    ICMPv6 *icmpModule = nullptr;
 
   public:
     /**
