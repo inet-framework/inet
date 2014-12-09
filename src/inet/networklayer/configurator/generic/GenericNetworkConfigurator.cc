@@ -28,7 +28,7 @@ Define_Module(GenericNetworkConfigurator);
 
 void GenericNetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER_3) {
         long initializeStartTime = clock();
         Topology topology;
@@ -69,7 +69,10 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
 
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
-        topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+        if (!strcmp(linkWeightMode, "constant"))
+            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+        else
+            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
 
         // add a route to all destinations in the network
         for (int j = 0; j < topology.getNumNodes(); j++) {

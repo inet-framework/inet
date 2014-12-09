@@ -227,6 +227,11 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     //@}
 
     virtual IRoute *createRoute();
+
+    /**
+     * Prints routing table.
+     */
+    virtual void printRoutingTable();
 };
 
 } // namespace inet

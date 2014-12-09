@@ -58,6 +58,7 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
     virtual const IModulation *getModulation() const { return modulation; }
+    virtual const IErrorModel *getErrorModel() const { return errorModel; }
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }

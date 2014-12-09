@@ -21,4 +21,8 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 simple NetworkConfiguratorBase like INetworkConfigurator
 {
+    parameters:
+        string linkWeightMode @enum = default("constant"); // either "constant", "dataRate", or "errorRate"
+        double defaultLinkWeight = default(1);
+        double minLinkWeight = default(1E-3);
 }

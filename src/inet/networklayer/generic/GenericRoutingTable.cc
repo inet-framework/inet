@@ -420,5 +420,11 @@ IRoute *GenericRoutingTable::createRoute()
     return new GenericRoute();
 }
 
+void GenericRoutingTable::printRoutingTable()
+{
+    for (auto i = routes.begin(); i != routes.end(); ++i)
+        EV_INFO << (*i)->getInterface()->getFullPath() << " -> " << (*i)->getDestinationAsGeneric().str() << " as " << (*i)->info() << endl;
+}
+
 } // namespace inet
 

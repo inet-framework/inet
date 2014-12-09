@@ -63,8 +63,7 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
 
 void IPv4NetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
+    NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
@@ -72,7 +71,6 @@ void IPv4NetworkConfigurator::initialize(int stage)
         addSubnetRoutesParameter = par("addSubnetRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
-        configuration = par("config");
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
         ensureConfigurationComputed(topology);
@@ -1229,7 +1227,10 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology)
 
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
-        topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+        if (!strcmp(linkWeightMode, "constant"))
+            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+        else
+            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
 
         // check if adding the default routes would be ok (this is an optimization)
         if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo) {

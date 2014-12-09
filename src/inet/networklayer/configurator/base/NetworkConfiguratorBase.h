@@ -153,10 +153,14 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
 
   protected:
     // parameters
+    const char *linkWeightMode;
+    double defaultLinkWeight;
+    double minLinkWeight;
     cXMLElement *configuration;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
@@ -171,7 +175,9 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
-    virtual double getChannelWeight(cChannel *transmissionChannel);
+    virtual double computeNodeWeight(Node *node);
+    virtual double computeWiredLinkWeight(Link *link);
+    virtual double computeWirelessLinkWeight(Link *link);
     virtual bool isBridgeNode(Node *node);
     virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
     virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
