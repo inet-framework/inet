@@ -19,7 +19,7 @@
 
 // package module_.lib;
 
-import inet.applications.ITCPApp;
+import inet.applications.contract.ITCPApp;
 
 
 //

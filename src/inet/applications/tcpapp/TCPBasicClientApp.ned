@@ -17,7 +17,7 @@
 
 package inet.applications.tcpapp;
 
-import inet.applications.ITCPApp;
+import inet.applications.contract.ITCPApp;
 
 
 //

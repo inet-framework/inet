@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.applications;
+package inet.applications.contract;
 
 //
 // Template for UDP applications. It shows what gates a UDP app

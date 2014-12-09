@@ -17,7 +17,7 @@
 
 package inet.routing.rip;
 
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 
 
 //

@@ -16,7 +16,7 @@ package inet.applications.sctpapp;//
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import inet.applications.ISCTPApp;
+import inet.applications.contract.ISCTPApp;
 
 simple SCTPNatServer like ISCTPApp
 {

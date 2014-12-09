@@ -17,7 +17,7 @@
 
 package inet.node.inet;
 
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 import inet.routing.IBGPRouting;
 import inet.routing.IIPRouting;
 import inet.transportlayer.ITCP;

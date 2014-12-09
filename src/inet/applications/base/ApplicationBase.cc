@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/base/ApplicationBase.h"
 
-package inet.applications;
+namespace inet {
 
-//
-// Template for ping applications. It shows what gates a ping app
-// needs, to be able to be used in ~StandardHost etc.
-//
-moduleinterface IPingApp
+ApplicationBase::ApplicationBase()
 {
-    parameters:
-        @display("i=block/app");
-    gates:
-        input pingIn @labels(PingPayload/up);
-        output pingOut @labels(PingPayload/down);
 }
+
+} // namespace inet
 

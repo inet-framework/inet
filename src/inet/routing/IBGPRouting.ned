@@ -17,7 +17,7 @@
 
 package inet.routing;
 
-import inet.applications.ITCPApp;
+import inet.applications.contract.ITCPApp;
 
 
 //

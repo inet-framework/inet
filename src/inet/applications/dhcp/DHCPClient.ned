@@ -19,7 +19,7 @@
 
 package inet.applications.dhcp;
 
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 
 //
 // Implements the DHCP client protocol. DHCP (Dynamic Host Configuration Protocol),

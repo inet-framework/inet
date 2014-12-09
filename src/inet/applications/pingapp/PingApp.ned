@@ -18,7 +18,7 @@
 
 package inet.applications.pingapp;
 
-import inet.applications.IPingApp;
+import inet.applications.contract.IPingApp;
 
 
 //

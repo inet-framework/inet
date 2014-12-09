@@ -17,7 +17,7 @@
 
 package inet.applications.pingapp;
 
-import inet.applications.IPingApp;
+import inet.applications.contract.IPingApp;
 
 //
 // Generates ping requests to several hosts (or rather, network interfaces),

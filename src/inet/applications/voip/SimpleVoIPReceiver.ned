@@ -18,7 +18,7 @@
 
 package inet.applications.voip;
 
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 
 
 //

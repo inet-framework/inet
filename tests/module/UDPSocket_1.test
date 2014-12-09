@@ -35,7 +35,7 @@ void TestApp::activity()
 }
 
 %file: TestApp.ned
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 
 simple TestApp like IUDPApp
 {

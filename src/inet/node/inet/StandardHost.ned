@@ -18,10 +18,10 @@
 
 package inet.node.inet;
 
-import inet.applications.IPingApp;
-import inet.applications.ISCTPApp;
-import inet.applications.ITCPApp;
-import inet.applications.IUDPApp;
+import inet.applications.contract.IPingApp;
+import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.ITCPApp;
+import inet.applications.contract.IUDPApp;
 import inet.transportlayer.ISCTP;
 import inet.transportlayer.ITCP;
 import inet.transportlayer.IUDP;

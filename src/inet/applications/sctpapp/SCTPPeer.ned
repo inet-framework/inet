@@ -17,7 +17,7 @@
 
 package inet.applications.sctpapp;
 
-import inet.applications.ISCTPApp;
+import inet.applications.contract.ISCTPApp;
 
 
 simple SCTPPeer like ISCTPApp

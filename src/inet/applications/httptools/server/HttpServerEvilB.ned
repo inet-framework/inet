@@ -17,8 +17,7 @@
 
 package inet.applications.httptools.server;
 
-import inet.applications.ITCPApp;
-
+import inet.applications.contract.ITCPApp;
 
 //
 // HttpServerEvilB
