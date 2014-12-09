@@ -590,7 +590,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.mobility.common
+                       inet.mobility.base
                        inet.mobility.group
                        inet.mobility.single
                        inet.mobility.static
