@@ -151,9 +151,9 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                 linkIJ->setWeight(computeWirelessLinkWeight(linkIJ));
                 topology.addLink(linkIJ, interfaceInfoI->node, interfaceInfoJ->node);
                 Link *linkJI = new Link();
-                linkJI->setWeight(computeWirelessLinkWeight(linkJI));
                 linkJI->sourceInterfaceInfo = interfaceInfoJ;
                 linkJI->destinationInterfaceInfo = interfaceInfoI;
+                linkJI->setWeight(computeWirelessLinkWeight(linkJI));
                 topology.addLink(linkJI, interfaceInfoJ->node, interfaceInfoI->node);
             }
         }
@@ -326,8 +326,8 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         // compute the packet error rate between the two interfaces using a dummy transmission
         InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
         InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->node->module;
-        cModule *receiverInterfaceModule = receiverInterfaceInfo->node->module;
+        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
+        cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
         const NarrowbandReceiverBase *receiver = dynamic_cast<const NarrowbandReceiverBase *>(receiverRadio->getReceiver());
