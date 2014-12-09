@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
-#include "inet/environment/cache/IObjectCache.h"
+#include "inet/environment/objectcache/IObjectCache.h"
 #include "inet/environment/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/base/ShapeBase.h"

@@ -17,7 +17,7 @@
 
 package inet.environment;
 
-import inet.environment.cache.IObjectCache;
+import inet.environment.objectcache.IObjectCache;
 
 //
 // The propagation of communication signals, the movement of communicating

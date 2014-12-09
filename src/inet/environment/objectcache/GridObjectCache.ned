@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.environment.cache;
+package inet.environment.objectcache;
 
 //
 // This object cache model stores physical objects in a spatial grid. Each cell

@@ -15,28 +15,31 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GRIDOBJECTCACHE_H
-#define __INET_GRIDOBJECTCACHE_H
+#ifndef __INET_BVHOBJECTCACHE_H
+#define __INET_BVHOBJECTCACHE_H
 
-#include "inet/environment/cache/IObjectCache.h"
-#include "inet/common/geometry/container/SpatialGrid.h"
+#include "inet/environment/objectcache/IObjectCache.h"
+#include "inet/common/geometry/container/BVHTree.h"
 #include "inet/environment/PhysicalEnvironment.h"
 #include "inet/environment/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
 
 namespace inet {
 
-class GridObjectCache : public IObjectCache, public cModule
+class BVHObjectCache : public IObjectCache, public cModule
 {
   protected:
     /** @name Parameters */
     //@{
     PhysicalEnvironment *physicalEnvironment;
+    unsigned int leafCapacity;
+    const char *axisOrder;
     //@}
 
     /** @name Cache */
     //@{
-    SpatialGrid *grid;
+    mutable BVHTree *bvhTree;
+    mutable std::vector<const PhysicalObject *> objects;
     //@}
 
   protected:
@@ -44,8 +47,8 @@ class GridObjectCache : public IObjectCache, public cModule
     virtual void initialize(int stage);
 
   public:
-    GridObjectCache();
-    virtual ~GridObjectCache();
+    BVHObjectCache();
+    virtual ~BVHObjectCache();
 
     bool insertObject(const PhysicalObject *object);
     void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
@@ -53,4 +56,5 @@ class GridObjectCache : public IObjectCache, public cModule
 
 } // namespace inet
 
-#endif // ifndef __INET_GRIDOBJECTCACHE_H
+#endif // ifndef __INET_BVHOBJECTCACHE_H
+
