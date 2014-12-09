@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Andras Varga
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.transportlayer.common;
+#include "inet/transportlayer/base/TransportProtocolBase.h"
 
-import inet.common.LayeredProtocolBase;
+namespace inet {
 
+} // namespace inet
 
-//
-// Module base for different transport protocols.
-//
-simple TransportProtocolBase extends LayeredProtocolBase
-{
-    gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn @labels(ITransportPacket/up);
-        output lowerLayerOut @labels(ITransportPacket/down);
-}
