@@ -19,21 +19,19 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-
 package inet.mobility.static;
 
-import inet.mobility.common.MobilityBase;
+import inet.mobility.base.MobilityBase;
 
 //
 // Places all hosts on concentric circles
 //
 simple StaticConcentricMobility extends MobilityBase
 {
-    parameters:    	
+    parameters:
         int numHosts;
         double initialZ @unit(m) = default(0m);
         double distance @unit(m) = default(100m);
-        
+
         @class(StaticConcentricMobility);
 }
-
