@@ -17,7 +17,7 @@
 
 package inet.mobility.single;
 
-import inet.mobility.common.MovingMobilityBase;
+import inet.mobility.base.MovingMobilityBase;
 
 //
 // Moves the node around a rectangle.

@@ -19,7 +19,7 @@
 
 package inet.mobility.single;
 
-import inet.mobility.common.MovingMobilityBase;
+import inet.mobility.base.MovingMobilityBase;
 
 //
 // Uses a probabilistic transition matrix to change the state of motion.

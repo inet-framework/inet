@@ -18,7 +18,7 @@
 
 package inet.mobility.single;
 
-import inet.mobility.common.MovingMobilityBase;
+import inet.mobility.base.MovingMobilityBase;
 
 //
 // This is a linear mobility model with speed, angle and acceleration parameters.

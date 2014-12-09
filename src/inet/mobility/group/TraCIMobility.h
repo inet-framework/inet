@@ -31,7 +31,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/INETDefs.h"
-#include "inet/mobility/common/MobilityBase.h"
+#include "inet/mobility/base/MobilityBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/group/TraCIScenarioManager.h"
 

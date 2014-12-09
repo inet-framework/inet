@@ -20,7 +20,7 @@
 
 package inet.mobility.group;
 
-import inet.mobility.common.MobilityBase;
+import inet.mobility.base.MobilityBase;
 
 //
 // Used in modules created by the TraCIScenarioManager.

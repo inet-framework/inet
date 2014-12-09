@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/mobility/common/MobilityBase.h"
+#include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
 

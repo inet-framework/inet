@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/mobility/common/LineSegmentsMobilityBase.h"
+#include "inet/mobility/base/LineSegmentsMobilityBase.h"
 #include "inet/mobility/single/BonnMotionFileCache.h"
 
 namespace inet {

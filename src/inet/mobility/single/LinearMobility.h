@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/mobility/common/MovingMobilityBase.h"
+#include "inet/mobility/base/MovingMobilityBase.h"
 
 namespace inet {
 

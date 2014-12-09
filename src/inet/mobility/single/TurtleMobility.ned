@@ -17,7 +17,7 @@
 
 package inet.mobility.single;
 
-import inet.mobility.common.MovingMobilityBase;
+import inet.mobility.base.MovingMobilityBase;
 
 //
 // A LOGO-style movement model, with the script coming from XML. It can be
