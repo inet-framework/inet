@@ -58,6 +58,11 @@ class INET_API IRoutingTable
      * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const = 0;    //XXX should be find..., see next one
+
+    /**
+     * Prints the routing table.
+     */
+    virtual void printRoutingTable() const = 0;
     //@}
 
     /** @name Routing functions (query the route table) */

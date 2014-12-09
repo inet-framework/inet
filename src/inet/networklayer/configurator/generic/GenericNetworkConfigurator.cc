@@ -131,7 +131,7 @@ void GenericNetworkConfigurator::dumpRoutes(Topology& topology)
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable) {
             EV_INFO << "Node " << node->module->getFullPath() << endl;
-            // TODO: node->routingTable->printRoutingTable();
+            node->routingTable->printRoutingTable();
             if (node->routingTable->getNumMulticastRoutes() > 0)
                 ; // TODO: node->routingTable->printMulticastRoutingTable();
         }

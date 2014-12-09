@@ -915,5 +915,11 @@ bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
     return true;
 }
 
+void IPv6RoutingTable::printRoutingTable() const
+{
+    for (auto i = routeList.begin(); i != routeList.end(); ++i)
+        EV_INFO << (*i)->getInterface()->getFullPath() << " -> " << (*i)->getDestinationAsGeneric().str() << " as " << (*i)->info() << endl;
+}
+
 } // namespace inet
 

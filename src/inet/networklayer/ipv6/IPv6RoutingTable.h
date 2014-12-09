@@ -395,6 +395,11 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) {    /*TODO removeMulticastRoute(entry);*/ return entry; }
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) { return false;    /*TODO: deleteMulticastRoute(entry);*/ }
     virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
+
+    /**
+     * Prints the routing table.
+     */
+    virtual void printRoutingTable() const;
 };
 
 } // namespace inet

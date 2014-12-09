@@ -420,7 +420,7 @@ IRoute *GenericRoutingTable::createRoute()
     return new GenericRoute();
 }
 
-void GenericRoutingTable::printRoutingTable()
+void GenericRoutingTable::printRoutingTable() const
 {
     for (auto i = routes.begin(); i != routes.end(); ++i)
         EV_INFO << (*i)->getInterface()->getFullPath() << " -> " << (*i)->getDestinationAsGeneric().str() << " as " << (*i)->info() << endl;
