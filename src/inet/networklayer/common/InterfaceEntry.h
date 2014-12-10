@@ -156,7 +156,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void resetInterface();
 
   public:
-    InterfaceEntry(cModule *interfaceModule);
+    InterfaceEntry(cModule *module);
     virtual ~InterfaceEntry();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -183,7 +183,7 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const { return interfaceId; }
-    cModule *getInterfaceModule() const { return interfaceModule->getParentModule(); }
+    cModule *getInterfaceModule() const { return interfaceModule; }
     int getNetworkLayerGateIndex() const { return nwLayerGateIndex; }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }

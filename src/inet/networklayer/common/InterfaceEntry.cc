@@ -22,6 +22,7 @@
 //#include <algorithm>
 //#include <sstream>
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 #include "inet/networklayer/common/IInterfaceTable.h"
@@ -62,9 +63,9 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
     return out.str();
 }
 
-InterfaceEntry::InterfaceEntry(cModule *ifmod)
+InterfaceEntry::InterfaceEntry(cModule *module)
 {
-    interfaceModule = ifmod;
+    interfaceModule = findModuleUnderContainingNode(module);
     state = UP;
     carrier = true;
     datarate = 0;
