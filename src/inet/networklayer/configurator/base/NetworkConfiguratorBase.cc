@@ -423,7 +423,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 
 /**
  * If this link has exactly one node that connects to other links as well, we can assume
- * it is a "gateway" and return that (we'll use it in routing); otherwise return NULL.
+ * it is a "gateway" and return that (we'll use it in routing); otherwise return nullptr.
  */
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {

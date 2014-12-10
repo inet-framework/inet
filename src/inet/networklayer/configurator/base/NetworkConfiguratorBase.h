@@ -22,11 +22,14 @@
 #define __INET_NETWORKCONFIGURATORBASE_H
 
 #include <algorithm>
+
+#include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
+#include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/PatternMatcher.h"
 
 namespace inet {
 
@@ -46,13 +49,13 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     class Node : public inet::Topology::Node
     {
       public:
-        cModule *module;
-        IInterfaceTable *interfaceTable;
-        IRoutingTable *routingTable;
+        cModule *module = nullptr;
+        IInterfaceTable *interfaceTable = nullptr;
+        IRoutingTable *routingTable = nullptr;
         std::vector<InterfaceInfo *> interfaceInfos;
 
       public:
-        Node(cModule *module) : inet::Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
+        Node(cModule *module) : inet::Topology::Node(module->getId()), module(module) { }
     };
 
     /**
@@ -61,11 +64,11 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     class Link : public inet::Topology::Link
     {
       public:
-        InterfaceInfo *sourceInterfaceInfo;
-        InterfaceInfo *destinationInterfaceInfo;
+        InterfaceInfo *sourceInterfaceInfo = nullptr;
+        InterfaceInfo *destinationInterfaceInfo = nullptr;
 
       public:
-        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+        Link() { }
     };
 
     /**
@@ -74,15 +77,15 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     class InterfaceInfo : public cObject
     {
       public:
-        Node *node;
-        LinkInfo *linkInfo;
-        InterfaceEntry *interfaceEntry;
-        int mtu;
-        double metric;
-        bool configure;    // false means the IP address of the interface will not be modified
-        bool addStaticRoute;    // add-static-route attribute
-        bool addDefaultRoute;    // add-default-route attribute
-        bool addSubnetRoute;    // add-subnet-route attribute
+        Node *node = nullptr;
+        LinkInfo *linkInfo = nullptr;
+        InterfaceEntry *interfaceEntry = nullptr;
+        int mtu = 0;
+        double metric = NaN;
+        bool configure = false;    // false means the IP address of the interface will not be modified
+        bool addStaticRoute = false;    // add-static-route attribute
+        bool addDefaultRoute = false;    // add-default-route attribute
+        bool addSubnetRoute = false;    // add-subnet-route attribute
 
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
@@ -98,10 +101,10 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     {
       public:
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
-        InterfaceInfo *gatewayInterfaceInfo;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
+        InterfaceInfo *gatewayInterfaceInfo = nullptr;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
       public:
-        LinkInfo() { gatewayInterfaceInfo = NULL; }
+        LinkInfo() {  }
         ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 
@@ -125,7 +128,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     class Matcher
     {
       protected:
-        bool matchesany;
+        bool matchesany = false;
         std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
       public:
@@ -139,7 +142,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     class InterfaceMatcher
     {
       protected:
-        bool matchesany;
+        bool matchesany = false;
         std::vector<inet::PatternMatcher *> nameMatchers;
         std::vector<inet::PatternMatcher *> towardsMatchers;
 
@@ -153,10 +156,10 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
 
   protected:
     // parameters
-    const char *linkWeightMode;
-    double defaultLinkWeight;
-    double minLinkWeight;
-    cXMLElement *configuration;
+    const char *linkWeightMode = nullptr;
+    double defaultLinkWeight = NaN;
+    double minLinkWeight = NaN;
+    cXMLElement *configuration = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
