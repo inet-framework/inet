@@ -20,6 +20,7 @@
 #define __INET_TOKENBUCKETMETER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -29,15 +30,15 @@ namespace inet {
 class INET_API TokenBucketMeter : public cSimpleModule
 {
   protected:
-    double CIR;    // Commited Information Rate (bits/sec)
-    long CBS;    // Committed Burst Size (in bits)
-    bool colorAwareMode;
+    double CIR = NaN;    // Commited Information Rate (bits/sec)
+    long CBS = 0;    // Committed Burst Size (in bits)
+    bool colorAwareMode = false;
 
-    long Tc;    // token bucket for committed burst
+    long Tc = 0;    // token bucket for committed burst
     simtime_t lastUpdateTime;
 
-    int numRcvd;
-    int numRed;
+    int numRcvd = 0;
+    int numRed = 0;
 
   public:
     TokenBucketMeter() {}

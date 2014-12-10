@@ -31,23 +31,21 @@ class INET_API MultiFieldClassifier : public cSimpleModule
   protected:
     struct Filter
     {
-        int gateIndex;
+        int gateIndex = -1;
 
         L3Address srcAddr;
-        int srcPrefixLength;
+        int srcPrefixLength = 0;
         L3Address destAddr;
-        int destPrefixLength;
-        int protocol;
-        int tos;
-        int tosMask;
-        int srcPortMin;
-        int srcPortMax;
-        int destPortMin;
-        int destPortMax;
+        int destPrefixLength = 0;
+        int protocol = -1;
+        int tos = 0;
+        int tosMask = 0;
+        int srcPortMin = -1;
+        int srcPortMax = -1;
+        int destPortMin = -1;
+        int destPortMax = -1;
 
-        Filter() : gateIndex(-1),
-            srcPrefixLength(0), destPrefixLength(0), protocol(-1), tos(0), tosMask(0),
-            srcPortMin(-1), srcPortMax(-1), destPortMin(-1), destPortMax(-1) {}
+        Filter() {}
     #ifdef WITH_IPv4
         bool matches(IPv4Datagram *datagram);
     #endif // ifdef WITH_IPv4
@@ -57,10 +55,10 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     };
 
   protected:
-    int numOutGates;
+    int numOutGates = 0;
     std::vector<Filter> filters;
 
-    int numRcvd;
+    int numRcvd = 0;
 
     static simsignal_t pkClassSignal;
 

@@ -29,10 +29,10 @@ namespace inet {
 class INET_API BehaviorAggregateClassifier : public cSimpleModule
 {
   protected:
-    int numOutGates;
+    int numOutGates = 0;
     std::map<int, int> dscpToGateIndexMap;
 
-    int numRcvd;
+    int numRcvd = 0;
 
     static simsignal_t pkClassSignal;
 
