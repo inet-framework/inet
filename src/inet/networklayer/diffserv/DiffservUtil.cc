@@ -75,7 +75,6 @@ double parseInformationRate(const char *attrValue, const char *attrName, IInterf
         double datarate = strtod(attrValue, &unit);
         return cNEDValue::convertUnit(datarate, unit, "bps");
     }
-    return 0;
 }
 
 int parseIntAttribute(const char *attrValue, const char *attrName, bool isOptional)
