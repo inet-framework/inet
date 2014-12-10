@@ -173,15 +173,15 @@ void GenericRoutingTable::configureRouterId()
 void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
 {
     int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
-    int interfaceModuleId = ie->getNetworkInterfaceModule() ? ie->getNetworkInterfaceModule()->getId() : -1;
+    int interfaceModuleId = ie->getInterfaceModule() ? ie->getInterfaceModule()->getId() : -1;
     // mac
     GenericNetworkProtocolInterfaceData *d = new GenericNetworkProtocolInterfaceData();
     d->setMetric(metric);
     if (addressType == L3Address::MAC)
         d->setAddress(ie->getMacAddress());
-    else if (ie->getNetworkInterfaceModule() && addressType == L3Address::MODULEPATH)
+    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEPATH)
         d->setAddress(ModulePathAddress(interfaceModuleId));
-    else if (ie->getNetworkInterfaceModule() && addressType == L3Address::MODULEID)
+    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEID)
         d->setAddress(ModuleIdAddress(interfaceModuleId));
     ie->setGenericNetworkProtocolData(d);
 }

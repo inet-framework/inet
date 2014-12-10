@@ -176,15 +176,14 @@ class INET_API InterfaceEntry : public cNamedObject
      */
     bool isUp() const { return getState() == UP && hasCarrier(); }
 
-    cModule *getNetworkInterfaceModule() const { return interfaceModule->getParentModule(); }
-    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getNetworkInterfaceModule()->getId()); }
-    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getNetworkInterfaceModule()->getId()); }
+    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getInterfaceModule()->getId()); }
+    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getInterfaceModule()->getId()); }
     const L3Address getNetworkAddress() const;
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const { return interfaceId; }
-//    cModule *getInterfaceModule() const { return interfaceModule; }
+    cModule *getInterfaceModule() const { return interfaceModule->getParentModule(); }
     int getNetworkLayerGateIndex() const { return nwLayerGateIndex; }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }

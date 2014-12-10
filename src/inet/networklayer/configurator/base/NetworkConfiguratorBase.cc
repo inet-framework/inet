@@ -316,7 +316,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         return defaultLinkWeight;
     else if (!strcmp(linkWeightMode, "dataRate")) {
         // compute the packet error rate between the two interfaces using a dummy transmission
-        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
+        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         const NarrowbandTransmitterBase *transmitter = dynamic_cast<const NarrowbandTransmitterBase *>(transmitterRadio->getTransmitter());
         double dataRate = transmitter->getBitrate().get();
@@ -326,8 +326,8 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         // compute the packet error rate between the two interfaces using a dummy transmission
         InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
         InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
-        cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
+        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
+        cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
         const NarrowbandReceiverBase *receiver = dynamic_cast<const NarrowbandReceiverBase *>(receiverRadio->getReceiver());
@@ -393,7 +393,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     }
 
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
-    cModule *module = interfaceEntry->getNetworkInterfaceModule();
+    cModule *module = interfaceEntry->getInterfaceModule();
     if (!module)
         module = hostModule;
     cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
