@@ -396,7 +396,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     cModule *module = interfaceEntry->getInterfaceModule();
     if (!module)
         module = hostModule;
-    cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
+    cModule *mgmtModule = module->getSubmodule("mgmt");
     if (mgmtModule) {
         if (mgmtModule->hasPar("ssid"))
             return mgmtModule->par("ssid");

@@ -113,53 +113,6 @@ INET_API T *getModuleFromPar(cPar& par, cModule *from)
     return m;
 }
 
-/**
- * Finds and returns the pointer to a module of type T and name N.
- * Uses findModuleWhereverInNode(). See usage e.g. at IPv4RoutingTableAccess.
- */
-template<typename T>
-class INET_API ModuleAccess
-{
-    // Note: MSVC 6.0 doesn't like const char *N as template parameter,
-    // so we have to pass it via the ctor...
-
-  private:
-    const char *name;
-    T *p;
-
-  public:
-    ModuleAccess(const char *n) { name = n; p = nullptr; }
-    virtual ~ModuleAccess() {}
-
-    virtual T *get()
-    {
-        if (!p)
-            p = get(simulation.getContextModule());
-        return p;
-    }
-
-    virtual T *get(cModule *from)
-    {
-        T *m = getIfExists(from);
-        if (!m) throw cRuntimeError("Module (%s)%s not found", opp_typename(typeid(T)), name);
-        return m;
-    }
-
-    virtual T *getIfExists()
-    {
-        if (!p)
-            p = getIfExists(simulation.getContextModule());
-        return p;
-    }
-
-    virtual T *getIfExists(cModule *from)
-    {
-        if (!from) throw cRuntimeError("Invalid argument: module must not be nullptr");
-        cModule *m = findModuleWhereverInNode(name, from);
-        return dynamic_cast<T *>(m);
-    }
-};
-
 } // namespace inet
 
 #endif // ifndef __INET_MODULEACCESS_H
