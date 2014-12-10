@@ -350,7 +350,7 @@ bool MoBANCoordinator::readMobilityPatternFile()
 bool MoBANCoordinator::readPostureSpecificationFile()
 {
     cXMLElement *xmlPosture = par("postureSpecFile").xmlValue();
-    if (xmlPosture == 0)
+    if (xmlPosture == nullptr)
         return false;
 
     const char *str;
@@ -370,7 +370,7 @@ bool MoBANCoordinator::readPostureSpecificationFile()
     cXMLElementList::const_iterator posture;
     for (posture = postures.begin(); posture != postures.end(); posture++) {
         str = (*posture)->getAttribute("postureID");
-        postureID = strtol(str, 0, 0);
+        postureID = strtol(str, nullptr, 0);
         if (postureID < 0 || postureID >= numPostures)
             throw cRuntimeError("Posture ID in input posture specification file is out of the range");
 
@@ -380,9 +380,9 @@ bool MoBANCoordinator::readPostureSpecificationFile()
         postureList[postureID]->setPostureName(const_cast<char *>(str));
 
         str = (*posture)->getAttribute("minSpeed");
-        double minS = strtod(str, 0);
+        double minS = strtod(str, nullptr);
         str = (*posture)->getAttribute("maxSpeed");
-        double maxS = strtod(str, 0);
+        double maxS = strtod(str, nullptr);
         postureList[postureID]->setPostureSpeed(minS, maxS);
 
         int i = 0;
@@ -396,19 +396,19 @@ bool MoBANCoordinator::readPostureSpecificationFile()
         cXMLElementList::const_iterator param;
         for (param = nodeParameters.begin(); param != nodeParameters.end(); param++) {
             str = (*param)->getAttribute("positionX");
-            x = strtod(str, 0);
+            x = strtod(str, nullptr);
 
             str = (*param)->getAttribute("positionY");
-            y = strtod(str, 0);
+            y = strtod(str, nullptr);
 
             str = (*param)->getAttribute("positionZ");
-            z = strtod(str, 0);
+            z = strtod(str, nullptr);
 
             str = (*param)->getAttribute("radius");
-            r = strtod(str, 0);
+            r = strtod(str, nullptr);
 
             str = (*param)->getAttribute("speed");
-            s = strtod(str, 0);
+            s = strtod(str, nullptr);
 
             postureList[postureID]->setPs(i, Coord(x, y, z));
             postureList[postureID]->setRadius(i, r);
@@ -439,7 +439,7 @@ bool MoBANCoordinator::readPostureSpecificationFile()
 bool MoBANCoordinator::readConfigurationFile()
 {
     cXMLElement *xmlConfig = par("configFile").xmlValue();
-    if (xmlConfig == 0)
+    if (xmlConfig == nullptr)
         return false;
 
     cXMLElementList tagList;
@@ -456,7 +456,7 @@ bool MoBANCoordinator::readConfigurationFile()
     else {
         tempTag = tagList.front();
         str = tempTag->getAttribute("postureID");
-        postureID = strtol(str, 0, 0);
+        postureID = strtol(str, nullptr, 0);
     }
     currentPosture = postureList[postureID];
     EV_DEBUG << "Initial Posture: " << currentPosture->getPostureName() << endl;
@@ -470,11 +470,11 @@ bool MoBANCoordinator::readConfigurationFile()
         tempTag = tagList.front();
 
         str = tempTag->getAttribute("x");
-        x = strtod(str, 0);
+        x = strtod(str, nullptr);
         str = tempTag->getAttribute("y");
-        y = strtod(str, 0);
+        y = strtod(str, nullptr);
         str = tempTag->getAttribute("z");
-        z = strtod(str, 0);
+        z = strtod(str, nullptr);
         lastPosition = Coord(x, y, z);
     }
     EV_DEBUG << "Initial position of the LC: " << lastPosition << endl;
@@ -490,9 +490,9 @@ bool MoBANCoordinator::readConfigurationFile()
         tempTag = tagList.front();
 
         str = tempTag->getAttribute("min");
-        minDuration = strtod(str, 0);
+        minDuration = strtod(str, nullptr);
         str = tempTag->getAttribute("max");
-        maxDuration = strtod(str, 0);
+        maxDuration = strtod(str, nullptr);
     }
     EV_DEBUG << "Posture duration range: (" << minDuration << " , " << maxDuration << ")" << endl;
 
@@ -566,7 +566,7 @@ bool MoBANCoordinator::readConfigurationFile()
             j = 0;
             for (cXMLElementList::const_iterator cell = cellList.begin(); cell != cellList.end(); cell++) {
                 str = (*cell)->getAttribute("value");
-                matrix[i][j] = strtod(str, 0);
+                matrix[i][j] = strtod(str, nullptr);
                 j++;
             }
 
@@ -615,18 +615,18 @@ bool MoBANCoordinator::readConfigurationFile()
             Coord minBound, maxBound;
             for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++) {
                 str = (*aBound)->getAttribute("xMin");
-                minBound.x = strtod(str, 0);
+                minBound.x = strtod(str, nullptr);
                 str = (*aBound)->getAttribute("yMin");
-                minBound.y = strtod(str, 0);
+                minBound.y = strtod(str, nullptr);
                 str = (*aBound)->getAttribute("zMin");
-                minBound.z = strtod(str, 0);
+                minBound.z = strtod(str, nullptr);
 
                 str = (*aBound)->getAttribute("xMax");
-                maxBound.x = strtod(str, 0);
+                maxBound.x = strtod(str, nullptr);
                 str = (*aBound)->getAttribute("yMax");
-                maxBound.y = strtod(str, 0);
+                maxBound.y = strtod(str, nullptr);
                 str = (*aBound)->getAttribute("zMax");
-                maxBound.z = strtod(str, 0);
+                maxBound.z = strtod(str, nullptr);
 
                 transitions->setAreaBoundry(typeID, minBound, maxBound);
                 EV_DEBUG << "Low bound: " << minBound << endl;
@@ -661,9 +661,9 @@ bool MoBANCoordinator::readConfigurationFile()
             simtime_t minTime, maxTime;
             for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++) {
                 str = (*aBound)->getAttribute("tMin");
-                minTime = strtod(str, 0);
+                minTime = strtod(str, nullptr);
                 str = (*aBound)->getAttribute("tMax");
-                maxTime = strtod(str, 0);
+                maxTime = strtod(str, nullptr);
 
                 transitions->setTimeBoundry(typeID, minTime, maxTime);
                 EV_DEBUG << "Low bound: (" << minTime.dbl() << ", " << maxTime << ")" << endl;

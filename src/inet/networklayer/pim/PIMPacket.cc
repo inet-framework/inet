@@ -26,13 +26,13 @@ PIMHello::PIMHello(const char *name, int kind) : PIMHello_Base(name, kind)
     this->setType(Hello);
 
     options_arraysize = 0;
-    this->options_var = 0;
+    this->options_var = nullptr;
 }
 
 PIMHello::PIMHello(const PIMHello& other) : PIMHello_Base(other)
 {
     options_arraysize = 0;
-    this->options_var = 0;
+    this->options_var = nullptr;
     copy(other);
 }
 
@@ -88,7 +88,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
     delete[] this->options_var;
     b->unpack(options_arraysize);
     if (options_arraysize == 0) {
-        this->options_var = 0;
+        this->options_var = nullptr;
     }
     else {
         this->options_var = new HelloOptionPtr[options_arraysize];

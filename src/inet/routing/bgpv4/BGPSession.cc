@@ -24,10 +24,10 @@ namespace inet {
 namespace bgp {
 
 BGPSession::BGPSession(BGPRouting& _bgpRouting)
-    : _bgpRouting(_bgpRouting), _ptrStartEvent(0), _connectRetryCounter(0)
-    , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(0)
-    , _holdTime(BGP_HOLD_TIME), _ptrHoldTimer(0)
-    , _keepAliveTime(BGP_KEEP_ALIVE), _ptrKeepAliveTimer(0)
+    : _bgpRouting(_bgpRouting), _ptrStartEvent(nullptr), _connectRetryCounter(0)
+    , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(nullptr)
+    , _holdTime(BGP_HOLD_TIME), _ptrHoldTimer(nullptr)
+    , _keepAliveTime(BGP_KEEP_ALIVE), _ptrKeepAliveTimer(nullptr)
     , _openMsgSent(0), _openMsgRcv(0), _keepAliveMsgSent(0)
     , _keepAliveMsgRcv(0), _updateMsgSent(0), _updateMsgRcv(0)
 {
@@ -83,7 +83,7 @@ void BGPSession::setTimers(simtime_t *delayTab)
 
 void BGPSession::startConnection()
 {
-    if (_ptrStartEvent == 0) {
+    if (_ptrStartEvent == nullptr) {
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
     }
     if (_info.sessionType == IGP) {

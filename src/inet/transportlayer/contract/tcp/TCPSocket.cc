@@ -332,7 +332,7 @@ void TCPSocket::processMessage(cMessage *msg)
 
 TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char *transferMode)
 {
-    if (0 == transferMode || 0 == transferMode[0])
+    if (nullptr == transferMode || 0 == transferMode[0])
         return TCP_TRANSFER_UNDEFINED;
 
     if (0 == strcmp(transferMode, "bytecount"))
@@ -351,7 +351,7 @@ void TCPSocket::readDataTransferModePar(cComponent& component)
 {
     const char *transferMode = component.par("dataTransferMode");
 
-    if (0 == transferMode)
+    if (nullptr == transferMode)
         throw cRuntimeError("Missing dataTransferMode parameter at %s.",
                 component.getFullPath().c_str());
 

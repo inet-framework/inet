@@ -101,9 +101,9 @@ void TraCIMobility::initialize(int stage)
         WATCH(lastPosition.x);
         WATCH(lastPosition.y);
 
-        startAccidentMsg = 0;
-        stopAccidentMsg = 0;
-        manager = 0;
+        startAccidentMsg = nullptr;
+        stopAccidentMsg = nullptr;
+        manager = nullptr;
         last_speed = -1;
 
         if (accidentCount > 0) {

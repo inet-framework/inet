@@ -668,7 +668,7 @@ SessionID BGPRouting::createSession(BGPSessionType typeSession, const char *peer
     info.peerAddr.set(peerAddr);
     if (typeSession == EGP) {
         info.linkIntf = _rt->getInterfaceForDestAddr(info.peerAddr);
-        if (info.linkIntf == 0) {
+        if (info.linkIntf == nullptr) {
             throw cRuntimeError("BGP Error: No configuration interface for peer address: %s", peerAddr);
         }
         info.sessionID = info.peerAddr.getInt() + info.linkIntf->ipv4Data()->getIPAddress().getInt();
@@ -813,7 +813,7 @@ SessionID BGPRouting::findNextSession(BGPSessionType type, bool startSession)
     }
     if (startSession == true && type == IGP && sessionID != (SessionID)-1) {
         InterfaceEntry *linkIntf = _rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
-        if (linkIntf == 0) {
+        if (linkIntf == nullptr) {
             throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
         }
         _BGPSessions[sessionID]->setlinkIntf(linkIntf);

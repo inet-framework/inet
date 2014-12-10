@@ -104,7 +104,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         if ((batman_if = is_batman_if(ifr))==nullptr)
             continue;
 
-        add_del_rule(netaddr.getAddress(), mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);
+        add_del_rule(netaddr.getAddress(), mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), nullptr, RULE_TYPE_SRC, rule_action);
 
         if (ifr->isLoopback())
             add_del_rule(L3Address(), 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);

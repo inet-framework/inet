@@ -159,7 +159,7 @@ void DYMOFau::finish()
         recordScalar("data latency", dataLatency/dataSamples);
 
     delete dymo_routingTable;
-    dymo_routingTable = 0;
+    dymo_routingTable = nullptr;
 
     outstandingRREQList.delAll();
 
@@ -462,7 +462,7 @@ void DYMOFau::handleLowerRMForRelay(DYMO_RM *routingMsg)
         //entry->routeUsed.start(ROUTE_USED_TIMEOUT);
         //entry->routeDelete.cancel();
 
-        if (entry->routeBroken) entry = 0;
+        if (entry->routeBroken) entry = nullptr;
     }
 
     /** received routing message is an RREP and no routing entry was found **/
@@ -1125,7 +1125,7 @@ DYMO_RM* DYMOFau::updateRoutes(DYMO_RM * pkt)
     std::vector<DYMO_AddressBlock> additional_nodes = pkt->getAdditionalNodes();
     std::vector<DYMO_AddressBlock> new_additional_nodes;
 
-    bool isRREQ = (dynamic_cast<DYMO_RREQ*>(pkt) != 0);
+    bool isRREQ = (dynamic_cast<DYMO_RREQ*>(pkt) != nullptr);
     uint32_t nextHopAddress = getNextHopAddress(pkt);
     InterfaceEntry* nextHopInterface = getNextHopInterface(pkt);
 

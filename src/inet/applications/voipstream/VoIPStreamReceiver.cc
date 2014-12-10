@@ -120,7 +120,7 @@ void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
 
     int gotFrame;
     AVFrame decodedFrame = {
-        { 0 }
+        { nullptr }
     };
     int consumedBytes = avcodec_decode_audio4(decCtx, &decodedFrame, &gotFrame, &avpkt);
     if (consumedBytes < 0 || !gotFrame)

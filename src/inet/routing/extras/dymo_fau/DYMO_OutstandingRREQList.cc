@@ -81,7 +81,7 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(unsigned int destA
     {
         if (IPv4Address(destAddr).prefixMatches(IPv4Address((*iter)->destAddr), prefix)) return *iter;
     }
-    return 0;
+    return nullptr;
 }
 
 DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getExpired()
@@ -90,7 +90,7 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getExpired()
     {
         if ((*iter)->wait_time->stopWhenExpired()) return *iter;
     }
-    return 0;
+    return nullptr;
 }
 
 bool DYMO_OutstandingRREQList::hasActive() const

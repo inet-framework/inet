@@ -483,7 +483,7 @@ void VoIPStreamSender::readFrame()
                 int in_nb_samples = frame->nb_samples;
 
                 uint8_t *out_data[AVRESAMPLE_MAX_CHANNELS] = {
-                    0
+                    nullptr
                 };
                 int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
                 int out_linesize;

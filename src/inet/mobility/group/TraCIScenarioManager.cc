@@ -117,7 +117,7 @@ void TraCIScenarioManager::initialize(int stage)
         activeVehicleCount = 0;
         autoShutdownTriggered = false;
 
-        socketPtr = 0;
+        socketPtr = nullptr;
 
         connectAndStartTrigger = new cMessage("connect");
         scheduleAt(connectAt, connectAndStartTrigger);
@@ -404,7 +404,7 @@ void TraCIScenarioManager::finish()
     if (socketPtr) {
         closesocket(MYSOCKET);
         delete &MYSOCKET;
-        socketPtr = 0;
+        socketPtr = nullptr;
     }
     while (hosts.begin() != hosts.end()) {
         deleteModule(hosts.begin()->first);
@@ -756,7 +756,7 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
 cModule *TraCIScenarioManager::getManagedModule(std::string nodeId)
 {
     if (hosts.find(nodeId) == hosts.end())
-        return 0;
+        return nullptr;
     return hosts[nodeId];
 }
 

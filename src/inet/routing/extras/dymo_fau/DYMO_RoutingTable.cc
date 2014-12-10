@@ -178,7 +178,7 @@ DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 //=================================================================================================
@@ -188,7 +188,7 @@ DYMO_RoutingEntry* DYMO_RoutingTable::getByAddress(IPv4Address addr)
 DYMO_RoutingEntry* DYMO_RoutingTable::getForAddress(IPv4Address addr)
 {
     int longestPrefix = 0;
-    DYMO_RoutingEntry* longestPrefixEntry = 0;
+    DYMO_RoutingEntry* longestPrefixEntry = nullptr;
     for (auto iter = routeVector.begin(); iter < routeVector.end(); iter++)
     {
         DYMO_RoutingEntry *entry = *iter;

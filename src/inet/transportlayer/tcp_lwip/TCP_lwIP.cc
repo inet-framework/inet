@@ -73,7 +73,7 @@ TCP_lwIP::TCP_lwIP()
     netIf.name[0] = 'T';
     netIf.name[1] = 'C';
     netIf.netmask.addr = L3Address();
-    netIf.next = 0;
+    netIf.next = nullptr;
     netIf.num = 0;
     netIf.output = nullptr;
     netIf.state = nullptr;

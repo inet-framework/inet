@@ -266,7 +266,7 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
 
-    return NULL;
+    return nullptr;
 }
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
@@ -275,7 +275,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceIn
         if (node->interfaceInfos.at(i)->interfaceEntry == interfaceEntry)
             return node->interfaceInfos.at(i);
 
-    return NULL;
+    return nullptr;
 }
 
 double NetworkConfiguratorBase::computeNodeWeight(Node *node)
@@ -427,7 +427,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
  */
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
-    InterfaceInfo *gatewayInterfaceInfo = NULL;
+    InterfaceInfo *gatewayInterfaceInfo = nullptr;
     for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
@@ -443,7 +443,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewa
         if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
-                return NULL; // we already found one gateway, this makes it ambiguous! report "no gateway"
+                return nullptr; // we already found one gateway, this makes it ambiguous! report "no gateway"
             else
                 gatewayInterfaceInfo = interfaceInfo; // remember gateway
         }
@@ -458,7 +458,7 @@ IInterfaceTable *NetworkConfiguratorBase::findInterfaceTable(Node *node)
 
 IRoutingTable *NetworkConfiguratorBase::findRoutingTable(Node *node)
 {
-    return NULL;
+    return nullptr;
 }
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *ie)

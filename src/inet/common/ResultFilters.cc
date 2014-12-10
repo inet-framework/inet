@@ -92,7 +92,7 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
         cMessage *msg = (cMessage *)object;
 
         INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-        if (ctrl != NULL) {
+        if (ctrl != nullptr) {
             fire(this, t, ctrl->getSourceAddress().str().c_str());
         }
     }
