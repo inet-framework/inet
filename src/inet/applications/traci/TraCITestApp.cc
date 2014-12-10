@@ -229,7 +229,7 @@ void TraCITestApp::handlePositionUpdate()
             bool r = (i != traci->getManager()->getManagedHosts().end());
             assertTrue("(commandAddVehicle) vehicle now driving", r);
             cModule *mod = i->second;
-            TraCIMobility *traci2 = check_and_cast<TraCIMobility *>(findModuleWhereverInNode("mobility", mod));
+            TraCIMobility *traci2 = check_and_cast<TraCIMobility *>(getContainingNode(mod)->getSubmodule("mobility"));
             assertTrue("(commandAddVehicle) vehicle driving at speed", traci2->getSpeed() > 25);
         }
     }

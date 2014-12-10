@@ -32,22 +32,6 @@ INET_API bool isNetworkNode(cModule *mod);
 /**
  * Find a module with given name, and "closest" to module "from".
  *
- * Operation: gradually rises in the module hierarchy, and searches
- * recursively among all submodules at every level.
- */
-INET_API cModule *findModuleWherever(const char *name, cModule *from);
-
-/**
- * Find a module with given name, and "closest" to module "from".
- *
- * Operation: gradually rises in the module hierarchy up to the @node
- * module, and searches recursively among all submodules at every level.
- */
-INET_API cModule *findModuleWhereverInNode(const char *name, cModule *from);
-
-/**
- * Find a module with given name, and "closest" to module "from".
- *
  * Operation: gradually rises in the module hierarchy, and looks for a submodule
  * of the given name.
  */
