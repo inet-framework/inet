@@ -255,7 +255,7 @@ class AODVUU : public ManetRoutingBase
     int optimized_hellos;
     int ratelimit;
     int llfeedback;
-    char *progname;
+    const char *progname;
     int wait_on_reboot;
     struct timer worb_timer;
 
