@@ -316,7 +316,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         return defaultLinkWeight;
     else if (!strcmp(linkWeightMode, "dataRate")) {
         // compute the packet error rate between the two interfaces using a dummy transmission
-        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
+        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getNetworkInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         const NarrowbandTransmitterBase *transmitter = dynamic_cast<const NarrowbandTransmitterBase *>(transmitterRadio->getTransmitter());
         double dataRate = transmitter->getBitrate().get();
@@ -393,7 +393,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     }
 
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
-    cModule *module = interfaceEntry->getInterfaceModule();
+    cModule *module = interfaceEntry->getNetworkInterfaceModule();
     if (!module)
         module = hostModule;
     cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);

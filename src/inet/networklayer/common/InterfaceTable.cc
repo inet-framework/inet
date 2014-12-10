@@ -284,7 +284,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
 
 void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
 {
-    cModule *ifmod = entry->getInterfaceModule();
+    cModule *ifmod = entry->getNetworkInterfaceModule();
     if (!ifmod)
         return; // virtual interface
 
@@ -293,7 +293,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getInterfaceModule()->getFullPath().c_str(), this->getFullPath().c_str());
+        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getNetworkInterfaceModule()->getFullPath().c_str(), this->getFullPath().c_str());
 
     // ASSUMPTIONS:
     // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. IPv4NetworkLayer or MPLS)
