@@ -43,7 +43,7 @@ class IIPv4RoutingTable;
 class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
 {
   public:
-    struct ARPCacheEntry;
+    class ARPCacheEntry;
     typedef std::map<IPv4Address, ARPCacheEntry *> ARPCache;
     typedef std::vector<cMessage *> MsgPtrVector;
 
