@@ -23,7 +23,7 @@
 #include "inet/linklayer/loopback/Loopback.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/NotifierConsts.h"
 

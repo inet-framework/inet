@@ -20,9 +20,9 @@
 #define __INET_RIPROUTING_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IRoute.h"
-#include "inet/networklayer/common/IRoutingTable.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoute.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 

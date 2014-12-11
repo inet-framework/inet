@@ -21,7 +21,7 @@
 #include <set>
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
 #include "inet/networklayer/common/InterfaceEntry.h"

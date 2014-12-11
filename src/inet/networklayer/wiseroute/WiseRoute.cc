@@ -29,7 +29,7 @@
 
 #include "inet/networklayer/wiseroute/WiseRoute.h"
 #include "inet/common/INETMath.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/FindModule.h"

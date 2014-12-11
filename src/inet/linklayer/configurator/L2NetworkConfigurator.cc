@@ -23,7 +23,7 @@
 #include <queue>
 
 #include "inet/linklayer/configurator/L2NetworkConfigurator.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"

@@ -23,7 +23,7 @@
 
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/common/NotifierConsts.h"

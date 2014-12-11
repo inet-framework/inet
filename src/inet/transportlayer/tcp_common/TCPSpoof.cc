@@ -13,7 +13,7 @@
 
 #include "inet/transportlayer/tcp_common/TCPSpoof.h"
 
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 

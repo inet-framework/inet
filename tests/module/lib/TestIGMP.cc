@@ -5,7 +5,7 @@
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IGMPv2.h"
 

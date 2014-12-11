@@ -27,7 +27,7 @@
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
 #include "inet/routing/ospfv2/OSPFTimer.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetfilter.h"
 
 namespace inet {
 

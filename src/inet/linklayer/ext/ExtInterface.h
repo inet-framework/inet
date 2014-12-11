@@ -27,7 +27,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/base/MACBase.h"
 #include "inet/linklayer/ext/ExtFrame_m.h"
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 

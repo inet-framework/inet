@@ -19,12 +19,12 @@
 
 #include <stdlib.h>
 
-#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/base/MACBase.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 

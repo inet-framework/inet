@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
 #include "inet/networklayer/pim/PIMPacket_m.h"
 

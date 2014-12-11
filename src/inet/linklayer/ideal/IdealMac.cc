@@ -24,7 +24,7 @@
 
 #include "inet/linklayer/ideal/IdealMacFrame_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/INETUtils.h"
 

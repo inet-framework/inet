@@ -14,7 +14,7 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/linklayer/common/MACProtocolBase.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

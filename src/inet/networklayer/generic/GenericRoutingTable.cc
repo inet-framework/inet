@@ -20,7 +20,7 @@
 
 #include "inet/networklayer/generic/GenericRoutingTable.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/common/NotifierConsts.h"

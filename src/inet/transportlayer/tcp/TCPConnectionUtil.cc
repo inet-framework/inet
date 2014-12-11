@@ -24,7 +24,7 @@
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"

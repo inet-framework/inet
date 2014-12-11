@@ -15,7 +15,7 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/common/IRoute.h"
+#include "inet/networklayer/contract/IRoute.h"
 
 namespace inet {
 

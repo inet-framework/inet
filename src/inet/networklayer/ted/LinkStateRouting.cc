@@ -23,7 +23,7 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ted/TED.h"
 
 namespace inet {

@@ -23,7 +23,7 @@
 
 #include "inet/routing/ospfv2/OSPFConfigReader.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

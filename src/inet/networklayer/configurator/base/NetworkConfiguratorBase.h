@@ -23,8 +23,8 @@
 
 #include <algorithm>
 #include "inet/common/Topology.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/PatternMatcher.h"
 

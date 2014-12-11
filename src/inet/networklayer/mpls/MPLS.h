@@ -25,7 +25,7 @@
 #include "inet/networklayer/mpls/ConstType.h"
 
 #include "inet/networklayer/mpls/LIBTable.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 #include "inet/networklayer/mpls/IClassifier.h"
 

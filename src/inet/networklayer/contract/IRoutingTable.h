@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/common/IRoute.h"
+#include "inet/networklayer/contract/IRoute.h"
 
 namespace inet {
 

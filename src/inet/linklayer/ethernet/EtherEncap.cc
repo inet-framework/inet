@@ -20,7 +20,7 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 
 #include "inet/linklayer/ethernet/EtherFrame.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {

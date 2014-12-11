@@ -24,7 +24,7 @@
 
 #include <map>
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/common/IRoute.h"
+#include "inet/networklayer/contract/IRoute.h"
 
 /**
  * Records interface table and routing table changes into the eventlog.

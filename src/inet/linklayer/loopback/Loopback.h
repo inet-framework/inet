@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/base/MACBase.h"
 #include "inet/linklayer/common/TxNotifDetails.h"
 
 namespace inet {

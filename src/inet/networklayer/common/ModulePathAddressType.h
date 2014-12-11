@@ -19,7 +19,7 @@
 #define __INET_MODULEPATHADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/ModulePathAddress.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 

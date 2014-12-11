@@ -16,7 +16,7 @@
 
 #include <algorithm>
 #include "inet/common/lifecycle/LifecycleController.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"

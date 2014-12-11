@@ -25,7 +25,7 @@
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
 #include "inet/routing/ospfv2/router/OSPFRoutingTableEntry.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

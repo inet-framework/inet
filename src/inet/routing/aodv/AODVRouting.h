@@ -20,10 +20,10 @@
 #define __INET_AODVROUTING_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
-#include "inet/networklayer/common/IL3AddressType.h"
-#include "inet/networklayer/common/IRoutingTable.h"
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"

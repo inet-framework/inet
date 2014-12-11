@@ -27,7 +27,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/xmipv6/BindingCache.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"

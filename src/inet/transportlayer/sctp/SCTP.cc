@@ -19,7 +19,7 @@
 #include "inet/transportlayer/sctp/SCTP.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/common/ModuleAccess.h"

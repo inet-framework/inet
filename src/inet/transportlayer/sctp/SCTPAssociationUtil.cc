@@ -25,7 +25,7 @@
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/transportlayer/sctp/SCTPQueue.h"
 #include "inet/transportlayer/sctp/SCTPAlgorithm.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"

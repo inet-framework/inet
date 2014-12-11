@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/common/MACProtocolBase.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
 
 namespace inet {
 

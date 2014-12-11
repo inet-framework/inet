@@ -19,7 +19,7 @@
 #define __INET_IPV4ADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 

@@ -21,7 +21,7 @@
 #define __INET_DYMOROUTEDATA_H
 
 #include <omnetpp.h>
-#include "inet/networklayer/common/IRoute.h"
+#include "inet/networklayer/contract/IRoute.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 
 namespace inet {

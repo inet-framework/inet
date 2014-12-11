@@ -15,7 +15,7 @@
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/linklayer/contract/IMACProtocol.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/common/MACProtocolBase.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/linklayer/lmac/LMacFrame_m.h"
 
 namespace inet {

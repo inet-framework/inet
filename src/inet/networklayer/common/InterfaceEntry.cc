@@ -25,7 +25,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"

@@ -19,7 +19,7 @@
 #define __INET_IPV6_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"

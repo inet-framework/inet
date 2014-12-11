@@ -21,7 +21,7 @@
 
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

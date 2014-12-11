@@ -19,10 +19,10 @@
 #include "inet/routing/extras/base/ManetNetfilterHook.h"
 
 #include "inet/routing/extras/base/ControlManetRouting_m.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/ProtocolMap.h"

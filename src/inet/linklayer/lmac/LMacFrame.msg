@@ -3,7 +3,7 @@
 // @author Anna Foerster
 
 cplusplus {{
-    #include "inet/linklayer/common/MACFrameBase_m.h"
+    #include "inet/linklayer/base/MACFrameBase_m.h"
 }}
 
 namespace inet;

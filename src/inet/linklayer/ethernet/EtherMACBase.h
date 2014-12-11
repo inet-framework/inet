@@ -24,7 +24,7 @@
 
 #include "inet/common/INETMath.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/common/MACBase.h"
+#include "inet/linklayer/base/MACBase.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"

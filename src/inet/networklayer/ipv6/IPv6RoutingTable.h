@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/ipv6/IPv6Route.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"

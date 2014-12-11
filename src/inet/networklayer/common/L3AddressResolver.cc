@@ -20,7 +20,7 @@
 //
 
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 #include "inet/networklayer/common/ModulePathAddress.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"

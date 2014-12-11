@@ -21,7 +21,7 @@
  **************************************************************************/
 
 #include "inet/networklayer/flood/Flood.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"

@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/generic/GenericRoute.h"
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 
 namespace inet {
 

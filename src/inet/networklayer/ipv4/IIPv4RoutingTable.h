@@ -24,7 +24,7 @@
 
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"    // not strictly required, but most clients will need it anyway
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 
 namespace inet {
 

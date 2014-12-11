@@ -24,7 +24,7 @@
 #include "inet/networklayer/arp/IARP.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"

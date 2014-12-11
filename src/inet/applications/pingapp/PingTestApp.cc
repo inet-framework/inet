@@ -20,8 +20,8 @@
 #include "inet/applications/pingapp/PingTestApp.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/IL3AddressType.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/applications/pingapp/PingPayload_m.h"

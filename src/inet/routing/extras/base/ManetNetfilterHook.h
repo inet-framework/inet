@@ -19,7 +19,7 @@
 #ifndef __INET_MANETNETFILTERHOOK_H
 #define __INET_MANETNETFILTERHOOK_H
 
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetfilter.h"
 
 #include <vector>
 #include <set>

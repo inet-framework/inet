@@ -19,7 +19,7 @@
 #define __INET_MODULEACCESS_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

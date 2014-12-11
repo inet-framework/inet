@@ -21,7 +21,7 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ProtocolMap.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 

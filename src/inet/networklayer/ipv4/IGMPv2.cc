@@ -19,7 +19,7 @@
 #include "inet/networklayer/ipv4/IGMPv2.h"
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"

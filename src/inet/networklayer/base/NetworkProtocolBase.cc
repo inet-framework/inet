@@ -14,7 +14,7 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/networklayer/common/NetworkProtocolBase.h"
+#include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 

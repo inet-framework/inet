@@ -23,7 +23,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/common/IInterfaceTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ted/TED.h"
 
 namespace inet {

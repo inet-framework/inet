@@ -19,7 +19,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/INetfilter.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkDatagram.h"
 
 namespace inet {

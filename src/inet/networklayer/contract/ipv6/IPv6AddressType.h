@@ -19,7 +19,7 @@
 #define __INET_IPV6ADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/common/IL3AddressType.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 

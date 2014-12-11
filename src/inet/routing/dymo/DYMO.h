@@ -24,9 +24,9 @@
 #include <map>
 #include <omnetpp.h>
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/networklayer/common/IL3AddressType.h"
-#include "inet/networklayer/common/INetfilter.h"
-#include "inet/networklayer/common/IRoutingTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/routing/dymo/DYMOdefs.h"
