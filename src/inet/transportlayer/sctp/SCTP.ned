@@ -18,8 +18,7 @@
 
 package inet.transportlayer.sctp;
 
-import inet.transportlayer.ISCTP;
-
+import inet.transportlayer.contract.ISCTP;
 
 //
 // Implements the SCTP protocol.

@@ -22,10 +22,9 @@ import inet.applications.contract.IPingApp;
 import inet.applications.contract.ISCTPApp;
 import inet.applications.contract.ITCPApp;
 import inet.applications.contract.IUDPApp;
-import inet.transportlayer.ISCTP;
-import inet.transportlayer.ITCP;
-import inet.transportlayer.IUDP;
-
+import inet.transportlayer.contract.ISCTP;
+import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.IUDP;
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and applications.

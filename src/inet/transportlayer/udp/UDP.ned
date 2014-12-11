@@ -16,12 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.transportlayer.udp;
 
-import inet.transportlayer.IUDP;
-
+import inet.transportlayer.contract.IUDP;
 
 //
 // UDP protocol implementation, for IPv4 and IPv6.

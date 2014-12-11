@@ -19,8 +19,7 @@
 
 package inet.transportlayer.tcp;
 
-import inet.transportlayer.ITCP;
-
+import inet.transportlayer.contract.ITCP;
 
 //
 // TCP protocol implementation.

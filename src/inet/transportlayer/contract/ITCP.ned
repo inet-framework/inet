@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.transportlayer;
+package inet.transportlayer.contract;
 
 //
 // Interface for TCP protocol implementations. All TCP implementations should

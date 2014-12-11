@@ -22,8 +22,8 @@ import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.mpls.MPLS;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.TED;
-import inet.transportlayer.ITCP;
-import inet.transportlayer.IUDP;
+import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.IUDP;
 
 
 //

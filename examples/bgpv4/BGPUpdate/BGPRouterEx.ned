@@ -24,7 +24,7 @@ import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.routing.bgpv4.BGPRouting;
 import inet.routing.ospfv2.OSPFRouting;
-import inet.transportlayer.ITCP;
+import inet.transportlayer.contract.ITCP;
 
 
 //

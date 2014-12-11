@@ -20,9 +20,8 @@ package inet.node.inet;
 import inet.applications.contract.IUDPApp;
 import inet.routing.IBGPRouting;
 import inet.routing.IIPRouting;
-import inet.transportlayer.ITCP;
-import inet.transportlayer.IUDP;
-
+import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.IUDP;
 
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.

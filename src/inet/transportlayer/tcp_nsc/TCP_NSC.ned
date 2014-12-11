@@ -16,11 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.transportlayer.tcp_nsc;
 
-import inet.transportlayer.ITCP;
-
+import inet.transportlayer.contract.ITCP;
 
 //
 // TCP model based on the Network Simulation Cradle by Sam Jansen.

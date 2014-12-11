@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.transportlayer.tcp_common;
 
-import inet.transportlayer.ITCP;
-
+import inet.transportlayer.contract.ITCP;
 
 //
 // Sends fabricated TCP packets. This is a base implementation,
