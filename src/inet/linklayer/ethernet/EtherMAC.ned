@@ -19,7 +19,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.contract.IEtherMAC;
 
 
 //

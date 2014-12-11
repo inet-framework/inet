@@ -19,10 +19,10 @@
 package inet.node.ethernet;
 
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.IMACAddressTable;
-import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.ISpanningTree;
-import inet.linklayer.IWiredNic;
+import inet.linklayer.contract.IMACAddressTable;
+import inet.linklayer.contract.IMACRelayUnit;
+import inet.linklayer.contract.ISpanningTree;
+import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 

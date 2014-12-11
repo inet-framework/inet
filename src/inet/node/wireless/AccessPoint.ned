@@ -16,10 +16,10 @@
 package inet.node.wireless;
 
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.IMACAddressTable;
-import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IWirelessNic;
+import inet.linklayer.contract.IMACAddressTable;
+import inet.linklayer.contract.IMACRelayUnit;
+import inet.linklayer.contract.IWiredNic;
+import inet.linklayer.contract.IWirelessNic;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 

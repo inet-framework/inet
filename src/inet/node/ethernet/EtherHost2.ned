@@ -18,7 +18,7 @@
 package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.contract.IEtherMAC;
 import inet.linklayer.ethernet.EtherQoSQueue;
 import inet.linklayer.ethernet.IEtherEncap;
 

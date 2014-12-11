@@ -17,7 +17,7 @@
 //
 
 package inet.linklayer.ieee8021d.rstp;
-import inet.linklayer.ISpanningTree;
+import inet.linklayer.contract.ISpanningTree;
 
 //
 // Implements the Rapid Spanning Tree Protocol (IEEE 802.D-2004) for IEC 48-bit

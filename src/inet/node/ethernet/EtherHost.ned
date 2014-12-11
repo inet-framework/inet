@@ -21,7 +21,7 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.contract.IEtherMAC;
 import inet.linklayer.ethernet.EtherLLC;
 import inet.linklayer.ethernet.EtherQoSQueue;
 

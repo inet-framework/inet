@@ -17,7 +17,7 @@
 
 package inet.linklayer.ext;
 
-import inet.linklayer.IExternalNic;
+import inet.linklayer.contract.IExternalNic;
 
 //
 // Implements an interface that corresponds to a real interface

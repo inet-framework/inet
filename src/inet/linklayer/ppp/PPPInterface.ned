@@ -21,8 +21,8 @@ package inet.linklayer.ppp;
 
 import inet.common.IHook;
 import inet.common.queue.IOutputQueue;
-import inet.linklayer.ITrafficConditioner;
-import inet.linklayer.IWiredNic;
+import inet.linklayer.contract.ITrafficConditioner;
+import inet.linklayer.contract.IWiredNic;
 
 
 //

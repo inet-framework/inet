@@ -15,7 +15,7 @@
 
 package inet.linklayer.ethernet.switch;
 
-import inet.linklayer.IMACAddressTable;
+import inet.linklayer.contract.IMACAddressTable;
 
 //
 // This module handles the mapping between ports and MAC addresses.

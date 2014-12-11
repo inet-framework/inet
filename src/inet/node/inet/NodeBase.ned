@@ -19,9 +19,9 @@ package inet.node.inet;
 
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.PcapRecorder;
-import inet.linklayer.IExternalNic;
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IWirelessNic;
+import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.IWiredNic;
+import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.IRoutingTable;

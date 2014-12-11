@@ -1,6 +1,6 @@
 
 
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.contract.IEtherMAC;
 import inet.linklayer.ethernet.EtherQoSQueue;
 
 

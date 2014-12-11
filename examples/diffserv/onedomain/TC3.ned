@@ -21,7 +21,7 @@ package inet.examples.diffserv.onedomain;
 
 import inet.common.queue.Join;
 import inet.common.queue.Sink;
-import inet.linklayer.ITrafficConditioner;
+import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;
 

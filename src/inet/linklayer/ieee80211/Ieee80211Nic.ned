@@ -18,7 +18,7 @@
 package inet.linklayer.ieee80211;
 
 import inet.common.IHook;
-import inet.linklayer.IWirelessNic;
+import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;

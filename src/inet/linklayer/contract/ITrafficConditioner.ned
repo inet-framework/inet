@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer;
+package inet.linklayer.contract;
 
 //
 // This is the interface of traffic conditioner modules.

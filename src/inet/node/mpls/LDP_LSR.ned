@@ -12,7 +12,7 @@
 package inet.node.mpls;
 
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.IWiredNic;
+import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;

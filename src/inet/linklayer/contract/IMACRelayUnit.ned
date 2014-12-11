@@ -15,9 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-package inet.linklayer;
+package inet.linklayer.contract;
 
 //
 // Prototype for modules providing Ethernet switch functionality.

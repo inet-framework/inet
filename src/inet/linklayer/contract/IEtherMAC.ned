@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.linklayer;
+package inet.linklayer.contract;
 
 //
 // Interface for Ethernet MAC implementations. All Ethernet MAC implementations

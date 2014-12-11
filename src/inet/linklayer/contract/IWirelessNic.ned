@@ -1,6 +1,4 @@
 //
-// Copyright (C) 2012 OpenSim Ltd
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -15,13 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer;
+package inet.linklayer.contract;
 
-moduleinterface INic
+moduleinterface IWirelessNic extends INic
 {
     parameters:
         @display("i=block/ifcard");
     gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
+        input radioIn @labels(IRadioFrame); // to receive radio frames
 }

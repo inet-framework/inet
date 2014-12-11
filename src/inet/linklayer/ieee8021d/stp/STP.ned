@@ -16,7 +16,7 @@
 //
 
 package inet.linklayer.ieee8021d.stp;
-import inet.linklayer.ISpanningTree;
+import inet.linklayer.contract.ISpanningTree;
 
 //
 // The Spanning Tree Protocol (STP) is a network protocol that ensures a loop-free

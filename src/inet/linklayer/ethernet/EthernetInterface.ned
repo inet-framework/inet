@@ -21,9 +21,9 @@
 package inet.linklayer.ethernet;
 
 import inet.common.IHook;
-import inet.linklayer.IEtherMAC;
-import inet.linklayer.ITrafficConditioner;
-import inet.linklayer.IWiredNic;
+import inet.linklayer.contract.IEtherMAC;
+import inet.linklayer.contract.ITrafficConditioner;
+import inet.linklayer.contract.IWiredNic;
 
 
 //

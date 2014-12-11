@@ -18,7 +18,7 @@
 
 package inet.linklayer.ieee802154;
 
-import inet.linklayer.IWirelessNic;
+import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.csma.CSMA;
 import inet.physicallayer.contract.IRadio;
 

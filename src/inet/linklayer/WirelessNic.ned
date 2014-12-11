@@ -18,8 +18,8 @@
 package inet.linklayer;
 
 import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.contract.IWirelessNic;
 import inet.physicallayer.contract.IRadio;
-import inet.power.contract.IEnergyConsumer;
 
 module WirelessNic like IWirelessNic
 {

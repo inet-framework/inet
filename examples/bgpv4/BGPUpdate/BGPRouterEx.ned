@@ -18,7 +18,7 @@
 package inet.examples.bgpv4.BGPUpdate;
 
 import inet.common.misc.MessageChecker;
-import inet.linklayer.IWiredNic;
+import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ipv4.IPv4RoutingTable;
