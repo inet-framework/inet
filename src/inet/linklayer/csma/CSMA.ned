@@ -24,7 +24,7 @@
 
 package inet.linklayer.csma;
 
-import inet.linklayer.common.MACProtocolBase;
+import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.contract.IMACProtocol;
 
 //
