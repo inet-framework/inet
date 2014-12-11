@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer;
+package inet.linklayer.common;
 
 import inet.linklayer.contract.IMACProtocol;
 import inet.linklayer.contract.IWirelessNic;
