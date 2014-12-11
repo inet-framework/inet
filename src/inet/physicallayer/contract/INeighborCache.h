@@ -25,7 +25,7 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * TODO
+ * This interface keeps track of neighbor relationships between radios.
  */
 class INET_API INeighborCache : public IPrintableObject
 {
@@ -34,6 +34,10 @@ class INET_API INeighborCache : public IPrintableObject
 
     virtual void removeRadio(const IRadio *radio) = 0;
 
+    /**
+     * Sends the provided frame (using the radio medium) to all neighbors within
+     * the given range.
+     */
     virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const = 0;
 };
 

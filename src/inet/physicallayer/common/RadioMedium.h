@@ -252,7 +252,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The list of ongoing transmissions on the radio medium.
      */
-    // TODO: consider using an interval graph for receptions (per receiver radio)
     std::vector<const ITransmission *> transmissions;
     //@}
 
@@ -453,10 +452,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * the radio medium.
      */
     virtual void sendToAffectedRadios(IRadio *transmitter, const IRadioFrame *frame);
-    //@}
 
-    // TODO: revise name
+    /**
+     * Sends a copy of the provided radio frame to all receivers on the radio medium.
+     */
     virtual void sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame);
+    //@}
 
     /** @name Reception */
     //@{

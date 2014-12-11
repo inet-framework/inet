@@ -46,7 +46,6 @@ namespace physicallayer {
  * thread. They may also be called several times due to cache invalidation before
  * the actual result is needed. This process is controlled by the radio medium.
  */
-// TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 class INET_API IReceiver : public IPrintableObject
 {
   public:
