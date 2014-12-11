@@ -15,10 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.common;
+package inet.networklayer.base;
 
 import inet.common.LayeredProtocolBase;
-
 
 //
 // Module base for different network protocols.

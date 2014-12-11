@@ -15,7 +15,7 @@
 //**************************************************************************
 package inet.networklayer.probabilistic;
 
-import inet.networklayer.common.NetworkProtocolBase;
+import inet.networklayer.base.NetworkProtocolBase;
 import inet.networklayer.contract.INetworkProtocol;
 
 //
