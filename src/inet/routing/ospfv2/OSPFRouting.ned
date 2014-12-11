@@ -13,7 +13,7 @@
 
 package inet.routing.ospfv2;
 
-import inet.routing.IIPRouting;
+import inet.routing.contract.IIPRouting;
 
 //
 // Implements the OSPFv4 routing protocol.

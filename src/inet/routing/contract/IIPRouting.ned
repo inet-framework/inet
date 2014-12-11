@@ -10,8 +10,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
-package inet.routing;
+package inet.routing.contract;
 
 //
 // Interface for routing protocol modules connected to IP Layer.

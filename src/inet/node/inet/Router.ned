@@ -18,8 +18,8 @@
 package inet.node.inet;
 
 import inet.applications.contract.IUDPApp;
-import inet.routing.IBGPRouting;
-import inet.routing.IIPRouting;
+import inet.routing.contract.IBGPRouting;
+import inet.routing.contract.IIPRouting;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 

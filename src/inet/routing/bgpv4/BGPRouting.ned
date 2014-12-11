@@ -17,7 +17,7 @@
 
 package inet.routing.bgpv4;
 
-import inet.routing.IBGPRouting;
+import inet.routing.contract.IBGPRouting;
 
 
 //

@@ -15,10 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.routing;
+package inet.routing.contract;
 
 import inet.applications.contract.ITCPApp;
-
 
 //
 // Interface for BGP routing module.
