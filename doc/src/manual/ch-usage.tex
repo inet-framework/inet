@@ -54,7 +54,7 @@ INET are organized roughly according to OSI layers; the top packages
 include \ttt{inet.applications}, \ttt{inet.transportlayer},
 \ttt{inet.networklayer}, \ttt{inet.linklayer}, and \ttt{inet.physicallayer}. 
 Other packages are \ttt{inet.routing}, \ttt{inet.mobility}, \ttt{inet.power}, 
-\ttt{inet.environment}, and \ttt{inet.nodes}. These packages correspond to the 
+\ttt{inet.environment}, and \ttt{inet.node}. These packages correspond to the
 \ttt{src/applications/}, \ttt{src/transportlayer/}, etc. directories in the
 INET source tree. (The \ttt{src/inet/} directory corresponds to the \ttt{inet} 
 package, as defined by the \ttt{src/inet/package.ned} file.) Subdirectories
@@ -65,9 +65,9 @@ name, with the source files placed in the same directory as the NED file.
 The \ttt{inet.node} package contains various pre-assembled host, router,
 switch, access point, and other modules, for example
 \nedtype{StandardHost}, \nedtype{Router} and \nedtype{EtherSwitch} and
-\nedtype{WirelessAP}. These compound modules contain some customization
+\nedtype{AccessPoint}. These compound modules contain some customization
 options via parametric submodule types, but they are not meant to be
-universal: it is expected that you will create your own node models for
+universal, so it may be necessary to create your own node models for
 your particular simulation scenarios.
 
 Network interfaces (Ethernet, IEEE 802.11, etc) are usually compound modules
@@ -78,7 +78,7 @@ Not all modules implement protocols. There are modules which hold data (for
 example \nedtype{IPv4RoutingTable}), perform autoconfiguration of a network
 (\nedtype{IPv4NetworkConfigurator}), move a mobile node around (for example
 \nedtype{ConstSpeedMobility}), and perform housekeeping associated with
-radio channels in wireless simulations (\nedtype{RadioMedium}).
+radio signals in wireless simulations (\nedtype{RadioMedium}).
 
 Protocol headers and packet formats are described in message definition
 files (msg files), which are translated into C++ classes by OMNeT++'s
