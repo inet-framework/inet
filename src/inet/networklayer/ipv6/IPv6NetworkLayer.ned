@@ -19,8 +19,8 @@
 //
 package inet.networklayer.ipv6;
 
-import inet.networklayer.IIPv6Tunneling;
-import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.contract.IIPv6Tunneling;
+import inet.networklayer.contract.IxMIPv6Support;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.icmpv6.ICMPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;

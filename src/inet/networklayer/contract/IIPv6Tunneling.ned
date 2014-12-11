@@ -1,7 +1,5 @@
 //
 // Copyright (C) 2007
-// Faqir Zarrar Yousaf
-// Communication Networks Institute, Dortmund University of Technology (TU Dortmund), Germany.
 // Christian Bauer
 // Institute of Communications and Navigation, German Aerospace Center (DLR)
 //
@@ -20,31 +18,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.networklayer;
+package inet.networklayer.contract;
 
 //
-// Module interface for xMIPv6 (where x = F, H, F-H).
+// \IPv6 Tunnel Manager
 //
-moduleinterface IxMIPv6Support
+// @see IPv6, IPv6NeighbourDiscovery, ICMPv6
+//
+moduleinterface IIPv6Tunneling
 {
-    parameters:
-        bool isHomeAgent;
-        bool isMobileNode;
-        @display("i=block/classifier2");
+    @display("i=block/tunnel");
     gates:
-        input fromIPv6;
-        output toIPv6;
+        input upperLayerIn;
+        output upperLayerOut;
+        input linkLayerIn;
+        output linkLayerOut;
 }
 
-simple xMIPv6Support_None like IxMIPv6Support
+simple IPv6Tunneling_None like IIPv6Tunneling
 {
-    parameters:
-        bool isHomeAgent = default(false);
-        bool isMobileNode = default(false);
-        @display("i=old/x_noentry");
-        @class("UnimplementedModule");
-        gates:
-        input fromIPv6;
-        output toIPv6;
+    @display("i=old/x_noentry");
+    @class("UnimplementedModule");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input linkLayerIn;
+        output linkLayerOut;
 }
 

@@ -20,7 +20,7 @@
 
 package inet.networklayer.ipv6tunneling;
 
-import inet.networklayer.IIPv6Tunneling;
+import inet.networklayer.contract.IIPv6Tunneling;
 
 
 //

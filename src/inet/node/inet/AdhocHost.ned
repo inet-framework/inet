@@ -15,7 +15,7 @@
 
 package inet.node.inet;
 
-import inet.networklayer.IManetRouting;
+import inet.networklayer.contract.IManetRouting;
 
 
 //

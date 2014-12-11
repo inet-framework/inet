@@ -22,7 +22,7 @@
 
 package inet.networklayer.xmipv6;
 
-import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.contract.IxMIPv6Support;
 
 
 //
