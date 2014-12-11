@@ -35,16 +35,3 @@ moduleinterface IxMIPv6Support
         input fromIPv6;
         output toIPv6;
 }
-
-simple xMIPv6Support_None like IxMIPv6Support
-{
-    parameters:
-        bool isHomeAgent = default(false);
-        bool isMobileNode = default(false);
-        @display("i=old/x_noentry");
-        @class("UnimplementedModule");
-    gates:
-        input fromIPv6;
-        output toIPv6;
-}
-

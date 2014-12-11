@@ -58,15 +58,3 @@ moduleinterface IUDP
         output appOut[] @labels(UDPControlInfo/up);
         output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }
-
-simple UDP_None like IUDP
-{
-    parameters:
-        @display("i=old/x_noentry");
-        @class("UnimplementedModule");
-    gates:
-        input appIn[] @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output appOut[] @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
-}

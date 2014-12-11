@@ -52,16 +52,3 @@ moduleinterface IMACRelayUnit
         input stpIn @loose;
         output stpOut @loose;
 }
-
-simple MACRelayUnit_None like IMACRelayUnit
-{
-    parameters:
-        @display("i=old/x_noentry");
-        @class("UnimplementedModule");
-    gates:
-        input ifIn[] @labels(EtherFrame);
-        output ifOut[] @labels(EtherFrame);
-        input stpIn @loose;
-        output stpOut @loose;
-}
-

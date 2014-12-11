@@ -24,14 +24,19 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+
+#ifdef WITH_RADIO
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/base/NarrowbandReceiverBase.h"
+#endif
 
 namespace inet {
 
+#ifdef WITH_RADIO
 using namespace inet::physicallayer;
+#endif
 
 NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
 {
@@ -315,14 +320,19 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
     if (!strcmp(linkWeightMode, "constant"))
         return defaultLinkWeight;
     else if (!strcmp(linkWeightMode, "dataRate")) {
+#ifdef WITH_RADIO
         // compute the packet error rate between the two interfaces using a dummy transmission
         cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         const NarrowbandTransmitterBase *transmitter = dynamic_cast<const NarrowbandTransmitterBase *>(transmitterRadio->getTransmitter());
         double dataRate = transmitter->getBitrate().get();
         return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
+#else
+        throw cRuntimeError("Radio feature is disabled");
+#endif
     }
     else if (!strcmp(linkWeightMode, "errorRate")) {
+#ifdef WITH_RADIO
         // compute the packet error rate between the two interfaces using a dummy transmission
         InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
         InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
@@ -353,6 +363,9 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
             return minLinkWeight - log(1 - packetErrorRate);
         }
         return defaultLinkWeight;
+#else
+        throw cRuntimeError("Radio feature is disabled");
+#endif
     }
     else
         throw cRuntimeError("Unknown linkWeightMode");

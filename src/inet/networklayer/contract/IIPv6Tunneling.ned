@@ -34,15 +34,3 @@ moduleinterface IIPv6Tunneling
         input linkLayerIn;
         output linkLayerOut;
 }
-
-simple IPv6Tunneling_None like IIPv6Tunneling
-{
-    @display("i=old/x_noentry");
-    @class("UnimplementedModule");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input linkLayerIn;
-        output linkLayerOut;
-}
-

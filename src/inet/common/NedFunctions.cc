@@ -133,6 +133,33 @@ Define_NED_Function2(nedf_absPath,
         "Returns absolute path of given module"
         );
 
+cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int argc)
+{
+    cRegistrationList *types = componentTypes.getInstance();
+    for (int i=0; i<argc; i++)
+    {
+        if (argv[i].getType() != cNEDValue::STR)
+            throw cRuntimeError("firstAvailable(): string arguments expected");
+        const char *name = argv[i].stringValue();
+        cComponentType *c;
+        c = dynamic_cast<cComponentType *>(types->lookup(name)); // by qualified name
+        if (c && c->isAvailable())
+            return argv[i];
+        c = dynamic_cast<cComponentType *>(types->find(name)); // by simple name
+        if (c && c->isAvailable())
+            return argv[i];
+    }
+    return "";
+}
+
+Define_NED_Function2(nedf_firstAvailableOrEmpty,
+    "string firstAvailableOrEmpty(...)",
+    "misc",
+    "Accepts any number of strings, interprets them as NED type names "
+    "(qualified or unqualified), and returns the first one that exists and "
+    "its C++ implementation class is also available. Returns empty string if "
+    "none of the types are available.");
+
 } // namespace utils
 
 } // namespace inet

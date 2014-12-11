@@ -30,15 +30,3 @@ moduleinterface ISCTP
         output to_appl[];
         output to_ip;
 }
-
-simple SCTP_None like ISCTP
-{
-    parameters:
-        @display("i=old/x_noentry");
-        @class("UnimplementedModule");
-    gates:
-        input from_appl[];
-        input from_ip;
-        output to_appl[];
-        output to_ip;
-}
