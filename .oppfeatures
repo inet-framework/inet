@@ -679,12 +679,14 @@
         nedPackages = "
                        inet.physicallayer.apsk
                        inet.physicallayer.base
+                       inet.physicallayer.backgroundnoise
                        inet.physicallayer.antenna
                        inet.physicallayer.common
                        inet.physicallayer.errormodel
                        inet.physicallayer.ideal
                        inet.physicallayer.mapping
                        inet.physicallayer.neighborcache
+                       inet.physicallayer.obstacleloss
                        inet.physicallayer.pathloss
                        inet.physicallayer.energyconsumer
                        inet.physicallayer.propagation
