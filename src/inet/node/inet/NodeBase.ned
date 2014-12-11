@@ -24,7 +24,7 @@ import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.contract.IMobility;
-import inet.networklayer.common.IRoutingTable;
+import inet.networklayer.contract.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
 import inet.power.contract.IEnergyStorage;

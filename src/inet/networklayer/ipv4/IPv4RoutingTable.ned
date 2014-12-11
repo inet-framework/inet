@@ -17,7 +17,7 @@
 
 package inet.networklayer.ipv4;
 
-import inet.networklayer.common.IRoutingTable;
+import inet.networklayer.contract.IRoutingTable;
 
 //
 // Stores the routing table. (Per-interface configuration is stored in

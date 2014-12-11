@@ -18,7 +18,7 @@
 
 package inet.networklayer.multi;
 
-import inet.networklayer.common.IRoutingTable;
+import inet.networklayer.contract.IRoutingTable;
 
 //
 // This module supports multiple different routing tables simultaneously.

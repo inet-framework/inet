@@ -17,7 +17,7 @@
 
 package inet.networklayer.ipv6;
 
-import inet.networklayer.common.IRoutingTable;
+import inet.networklayer.contract.IRoutingTable;
 
 //
 // IPv6 Routing Table and Neighbour Discovery data structures.
