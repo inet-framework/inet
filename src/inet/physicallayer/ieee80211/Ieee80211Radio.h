@@ -44,6 +44,7 @@ class INET_API Ieee80211Radio : public Radio
   public:
     Ieee80211Radio();
 
+    virtual void setPower(W newPower);
     virtual void setBitrate(bps newBitrate);
     virtual void setChannelNumber(int newChannelNumber);
 };

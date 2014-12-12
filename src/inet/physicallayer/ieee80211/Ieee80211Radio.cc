@@ -51,6 +51,8 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         if (configureCommand->getRadioMode() != -1)
             setRadioMode((RadioMode)configureCommand->getRadioMode());
         W newPower = configureCommand->getPower();
+        if (!isNaN(newPower.get()))
+            setPower(newPower);
         bps newBitrate = configureCommand->getBitrate();
         if (!isNaN(newBitrate.get()))
             setBitrate(newBitrate);
@@ -61,6 +63,12 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
     }
     else
         Radio::handleUpperCommand(message);
+}
+
+void Ieee80211Radio::setPower(W newPower)
+{
+    NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
+    narrowbandTransmitter->setPower(newPower);
 }
 
 void Ieee80211Radio::setBitrate(bps newBitrate)
