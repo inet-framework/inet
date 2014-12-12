@@ -650,7 +650,7 @@
         labels = ""
         nedPackages = "
                        inet.environment
-                       inet.environment.cache
+                       inet.environment.objectcache
                       "
         extraSourceFolders = ""
         compileFlags = ""
