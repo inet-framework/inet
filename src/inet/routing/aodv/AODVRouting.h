@@ -68,34 +68,34 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     };
 
     // context
-    IL3AddressType *addressType;    // to support both IPv4 and v6 addresses.
+    IL3AddressType *addressType = nullptr;    // to support both IPv4 and v6 addresses.
 
     // environment
-    cModule *host;
-    IRoutingTable *routingTable;
-    IInterfaceTable *interfaceTable;
-    INetfilter *networkProtocol;
+    cModule *host = nullptr;
+    IRoutingTable *routingTable = nullptr;
+    IInterfaceTable *interfaceTable = nullptr;
+    INetfilter *networkProtocol = nullptr;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
-    unsigned int rerrRatelimit;
-    unsigned int aodvUDPPort;
-    bool askGratuitousRREP;
-    bool useHelloMessages;
+    unsigned int rerrRatelimit = 0;
+    unsigned int aodvUDPPort = 0;
+    bool askGratuitousRREP = false;
+    bool useHelloMessages = false;
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
     simtime_t helloInterval;
-    unsigned int netDiameter;
-    unsigned int rreqRetries;
-    unsigned int rreqRatelimit;
-    unsigned int timeoutBuffer;
-    unsigned int ttlStart;
-    unsigned int ttlIncrement;
-    unsigned int ttlThreshold;
-    unsigned int localAddTTL;
-    unsigned int allowedHelloLoss;
+    unsigned int netDiameter = 0;
+    unsigned int rreqRetries = 0;
+    unsigned int rreqRatelimit = 0;
+    unsigned int timeoutBuffer = 0;
+    unsigned int ttlStart = 0;
+    unsigned int ttlIncrement = 0;
+    unsigned int ttlThreshold = 0;
+    unsigned int localAddTTL = 0;
+    unsigned int allowedHelloLoss = 0;
     simtime_t nodeTraversalTime;
-    cPar *jitterPar;
-    cPar *periodicJitter;
+    cPar *jitterPar = nullptr;
+    cPar *periodicJitter = nullptr;
 
     // the following parameters are calculated from the parameters defined above
     // see the NED file for more info
@@ -107,27 +107,27 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     simtime_t pathDiscoveryTime;
 
     // state
-    unsigned int rreqId;    // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
-    unsigned int sequenceNum;    // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
+    unsigned int rreqId = 0;    // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
+    unsigned int sequenceNum = 0;    // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
     std::map<L3Address, WaitForRREP *> waitForRREPTimers;    // timeout for Route Replies
     std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare> rreqsArrivalTime;    // maps RREQ id to its arriving time
     L3Address failedNextHop;    // next hop to the destination who failed to send us RREP-ACK
     std::map<L3Address, simtime_t> blacklist;    // we don't accept RREQs from blacklisted nodes
-    unsigned int rerrCount;    // num of originated RERR in the last second
-    unsigned int rreqCount;    // num of originated RREQ in the last second
+    unsigned int rerrCount = 0;    // num of originated RERR in the last second
+    unsigned int rreqCount = 0;    // num of originated RREQ in the last second
     simtime_t lastBroadcastTime;    // the last time when any control packet was broadcasted
     std::map<L3Address, unsigned int> addressToRreqRetries;    // number of re-discovery attempts per address
 
     // self messages
-    cMessage *helloMsgTimer;    // timer to send hello messages (only if the feature is enabled)
-    cMessage *expungeTimer;    // timer to clean the routing table out
-    cMessage *counterTimer;    // timer to set rrerCount = rreqCount = 0 in each second
-    cMessage *rrepAckTimer;    // timer to wait for RREP-ACKs (RREP-ACK timeout)
-    cMessage *blacklistTimer;    // timer to clean the blacklist out
+    cMessage *helloMsgTimer = nullptr;    // timer to send hello messages (only if the feature is enabled)
+    cMessage *expungeTimer = nullptr;    // timer to clean the routing table out
+    cMessage *counterTimer = nullptr;    // timer to set rrerCount = rreqCount = 0 in each second
+    cMessage *rrepAckTimer = nullptr;    // timer to wait for RREP-ACKs (RREP-ACK timeout)
+    cMessage *blacklistTimer = nullptr;    // timer to clean the blacklist out
 
     // lifecycle
     simtime_t rebootTime;    // the last time when the node rebooted
-    bool isOperational;
+    bool isOperational = false;
 
     // internal
     std::multimap<L3Address, INetworkDatagram *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for

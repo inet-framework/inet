@@ -224,17 +224,6 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
 
 AODVRouting::AODVRouting()
 {
-    interfaceTable = nullptr;
-    host = nullptr;
-    routingTable = nullptr;
-    isOperational = false;
-    networkProtocol = nullptr;
-    addressType = nullptr;
-    helloMsgTimer = nullptr;
-    expungeTimer = nullptr;
-    blacklistTimer = nullptr;
-    rrepAckTimer = nullptr;
-    jitterPar = nullptr;
 }
 
 bool AODVRouting::hasOngoingRouteDiscovery(const L3Address& target)
