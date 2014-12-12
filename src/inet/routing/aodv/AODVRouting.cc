@@ -135,10 +135,9 @@ void AODVRouting::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown self message");
     }
     else {
-        UDPPacket *udpPacket = dynamic_cast<UDPPacket *>(msg);
+        UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
-        INetworkProtocolControlInfo *udpProtocolCtrlInfo = dynamic_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
-        ASSERT(udpProtocolCtrlInfo != nullptr);
+        INetworkProtocolControlInfo *udpProtocolCtrlInfo = check_and_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
         L3Address sourceAddr = udpProtocolCtrlInfo->getSourceAddress();
         unsigned int arrivalPacketTTL = udpProtocolCtrlInfo->getHopLimit();
 
