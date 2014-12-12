@@ -116,10 +116,8 @@ module IPv6NetworkLayer like INetworkLayer
         ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
 
         //IPv6 to Mobile IPv6
-        if xMIPv6Support {
-            ipv6.xMIPv6Out --> mipv6support.fromIPv6;
-            ipv6.xMIPv6In <-- mipv6support.toIPv6;
-        }
+        ipv6.xMIPv6Out --> mipv6support.fromIPv6 if xMIPv6Support;
+        ipv6.xMIPv6In <-- mipv6support.toIPv6 if xMIPv6Support;
 
         // IPv6 to L2
         for i=0..sizeof(ifIn)-1 {
