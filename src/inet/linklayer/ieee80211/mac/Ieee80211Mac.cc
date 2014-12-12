@@ -1560,8 +1560,9 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
 {
     double tim;
     double bitRate = bitrate;
-    if (dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo())) {
-        bitRate = dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo())->getBitrate().get();
+    TransmissionRequest *trq = dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo());
+    if (trq) {
+        bitRate = trq->getBitrate().get();
         if (bitRate == 0)
             bitRate = bitrate;
     }
