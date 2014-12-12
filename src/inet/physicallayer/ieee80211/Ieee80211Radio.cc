@@ -48,6 +48,9 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
+        if (configureCommand->getRadioMode() != -1)
+            setRadioMode((RadioMode)configureCommand->getRadioMode());
+        W newPower = configureCommand->getPower();
         bps newBitrate = configureCommand->getBitrate();
         if (!isNaN(newBitrate.get()))
             setBitrate(newBitrate);

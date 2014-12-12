@@ -37,9 +37,10 @@ enum RadioCommandCode
 //
 class ConfigureRadioCommand
 {
-    int channelNumber = -1; // new channel number in the range [0, numChannels] or -1 if not set.
-    bps bitrate = bps(NaN); // new default bitrate in the range (0, +infinity) or NaN if not set.
+    int radioMode = -1;     // new radio mode or -1 if not set.
     W power = W(NaN);       // new default transmission power in the range (0, +infinity) or NaN if not set.
+    bps bitrate = bps(NaN); // new default bitrate in the range (0, +infinity) or NaN if not set.
+    int channelNumber = -1; // new channel number in the range [0, numChannels] or -1 if not set.
 }
 
 //
