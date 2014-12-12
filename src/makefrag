@@ -1,7 +1,6 @@
 # if you want to use external interfaces with inet, you should install
 # winpcap (on windows) or libpcap-dev (on linux) and re-run ./configure in
-# the omnetpp root directory and comment out the following line:
-HAVE_PCAP=no
+# the omnetpp root directory
 
 ifeq ($(HAVE_PCAP),yes)
   # link with PCAP libs too

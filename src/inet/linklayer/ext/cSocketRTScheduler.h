@@ -31,9 +31,15 @@
 #define HAVE_U_INT16_T
 #define HAVE_U_INT32_T
 #define HAVE_U_INT64_T
-#ifdef HAVE_PCAP
+
+#ifndef HAVE_PCAP
+#error "No PCAP! If you want to use external interfaces with INET, \
+install winpcap (on windows) or libpcap-dev (on linux) \
+and re-run ./configure in the omnetpp root directory \
+- otherwise you should disable the 'Network emulation support' feature in INET"
+#endif // ifndef HAVE_PCAP
+
 #include <pcap.h>
-#endif // ifdef HAVE_PCAP
 #include "inet/linklayer/ext/ExtFrame_m.h"
 
 namespace inet {
@@ -56,12 +62,10 @@ class cSocketRTScheduler : public cScheduler
      * Destructor.
      */
     virtual ~cSocketRTScheduler();
-#ifdef HAVE_PCAP
     static std::vector<cModule *> modules;
     static std::vector<pcap_t *> pds;
     static std::vector<int> datalinks;
     static std::vector<int> headerLengths;
-#endif // ifdef HAVE_PCAP
     static timeval baseTime;
 
     /**

@@ -32,14 +32,12 @@
 #define PCAP_SNAPLEN    65536 /* capture all data packets with up to pcap_snaplen bytes */
 #define PCAP_TIMEOUT    10    /* Timeout in ms */
 
-#ifdef HAVE_PCAP
+namespace inet {
+
 std::vector<cModule *> cSocketRTScheduler::modules;
 std::vector<pcap_t *> cSocketRTScheduler::pds;
 std::vector<int32> cSocketRTScheduler::datalinks;
 std::vector<int32> cSocketRTScheduler::headerLengths;
-#endif // ifdef HAVE_PCAP
-
-namespace inet {
 
 timeval cSocketRTScheduler::baseTime;
 
@@ -63,7 +61,6 @@ void cSocketRTScheduler::startRun()
 {
     gettimeofday(&baseTime, nullptr);
 
-#ifdef HAVE_PCAP
     // Enabling sending makes no sense when we can't receive...
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
@@ -71,7 +68,6 @@ void cSocketRTScheduler::startRun()
     const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
-#endif // ifdef HAVE_PCAP
 }
 
 void cSocketRTScheduler::endRun()
@@ -79,7 +75,6 @@ void cSocketRTScheduler::endRun()
     close(fd);
     fd = INVALID_SOCKET;
 
-#ifdef HAVE_PCAP
     for (uint16 i = 0; i < pds.size(); i++) {
         pcap_stat ps;
         if (pcap_stats(pds.at(i), &ps) < 0)
@@ -94,7 +89,6 @@ void cSocketRTScheduler::endRun()
     pds.clear();
     datalinks.clear();
     headerLengths.clear();
-#endif // ifdef HAVE_PCAP
 }
 
 void cSocketRTScheduler::executionResumed()
@@ -105,7 +99,6 @@ void cSocketRTScheduler::executionResumed()
 
 void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)
 {
-#ifdef HAVE_PCAP
     char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fcode;
     pcap_t *pd;
@@ -164,19 +157,15 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     headerLengths.push_back(headerLength);
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
-#else // ifdef HAVE_PCAP
-    throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): code was compiled without pcap support");
-#endif // ifdef HAVE_PCAP
 }
 
-#ifdef HAVE_PCAP
 static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
     unsigned i;
     int32 headerLength;
     int32 datalink;
     cModule *module;
-    struct ether_header *ethernet_hdr;
+    struct serializer::ether_header *ethernet_hdr;
 
     i = *(uint16 *)user;
     datalink = cSocketRTScheduler::datalinks.at(i);
@@ -185,7 +174,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 
     // skip ethernet frames not encapsulating an IP packet.
     if (datalink == DLT_EN10MB) {
-        ethernet_hdr = (struct ether_header *)bytes;
+        ethernet_hdr = (struct serializer::ether_header *)bytes;
         if (ntohs(ethernet_hdr->ether_type) != ETHERTYPE_IP)
             return;
     }
@@ -208,24 +197,19 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     simulation.msgQueue.insert(notificationMsg);
 }
 
-#endif // ifdef HAVE_PCAP
-
 bool cSocketRTScheduler::receiveWithTimeout()
 {
     bool found;
     struct timeval timeout;
-#ifdef HAVE_PCAP
     int32 n;
 #ifdef LINUX
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif // ifdef LINUX
-#endif // ifdef HAVE_PCAP
 
     found = false;
     timeout.tv_sec = 0;
     timeout.tv_usec = PCAP_TIMEOUT * 1000;
-#ifdef HAVE_PCAP
 #ifdef LINUX
     FD_ZERO(&rdfds);
     maxfd = -1;
@@ -253,9 +237,6 @@ bool cSocketRTScheduler::receiveWithTimeout()
     if (!found)
         select(0, nullptr, nullptr, nullptr, &timeout);
 #endif // ifndef LINUX
-#else // ifdef HAVE_PCAP
-    select(0, nullptr, nullptr, nullptr, &timeout);
-#endif // ifdef HAVE_PCAP
     return found;
 }
 
@@ -314,8 +295,10 @@ cMessage * cSocketRTScheduler::getNextEvent()
         diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
+#if OMNETPP_VERSION >= 0x0500
     cEvent *tmp = sim->msgQueue.removeFirst();
     ASSERT(tmp == event);
+#endif // if OMNETPP_VERSION >= 0x0500
     return event;
 }
 #undef cEvent
