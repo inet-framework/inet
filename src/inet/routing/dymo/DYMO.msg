@@ -42,9 +42,9 @@ class AddressBlock {
     bool hasMetric;
     double metric;
     bool hasMetricType;
-    DYMOMetricType metricType;
+    DYMOMetricType metricType = (DYMOMetricType)-1;
     bool hasSequenceNumber;
-    DYMOSequenceNumber sequenceNumber;
+    DYMOSequenceNumber sequenceNumber = 0;
 }
 
 //
