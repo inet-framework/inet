@@ -19,7 +19,6 @@
 //
 package inet.networklayer.ipv6;
 
-import inet.common.queue.Nop;
 import inet.networklayer.contract.IIPv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
@@ -82,7 +81,7 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=44,79");
         }
-        xdummy: Nop if !xMIPv6Support;
+
     connections allowunconnected:  // FIXME remove 'nocheck'!
         for i=0..sizeof(transportIn)-1 {
             transportIn[i] --> { @display("m=n"); } --> ipv6.transportIn++;

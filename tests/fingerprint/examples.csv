@@ -112,7 +112,7 @@
 # /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          fe01-d055
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          d5a6-0850
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          4fd0-6479
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          d731-116e
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          342c-eec8
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          dec4-372d
@@ -255,23 +255,23 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            31ab-f723
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            b2ba-8928
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          2e82-e76f
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             0ac6-2503
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             6d00-b9bc
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             572e-216f
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             6902-bf18
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             fa4b-931c
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             10ea-ab53
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             fb62-4168
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             9cb1-5251
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             d3d9-da43
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           c117-41b2
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a4cf-8ecd
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            95d7-ac71
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          3708-cb40
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             1803-2ee9
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             d621-0700
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             56d4-ff26
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             4503-75e3
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             14fa-cb82
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             05fc-2292
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             6f20-2233
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             5904-e896
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             f75a-5384
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           7412-a8dc
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a81f-7524
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            a794-9420
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             7084-4f55
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             b007-c735
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
@@ -359,8 +359,8 @@
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,         cf15-154c
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,         1b9f-070f
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            19a4-cae6
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         a15d-9074
-/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         5cf1-fbd6
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         8509-ae83
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         5f26-6145
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51    # unstable fingerprint
