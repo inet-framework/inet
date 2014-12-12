@@ -19,9 +19,10 @@
 //
 package inet.networklayer.ipv6;
 
+import inet.common.queue.Nop;
 import inet.networklayer.contract.IIPv6Tunneling;
-import inet.networklayer.contract.IxMIPv6Support;
 import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.contract.IxMIPv6Support;
 import inet.networklayer.icmpv6.ICMPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 
@@ -81,6 +82,7 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=44,79");
         }
+        xdummy: Nop if !xMIPv6Support;
     connections allowunconnected:  // FIXME remove 'nocheck'!
         for i=0..sizeof(transportIn)-1 {
             transportIn[i] --> { @display("m=n"); } --> ipv6.transportIn++;
@@ -115,8 +117,10 @@ module IPv6NetworkLayer like INetworkLayer
         ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
 
         //IPv6 to Mobile IPv6
-        ipv6.xMIPv6Out --> mipv6support.fromIPv6;
-        ipv6.xMIPv6In <-- mipv6support.toIPv6;
+        if xMIPv6Support {
+            ipv6.xMIPv6Out --> mipv6support.fromIPv6;
+            ipv6.xMIPv6In <-- mipv6support.toIPv6;
+        }
 
         // IPv6 to L2
         for i=0..sizeof(ifIn)-1 {
