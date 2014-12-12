@@ -40,8 +40,7 @@ class BGPSession;
 class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
 {
   public:
-    BGPRouting()
-        : _myAS(0), _inft(0), _rt(0) {}
+    BGPRouting() {}
 
     virtual ~BGPRouting();
 
@@ -131,11 +130,11 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
     TCPSocketMap _socketMap;
-    ASID _myAS;
-    SessionID _currSessionId;
+    ASID _myAS = 0;
+    SessionID _currSessionId = 0;
 
-    IInterfaceTable *_inft;
-    IIPv4RoutingTable *_rt;    // The IP routing table
+    IInterfaceTable *_inft = nullptr;
+    IIPv4RoutingTable *_rt = nullptr;    // The IP routing table
     typedef std::vector<RoutingTableEntry *> RoutingTableEntryVector;
     RoutingTableEntryVector _BGPRoutingTable;    // The BGP routing table
     RoutingTableEntryVector _prefixListIN;

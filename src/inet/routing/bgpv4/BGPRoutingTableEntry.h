@@ -43,12 +43,11 @@ class INET_API RoutingTableEntry : public IPv4Route
   private:
     // destinationID is RoutingEntry::host
     // addressMask is RoutingEntry::netmask
-    RoutingPathType _pathType;
+    RoutingPathType _pathType = INCOMPLETE;
     std::vector<ASID> _ASList;
 };
 
-inline RoutingTableEntry::RoutingTableEntry(void) :
-    IPv4Route(), _pathType(INCOMPLETE)
+inline RoutingTableEntry::RoutingTableEntry(void)
 {
     setNetmask(IPv4Address::ALLONES_ADDRESS);
     setMetric(DEFAULT_COST);
