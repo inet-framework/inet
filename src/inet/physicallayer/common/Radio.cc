@@ -251,7 +251,13 @@ void Radio::handleSelfMessage(cMessage *message)
 
 void Radio::handleUpperCommand(cMessage *message)
 {
-    throw cRuntimeError("Unsupported command");
+    if (message->getKind() == RADIO_C_CONFIGURE) {
+        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
+        if (configureCommand->getRadioMode() != -1)
+            setRadioMode((RadioMode)configureCommand->getRadioMode());
+    }
+    else
+        throw cRuntimeError("Unsupported command");
 }
 
 void Radio::handleLowerCommand(cMessage *message)

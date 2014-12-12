@@ -32,7 +32,7 @@ Define_Module(Ieee80211Radio);
 simsignal_t Ieee80211Radio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 Ieee80211Radio::Ieee80211Radio() :
-    Radio(),
+    NarrowbandRadioBase(),
     channelNumber(-1)
 {
 }
@@ -48,34 +48,14 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
-        if (configureCommand->getRadioMode() != -1)
-            setRadioMode((RadioMode)configureCommand->getRadioMode());
-        W newPower = configureCommand->getPower();
-        if (!isNaN(newPower.get()))
-            setPower(newPower);
-        bps newBitrate = configureCommand->getBitrate();
-        if (!isNaN(newBitrate.get()))
-            setBitrate(newBitrate);
+        NarrowbandRadioBase::handleUpperCommand(message);
         int newChannelNumber = configureCommand->getChannelNumber();
         if (newChannelNumber != -1)
             setChannelNumber(newChannelNumber);
         delete message;
     }
     else
-        Radio::handleUpperCommand(message);
-}
-
-void Ieee80211Radio::setPower(W newPower)
-{
-    NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    narrowbandTransmitter->setPower(newPower);
-}
-
-void Ieee80211Radio::setBitrate(bps newBitrate)
-{
-    NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    narrowbandTransmitter->setBitrate(newBitrate);
-    endReceptionTimer = nullptr;
+        NarrowbandRadioBase::handleUpperCommand(message);
 }
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
