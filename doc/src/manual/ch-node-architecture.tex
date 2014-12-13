@@ -25,14 +25,12 @@ destination IPv4 address. The IPv4 module calls the latter function for
 routing packets, and routing protocols such as OSPF or BGP call the route
 manipulation methods to add and manage discovered routes. For IPv6
 simulations, \nedtype{IPv4RoutingTable} is replaced (or co-exists) with
-a \nedtype{IPv6RoutingTable} module
+a \nedtype{IPv6RoutingTable} module, possibly with a \nedtype{BindingCache}
+module as well.
 
 \ifdraft TODO
 ; and for Mobile IPv6 simulations (xMIPv6 project [TODO])
 \fi
-
-, possibly with a \nedtype{BindingCache} module
-as well.
 
 \ifdraft TODO
 \item \tbf{Notification Board (\nedtype{NotificationBoard})}. This module
@@ -122,8 +120,8 @@ implementations (e.g. the \nedtype{RSVP} module) manage the information in
 
 \item \tbf{Relay unit}. Ethernet (and possibly other) switch models may
 contain a relay unit, which switches frames among Ethernet (and other
-IEEE 802) NICs. Concrete relay unit types include \nedtype{MACRelayUnitPP}
-and \nedtype{MACRelayUnitNP}, which differ in their performance models.
+IEEE 802) NICs. Concrete relay unit types include \nedtype{MACRelayUnit}
+and \nedtype{Ieee8021dRelay}, which differ in their performance models.
 
 \ifdraft TODO
 \item \tbf{Power consumption}. INET extensions uses for wireless sensor
@@ -141,9 +139,9 @@ valid approach to create custom node models.
 
 Most modules are optional, i.e. can be left out of hosts or other node
 models when not needed in the given scenario. For example, switch models do
-not need a network layer, a routing table or interface table; it may need a
-notification board though. Some NICs (e.g. \nedtype{EtherMAC}) can be used
-without and interface table and queue models as well.
+not need a network layer, a routing table or interface table. Some NICs (e.g.
+\nedtype{EtherMAC}) can be used without and interface table and queue models as
+well.
 
 \ifdraft TODO
 The notification board (\nedtype{NotificationBoard}) and the interface
@@ -352,13 +350,12 @@ functions. This is possible because NICs create and register entries in
 
 \item \textbf{Network layer protocols} cannot add data via subclassing, so
 composition has to be used. \cppclass{InterfaceEntry} contains pointers to
-network-layer specific data structures. Currently there are four pointers:
-one for IPv4 specific data, one for IPv6 specific data, and two additional
-ones that are unassigned. The four data objects can be accessed with the
-following \cppclass{InterfaceEntry} member functions: \ffunc{ipv4Data()},
-\ffunc{ipv6Data()}, \ffunc{protocol3Data()}, and \ffunc{protocol4Data()}.
+network-layer specific data structures. For example, there are pointers to
+IPv4 specific data, and IPv6 specific data. These objects can be accessed with
+the following \cppclass{InterfaceEntry} member functions: \ffunc{ipv4Data()},
+\ffunc{ipv6Data()}, and \ffunc{getGenericNetworkProtocolData()}.
 They return pointers of the types \cppclass{IPv4InterfaceData},
-\cppclass{IPv6InterfaceData} and \cppclass{InterfaceProtocolData} (2x),
+\cppclass{IPv6InterfaceData}, and \cppclass{GenericNetworkProtocolInterfaceData},
 respectively. For illustration, \cppclass{IPv4InterfaceData} is installed
 onto the interface entries by the \nedtype{IPv4RoutingTable} module, and it
 contains data such as the IP address of the interface, the netmask, link
@@ -391,7 +388,7 @@ void PPP::initialize(int stage)
 
 InterfaceEntry *PPP::registerInterface(double datarate)
 {
-    InterfaceEntry *e = new InterfaceEntry();
+    InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
     e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
@@ -411,8 +408,8 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     e->setPointToPoint(true);
 
     // add
-    IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    ift->addInterface(e);
 
     return e;
 }
@@ -616,10 +613,8 @@ simple TCP like ITCP
     gates:
         input appIn[] @labels(TCPCommand/down);
         output appOut[] @labels(TCPCommand/up);
-        input ipIn @labels(TCPSegment,IPControlInfo/up);
-        output ipOut @labels(TCPSegment,IPControlInfo/down);
-        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
-        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPControlInfo/up);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/up);
 }
 \end{ned}
 
