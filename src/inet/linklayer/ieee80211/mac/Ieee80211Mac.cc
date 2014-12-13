@@ -808,6 +808,8 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
  */
 void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
+    ASSERT(!isInHandleWithFSM);
+    isInHandleWithFSM = true;
     removeOldTuplesFromDuplicateMap();
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (isUpperMessage(msg) && fsm.getState() != IDLE) {
@@ -828,6 +830,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             cancelEvent(endBackoff(numCategories() - 1));
         }
         EV_DEBUG << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
+        isInHandleWithFSM = false;
         return;
     }
 
@@ -836,6 +839,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     {
         EV << "Re-schedule WAITACK timeout \n";
         scheduleAt(simTime() + controlFrameTxTime(LENGTH_ACK), endTimeout);
+        isInHandleWithFSM = false;
         return;
     }
 
@@ -1382,6 +1386,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         }
         last = simTime();
     }
+    isInHandleWithFSM = false;
 }
 
 void Ieee80211Mac::finishReception()

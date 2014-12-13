@@ -99,6 +99,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     bool prioritizeMulticast;
 
   protected:
+    bool isInHandleWithFSM = false;
     IRadio::TransmissionState transmissionState;
     /**
      * @name Configuration parameters
