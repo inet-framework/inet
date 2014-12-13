@@ -42,7 +42,7 @@ IPv4 network layer of hosts and routers:
   \item \nedtype{IPv4} is the main module that implements RFC791. This
         module performs IP encapsulation/decapsulation, fragmentation
         and assembly, and routing of IP datagrams.
-  \item The \nedtype{RoutingTable} is a helper module that manages the routing
+  \item The \nedtype{IPv4RoutingTable} is a helper module that manages the routing
         table of the node. It is queried by the \nedtype{IPv4} module
         for best routes, and updated by the routing daemons implementing
         RIP, OSPF, Manet, etc. protocols.
@@ -55,11 +55,11 @@ IPv4 network layer of hosts and routers:
 \end{itemize}
 
 These modules are assembled into a complete network layer module
-called \nedtype{NetworkLayer}. This module has
+called \nedtype{IPv4NetworkLayer}. This module has
 dedicated gates for TCP, UDP, SCTP, RSVP, OSPF, Manet, and Ping
 higher layer protocols. It can be connected to several network
 interface cards: Ethernet, PPP, Wlan, or external interfaces.
-The \nedtype{NetworkLayer} module is used to build IPv4 hosts
+The \nedtype{IPv4NetworkLayer} module is used to build IPv4 hosts
 (\nedtype{StandardHost}) and routers (\nedtype{Router}).
 
 The implementation of these modules are based on the following RFCs:
@@ -486,9 +486,9 @@ In the graphical interface the bubble of the \nedtype{IPv4} module
 also displays these counters.
 
 
-\section{The RoutingTable module}
+\section{The IPv4RoutingTable module}
 
-The \nedtype{RoutingTable} module represents the routing table.
+The \nedtype{IPv4RoutingTable} module represents the routing table.
 IP hosts and routers contain one instance of this class. It has
 methods to manage the routing table and the interface table,
 so one can achieve functionality similar to the \fprog{route} and
@@ -570,7 +570,7 @@ of the datagram, then the forwarding algorithm chooses the one with the
 
 \subsection*{Parameters}
 
-The \nedtype{RoutingTable} module has the following parameters:
+The \nedtype{IPv4RoutingTable} module has the following parameters:
 
 \begin{itemize}
   \item \fpar{routerId}: for routers, the router id using IPv4 address dotted notation;
@@ -592,13 +592,13 @@ with the XML configuration of \nedtype{IPv4NetworkConfigurator}. Section \ref{su
 describes the format of the new configuration files.
 \end{warning}
 
-% FIXME (#467) RoutingTable::invalidateCache() should clear localBroadcastAddresses.
-% RoutingTable::findBestMatchingRoute() should search in this order:
+% FIXME (#467) IPv4RoutingTable::invalidateCache() should clear localBroadcastAddresses.
+% IPv4RoutingTable::findBestMatchingRoute() should search in this order:
 %          1. host routes (exact match)
 %          2. network routes (longest match)
 %          3. default routes (round robin)
 %   It is ok, if host routes has 255.255.255.255 netmask, and default has 0.0.0.0 netmask.
-% FIXME RoutingTable::findBestMatchingRoute() if(...MANET...) branch always set bestRoute to NULL,
+% FIXME IPv4RoutingTable::findBestMatchingRoute() if(...MANET...) branch always set bestRoute to NULL,
 %       because if there were exact match, it would have been choosen in the previous loop.
 
 \section{The ICMP module}
@@ -914,7 +914,7 @@ assumes that the group has no local members.
 
 \subsection{Disabling IGMP}
 
-The IPv4 \nedtype{NetworkLayer} contains an instance of the IGMP
+The IPv4 \nedtype{IPv4NetworkLayer} contains an instance of the IGMP
 module. IGMP can be turned off by setting the \fpar{enabled}
 parameter to false. When disabled, then no IGMP message
 is generated, and incoming IGMP messages are ignored.
@@ -962,9 +962,9 @@ Router timeouts are configured by these parameters:
    Default is \fpar{robustnessVariable}.
 \end{itemize}
 
-\section{The NetworkLayer module}
+\section{The IPv4NetworkLayer module}
 
-The \nedtype{NetworkLayer} module packs the \nedtype{IP}, \nedtype{ICMP},
+The \nedtype{IPv4NetworkLayer} module packs the \nedtype{IP}, \nedtype{ICMP},
 \nedtype{ARP}, and \nedtype{IGMP} modules into one compound module.
 The compound module defines gates for connecting UDP, TCP, SCTP, RSVP and
 OSPF transport protocols. The \ttt{pingIn} and \ttt{pingOut} gates of the
@@ -1124,7 +1124,7 @@ The network topology graph is constructed from the nodes
 of the network. The node is a module having a @node property
 (this includes hosts, routers, and L2 devices like switches,
  access points, Ethernet hubs, etc.). An IP node is a node
-that contains an \nedtype{InterfaceTable} and a \nedtype{RoutingTable}.
+that contains an \nedtype{InterfaceTable} and a \nedtype{IPv4RoutingTable}.
 A router is an IP node that has multiple network interfaces,
 and IP forwarding is enabled in its routing table module.
 In multicast routers the \fpar{forwardMulticast} parameter
@@ -1525,7 +1525,7 @@ can iterfere with the configurator.
 
 The \nedtype{FlatNetworkConfigurator} searches each IP nodes of the network.
 (IP nodes are those modules that have the @node NED property and
-has a \nedtype{RoutingTable} submodule named ``routingTable'').
+has a \nedtype{IPv4RoutingTable} submodule named ``routingTable'').
 The configurator then assigns IP addresses to the IP nodes, controlled
 by the following module parameters:
 \begin{itemize}
@@ -1576,7 +1576,7 @@ best matching route will be proportional to $n$.
 
 Routing files are files with \ttt{.irt} or \ttt{.mrt} extension,
 and their names are passed in the \fpar{routingFile} parameter
-to \nedtype{RoutingTable} modules.
+to \nedtype{IPv4RoutingTable} modules.
 
 Routing files may contain network interface configuration and static
 routes. Both are optional. Network interface entries in the file
@@ -1584,7 +1584,7 @@ configure existing interfaces; static routes are added to the route table.
 
 Interfaces themselves are represented in the simulation by modules
 (such as the PPP module). Modules automatically register themselves
-with appropriate defaults in the RoutingTable, and entries in the
+with appropriate defaults in the IPv4RoutingTable, and entries in the
 routing file refine (overwrite) these settings.
 Interfaces are identified by names (e.g. ppp0, ppp1, eth0) which
 are normally derived from the module's name: a module called

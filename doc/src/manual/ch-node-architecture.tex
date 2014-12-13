@@ -148,7 +148,7 @@ without and interface table and queue models as well.
 \ifdraft TODO
 The notification board (\nedtype{NotificationBoard}) and the interface
 table (\nedtype{InterfaceTable}) will be described later in this chapter.
-Other modules are covered in later chapters, i.e. \nedtype{RoutingTable}
+Other modules are covered in later chapters, i.e. \nedtype{IPv4RoutingTable}
 in the IPv4 chapter.
 \fi
 
@@ -203,7 +203,7 @@ router model, and it is accessed via direct C++ method calls (not message
 exchange). Modules can \textit{subscribe} to categories of changes
 (e.g. ``routing table changed'' or ``radio channel became empty''). When
 such a change occurs, the corresponding module (e.g. the
-\nedtype{RoutingTable} or the physical layer module) will let
+\nedtype{IPv4RoutingTable} or the physical layer module) will let
 \nedtype{NotificationBoard} know, and it will disseminate this information
 to all interested modules.
 
@@ -360,7 +360,7 @@ following \cppclass{InterfaceEntry} member functions: \ffunc{ipv4Data()},
 They return pointers of the types \cppclass{IPv4InterfaceData},
 \cppclass{IPv6InterfaceData} and \cppclass{InterfaceProtocolData} (2x),
 respectively. For illustration, \cppclass{IPv4InterfaceData} is installed
-onto the interface entries by the \nedtype{RoutingTable} module, and it
+onto the interface entries by the \nedtype{IPv4RoutingTable} module, and it
 contains data such as the IP address of the interface, the netmask, link
 metric for routing, and IP multicast addresses associated with the
 interface. A protocol data pointer will be \ttt{NULL} if the corresponding
