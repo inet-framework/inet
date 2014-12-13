@@ -8,6 +8,8 @@ src/Makefile
 src/Makefile.vc
 /doc/doxy/
 /doc/neddoc/
+/doc/src/manual/figures/*.pdf
+/doc/src/manual/inet-manual.pdf
 /examples/*/results/
 /examples/*/*/results/
 /examples/*/*/*/results/
