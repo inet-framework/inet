@@ -164,6 +164,18 @@ how to configure result collection
 \fi
 
 
+\ifdraft TODO
+\section{TODO}
+Some modules have only one instance, at global network level:
+
+\nedtype{IPv4NetworkConfigurator} assigns IP addresses to hosts and routers,
+and sets up static routing.
+
+\nedtype{ScenarioManager} makes simulations scriptable. Modules can be made to support
+scripting by implementing the \cppclass{IScriptable} C++ interface.
+\fi
+
+
 \section{Setting up wired network simulations}
 
 For an introduction, in this section we show you how to set up simulations
@@ -185,26 +197,23 @@ todo which modules are needed into it, what they do, etc.
 how to add apps, etc
 \fi
 
+\ifdraft TODO
 \subsection{Modeling Link and Node Failures}
 
-\ifdraft TODO
 more
 \fi
 
-Some modules have only one instance, at global network level:
 
-\nedtype{IPv4NetworkConfigurator} assigns IP addresses to hosts and routers,
-and sets up static routing.
+\section{Setting up wireless network simulations}
 
-\nedtype{ScenarioManager} makes simulations scriptable. Modules can be made to support
-scripting by implementing the \cppclass{IScriptable} C++ interface.
-
-\nedtype{RadioMedium} is required for wireless simulations. It keeps track of which
-nodes are within interference distance of other nodes.
+In this section we show you how to set up wireless network simulations using
+IEEE 802.11 links with autoconfigured static IP routing. Such a network can be
+assembled using the predefined \nedtype{WirelessHost} and \nedtype{AccessPoint}
+modules. \nedtype{RadioMedium} is also required for wireless simulations. It
+keeps track of which nodes are within interference distance of other nodes.
 
 
-
-\subsection{Specifying IP (IPv6) addresses in module parameters}
+\section{Specifying network addresses in module parameters}
 
 In INET, TCP, UDP and all application layer modules work with
 both IPv4 and IPv6. Internally they use the \cppclass{L3Address} C++ class, which
@@ -225,12 +234,6 @@ specified in module parameters in omnetpp.ini.
       \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
 \end{itemize}
 
-
-\ifdraft TODO
-\section{Setting up wireless network simulations}
-
-todo which modules are needed into it, what they do, etc.
-\fi
 
 \ifdraft TODO
 \section{Setting up ad-hoc network simulations}

@@ -27,8 +27,7 @@ NICs consist of four layers, which are the following (in top-down order):
   \item physical layer (radio)
 \end{enumerate}
 
-\textit{The physical layer} modules (\nedtype{Ieee80211Radio}; with some limitations,
-\nedtype{SnrEval80211}, \nedtype{Decider80211} can also be used) deal with modelling
+\textit{The physical layer} modules (\nedtype{Ieee80211Radio}) deal with modelling
 transmission and reception of frames. They model the characteristics of
 the radio channel, and determine if a frame was received correctly
 (that is, it did not suffer bit errors due to low signal power or

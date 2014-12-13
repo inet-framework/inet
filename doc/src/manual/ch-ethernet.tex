@@ -472,10 +472,13 @@ medium connected to the port; if collisions are possible (it's a bus or hub)
 it must be set to false, otherwise it can be set to true.
 By default it uses half duples MAC with CSMA/CD.
 
+\ifdraft
+TODO: I think this is no longer true, because we have STP, RSTP
 \begin{note}
 Switches don't implement the Spanning Tree Protocol. You need to
 avoid cycles in the LAN topology.
 \end{note}
+\fi
 
 \section{Link Layer Control}
 \label{sec:LLC}
