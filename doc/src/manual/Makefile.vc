@@ -49,7 +49,7 @@ pdf: $(ALLTEX) $(DOTPICS:.dot=.svg) $(PDFPICS) figures/*.png
 	$(DOT) -Tpng $< >$@
 
 clean:
-	-del inet-manual.dvi inet-manual.pdf *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.htm inet-manual.tmp inet-manual.html
+	-del inet-manual.dvi inet-manual.pdf *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.bbl *.htm inet-manual.tmp inet-manual.html
 	-del /q figures\*.pdf
 	-cd figures && for %%I in (*.svg) do del %%~nI.png
 	-cd figures && for %%I in (*.dot) do del %%~nI.svg

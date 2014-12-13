@@ -54,7 +54,7 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png cover
 	pdflatex inet-manual.tex $(LOGFILTER)
 	pdflatex inet-manual.tex $(LOGFILTER)
 #	pdftk C=cover.pdf B=../cover/copyright.pdf D=inet-manual.pdf cat C B D3-end output ../../Manual.pdf
-	rm -f *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg
+	rm -f *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.bbl
 
 %.pdf: %.svg
 	$(INKSCAPE) $< -A $@
