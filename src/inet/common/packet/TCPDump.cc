@@ -31,10 +31,6 @@ namespace inet {
 
 Define_Module(TCPDump);
 
-TCPDump::TCPDump() : cSimpleModule(), tcpdump()
-{
-}
-
 TCPDump::~TCPDump()
 {
 }
