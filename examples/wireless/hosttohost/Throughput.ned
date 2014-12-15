@@ -24,7 +24,7 @@ import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 module ThroughputClient
@@ -103,7 +103,7 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=61,46");
         }

@@ -20,7 +20,7 @@ package inet.examples.geometry;
 import inet.environment.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 network ObstacleIntersectionTest
 {
@@ -32,7 +32,7 @@ network ObstacleIntersectionTest
             parameters:
                 @display("p=50,50");
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=50,150");
         }

@@ -21,7 +21,7 @@ package inet.examples.wireless.throughput;
 import inet.applications.ethernet.EtherAppCli;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 module ThroughputClient
 {
@@ -66,7 +66,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=61,46");
         }

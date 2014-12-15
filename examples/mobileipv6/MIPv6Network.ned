@@ -30,7 +30,7 @@ import inet.node.wireless.AccessPoint;
 import inet.node.xmipv6.CorrespondentNode6;
 import inet.node.xmipv6.HomeAgent6;
 import inet.node.xmipv6.WirelessHost6;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 channel fiberline extends ned.DatarateChannel
@@ -60,7 +60,7 @@ network mIPv6Network
             parameters:
                 @display("p=763,53");
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=753,123");
         }

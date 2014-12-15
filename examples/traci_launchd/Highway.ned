@@ -21,13 +21,13 @@
 package inet.examples.traci_launchd;
 
 import inet.mobility.group.TraCIScenarioManagerLaunchd;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 module Highway
 {
     submodules:
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=256,128");
         }

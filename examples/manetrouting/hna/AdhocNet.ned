@@ -23,7 +23,7 @@ import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 network AdhocNet
@@ -41,7 +41,7 @@ network AdhocNet
         }
 
     submodules:
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=83,15");
         }
 

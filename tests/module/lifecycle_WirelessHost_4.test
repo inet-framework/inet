@@ -39,12 +39,12 @@ sim-time-limit = 10s
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: Ieee80211RadioMedium;
+        radioMedium: Ieee80211ScalarRadioMedium;
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
         host: AdhocHost;

@@ -21,7 +21,7 @@ package inet.examples.manetrouting.grid_aodv;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 network MobileGrid
@@ -34,7 +34,7 @@ network MobileGrid
                 //  nodeId = index;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }

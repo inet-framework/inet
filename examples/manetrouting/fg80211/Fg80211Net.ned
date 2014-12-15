@@ -20,7 +20,7 @@ package inet.examples.manetrouting.fg80211;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 network Fg80211Net
@@ -37,7 +37,7 @@ network Fg80211Net
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }

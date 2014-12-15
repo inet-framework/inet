@@ -21,7 +21,7 @@ package inet.examples.wireless.lan80211;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 network Lan80211
@@ -38,7 +38,7 @@ network Lan80211
             @display("p=213,174;r=,,#707070");
             wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=61,46");
         }
         configurator: IPv4NetworkConfigurator {

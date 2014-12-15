@@ -23,7 +23,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
 
 
 network WirelessNetWithDHCP
@@ -32,7 +32,7 @@ network WirelessNetWithDHCP
     int numHosts;
     **.mgmt.numChannels = 5;
     submodules:
-        radioMedium: Ieee80211RadioMedium {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=64,34");
         }
         gateway: Router {
