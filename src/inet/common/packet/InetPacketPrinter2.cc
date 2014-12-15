@@ -126,8 +126,8 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); showEncapsulatedPackets && pk; pk = pk->getEncapsulatedPacket()) {
         std::ostringstream out;
-        if (dynamic_cast<INetworkDatagram *>(pk)) {
-            INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
+        INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
+        if (dgram) {
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4
