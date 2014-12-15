@@ -19,6 +19,7 @@ package inet.physicallayer.ieee80211;
 
 import inet.physicallayer.apsk.APSKDimensionalTransmitter;
 
+// TODO: remove APSK dependency, factor out common part
 module Ieee80211DimensionalTransmitter extends APSKDimensionalTransmitter
 {
     parameters:

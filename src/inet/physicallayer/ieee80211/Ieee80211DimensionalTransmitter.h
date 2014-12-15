@@ -25,6 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
+// TODO: remove APSK dependency, factor out common part
 class INET_API Ieee80211DimensionalTransmitter : public APSKDimensionalTransmitter
 {
   protected:
