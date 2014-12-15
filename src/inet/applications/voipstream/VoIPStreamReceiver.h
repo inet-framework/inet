@@ -51,8 +51,7 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     VoIPStreamReceiver() {}
     ~VoIPStreamReceiver();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);
