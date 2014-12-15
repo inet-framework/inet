@@ -17,8 +17,15 @@
 
 package inet.physicallayer.ieee80211;
 
-module Ieee80211ScalarReceiver extends Ieee80211ReceiverBase
+import inet.physicallayer.base.NarrowbandReceiverBase;
+
+module Ieee80211ReceiverBase extends NarrowbandReceiverBase
 {
     parameters:
-        @class(Ieee80211ScalarReceiver);
+        string opMode @enum("b","g","a","p");
+        string preambleMode @enum("long", "short");
+        modulation = default("BPSK"); // TODO: this is false
+        errorModelType = default("Ieee80211NistErrorModel");
+        // TODO: remove when opMode is removed from the error model
+        *.opMode = opMode;
 }

@@ -17,13 +17,8 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.APSKScalarTransmitter;
-
-module Ieee80211ScalarTransmitter extends APSKScalarTransmitter
+module Ieee80211ScalarTransmitter extends Ieee80211TransmitterBase
 {
     parameters:
-        int channelNumber;
-        string opMode @enum("b","g","a","p");
-        string preambleMode @enum("long", "short");
         @class(Ieee80211ScalarTransmitter);
 }
