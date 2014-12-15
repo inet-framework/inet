@@ -17,25 +17,25 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.APSKScalarRadio;
+import inet.physicallayer.common.Radio;
 
-// TODO: rename to Ieee80211ScalarRadio
-module Ieee80211Radio extends APSKScalarRadio
+module Ieee80211Radio extends Radio
 {
     parameters:
         int channelNumber = default(0);
         string opMode @enum("b","g","a","p") = default("g");
         string preambleMode @enum("long", "short") = default("long");
-        carrierFrequency = default(2.412GHz);
-        bandwidth = default(2MHz);
-        transmitterType = default("Ieee80211ScalarTransmitter");
+        double carrierFrequency @unit(Hz) = default(2.412GHz);
+        double bandwidth @unit(Hz) = default(2MHz);
+        antennaType = default("IsotropicAntenna");
         transmitter.bitrate = default(11Mbps);
         transmitter.headerBitLength = default(192b);
         transmitter.power = default(20mW);
-        receiverType = default("Ieee80211ScalarReceiver");
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
+        *.carrierFrequency = carrierFrequency;
+        *.bandwidth = bandwidth;
         *.channelNumber = channelNumber;
         *.opMode = opMode;
         *.preambleMode = preambleMode;
