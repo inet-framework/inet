@@ -116,7 +116,6 @@ module MultiDYMO like IDYMO
         output ipOut;
 
     submodules:
-        // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
         ipv4: DYMO if enableIPv4 {
             @display("p=100,100");
         }
