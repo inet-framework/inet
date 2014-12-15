@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk;
+package inet.physicallayer.base;
 
-import inet.physicallayer.base.NarrowbandRadioBase;
+import inet.physicallayer.common.Radio;
 
-module APSKScalarRadio extends NarrowbandRadioBase
+module NarrowbandRadioBase extends Radio
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("APSKScalarTransmitter");
-        receiverType = default("APSKScalarReceiver");
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
+        *.carrierFrequency = carrierFrequency;
+        *.bandwidth = bandwidth;
 }

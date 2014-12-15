@@ -17,16 +17,16 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.common.Radio;
+import inet.physicallayer.base.NarrowbandRadioBase;
 
-module Ieee80211Radio extends Radio
+module Ieee80211Radio extends NarrowbandRadioBase
 {
     parameters:
         int channelNumber = default(0);
         string opMode @enum("b","g","a","p") = default("g");
         string preambleMode @enum("long", "short") = default("long");
-        double carrierFrequency @unit(Hz) = default(2.412GHz);
-        double bandwidth @unit(Hz) = default(2MHz);
+        carrierFrequency @unit(Hz) = default(2.412GHz);
+        bandwidth @unit(Hz) = default(2MHz);
         antennaType = default("IsotropicAntenna");
         transmitter.bitrate = default(11Mbps);
         transmitter.headerBitLength = default(192b);
@@ -34,8 +34,6 @@ module Ieee80211Radio extends Radio
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
         *.channelNumber = channelNumber;
         *.opMode = opMode;
         *.preambleMode = preambleMode;
