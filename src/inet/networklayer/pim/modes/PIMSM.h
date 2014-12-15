@@ -186,6 +186,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void removeDownstreamInterface(unsigned int i);
 
         DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
+        DownstreamInterface *getDownstreamInterfaceByInterfaceId(int interfaceId);
         int findDownstreamInterface(InterfaceEntry *ie);
 
         bool isImmediateOlistNull();

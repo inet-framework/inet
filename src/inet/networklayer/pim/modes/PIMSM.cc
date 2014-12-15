@@ -687,7 +687,8 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
         if (routeSG) {
             PimsmInterface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
                 static_cast<PimsmInterface *>(routeSG->upstreamInterface) :
-                static_cast<PimsmInterface *>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+                static_cast<PimsmInterface *>(routeSG->getDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+            ASSERT(incomingInterface);
 
             Interface::AssertState stateBefore = incomingInterface->assertState;
             processAssertSG(incomingInterface, receivedMetric);
@@ -705,7 +706,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
     if (routeG) {
         PimsmInterface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
             static_cast<PimsmInterface *>(routeG->upstreamInterface) :
-            static_cast<PimsmInterface *>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+            static_cast<PimsmInterface *>(routeG->getDownstreamInterfaceByInterfaceId(incomingInterfaceId));
         ASSERT(incomingInterface);
         processAssertG(incomingInterface, receivedMetric);
     }
@@ -1163,7 +1164,7 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 
     Route *routeG = findRouteG(group);
     if (routeG) {
-        DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+        DownstreamInterface *downstream = routeG->getDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
         downstream->setLocalReceiverInclude(false);
         updateJoinDesired(routeG);
     }
@@ -1177,7 +1178,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
     if (!routeG)
         routeG = addNewRouteG(group, Route::PRUNED);
 
-    DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+    DownstreamInterface *downstream = routeG->getDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
     downstream->setLocalReceiverInclude(true);
 
     updateJoinDesired(routeG);
@@ -1975,6 +1976,14 @@ PIMSM::DownstreamInterface *PIMSM::Route::findDownstreamInterfaceByInterfaceId(i
             return downstream;
     }
     return nullptr;
+}
+
+PIMSM::DownstreamInterface *PIMSM::Route::getDownstreamInterfaceByInterfaceId(int interfaceId)
+{
+    DownstreamInterface *downstream = findDownstreamInterfaceByInterfaceId(interfaceId);
+    if (!downstream)
+        throw cRuntimeError("getDownstreamInterfaceByInterfaceId(): interface %d not found", interfaceId);
+    return downstream;
 }
 
 int PIMSM::Route::findDownstreamInterface(InterfaceEntry *ie)
