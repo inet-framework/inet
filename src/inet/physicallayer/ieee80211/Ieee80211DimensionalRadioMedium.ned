@@ -17,14 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.APSKDimensionalRadioMedium;
-
-module Ieee80211DimensionalRadioMedium extends APSKDimensionalRadioMedium
+module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
 {
     parameters:
-        // TODO: move to addRadio, query radios for these parameters
-        carrierFrequency = default(2.4GHz);
-        minReceptionPower = default(-85dBm);
-        minInterferencePower = default(-110dBm);
-        backgroundNoise.power = default(-110dBm);
+        analogModelType = default("DimensionalAnalogModel");
+        backgroundNoiseType = default("IsotropicDimensionalBackgroundNoise");
 }

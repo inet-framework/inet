@@ -17,9 +17,16 @@
 
 package inet.physicallayer.ieee80211;
 
-module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
+import inet.physicallayer.common.RadioMedium;
+
+module Ieee80211RadioMedium extends RadioMedium
 {
     parameters:
-        analogModelType = default("ScalarAnalogModel");
-        backgroundNoiseType = default("IsotropicScalarBackgroundNoise");
+        propagationType = default("ConstantSpeedPropagation");
+        pathLossType = default("FreeSpacePathLoss");
+        // TODO: move to addRadio, query radios for these parameters
+        carrierFrequency = default(2.4GHz);
+        minReceptionPower = default(-85dBm);
+        minInterferencePower = default(-110dBm);
+        backgroundNoise.power = default(-110dBm);
 }
