@@ -34,7 +34,7 @@ namespace physicallayer {
 Define_Module(Ieee80211ScalarTransmitter);
 
 Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
-    APSKScalarTransmitter(),
+    NarrowbandTransmitterBase(),
     opMode('\0'),
     preambleMode((Ieee80211PreambleMode) - 1)
 {
@@ -42,7 +42,7 @@ Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
 
 void Ieee80211ScalarTransmitter::initialize(int stage)
 {
-    APSKScalarTransmitter::initialize(stage);
+    NarrowbandTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))

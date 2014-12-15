@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211SCALARTRANSMITTER_H
 #define __INET_IEEE80211SCALARTRANSMITTER_H
 
-#include "inet/physicallayer/apsk/APSKScalarTransmitter.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ScalarTransmitter : public APSKScalarTransmitter
+class INET_API Ieee80211ScalarTransmitter : public NarrowbandTransmitterBase
 {
   protected:
     char opMode;

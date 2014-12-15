@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211DIMENSIONALRECEIVER_H
 #define __INET_IEEE80211DIMENSIONALRECEIVER_H
 
-#include "inet/physicallayer/apsk/APSKDimensionalReceiver.h"
+#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
 #include "inet/physicallayer/ieee80211/BerParseFile.h"
 #include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211DimensionalReceiver : public APSKDimensionalReceiver
+class INET_API Ieee80211DimensionalReceiver : public NarrowbandReceiverBase
 {
   protected:
     char opMode;

@@ -17,15 +17,8 @@
 
 package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.apsk.APSKDimensionalReceiver;
-
-module Ieee80211DimensionalReceiver extends APSKDimensionalReceiver
+module Ieee80211DimensionalReceiver extends Ieee80211ReceiverBase
 {
     parameters:
-        string opMode @enum("b","g","a","p");
-        string preambleMode @enum("long", "short");
-        errorModelType = default("Ieee80211NistErrorModel");
-        // TODO: remove when opMode is removed from the error model
-        *.opMode = opMode;
         @class(Ieee80211DimensionalReceiver);
 }

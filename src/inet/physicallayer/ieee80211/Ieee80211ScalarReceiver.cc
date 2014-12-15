@@ -27,7 +27,7 @@ namespace physicallayer {
 Define_Module(Ieee80211ScalarReceiver);
 
 Ieee80211ScalarReceiver::Ieee80211ScalarReceiver() :
-    APSKScalarReceiver(),
+    NarrowbandReceiverBase(),
     opMode('\0'),
     preambleMode((Ieee80211PreambleMode)-1)
 {
@@ -35,7 +35,7 @@ Ieee80211ScalarReceiver::Ieee80211ScalarReceiver() :
 
 void Ieee80211ScalarReceiver::initialize(int stage)
 {
-    APSKScalarReceiver::initialize(stage);
+    NarrowbandReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))
@@ -61,7 +61,7 @@ void Ieee80211ScalarReceiver::initialize(int stage)
 bool Ieee80211ScalarReceiver::computeIsReceptionPossible(const ITransmission *transmission) const
 {
     const Ieee80211ScalarTransmission *ieee80211Transmission = check_and_cast<const Ieee80211ScalarTransmission *>(transmission);
-    return APSKScalarReceiver::computeIsReceptionPossible(transmission) && ieee80211Transmission->getOpMode() == opMode && ieee80211Transmission->getPreambleMode() == preambleMode;
+    return NarrowbandReceiverBase::computeIsReceptionPossible(transmission) && ieee80211Transmission->getOpMode() == opMode && ieee80211Transmission->getPreambleMode() == preambleMode;
 }
 
 } // namespace physicallayer
