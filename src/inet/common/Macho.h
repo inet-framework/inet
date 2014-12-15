@@ -1597,19 +1597,19 @@ class _MachineBase
     friend class ::inet::TestAccess;
 
     // Current state of Machine object.
-    _StateInstance *myCurrentState;
+    _StateInstance *myCurrentState = nullptr;
 
     // Information about pending state transition.
-    _StateInstance *myPendingState;
-    _Initializer *myPendingInit;
+    _StateInstance *myPendingState = nullptr;
+    _Initializer *myPendingInit = nullptr;
 
     // Deprecated!
-    void *myPendingBox;
+    void *myPendingBox = nullptr;
 
-    _IEventBase *myPendingEvent;
+    _IEventBase *myPendingEvent = nullptr;
 
     // Array of StateInstance objects.
-    _StateInstance **myInstances;
+    _StateInstance **myInstances = nullptr;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
