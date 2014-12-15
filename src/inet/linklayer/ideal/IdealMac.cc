@@ -36,10 +36,6 @@ simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
 IdealMac::IdealMac()
 {
-    queueModule = nullptr;
-    radio = nullptr;
-    lastSentPk = nullptr;
-    ackTimeoutMsg = nullptr;
 }
 
 IdealMac::~IdealMac()

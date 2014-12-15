@@ -44,20 +44,20 @@ class INET_API IdealMac : public MACProtocolBase
     static simsignal_t dropPkNotForUsSignal;
 
     // parameters
-    int headerLength;    // IdealMacFrame header length in bytes
-    double bitrate;    // [bits per sec]
-    bool promiscuous;    // promiscuous mode
+    int headerLength = 0;    // IdealMacFrame header length in bytes
+    double bitrate = 0;    // [bits per sec]
+    bool promiscuous = false;    // promiscuous mode
     MACAddress address;    // MAC address
-    bool fullDuplex;
+    bool fullDuplex = false;
 
-    IRadio *radio;
-    IRadio::TransmissionState transmissionState;
-    IPassiveQueue *queueModule;
+    IRadio *radio = nullptr;
+    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    IPassiveQueue *queueModule = nullptr;
 
-    int outStandingRequests;
-    cPacket *lastSentPk;
+    int outStandingRequests = 0;
+    cPacket *lastSentPk = nullptr;
     simtime_t ackTimeout;
-    cMessage *ackTimeoutMsg;
+    cMessage *ackTimeoutMsg = nullptr;
 
   protected:
     /** implements MacBase functions */
