@@ -48,7 +48,7 @@ namespace inet {
 class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
-    VoIPStreamReceiver() { resultFile = ""; }
+    VoIPStreamReceiver() {}
     ~VoIPStreamReceiver();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -68,39 +68,40 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     class Connection
     {
       public:
-        Connection() : offline(true), oc(nullptr), fmt(nullptr), audio_st(nullptr), decCtx(nullptr), pCodecDec(nullptr) {}
+        Connection() {}
         void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);
         void writeLostSamples(int sampleCount);
         void closeAudio();
 
-        bool offline;
-        uint16_t seqNo;
-        uint32_t timeStamp;
-        uint32_t ssrc;
-        enum AVCodecID codec;
-        short sampleBits;
-        int sampleRate;
-        int samplesPerPacket;
-        int transmitBitrate;
+      public:
+        bool offline = true;
+        uint16_t seqNo = 0;
+        uint32_t timeStamp = 0;
+        uint32_t ssrc = 0;
+        enum AVCodecID codec = AV_CODEC_ID_NONE;
+        short sampleBits = 0;
+        int sampleRate = 0;
+        int samplesPerPacket = 0;
+        int transmitBitrate = 0;
         simtime_t lastPacketFinish;
-        AVFormatContext *oc;
-        AVOutputFormat *fmt;
-        AVStream *audio_st;
-        AVCodecContext *decCtx;
-        AVCodec *pCodecDec;
+        AVFormatContext *oc = nullptr;
+        AVOutputFormat *fmt = nullptr;
+        AVStream *audio_st = nullptr;
+        AVCodecContext *decCtx = nullptr;
+        AVCodec *pCodecDec = nullptr;
         AudioOutFile outFile;
         L3Address srcAddr;
-        int srcPort;
+        int srcPort = -1;
         L3Address destAddr;
-        int destPort;
+        int destPort = -1;
     };
 
   protected:
-    int localPort;
+    int localPort = -1;
     simtime_t playoutDelay;
-    const char *resultFile;
+    const char *resultFile = nullptr;
 
     UDPSocket socket;
 

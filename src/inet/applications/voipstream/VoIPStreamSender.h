@@ -101,46 +101,46 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
 
   protected:
     // general parameters
-    int localPort;
-    int destPort;
+    int localPort = -1;
+    int destPort = -1;
     L3Address destAddress;
 
-    int voipHeaderSize;
-    int voipSilenceThreshold;    // the maximum amplitude of a silence packet
-    int voipSilencePacketSize;    // size of a silence packet
-    int sampleRate;    // samples/sec [Hz]
-    const char *codec;
-    int compressedBitRate;
+    int voipHeaderSize = 0;
+    int voipSilenceThreshold = 0;    // the maximum amplitude of a silence packet
+    int voipSilencePacketSize = 0;    // size of a silence packet
+    int sampleRate = 0;    // samples/sec [Hz]
+    const char *codec = nullptr;
+    int compressedBitRate = 0;
     simtime_t packetTimeLength;
-    const char *soundFile;    // input audio file name
-    int repeatCount;
+    const char *soundFile = nullptr;    // input audio file name
+    int repeatCount = 0;
 
-    const char *traceFileName;    // name of the output trace file, nullptr or empty to turn off recording
+    const char *traceFileName = nullptr;    // name of the output trace file, nullptr or empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters
-    AVFormatContext *pFormatCtx;
-    AVCodecContext *pCodecCtx;
-    AVCodec *pCodec;    // input decoder codec
+    AVFormatContext *pFormatCtx = nullptr;
+    AVCodecContext *pCodecCtx = nullptr;
+    AVCodec *pCodec = nullptr;    // input decoder codec
 
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    AVAudioResampleContext *pReSampleCtx;
+    AVAudioResampleContext *pReSampleCtx = nullptr;
 #else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    ReSampleContext *pReSampleCtx;
+    ReSampleContext *pReSampleCtx = nullptr;
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 
-    AVCodecContext *pEncoderCtx;
-    AVCodec *pCodecEncoder;    // output encoder codec
+    AVCodecContext *pEncoderCtx = nullptr;
+    AVCodec *pCodecEncoder = nullptr;    // output encoder codec
 
     // state variables
     UDPSocket socket;
-    int streamIndex;
-    uint32_t pktID;    // increasing packet sequence number
-    int samplesPerPacket;
+    int streamIndex = -1;
+    uint32_t pktID = 0;    // increasing packet sequence number
+    int samplesPerPacket = 0;
     AVPacket packet;
     Buffer sampleBuffer;
 
-    cMessage *timer;
+    cMessage *timer = nullptr;
 
     // statistics:
     static simsignal_t sentPkSignal;
