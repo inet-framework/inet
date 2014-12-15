@@ -92,14 +92,14 @@ class INET_API PatternMatcher
 
     struct Elem
     {
-        ElemType type;
+        ElemType type = END;
         std::string literalstring;    // if type==LITERALSTRING
         std::string setchars;    // SET/NEGSET: character pairs (0,1),(2,3) etc denote char ranges
-        long fromnum, tonum;    // NUMRANGE; -1 means "unset"
+        long fromnum = -1, tonum = -1;    // NUMRANGE; -1 means "unset"
     };
 
     std::vector<Elem> pattern;
-    bool iscasesensitive;
+    bool iscasesensitive = false;
 
     std::string rest;    // used to pass return value from doMatch() to patternPrefixMatches()
 
