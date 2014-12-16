@@ -48,10 +48,10 @@ class INET_API RSTP : public STPBase
     // Set by management: see the ned file for more info
     simtime_t migrateTime;
     simtime_t tcWhileTime;
-    bool autoEdge;
+    bool autoEdge = false;
 
-    cMessage *helloTimer;
-    cMessage *upgradeTimer;
+    cMessage *helloTimer = nullptr;
+    cMessage *upgradeTimer = nullptr;
 
   public:
     RSTP();

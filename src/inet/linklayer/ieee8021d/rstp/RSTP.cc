@@ -30,8 +30,6 @@ Define_Module(RSTP);
 
 RSTP::RSTP()
 {
-    helloTimer = nullptr;
-    upgradeTimer = nullptr;
 }
 
 RSTP::~RSTP()
