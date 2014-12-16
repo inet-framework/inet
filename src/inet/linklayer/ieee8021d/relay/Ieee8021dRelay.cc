@@ -186,7 +186,7 @@ void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
     MACAddress address = controlInfo->getDest();
     delete controlInfo;
 
-    if (portNum >= portCount || portNum < 0)
+    if (portNum >= portCount)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
     // TODO: use LLCFrame
