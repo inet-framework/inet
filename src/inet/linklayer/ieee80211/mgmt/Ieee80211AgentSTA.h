@@ -41,9 +41,9 @@ namespace ieee80211 {
 class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
 {
   protected:
-    InterfaceEntry *myIface;
+    InterfaceEntry *myIface = nullptr;
     MACAddress prevAP;
-    bool activeScan;
+    bool activeScan = false;
     std::vector<int> channelsToScan;
     simtime_t probeDelay;
     simtime_t minChannelTime;
@@ -59,7 +59,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     static simsignal_t dropConfirmSignal;
 
   public:
-    Ieee80211AgentSTA() : myIface(nullptr) {}
+    Ieee80211AgentSTA() {}
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
