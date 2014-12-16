@@ -107,7 +107,7 @@ void IPv6ControlInfo::setExtensionHeaderArraySize(unsigned int size)
 
 IPv6ExtensionHeaderPtr& IPv6ControlInfo::getExtensionHeader(unsigned int k)
 {
-    ASSERT(k >= 0 && k < extensionHeaders.size());
+    ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
