@@ -1798,8 +1798,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
             ASSERT(transmissionQueue()->end() != nextframeToSend);
             double bitRate = bitrate;
             int size = (*nextframeToSend)->getBitLength();
-            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo())) {
-                bitRate = dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo())->getBitrate().get();
+            TransmissionRequest *trRq = dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo());
+            if (trRq) {
+                bitRate = trRq->getBitrate().get();
                 if (bitRate == 0)
                     bitRate = bitrate;
             }
