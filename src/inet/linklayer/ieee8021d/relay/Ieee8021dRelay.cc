@@ -27,9 +27,6 @@ Define_Module(Ieee8021dRelay);
 
 Ieee8021dRelay::Ieee8021dRelay()
 {
-    ifTable = nullptr;
-    macTable = nullptr;
-    ie = nullptr;
 }
 
 void Ieee8021dRelay::initialize(int stage)
