@@ -171,7 +171,7 @@ void Ieee80211Mac::initialize(int stage)
 
         defaultAC = par("defaultAC");
         if (classifier && dynamic_cast<Ieee80211eClassifier *>(classifier))
-            dynamic_cast<Ieee80211eClassifier *>(classifier)->setDefaultClass(defaultAC);
+            static_cast<Ieee80211eClassifier *>(classifier)->setDefaultClass(defaultAC);
 
         for (int i = 0; i < numCategories(); i++) {
             std::stringstream os;
