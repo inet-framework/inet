@@ -71,17 +71,17 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
   protected:
     // configuration
     std::string ssid;
-    int channelNumber;
+    int channelNumber = -1;
     simtime_t beaconInterval;
-    int numAuthSteps;
+    int numAuthSteps = 0;
     Ieee80211SupportedRatesElement supportedRates;
 
     // state
     STAList staList;    ///< list of STAs
-    cMessage *beaconTimer;
+    cMessage *beaconTimer = nullptr;
 
   public:
-    Ieee80211MgmtAP() : beaconTimer(nullptr) {}
+    Ieee80211MgmtAP() {}
     virtual ~Ieee80211MgmtAP();
 
   protected:
