@@ -52,20 +52,7 @@ Register_Enum(inet::Ieee80211Mac,
  * Construction functions.
  */
 
-Ieee80211Mac::Ieee80211Mac() :
-    transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED),
-    throughputTimer(nullptr),
-    classifier(nullptr),
-    radio(nullptr),
-    fr(nullptr),
-    queueModule(nullptr),
-    pendingRadioConfigMsg(nullptr),
-    endSIFS(nullptr),
-    endDIFS(nullptr),
-    endTXOP(nullptr),
-    endTimeout(nullptr),
-    endReserve(nullptr),
-    mediumStateChange(nullptr)
+Ieee80211Mac::Ieee80211Mac()
 {
 }
 
