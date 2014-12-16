@@ -43,13 +43,13 @@ class INET_API STP : public STPBase
 
   protected:
     static const double tickInterval;    // interval between two ticks
-    bool isRoot;
-    unsigned int rootPort;
+    bool isRoot = false;
+    unsigned int rootPort = 0;
     std::vector<unsigned int> desPorts;    // set of designated ports
 
     // Discovered values
-    unsigned int rootPathCost;
-    unsigned int rootPriority;
+    unsigned int rootPathCost = 0;
+    unsigned int rootPriority = 0;
     MACAddress rootAddress;
 
     simtime_t currentMaxAge;
@@ -58,13 +58,13 @@ class INET_API STP : public STPBase
     simtime_t helloTime;
 
     // Parameter change detection
-    unsigned int currentBridgePriority;
+    unsigned int currentBridgePriority = 0;
     // Topology change commencing
-    bool topologyChangeNotification;
-    bool topologyChangeRecvd;
+    bool topologyChangeNotification = false;
+    bool topologyChangeRecvd = false;
 
     PortInfo defaultPort;
-    cMessage *tick;
+    cMessage *tick = nullptr;
 
   public:
     STP();

@@ -27,7 +27,6 @@ Define_Module(STPTester);
 
 STPTester::STPTester()
 {
-    checkTimer = new cMessage("checktime");
 }
 
 STPTester::~STPTester()
@@ -37,6 +36,7 @@ STPTester::~STPTester()
 
 void STPTester::initialize()
 {
+    checkTimer = new cMessage("checktime");
     checkTime = par("checkTime");
     scheduleAt(simTime() + checkTime, checkTimer);
 }

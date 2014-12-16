@@ -43,15 +43,15 @@ class INET_API STPTester : public cSimpleModule
     };
 
   protected:
-    bool loop;
-    int numOfVisitedNodes;
-    int numOfNodes;
+    bool loop = false;
+    int numOfVisitedNodes = 0;
+    int numOfNodes = 0;
     std::map<Topology::Node *, int> color;
     std::map<Topology::Node *, Topology::Node *> parent;
     Topology graph;
 
     simtime_t checkTime;
-    cMessage *checkTimer;
+    cMessage *checkTimer = nullptr;
 
   public:
     // Includes network topology extraction

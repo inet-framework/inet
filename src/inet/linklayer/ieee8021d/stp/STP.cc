@@ -29,8 +29,7 @@ Define_Module(STP);
 
 const double STP::tickInterval = 1;
 
-STP::STP() :
-    tick(nullptr)
+STP::STP()
 {
 }
 
