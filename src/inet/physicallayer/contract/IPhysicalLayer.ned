@@ -18,7 +18,8 @@
 package inet.physicallayer.contract;
 
 //
-// This module interface provides an abstraction for the interface of different physical layers.
+// This module interface provides an abstraction for the interface of different
+// physical layers.
 //
 moduleinterface IPhysicalLayer
 {

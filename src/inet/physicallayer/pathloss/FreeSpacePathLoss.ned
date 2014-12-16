@@ -25,4 +25,5 @@ module FreeSpacePathLoss like IPathLoss
         double alpha = default(2);
         double systemLoss @unit(dB) = default(0dB);
         @class(FreeSpacePathLoss);
+        @display("i=block/control");
 }

@@ -17,6 +17,11 @@
 
 package inet.physicallayer.contract;
 
+//
+// The background noise model describes the thermal noise, the cosmic background
+// noise, and other random fluctuations of the electromagnetic field that affect
+// the quality of the communication channel. 
+//
 moduleinterface IRadioBackgroundNoise
 {
     parameters:

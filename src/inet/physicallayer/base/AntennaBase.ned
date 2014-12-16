@@ -19,6 +19,9 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.contract.IAntenna;
 
+//
+// This module servces as the base module for antenna models.
+//
 module AntennaBase like IAntenna
 {
     parameters:

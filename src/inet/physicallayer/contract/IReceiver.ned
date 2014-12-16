@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The receiver model describes the physical process which converts electric
+// signals into packets.
+//
 moduleinterface IReceiver
 {
     parameters:

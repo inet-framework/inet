@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The antenna model describes the physical device (a part of the radio) which
+// converts electric signals into radio waves, and vice versa.
+//
 moduleinterface IAntenna
 {
     parameters:

@@ -29,4 +29,5 @@ module UWBIRStochasticPathLoss like IPathLoss
         double sigmaSigma;
         bool shadowing;
         @class(UWBIRStochasticPathLoss);
+        @display("i=block/control");
 }

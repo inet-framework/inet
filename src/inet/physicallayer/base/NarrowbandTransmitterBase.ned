@@ -19,13 +19,17 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.contract.ITransmitter;
 
+//
+// This module servces as a base module for narrowband transmitter models.
+//
 module NarrowbandTransmitterBase like ITransmitter
 {
     parameters:
-        double bitrate @unit(bps);
-        double headerBitLength @unit(b);
-        double power @unit(W);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation; // "BPSK", "16-QAM", "256-QAM"
+        double bitrate @unit(bps);         // the bitrate of the transmitter is used to compute the duration of the transmission
+        double headerBitLength @unit(b);   // number of header bits added to the length of the MAC frame
+        double power @unit(W);             // transmission power
+        double carrierFrequency @unit(Hz); // center frequency of the band where the transmitter transmits on the medium
+        double bandwidth @unit(Hz);        // bandwidth of the band where the transmitter transmits on the medium
+        string modulation;                 // "BPSK", "16-QAM", "256-QAM"
+        @display("i=block/wtx");
 }

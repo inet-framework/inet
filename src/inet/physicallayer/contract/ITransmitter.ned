@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The transmitter model describes the physical process which converts packets
+// into electric signals.
+//
 moduleinterface ITransmitter
 {
     parameters:

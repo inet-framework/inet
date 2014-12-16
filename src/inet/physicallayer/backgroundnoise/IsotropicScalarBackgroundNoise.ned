@@ -19,9 +19,15 @@ package inet.physicallayer.backgroundnoise;
 
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 
+//
+// This background noise model describes noise that does not change over space,
+// time and frequency. It produces scalar noise signals that can be further used
+// in scalar computations.  
+//
 module IsotropicScalarBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
-        double power @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double power @unit(dBm); // noise power
         @class(IsotropicScalarBackgroundNoise);
+        @display("i=block/mac");
 }

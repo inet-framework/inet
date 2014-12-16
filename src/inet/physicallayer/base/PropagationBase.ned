@@ -19,8 +19,12 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.contract.IPropagation;
 
+//
+// This module servces as a base module for propagation models.
+//
 module PropagationBase like IPropagation
 {
     parameters:
-        double propagationSpeed @unit(mps) = default(299792458mps);
+        double propagationSpeed @unit(mps) = default(299792458mps); // the theoretical propagation speed of signals on the medium (used by path loss models)
+        @display("i=block/timer");
 }

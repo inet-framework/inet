@@ -19,10 +19,15 @@ package inet.physicallayer.propagation;
 
 import inet.physicallayer.base.PropagationBase;
 
+//
+// This propagation model computes the propagation time to be proportional to
+// the traveled distance, the ratio is determined by the constant propagation
+// speed parameter.
+//
 module ConstantSpeedPropagation extends PropagationBase
 {
     parameters:
-        bool ignoreMovementDuringPropagation = default(true);
-        bool ignoreMovementDuringReception = default(true);
+        bool ignoreMovementDuringPropagation = default(true); // true means that the movement of the transmitter and the receiver during the signal propagation is ignored
+        bool ignoreMovementDuringReception = default(true);   // true means that the movement of the transmitter and the receiver during the signal reception is ignored 
         @class(ConstantSpeedPropagation);
 }

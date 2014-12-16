@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The error model describes how the signal to noise ratio affects the amount of
+// errors at the receiver.
+//
 moduleinterface IErrorModel
 {
     parameters:

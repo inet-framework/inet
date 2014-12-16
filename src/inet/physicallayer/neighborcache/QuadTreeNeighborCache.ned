@@ -17,6 +17,10 @@ package inet.physicallayer.neighborcache;
 
 import inet.physicallayer.contract.INeighborCache;
 
+//
+// This neighbor cache model organizes radios in a 2 dimensional quad tree
+// (ignoring the Z axis) with constant node size and updates periodically.
+//
 module QuadTreeNeighborCache like INeighborCache
 {
     parameters:

@@ -19,11 +19,17 @@ package inet.physicallayer.obstacleloss;
 
 import inet.physicallayer.contract.IObstacleLoss;
 
+//
+// This obstacle loss model determines the power loss by computing the accurate
+// dielectric and reflection loss along the straight path considering the shape,
+// the position, the orientation, and the material of obstructing physical
+// objects.
+//
 module TracingObstacleLoss like IObstacleLoss
 {
     parameters:
-        string environmentModule = "environment";
-        bool leaveIntersectionTrail = default(false);
+        string environmentModule = "environment";     // the path of the environment model relative to the network
+        bool leaveIntersectionTrail = default(false); // true means the instersections of transmissions and physical objects will be displayed on the canvas of the compund module
         @display("i=block/control");
         @class(TracingObstacleLoss);
 }

@@ -15,6 +15,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The neighbor cache model computes the affected set of receivers on the medium
+// for a given transmission.
+//
 moduleinterface INeighborCache
 {
     parameters:

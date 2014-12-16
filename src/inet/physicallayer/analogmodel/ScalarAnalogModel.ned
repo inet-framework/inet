@@ -19,8 +19,14 @@ package inet.physicallayer.analogmodel;
 
 import inet.physicallayer.contract.IAnalogModel;
 
+//
+// This analog model computes with scalar analog power representation. In other
+// words, the signal power does not change over time or frequency, except for
+// the boundaries of the signal.
+//
 module ScalarAnalogModel like IAnalogModel
 {
     parameters:
         @class(ScalarAnalogModel);
+        @display("i=block/cogwheel");
 }

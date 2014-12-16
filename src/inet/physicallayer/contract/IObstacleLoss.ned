@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The obstacle loss model describes the reduction of power as the signal passes
+// through physical objects. 
+//
 moduleinterface IObstacleLoss
 {
     parameters:

@@ -17,6 +17,10 @@ package inet.physicallayer.neighborcache;
 
 import inet.physicallayer.contract.INeighborCache;
 
+//
+// This neighbor cache model maintains a separate periodically updated neighbor
+// list for each radio.
+//
 module NeighborListNeighborCache like INeighborCache
 {
     parameters:

@@ -19,11 +19,14 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.common.Radio;
 
+//
+// This module servces as a base module for narrowband radio models.
+//
 module NarrowbandRadioBase extends Radio
 {
     parameters:
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
+        double carrierFrequency @unit(Hz);     // center frequency of the band where the radio transmits and receives signals on the medium
+        double bandwidth @unit(Hz);            // bandwidth of the band where the radio transmits and receives signals on the medium
+        *.carrierFrequency = carrierFrequency; // passed down to transmitter and receiver by default
+        *.bandwidth = bandwidth;               // passed down to transmitter and receiver by default
 }

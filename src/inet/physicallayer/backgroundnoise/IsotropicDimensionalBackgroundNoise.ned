@@ -19,6 +19,11 @@ package inet.physicallayer.backgroundnoise;
 
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 
+//
+// This background noise model describes noise that does not change over space,
+// time and frequency. It produces dimensional noise signals that can be further
+// used in dimensional computations.  
+//
 module IsotropicDimensionalBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
@@ -26,4 +31,5 @@ module IsotropicDimensionalBackgroundNoise like IRadioBackgroundNoise
         string dimensions = default("time"); // dimensions of noise power: time and/or frequency
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @class(IsotropicDimensionalBackgroundNoise);
+        @display("i=block/mac");
 }

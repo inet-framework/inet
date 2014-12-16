@@ -19,6 +19,9 @@ package inet.physicallayer.base;
 
 import inet.physicallayer.contract.IErrorModel;
 
+//
+// This module servces as the base module for error models.
+//
 module ErrorModelBase like IErrorModel
 {
     parameters:

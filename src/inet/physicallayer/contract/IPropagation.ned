@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The propagation model describes how a radio signal propagates through space
+// over time.
+//
 moduleinterface IPropagation
 {
     parameters:

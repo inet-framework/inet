@@ -17,6 +17,10 @@ package inet.physicallayer.neighborcache;
 
 import inet.physicallayer.contract.INeighborCache;
 
+//
+// This neighbor cache model organizes radios in a 3 dimensional grid with
+// constant cell size and updates periodically.
+//
 module GridNeighborCache like INeighborCache
 {
     parameters:

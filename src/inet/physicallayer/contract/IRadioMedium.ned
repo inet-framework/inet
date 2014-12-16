@@ -17,6 +17,12 @@
 
 package inet.physicallayer.contract;
 
+//
+// The medium model describes the shared physical medium where communication
+// takes place. It keeps track of radios, noise sources, ongoing transmissions,
+// background noise, and other ongoing noises. The medium computes when, where 
+// and how transmissions and noises arrive at receivers.  
+//
 moduleinterface IRadioMedium
 {
     parameters:

@@ -17,6 +17,10 @@
 
 package inet.physicallayer.contract;
 
+//
+// The path loss model  describes the reduction of power as the signal
+// propagates through space.
+//
 moduleinterface IPathLoss
 {
     parameters:
