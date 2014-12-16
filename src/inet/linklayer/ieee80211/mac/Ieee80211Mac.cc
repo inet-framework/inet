@@ -722,8 +722,7 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
     }
     emit(NF_LINK_FULL_PROMISCUOUS, msg);
     validRecMode = false;
-    if (msg->getControlInfo() && dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo())) {
-        Radio80211aControlInfo *cinfo = dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo());
+    if (cinfo) {
         recFrameModulationType = cinfo->getModulationType();
         if (recFrameModulationType.getDataRate() > 0)
             validRecMode = true;
