@@ -369,9 +369,9 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, c
             return;
         if (frame->getType() != ST_BEACON)
             return;
-        if (dynamic_cast<Radio80211aControlInfo *>(frame->getControlInfo()) == nullptr)
-            return;
         Radio80211aControlInfo *ctl = dynamic_cast<Radio80211aControlInfo *>(frame->getControlInfo());
+        if (ctl == nullptr)
+            return;
         Ieee80211BeaconFrame *beacon = (check_and_cast<Ieee80211BeaconFrame *>(frame));
         APInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
