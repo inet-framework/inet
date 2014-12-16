@@ -29,10 +29,6 @@ static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
 STPBase::STPBase()
 {
-    switchModule = nullptr;
-    macTable = nullptr;
-    ifTable = nullptr;
-    ie = nullptr;
 }
 
 void STPBase::initialize(int stage)

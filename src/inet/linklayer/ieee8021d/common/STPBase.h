@@ -32,21 +32,21 @@ namespace inet {
 class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
-    bool visualize;    // if true it visualize the spanning tree
-    bool isOperational;    // for lifecycle
-    unsigned int numPorts;    // number of ports
+    bool visualize = false;    // if true it visualize the spanning tree
+    bool isOperational = false;    // for lifecycle
+    unsigned int numPorts = 0;    // number of ports
 
-    unsigned int bridgePriority;    // bridge's priority
+    unsigned int bridgePriority = 0;    // bridge's priority
     MACAddress bridgeAddress;    // bridge's MAC address
 
     simtime_t maxAge;
     simtime_t helloTime;
     simtime_t forwardDelay;
 
-    cModule *switchModule;
-    IMACAddressTable *macTable;
-    IInterfaceTable *ifTable;
-    InterfaceEntry *ie;
+    cModule *switchModule = nullptr;
+    IMACAddressTable *macTable = nullptr;
+    IInterfaceTable *ifTable = nullptr;
+    InterfaceEntry *ie = nullptr;
 
   public:
     STPBase();
