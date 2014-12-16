@@ -24,6 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * Implements the ConstantErrorModel model, see the NED file for details.
+ */
 class INET_API ConstantErrorModel : public ErrorModelBase
 {
   protected:
