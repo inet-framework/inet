@@ -17,11 +17,15 @@
 
 package inet.physicallayer.antenna;
 
-import inet.physicallayer.contract.IAntenna;
+import inet.physicallayer.base.AntennaBase;
 
-module ConstantGainAntenna like IAntenna
+//
+// This antenna model describes an antenna that has an antenna gain indepent of
+// the transmission or reception direction.
+//
+module ConstantGainAntenna extends AntennaBase
 {
     parameters:
-        double gain @unit(dB); // antenna gain in any direction
+        double gain @unit(dB); // antenna gain indepent of transmission or reception direction
         @class(ConstantGainAntenna);
 }

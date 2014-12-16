@@ -17,9 +17,13 @@
 
 package inet.physicallayer.antenna;
 
-import inet.physicallayer.contract.IAntenna;
+import inet.physicallayer.base.AntennaBase;
 
-module IsotropicAntenna like IAntenna
+//
+// This antenna model describes the theoretical point source which radiates the
+// same intensity of radiation in all directions.
+//
+module IsotropicAntenna extends AntennaBase
 {
     parameters:
         @class(IsotropicAntenna);

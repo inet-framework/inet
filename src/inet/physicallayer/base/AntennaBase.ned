@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.antenna;
+package inet.physicallayer.base;
 
-import inet.physicallayer.base.AntennaBase;
+import inet.physicallayer.contract.IAntenna;
 
-//
-// This antenna model describes the well-known dipole antenna or doublet. It
-// consists of two identical conductive elements, which are bilaterally
-// symmetrical.
-//
-module DipoleAntenna extends AntennaBase
+module AntennaBase like IAntenna
 {
     parameters:
-        double length @unit(m); // the length of the dipole antenna
-        @class(DipoleAntenna);
+        string mobilityModule = default(".mobility"); // the path to the mobility module relative to the network node
+        @display("i=device/antennatower");
 }

@@ -30,7 +30,7 @@ AntennaBase::AntennaBase() :
 void AntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        mobility = check_and_cast<IMobility *>(getContainingNode(this)->getSubmodule("mobility"));
+        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), getContainingNode(this));
 }
 
 } // namespace physicallayer
