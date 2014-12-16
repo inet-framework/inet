@@ -19,8 +19,18 @@ package inet.physicallayer.ideal;
 
 import inet.physicallayer.contract.IAnalogModel;
 
+//
+// This analog model provides a very simple and predictable physical layer
+// behavior. It determines the reception power by categorizing transmissions
+// based on the distance between the transmitter and the receiver. It doesn't
+// support noise and signal to noise ratio calculations. 
+//
+// See ~IdealRadio, ~IdealRadioMedium, ~IdealTransmitter, and ~IdealReceiver for
+// more details.
+//
 module IdealAnalogModel like IAnalogModel
 {
     parameters:
         @class(IdealAnalogModel);
+        @display("i=block/cogwheel");
 }

@@ -24,6 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * This model doesn't specify any listening properties.
+ */
 class INET_API IdealListening : public ListeningBase
 {
   public:

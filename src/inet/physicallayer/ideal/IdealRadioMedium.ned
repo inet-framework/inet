@@ -19,11 +19,18 @@ package inet.physicallayer.ideal;
 
 import inet.physicallayer.common.RadioMedium;
 
+//
+// This radio medium model provides a very simple but fast and predictable
+// physical layer behavior. It must be used in conjunction with the ~IdealRadio
+// model.
+//
+// See ~IdealRadio, ~IdealAnalogModel, ~IdealTransmitter, and ~IdealReceiver for
+// more details.
+//
 module IdealRadioMedium extends RadioMedium
 {
     parameters:
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
         analogModelType = default("IdealAnalogModel");
-        backgroundNoiseType = default("");
 }

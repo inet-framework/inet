@@ -24,6 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * Implements the IdealReceiver model, see the NED file for details.
+ */
 class INET_API IdealReceiver : public ReceiverBase
 {
   protected:

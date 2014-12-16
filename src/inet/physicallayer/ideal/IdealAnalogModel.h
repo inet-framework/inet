@@ -24,6 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * Implements the IdealAnalogModel model, see the NED file for details.
+ */
 class INET_API IdealAnalogModel : public cModule, public IAnalogModel
 {
   public:

@@ -24,6 +24,9 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * Implements the IdealTransmitter model, see the NED file for details.
+ */
 class INET_API IdealTransmitter : public TransmitterBase
 {
   protected:

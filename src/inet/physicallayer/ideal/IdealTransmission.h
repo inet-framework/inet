@@ -24,6 +24,10 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * This model characterizes transmissions with the communication range,
+ * interference range, and detection range.
+ */
 class INET_API IdealTransmission : public TransmissionBase
 {
   protected:

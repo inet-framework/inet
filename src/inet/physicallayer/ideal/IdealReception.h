@@ -24,6 +24,11 @@ namespace inet {
 
 namespace physicallayer {
 
+/**
+ * This model characterizes receptions with a simplified reception power that
+ * falls into one of the categories: receivable, interfering, detectable, and
+ * undetectable.
+ */
 class INET_API IdealReception : public ReceptionBase
 {
   public:

@@ -19,11 +19,26 @@ package inet.physicallayer.ideal;
 
 import inet.physicallayer.common.Radio;
 
+//
+// This radio model provides a very simple but fast and predictable physical
+// layer behavior. It must be used in conjunction with the ~IdealRadioMedium
+// model.
+//
+// The idea behind this radio model is to describe transmissions with a few
+// distance based parameters: communication range, interference range, and
+// detection range. Whether the reception is successful or not, depends on the
+// distance between the transmitter and the receiver. This model is similar to
+// the unit disk radio, but it's also more general than that. The ideal model
+// also supports an ideal communication channel where all transmissions are
+// received sucessfully independent of distance and interfering transmissions.
+//
+// See ~IdealRadioMedium, ~IdealAnalogModel, ~IdealTransmitter, and
+// ~IdealReceiver for more details.
+//
 module IdealRadio extends Radio
 {
     parameters:
         antennaType = default("IsotropicAntenna");
         transmitterType = default("IdealTransmitter");
         receiverType = default("IdealReceiver");
-        @class(Radio);
 }

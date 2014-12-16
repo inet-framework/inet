@@ -19,9 +19,19 @@ package inet.physicallayer.ideal;
 
 import inet.physicallayer.contract.IReceiver;
 
+//
+// This receiver model receives a transmission succesfully within communication
+// range unless there's another interfering transmission within interference
+// range. It also supports an ideal communication channel with configuring the
+// receiver to ignore interfering transmissions.
+//
+// See also ~IdealTransmitter, ~IdealRadio, ~IdealRadioMedium, and
+// ~IdealAnalogModel for more details.
+//
 module IdealReceiver like IReceiver
 {
     parameters:
-        bool ignoreInterference = default(false);
+        bool ignoreInterference = default(false); // true means interfering transmissions are ignored when determining whether a reception is successful or not
         @class(IdealReceiver);
+        @display("i=block/wrx");
 }
