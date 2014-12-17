@@ -334,7 +334,7 @@ void GenericRoutingTable::addRoute(IRoute *route)
 {
     Enter_Method("addRoute(...)");
 
-    GenericRoute *entry = dynamic_cast<GenericRoute *>(route);
+    GenericRoute *entry = check_and_cast<GenericRoute *>(route);
 
     // check that the interface exists
     if (!entry->getInterface())
