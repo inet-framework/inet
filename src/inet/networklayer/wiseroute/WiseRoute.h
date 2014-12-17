@@ -59,38 +59,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     WiseRoute& operator=(const WiseRoute&);
 
   public:
-    WiseRoute()
-        : NetworkProtocolBase()
-        , routeTable()
-        , floodTable()
-        , headerLength(0)
-        , sinkAddress()
-        , rssiThreshold(0)
-        , routeFloodsInterval(0)
-        , floodSeqNumber(0)
-        , routeFloodTimer(nullptr)
-        , nbDataPacketsForwarded(0)
-        , nbDataPacketsReceived(0)
-        , nbDataPacketsSent(0)
-        , nbDuplicatedFloodsReceived(0)
-        , nbFloodsSent(0)
-        , nbPureUnicastSent(0)
-        , nbRouteFloodsSent(0)
-        , nbRouteFloodsReceived(0)
-        , nbUnicastFloodForwarded(0)
-        , nbPureUnicastForwarded(0)
-        , nbGetRouteFailures(0)
-        , nbRoutesRecorded(0)
-        , nbHops(0)
-        , receivedRSSI()
-        , routeRSSI()
-        , allReceivedRSSI()
-        , allReceivedBER()
-        , routeBER()
-        , receivedBER()
-        , nextHopSelectionForSink()
-        , trace(false)
-    {}
+    WiseRoute() {}
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
@@ -126,43 +95,43 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     tRouteTable routeTable;
     tFloodTable floodTable;
 
-    IARP *arp;
+    IARP *arp = nullptr;
 
     /**
      * @brief Length of the NetwPkt header
      * Read from omnetpp.ini
      **/
-    int headerLength;
+    int headerLength = 0;
 
     L3Address myNetwAddr;
     L3Address sinkAddress;
 
     /** @brief Minimal received RSSI necessary for adding source to routing table. */
-    double rssiThreshold;
+    double rssiThreshold = 0.0;
 
     /** @brief Interval [seconds] between two route floods. A route flood is a simple flood from
      *         which other nodes can extract routing (next hop) information.
      */
-    double routeFloodsInterval;
+    double routeFloodsInterval = 0.0;
 
     /** @brief Flood sequence number */
-    unsigned long floodSeqNumber;
+    unsigned long floodSeqNumber = 0;
 
-    cMessage *routeFloodTimer;
+    cMessage *routeFloodTimer = nullptr;
 
-    long nbDataPacketsForwarded;
-    long nbDataPacketsReceived;
-    long nbDataPacketsSent;
-    long nbDuplicatedFloodsReceived;
-    long nbFloodsSent;
-    long nbPureUnicastSent;
-    long nbRouteFloodsSent;
-    long nbRouteFloodsReceived;
-    long nbUnicastFloodForwarded;
-    long nbPureUnicastForwarded;
-    long nbGetRouteFailures;
-    long nbRoutesRecorded;
-    long nbHops;
+    long nbDataPacketsForwarded = 0;
+    long nbDataPacketsReceived = 0;
+    long nbDataPacketsSent = 0;
+    long nbDuplicatedFloodsReceived = 0;
+    long nbFloodsSent = 0;
+    long nbPureUnicastSent = 0;
+    long nbRouteFloodsSent = 0;
+    long nbRouteFloodsReceived = 0;
+    long nbUnicastFloodForwarded = 0;
+    long nbPureUnicastForwarded = 0;
+    long nbGetRouteFailures = 0;
+    long nbRoutesRecorded = 0;
+    long nbHops = 0;
 
     cOutVector receivedRSSI;
     cOutVector routeRSSI;
@@ -172,7 +141,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     cOutVector receivedBER;
     cOutVector nextHopSelectionForSink;
 
-    bool trace;
+    bool trace = false;
 
     /**
      * @name Handle Messages
