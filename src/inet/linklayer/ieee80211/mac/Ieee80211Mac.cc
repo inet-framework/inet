@@ -623,28 +623,23 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
         if (!prioritizeMulticast || !frame->getReceiverAddress().isMulticast() || transmissionQueue()->size() < 2)
             transmissionQueue()->push_back(frame);
         else {
-            // if the last frame is management insert here
-            Ieee80211DataFrame *frameAux = dynamic_cast<Ieee80211DataFrame *>(transmissionQueue()->back());
-            if ((frameAux == nullptr) || (frameAux && frameAux->getReceiverAddress().isMulticast()))
-                transmissionQueue()->push_back(frame);
-            else {
-                // in other case search the possition
-                ASSERT(transmissionQueue()->size() >= 2);
-                auto p = transmissionQueue()->end();
+            // current frame is multicast, insert it prior to any unicast dataframe
+            ASSERT(transmissionQueue()->size() >= 2);
+            auto p = transmissionQueue()->end();
+            --p;
+            while (p != transmissionQueue()->begin()) {
+                if (dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr)
+                    break;  // management frame
+                if ((*p)->getReceiverAddress().isMulticast())
+                    break;  // multicast frame
                 --p;
-                // condition (p != transmissionQueue()->begin()): we don't know if first frame in the queue is in middle of transmission
-                while ((p != transmissionQueue()->begin()) && (*p)->getReceiverAddress().isMulticast()) {    // search the first broadcast dataframe
-                    if (dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr)
-                        break;
-                    p--;
-                }
-                p++;
-                transmissionQueue()->insert(p, frame);
             }
+            ++p;
+            transmissionQueue()->insert(p, frame);
         }
     }
     else {
-        if (transmissionQueue()->empty() || transmissionQueue()->size() == 1) {
+        if (transmissionQueue()->size() < 2) {
             transmissionQueue()->push_back(frame);
         }
         else {
@@ -652,7 +647,7 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
             //so for sure we placed it on second place
             auto p = transmissionQueue()->begin();
             p++;
-            while ((dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr) && (p != transmissionQueue()->end())) // search the first not management frame
+            while ((p != transmissionQueue()->end()) && (dynamic_cast<Ieee80211DataFrame *>(*p) == nullptr)) // search the first not management frame
                 p++;
             transmissionQueue()->insert(p, frame);
         }

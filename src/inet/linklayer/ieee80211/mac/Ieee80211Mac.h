@@ -576,7 +576,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void clearQueue();
 
     /** @brief Mapping to access categories. */
-    virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);
+    virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);     // FIXME rename it, change return type, change 'return 200'
 
     /** @brief Send down the change channel message to the physical layer if there is any. */
     virtual void sendDownPendingRadioConfigMsg();
