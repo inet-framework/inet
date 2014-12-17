@@ -28,6 +28,9 @@ import inet.power.contract.IEnergyConsumer;
 // and receiving signals on the medium. It contains an antenna model, a
 // transmitter model, a receiver model, and an energy consumer model.
 //
+// The radio model supports changing radio mode, transmission power, or bitrate
+// via ~ConfigureRadioCommand, or with direct C++ function calls.
+//
 // switchingTimes parameter should be regarded as a 5x5 matrix:
 //
 //               OFF SLEEP RECEIVER TRANSMITTER TRANSCEIVER
@@ -59,8 +62,8 @@ module Radio like IRadio
 
         bool displayCommunicationRange = default(true); // if true communication range is displayed as a blue circle around the node
         bool displayInterferenceRange = default(true);  // if true interference range is displayed as a gray circle around the node
-        
-        *.energySourceModule = default(absPath(energySourceModule)); 
+
+        *.energySourceModule = default(absPath(energySourceModule));
 
         @class(Radio);
         @display("i=block/wrxtx");

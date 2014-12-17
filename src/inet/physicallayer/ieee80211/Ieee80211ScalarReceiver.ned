@@ -17,6 +17,16 @@
 
 package inet.physicallayer.ieee80211;
 
+//
+// This receiver model receives an IEEE 802.11 transmission successfully if the
+// minimum of the signal to noise and interference ratio over the duration of
+// the reception is sufficiently high. It uses one of the IEEE 802.11 specific
+// error models to compute the error rate based on this value and the used
+// operation mode.
+//
+// See also ~Ieee80211ScalarTransmitter, ~Ieee80211ScalarRadio, and
+// ~Ieee80211ScalarRadioMedium.
+//
 module Ieee80211ScalarReceiver extends Ieee80211ReceiverBase
 {
     parameters:

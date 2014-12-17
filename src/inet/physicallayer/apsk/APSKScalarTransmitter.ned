@@ -19,6 +19,13 @@ package inet.physicallayer.apsk;
 
 import inet.physicallayer.base.NarrowbandTransmitterBase;
 
+//
+// This transmitter model produces transmissions that have scalar transmission
+// power in their analog representation and the configured modulation.
+//
+// See also ~APSKScalarReceiver, ~APSKScalarRadio, ~APSKScalarRadioMedium, and
+// ~APSKScalarAnalogModel.
+//
 module APSKScalarTransmitter extends NarrowbandTransmitterBase
 {
     parameters:

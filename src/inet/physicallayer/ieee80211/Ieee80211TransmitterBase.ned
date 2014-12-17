@@ -19,6 +19,14 @@ package inet.physicallayer.ieee80211;
 
 import inet.physicallayer.base.NarrowbandTransmitterBase;
 
+//
+// This transmitter model serves as the base module for IEEE 802.11 transmitters.
+// It supports switching channels, configuring different operation modes, and
+// preamble modes.
+//
+// See also ~Ieee80211ReceiverBase, ~Ieee80211ScalarTransmitter, and
+// ~Ieee80211DimensionalTransmitter.
+//
 module Ieee80211TransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:

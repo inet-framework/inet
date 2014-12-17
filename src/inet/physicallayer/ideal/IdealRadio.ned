@@ -32,8 +32,8 @@ import inet.physicallayer.common.Radio;
 // also supports an ideal communication channel where all transmissions are
 // received sucessfully independent of distance and interfering transmissions.
 //
-// See ~IdealRadioMedium, ~IdealAnalogModel, ~IdealTransmitter, and
-// ~IdealReceiver for more details.
+// See also ~IdealRadioMedium, ~IdealAnalogModel, ~IdealTransmitter, and
+// ~IdealReceiver.
 //
 module IdealRadio extends Radio
 {

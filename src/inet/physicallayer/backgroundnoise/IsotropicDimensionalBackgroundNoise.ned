@@ -22,7 +22,7 @@ import inet.physicallayer.contract.IRadioBackgroundNoise;
 //
 // This background noise model describes noise that does not change over space,
 // time and frequency. It produces dimensional noise signals that can be further
-// used in dimensional computations.  
+// used in dimensional computations.
 //
 module IsotropicDimensionalBackgroundNoise like IRadioBackgroundNoise
 {

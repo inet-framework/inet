@@ -19,6 +19,15 @@ package inet.physicallayer.apsk;
 
 import inet.physicallayer.base.NarrowbandRadioBase;
 
+//
+// This radio model provides a hypothetical radio that simply uses one of the
+// well-known modulations without utilizing other techiques such as forward
+// error correction, interleaving, spreading, etc. It must be used in
+// conjunction with the ~APSKScalarRadioMedium model.
+//
+// See also ~APSKScalarRadioMedium, ~ScalarAnalogModel, ~APSKScalarTransmitter,
+// and ~APSKScalarReceiver.
+//
 module APSKScalarRadio extends NarrowbandRadioBase
 {
     parameters:

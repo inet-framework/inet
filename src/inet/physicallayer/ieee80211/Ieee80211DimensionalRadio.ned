@@ -17,6 +17,14 @@
 
 package inet.physicallayer.ieee80211;
 
+//
+// This radio model uses dimensional transmission power (that changes over time
+// and/or frequency) in the analog representation. It must be used in
+// conjunction with the ~Ieee80211DimensionalRadioMedium model.
+//
+// See also ~Ieee80211DimensionalRadioMedium, ~Ieee80211DimensionalTransmitter,
+// ~Ieee80211DimensionalReceiver, and ~DimensionalAnalogModel.
+//
 module Ieee80211DimensionalRadio extends Ieee80211Radio
 {
     parameters:

@@ -17,6 +17,13 @@
 
 package inet.physicallayer.ieee80211;
 
+//
+// This radio model uses scalar transmission power in the analog representation.
+// It must be used in conjunction with the ~Ieee80211ScalarRadioMedium model.
+//
+// See also ~Ieee80211ScalarRadioMedium, ~Ieee80211ScalarTransmitter,
+// ~Ieee80211ScalarReceiver, and ~ScalarAnalogModel.
+//
 module Ieee80211ScalarRadio extends Ieee80211Radio
 {
     parameters:

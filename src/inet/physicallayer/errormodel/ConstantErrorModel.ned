@@ -27,7 +27,7 @@ import inet.physicallayer.base.ErrorModelBase;
 module ConstantErrorModel extends ErrorModelBase
 {
     parameters:
-        double packetErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set  
+        double packetErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
         double bitErrorRate = default(0/0);    // a probability in the range [0, 1] or NaN if not set
         double symbolErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
         @class(ConstantErrorModel);

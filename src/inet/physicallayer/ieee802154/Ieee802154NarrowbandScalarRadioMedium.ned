@@ -26,7 +26,7 @@ module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
         propagationType = default("ConstantSpeedPropagation");
         analogModelType = default("ScalarAnalogModel");
         backgroundNoiseType = default("IsotropicScalarBackgroundNoise");
-        
+
         // 802.15.4-2006, page 266
         pathLossType = default("BreakpointPathLoss");
         pathLoss.breakpointDistance = 8 m;
@@ -34,7 +34,7 @@ module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
         pathLoss.alpha1 = 2;
         pathLoss.l02 = 58.5;
         pathLoss.alpha2 = 3.3;
-        
+
         // Reflects the thermal noise for the receiver sensitivity
         // TODO couple with sensitivity
         backgroundNoise.power = default(-96.616dBm);

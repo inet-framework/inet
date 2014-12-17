@@ -19,6 +19,16 @@ package inet.physicallayer.ieee80211;
 
 import inet.physicallayer.common.RadioMedium;
 
+//
+// This radio medium model is part of thee IEEE 802.11 physical layer model. It
+// must be used in conjunction with the ~Ieee80211Radio model or other derived
+// models.
+//
+// This model provides sensible default values for the radio medium parameters
+// to be used in IEEE 802.11 simulations.
+//
+// See also ~Ieee80211ScalarRadioMedium, and ~Ieee80211DimensionalRadioMedium.
+//
 module Ieee80211RadioMedium extends RadioMedium
 {
     parameters:

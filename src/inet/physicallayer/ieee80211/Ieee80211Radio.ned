@@ -19,13 +19,26 @@ package inet.physicallayer.ieee80211;
 
 import inet.physicallayer.base.NarrowbandRadioBase;
 
+//
+// This radio model is part of the IEEE 802.11 physical layer model. It supports
+// multiple channels, different operation modes, and preamble modes. It must be
+// used in conjunction with the ~Ieee80211RadioMedium model or other derived
+// models.
+//
+// This model provides sensible default values for the radio parameters to be
+// used in IEEE 802.11 simulations. It also supports switching channels via
+// ~ConfigureRadioCommand, or with direct C++ function calls.
+//
+// See also ~Ieee80211ScalarRadio, and ~Ieee80211DimensionalRadio for more
+// details.
+//
 module Ieee80211Radio extends NarrowbandRadioBase
 {
     parameters:
-        int channelNumber = default(0);
-        string opMode @enum("b","g","a","p") = default("g");
-        string preambleMode @enum("long", "short") = default("long");
-        carrierFrequency @unit(Hz) = default(2.412GHz);
+        int channelNumber = default(0);                               // initial channel number
+        string opMode @enum("b","g","a","p") = default("g");          // operation mode
+        string preambleMode @enum("long", "short") = default("long"); // preamble length
+        carrierFrequency @unit(Hz) = default(2.412GHz);               // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(2MHz);
         antennaType = default("IsotropicAntenna");
         transmitter.bitrate = default(11Mbps);

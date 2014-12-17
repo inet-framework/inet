@@ -19,6 +19,14 @@ package inet.physicallayer.ieee80211;
 
 import inet.physicallayer.base.NarrowbandReceiverBase;
 
+//
+// This receiver model serves as the base module for IEEE 802.11 receivers. It
+// supports switching channels, configuring different operation modes, and
+// preamble modes.
+//
+// See also ~Ieee80211TransmitterBase, ~Ieee80211ScalarReceiver, and
+// ~Ieee80211DimensionalReceiver.
+//
 module Ieee80211ReceiverBase extends NarrowbandReceiverBase
 {
     parameters:

@@ -28,6 +28,6 @@ module ConstantSpeedPropagation extends PropagationBase
 {
     parameters:
         bool ignoreMovementDuringPropagation = default(true); // true means that the movement of the transmitter and the receiver during the signal propagation is ignored
-        bool ignoreMovementDuringReception = default(true);   // true means that the movement of the transmitter and the receiver during the signal reception is ignored 
+        bool ignoreMovementDuringReception = default(true);   // true means that the movement of the transmitter and the receiver during the signal reception is ignored
         @class(ConstantSpeedPropagation);
 }

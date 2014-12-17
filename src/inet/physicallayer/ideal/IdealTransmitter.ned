@@ -26,7 +26,7 @@ import inet.physicallayer.contract.ITransmitter;
 // to infinity.
 //
 // See also ~IdealReceiver, ~IdealRadio, ~IdealRadioMedium, and
-// ~IdealAnalogModel for more details.
+// ~IdealAnalogModel.
 //
 module IdealTransmitter like ITransmitter
 {

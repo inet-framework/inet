@@ -26,7 +26,7 @@ import inet.physicallayer.contract.IReceiver;
 // receiver to ignore interfering transmissions.
 //
 // See also ~IdealTransmitter, ~IdealRadio, ~IdealRadioMedium, and
-// ~IdealAnalogModel for more details.
+// ~IdealAnalogModel.
 //
 module IdealReceiver like IReceiver
 {

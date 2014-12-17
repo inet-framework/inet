@@ -24,8 +24,8 @@ import inet.physicallayer.common.RadioMedium;
 // physical layer behavior. It must be used in conjunction with the ~IdealRadio
 // model.
 //
-// See ~IdealRadio, ~IdealAnalogModel, ~IdealTransmitter, and ~IdealReceiver for
-// more details.
+// See also ~IdealRadio, ~IdealAnalogModel, ~IdealTransmitter, and
+// ~IdealReceiver.
 //
 module IdealRadioMedium extends RadioMedium
 {

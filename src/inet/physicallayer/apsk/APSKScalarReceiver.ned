@@ -19,6 +19,15 @@ package inet.physicallayer.apsk;
 
 import inet.physicallayer.base.NarrowbandReceiverBase;
 
+//
+// This receiver model receives a transmission succesfully if the minimum of the
+// signal to noise and interference ratio over the duration of the reception is
+// sufficiently high. It uses the error model to compute the error rate based on
+// this value and the used modulation.
+//
+// See also ~APSKScalarTransmitter, ~APSKScalarRadio, ~APSKScalarRadioMedium, and
+// ~ScalarAnalogModel.
+//
 module APSKScalarReceiver extends NarrowbandReceiverBase
 {
     parameters:
