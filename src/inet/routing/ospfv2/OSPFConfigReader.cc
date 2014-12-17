@@ -41,7 +41,8 @@ namespace ospf {
 
 using namespace xmlutils;
 
-OSPFConfigReader::OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift) : ospfModule(ospfModule), ift(ift)
+OSPFConfigReader::OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift) :
+        ospfModule(ospfModule), ift(ift)
 {
 }
 

@@ -37,10 +37,11 @@ namespace ospf {
 class INET_API OSPFConfigReader
 {
   private:
-    cModule *ospfModule;
-    IInterfaceTable *ift;    // provides access to the interface table
-    Router *ospfRouter;    // data structure to fill in
+    cModule *ospfModule = nullptr;
+    IInterfaceTable *ift = nullptr;    // provides access to the interface table
+    Router *ospfRouter = nullptr;    // data structure to fill in
 
+  private:
     cPar& par(const char *name) const { return ospfModule->par(name); }
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
