@@ -585,6 +585,9 @@ bool MoBANCoordinator::readConfigurationFile()
             EV_DEBUG << endl;
         }
     }
+    for (unsigned int i = 0; i < numPostures; ++i)
+        delete [] matrix[i];
+    delete [] matrix;
 
     /* Reading the Area types, if there are any. */
     tagList = xmlConfig->getElementsByTagName("areaTypes");
