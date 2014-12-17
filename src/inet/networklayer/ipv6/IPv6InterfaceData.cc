@@ -80,8 +80,6 @@ std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
 
 IPv6InterfaceData::IPv6InterfaceData()
 {
-    hostMcastData = nullptr;
-    routerMcastData = nullptr;
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();
 #endif /* WITH_xMIPv6 */

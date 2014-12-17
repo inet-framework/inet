@@ -129,8 +129,8 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
         std::string detailedInfo();
     };
 
-    HostMulticastData *hostMcastData;
-    RouterMulticastData *routerMcastData;
+    HostMulticastData *hostMcastData = nullptr;
+    RouterMulticastData *routerMcastData = nullptr;
 
   public:
     /**
@@ -234,7 +234,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     };
     friend std::ostream& operator<<(std::ostream& os, const HomeNetworkInfo& homeNetInfo);
     HomeNetworkInfo homeInfo;
-    bool dadInProgress;
+    bool dadInProgress = false;
 
   public:
     bool isDADInProgress() { return dadInProgress; };
@@ -785,7 +785,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     IPv6Address removeAddress(IPv6InterfaceData::AddressType type);    // update 06.08.08 - CB
 
   protected:
-    IPv6RoutingTable *rt6;    // A pointer variable, specifically used to access the type of node (MN, HA, Router, CN). Used in info(). (Zarrar Yousaf 20.07.07)
+    IPv6RoutingTable *rt6 = nullptr;    // A pointer variable, specifically used to access the type of node (MN, HA, Router, CN). Used in info(). (Zarrar Yousaf 20.07.07)
 #endif /* WITH_xMIPv6 */
 };
 
