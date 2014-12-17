@@ -72,7 +72,7 @@ class INET_API Posture
 
     /** @brief A given name to the posture like walking, sitting.
      * It might be used for showing the current posture in the graphical interface during the simulation run */
-    char posture_name[50];
+    char *posture_name;
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */

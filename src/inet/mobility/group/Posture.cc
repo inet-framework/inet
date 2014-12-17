@@ -75,6 +75,8 @@ Posture::~Posture()
     for (unsigned int i = 0; i < numNodes; ++i)
         delete [] alphaSD[i];
     delete [] alphaSD;
+
+    delete [] posture_name;
 }
 
 bool Posture::setPs(unsigned int i, Coord ps)
@@ -88,7 +90,8 @@ bool Posture::setPs(unsigned int i, Coord ps)
 
 bool Posture::setPostureName(char *str)
 {
-    strcpy(posture_name, str);
+    delete [] posture_name;
+    posture_name = opp_strdup(str);
     return true;
 }
 
