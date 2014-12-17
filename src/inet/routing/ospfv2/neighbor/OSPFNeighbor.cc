@@ -34,18 +34,11 @@ namespace ospf {
 unsigned long Neighbor::ddSequenceNumberInitSeed = 0;
 
 Neighbor::Neighbor(RouterID neighbor) :
-    updateRetransmissionTimerActive(false),
-    requestRetransmissionTimerActive(false),
-    firstAdjacencyInited(false),
-    ddSequenceNumber(0),
     neighborID(neighbor),
-    neighborPriority(0),
     neighborIPAddress(NULL_IPV4ADDRESS),
     neighborsDesignatedRouter(NULL_DESIGNATEDROUTERID),
     neighborsBackupDesignatedRouter(NULL_DESIGNATEDROUTERID),
-    designatedRoutersSetUp(false),
-    neighborsRouterDeadInterval(40),
-    lastTransmittedDDPacket(nullptr)
+    neighborsRouterDeadInterval(40)
 {
     memset(&lastReceivedDDPacket, 0, sizeof(Neighbor::DDPacketID));
     // setting only I and M bits is invalid -> good initializer

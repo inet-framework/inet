@@ -88,34 +88,34 @@ class Neighbor
     };
 
   private:
-    NeighborState *state;
-    NeighborState *previousState;
-    cMessage *inactivityTimer;
-    cMessage *pollTimer;
-    cMessage *ddRetransmissionTimer;
-    cMessage *updateRetransmissionTimer;
-    bool updateRetransmissionTimerActive;
-    cMessage *requestRetransmissionTimer;
-    bool requestRetransmissionTimerActive;
-    DatabaseExchangeRelationshipType databaseExchangeRelationship;
-    bool firstAdjacencyInited;
-    unsigned long ddSequenceNumber;
+    NeighborState *state = nullptr;
+    NeighborState *previousState = nullptr;
+    cMessage *inactivityTimer = nullptr;
+    cMessage *pollTimer = nullptr;
+    cMessage *ddRetransmissionTimer = nullptr;
+    cMessage *updateRetransmissionTimer = nullptr;
+    bool updateRetransmissionTimerActive = false;
+    cMessage *requestRetransmissionTimer = nullptr;
+    bool requestRetransmissionTimerActive = false;
+    DatabaseExchangeRelationshipType databaseExchangeRelationship = (DatabaseExchangeRelationshipType)-1;
+    bool firstAdjacencyInited = false;
+    unsigned long ddSequenceNumber = 0;
     DDPacketID lastReceivedDDPacket;
     RouterID neighborID;
-    unsigned char neighborPriority;
+    unsigned char neighborPriority = 0;
     IPv4Address neighborIPAddress;
     OSPFOptions neighborOptions;
     DesignatedRouterID neighborsDesignatedRouter;
     DesignatedRouterID neighborsBackupDesignatedRouter;
-    bool designatedRoutersSetUp;
-    short neighborsRouterDeadInterval;
+    bool designatedRoutersSetUp = false;
+    short neighborsRouterDeadInterval = 0;
     std::list<OSPFLSA *> linkStateRetransmissionList;
     std::list<OSPFLSAHeader *> databaseSummaryList;
     std::list<OSPFLSAHeader *> linkStateRequestList;
     std::list<TransmittedLSA> transmittedLSAs;
-    OSPFDatabaseDescriptionPacket *lastTransmittedDDPacket;
+    OSPFDatabaseDescriptionPacket *lastTransmittedDDPacket = nullptr;
 
-    Interface *parentInterface;
+    Interface *parentInterface = nullptr;
 
     // TODO: Should come from a global unique number generator module.
     static unsigned long ddSequenceNumberInitSeed;
