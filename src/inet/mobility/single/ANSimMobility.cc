@@ -39,25 +39,29 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
 void ANSimMobility::computeMaxSpeed()
 {
     cXMLElement *rootElem = par("ansimTrace");
-    rootElem = rootElem->getElementByPath("mobility/position_change");
-    if (!rootElem)
+    cXMLElement *curElem = rootElem->getElementByPath("mobility/position_change");
+    if (!curElem)
         throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
                 rootElem->getSourceLocation());
-    rootElem = findNextPositionChange(rootElem);
-    cXMLElement *destElem = firstChildWithTag(rootElem, "destination");
+    cXMLElement *nextElem = findNextPositionChange(curElem);
+    if (!nextElem)
+        throw cRuntimeError("Element doesn't have second <position_change> grandchild at %s",
+                curElem->getSourceLocation());
+    curElem = nextElem;
+    cXMLElement *destElem = firstChildWithTag(curElem, "destination");
     const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
     const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
     Coord lastPos(atof(xStr), atof(yStr), 0);
     // first position is the initial position so we don't take it into account to compute maxSpeed
-    if (rootElem)
-        rootElem = rootElem->getNextSibling();
-    while (rootElem)
+    if (curElem)
+        curElem = curElem->getNextSibling();
+    while (curElem)
     {
-        cXMLElement *destElem = firstChildWithTag(rootElem, "destination");
+        cXMLElement *destElem = firstChildWithTag(curElem, "destination");
         const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
         const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
-        const char *startTimeStr = firstChildWithTag(rootElem, "start_time")->getNodeValue();
-        const char *endTimeStr = firstChildWithTag(rootElem, "end_time")->getNodeValue();
+        const char *startTimeStr = firstChildWithTag(curElem, "start_time")->getNodeValue();
+        const char *endTimeStr = firstChildWithTag(curElem, "end_time")->getNodeValue();
         double elapsedTime = atof(endTimeStr) - atof(startTimeStr);
         if (elapsedTime == 0)
             throw cRuntimeError("Elapsed time is zero: infinite speed");
@@ -67,7 +71,7 @@ void ANSimMobility::computeMaxSpeed()
         if (currentSpeed > maxSpeed)
             maxSpeed = currentSpeed;
         lastPos = currentPos;
-        rootElem = findNextPositionChange(rootElem->getNextSibling());
+        curElem = findNextPositionChange(curElem->getNextSibling());
     }
 }
 
