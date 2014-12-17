@@ -319,7 +319,6 @@ IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
             return it->local;
 
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
-    return IPv4Address();    // prevent warning
 }
 
 IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
@@ -330,7 +329,6 @@ IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
             return it->remote;
 
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
-    return IPv4Address();    // prevent warning
 }
 
 bool TED::isLocalPeer(IPv4Address inetAddr)
