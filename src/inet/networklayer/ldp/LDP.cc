@@ -1097,10 +1097,12 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
     ASSERT(label > 0);
 
     auto it = findFecEntry(fecList, fec.addr, fec.length);
-    ASSERT(it != fecList.end());
+    if (it == fecList.end())
+        throw cRuntimeError("Model error: fec not in fecList");
 
     auto dit = findFecEntry(fecDown, it->fecid, fromIP);
-    ASSERT(dit == fecDown.end());
+    if (dit != fecDown.end())
+        throw cRuntimeError("Model error: found in fecDown");
 
     // insert among received mappings
 
