@@ -129,6 +129,7 @@ int PostureTransition::addSteadyState(std::string name, double *iVector)
     TransMatrix *mat = new TransMatrix;
     mat->name = name;
     mat->matrix = extractMatrixFromSteadyState(steady);
+    delete [] steady;
 
     matrixList.push_back(mat);
 
