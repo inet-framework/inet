@@ -35,8 +35,6 @@ Define_Module(TED);
 
 TED::TED()
 {
-    rt = nullptr;
-    ift = nullptr;
 }
 
 TED::~TED()

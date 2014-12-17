@@ -96,15 +96,15 @@ class TED : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    IIPv4RoutingTable *rt;
-    IInterfaceTable *ift;
+    IIPv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
     IPv4Address routerId;
 
     IPAddressVector interfaceAddrs;    // list of local interface addresses
 
-  protected:
-    int maxMessageId;
+    int maxMessageId = 0;
 
+  protected:
     virtual int assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr);
 
     std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,

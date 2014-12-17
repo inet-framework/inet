@@ -32,7 +32,6 @@ Define_Module(LinkStateRouting);
 
 LinkStateRouting::LinkStateRouting()
 {
-    announceMsg = nullptr;
 }
 
 LinkStateRouting::~LinkStateRouting()

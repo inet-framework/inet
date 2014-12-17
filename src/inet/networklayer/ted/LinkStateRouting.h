@@ -55,8 +55,8 @@ class InterfaceEntry;
 class LinkStateRouting : public cSimpleModule, public cListener
 {
   protected:
-    TED *tedmod;
-    cMessage *announceMsg;
+    TED *tedmod = nullptr;
+    cMessage *announceMsg = nullptr;
     IPv4Address routerId;
 
     IPAddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
