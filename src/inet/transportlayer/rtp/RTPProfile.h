@@ -176,14 +176,14 @@ class INET_API RTPProfile : public cSimpleModule
      * The name of this profile. Needed for dynamic creating
      * of sender and receiver modules.
      */
-    const char *_profileName;
+    const char *_profileName = nullptr;
 
     /**
      * The maximum number of incoming data streams this profile
      * module can handle. It is set to the gate size of
      * "payloadReceiverOut", "payloadReceiverIn".
      */
-    int _maxReceivers;
+    int _maxReceivers = 0;
 
     /**
      * Stores information to which gate rtp data packets
@@ -195,24 +195,24 @@ class INET_API RTPProfile : public cSimpleModule
     /**
      * The percentage of the available bandwidth to be used for rtcp.
      */
-    int _rtcpPercentage;
+    int _rtcpPercentage = 0;
 
     /**
      * The rtp port this profile uses if no port is given.
      */
-    int _preferredPort;
+    int _preferredPort = -1;
 
     /**
      * The maximum size an RTPPacket can have.
      */
-    int _mtu;
+    int _mtu = 0;
 
     /**
      * If this is set true the RTPProfile automatically sets the output
      * file name for payload receiver modules so the user is not bothered
      * to set them manually during simulation runtime.
      */
-    bool _autoOutputFileNames;
+    bool _autoOutputFileNames = false;
 };
 
 } // namespace rtp
