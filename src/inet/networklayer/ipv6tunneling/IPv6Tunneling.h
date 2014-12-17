@@ -56,8 +56,8 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     };
 
   protected:
-    IInterfaceTable *ift;
-    IPv6RoutingTable *rt;
+    IInterfaceTable *ift = nullptr;
+    IPv6RoutingTable *rt = nullptr;
 
     struct Tunnel
     {
@@ -78,16 +78,16 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
         IPv6Address exit;
 
         // hoplimit (0 for default)
-        int hopLimit;
+        int hopLimit = 0;
 
         // traffic class (0 for default)
-        int trafficClass;
+        int trafficClass = 0;
 
         // flowLabel (0 for default)
-        int flowLabel;
+        int flowLabel = 0;
 
         // the Path MTU of the tunnel (not used)
-        int tunnelMTU;
+        int tunnelMTU = 0;
 
         /**
          * Specifies the type of the tunnel
@@ -96,7 +96,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
          * * type 2 routing header pseudo tunnel for communication with MNs (RFC 3775)
          * * home address option header pseudo tunnel for communication with CNs (RFC 3775)
          */
-        TunnelType tunnelType;
+        TunnelType tunnelType = INVALID;
 
         // if this address is set, the tunnel is actually a split tunnel, where only
         // packets with a certain destination get forwarded
@@ -104,7 +104,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
         // (nearly) everything will get routed
         IPv6Address destTrigger;
 
-        bool isTriggerPrefix;
+        bool isTriggerPrefix = false;
     };
 
     typedef std::map<int, struct Tunnel> Tunnels;
@@ -124,10 +124,10 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     Tunnels tunnels;
 
     // The lowest vIfIndex assigned so far. Virtual ifIndexes are assigned downwards.
-    int vIfIndexTop;
+    int vIfIndexTop = 0;
 
     // number of tunnels which are not split tunnels
-    int noOfNonSplitTunnels;
+    int noOfNonSplitTunnels = 0;
 
   public:
     IPv6Tunneling();
