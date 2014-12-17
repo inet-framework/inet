@@ -46,6 +46,7 @@
 #include <string.h>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/Coord.h"
 
 namespace inet {
@@ -62,37 +63,37 @@ class INET_API Posture
 {
   protected:
     /** @brief Number of nodes existing in the WBAN */
-    unsigned int numNodes;
+    unsigned int numNodes = 0;
 
     /** @brief The unique ID of the posture */
-    unsigned int postureID;
+    unsigned int postureID = 0;
 
     /** @brief The relative reference position of each node in this posture */
-    Coord *nodePs;
+    Coord *nodePs = nullptr;
 
     /** @brief A given name to the posture like walking, sitting.
      * It might be used for showing the current posture in the graphical interface during the simulation run */
-    char *posture_name;
+    char *posture_name = nullptr;
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
-    double **alphaMean;
+    double **alphaMean = nullptr;
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
-    double **alphaSD;    // Standard deviation of alpha
+    double **alphaSD = nullptr;    // Standard deviation of alpha
 
     /** @brief Radious of the sphere around each node for individual mobility */
-    double *nodeRadius;
+    double *nodeRadius = nullptr;
 
     /** @brief Movement speed of the node for individual mobility */
-    double *nodeSpeed;
+    double *nodeSpeed = nullptr;
 
     /** @brief Maximum value of the speed range for the global movement in this posture */
-    double maxSpeed;
+    double maxSpeed = NaN;
 
     /** @brief Minimum value of the speed range for the global movement in this posture */
-    double minSpeed;
+    double minSpeed = NaN;
 
   public:
     /** @brief Construct a posture object with the given ID and number of nodes, respectively */

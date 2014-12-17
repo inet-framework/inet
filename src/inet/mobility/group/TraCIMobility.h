@@ -31,6 +31,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/group/TraCIScenarioManager.h"
@@ -59,14 +60,14 @@ class INET_API TraCIMobility : public MobilityBase
     class Statistics
     {
       public:
-        double firstRoadNumber;    /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
+        double firstRoadNumber = NaN;    /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
         simtime_t startTime;    /**< for statistics: start time */
         simtime_t totalTime;    /**< for statistics: total time travelled */
         simtime_t stopTime;    /**< for statistics: stop time */
-        double minSpeed;    /**< for statistics: minimum value of currentSpeed */
-        double maxSpeed;    /**< for statistics: maximum value of currentSpeed */
-        double totalDistance;    /**< for statistics: total distance travelled */
-        double totalCO2Emission;    /**< for statistics: total CO2 emission */
+        double minSpeed = NaN;    /**< for statistics: minimum value of currentSpeed */
+        double maxSpeed = NaN;    /**< for statistics: maximum value of currentSpeed */
+        double totalDistance = 0.0;    /**< for statistics: total distance travelled */
+        double totalCO2Emission = 0.0;    /**< for statistics: total CO2 emission */
 
         void initialize();
         void watch(cSimpleModule& module);
@@ -200,7 +201,7 @@ class INET_API TraCIMobility : public MobilityBase
     }
 
   protected:
-    int accidentCount;    /**< number of accidents */
+    int accidentCount = 0;    /**< number of accidents */
 
     cOutVector currentPosXVec;    /**< vector plotting posx */
     cOutVector currentPosYVec;    /**< vector plotting posy */
@@ -210,21 +211,21 @@ class INET_API TraCIMobility : public MobilityBase
 
     Statistics statistics;    /**< everything statistics-related */
 
-    bool isPreInitialized;    /**< true if preInitialize() has been called immediately before initialize() */
+    bool isPreInitialized = false;    /**< true if preInitialize() has been called immediately before initialize() */
 
     std::string external_id;    /**< updated by setExternalId() */
 
     simtime_t lastUpdate;    /**< updated by nextPosition() */
     Coord nextPos;    /**< updated by nextPosition() */
     std::string road_id;    /**< updated by nextPosition() */
-    double speed;    /**< updated by nextPosition() */
-    double angle;    /**< updated by nextPosition() */
-    TraCIScenarioManager::VehicleSignal signals;    /**<updated by nextPosition() */
+    double speed = 0.0;    /**< updated by nextPosition() */
+    double angle = NaN;    /**< updated by nextPosition() */
+    TraCIScenarioManager::VehicleSignal signals = TraCIScenarioManager::VEH_SIGNAL_UNDEF;    /**<updated by nextPosition() */
 
-    cMessage *startAccidentMsg;
-    cMessage *stopAccidentMsg;
-    mutable TraCIScenarioManager *manager;
-    double last_speed;
+    cMessage *startAccidentMsg = nullptr;
+    cMessage *stopAccidentMsg = nullptr;
+    mutable TraCIScenarioManager *manager = nullptr;
+    double last_speed = NaN;
 
     virtual void fixIfHostGetsOutside();    /**< called after each read to check for (and handle) invalid positions */
 
