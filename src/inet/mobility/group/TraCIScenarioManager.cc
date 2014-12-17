@@ -317,7 +317,8 @@ void TraCIScenarioManager::connect()
 
     {
         int x = 1;
-        ::setsockopt(MYSOCKET, IPPROTO_TCP, TCP_NODELAY, (const char *)&x, sizeof(x));
+        if (::setsockopt(MYSOCKET, IPPROTO_TCP, TCP_NODELAY, (const char *)&x, sizeof(x)) < 0)
+            throw cRuntimeError("Could not connect to TraCI server, setsockopt() error message: %d: %s", sock_errno(), strerror(sock_errno()));
     }
 }
 
