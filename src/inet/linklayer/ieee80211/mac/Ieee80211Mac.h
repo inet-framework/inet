@@ -677,6 +677,8 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual void handleNodeCrash();
 
+    virtual void configureRadioMode(IRadio::RadioMode radioMode);
+
   public:
     virtual State getState() { return static_cast<State>(fsm.getState()); }
     virtual unsigned int getQueueSize() { return transmissionQueueSize(); }

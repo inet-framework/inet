@@ -798,7 +798,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
         handleWithFSM(mediumStateChange);
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
         transmissionState = newRadioTransmissionState;
     }
 }
@@ -1698,7 +1698,7 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV_INFO << "sending ACK frame\n";
     numAckSend++;
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setControlBitrate(buildACKFrame(frameToACK)));
 }
 
@@ -1738,14 +1738,14 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
         scheduleAt(simTime() + time, endTXOP);
     }
     EV_INFO << "sending Data frame\n";
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame *>(setBitrateFrame(frameToSend))));
 }
 
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV_INFO << "sending RTS frame\n";
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setControlBitrate(buildRTSFrame(frameToSend)));
 }
 
@@ -1754,7 +1754,7 @@ void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     EV_INFO << "sending Multicast frame\n";
     if (frameToSend->getControlInfo())
         delete frameToSend->removeControlInfo();
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame *>(setBasicBitrate(frameToSend))));
 }
 
@@ -1769,7 +1769,7 @@ void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV_INFO << "sending CTS frame\n";
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setControlBitrate(buildCTSFrame(rtsFrame)));
 }
 
@@ -2727,6 +2727,17 @@ void Ieee80211Mac::handleNodeCrash()
             transmissionQueue(i)->pop_front();
             delete temp;
         }
+    }
+}
+
+void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
+{
+    if (radio->getRadioMode() != radioMode) {
+        ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
+        configureCommand->setRadioMode(radioMode);
+        cMessage *message = new cMessage("configureRadioMode", RADIO_C_CONFIGURE);
+        message->setControlInfo(configureCommand);
+        sendDown(message);
     }
 }
 
