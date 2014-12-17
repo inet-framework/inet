@@ -352,6 +352,8 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     //currently being performed on the neighbour where the TCP ACK was received from.
 
     Neighbour *nce = neighbourCache.lookup(neighbour, interfaceId);
+    if (!nce)
+        throw cRuntimeError("Model error: not found in cache");
 
     cMessage *msg = nce->nudTimeoutEvent;
     if (msg != nullptr) {
