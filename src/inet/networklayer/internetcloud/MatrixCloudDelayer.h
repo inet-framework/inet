@@ -54,11 +54,11 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
       public:
         Matcher srcMatcher;
         Matcher destMatcher;
-        bool symmetric;
+        bool symmetric = false;
         cDynamicExpression delayPar;
         cDynamicExpression dataratePar;
         cDynamicExpression dropPar;
-        cXMLElement *entity;
+        cXMLElement *entity = nullptr;
 
       public:
         MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric);
@@ -69,13 +69,13 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     class Descriptor
     {
       public:
-        cDynamicExpression *delayPar;
-        cDynamicExpression *dataratePar;
-        cDynamicExpression *dropPar;
+        cDynamicExpression *delayPar = nullptr;
+        cDynamicExpression *dataratePar = nullptr;
+        cDynamicExpression *dropPar = nullptr;
         simtime_t lastSent;
 
       public:
-        Descriptor() : delayPar(nullptr), dataratePar(nullptr), dropPar(nullptr), lastSent(SIMTIME_ZERO) {}
+        Descriptor() {}
     };
 
     typedef std::pair<int, int> IDPair;
@@ -85,8 +85,8 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     MatrixEntryPtrVector matrixEntries;
     IDPairToDescriptorMap idPairToDescriptorMap;
 
-    IInterfaceTable *ift;
-    cModule *host;
+    IInterfaceTable *ift = nullptr;
+    cModule *host = nullptr;
 
   protected:
     virtual ~MatrixCloudDelayer();
