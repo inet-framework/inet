@@ -172,17 +172,17 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     simtime_t retryInterval;
 
   protected:
-    TED *tedmod;
-    IIPv4RoutingTable *rt;
-    IInterfaceTable *ift;
-    LIBTable *lt;
+    TED *tedmod = nullptr;
+    IIPv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
+    LIBTable *lt = nullptr;
 
-    IRSVPClassifier *rpct;
+    IRSVPClassifier *rpct = nullptr;
 
-    int maxPsbId;
-    int maxRsbId;
+    int maxPsbId = 0;
+    int maxRsbId = 0;
 
-    int maxSrcInstance;
+    int maxSrcInstance = 0;
 
     IPv4Address routerId;
 

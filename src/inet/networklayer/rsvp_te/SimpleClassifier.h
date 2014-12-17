@@ -53,11 +53,11 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
 
   protected:
     IPv4Address routerId;
-    int maxLabel;
+    int maxLabel = 0;
 
     std::vector<FECEntry> bindings;
-    LIBTable *lt;
-    RSVP *rsvp;
+    LIBTable *lt = nullptr;
+    RSVP *rsvp = nullptr;
 
   public:
     SimpleClassifier() {}
