@@ -35,12 +35,12 @@ class IInterfaceTable;
 class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
 {
   private:
-    IInterfaceTable *ift;    // cached pointer
+    IInterfaceTable *ift = nullptr;    // cached pointer
 
     L3Address routerId;
-    L3Address::AddressType addressType;
-    bool forwarding;
-    bool multicastForwarding;
+    L3Address::AddressType addressType = L3Address::NONE;
+    bool forwarding = false;
+    bool multicastForwarding = false;
 
     typedef std::vector<GenericRoute *> RouteVector;
     RouteVector routes;    // unicast route table, sorted by prefix match order

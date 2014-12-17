@@ -44,7 +44,6 @@ std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
 
 GenericRoutingTable::GenericRoutingTable()
 {
-    ift = nullptr;
 }
 
 GenericRoutingTable::~GenericRoutingTable()
