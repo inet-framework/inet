@@ -324,7 +324,8 @@ IRoute *GenericRoutingTable::getRoute(int k) const
 IRoute *GenericRoutingTable::getDefaultRoute() const
 {
     // if there is a default route entry, it is the last valid entry
-    for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getPrefixLength() == 0; ++i)
+    auto i = routes.rbegin();
+    if (i != routes.rend() && (*i)->getPrefixLength() == 0)
         return *i;
     return nullptr;
 }
