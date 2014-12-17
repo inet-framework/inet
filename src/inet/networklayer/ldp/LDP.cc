@@ -87,7 +87,6 @@ std::ostream& operator<<(std::ostream& os, const FEC_TLV& a)
 
 LDP::LDP()
 {
-    sendHelloMsg = nullptr;
 }
 
 LDP::~LDP()

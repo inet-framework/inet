@@ -112,11 +112,11 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     //
     // other variables:
     //
-    NodeStatus *nodeStatus;
-    IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;
-    LIBTable *lt;
-    TED *tedmod;
+    NodeStatus *nodeStatus = nullptr;
+    IInterfaceTable *ift = nullptr;
+    IIPv4RoutingTable *rt = nullptr;
+    LIBTable *lt = nullptr;
+    TED *tedmod = nullptr;
 
     UDPSocket udpSocket;    // for receiving Hello
     std::vector<UDPSocket> udpSockets;    // for sending Hello, one socket for each multicast interface
@@ -124,9 +124,9 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     TCPSocketMap socketMap;    // holds TCP connections with peers
 
     // hello timeout message
-    cMessage *sendHelloMsg;
+    cMessage *sendHelloMsg = nullptr;
 
-    int maxFecid;
+    int maxFecid = 0;
 
   protected:
     /**
