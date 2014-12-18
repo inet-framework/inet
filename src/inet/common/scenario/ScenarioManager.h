@@ -40,8 +40,8 @@ class INET_API ScenarioManager : public cSimpleModule
 {
   protected:
     // total number of changes, and number of changes already done
-    int numChanges;
-    int numDone;
+    int numChanges = 0;
+    int numDone = 0;
 
   protected:
     // utilities
