@@ -37,15 +37,15 @@ class IIPv4RoutingTable;
 class INET_API FlatNetworkConfigurator : public cSimpleModule
 {
   protected:
-    struct NodeInfo
+    class NodeInfo
     {
-        NodeInfo() { isIPNode = false; ift = nullptr; rt = nullptr; usesDefaultRoute = false; }
-        bool isIPNode;
-        IInterfaceTable *ift;
-        IIPv4RoutingTable *rt;
+      public:
+        bool isIPNode = false;
+        IInterfaceTable *ift = nullptr;
+        IIPv4RoutingTable *rt = nullptr;
         IPv4Address address;
-        bool usesDefaultRoute;
-        bool ipForwardEnabled;
+        bool usesDefaultRoute = false;
+        bool ipForwardEnabled = false;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
