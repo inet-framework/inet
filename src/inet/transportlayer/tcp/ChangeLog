@@ -65,6 +65,8 @@
 	Source: https://github.com/maferhe2/TCP-Vegas-Westwood,
 	commit 5cae09feea84bd85b9d657833de90f4beae1de25
 
+	Project web site: http://www.grc.upv.es/Software/tcpinet.html
+
 	See the following paper:
 	"INET framework extensions for TCP Vegas and TCP Westwood",
 	Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni.
