@@ -499,50 +499,50 @@ void OLSR_state::clear_all()
 
 }
 
-OLSR_state::OLSR_state(OLSR_state * st)
+OLSR_state::OLSR_state(const OLSR_state& st)
 {
-    for (auto it = st->linkset_.begin(); it != st->linkset_.end(); it++)
+    for (auto it = st.linkset_.begin(); it != st.linkset_.end(); it++)
     {
         OLSR_link_tuple* tuple = *it;
         linkset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->nbset_.begin(); it != st->nbset_.end(); it++)
+    for (auto it = st.nbset_.begin(); it != st.nbset_.end(); it++)
     {
         OLSR_nb_tuple* tuple = *it;
         nbset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->nb2hopset_.begin(); it != st->nb2hopset_.end(); it++)
+    for (auto it = st.nb2hopset_.begin(); it != st.nb2hopset_.end(); it++)
     {
         OLSR_nb2hop_tuple* tuple = *it;
         nb2hopset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->topologyset_.begin(); it != st->topologyset_.end(); it++)
+    for (auto it = st.topologyset_.begin(); it != st.topologyset_.end(); it++)
     {
         OLSR_topology_tuple* tuple = *it;
         topologyset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->mprset_.begin(); it != st->mprset_.end(); it++)
+    for (auto it = st.mprset_.begin(); it != st.mprset_.end(); it++)
     {
         mprset_.insert(*it);
     }
 
-    for (auto it = st->mprselset_.begin(); it != st->mprselset_.end(); it++)
+    for (auto it = st.mprselset_.begin(); it != st.mprselset_.end(); it++)
     {
         OLSR_mprsel_tuple* tuple = *it;
         mprselset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->dupset_.begin(); it != st->dupset_.end(); it++)
+    for (auto it = st.dupset_.begin(); it != st.dupset_.end(); it++)
     {
         OLSR_dup_tuple* tuple = *it;
         dupset_.push_back(tuple->dup());
     }
 
-    for (auto it = st->ifaceassocset_.begin(); it != st->ifaceassocset_.end(); it++)
+    for (auto it = st.ifaceassocset_.begin(); it != st.ifaceassocset_.end(); it++)
     {
         OLSR_iface_assoc_tuple* tuple = *it;
         ifaceassocset_.push_back(tuple->dup());

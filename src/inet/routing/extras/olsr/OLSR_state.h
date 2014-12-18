@@ -104,8 +104,8 @@ class OLSR_state : public cObject
 
     OLSR_state() {}
     ~OLSR_state();
-    OLSR_state(OLSR_state *);
-    virtual OLSR_state * dup() {return new OLSR_state(this);}
+    OLSR_state(const OLSR_state &);
+    virtual OLSR_state * dup() const { return new OLSR_state(*this); }
 };
 
 } // namespace inetmanet
