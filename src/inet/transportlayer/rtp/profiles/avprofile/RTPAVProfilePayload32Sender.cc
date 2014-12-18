@@ -80,6 +80,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     int bits;
     char unit[100];
     char description[100];
+    bool ret;
 
     _inputFileStream >> bits;
     _inputFileStream >> unit;
@@ -164,13 +165,14 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
         _reminderMessage = new cMessage("nextFrame");
         scheduleAt(simTime() + 1.0 / _framesPerSecond, _reminderMessage);
-        return true;
+        ret = true;
     }
     else {
         std::cout << "LastSequenceNumber " << _sequenceNumber << endl;
-        return false;
+        ret = false;
     }
     EV_TRACE << "sendPacket() Exit" << endl;
+    return ret;
 }
 
 } // namespace rtp
