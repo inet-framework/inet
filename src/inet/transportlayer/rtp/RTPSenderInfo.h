@@ -97,11 +97,6 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      */
     virtual void setSequenceNumberBase(uint16 sequenceNumberBase);
 
-    /**
-     * A sender info shall never be deleted!
-     */
-    virtual bool toBeDeleted(simtime_t now) const;
-
   private:
     void copy(const RTPSenderInfo& other);
 

@@ -126,11 +126,6 @@ void RTPSenderInfo::setSequenceNumberBase(uint16 sequenceNumberBase)
     _sequenceNumberBase = sequenceNumberBase;
 }
 
-bool RTPSenderInfo::toBeDeleted(simtime_t now) const
-{
-    return false;
-}
-
 } // namespace rtp
 
 } // namespace inet
