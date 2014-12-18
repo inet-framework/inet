@@ -80,7 +80,6 @@ class INET_API SpatialGrid
                 Triplet<int> step;
                 Triplet<double> tDelta;
                 Triplet<double> tExit;
-                LineSegmentIterator *endIter;
                 bool reachedEnd;
             public:
                 LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const Triplet<double>& voxelSizes, const Triplet<int>& numVoxels);
