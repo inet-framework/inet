@@ -53,7 +53,7 @@ class noncobject ByteArray;
 struct TCPPayloadMessage
 {
     unsigned int endSequenceNo;
-    cPacketPtr msg;      // pointer to payload msg
+    cPacketPtr msg = nullptr;      // pointer to payload msg
 }
 
 //
