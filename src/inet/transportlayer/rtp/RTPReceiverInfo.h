@@ -113,34 +113,34 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     /**
      * The sequence number of the first RTPPacket received.
      */
-    uint16 _sequenceNumberBase;
+    uint16 _sequenceNumberBase = 0;
 
     /**
      * The highest sequence number of an RTPPacket received.
      */
-    uint16 _highestSequenceNumber;
+    uint16 _highestSequenceNumber = 0;
 
     /**
      * The highest sequence number of an RTPPacket received
      * before the beginning of the current rtcp interval.
      */
-    uint32 _highestSequenceNumberPrior;
+    uint32 _highestSequenceNumberPrior = 0;
 
     /**
      * The number of sequence number wrap arounds.
      */
-    uint32 _sequenceNumberCycles;
+    uint32 _sequenceNumberCycles = 0;
 
     /**
      * How many RTP packets from this source have been received.
      */
-    uint32 _packetsReceived;
+    uint32 _packetsReceived = 0;
 
     /**
      * How many RTP packets have been received from this source
      * before the current rtcp interval began.
      */
-    uint32 _packetsReceivedPrior;
+    uint32 _packetsReceivedPrior = 0;
 
     /**
      * The interarrival jitter. See RTP rfc for details.
@@ -160,23 +160,23 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
      * RTP timestamps. It is calculated when two sender reports have
      * been received.
      */
-    int _clockRate;
+    int _clockRate = 0;
 
     /**
      * The RTP time stamp of the last SenderReport received from this sender.
      */
-    uint32 _lastSenderReportRTPTimeStamp;
+    uint32 _lastSenderReportRTPTimeStamp = 0;
 
     /**
      * The ntp time stamp of the last SenderReport received from this sender.
      */
-    uint64 _lastSenderReportNTPTimeStamp;
+    uint64 _lastSenderReportNTPTimeStamp = 0;
 
     /**
      * The RTP time stamp of the last RTPPacket received from this sender.
      * Needed for calculating the jitter.
      */
-    uint32 _lastPacketRTPTimeStamp;
+    uint32 _lastPacketRTPTimeStamp = 0;
 
     /**
      * The arrival time of the last RTPPacket received from this sender.
@@ -193,22 +193,18 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
      * The consecutive number of rtcp intervals this rtcp end system
      * hasn't sent anything.
      */
-    int _inactiveIntervals;
+    int _inactiveIntervals = 0;
 
     /**
      * The time when this RTP end system has been inactive for five
      * consecutive rtcp intervals.
      */
-    simtime_t _startOfInactivity;
+    simtime_t _startOfInactivity = 0.0;
 
     /**
      * The number of RTP and rtcp packets received from this RTP end system.
      */
-    int _itemsReceived;
-
-    int packetLoss;
-
-    FILE *packetSequenceLostLogFile;
+    int _itemsReceived = 0;
 };
 
 } // namespace rtp

@@ -28,27 +28,6 @@ Register_Class(RTPReceiverInfo);
 
 RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
 {
-    _sequenceNumberBase = 0;
-    _highestSequenceNumber = 0;
-    _highestSequenceNumberPrior = 0;
-    _sequenceNumberCycles = 0;
-
-    _packetsReceived = 0;
-    _packetsReceivedPrior = 0;
-
-    _jitter = 0.0;
-    _clockRate = 0;
-    _lastSenderReportRTPTimeStamp = 0;
-    _lastSenderReportNTPTimeStamp = 0;
-    _lastPacketRTPTimeStamp = 0;
-
-    _lastPacketArrivalTime = 0.0;
-    _lastSenderReportArrivalTime = 0.0;
-
-    _inactiveIntervals = 0;
-    _startOfInactivity = 0.0;
-    _itemsReceived = 0;
-    packetSequenceLostLogFile = nullptr;
 }
 
 RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo(receiverInfo)
