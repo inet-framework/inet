@@ -302,7 +302,7 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link)
     }
     else if (!strcmp(linkWeightMode, "errorRate")) {
         cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
-        if (!transmissionChannel) {
+        if (transmissionChannel) {
             InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
             double bitErrorRate = transmissionChannel->getBitErrorRate();
             double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
