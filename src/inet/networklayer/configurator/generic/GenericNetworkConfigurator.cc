@@ -93,12 +93,15 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
             Node *node = destinationNode;
             Link *link = nullptr;
             InterfaceEntry *nextHopInterfaceEntry = nullptr;
-            while (node != sourceNode) {
+            ASSERT(node != sourceNode);
+            do {
                 link = (Link *)node->getPath(0);
                 if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getGenericNetworkProtocolData())
                     nextHopInterfaceEntry = link->sourceInterfaceInfo->interfaceEntry;
                 node = (Node *)node->getPath(0)->getRemoteNode();
-            }
+            } while (node != sourceNode);
+
+            ASSERT(link);
 
             // determine source interface
             InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
