@@ -41,9 +41,9 @@ OLSR_rtable::OLSR_rtable()
 {
 }
 
-OLSR_rtable::OLSR_rtable(OLSR_rtable *rtable)
+OLSR_rtable::OLSR_rtable(const OLSR_rtable& rtable)
 {
-    for (rtable_t::const_iterator itRtTable = rtable->getInternalTable()->begin();itRtTable != rtable->getInternalTable()->begin();++itRtTable)
+    for (rtable_t::const_iterator itRtTable = rtable.getInternalTable()->begin();itRtTable != rtable.getInternalTable()->begin();++itRtTable)
     {
         rt_[itRtTable->first] = itRtTable->second->dup();
     }
@@ -212,7 +212,7 @@ OLSR_rtable::size()
 ///
 ///
 
-std::string OLSR_rtable::detailedInfo()
+std::string OLSR_rtable::detailedInfo() const
 {
     std::stringstream out;
 

@@ -56,10 +56,10 @@ class OLSR_rtable : public cObject
   public:
     rtable_t    rt_;    ///< Data structure for the routing table.
 
-    OLSR_rtable(OLSR_rtable*);
+    OLSR_rtable(const OLSR_rtable& other);
     OLSR_rtable();
     ~OLSR_rtable();
-    const rtable_t * getInternalTable() {return &rt_;}
+    const rtable_t * getInternalTable() const { return &rt_; }
 
 
     void        clear();
@@ -71,9 +71,9 @@ class OLSR_rtable : public cObject
     OLSR_rt_entry*  find_send_entry(OLSR_rt_entry*);
     uint32_t    size();
 
-    virtual std::string detailedInfo();
+    virtual std::string detailedInfo() const;
 
-    virtual OLSR_rtable *dup() {return new OLSR_rtable(this);}
+    virtual OLSR_rtable *dup() const { return new OLSR_rtable(*this); }
 
 //  void        print(Trace*);
 };
