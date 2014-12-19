@@ -148,8 +148,6 @@ void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
 
     EV_INFO << "doStackOps: " << outLabel << endl;
 
-    ASSERT(n >= 0);
-
     for (unsigned int i = 0; i < n; i++) {
         switch (outLabel[i].optcode) {
             case PUSH_OPER:
