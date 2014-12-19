@@ -269,7 +269,6 @@ FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
 
     INetworkProtocolControlInfo *cInfo = check_and_cast_nullable<INetworkProtocolControlInfo *>(appPkt->removeControlInfo());
     FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
-    pkt->setTransportProtocol(cInfo->getTransportProtocol());
     pkt->setBitLength(headerLength);
 
     if (cInfo == nullptr) {
@@ -278,6 +277,7 @@ FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
+        pkt->setTransportProtocol(cInfo->getTransportProtocol());
         netwAddr = cInfo->getDestinationAddress();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
