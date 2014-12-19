@@ -53,10 +53,10 @@ class INET_API Dimension
 {
   protected:
     /** @brief The unique name of the dimension this instance represents.*/
-    const char *name;
+    const char *name = nullptr;
 
     /** @brief The unique id of the dimension this instance represents.*/
-    int id;
+    int id = 0;
 
   public:
     /** @brief Shortcut to the time Dimension, same as 'Dimension("time")',
@@ -68,9 +68,7 @@ class INET_API Dimension
     static const Dimension frequency;
 
   public:
-    Dimension() :
-        id(0)
-    {}
+    Dimension() {}
 
     /**
      * @brief Creates a new dimension instance representing the
