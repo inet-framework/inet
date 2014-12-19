@@ -1119,7 +1119,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                              << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
                              << " in " << arrival->getStartPropagationTime() * 1E+6 << " us propagation time." << endl;
                     TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-                    RadioFrame *frameCopy = dynamic_cast<const RadioFrame *>(transmissionCacheEntry->frame)->dup();
+                    RadioFrame *frameCopy = check_and_cast<const RadioFrame *>(transmissionCacheEntry->frame)->dup();
                     simtime_t delay = arrival->getStartTime() - simTime();
                     simtime_t duration = delay > 0 ? frameCopy->getDuration() : frameCopy->getDuration() + delay;
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
