@@ -28,7 +28,6 @@ Define_Module(RTPPayloadSender);
 
 RTPPayloadSender::RTPPayloadSender()
 {
-    _reminderMessage = nullptr;
 }
 
 RTPPayloadSender::~RTPPayloadSender()

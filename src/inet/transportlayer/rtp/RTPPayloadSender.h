@@ -157,56 +157,56 @@ class INET_API RTPPayloadSender : public cSimpleModule
     /**
      * The maximum size of an RTPPacket.
      */
-    int _mtu;
+    int _mtu = 0;
 
     /**
      * The ssrc identifier of this sender module.
      */
-    uint32 _ssrc;
+    uint32 _ssrc = 0;
 
     /**
      * The payload type this sender creates.
      */
-    int _payloadType;
+    int _payloadType = -1;
 
     /**
      * The clock rate in ticks per second this sender uses.
      */
-    int _clockRate;
+    int _clockRate = 0;
 
     /**
      * The first rtp time stamp used for created rtp data
      * packets. The value is chosen randomly.
      */
-    uint32 _timeStampBase;
+    uint32 _timeStampBase = 0;
 
     /**
      * The current rtp time stamp.
      */
-    uint32 _timeStamp;
+    uint32 _timeStamp = 0;
 
     /**
      * The first sequence number used for created rtp data
      * packets. The value is chosen randomly.
      */
-    uint16 _sequenceNumberBase;
+    uint16 _sequenceNumberBase = 0;
 
     /**
      * The current sequence number.
      */
-    uint16 _sequenceNumber;
+    uint16 _sequenceNumber = 0;
 
     /**
      * The current state of data transmission.
      */
-    SenderStatus _status;
+    SenderStatus _status = (SenderStatus)-1;
 
     /**
        A self message used as timer for the moment the next packet must be sent.
        It's a member variable because when playing gets paused or stopped the timer
        must be cancelled.
      */
-    cMessage *_reminderMessage;
+    cMessage *_reminderMessage = nullptr;
 };
 
 } // namespace rtp
