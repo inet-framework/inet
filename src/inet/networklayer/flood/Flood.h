@@ -54,19 +54,19 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 {
   protected:
     /** @brief Network layer sequence number*/
-    unsigned long seqNum;
+    unsigned long seqNum = 0;
 
     /** @brief cached variable of my networ address */
     L3Address myNetwAddr;
 
     /** @brief Length of the header*/
-    int headerLength;
+    int headerLength = 0;
 
     /** @brief Default time-to-live (ttl) used for this module*/
-    int defaultTtl;
+    int defaultTtl = 0;
 
     /** @brief Defines whether to use plain flooding or not*/
-    bool plainFlooding;
+    bool plainFlooding = false;
 
     class Bcast
     {
@@ -91,7 +91,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
      * @brief Max number of entries in the list of already broadcasted
      * messages
      **/
-    unsigned int bcMaxEntries;
+    unsigned int bcMaxEntries = 0;
 
     /**
      * @brief Time after which an entry for an already broadcasted msg
@@ -99,20 +99,13 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
      **/
     simtime_t bcDelTime;
 
+    long nbDataPacketsReceived = 0;
+    long nbDataPacketsSent = 0;
+    long nbDataPacketsForwarded = 0;
+    long nbHops = 0;
+
   public:
-    Flood()
-        : NetworkProtocolBase()
-        , seqNum(0)
-        , defaultTtl(0)
-        , plainFlooding(false)
-        , bcMsgs()
-        , bcMaxEntries(0)
-        , bcDelTime()
-        , nbDataPacketsReceived(0)
-        , nbDataPacketsSent(0)
-        , nbDataPacketsForwarded(0)
-        , nbHops(0)
-    {}
+    Flood() {}
 
     /** @brief Initialization of omnetpp.ini parameters*/
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -122,11 +115,6 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     virtual void finish();
 
   protected:
-
-    long nbDataPacketsReceived;
-    long nbDataPacketsSent;
-    long nbDataPacketsForwarded;
-    long nbHops;
 
     /** @brief Handle messages from upper layer */
     virtual void handleUpperPacket(cPacket *);
