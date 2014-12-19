@@ -508,7 +508,6 @@ simtime_t Ieee80211Modulation::getPlcpHeaderDuration(ModulationType payloadMode,
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return 0;
     }
 }
 
@@ -551,7 +550,6 @@ simtime_t Ieee80211Modulation::getPlcpPreambleDuration(ModulationType payloadMod
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return 0;
     }
 }
 
@@ -607,7 +605,6 @@ simtime_t Ieee80211Modulation::getPayloadDuration(uint64_t size, ModulationType 
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return 0;
     }
 }
 
@@ -663,7 +660,6 @@ ModulationType Ieee80211Modulation::getPlcpHeaderMode(ModulationType payloadMode
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return ModulationType();
     }
 }
 
@@ -703,7 +699,6 @@ simtime_t Ieee80211Modulation::getSlotDuration(ModulationType modType, Ieee80211
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return SIMTIME_ZERO;
     }
 }
 
@@ -737,7 +732,6 @@ simtime_t Ieee80211Modulation::getSifsTime(ModulationType modType, Ieee80211Prea
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return SIMTIME_ZERO;
     }
 }
 
@@ -777,7 +771,6 @@ simtime_t Ieee80211Modulation::get_aPHY_RX_START_Delay(ModulationType modType, I
 
         default:
             throw cRuntimeError("unsupported modulation class");
-            return SIMTIME_ZERO;
     }
 }
 
