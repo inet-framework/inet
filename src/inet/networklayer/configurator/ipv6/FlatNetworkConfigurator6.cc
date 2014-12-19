@@ -229,7 +229,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(atNode->getModule());
 
             // skip non-IPv6 nodes
-            if (!destRt)
+            if (!rt)
                 continue;
 
             // skip hosts' routing tables
