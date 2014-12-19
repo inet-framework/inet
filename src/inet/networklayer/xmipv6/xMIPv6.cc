@@ -336,7 +336,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie)
     if (buDest == ie->ipv6Data()->getHomeAgentAddress()) // update 12.06.08 - CB
         createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHABindingLifeTime(), true);
     else {
-        if (bulEntry != nullptr && bulEntry->state == BindingUpdateList::DEREGISTER) // CB, 10.10.08
+        if (bulEntry->state == BindingUpdateList::DEREGISTER) // CB, 10.10.08
             createDeregisterBUTimer(buDest, ie); // CB, 10.10.08
         else
             createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRRBindingLifeTime(), false);
