@@ -151,16 +151,11 @@ void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
     Key key(addr, interfaceID);
     auto it = neighbourMap.find(key);
     ASSERT(it != neighbourMap.end());    // entry must exist
-    neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent);
-    it->second.nudTimeoutEvent = nullptr;
-    if (it->second.isDefaultRouter())
-        defaultRouterList.remove(it->second);
-    neighbourMap.erase(it);
+    remove(it);
 }
 
 void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 {
-    //delete it->second.nudTimeoutEvent;
     neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent);    // 20.9.07 - CB
     it->second.nudTimeoutEvent = nullptr;
     if (it->second.isDefaultRouter())
