@@ -54,8 +54,8 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg)
         delete rinp;
     }
     else {
+        //delete rinp;
         throw cRuntimeError("RTPInnerPacket of wrong type received");
-        delete rinp;
     }
 }
 
