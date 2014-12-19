@@ -39,7 +39,6 @@ simsignal_t RTCP::rcvdPkSignal = registerSignal("rcvdPk");
 
 RTCP::RTCP()
 {
-    _senderInfo = nullptr;
 }
 
 void RTCP::initialize(int stage)
