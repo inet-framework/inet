@@ -22,8 +22,12 @@
 //#include <algorithm>
 //#include <sstream>
 
-#include "inet/common/ModuleAccess.h"
+
+
 #include "inet/networklayer/common/InterfaceEntry.h"
+
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -66,6 +70,9 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
 InterfaceEntry::InterfaceEntry(cModule *module)
 {
     interfaceModule = findModuleUnderContainingNode(module);
+    if (!interfaceModule)
+        throw cRuntimeError("NIC module not found in the host");
+    setName(utils::stripnonalnum(interfaceModule->getFullName()).c_str());
     state = UP;
     carrier = true;
     datarate = 0;

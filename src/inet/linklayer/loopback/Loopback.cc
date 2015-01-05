@@ -62,9 +62,6 @@ InterfaceEntry *Loopback::createInterfaceEntry()
 {
     InterfaceEntry *ie = new InterfaceEntry(this);
 
-    // interface name: NIC module's name without special characters ([])
-    ie->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
-
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);

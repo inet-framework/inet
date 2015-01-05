@@ -182,9 +182,6 @@ InterfaceEntry *CSMA::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
-    // interface name: NIC module's name without special characters ([])
-    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
-
     // data rate
     e->setDatarate(bitrate);
 

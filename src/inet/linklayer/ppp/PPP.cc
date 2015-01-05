@@ -120,9 +120,6 @@ InterfaceEntry *PPP::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
-    // interface name: NIC module's name without special characters ([])
-    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
-
     // data rate
     bool connected = datarateChannel != nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;

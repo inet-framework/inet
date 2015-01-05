@@ -481,10 +481,6 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
-    e->setName(interfaceName.c_str());
-
     // address
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
