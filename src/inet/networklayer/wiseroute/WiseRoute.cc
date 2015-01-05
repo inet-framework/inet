@@ -47,7 +47,7 @@ void WiseRoute::initialize(int stage)
 {
     NetworkProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        arp = check_and_cast<IARP *>(getParentModule()->getSubmodule("arp"));
+        arp = getModuleFromPar<IARP>(par("arpModule"), this);
         headerLength = par("headerLength");
         rssiThreshold = par("rssiThreshold").doubleValue();
         rssiThreshold = math::dBm2mW(rssiThreshold);

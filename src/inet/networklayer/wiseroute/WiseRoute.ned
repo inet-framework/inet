@@ -65,6 +65,9 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
         // If set to zero, this node does not initiates route tree building.
         // If set to a value larger than zero, this nodes periodically initiates route tree building.
         double routeFloodsInterval @unit(s) = default(0 s);
+
+        string arpModule; // The path to the ARP module
+
         @display("i=block/fork");
         @class(WiseRoute);
 }
