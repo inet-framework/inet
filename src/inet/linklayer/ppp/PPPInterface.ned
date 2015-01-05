@@ -63,7 +63,7 @@ module PPPInterface like IWiredNic
         }
         ppp: PPP {
             parameters:
-                queueModule = (queueType == "" ? "" : "queue");
+                queueModule = (queueType == "" ? "" : "^.queue");
                 txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=98,207");
         }

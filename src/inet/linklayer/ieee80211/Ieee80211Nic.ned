@@ -72,7 +72,7 @@ module Ieee80211Nic like IWirelessNic
         }
         mac: Ieee80211Mac {
             parameters:
-                queueModule = "mgmt";
+                queueModule = "^.mgmt";
                 @display("p=157,217");
         }
         radio: <radioType> like IRadio {

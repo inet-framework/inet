@@ -21,6 +21,7 @@
 #include "inet/linklayer/ppp/PPP.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/NotifierConsts.h"
@@ -69,7 +70,7 @@ void PPP::initialize(int stage)
         queueModule = nullptr;
 
         if (par("queueModule").stringValue()[0]) {
-            cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
+            cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
             if (mod->isSimple())
                 queueModule = check_and_cast<IPassiveQueue *>(mod);
             else {

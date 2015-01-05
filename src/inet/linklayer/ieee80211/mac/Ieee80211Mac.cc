@@ -499,7 +499,7 @@ void Ieee80211Mac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
     if (par("queueModule").stringValue()[0]) {
-        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
+        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
         queueModule = check_and_cast<IPassiveQueue *>(module);
 
         EV_DEBUG << "Requesting first two frames from queue module\n";

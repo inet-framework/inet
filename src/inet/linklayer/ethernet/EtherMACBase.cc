@@ -198,7 +198,7 @@ void EtherMACBase::initialize(int stage)
 void EtherMACBase::initializeQueueModule()
 {
     if (par("queueModule").stringValue()[0]) {
-        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
+        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
         IPassiveQueue *queueModule;
         if (module->isSimple())
             queueModule = check_and_cast<IPassiveQueue *>(module);
