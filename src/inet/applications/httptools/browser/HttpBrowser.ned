@@ -115,6 +115,7 @@ simple HttpBrowser like ITCPApp
         string scriptFile = default("");                // The browsing script file. Blank to disable.
         double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable. This is the time at which the browser first comes to life in a simulation scenario. Note that this can be any random distribution which OMNeT++ supports.
         xml config;                                     // The XML config file
+        string httpBrowserControllerModule = default("controller"); // the absolute path to the http browser controller, @see HttpController
     gates:
         input tcpIn;
         output tcpOut;
