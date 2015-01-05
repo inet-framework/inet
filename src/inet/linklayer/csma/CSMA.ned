@@ -90,5 +90,7 @@ simple CSMA extends MACProtocolBase like IMACProtocol
         // maximum backoff exponent (for exponential backoff method only)
         double macMaxBE = default(8);
 
+        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+
         @class(CSMA);
 }
