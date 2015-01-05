@@ -68,7 +68,6 @@ void DHCPClient::initialize(int stage)
 
         // get the hostname
         host = getContainingNode(this);
-        hostName = host->getFullName();
 
         // for a wireless interface subscribe the association event to start the DHCP protocol
         host->subscribe(NF_L2_ASSOCIATED, this);
@@ -318,7 +317,7 @@ void DHCPClient::bindLease()
     ie->ipv4Data()->setNetmask(lease->ip.getNetworkMask());
 
     std::string banner = "Got IP " + lease->ip.str();
-    this->getParentModule()->bubble(banner.c_str());
+    host->bubble(banner.c_str());
 
     /*
         The client SHOULD perform a final check on the parameters (ping, ARP).
@@ -329,7 +328,7 @@ void DHCPClient::bindLease()
      */
 
     EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
-            << this->getParentModule()->getFullName() << "." << endl;
+            << host->getFullName() << "." << endl;
 
     IPv4Route *iroute = nullptr;
     for (int i = 0; i < irt->getNumRoutes(); i++) {
