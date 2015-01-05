@@ -42,8 +42,7 @@ void MPLS::initialize(int stage)
 
         lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-
-        pct = check_and_cast<IClassifier *>(getParentModule()->getSubmodule(par("classifier")));
+        pct = getModuleFromPar<IClassifier>(par("classifierModule"), this);
     }
 }
 

@@ -93,7 +93,7 @@ module RSVP_LSR
         }
         mpls: MPLS {
             parameters:
-                classifier = "classifier";
+                classifierModule = "^.classifier";
                 @display("p=192,270");
             gates:
                 netwIn[sizeof(pppg)+1];
