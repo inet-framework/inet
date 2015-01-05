@@ -43,6 +43,7 @@ simple LMacLayer extends MACProtocolBase like IMACProtocol
 
         int reservedMobileSlots = default(2);
         int numSlots = default(64);
+        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(LMacLayer);
 }

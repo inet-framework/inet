@@ -9,9 +9,11 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "inet/common/INETUtils.h"
 #include "inet/linklayer/lmac/LMacLayer.h"
+
+#include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/lmac/LMacFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
@@ -52,7 +54,7 @@ void LMacLayer::initialize(int stage)
         initializeMACAddress();
         registerInterface();
 
-        cModule *radioModule = getParentModule()->getSubmodule("radio");
+        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
