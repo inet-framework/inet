@@ -74,6 +74,7 @@ module RSVP_LSR
         rsvp: RSVP {
             parameters:
                 peers = peers;
+                classifierModule = "^.classifier";
                 @display("p=156,67");
         }
         classifier: SimpleClassifier {
