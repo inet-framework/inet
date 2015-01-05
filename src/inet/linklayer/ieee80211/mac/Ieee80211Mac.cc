@@ -2609,7 +2609,10 @@ const MACAddress& Ieee80211Mac::isInterfaceRegistered()
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
         return MACAddress::UNSPECIFIED_ADDRESS;
-    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
+    cModule *interfaceModule = findModuleUnderContainingNode(this);
+    if (!interfaceModule)
+        throw cRuntimeError("NIC module not found in the host");
+    std::string interfaceName = utils::stripnonalnum(interfaceModule->getFullName());
     InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
