@@ -60,9 +60,7 @@ void Ieee80211MgmtBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         // obtain our address from MAC
-        cModule *mac = getParentModule()->getSubmodule("mac");
-        if (!mac)
-            throw cRuntimeError("MAC module not found; it is expected to be next to this submodule and called 'mac'");
+        cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
         myAddress.setAddress(mac->par("address").stringValue());
     }
 }

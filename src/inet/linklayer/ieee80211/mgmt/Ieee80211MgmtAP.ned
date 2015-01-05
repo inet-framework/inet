@@ -49,6 +49,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+        string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
         @signal[enqueuePk](type=cPacket);
         @signal[dequeuePk](type=cPacket);
