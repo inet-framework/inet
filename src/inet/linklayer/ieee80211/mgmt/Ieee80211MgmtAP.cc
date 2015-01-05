@@ -69,7 +69,8 @@ void Ieee80211MgmtAP::initialize(int stage)
         //TBD fill in supportedRates
 
         // subscribe for notifications
-        getParentModule()->getSubmodule("radio")->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
+        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
+        radioModule->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");

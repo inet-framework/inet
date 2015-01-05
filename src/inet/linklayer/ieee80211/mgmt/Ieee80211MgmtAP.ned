@@ -48,6 +48,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
         string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
+        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         @display("i=block/cogwheel");
         @signal[enqueuePk](type=cPacket);
         @signal[dequeuePk](type=cPacket);
