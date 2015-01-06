@@ -49,7 +49,7 @@ void HttpServerBase::initialize(int stage)
         hostName = (const char *)par("hostName");
         if (hostName.empty()) {
             hostName = "www.";
-            hostName += getParentModule()->getFullName();
+            hostName += host->getFullName();
             hostName += ".com";
         }
         EV_DEBUG << "Initializing HTTP server. Using WWW name " << hostName << endl;
@@ -182,7 +182,7 @@ void HttpServerBase::updateDisplay()
     if (ev.isGUI()) {
         char buf[1024];
         sprintf(buf, "%ld", htmlDocsServed);
-        cDisplayString& ds = getParentModule()->getDisplayString();
+        cDisplayString& ds = host->getDisplayString();
         ds.setTagArg("t", 0, buf);
 
         if (activationTime <= simTime()) {
@@ -402,7 +402,7 @@ void HttpServerBase::registerWithController()
     HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
     if (controller == nullptr)
         throw cRuntimeError("Controller module not found");
-    controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(host->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

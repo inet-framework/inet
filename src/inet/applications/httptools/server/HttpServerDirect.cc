@@ -17,6 +17,8 @@
 
 #include "inet/applications/httptools/server/HttpServerDirect.h"
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 
 namespace httptools {
@@ -52,9 +54,9 @@ void HttpServerDirect::handleMessage(cMessage *msg)
             delete msg;
             return;
         }
-
+        cModule *senderHost = getContainingNode(senderModule);
         EV_DEBUG << "Sender is " << senderModule->getFullName()
-                 << " in host " << senderModule->getParentModule()->getFullName() << endl;
+                 << " in host " << senderHost->getFullName() << endl;
         cPacket *reply = handleReceivedMessage(msg);
         // Echo back to the requester
         if (reply != nullptr)
