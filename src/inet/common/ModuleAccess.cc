@@ -64,7 +64,7 @@ cModule *getContainingNode(cModule *from)
 {
     cModule *curmod = findContainingNode(from);
     if (!curmod)
-        throw cRuntimeError("getContainingNode(): node module not found (it should have a property named node)");
+        throw cRuntimeError("getContainingNode(): node module not found (it should have a property named node) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
     return curmod;
 }
 
