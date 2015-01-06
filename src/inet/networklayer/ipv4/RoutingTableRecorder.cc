@@ -109,7 +109,7 @@ void RoutingTableRecorder::recordSnapshot()
         cModule *module = simulation.getModule(id);
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(module);
         if (ift) {
-            cModule *host = module->getParentModule();
+            cModule *host = getContainingNode(module);
             for (int i = 0; i < ift->getNumInterfaces(); i++)
                 recordInterface(host, ift->getInterface(i), -1);
         }
@@ -118,22 +118,19 @@ void RoutingTableRecorder::recordSnapshot()
         cModule *module = simulation.getModule(id);
         IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
         if (rt) {
-            // TODO: find out host correctly
-            cModule *host = module->getParentModule();
+            cModule *host = getContainingNode(module);
             for (int i = 0; i < rt->getNumRoutes(); i++)
                 recordRoute(host, rt->getRoute(i), -1);
         }
         IPv6RoutingTable *rt6 = dynamic_cast<IPv6RoutingTable *>(module);
         if (rt6) {
-            // TODO: find out host correctly
-            cModule *host = module->getParentModule();
+            cModule *host = getContainingNode(module);
             for (int i = 0; i < rt6->getNumRoutes(); i++)
                 recordRoute(host, rt6->getRoute(i), -1);
         }
         GenericRoutingTable *generic = dynamic_cast<GenericRoutingTable *>(module);
         if (generic) {
-            // TODO: find out host correctly
-            cModule *host = module->getParentModule();
+            cModule *host = getContainingNode(module);
             for (int i = 0; i < generic->getNumRoutes(); i++)
                 recordRoute(host, generic->getRoute(i), -1);
         }
