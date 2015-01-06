@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/configurator/ipv4/HostAutoConfigurator.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
@@ -58,9 +59,7 @@ void HostAutoConfigurator::setupNetworkLayer()
     std::string mcastGroups = par("mcastGroups").stringValue();
 
     // get our host module
-    cModule *host = getParentModule();
-    if (!host)
-        throw cRuntimeError("No parent module found");
+    cModule *host = getContainingNode(this);
 
     IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(host->getId()));
 
