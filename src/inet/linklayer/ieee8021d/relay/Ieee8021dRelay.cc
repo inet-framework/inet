@@ -228,7 +228,7 @@ void Ieee8021dRelay::deliverBPDU(EtherFrame *frame)
 Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int portNum)
 {
     if (isStpAware) {
-        cGate *gate = this->getParentModule()->gate("ethg$o", portNum);
+        cGate *gate = getContainingNode(this)->gate("ethg$o", portNum);
         InterfaceEntry *gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
         Ieee8021dInterfaceData *portData = gateIfEntry->ieee8021dData();
 
