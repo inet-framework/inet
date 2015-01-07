@@ -230,7 +230,7 @@ Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int portNu
     if (isStpAware) {
         cGate *gate = getContainingNode(this)->gate("ethg$o", portNum);
         InterfaceEntry *gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-        Ieee8021dInterfaceData *portData = gateIfEntry->ieee8021dData();
+        Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->ieee8021dData() : nullptr;
 
         if (!portData)
             throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", portNum);
