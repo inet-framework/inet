@@ -55,6 +55,8 @@ Radio::Radio() :
 
 Radio::~Radio()
 {
+    if (medium)
+        medium->removeRadio(this);
     cancelAndDelete(endTransmissionTimer);
     cancelAndDelete(endSwitchTimer);
 }
