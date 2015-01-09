@@ -428,13 +428,20 @@ void SCTPServer::handleMessage(cMessage *msg)
                 break;
             }
 
-            case SCTP_I_CLOSED:
+            case SCTP_I_CLOSED: {
+                SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
+                id = command->getAssocId();
+                EV_INFO << "server: SCTP_I_CLOSED for assoc "  << id << endl;
+                ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
+                i->second.stop = simulation.getSimTime();
+                i->second.lifeTime = i->second.stop - i->second.start;
                 if (delayTimer->isScheduled())
                     cancelEvent(delayTimer);
                 if (finishEndsSimulation)
                     endSimulation();
                 delete msg;
                 break;
+            }
 
             default:
                 delete msg;
