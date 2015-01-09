@@ -192,7 +192,7 @@ void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         deleteInterfaceRoutes(entry);
     }
     else if (signalID == NF_INTERFACE_STATE_CHANGED) {
-        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry *>(obj);
+        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntryChangeDetails*>(obj)->getInterfaceEntry();
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
         // an interface went down
