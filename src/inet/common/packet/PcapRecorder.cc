@@ -98,8 +98,10 @@ void PcapRecorder::initialize()
         }
     }
 
-    if (*file)
+    if (*file) {
         pcapDumper.openPcap(file, snaplen);
+        pcapDumper.setFlushParameter((bool)par("alwaysFlush"));
+    }
 }
 
 void PcapRecorder::handleMessage(cMessage *msg)

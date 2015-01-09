@@ -40,6 +40,7 @@ class PcapDump
   protected:
     FILE *dumpfile;    // pcap file
     unsigned int snaplen;    // max. length of packets in pcap file
+    bool flush;
 
   public:
     /**
@@ -75,6 +76,11 @@ class PcapDump
      * Closes the output file if it is open.
      */
     void closePcap();
+
+    /**
+     * Force flushing of pcap dump.
+     */
+    void setFlushParameter(bool doFlush) { flush = doFlush; };
 };
 
 } // namespace inet

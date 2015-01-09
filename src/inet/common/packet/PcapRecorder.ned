@@ -58,6 +58,7 @@ simple PcapRecorder
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on
         string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
+        bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         @display("i=block/process;is=s");
 }
 
