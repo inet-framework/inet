@@ -71,7 +71,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     bool isUp = false;
 
     long numResolutions = 0;
-    long numFailedResolutions= 0;
+    long numFailedResolutions = 0;
     long numRequestsSent = 0;
     long numRepliesSent = 0;
 
@@ -83,7 +83,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     cGate *netwOutGate = nullptr;
 
     IInterfaceTable *ift = nullptr;
-    IIPv4RoutingTable *rt;    // for answering ProxyARP requests
+    IIPv4RoutingTable *rt = nullptr;    // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.
