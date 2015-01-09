@@ -147,7 +147,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
         WAIT_ACK_TX    //9
     };
     /** @brief The current state of the protocol */
-    States macState;
+    States macState = (States)-1;
 
     /** @brief Types of messages (self messages and packets) the node can
      * process **/
@@ -214,7 +214,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
      * used */
     int maxTxAttempts = 0;
     /** @brief Gather stats at the end of the simulation */
-    bool stats;
+    bool stats = false;
 
     /** @brief Possible colors of the node for animation */
     enum BMAC_COLORS {
