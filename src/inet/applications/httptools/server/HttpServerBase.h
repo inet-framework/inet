@@ -61,8 +61,8 @@ class INET_API HttpServerBase : public HttpNodeBase
     };
 
     std::string hostName;    // the server name, e.g. www.example.com.
-    int port;    // the listening port of the server
-    bool scriptedMode;    // set to true if a scripted site definition is used
+    int port = -1;    // the listening port of the server
+    bool scriptedMode = false;    // set to true if a scripted site definition is used
     std::map<std::string, HtmlPageData> htmlPages;    // A map of html pages, keyed by a resource URL. Used in scripted mode
     std::map<std::string, unsigned int> resources;    // a map of resource, keyed by a resource URL. Used in scripted mode
     simtime_t activationTime;    // the activation time of the server -- initial startup delay
