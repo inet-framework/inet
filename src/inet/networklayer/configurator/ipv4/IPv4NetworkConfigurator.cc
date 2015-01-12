@@ -698,8 +698,9 @@ void IPv4NetworkConfigurator::dumpAddresses(Topology& topology)
         EV_INFO << "Link " << i << endl;
         LinkInfo *linkInfo = topology.linkInfos[i];
         for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
-            InterfaceEntry *interfaceEntry = linkInfo->interfaceInfos[j]->interfaceEntry;
-            cModule *host = getContainingNode(check_and_cast<cModule *>(interfaceEntry->getInterfaceTable()));
+            InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
+            InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
+            cModule *host = interfaceInfo->node->module;
             EV_INFO << "    " << host->getFullName() << " / " << interfaceEntry->info() << endl;
         }
     }
