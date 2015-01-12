@@ -40,7 +40,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     // parameters: for more details, see the corresponding NED parameters' documentation
     L3Address destAddr;
     L3Address srcAddr;
-    int packetSize;
+    int packetSize = 0;
     cPar *sendIntervalPar = nullptr;
     int hopLimit = 0;
     int count = 0;
