@@ -535,6 +535,7 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
     if (!isTruncatedMode && bestNode.symbol == -1)
         throw cRuntimeError("None of the paths in the trellis graph lead to the all-zeros state");
     BitVector decodedMsg = traversePath(bestNode, trellisGraph);
+    delete [] trellisGraph;
     EV_DETAIL << "Recovered message: " << decodedMsg << endl
     << " Number of errors: " << bestNode.numberOfErrors
     << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
