@@ -36,13 +36,13 @@ class INET_API TCPSessionApp : public TCPAppBase
     struct Command
     {
         simtime_t tSend;
-        long numBytes;
+        long numBytes = 0;
         Command(simtime_t t, long n) { tSend = t; numBytes = n; }
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
 
-    bool activeOpen;
+    bool activeOpen = false;
     simtime_t tOpen;
     simtime_t tSend;
     simtime_t tClose;
