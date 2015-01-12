@@ -103,13 +103,13 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             if (!sizeAttribute)
                 throw cRuntimeError("Missing size attribute of cuboid");
             cStringTokenizer tokenizer(sizeAttribute);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid size x at %s", element->getSourceLocation());
             size.x = atof(tok);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid size y at %s", element->getSourceLocation());
             size.y = atof(tok);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid size z at %s", element->getSourceLocation());
             size.z = atof(tok);
             shape = new Cuboid(size);
@@ -140,7 +140,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             {
                 Coord point;
                 point.x = atof(tokenizer.nextToken());
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
                 point.y = atof(tok);
                 points.push_back(point);
@@ -161,10 +161,10 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             {
                 Coord point;
                 point.x = atof(tokenizer.nextToken());
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing polyhedron y at %s", element->getSourceLocation());
                 point.y = atof(tok);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing polyhedron z at %s", element->getSourceLocation());
                 point.z = atof(tok);
                 points.push_back(point);
@@ -245,13 +245,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (orientationAttribute)
         {
             cStringTokenizer tokenizer(orientationAttribute);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
             orientation.alpha = math::deg2rad(atof(tok));
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
             orientation.beta = math::deg2rad(atof(tok));
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
             orientation.gamma = math::deg2rad(atof(tok));
         }
@@ -265,13 +265,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (!strcmp(shapeType, "cuboid"))
         {
             Coord size;
-            if (!((tok = shapeTokenizer.nextToken())))
+            if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid x at %s", element->getSourceLocation());
             size.x = atof(tok);
-            if (!((tok = shapeTokenizer.nextToken())))
+            if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid y at %s", element->getSourceLocation());
             size.y = atof(tok);
-            if (!((tok = shapeTokenizer.nextToken())))
+            if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid z at %s", element->getSourceLocation());
             size.z = atof(tok);
             shape = new Cuboid(size);
@@ -279,7 +279,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         else if (!strcmp(shapeType, "sphere"))
         {
-            if (!((tok = shapeTokenizer.nextToken())))
+            if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing sphere radius at %s", element->getSourceLocation());
             double radius = atof(tok);
             shape = new Sphere(radius);
@@ -288,7 +288,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         else if (!strcmp(shapeType, "prism"))
         {
             double height;
-            if (!((tok = shapeTokenizer.nextToken())))
+            if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing prism height at %s", element->getSourceLocation());
             height = atof(tok);
             std::vector<Coord> points;
@@ -296,7 +296,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             {
                 Coord point;
                 point.x = atof(shapeTokenizer.nextToken());
-                if (!((tok = shapeTokenizer.nextToken())))
+                if ((tok = shapeTokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
                 point.y = atof(tok);
                 points.push_back(point);
@@ -319,10 +319,10 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             {
                 Coord point;
                 point.x = atof(shapeTokenizer.nextToken());
-                if (!((tok = shapeTokenizer.nextToken())))
+                if ((tok = shapeTokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing polyhedron y at %s", element->getSourceLocation());
                 point.y = atof(tok);
-                if (!((tok = shapeTokenizer.nextToken())))
+                if ((tok = shapeTokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing polyhedron z at %s", element->getSourceLocation());
                 point.z = atof(tok);
                 points.push_back(point);
@@ -361,13 +361,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 position = Coord::ZERO;
             else
                 throw cRuntimeError("Unknown position kind");
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position x at %s", element->getSourceLocation());
             position.x += atof(tok);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position y at %s", element->getSourceLocation());
             position.y += atof(tok);
-            if (!((tok = tokenizer.nextToken())))
+            if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position z at %s", element->getSourceLocation());
             position.z += atof(tok);
         }
@@ -397,13 +397,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (strchr(lineColorAttribute, ' '))
             {
                 cStringTokenizer tokenizer(lineColorAttribute);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing line-color red at %s", element->getSourceLocation());
                 lineColor.red = atoi(tok);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing line-color green at %s", element->getSourceLocation());
                 lineColor.green = atoi(tok);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing line-color blue at %s", element->getSourceLocation());
                 lineColor.blue = atoi(tok);
             }
@@ -422,13 +422,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (strchr(fillColorAttribute, ' '))
             {
                 cStringTokenizer tokenizer(fillColorAttribute);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing fill-color red at %s", element->getSourceLocation());
                 fillColor.red = atoi(tok);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing fill-color green at %s", element->getSourceLocation());
                 fillColor.green = atoi(tok);
-                if (!((tok = tokenizer.nextToken())))
+                if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing fill-color blue at %s", element->getSourceLocation());
                 fillColor.blue = atoi(tok);
             }
