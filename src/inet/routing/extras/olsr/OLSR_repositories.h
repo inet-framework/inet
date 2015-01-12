@@ -156,12 +156,12 @@ typedef struct OLSR_link_tuple : public cObject
     inline double&      time()          { return time_; }
 
     OLSR_link_tuple() {asocTimer = nullptr;}
-    OLSR_link_tuple(OLSR_link_tuple * e)
+    OLSR_link_tuple(const OLSR_link_tuple * e)
     {
         memcpy(this, e, sizeof(OLSR_link_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_link_tuple *dup() {return new OLSR_link_tuple(this);}
+    virtual OLSR_link_tuple *dup() const {return new OLSR_link_tuple(this);}
 
 } OLSR_link_tuple;
 
@@ -240,12 +240,12 @@ typedef struct OLSR_mprsel_tuple : public cObject
     inline double&      time()      { return time_; }
 
     OLSR_mprsel_tuple() {asocTimer = nullptr;}
-    OLSR_mprsel_tuple(OLSR_mprsel_tuple * e)
+    OLSR_mprsel_tuple(const OLSR_mprsel_tuple * e)
     {
         memcpy(this, e, sizeof(OLSR_mprsel_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_mprsel_tuple *dup() {return new OLSR_mprsel_tuple(this);}
+    virtual OLSR_mprsel_tuple *dup() const {return new OLSR_mprsel_tuple(this);}
 
 
 } OLSR_mprsel_tuple;
@@ -313,7 +313,7 @@ typedef struct OLSR_topology_tuple : public cObject
     inline int & local_iface_index() {return index;}
 
     OLSR_topology_tuple() {asocTimer = nullptr;}
-    OLSR_topology_tuple(OLSR_topology_tuple * e)
+    OLSR_topology_tuple(const OLSR_topology_tuple * e)
     {
         dest_addr_ = e->dest_addr_;
         last_addr_ = e->last_addr_;
@@ -322,7 +322,7 @@ typedef struct OLSR_topology_tuple : public cObject
         index = e->index;
         asocTimer = nullptr;
     }
-    virtual OLSR_topology_tuple *dup() {return new OLSR_topology_tuple(this);}
+    virtual OLSR_topology_tuple *dup() const {return new OLSR_topology_tuple(this);}
 
 } OLSR_topology_tuple;
 
