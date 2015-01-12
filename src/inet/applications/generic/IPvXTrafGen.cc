@@ -34,10 +34,6 @@ simsignal_t IPvXTrafGen::sentPkSignal = registerSignal("sentPk");
 
 IPvXTrafGen::IPvXTrafGen()
 {
-    timer = nullptr;
-    nodeStatus = nullptr;
-    packetLengthPar = nullptr;
-    sendIntervalPar = nullptr;
 }
 
 IPvXTrafGen::~IPvXTrafGen()
