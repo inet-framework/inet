@@ -47,7 +47,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
 
     // parameters
     std::vector<L3Address> destAddresses;
-    ChooseDestAddrMode chooseDestAddrMode;
+    ChooseDestAddrMode chooseDestAddrMode = (ChooseDestAddrMode)0;
     simtime_t delayLimit;
     simtime_t startTime;
     simtime_t stopTime;
