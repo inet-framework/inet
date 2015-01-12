@@ -88,11 +88,13 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     typedef std::map<MACAddress, Ieee80211ASFTuple> Ieee80211ASFTupleList;
 
-    enum {
+    enum RateControlMode {
         RATE_ARF,    // Auto Rate Fallback
         RATE_AARF,    // Adaptatice ARF
         RATE_CR,    // Constant Rate
-    } rateControlMode;
+    };
+
+    RateControlMode rateControlMode = (RateControlMode)-1;
 
     Ieee80211PreambleMode wifiPreambleType = (Ieee80211PreambleMode)-1;
     ModulationType recFrameModulationType;
