@@ -1433,7 +1433,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
     do {
         LSAType vertexType = static_cast<LSAType>(justAddedVertex->getHeader().getLsType());
 
-        if ((vertexType == ROUTERLSA_TYPE)) {
+        if (vertexType == ROUTERLSA_TYPE) {
             RouterLSA *routerVertex = check_and_cast<RouterLSA *>(justAddedVertex);
             if (routerVertex->getV_VirtualLinkEndpoint()) {    // (2)
                 transitCapability = true;
@@ -1539,7 +1539,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
             }
         }
 
-        if ((vertexType == NETWORKLSA_TYPE)) {
+        if (vertexType == NETWORKLSA_TYPE) {
             NetworkLSA *networkVertex = check_and_cast<NetworkLSA *>(justAddedVertex);
             unsigned int routerCount = networkVertex->getAttachedRoutersArraySize();
 
