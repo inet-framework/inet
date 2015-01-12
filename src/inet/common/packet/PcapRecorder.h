@@ -38,9 +38,8 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     SignalList signalList;
     PacketDump packetDumper;
     PcapDump pcapDumper;
-    unsigned int snaplen;
-    unsigned long first, last, space;
-    bool dumpBadFrames;
+    unsigned int snaplen = 0;
+    bool dumpBadFrames = false;
 
   public:
     PcapRecorder();

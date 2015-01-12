@@ -66,11 +66,6 @@ struct pcaprec_hdr
     uint32 orig_len;    /* actual length of packet */
 };
 
-PcapDump::PcapDump()
-{
-    dumpfile = nullptr;
-}
-
 PcapDump::~PcapDump()
 {
     closePcap();

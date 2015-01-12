@@ -38,15 +38,15 @@ class IPv6Datagram;
 class PcapDump
 {
   protected:
-    FILE *dumpfile;    // pcap file
-    unsigned int snaplen;    // max. length of packets in pcap file
-    bool flush;
+    FILE *dumpfile = nullptr;    // pcap file
+    unsigned int snaplen = 0;    // max. length of packets in pcap file
+    bool flush = false;
 
   public:
     /**
      * Constructor. It does not open the output file.
      */
-    PcapDump();
+    PcapDump() {}
 
     /**
      * Destructor. It closes the output file if it is open.
