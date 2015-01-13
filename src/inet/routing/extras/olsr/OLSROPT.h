@@ -62,7 +62,7 @@ class OLSROPT : public OLSR
 
     virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
     virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &);
-    virtual int         update_topology_tuples(OLSR_msg msg, int index);
+    virtual int         update_topology_tuples(OLSR_msg& msg, int index);
     virtual void nb_loss(OLSR_link_tuple* tuple);
 
 };

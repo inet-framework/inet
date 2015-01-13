@@ -226,7 +226,7 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
 }
 
 int
-OLSROPT::update_topology_tuples(OLSR_msg msg, int index)
+OLSROPT::update_topology_tuples(OLSR_msg& msg, int index)
 {
 
     double now = CURRENT_TIME;
