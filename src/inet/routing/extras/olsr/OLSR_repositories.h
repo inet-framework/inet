@@ -63,9 +63,9 @@ typedef struct OLSR_rt_entry : public cObject
     double quality;
     double delay;
     int index;
-    inline int & local_iface_index() {return index;}
     PathVector  route;
 
+    inline int & local_iface_index() {return index;}
     inline nsaddr_t & dest_addr()   { return dest_addr_; }
     inline nsaddr_t & next_addr()   { return next_addr_; }
     inline nsaddr_t & iface_addr()  { return iface_addr_; }
@@ -83,8 +83,10 @@ typedef struct OLSR_rt_entry : public cObject
         next_addr_ = e->next_addr_;   ///< Address of the next hop.
         iface_addr_ = e->iface_addr_; ///< Address of the local interface.
         dist_ = e->dist_;     ///< Distance in hops to the destination.
-        route = e->route;
+        quality = e->quality;
+        delay = e->delay;
         index = e->index;
+        route = e->route;
     }
     virtual OLSR_rt_entry *dup() const {return new OLSR_rt_entry(this);}
 
