@@ -73,7 +73,7 @@ class DSRPkt : public IPv4Datagram
     void clean();
 
   public:
-    explicit DSRPkt(const char *name=nullptr) : IPv4Datagram(name) {costVector=nullptr; options=nullptr; costVectorSize=0; dsr_ttl=0;}
+    explicit DSRPkt(const char *name=nullptr) : IPv4Datagram(name) {costVector=nullptr; options=nullptr; costVectorSize=0; dsr_ttl=0; encap_protocol = (IPProtocolId)0; }
     ~DSRPkt ();
     DSRPkt (const DSRPkt  &m);
     DSRPkt (struct dsr_pkt *dp,int interface_id);
