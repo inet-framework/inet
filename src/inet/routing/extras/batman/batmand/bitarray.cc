@@ -45,7 +45,7 @@ uint8_t Batman::get_bit_status(std::vector<TYPE_OF_WORD> &seq_bits, uint16_t las
         word_offset = (last_seqno - curr_seqno) % WORD_BIT_SIZE;    /* which position in the selected word */
         word_num = (last_seqno - curr_seqno) / WORD_BIT_SIZE;    /* which word */
 
-        if (seq_bits[word_num] & 1<<word_offset)   /* get position status */
+        if (seq_bits[word_num] & (((TYPE_OF_WORD)1) << word_offset))   /* get position status */
             return 1;
         else
             return 0;
@@ -65,7 +65,7 @@ void Batman::bit_mark(std::vector<TYPE_OF_WORD> &seq_bits, int32_t n) {
     word_offset = n%WORD_BIT_SIZE;    /* which position in the selected word */
     word_num = n/WORD_BIT_SIZE;    /* which word */
 
-    seq_bits[word_num] |= 1<<word_offset;    /* turn the position on */
+    seq_bits[word_num] |= ((TYPE_OF_WORD)1) << word_offset;    /* turn the position on */
 }
 
 /* shift the packet array p by n places. */
