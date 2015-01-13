@@ -173,7 +173,7 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     dgram->setVersion(dp->nh.iph->version); // Ip version
     dgram->setTypeOfService(dp->nh.iph->tos); // ToS
     dgram->setIdentification(dp->nh.iph->id); // Identification
-    dgram->setMoreFragments(dp->nh.iph->tos & 0x2000);
+    dgram->setMoreFragments(dp->nh.iph->frag_off & 0x2000);
     dgram->setDontFragment(dp->nh.iph->frag_off & 0x4000);
 #ifdef NEWFRAGMENT
     dgram->setTotalPayloadLength(dp->totalPayloadLength);
