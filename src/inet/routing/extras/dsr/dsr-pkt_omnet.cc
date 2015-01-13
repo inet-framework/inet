@@ -98,27 +98,26 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 
 void DSRPkt::copy(const DSRPkt& m)
 {
+    struct dsr_opt_hdr *opth = m.options;
+    int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
+    options = (struct dsr_opt_hdr *) new char[dsr_opts_len];
+    memcpy((char*)options, (char*)m.options, dsr_opts_len);
+
     encap_protocol = m.encap_protocol;
     previous = m.previous;
     next = m.next;
 
-    struct dsr_opt_hdr *opth;
-
-    opth = m.options;
-
-    int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
-
-    options = (struct dsr_opt_hdr *) new char[dsr_opts_len];
-
-    memcpy((char*)options, (char*)m.options, dsr_opts_len);
-
+    costVector = nullptr;
     costVectorSize = m.costVectorSize;
     if (m.costVectorSize>0)
     {
         costVector = new EtxCost[m.costVectorSize];
         memcpy((char*)costVector, (char*)m.costVector, m.costVectorSize*sizeof(EtxCost));
     }
+
+    dsr_ttl = m.dsr_ttl;
 }
+
 // Constructor
 DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 {
