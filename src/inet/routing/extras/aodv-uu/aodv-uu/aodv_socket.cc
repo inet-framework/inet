@@ -575,28 +575,17 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 
 #ifdef OMNETPP
     aodv_msg->prevFix=this->isStaticNode();
-    if (this->isStaticNode())
+
+    uint32_t curCost = this->isStaticNode() ? costStatic : costMobile;
+    if (dynamic_cast<RREP*>(aodv_msg))
     {
-        if (dynamic_cast<RREP*>(aodv_msg))
-        {
-            static_cast<RREP*>(aodv_msg)->cost += costStatic;
-        }
-        else if (dynamic_cast<RREQ*> (aodv_msg))
-        {
-            static_cast<RREQ*>(aodv_msg)->cost += costStatic;
-        }
+        static_cast<RREP*>(aodv_msg)->cost += curCost;
     }
-    else
+    else if (dynamic_cast<RREQ*> (aodv_msg))
     {
-        if (dynamic_cast<RREP*>(aodv_msg))
-        {
-            static_cast<RREP*>(aodv_msg)->cost += costMobile;
-        }
-        else if (dynamic_cast<RREQ*>(aodv_msg))
-        {
-            static_cast<RREQ*>(aodv_msg)->cost += costMobile;
-        }
+        static_cast<RREQ*>(aodv_msg)->cost += curCost;
     }
+
     L3Address destAdd;
     if (dst.s_addr == L3Address(IPv4Address(AODV_BROADCAST)))
     {
