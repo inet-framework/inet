@@ -206,7 +206,7 @@ void NS_CLASS alog(int type, int errnum, const char *function, const char *forma
     /*   if (type <= LOG_NOTICE) */
     /*  len += sprintf(log_buf + len, "%s: ", progname); */
 
-    len += sprintf(log_buf + len, "%s %02d:%02d:%02d.%03ld %s: %s",nodeName, time->tm_hour,
+    len += sprintf(log_buf + len, "%s %02d:%02d:%02d.%03ld %s: %s",nodeName.c_str(), time->tm_hour,
                    time->tm_min, time->tm_sec, now.tv_usec / 1000, function,
                    msg);
 //    len += sprintf(log_buf + len, "%s time = %lf - %s %s ",nodeName, simTime(), function,

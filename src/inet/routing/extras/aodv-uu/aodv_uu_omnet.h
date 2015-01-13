@@ -117,7 +117,7 @@ class AODVUU : public ManetRoutingBase
 {
 
   private:
-    char nodeName[50];
+    opp_string nodeName;
     bool useIndex;
     bool isRoot;
     uint32_t costStatic;
