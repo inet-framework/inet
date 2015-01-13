@@ -872,7 +872,7 @@ void DSRUU::EtxMsgProc(cMessage *m)
 {
     DSRPktExt *msg;
     int pos = -1;
-    msg = dynamic_cast<DSRPktExt*>(m);
+    msg = check_and_cast<DSRPktExt*>(m);
     EtxList *list = msg->getExtension();
     int size = msg->getSizeExtension();
 
