@@ -2735,7 +2735,7 @@ OLSR_ETX::link_quality()
     double now = CURRENT_TIME;
     for (auto it = state_.linkset_.begin(); it != state_.linkset_.end(); it++)
     {
-        OLSR_ETX_link_tuple* tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it);
+        OLSR_ETX_link_tuple* tuple = check_and_cast<OLSR_ETX_link_tuple*>(*it);
         if (tuple->next_hello() < now)
             tuple->packet_timeout();
     }
