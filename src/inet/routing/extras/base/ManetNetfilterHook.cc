@@ -58,7 +58,7 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramPreRoutingHook(INetworkDat
 
         if (checkPacketUnroutable(datagram, nullptr))
         {
-            delete dynamic_cast<cPacket *>(datagram)->removeControlInfo();
+            delete check_and_cast<cPacket *>(datagram)->removeControlInfo();
             sendNoRouteMessageToManet(datagram);
             return INetfilter::IHook::STOLEN;
         }
@@ -83,7 +83,7 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramLocalInHook(INetworkDatagr
     {
         if (datagram->getTransportProtocol() == IP_PROT_DSR)
         {
-            sendToManet(dynamic_cast<cPacket *>(datagram));
+            sendToManet(check_and_cast<cPacket *>(datagram));
             return INetfilter::IHook::STOLEN;
         }
     }
@@ -95,7 +95,7 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramLocalOutHook(INetworkDatag
 {
     if (isReactive)
     {
-        cPacket * packet = dynamic_cast<cPacket *>(datagram);
+        cPacket * packet = check_and_cast<cPacket *>(datagram);
         // Dsr routing, Dsr is a HL protocol and send datagram
         if (datagram->getTransportProtocol()==IP_PROT_DSR)
         {
@@ -135,7 +135,7 @@ void ManetNetfilterHook::sendNoRouteMessageToManet(INetworkDatagram *datagram)
 {
     if (datagram->getTransportProtocol()==IP_PROT_DSR)
     {
-        sendToManet(dynamic_cast<cPacket *>(datagram));
+        sendToManet(check_and_cast<cPacket *>(datagram));
     }
     else
     {
@@ -143,7 +143,7 @@ void ManetNetfilterHook::sendNoRouteMessageToManet(INetworkDatagram *datagram)
         control->setOptionCode(MANET_ROUTE_NOROUTE);
         control->setSrcAddress(datagram->getSourceAddress());
         control->setDestAddress(datagram->getDestinationAddress());
-        control->encapsulate(dynamic_cast<cPacket *>(datagram));
+        control->encapsulate(check_and_cast<cPacket *>(datagram));
         sendToManet(control);
     }
 }
