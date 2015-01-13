@@ -37,14 +37,14 @@ namespace inetmanet {
 class INET_API ManetNetfilterHook : public INetfilter::IHook
 {
   protected:
-    cModule* module;    // Manet module
-    IPv4 *ipLayer;      // IPv4 module
-    IInterfaceTable *ift;
-    IRoutingTable *rt;
-    bool isReactive;    // true if it's a reactive routing
+    cModule* module = nullptr;    // Manet module
+    IPv4 *ipLayer = nullptr;      // IPv4 module
+    IInterfaceTable *ift = nullptr;
+    IRoutingTable *rt = nullptr;
+    bool isReactive = false;    // true if it's a reactive routing
 
   public:
-    ManetNetfilterHook() : module(nullptr), ipLayer(nullptr), isReactive(false) {}
+    ManetNetfilterHook() {}
 
   protected:
     void initHook(cModule* module);
