@@ -135,13 +135,13 @@ class DSRUUTimer:public cOwnedObject
 {
   protected:
     cMessage msgtimer;
-    DSRUU *a_;
+    DSRUU *a_ = nullptr;
 
 
   public:
     simtime_t expires;
-    fct_t function;
-    unsigned long data;
+    fct_t function = nullptr;
+    unsigned long data = 0;
 
 
     DSRUUTimer(DSRUU * a):cOwnedObject()
