@@ -1157,6 +1157,7 @@ route_discovery:
 struct dev_info NS_CLASS dev_ifindex (int ifindex)
 {
     int index = ifindex2devindex(ifindex);
+    ASSERT(index >= 0);
     return  (this_host.devs[index]);
 }
 
