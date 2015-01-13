@@ -579,22 +579,22 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     {
         if (dynamic_cast<RREP*>(aodv_msg))
         {
-            dynamic_cast<RREP*>(aodv_msg)->cost += costStatic;
+            static_cast<RREP*>(aodv_msg)->cost += costStatic;
         }
         else if (dynamic_cast<RREQ*> (aodv_msg))
         {
-            dynamic_cast<RREQ*>(aodv_msg)->cost += costStatic;
+            static_cast<RREQ*>(aodv_msg)->cost += costStatic;
         }
     }
     else
     {
         if (dynamic_cast<RREP*>(aodv_msg))
         {
-            dynamic_cast<RREP*>(aodv_msg)->cost += costMobile;
+            static_cast<RREP*>(aodv_msg)->cost += costMobile;
         }
         else if (dynamic_cast<RREQ*>(aodv_msg))
         {
-            dynamic_cast<RREQ*>(aodv_msg)->cost += costMobile;
+            static_cast<RREQ*>(aodv_msg)->cost += costMobile;
         }
     }
     L3Address destAdd;
