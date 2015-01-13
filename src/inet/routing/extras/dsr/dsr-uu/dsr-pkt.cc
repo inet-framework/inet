@@ -257,7 +257,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
     memset(dp, 0, sizeof(dsr_pkt));
     if (p)
     {
-        IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
+        IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(p);
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
         cObject * ctrl = dgram->removeControlInfo();
@@ -309,7 +309,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
             int n;
             if (dynamic_cast<DSRPkt*> (p))
             {
-                DSRPkt * dsrpkt = dynamic_cast<DSRPkt*> (p);
+                DSRPkt *dsrpkt = static_cast<DSRPkt*>(p);
 
                 opth =  dsrpkt->getOptions();
                 dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
@@ -373,7 +373,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
     memset(dp, 0, sizeof(dsr_pkt));
     if (p)
     {
-        IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
+        IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(p);
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
 
@@ -417,7 +417,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
             int n;
             if (dynamic_cast<DSRPkt*> (p))
             {
-                DSRPkt * dsrpkt = dynamic_cast<DSRPkt*> (p);
+                DSRPkt *dsrpkt = static_cast<DSRPkt*>(p);
 
                 opth =  dsrpkt->getOptions();
                 dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
