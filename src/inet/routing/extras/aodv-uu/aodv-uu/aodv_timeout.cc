@@ -210,9 +210,10 @@ void NS_CLASS local_repair_timeout(void *arg)
             {
                 if (!DEV_NR(i).enabled)
                     continue;
-                aodv_socket_send((AODV_msg *) rerr, rerr_dest,
+                aodv_socket_send((AODV_msg *) rerr->dup(), rerr_dest,
                                  RERR_CALC_SIZE(rerr), 1, &DEV_NR(i));
             }
+            delete rerr;
         }
         DEBUG(LOG_DEBUG, 0, "Sending RERR about %s to %s",
               ip_to_str(rt->dest_addr), ip_to_str(rerr_dest));
