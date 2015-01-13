@@ -559,7 +559,7 @@ void NS_CLASS handleMessage (cMessage *msg)
                 {
                     if (dynamic_cast<Ieee802Ctrl*> (ctrl))
                     {
-                        Ieee802Ctrl *ieeectrl = dynamic_cast<Ieee802Ctrl*> (ctrl);
+                        Ieee802Ctrl *ieeectrl = static_cast<Ieee802Ctrl*> (ctrl);
                         L3Address address(ieeectrl->getDest());
                         int index = getWlanInterfaceIndexByAddress(address);
                         if (index!=-1)
@@ -1178,18 +1178,16 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 
 void NS_CLASS processLinkBreak(const cPolymorphic *details)
 {
-    IPv4Datagram  *dgram=nullptr;
     if (llfeedback)
     {
         if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
         {
-            dgram = const_cast<IPv4Datagram *>(check_and_cast<const IPv4Datagram *>(details));
+            IPv4Datagram  *dgram = static_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details));
             packetFailed(dgram);
-            return;
         }
         else if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*> (details)))
         {
-            Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details));
+            Ieee80211DataFrame *frame = static_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details));
             packetFailedMac(frame);
         }
     }
