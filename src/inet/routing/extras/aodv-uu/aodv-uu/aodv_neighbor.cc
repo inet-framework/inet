@@ -216,21 +216,16 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
             double delay = -1;
             if (par("EqualDelay"))
                 delay = par("broadcastDelay");
-            int cont = getNumWlanInterfaces();
             for (i = 0; i < MAX_NR_INTERFACES; i++)
             {
                 struct in_addr dest;
                 if (!DEV_NR(i).enabled)
                     continue;
                 dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
-                if (cont>1)
-                    aodv_socket_send((AODV_msg *) rerr->dup(), dest,
+                aodv_socket_send((AODV_msg *) rerr->dup(), dest,
                                      RERR_CALC_SIZE(rerr), 1, &DEV_NR(i),delay);
-                else
-                    aodv_socket_send((AODV_msg *) rerr, dest,
-                                     RERR_CALC_SIZE(rerr), 1, &DEV_NR(i),delay);
-                cont--;
             }
+            delete rerr;
         }
         else
             delete rerr;

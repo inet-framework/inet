@@ -271,14 +271,6 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
         {
             /* FIXME: Should only transmit RERR on those interfaces
              * which have precursor nodes for the broken route */
-            numInterfaces = 0;
-            for (i = 0; i < MAX_NR_INTERFACES; i++)
-            {
-                if (!DEV_NR(i).enabled)
-                    continue;
-                numInterfaces++;
-            }
-
             for (i = 0; i < MAX_NR_INTERFACES; i++)
             {
                 struct in_addr dest;
@@ -287,16 +279,14 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                     continue;
                 dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
 #ifdef OMNETPP
-                if (numInterfaces>1)
-                {
-                    aodv_socket_send((AODV_msg *) new_rerr->dup(), dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
-                }
-                else
+                aodv_socket_send((AODV_msg *) new_rerr->dup(), dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
+#else
+                aodv_socket_send((AODV_msg *) new_rerr, dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
 #endif
-                    aodv_socket_send((AODV_msg *) new_rerr, dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
-                numInterfaces--;
             }
-
+#ifdef OMNETPP
+            delete rerr;
+#endif
         }
     }
 }
