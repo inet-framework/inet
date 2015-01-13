@@ -199,7 +199,7 @@ OLSR_DupTupleTimer::~OLSR_DupTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_dup_tuple* tuple = dynamic_cast<OLSR_dup_tuple*> (tuple_);
+    OLSR_dup_tuple* tuple = check_and_cast<OLSR_dup_tuple*> (tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
