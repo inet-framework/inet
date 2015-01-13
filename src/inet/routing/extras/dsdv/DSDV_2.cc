@@ -105,19 +105,8 @@ DSDV_2::forwardHello::~forwardHello()
     if (this->hello!=nullptr) delete this->hello;
 }
 
-DSDV_2::forwardHello::forwardHello()
-{
-    this->event = nullptr;
-    this->hello = nullptr;
-}
-
-
 DSDV_2::DSDV_2()
 {
-    // Set the pointer to nullptr, so that the destructor won't crash
-    // even if initialize() doesn't get called because of a runtime
-    // error or user cancellation during the startup process.
-    event = nullptr;
 }
 
 DSDV_2::~DSDV_2()

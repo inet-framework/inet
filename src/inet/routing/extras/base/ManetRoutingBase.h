@@ -64,35 +64,35 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
     class ProtocolRoutingData
     {
         public:
-            RouteMap* routesVector;
-            bool isProactive;
+            RouteMap* routesVector = nullptr;
+            bool isProactive = false;
     };
 
     typedef std::vector<ProtocolRoutingData> ProtocolsRoutes;
     typedef std::map<L3Address,ProtocolsRoutes>GlobalRouteMap;
 
-    RouteMap *routesVector;
+    RouteMap *routesVector = nullptr;
     static bool createInternalStore;
     static GlobalRouteMap *globalRouteMap;
 
-    IIPv4RoutingTable *inet_rt;
-    IInterfaceTable *inet_ift;
-    cModule *hostModule;
-    ICMP *icmpModule;
-    bool mac_layer_;
+    IIPv4RoutingTable *inet_rt = nullptr;
+    IInterfaceTable *inet_ift = nullptr;
+    cModule *hostModule = nullptr;
+    ICMP *icmpModule = nullptr;
+    bool mac_layer_ = false;
     L3Address    hostAddress;
     L3Address    routerId;
     Coord curPosition;
     Coord curSpeed;
     simtime_t posTimer;
-    bool   regPosition;
-    bool   useManetLabelRouting;
-    bool   isRegistered;
-    void *commonPtr;
-    bool sendToICMP;
-    ManetRoutingBase *collaborativeProtocol;
+    bool   regPosition = false;
+    bool   useManetLabelRouting = false;
+    bool   isRegistered = false;
+    void *commonPtr = nullptr;
+    bool sendToICMP = false;
+    ManetRoutingBase *collaborativeProtocol = nullptr;
 
-    IARP *arp;
+    IARP *arp = nullptr;
 
     typedef struct InterfaceIdentification
     {
@@ -107,11 +107,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
     } InterfaceIdentification;
     typedef std::vector <InterfaceIdentification> InterfaceVector;
 
-    InterfaceVector *interfaceVector;
+    InterfaceVector *interfaceVector = nullptr;
 
     std::vector<AddressGroup> addressGroupVector;
     std::vector<int> inAddressGroup;
-    bool staticNode;
+    bool staticNode = false;
 
     struct ManetProxyAddress
     {
@@ -119,7 +119,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
         L3Address address;
     };
 
-    bool isGateway;     /// true if the node will work like gateway for address in the list
+    bool isGateway = false;     /// true if the node will work like gateway for address in the list
 
     std::vector<ManetProxyAddress> proxyAddress;
 

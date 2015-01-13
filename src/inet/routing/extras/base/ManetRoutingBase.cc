@@ -54,20 +54,7 @@ bool ManetRoutingBase::createInternalStore = false;
 
 ManetRoutingBase::ManetRoutingBase()
 {
-    isRegistered = false;
-    regPosition = false;
-    mac_layer_ = false;
-    commonPtr = nullptr;
-    routesVector = nullptr;
     interfaceVector = new InterfaceVector;
-    staticNode = false;
-    collaborativeProtocol = nullptr;
-    arp = nullptr;
-    isGateway = false;
-    proxyAddress.clear();
-    addressGroupVector.clear();
-    inAddressGroup.clear();
-
 }
 
 

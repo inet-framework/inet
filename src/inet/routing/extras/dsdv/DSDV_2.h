@@ -44,26 +44,26 @@ using namespace std;
 class INET_API DSDV_2 : public cSimpleModule    // proactive protocol, don't need to ManetIPv4Hook
 {
   private:
-    cMessage *event;
-    cPar *broadcastDelay;
+    cMessage *event = nullptr;
+    cPar *broadcastDelay = nullptr;
     struct forwardHello
     {
-        cMessage *event;
-        DSDV_HelloMessage *hello;
+        cMessage *event = nullptr;
+        DSDV_HelloMessage *hello = nullptr;
+        forwardHello() {}
         ~forwardHello();
-        forwardHello();
     };
-    list<forwardHello*> *forwardList;
+    list<forwardHello*> *forwardList  = nullptr;
     //DSDV_HelloMessage *Hello;
-    InterfaceEntry *interface80211ptr;
-    int interfaceId;
-    unsigned int sequencenumber;
+    InterfaceEntry *interface80211ptr = nullptr;
+    int interfaceId = -1;
+    unsigned int sequencenumber = 0;
     simtime_t routeLifetime;
 
   protected:
     simtime_t hellomsgperiod_DSDV;
-    IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;
+    IInterfaceTable *ift = nullptr;
+    IIPv4RoutingTable *rt = nullptr;
 
   public:
     DSDV_2();
