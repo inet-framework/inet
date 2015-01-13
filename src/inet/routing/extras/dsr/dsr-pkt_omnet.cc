@@ -407,6 +407,9 @@ void DSRPkt::setCostVector(EtxCost *cost, int size)
 
 void DSRPkt::setCostVectorSize(unsigned n)
 {
+    if (n == costVectorSize)
+        return;
+
     if (n>0)
     {
         setBitLength(getBitLength()-(costVectorSize*SIZE_COST_BITS));
@@ -414,17 +417,8 @@ void DSRPkt::setCostVectorSize(unsigned n)
         memset(cost, 0, sizeof(EtxCost)*n);
         if (costVectorSize>0)
         {
-            if (n>costVectorSize)
-            {
-                memcpy(&cost, costVector, sizeof(EtxCost)*costVectorSize);
-            }
-            else
-            {
-                memcpy(&cost, costVector, sizeof(EtxCost)*n);
-
-            }
+            memcpy(cost, costVector, sizeof(EtxCost)*std::min(n, costVectorSize));
             delete [] costVector;
-
         }
         costVectorSize = n;
         setBitLength(getBitLength()+(costVectorSize*SIZE_COST_BITS));
@@ -436,9 +430,7 @@ void DSRPkt::setCostVectorSize(unsigned n)
         delete [] costVector;
         costVector = nullptr;
         costVectorSize = 0;
-        return;
     }
-
 }
 
 void DSRPkt::setCostVectorSize(EtxCost newLinkCost)
