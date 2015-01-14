@@ -619,6 +619,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
                             }
                             if (nb_link_tuple || max_link_tuple)
                                 continue;
+                            //FIXME nb_link_tuple and max_link_tuple are nullptr, but used below. Is wrong condition above?
                             if (parameter_.link_delay())
                             {
                                 if (nb_link_tuple->link_delay() < max_link_tuple->link_delay())
