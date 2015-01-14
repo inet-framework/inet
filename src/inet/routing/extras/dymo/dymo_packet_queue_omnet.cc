@@ -183,7 +183,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                         * a burst of packets. So to keep ARP happy, buffered
                         * packets are sent with ARP_DELAY seconds between
                         * sends. */
-                    qp->p = pkt_encapsulate(dynamic_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
+                    qp->p = pkt_encapsulate(static_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
                     // now Ip layer decremented again
                     // sendDelayed(qp->p, delay, "to_ip_from_network");
                     sendDelayed(qp->p, delay, "to_ip");
@@ -415,7 +415,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                              * a burst of packets. So to keep ARP happy, buffered
                              * packets are sent with ARP_DELAY seconds between
                              * sends. */
-                            qp->p = pkt_encapsulate(dynamic_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
+                            qp->p = pkt_encapsulate(static_cast <IPv4Datagram *> (qp->p), *gateWayAddress);
                             // now Ip layer decremented again
                             // sendDelayed(qp->p, delay, "to_ip_from_network");
                             sendDelayed(qp->p, delay, "to_ip");
