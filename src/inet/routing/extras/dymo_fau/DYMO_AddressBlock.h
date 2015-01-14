@@ -29,19 +29,17 @@ namespace inetmanet {
 class DYMO_AddressBlock
 {
   protected:
-    uint32_t address; /**< The IPv4 address of an additional node that can be reached via the DYMO router adding this information.  Each AdditionalNode.Address must have an associated Node.SeqNum in the address TLV block. */
-    uint16_t seqNum; /**< The DYMO sequence number associated with this routing information. */
-    uint8_t prefix; /**< The Node.Address is a network address with a particular prefix length. */
-    uint8_t dist; /**< A metric of the distance to reach the associated Node.Address. This field is incremented by at least one at each intermediate DYMO router, except the TargetNode.AddTLV.Dist.  The TargetNode's distance information is not modified. */
-    bool hasAddress_var; /**< true if the @c address member was assigned a value */
-    bool hasSeqNum_var; /**< true if the @c seqNum member was assigned a value */
-    bool hasPrefix_var; /**< true if the @c prefix member was assigned a value */
-    bool hasDist_var; /**< true if the @c dist member was assigned a value */
+    uint32_t address = 0; /**< The IPv4 address of an additional node that can be reached via the DYMO router adding this information.  Each AdditionalNode.Address must have an associated Node.SeqNum in the address TLV block. */
+    uint16_t seqNum = 0; /**< The DYMO sequence number associated with this routing information. */
+    uint8_t prefix = 0; /**< The Node.Address is a network address with a particular prefix length. */
+    uint8_t dist = 0; /**< A metric of the distance to reach the associated Node.Address. This field is incremented by at least one at each intermediate DYMO router, except the TargetNode.AddTLV.Dist.  The TargetNode's distance information is not modified. */
+    bool hasAddress_var = false; /**< true if the @c address member was assigned a value */
+    bool hasSeqNum_var = false; /**< true if the @c seqNum member was assigned a value */
+    bool hasPrefix_var = false; /**< true if the @c prefix member was assigned a value */
+    bool hasDist_var = false; /**< true if the @c dist member was assigned a value */
 
   public:
-    DYMO_AddressBlock() : hasAddress_var(false), hasSeqNum_var(false), hasPrefix_var(false), hasDist_var(false)
-    {
-    }
+    DYMO_AddressBlock() { }
 
     DYMO_AddressBlock(const DYMO_AddressBlock& other)
     {

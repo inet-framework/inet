@@ -26,7 +26,6 @@ namespace inet {
 namespace inetmanet {
 
 DYMO_RoutingEntry::DYMO_RoutingEntry(DYMOFau* dymo) :
-    routeNextHopInterface(nullptr),
     routeAgeMin(dymo, "routeAgeMin"),
     routeAgeMax(dymo, "routeAgeMax"),
     routeNew(dymo, "routeNew"),

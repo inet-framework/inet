@@ -50,18 +50,18 @@ class DYMO_RoutingEntry
      */
     /*@{*/
     IPv4Address routeAddress; /**< The IPv4 destination address of the getNode(s) associated with the routing table entry. */
-    unsigned int routeSeqNum; /**< The DYMO SeqNum associated with this routing information. */
+    unsigned int routeSeqNum = 0; /**< The DYMO SeqNum associated with this routing information. */
     IPv4Address routeNextHopAddress; /**< The IPv4 address of the next DYMO router on the path toward the Route.Address. */
-    InterfaceEntry* routeNextHopInterface; /**< The interface used to send packets toward the Route.Address. */
-    bool routeBroken; /**< A flag indicating whether this Route is broken.  This flag is set if the next hop becomes unreachable or in response to processing a RERR (see Section 5.5.4). */
+    InterfaceEntry* routeNextHopInterface = nullptr; /**< The interface used to send packets toward the Route.Address. */
+    bool routeBroken = false; /**< A flag indicating whether this Route is broken.  This flag is set if the next hop becomes unreachable or in response to processing a RERR (see Section 5.5.4). */
     /*@}*/
 
     /**
      * @name DYMO Optional Fields
      */
     /*@{*/
-    unsigned int routeDist; /**< A metric indicating the distance traversed before reaching the Route.Address node. */
-    int routePrefix; /**< Indicates that the associated address is a network address, rather than a host address.  The value is the length of the netmask/prefix.  If an address block does not have an associated PREFIX_LENGTH TLV [I-D.ietf-manet-packetbb], the prefix may be considered to have a prefix length equal to the address length (in bits). */
+    unsigned int routeDist = 0; /**< A metric indicating the distance traversed before reaching the Route.Address node. */
+    int routePrefix = 0; /**< Indicates that the associated address is a network address, rather than a host address.  The value is the length of the netmask/prefix.  If an address block does not have an associated PREFIX_LENGTH TLV [I-D.ietf-manet-packetbb], the prefix may be considered to have a prefix length equal to the address length (in bits). */
     /*@}*/
 
     /**
@@ -77,7 +77,7 @@ class DYMO_RoutingEntry
     /*@}*/
 
   protected:
-    DYMOFau* dymo; /**< DYMO module */
+    DYMOFau* dymo = nullptr; /**< DYMO module */
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& e);
