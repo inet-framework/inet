@@ -178,55 +178,55 @@ class DYMOFau : public ManetRoutingBase
     // MEMBER VARIABLES
     //===============================================================================
     /** @brief pointer to the routing table */
-    DYMO_RoutingTable *dymo_routingTable;
+    DYMO_RoutingTable *dymo_routingTable = nullptr;
 
-    cMessage* timerMsg; // timer self message, used for DYMO_Timer
-
-    /** @brief runs after the node has lost its OwnSeqNum. When either ownSeqNumLossTimeout or ownSeqNumLossTimeoutMax expires, the resumes participation in DYMO */
-    DYMO_Timer* ownSeqNumLossTimeout;
+    cMessage* timerMsg = nullptr; // timer self message, used for DYMO_Timer
 
     /** @brief runs after the node has lost its OwnSeqNum. When either ownSeqNumLossTimeout or ownSeqNumLossTimeoutMax expires, the resumes participation in DYMO */
-    DYMO_Timer* ownSeqNumLossTimeoutMax;
+    DYMO_Timer* ownSeqNumLossTimeout = nullptr;
+
+    /** @brief runs after the node has lost its OwnSeqNum. When either ownSeqNumLossTimeout or ownSeqNumLossTimeoutMax expires, the resumes participation in DYMO */
+    DYMO_Timer* ownSeqNumLossTimeoutMax = nullptr;
 
     /** @brief address of the node */
-    unsigned int myAddr;
+    unsigned int myAddr = 0;
 
     /** @brief sequence number of the node */
-    unsigned int ownSeqNum;
+    unsigned int ownSeqNum = 0;
 
     /** @brief vector contains the RREQs sent, waiting for a reply */
     DYMO_OutstandingRREQList outstandingRREQList;
 
     /** @brief vector contains the queued data packets, waiting for a route */
-    DYMO_DataQueue* queuedDataPackets;
+    DYMO_DataQueue* queuedDataPackets = nullptr;
 
     /** @brief defines the routing block size */
-    unsigned int rblockSize;
+    unsigned int rblockSize = 0;
 
     //  cPacket * rreq;
     //  cPacket * rerr;
 
-    int totalPacketsSent; /**< total number of packets sent down to lower layer */
-    int totalBytesSent; /**< total number of bytes sent down to lower layer */
+    int totalPacketsSent = 0; /**< total number of packets sent down to lower layer */
+    int totalBytesSent = 0; /**< total number of bytes sent down to lower layer */
 
-    int statsRREQSent; /**< number of generated DYMO RREQs */
-    int statsRREPSent; /**< number of generated DYMO RREPs */
-    int statsRERRSent; /**< number of generated DYMO RERRs */
+    int statsRREQSent = 0; /**< number of generated DYMO RREQs */
+    int statsRREPSent = 0; /**< number of generated DYMO RREPs */
+    int statsRERRSent = 0; /**< number of generated DYMO RERRs */
 
-    int statsRREQRcvd; /**< number of consumed DYMO RREQs */
-    int statsRREPRcvd; /**< number of consumed DYMO RREPs */
-    int statsRERRRcvd; /**< number of consumed DYMO RERRs */
+    int statsRREQRcvd = 0; /**< number of consumed DYMO RREQs */
+    int statsRREPRcvd = 0; /**< number of consumed DYMO RREPs */
+    int statsRERRRcvd = 0; /**< number of consumed DYMO RERRs */
 
-    int statsRREQFwd; /**< number of forwarded (and processed) DYMO RREQs */
-    int statsRREPFwd; /**< number of forwarded (and processed) DYMO RREPs */
-    int statsRERRFwd; /**< number of forwarded (and processed) DYMO RERRs */
+    int statsRREQFwd = 0; /**< number of forwarded (and processed) DYMO RREQs */
+    int statsRREPFwd = 0; /**< number of forwarded (and processed) DYMO RREPs */
+    int statsRERRFwd = 0; /**< number of forwarded (and processed) DYMO RERRs */
 
-    int statsDYMORcvd; /**< number of observed DYMO messages */
+    int statsDYMORcvd = 0; /**< number of observed DYMO messages */
 
     simtime_t discoveryLatency;
-    int disSamples;
+    int disSamples = -1;
     simtime_t dataLatency;
-    int dataSamples;
+    int dataSamples = -1;
 
     cOutVector discoveryDelayVec;
     cOutVector dataDelayVec;
@@ -234,24 +234,24 @@ class DYMOFau : public ManetRoutingBase
     //cOutVector dataLoadVec;
     //cOutVector controlLoadVec;
 
-    DYMO_TokenBucket* rateLimiterRREQ;
+    DYMO_TokenBucket* rateLimiterRREQ = nullptr;
 
-    int RESPONSIBLE_ADDRESSES_PREFIX; /**< NED parameter: netmask of network this DYMO router is responsible for, -1 for self only */
-    const char* DYMO_INTERFACES; /**< NED parameter: list of interfaces to run DYMO on, separated by a single space character */
+    int RESPONSIBLE_ADDRESSES_PREFIX = -1; /**< NED parameter: netmask of network this DYMO router is responsible for, -1 for self only */
+    const char* DYMO_INTERFACES = nullptr; /**< NED parameter: list of interfaces to run DYMO on, separated by a single space character */
     IPv4Address AUTOASSIGN_ADDRESS_BASE; /**< NED parameter: start of address range from which to automatically assign an address to the DYMO_INTERFACES */
-    int ROUTE_AGE_MIN_TIMEOUT;
-    int ROUTE_AGE_MAX_TIMEOUT;
-    int ROUTE_NEW_TIMEOUT;
-    int ROUTE_USED_TIMEOUT;
-    int ROUTE_DELETE_TIMEOUT;
-    int MIN_HOPLIMIT; /**< NED parameter: RREQs are first tried with this MsgHdr.HopLimit */
-    int MAX_HOPLIMIT; /**< NED parameter: MsgHdr.HopLimit for last RREQ, as well as other DYMO control messages */
-    double RREQ_RATE_LIMIT; /**< NED parameter: maximum average RREQs per second (token bucket) */
-    int RREQ_BURST_LIMIT; /**< NED parameter: maximum RREQs in a burst (token bucket) */
+    int ROUTE_AGE_MIN_TIMEOUT = -1;
+    int ROUTE_AGE_MAX_TIMEOUT = -1;
+    int ROUTE_NEW_TIMEOUT = -1;
+    int ROUTE_USED_TIMEOUT = -1;
+    int ROUTE_DELETE_TIMEOUT = -1;
+    int MIN_HOPLIMIT = -1; /**< NED parameter: RREQs are first tried with this MsgHdr.HopLimit */
+    int MAX_HOPLIMIT = -1; /**< NED parameter: MsgHdr.HopLimit for last RREQ, as well as other DYMO control messages */
+    double RREQ_RATE_LIMIT = NaN; /**< NED parameter: maximum average RREQs per second (token bucket) */
+    int RREQ_BURST_LIMIT = -1; /**< NED parameter: maximum RREQs in a burst (token bucket) */
     simtime_t RREQ_WAIT_TIME;
-    unsigned int RREQ_TRIES;
-    int BUFFER_SIZE_PACKETS; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
-    int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
+    unsigned int RREQ_TRIES = 0;
+    int BUFFER_SIZE_PACKETS = -1; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
+    int BUFFER_SIZE_BYTES = -1; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
     virtual bool supportGetRoute() {return false;}
     virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &add) {return 0;};

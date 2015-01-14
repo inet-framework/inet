@@ -49,13 +49,6 @@ const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are dela
 
 DYMOFau::DYMOFau()
 {
-    dymo_routingTable = nullptr;
-    timerMsg = nullptr;
-    ownSeqNumLossTimeout = nullptr;
-    ownSeqNumLossTimeoutMax = nullptr;
-    queuedDataPackets = nullptr;
-    rateLimiterRREQ = nullptr;
-    DYMO_INTERFACES = nullptr;
 }
 
 void DYMOFau::initialize(int stage)
