@@ -673,8 +673,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
             Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
             src.s_addr = L3Address(ctrl->getSrc());
             dst.s_addr = L3Address(ctrl->getDest());
-            if (ctrl)
-                delete ctrl;
+            delete ctrl;
         }
     }
 
