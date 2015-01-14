@@ -286,7 +286,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
 
     if (dynamic_cast<RE*>(p))
     {
-        RE * re = dynamic_cast<RE*>(p);
+        RE * re = static_cast<RE*>(p);
         if (isInMacLayer())
         {
             int numBlock = re_numblocks(re);
@@ -303,7 +303,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     }
     else if (dynamic_cast<RERR *>(p))
     {
-        RERR * rerr = dynamic_cast<RERR *>(p);
+        RERR * rerr = static_cast<RERR *>(p);
         totalRerrSend++;
         if (isInMacLayer())
         {

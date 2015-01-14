@@ -224,7 +224,7 @@ void DYMOFau::handleMessage(cMessage* apMsg)
     {
         if (dynamic_cast<ControlManetRouting *>(apMsg))
         {
-            ControlManetRouting * control = check_and_cast <ControlManetRouting *> (apMsg);
+            ControlManetRouting * control = static_cast<ControlManetRouting *>(apMsg);
             if (control->getOptionCode() == MANET_ROUTE_NOROUTE)
             {
                 IPv4Datagram * dgram = check_and_cast<IPv4Datagram*>(control->decapsulate());
@@ -244,7 +244,7 @@ void DYMOFau::handleMessage(cMessage* apMsg)
         }
         else if (dynamic_cast<UDPPacket *>(apMsg))
         {
-            udpPacket = check_and_cast<UDPPacket*>(apMsg);
+            udpPacket = static_cast<UDPPacket*>(apMsg);
             if (udpPacket->getDestinationPort() != DYMO_PORT)
             {
                 delete  apMsg;
@@ -347,9 +347,9 @@ void DYMOFau::handleLowerMsg(cPacket* apMsg)
      3) Unsupported Message: UERR
      4) Data Message
      **/
-    if (dynamic_cast<DYMO_RM*>(apMsg)) handleLowerRM(dynamic_cast<DYMO_RM*>(apMsg));
-    else if (dynamic_cast<DYMO_RERR*>(apMsg)) handleLowerRERR(dynamic_cast<DYMO_RERR*>(apMsg));
-    else if (dynamic_cast<DYMO_UERR*>(apMsg)) handleLowerUERR(dynamic_cast<DYMO_UERR*>(apMsg));
+    if (dynamic_cast<DYMO_RM*>(apMsg)) handleLowerRM(static_cast<DYMO_RM*>(apMsg));
+    else if (dynamic_cast<DYMO_RERR*>(apMsg)) handleLowerRERR(static_cast<DYMO_RERR*>(apMsg));
+    else if (dynamic_cast<DYMO_UERR*>(apMsg)) handleLowerUERR(static_cast<DYMO_UERR*>(apMsg));
     else if (apMsg->getKind() == UDP_I_ERROR) { EV_INFO << "discarded UDP error message" << endl; delete apMsg; }
     else throw cRuntimeError("message is no DYMO Packet");
 }

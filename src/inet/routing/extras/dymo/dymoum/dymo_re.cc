@@ -951,9 +951,9 @@ int NS_CLASS re_mustAnswer(RE *re, u_int32_t ifindex)
     {
         if (re->getControlInfo())
         {
-            if (dynamic_cast<MeshControlInfo*>(re->getControlInfo()))
+            MeshControlInfo *controlInfo = dynamic_cast<MeshControlInfo*>(re->getControlInfo());
+            if (controlInfo)
             {
-                MeshControlInfo * controlInfo = dynamic_cast<MeshControlInfo*>(re->getControlInfo());
                 if (controlInfo->getCollaborativeFeedback() && getCollaborativeProtocol())
                 {
                     src_addr.s_addr = re->re_blocks[0].re_node_addr;
@@ -968,7 +968,6 @@ int NS_CLASS re_mustAnswer(RE *re, u_int32_t ifindex)
                             if (entry->rt_hopcnt + cost<= controlInfo->getMaxHopCollaborative())
                                 haveRoute= true;
                         }
-
                     }
                 }
             }
