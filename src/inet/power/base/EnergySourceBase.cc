@@ -34,8 +34,8 @@ const IEnergyConsumer *EnergySourceBase::getEnergyConsumer(int energyConsumerId)
 W EnergySourceBase::computeTotalConsumedPower()
 {
     W totalConsumedPower = W(0);
-    for (auto it = energyConsumers.begin(); it != energyConsumers.end(); it++)
-        totalConsumedPower += (*it).consumedPower;
+    for (auto & elem : energyConsumers)
+        totalConsumedPower += (elem).consumedPower;
     return totalConsumedPower;
 }
 

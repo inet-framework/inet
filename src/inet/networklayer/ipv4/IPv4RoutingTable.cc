@@ -53,10 +53,10 @@ std::ostream& operator<<(std::ostream& os, const IPv4MulticastRoute& e)
 
 IPv4RoutingTable::~IPv4RoutingTable()
 {
-    for (unsigned int i = 0; i < routes.size(); i++)
-        delete routes[i];
-    for (unsigned int i = 0; i < multicastRoutes.size(); i++)
-        delete multicastRoutes[i];
+    for (auto & elem : routes)
+        delete elem;
+    for (auto & elem : multicastRoutes)
+        delete elem;
 }
 
 void IPv4RoutingTable::initialize(int stage)
@@ -455,8 +455,8 @@ IPv4Route *IPv4RoutingTable::findBestMatchingRoute(const IPv4Address& dest) cons
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     IPv4Route *bestRoute = nullptr;
-    for (RouteVector::const_iterator i = routes.begin(); i != routes.end(); ++i) {
-        IPv4Route *e = *i;
+    for (auto e : routes) {
+        
         if (e->isValid()) {
             if (IPv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) {    // match
                 bestRoute = const_cast<IPv4Route *>(e);
@@ -493,8 +493,8 @@ const IPv4MulticastRoute *IPv4RoutingTable::findBestMatchingMulticastRoute(const
 
     // TODO caching?
 
-    for (MulticastRouteVector::const_iterator i = multicastRoutes.begin(); i != multicastRoutes.end(); ++i) {
-        const IPv4MulticastRoute *e = *i;
+    for (auto e : multicastRoutes) {
+        
         if (e->isValid() && e->matches(origin, group))
             return e;
     }

@@ -67,8 +67,8 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
             return true;
         else {
             const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-            for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-                const IReception *interferingReception = *it;
+            for (auto interferingReception : *interferingReceptions) {
+                
                 IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
                 if (interferingPower == IdealReception::POWER_RECEIVABLE || interferingPower == IdealReception::POWER_INTERFERING)
                     return false;
@@ -88,8 +88,8 @@ const IListening *IdealReceiver::createListening(const IRadio *radio, const simt
 const IListeningDecision *IdealReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-        const IReception *interferingReception = *it;
+    for (auto interferingReception : *interferingReceptions) {
+        
         IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
         if (interferingPower != IdealReception::POWER_UNDETECTABLE)
             return new ListeningDecision(listening, true);

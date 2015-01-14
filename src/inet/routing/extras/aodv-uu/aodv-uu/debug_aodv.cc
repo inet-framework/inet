@@ -546,9 +546,9 @@ void NS_CLASS print_rt_table(void *arg)
 
     if (write(log_rt_fd, rt_buf, len) < 0) throw cRuntimeError("write() error");
     len = 0;
-    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto & elem : aodvRtTableMap)
     {
-        rt_table_t *rt = it->second;
+        rt_table_t *rt = elem.second;
 
         if (rt->dest_seqno == 0)
         sprintf(seqno_str, "-");

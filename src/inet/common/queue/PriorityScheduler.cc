@@ -24,8 +24,8 @@ Define_Module(PriorityScheduler);
 
 bool PriorityScheduler::schedulePacket()
 {
-    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it) {
-        IPassiveQueue *inputQueue = *it;
+    for (auto inputQueue : inputQueues) {
+        
         if (!inputQueue->isEmpty()) {
             inputQueue->requestPacket();
             return true;

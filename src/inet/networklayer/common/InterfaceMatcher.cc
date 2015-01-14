@@ -42,16 +42,16 @@ InterfaceMatcher::Matcher::Matcher(const char *pattern)
 
 InterfaceMatcher::Matcher::~Matcher()
 {
-    for (int i = 0; i < (int)matchers.size(); i++)
-        delete matchers[i];
+    for (auto & elem : matchers)
+        delete elem;
 }
 
 bool InterfaceMatcher::Matcher::matches(const char *s) const
 {
     if (matchesany)
         return true;
-    for (int i = 0; i < (int)matchers.size(); i++)
-        if (matchers[i]->matches(s))
+    for (auto & elem : matchers)
+        if (elem->matches(s))
             return true;
 
     return false;
@@ -76,8 +76,8 @@ bool InterfaceMatcher::Selector::matches(const InterfaceEntry *ie)
 
 InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 {
-    for (int i = 0; i < (int)xmlSelectors.size(); i++) {
-        cXMLElement *interfaceElement = xmlSelectors[i];
+    for (auto & xmlSelector : xmlSelectors) {
+        cXMLElement *interfaceElement = xmlSelector;
         const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
         const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
 
@@ -101,8 +101,8 @@ InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 
 InterfaceMatcher::~InterfaceMatcher()
 {
-    for (int i = 0; i < (int)selectors.size(); i++)
-        delete selectors[i];
+    for (auto & elem : selectors)
+        delete elem;
 }
 
 /**
@@ -141,8 +141,8 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
     std::vector<cModule *> deviceNodes;
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
-    for (auto it = hostNodes.begin(); it != hostNodes.end(); ++it) {
-        cModule *neighbour = *it;
+    for (auto neighbour : hostNodes) {
+        
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))

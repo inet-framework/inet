@@ -105,8 +105,8 @@ LMacLayer::~LMacLayer()
     cancelAndDelete(start_lmac);
     cancelAndDelete(send_control);
 
-    for (auto it = macQueue.begin(); it != macQueue.end(); ++it) {
-        delete (*it);
+    for (auto & elem : macQueue) {
+        delete (elem);
     }
     macQueue.clear();
 }

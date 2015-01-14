@@ -118,9 +118,9 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
     std::set<InterfaceEntry *> matchedBefore;
     cXMLElementList interfaceElements = configuration->getChildrenByTagName("interface");
 
-    for (int i = 0; i < (int)interfaceElements.size(); i++) {
+    for (auto & interfaceElements_i : interfaceElements) {
         std::set<InterfaceEntry *> interfacesSeen;
-        cXMLElement *interfaceElement = interfaceElements[i];
+        cXMLElement *interfaceElement = interfaceElements_i;
 
         const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
         const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
@@ -266,8 +266,8 @@ void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->module == networkNodeModule) {
-            for (int i = 0; i < (int)node->interfaceInfos.size(); i++) {
-                InterfaceInfo *interfaceInfo = node->interfaceInfos.at(i);
+            for (auto & elem : node->interfaceInfos) {
+                InterfaceInfo *interfaceInfo = elem;
                 if (interfaceInfo->interfaceEntry == interfaceEntry)
                     return configureInterface(interfaceInfo);
             }
@@ -287,8 +287,8 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 
 L2NetworkConfigurator::Matcher::~Matcher()
 {
-    for (int i = 0; i < (int)matchers.size(); i++)
-        delete matchers[i];
+    for (auto & elem : matchers)
+        delete elem;
 }
 
 L2NetworkConfigurator::Matcher::Matcher(const char *pattern)
@@ -309,8 +309,8 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
     if (matchesany)
         return true;
 
-    for (int i = 0; i < (int)matchers.size(); i++)
-        if (matchers[i]->matches(s))
+    for (auto & elem : matchers)
+        if (elem->matches(s))
             return true;
 
 

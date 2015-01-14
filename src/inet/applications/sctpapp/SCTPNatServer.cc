@@ -243,58 +243,58 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 NatMessage *nat = check_and_cast<NatMessage *>(smsg->decapsulate());
                 bool found = false;
                 if (natVector.size() > 0) {
-                    for (auto it = natVector.begin(); it != natVector.end(); it++) {
-                        if ((*it)->peer1 == nat->getPeer1() || (*it)->peer1Assoc == assocId) {
+                    for (auto & elem : natVector) {
+                        if ((elem)->peer1 == nat->getPeer1() || (elem)->peer1Assoc == assocId) {
                             EV << "found entry: info: Peer1 = " << nat->getPeer1() << "  peer1Address1=" << nat->getPeer1Addresses(0) << " peer2=" << nat->getPeer2() << " peer2Address1=" << nat->getPeer2Addresses(0) << "\n";
                             if (nat->getMulti() && nat->getPeer1AddressesArraySize() > 1 && nat->getPeer2AddressesArraySize() > 1) {
                                 EV << " peer1Address2=" << nat->getPeer1Addresses(1) << " peer2Address2=" << nat->getPeer2Addresses(1) << endl;
                             }
-                            if ((*it)->peer1 == 0 && !(*it)->peer1Address2.isUnspecified()) {
-                                (*it)->peer1 = nat->getPeer1();
-                                (*it)->peer1Address1 = ind->getRemoteAddr();
-                                (*it)->peer1Port = nat->getPortPeer1();
-                                if ((*it)->peer2 == 0) {
-                                    (*it)->peer2 = nat->getPeer2();
+                            if ((elem)->peer1 == 0 && !(elem)->peer1Address2.isUnspecified()) {
+                                (elem)->peer1 = nat->getPeer1();
+                                (elem)->peer1Address1 = ind->getRemoteAddr();
+                                (elem)->peer1Port = nat->getPortPeer1();
+                                if ((elem)->peer2 == 0) {
+                                    (elem)->peer2 = nat->getPeer2();
                                 }
                             }
-                            if (nat->getMulti() && (*it)->peer1Address2.isUnspecified()) {
-                                (*it)->peer1Address2 = ind->getRemoteAddr();
+                            if (nat->getMulti() && (elem)->peer1Address2.isUnspecified()) {
+                                (elem)->peer1Address2 = ind->getRemoteAddr();
                             }
-                            if (!(*it)->peer2Address1.isUnspecified() && !(*it)->peer1Address1.isUnspecified()) {
-                                if (!(*it)->multi || ((*it)->multi && !(*it)->peer2Address2.isUnspecified() && !(*it)->peer1Address2.isUnspecified())) {
-                                    EV << "entry now: Peer1=" << (*it)->peer1 << " Peer2=" << (*it)->peer2 << " peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << " peer2Port=" << (*it)->peer2Port << "\n";
-                                    sendInfo((*it));
+                            if (!(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()) {
+                                if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified())) {
+                                    EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer2Port=" << (elem)->peer2Port << "\n";
+                                    sendInfo((elem));
                                 }
                             }
                             found = true;
                             break;
                         }
-                        if ((*it)->peer2 == nat->getPeer1() || (*it)->peer2Assoc == assocId) {
+                        if ((elem)->peer2 == nat->getPeer1() || (elem)->peer2Assoc == assocId) {
                             EV << "opposite way:  info: Peer1 = " << nat->getPeer1() << "  peer1Address1=" << nat->getPeer1Addresses(0) << " peer2=" << nat->getPeer2() << " peer2Address1=" << nat->getPeer2Addresses(0) << "\n";
                             if (nat->getMulti() && nat->getPeer1AddressesArraySize() > 1 && nat->getPeer2AddressesArraySize() > 1) {
                                 EV << " peer1Address2=" << nat->getPeer1Addresses(1) << " peer2Address2=" << nat->getPeer2Addresses(1) << endl;
                             }
-                            if ((*it)->peer2 == 0) {
-                                (*it)->peer2 = nat->getPeer1();
+                            if ((elem)->peer2 == 0) {
+                                (elem)->peer2 = nat->getPeer1();
                             }
-                            if ((*it)->peer1 == 0) {
-                                (*it)->peer1 = nat->getPeer2();
+                            if ((elem)->peer1 == 0) {
+                                (elem)->peer1 = nat->getPeer2();
                             }
-                            if ((*it)->peer2Address1.isUnspecified()) {
-                                (*it)->peer2Address1 = ind->getRemoteAddr();
-                                (*it)->peer2Assoc = assocId;
-                                (*it)->peer2Port = nat->getPortPeer1();
-                                (*it)->peer2Gate = ind->getGate();
+                            if ((elem)->peer2Address1.isUnspecified()) {
+                                (elem)->peer2Address1 = ind->getRemoteAddr();
+                                (elem)->peer2Assoc = assocId;
+                                (elem)->peer2Port = nat->getPortPeer1();
+                                (elem)->peer2Gate = ind->getGate();
                                 EV << "set peer2Address1=" << ind->getRemoteAddr() << " peer2Assoc=" << assocId << " peer2Port=" << nat->getPortPeer1() << "\n";
                             }
-                            else if ((*it)->multi && !(*it)->peer2Address2.isUnspecified())
-                                (*it)->peer2Address2 = ind->getRemoteAddr();
+                            else if ((elem)->multi && !(elem)->peer2Address2.isUnspecified())
+                                (elem)->peer2Address2 = ind->getRemoteAddr();
 
-                            if (!(*it)->multi || ((*it)->multi && !(*it)->peer2Address2.isUnspecified() && !(*it)->peer1Address2.isUnspecified()
-                                                  && !(*it)->peer2Address1.isUnspecified() && !(*it)->peer1Address1.isUnspecified()))
+                            if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified()
+                                                  && !(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()))
                             {
-                                EV << "entry now: Peer1=" << (*it)->peer1 << " Peer2=" << (*it)->peer2 << " peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << " peer1Port=" << (*it)->peer1Port << "peer2Port=" << (*it)->peer2Port << "\n";
-                                sendInfo((*it));
+                                EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << "peer2Port=" << (elem)->peer2Port << "\n";
+                                sendInfo((elem));
                             }
                             found = true;
                             break;
@@ -367,40 +367,40 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 printNatVector();
                 EV << " address added: LOCAL=" << ind->getLocalAddr() << ", remote=" << ind->getRemoteAddr() << " assoc=" << assocId << "\n";
                 if (natVector.size() > 0) {
-                    for (auto it = natVector.begin(); it != natVector.end(); it++) {
-                        if ((*it)->peer1Assoc == assocId) {
-                            EV << "found entry for assoc1 = " << assocId << "  Peer1 = " << (*it)->peer1 << "  peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2=" << (*it)->peer2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << "\n";
-                            if ((*it)->multi && (*it)->peer1Address2.isUnspecified()) {
-                                (*it)->peer1Address2 = ind->getRemoteAddr();
+                    for (auto & elem : natVector) {
+                        if ((elem)->peer1Assoc == assocId) {
+                            EV << "found entry for assoc1 = " << assocId << "  Peer1 = " << (elem)->peer1 << "  peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2=" << (elem)->peer2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << "\n";
+                            if ((elem)->multi && (elem)->peer1Address2.isUnspecified()) {
+                                (elem)->peer1Address2 = ind->getRemoteAddr();
                                 EV << "added peer1Address2=" << ind->getRemoteAddr() << "\n";
                             }
-                            if (!(*it)->peer2Address1.isUnspecified()) {
-                                if (!(*it)->multi || ((*it)->multi && !(*it)->peer2Address2.isUnspecified() && !(*it)->peer1Address2.isUnspecified())) {
-                                    EV << "entry now: Peer1=" << (*it)->peer1 << " Peer2=" << (*it)->peer2 << " peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << " peer2Port=" << (*it)->peer2Port << "\n";
-                                    sendInfo((*it));
+                            if (!(elem)->peer2Address1.isUnspecified()) {
+                                if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified())) {
+                                    EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer2Port=" << (elem)->peer2Port << "\n";
+                                    sendInfo((elem));
                                 }
                             }
                             found = true;
                             break;
                         }
-                        else if ((*it)->peer2Assoc == assocId) {
-                            EV << "opposite way: found entry for assoc2 = " << assocId << "  peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << "\n";
-                            if ((*it)->multi)
-                                (*it)->peer2Address2 = ind->getRemoteAddr();
+                        else if ((elem)->peer2Assoc == assocId) {
+                            EV << "opposite way: found entry for assoc2 = " << assocId << "  peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << "\n";
+                            if ((elem)->multi)
+                                (elem)->peer2Address2 = ind->getRemoteAddr();
 
-                            if (!(*it)->multi || ((*it)->multi && !(*it)->peer2Address2.isUnspecified() && !(*it)->peer1Address2.isUnspecified())) {
-                                EV << "entry now: Peer1=" << (*it)->peer1 << " Peer2=" << (*it)->peer2 << " peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << " peer1Port=" << (*it)->peer1Port << "peer2Port=" << (*it)->peer2Port << "\n";
-                                sendInfo((*it));
+                            if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified())) {
+                                EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << "peer2Port=" << (elem)->peer2Port << "\n";
+                                sendInfo((elem));
                             }
                             found = true;
                             break;
                         }
-                        else if ((*it)->peer2Assoc == 0 && ((*it)->multi)) {
-                            (*it)->peer2Address2 = ind->getRemoteAddr();
-                            (*it)->peer2Assoc = assocId;
-                            (*it)->peer2Port = ind->getRemotePort();
-                            (*it)->peer2Gate = ind->getGate();
-                            EV << "entry now: Peer1=" << (*it)->peer1 << " Peer2=" << (*it)->peer2 << " peer1Address1=" << (*it)->peer1Address1 << " peer1Address2=" << (*it)->peer1Address2 << " peer2Address1=" << (*it)->peer2Address1 << " peer2Address2=" << (*it)->peer2Address2 << " peer1Port=" << (*it)->peer1Port << "peer2Port=" << (*it)->peer2Port << "\n";
+                        else if ((elem)->peer2Assoc == 0 && ((elem)->multi)) {
+                            (elem)->peer2Address2 = ind->getRemoteAddr();
+                            (elem)->peer2Assoc = assocId;
+                            (elem)->peer2Port = ind->getRemotePort();
+                            (elem)->peer2Gate = ind->getGate();
+                            EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << "peer2Port=" << (elem)->peer2Port << "\n";
 
                             found = true;
                         }
@@ -475,9 +475,9 @@ void SCTPNatServer::handleTimer(cMessage *msg)
 
 void SCTPNatServer::printNatVector(void)
 {
-    for (auto it = natVector.begin(); it != natVector.end(); it++) {
-        EV << "Peer1: " << (*it)->peer1 << " Assoc: " << (*it)->peer1Assoc << " Address1: " << (*it)->peer1Address1 << " Address2: " << (*it)->peer1Address2 << "Port: " << (*it)->peer1Port << endl;
-        EV << "Peer2: " << (*it)->peer2 << " Assoc: " << (*it)->peer2Assoc << " Address1: " << (*it)->peer2Address1 << " Address2: " << (*it)->peer2Address2 << "Port: " << (*it)->peer2Port << endl;
+    for (auto & elem : natVector) {
+        EV << "Peer1: " << (elem)->peer1 << " Assoc: " << (elem)->peer1Assoc << " Address1: " << (elem)->peer1Address1 << " Address2: " << (elem)->peer1Address2 << "Port: " << (elem)->peer1Port << endl;
+        EV << "Peer2: " << (elem)->peer2 << " Assoc: " << (elem)->peer2Assoc << " Address1: " << (elem)->peer2Address1 << " Address2: " << (elem)->peer2Address2 << "Port: " << (elem)->peer2Port << endl;
     }
 }
 

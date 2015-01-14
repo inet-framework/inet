@@ -247,9 +247,9 @@ void Batman::initialize(int stage)
         //if (gateway_class != 0)
         //    init_interface_gw();
 
-        for (unsigned int i = 0; i < if_list.size(); i++)
+        for (auto & elem : if_list)
         {
-            BatmanIf *batman_if = if_list[i];
+            BatmanIf *batman_if = elem;
             schedule_own_packet(batman_if);
         }
 
@@ -285,11 +285,11 @@ void Batman::handleMessage(cMessage *msg)
         INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
         L3Address srcAddr = ctrl->getSourceAddress();
         neigh = srcAddr;
-        for (unsigned int i=0; i<if_list.size(); i++)
+        for (auto & elem : if_list)
         {
-            if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
+            if (elem->dev->getInterfaceId() == ctrl->getInterfaceId())
             {
-                if_incoming = if_list[i];
+                if_incoming = elem;
                 break;
             }
         }

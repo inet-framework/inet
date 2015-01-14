@@ -148,8 +148,8 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         position.setArgValue(Dimension::frequency, endFrequency);
         powerMapping->setValue(position, 0);
         // iterate over timeGains and frequencyGains
-        for (std::vector<TimeGainEntry>::const_iterator it = timeGains.begin(); it != timeGains.end(); it++) {
-            const TimeGainEntry& timeGainEntry = *it;
+        for (const auto & timeGainEntry : timeGains) {
+            
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -160,8 +160,8 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
                 default:
                     throw cRuntimeError("Unknown time unit");
             }
-            for (std::vector<FrequencyGainEntry>::const_iterator it = frequencyGains.begin(); it != frequencyGains.end(); it++) {
-                const FrequencyGainEntry& frequencyGainEntry = *it;
+            for (const auto & frequencyGainEntry : frequencyGains) {
+                
                 switch (frequencyGainEntry.frequencyUnit) {
                     case 's':
                         position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
@@ -191,8 +191,8 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         position.setTime(0);
         powerMapping->setValue(position, 0);
         // iterate over timeGains
-        for (std::vector<TimeGainEntry>::const_iterator it = timeGains.begin(); it != timeGains.end(); it++) {
-            const TimeGainEntry& timeGainEntry = *it;
+        for (const auto & timeGainEntry : timeGains) {
+            
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -216,8 +216,8 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         position.setArgValue(Dimension::frequency, 0);
         powerMapping->setValue(position, 0);
         // iterate over frequencyGains
-        for (std::vector<FrequencyGainEntry>::const_iterator it = frequencyGains.begin(); it != frequencyGains.end(); it++) {
-            const FrequencyGainEntry& frequencyGainEntry = *it;
+        for (const auto & frequencyGainEntry : frequencyGains) {
+            
             switch (frequencyGainEntry.frequencyUnit) {
                 case 's':
                     position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);

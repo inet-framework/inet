@@ -1203,17 +1203,17 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
             // check for vehicles that need subscribing to
             std::set<std::string> needSubscribe;
             std::set_difference(drivingVehicles.begin(), drivingVehicles.end(), subscribedVehicles.begin(), subscribedVehicles.end(), std::inserter(needSubscribe, needSubscribe.begin()));
-            for (std::set<std::string>::const_iterator i = needSubscribe.begin(); i != needSubscribe.end(); ++i) {
-                subscribedVehicles.insert(*i);
-                subscribeToVehicleVariables(*i);
+            for (const auto & elem : needSubscribe) {
+                subscribedVehicles.insert(elem);
+                subscribeToVehicleVariables(elem);
             }
 
             // check for vehicles that need unsubscribing from
             std::set<std::string> needUnsubscribe;
             std::set_difference(subscribedVehicles.begin(), subscribedVehicles.end(), drivingVehicles.begin(), drivingVehicles.end(), std::inserter(needUnsubscribe, needUnsubscribe.begin()));
-            for (std::set<std::string>::const_iterator i = needUnsubscribe.begin(); i != needUnsubscribe.end(); ++i) {
-                subscribedVehicles.erase(*i);
-                unsubscribeFromVehicleVariables(*i);
+            for (const auto & elem : needUnsubscribe) {
+                subscribedVehicles.erase(elem);
+                unsubscribeFromVehicleVariables(elem);
             }
         }
         else if (variable1_resp == VAR_POSITION) {

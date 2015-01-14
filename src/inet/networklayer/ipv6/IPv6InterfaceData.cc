@@ -37,9 +37,9 @@ std::string IPv6InterfaceData::HostMulticastData::info()
     {
         out << "\tmcastgrps:";
         bool addComma = false;
-        for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i) {
-            if (joinedMulticastGroups[i] != IPv6Address::ALL_NODES_1) {
-                out << (addComma ? "," : "") << joinedMulticastGroups[i];
+        for (auto & elem : joinedMulticastGroups) {
+            if (elem != IPv6Address::ALL_NODES_1) {
+                out << (addComma ? "," : "") << elem;
                 addComma = true;
             }
         }
@@ -72,8 +72,8 @@ std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Multicast Listeners:";
-    for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i)
-        out << " " << reportedMulticastGroups[i];
+    for (auto & elem : reportedMulticastGroups)
+        out << " " << elem;
     out << "\n";
     return out.str();
 }
@@ -269,10 +269,10 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
         simtime_t expiryTime, simtime_t prefExpiryTime)
 {
-    for (auto it = addresses.begin(); it != addresses.end(); it++) {
-        if (it->address.matches(prefix, length)) {
-            it->expiryTime = expiryTime;
-            it->prefExpiryTime = prefExpiryTime;
+    for (auto & elem : addresses) {
+        if (elem.address.matches(prefix, length)) {
+            elem.expiryTime = expiryTime;
+            elem.prefExpiryTime = prefExpiryTime;
         }
     }
     choosePreferredAddress();
@@ -319,8 +319,8 @@ bool IPv6InterfaceData::hasAddress(const IPv6Address& addr) const
 
 bool IPv6InterfaceData::matchesSolicitedNodeMulticastAddress(const IPv6Address& solNodeAddr) const
 {
-    for (AddressDataVector::const_iterator it = addresses.begin(); it != addresses.end(); it++)
-        if (it->address.formSolicitedNodeMulticastAddress() == solNodeAddr)
+    for (const auto & elem : addresses)
+        if (elem.address.formSolicitedNodeMulticastAddress() == solNodeAddr)
             return true;
 
     return false;
@@ -352,9 +352,9 @@ void IPv6InterfaceData::tentativelyAssign(int i)
 
 const IPv6Address& IPv6InterfaceData::getLinkLocalAddress() const
 {
-    for (AddressDataVector::const_iterator it = addresses.begin(); it != addresses.end(); it++)
-        if (it->address.isLinkLocal()) // FIXME and valid
-            return it->address;
+    for (const auto & elem : addresses)
+        if (elem.address.isLinkLocal()) // FIXME and valid
+            return elem.address;
 
     return IPv6Address::UNSPECIFIED_ADDRESS;
 }
@@ -404,10 +404,10 @@ void IPv6InterfaceData::choosePreferredAddress()
     // sort addresses by scope and expiry time, then pick the first one
     std::sort(addresses.begin(), addresses.end(), addrLess);
     // choose first unicast address
-    for (int i = 0; i < (int)addresses.size(); ++i) {
-        if (addresses[i].address.isUnicast()) {
-            preferredAddr = addresses[i].address;
-            preferredAddrExpiryTime = addresses[i].expiryTime;
+    for (auto & elem : addresses) {
+        if (elem.address.isUnicast()) {
+            preferredAddr = elem.address;
+            preferredAddrExpiryTime = elem.expiryTime;
             return;
         }
     }
@@ -546,9 +546,9 @@ void IPv6InterfaceData::removeMulticastListener(const IPv6Address& multicastAddr
 
 const IPv6Address& IPv6InterfaceData::getGlobalAddress(AddressType type) const
 {
-    for (AddressDataVector::const_iterator it = addresses.begin(); it != addresses.end(); it++)
-        if (it->address.isGlobal() && it->addrType == type) // FIXME and valid, 25.9.07 - CB
-            return it->address;
+    for (const auto & elem : addresses)
+        if (elem.address.isGlobal() && elem.addrType == type) // FIXME and valid, 25.9.07 - CB
+            return elem.address;
 
     return IPv6Address::UNSPECIFIED_ADDRESS;
 }

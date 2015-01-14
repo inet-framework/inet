@@ -65,9 +65,9 @@ std::string DYMO_DataQueue::info() const
     ss << total << " queued datagrams: ";
 
     ss << "{" << std::endl;
-    for (std::list<DYMO_QueuedData>::const_iterator iter = dataQueue.begin(); iter != dataQueue.end(); iter++)
+    for (auto e : dataQueue)
     {
-        DYMO_QueuedData e = *iter;
+        
         ss << "  " << e << std::endl;
     }
     ss << "}";

@@ -628,9 +628,9 @@ xMIPv6::BUTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
     // TODO use STL search algorithm
 
     // update 13.9.07 - CB
-    for (auto it = transmitIfList.begin(); it != transmitIfList.end(); it++) {
-        if (dynamic_cast<BUTransmitIfEntry *>(it->second)) {
-            BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry *)(it->second);
+    for (auto & elem : transmitIfList) {
+        if (dynamic_cast<BUTransmitIfEntry *>(elem.second)) {
+            BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry *)(elem.second);
             if (buIfEntry->ifEntry->getInterfaceId() == ie->getInterfaceId() && buIfEntry->dest == dest) // update 5.9.07 - CB
                 return buIfEntry;
         }
@@ -2318,9 +2318,9 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
 
 xMIPv6::TimerIfEntry *xMIPv6::searchTimerIfEntry(IPv6Address& dest, int timerType)
 {
-    for (auto pos = transmitIfList.begin(); pos != transmitIfList.end(); ++pos) {
-        if (pos->first.type == timerType && pos->first.dest == dest)
-            return pos->second;
+    for (auto & elem : transmitIfList) {
+        if (elem.first.type == timerType && elem.first.dest == dest)
+            return elem.second;
     }
 
     return nullptr;
@@ -2385,10 +2385,10 @@ void xMIPv6::cancelEntries(int interfaceId, IPv6Address& CoA)
 
 void xMIPv6::removeCoAEntries()
 {
-    for (auto it = interfaceCoAList.begin(); it != interfaceCoAList.end(); ++it) {
+    for (auto & elem : interfaceCoAList) {
         //if (it->first == ie->interfaceId())
-        EV_DEBUG << "Cancelling timers for ifID=" << it->first << " and CoA=" << it->second << endl;
-        cancelEntries(it->first, it->second);
+        EV_DEBUG << "Cancelling timers for ifID=" << elem.first << " and CoA=" << elem.second << endl;
+        cancelEntries(elem.first, elem.second);
     }
 
     // delete all entries after cleanup

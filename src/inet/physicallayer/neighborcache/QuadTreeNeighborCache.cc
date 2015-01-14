@@ -125,9 +125,9 @@ void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFra
 
 void QuadTreeNeighborCache::fillQuadTreeWithRadios()
 {
-    for (unsigned int i = 0; i < radios.size(); i++) {
-        Coord radioPos = radios[i]->getAntenna()->getMobility()->getCurrentPosition();
-        if (!quadTree->insert(check_and_cast<const cObject *>(radios[i]), radioPos))
+    for (auto & elem : radios) {
+        Coord radioPos = elem->getAntenna()->getMobility()->getCurrentPosition();
+        if (!quadTree->insert(check_and_cast<const cObject *>(elem), radioPos))
             throw cRuntimeError("Unsuccessful QuadTree building");
     }
 }

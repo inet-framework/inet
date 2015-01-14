@@ -62,9 +62,9 @@ int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
 int NS_CLASS timer_is_queued(struct timer *t)
 {
     if (t)
-        for (auto i = dymoTimerList->begin(); i != dymoTimerList->end(); i++)
+        for (auto & elem : *dymoTimerList)
         {
-            if ((*i).second == t)return 1;
+            if ((elem).second == t)return 1;
         }
     return 0;
 }

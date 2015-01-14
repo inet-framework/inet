@@ -95,11 +95,11 @@ void NS_CLASS rerr_send(struct in_addr addr, int ttl, rtable_entry_t *entry)
             }
         }
 #else
-        for (auto it = dymoRoutingTable->begin(); it != dymoRoutingTable->end(); it++)
+        for (auto & elem : *dymoRoutingTable)
         {
             if (i >= MAX_RERR_BLOCKS)
                 continue;
-            rtable_entry_t *e = it->second;
+            rtable_entry_t *e = elem.second;
             if (e != entry && (e->rt_nxthop_addr.s_addr
                                == entry->rt_nxthop_addr.s_addr) &&
                     (e->rt_ifindex == entry->rt_ifindex))
@@ -283,9 +283,9 @@ void NS_CLASS rerr_send(struct in_addr addr, int ttl, rtable_entry_t *entry,stru
             }
         }
 #else
-        for (auto it = dymoRoutingTable->begin(); it != dymoRoutingTable->end(); it++)
+        for (auto & elem : *dymoRoutingTable)
         {
-            rtable_entry_t *e = it->second;
+            rtable_entry_t *e = elem.second;
             if (e != entry && (e->rt_nxthop_addr.s_addr
                                == entry->rt_nxthop_addr.s_addr) &&
                     (e->rt_ifindex == entry->rt_ifindex))

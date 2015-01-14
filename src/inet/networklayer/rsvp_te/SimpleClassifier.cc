@@ -68,19 +68,19 @@ bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outL
 
     // forwarding decision for non-labeled datagrams
 
-    for (auto it = bindings.begin(); it != bindings.end(); it++) {
-        if (!it->dest.isUnspecified() && !it->dest.equals(ipdatagram->getDestAddress()))
+    for (auto & elem : bindings) {
+        if (!elem.dest.isUnspecified() && !elem.dest.equals(ipdatagram->getDestAddress()))
             continue;
 
-        if (!it->src.isUnspecified() && !it->src.equals(ipdatagram->getSrcAddress()))
+        if (!elem.src.isUnspecified() && !elem.src.equals(ipdatagram->getSrcAddress()))
             continue;
 
-        EV_DETAIL << "packet belongs to fecid=" << it->id << endl;
+        EV_DETAIL << "packet belongs to fecid=" << elem.id << endl;
 
-        if (it->inLabel < 0)
+        if (elem.inLabel < 0)
             return false;
 
-        return lt->resolveLabel("", it->inLabel, outLabel, outInterface, color);
+        return lt->resolveLabel("", elem.inLabel, outLabel, outInterface, color);
     }
 
     return false;
@@ -90,14 +90,14 @@ bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outL
 
 void SimpleClassifier::bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel)
 {
-    for (auto it = bindings.begin(); it != bindings.end(); it++) {
-        if (it->session != session)
+    for (auto & elem : bindings) {
+        if (elem.session != session)
             continue;
 
-        if (it->sender != sender)
+        if (elem.sender != sender)
             continue;
 
-        it->inLabel = inLabel;
+        elem.inLabel = inLabel;
     }
 }
 
@@ -120,8 +120,8 @@ void SimpleClassifier::readTableFromXML(const cXMLElement *fectable)
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
     checkTags(fectable, "fecentry");
     cXMLElementList list = fectable->getChildrenByTagName("fecentry");
-    for (auto it = list.begin(); it != list.end(); it++)
-        readItemFromXML(*it);
+    for (auto & elem : list)
+        readItemFromXML(elem);
 }
 
 void SimpleClassifier::readItemFromXML(const cXMLElement *fec)

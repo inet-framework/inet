@@ -867,8 +867,8 @@ void SCTPNatPeer::finish()
 {
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    for (auto l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); l++) {
-        EV << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
+    for (auto & elem : rcvdBytesPerAssoc) {
+        EV << getFullPath() << ": received " << elem.second << " bytes in assoc " << elem.first << "\n";
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";

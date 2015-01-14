@@ -128,10 +128,10 @@ void NS_CLASS route_discovery_timeout(void *arg)
 #ifdef NS_PORT
     std::vector<L3Address> list;
     getListRelatedAp(entry->dest_addr.s_addr, list);
-    for (unsigned int i = 0; i < list.size(); i ++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
         packet_queue_set_verdict(auxAaddr, PQ_DROP);
     }
 #else

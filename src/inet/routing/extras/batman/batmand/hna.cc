@@ -171,10 +171,10 @@ void Batman::hna_local_buffer_fill(void)
     if (hna_list.empty())
         return;
 
-    for (unsigned int list_pos = 0; list_pos < hna_list.size(); list_pos++) {
+    for (auto & elem : hna_list) {
         HnaElement aux;
-        aux.addr = hna_list[list_pos].addr;
-        aux.netmask = hna_list[list_pos].netmask;
+        aux.addr = elem.addr;
+        aux.netmask = elem.netmask;
         hna_buff_local.push_back(aux);
     }
 }
@@ -300,8 +300,8 @@ void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
         return;
 
     bool notFound = true;
-    for (unsigned int list_pos = 0; list_pos < hna_global_entry->orig_list.size(); list_pos++) {
-        if (hna_global_entry->orig_list[list_pos] == orig_node) {
+    for (auto & elem : hna_global_entry->orig_list) {
+        if (elem == orig_node) {
             notFound = false;
             break;
         }
@@ -573,8 +573,8 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
     /* old routes which are not to be kept are deleted now. */
     num_elements = old_hna_len / SIZE_Hna_element;
 
-    for (unsigned int i = 0; i < old_hna.size(); i++) {
-        e = &old_hna[i];
+    for (auto & elem : old_hna) {
+        e = &elem;
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);

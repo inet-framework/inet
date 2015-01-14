@@ -85,10 +85,10 @@ Topology& Topology::operator=(const Topology&)
 
 void Topology::clear()
 {
-    for (int i = 0; i < (int)nodes.size(); i++) {
-        for (int j = 0; j < (int)nodes[i]->outLinks.size(); j++)
-            delete nodes[i]->outLinks[j]; // delete links from their source side
-        delete nodes[i];
+    for (auto & elem : nodes) {
+        for (auto & _j : elem->outLinks)
+            delete _j; // delete links from their source side
+        delete elem;
     }
     nodes.clear();
 }
@@ -102,8 +102,8 @@ static bool selectByModulePath(cModule *mod, void *data)
     // actually, this is selectByModuleFullPathPattern()
     const std::vector<std::string>& v = *(const std::vector<std::string> *)data;
     std::string path = mod->getFullPath();
-    for (int i = 0; i < (int)v.size(); i++)
-        if (PatternMatcher(v[i].c_str(), true, true, true).matches(path.c_str()))
+    for (auto & elem : v)
+        if (PatternMatcher(elem.c_str(), true, true, true).matches(path.c_str()))
             return true;
 
     return false;
@@ -212,11 +212,11 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     }
 
     // Discover out neighbors too.
-    for (int k = 0; k < (int)nodes.size(); k++) {
+    for (auto & elem : nodes) {
         // Loop through all its gates and find those which come
         // from or go to modules included in the topology.
 
-        Node *node = nodes[k];
+        Node *node = elem;
         cModule *mod = simulation.getModule(node->moduleId);
 
         for (cModule::GateIterator i(mod); !i.end(); i++) {
@@ -243,9 +243,9 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     }
 
     // fill inLinks vectors
-    for (int k = 0; k < (int)nodes.size(); k++) {
-        for (int l = 0; l < (int)nodes[k]->outLinks.size(); l++) {
-            Topology::Link *link = nodes[k]->outLinks[l];
+    for (auto & elem : nodes) {
+        for (auto & _l : elem->outLinks) {
+            Topology::Link *link = _l;
             link->destNode->inLinks.push_back(link);
         }
     }
@@ -269,16 +269,16 @@ int Topology::addNode(Node *node)
 void Topology::deleteNode(Node *node)
 {
     // remove outgoing links
-    for (int i = 0; i < (int)node->outLinks.size(); i++) {
-        Link *link = node->outLinks[i];
+    for (auto & elem : node->outLinks) {
+        Link *link = elem;
         unlinkFromDestNode(link);
         delete link;
     }
     node->outLinks.clear();
 
     // remove incoming links
-    for (int i = 0; i < (int)node->inLinks.size(); i++) {
-        Link *link = node->inLinks[i];
+    for (auto & elem : node->inLinks) {
+        Link *link = elem;
         unlinkFromSourceNode(link);
         delete link;
     }
@@ -381,9 +381,9 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
         throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
     target = _target;
 
-    for (int i = 0; i < (int)nodes.size(); i++) {
-        nodes[i]->dist = INFINITY;
-        nodes[i]->outPath = nullptr;
+    for (auto & elem : nodes) {
+        elem->dist = INFINITY;
+        elem->outPath = nullptr;
     }
     target->dist = 0;
 
@@ -420,9 +420,9 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
     target = _target;
 
     // clean path infos
-    for (int i = 0; i < (int)nodes.size(); i++) {
-        nodes[i]->dist = INFINITY;
-        nodes[i]->outPath = nullptr;
+    for (auto & elem : nodes) {
+        elem->dist = INFINITY;
+        elem->outPath = nullptr;
     }
 
     target->dist = 0;

@@ -97,8 +97,8 @@ void SpatialGrid::rangeQuery(const Coord& pos, double range, const IVisitor *vis
             for (int k = start[2]; k <= end[2]; k++) {
                 int voxelIndex = rowMajorIndex(Triplet<int>(i,j,k));
                 const Voxel& neighborVoxel = grid[voxelIndex];
-                for (Voxel::const_iterator it = neighborVoxel.begin(); it != neighborVoxel.end(); it++)
-                    visitor->visit(*it);
+                for (const auto & elem : neighborVoxel)
+                    visitor->visit(elem);
             }
         }
     }
@@ -114,12 +114,12 @@ void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const IVisito
         if (voxelIndex >= gridVectorLength)
             throw cRuntimeError("Out of index, gridVectorLength = %d, voxelIndex = %d", gridVectorLength, voxelIndex);
         const Voxel& intersectedVoxel = grid[voxelIndex];
-        for (Voxel::const_iterator it = intersectedVoxel.begin(); it != intersectedVoxel.end(); it++)
+        for (const auto & elem : intersectedVoxel)
         {
-            std::map<const cObject *, bool>::const_iterator objIter = visited.find(*it);
+            std::map<const cObject *, bool>::const_iterator objIter = visited.find(elem);
             if (objIter == visited.end() || !objIter->second)
-                visitor->visit(*it);
-            visited.insert(std::pair<const cObject*,bool>(*it, true));
+                visitor->visit(elem);
+            visited.insert(std::pair<const cObject*,bool>(elem, true));
         }
     }
 }

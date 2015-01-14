@@ -58,10 +58,10 @@ EroVector routeToEro(const IPAddressVector& rro)
 {
     EroVector ero;
 
-    for (unsigned int i = 0; i < rro.size(); i++) {
+    for (auto & elem : rro) {
         EroObj_t hop;
         hop.L = false;
-        hop.node = rro[i];
+        hop.node = elem;
         ero.push_back(hop);
     }
 
@@ -95,8 +95,8 @@ int find(const EroVector& ERO, IPv4Address node)
 
 bool find(std::vector<int>& vec, int value)
 {
-    for (unsigned int i = 0; i < vec.size(); i++)
-        if (vec[i] == value)
+    for (auto & elem : vec)
+        if (elem == value)
             return true;
 
     return false;
@@ -104,8 +104,8 @@ bool find(std::vector<int>& vec, int value)
 
 bool find(const IPAddressVector& vec, IPv4Address addr)
 {
-    for (unsigned int i = 0; i < vec.size(); i++)
-        if (vec[i] == addr)
+    for (auto & elem : vec)
+        if (elem == addr)
             return true;
 
     return false;
@@ -113,8 +113,8 @@ bool find(const IPAddressVector& vec, IPv4Address addr)
 
 void append(std::vector<int>& dest, const std::vector<int>& src)
 {
-    for (unsigned int i = 0; i < src.size(); i++)
-        dest.push_back(src[i]);
+    for (auto & elem : src)
+        dest.push_back(elem);
 }
 
 cModule *getPayloadOwner(cPacket *msg)

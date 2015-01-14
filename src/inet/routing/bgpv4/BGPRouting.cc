@@ -29,14 +29,13 @@ Define_Module(BGPRouting);
 
 BGPRouting::~BGPRouting(void)
 {
-    for (auto sessionIterator = _BGPSessions.begin();
-         sessionIterator != _BGPSessions.end(); sessionIterator++)
+    for (auto & elem : _BGPSessions)
     {
-        delete (*sessionIterator).second;
+        delete (elem).second;
     }
 
-    for (auto it = _prefixListINOUT.begin(); it != _prefixListINOUT.end(); ++it) {
-        delete (*it);
+    for (auto & elem : _prefixListINOUT) {
+        delete (elem);
     }
 }
 
@@ -117,8 +116,8 @@ void BGPRouting::finish()
     unsigned int statTab[NB_STATS] = {
         0, 0, 0, 0, 0, 0
     };
-    for (auto sessionIterator = _BGPSessions.begin(); sessionIterator != _BGPSessions.end(); sessionIterator++) {
-        (*sessionIterator).second->getStatistics(statTab);
+    for (auto & elem : _BGPSessions) {
+        (elem).second->getStatistics(statTab);
     }
     recordScalar("OPENMsgSent", statTab[0]);
     recordScalar("OPENMsgRecv", statTab[1]);
@@ -389,17 +388,16 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
     //if it is not the currentSession and if the session is already established
     //SESSION = IGP : send an update message to External BGP Peer (EGP) only
     //if it is not the currentSession and if the session is already established
-    for (auto sessionIt = _BGPSessions.begin();
-         sessionIt != _BGPSessions.end(); sessionIt++)
+    for (auto & elem : _BGPSessions)
     {
         if (isInTable(_prefixListOUT, entry) != (unsigned long)-1 || isInASList(_ASListOUT, entry) ||
-            ((*sessionIt).first == sessionIndex && type != NEW_SESSION_ESTABLISHED) ||
-            (type == NEW_SESSION_ESTABLISHED && (*sessionIt).first != sessionIndex) ||
-            !(*sessionIt).second->isEstablished())
+            ((elem).first == sessionIndex && type != NEW_SESSION_ESTABLISHED) ||
+            (type == NEW_SESSION_ESTABLISHED && (elem).first != sessionIndex) ||
+            !(elem).second->isEstablished())
         {
             continue;
         }
-        if ((_BGPSessions[sessionIndex]->getType() == IGP && (*sessionIt).second->getType() == EGP) ||
+        if ((_BGPSessions[sessionIndex]->getType() == IGP && (elem).second->getType() == EGP) ||
             _BGPSessions[sessionIndex]->getType() == EGP ||
             type == ROUTE_DESTINATION_CHANGED ||
             type == NEW_SESSION_ESTABLISHED)
@@ -428,8 +426,8 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
                 }
             }
 
-            InterfaceEntry *iftEntry = (*sessionIt).second->getLinkIntf();
-            content.getOrigin().setValue((*sessionIt).second->getType());
+            InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
+            content.getOrigin().setValue((elem).second->getType());
             content.getNextHop().setValue(iftEntry->ipv4Data()->getIPAddress());
             IPv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
@@ -439,8 +437,8 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
-                (*sessionIt).second->getSocket()->send(updateMsg);
-                (*sessionIt).second->addUpdateMsgSent();
+                (elem).second->getSocket()->send(updateMsg);
+                (elem).second->addUpdateMsgSent();
             }
         }
     }
@@ -458,19 +456,19 @@ bool BGPRouting::checkExternalRoute(const IPv4Route *route)
 
 void BGPRouting::loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab)
 {
-    for (auto timerElemIt = timerConfig.begin(); timerElemIt != timerConfig.end(); timerElemIt++) {
-        std::string nodeName = (*timerElemIt)->getTagName();
+    for (auto & elem : timerConfig) {
+        std::string nodeName = (elem)->getTagName();
         if (nodeName == "connectRetryTime") {
-            delayTab[0] = (double)atoi((*timerElemIt)->getNodeValue());
+            delayTab[0] = (double)atoi((elem)->getNodeValue());
         }
         else if (nodeName == "holdTime") {
-            delayTab[1] = (double)atoi((*timerElemIt)->getNodeValue());
+            delayTab[1] = (double)atoi((elem)->getNodeValue());
         }
         else if (nodeName == "keepAliveTime") {
-            delayTab[2] = (double)atoi((*timerElemIt)->getNodeValue());
+            delayTab[2] = (double)atoi((elem)->getNodeValue());
         }
         else if (nodeName == "startDelay") {
-            delayTab[3] = (double)atoi((*timerElemIt)->getNodeValue());
+            delayTab[3] = (double)atoi((elem)->getNodeValue());
         }
     }
 }
@@ -479,14 +477,14 @@ ASID BGPRouting::findMyAS(cXMLElementList& asList, int& outRouterPosition)
 {
     // find my own IPv4 address in the configuration file and return the AS id under which it is configured
     // and also the 1 based position of the entry inside the AS config element
-    for (auto asListIt = asList.begin(); asListIt != asList.end(); asListIt++) {
-        cXMLElementList routerList = (*asListIt)->getChildrenByTagName("Router");
+    for (auto & elem : asList) {
+        cXMLElementList routerList = (elem)->getChildrenByTagName("Router");
         outRouterPosition = 1;
-        for (auto routerListIt = routerList.begin(); routerListIt != routerList.end(); routerListIt++) {
-            IPv4Address routerAddr = IPv4Address((*routerListIt)->getAttribute("interAddr"));
+        for (auto & routerList_routerListIt : routerList) {
+            IPv4Address routerAddr = IPv4Address((routerList_routerListIt)->getAttribute("interAddr"));
             for (int i = 0; i < _inft->getNumInterfaces(); i++) {
                 if (_inft->getInterface(i)->ipv4Data()->getIPAddress() == routerAddr)
-                    return atoi((*routerListIt)->getParentNode()->getAttribute("id"));
+                    return atoi((routerList_routerListIt)->getParentNode()->getAttribute("id"));
             }
             outRouterPosition++;
         }
@@ -531,18 +529,18 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
     //create deny Lists
     std::vector<const char *> routerInSameASList;
 
-    for (auto ASConfigIt = ASConfig.begin(); ASConfigIt != ASConfig.end(); ASConfigIt++) {
-        std::string nodeName = (*ASConfigIt)->getTagName();
+    for (auto & elem : ASConfig) {
+        std::string nodeName = (elem)->getTagName();
         if (nodeName == "Router") {
-            if (isInInterfaceTable(_inft, IPv4Address((*ASConfigIt)->getAttribute("interAddr"))) == -1) {
-                routerInSameASList.push_back((*ASConfigIt)->getAttribute("interAddr"));
+            if (isInInterfaceTable(_inft, IPv4Address((elem)->getAttribute("interAddr"))) == -1) {
+                routerInSameASList.push_back((elem)->getAttribute("interAddr"));
             }
             continue;
         }
         if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
             RoutingTableEntry *entry = new RoutingTableEntry();     //FIXME Who will delete this entry?
-            entry->setDestination(IPv4Address((*ASConfigIt)->getAttribute("Address")));
-            entry->setNetmask(IPv4Address((*ASConfigIt)->getAttribute("Netmask")));
+            entry->setDestination(IPv4Address((elem)->getAttribute("Address")));
+            entry->setNetmask(IPv4Address((elem)->getAttribute("Netmask")));
             if (nodeName == "DenyRouteIN") {
                 _prefixListIN.push_back(entry);
                 _prefixListINOUT.push_back(entry);
@@ -558,7 +556,7 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
             }
         }
         else if (nodeName == "DenyAS" || nodeName == "DenyASIN" || nodeName == "DenyASOUT") {
-            ASID ASCur = atoi((*ASConfigIt)->getNodeValue());
+            ASID ASCur = atoi((elem)->getNodeValue());
             if (nodeName == "DenyASIN") {
                 _ASListIN.push_back(ASCur);
             }
@@ -685,11 +683,10 @@ SessionID BGPRouting::createSession(BGPSessionType typeSession, const char *peer
 
 SessionID BGPRouting::findIdFromPeerAddr(std::map<SessionID, BGPSession *> sessions, IPv4Address peerAddr)
 {
-    for (auto sessionIterator = sessions.begin();
-         sessionIterator != sessions.end(); sessionIterator++)
+    for (auto & session : sessions)
     {
-        if ((*sessionIterator).second->getPeerAddr().equals(peerAddr)) {
-            return (*sessionIterator).first;
+        if ((session).second->getPeerAddr().equals(peerAddr)) {
+            return (session).first;
         }
     }
     return -1;
@@ -740,12 +737,11 @@ int BGPRouting::isInInterfaceTable(IInterfaceTable *ifTable, IPv4Address addr)
 
 SessionID BGPRouting::findIdFromSocketConnId(std::map<SessionID, BGPSession *> sessions, int connId)
 {
-    for (auto sessionIterator = sessions.begin();
-         sessionIterator != sessions.end(); sessionIterator++)
+    for (auto & session : sessions)
     {
-        TCPSocket *socket = (*sessionIterator).second->getSocket();
+        TCPSocket *socket = (session).second->getSocket();
         if (socket->getConnectionId() == connId) {
-            return (*sessionIterator).first;
+            return (session).first;
         }
     }
     return -1;
@@ -768,9 +764,9 @@ unsigned long BGPRouting::isInTable(std::vector<RoutingTableEntry *> rtTable, Ro
 /*return true if the AS is found, false else*/
 bool BGPRouting::isInASList(std::vector<ASID> ASList, RoutingTableEntry *entry)
 {
-    for (auto it = ASList.begin(); it != ASList.end(); it++) {
+    for (auto & elem : ASList) {
         for (unsigned int i = 0; i < entry->getASCount(); i++) {
-            if ((*it) == entry->getAS(i)) {
+            if ((elem) == entry->getAS(i)) {
                 return true;
             }
         }
@@ -803,11 +799,10 @@ unsigned char BGPRouting::asLoopDetection(RoutingTableEntry *entry, ASID myAS)
 SessionID BGPRouting::findNextSession(BGPSessionType type, bool startSession)
 {
     SessionID sessionID = -1;
-    for (auto sessionIterator = _BGPSessions.begin();
-         sessionIterator != _BGPSessions.end(); sessionIterator++)
+    for (auto & elem : _BGPSessions)
     {
-        if ((*sessionIterator).second->getType() == type && !(*sessionIterator).second->isEstablished()) {
-            sessionID = (*sessionIterator).first;
+        if ((elem).second->getType() == type && !(elem).second->isEstablished()) {
+            sessionID = (elem).first;
             break;
         }
     }

@@ -143,9 +143,9 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
        destination (dest) as next hop. These entries (destinations)
        cannot be reached either since dest is down. They should
        therefore also be included in the RERR. */
-    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto & elem : aodvRtTableMap)
     {
-        rt_table_t *rt_u = it->second;;
+        rt_table_t *rt_u = elem.second;;
         if (rt_u->state == VALID &&
                 rt_u->next_hop.s_addr == rt->dest_addr.s_addr &&
                 rt_u->dest_addr.s_addr != rt->dest_addr.s_addr)
@@ -180,9 +180,9 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                     rerr_add_udest(rerr, rt_u->dest_addr, rt_u->dest_seqno);
                     if (!rerr_unicast_dest.s_addr.isUnspecified())
                     {
-                        for (unsigned int i = 0; i< rt_u->precursors.size(); i++)
+                        for (auto & _i : rt_u->precursors)
                         {
-                            precursor_t pr = rt_u->precursors[i];
+                            precursor_t pr = _i;
                             if (pr.neighbor.s_addr != rerr_unicast_dest.s_addr)
                             {
                                 rerr_unicast_dest.s_addr = L3Address();

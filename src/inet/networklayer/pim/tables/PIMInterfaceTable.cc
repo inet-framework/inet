@@ -46,8 +46,8 @@ std::string PIMInterface::info() const
 
 PIMInterfaceTable::~PIMInterfaceTable()
 {
-    for (auto it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
-        delete *it;
+    for (auto & elem : pimInterfaces)
+        delete elem;
 }
 
 void PIMInterfaceTable::handleMessage(cMessage *msg)

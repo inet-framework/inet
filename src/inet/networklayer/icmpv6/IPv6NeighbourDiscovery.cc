@@ -58,27 +58,27 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
     // structs themselves and not pointers.
 
     //   RATimerList raTimerList;
-    for (auto it =raTimerList.begin(); it != raTimerList.end(); ++it) {
-        cancelAndDelete(*it);
-        delete (*it);
+    for (const auto & elem : raTimerList) {
+        cancelAndDelete(elem);
+        delete (elem);
     }
 
     //   DADList dadList;
-    for (auto it =dadList.begin(); it != dadList.end(); ++it) {
-        cancelAndDelete((*it)->timeoutMsg);
-        delete (*it);
+    for (const auto & elem : dadList) {
+        cancelAndDelete((elem)->timeoutMsg);
+        delete (elem);
     }
 
     //   RDList rdList;
-    for (auto it =rdList.begin(); it != rdList.end(); ++it) {
-        cancelAndDelete((*it)->timeoutMsg);
-        delete (*it);
+    for (const auto & elem : rdList) {
+        cancelAndDelete((elem)->timeoutMsg);
+        delete (elem);
     }
 
     //   AdvIfList advIfList;
-    for (auto it =advIfList.begin(); it != advIfList.end(); ++it) {
-        cancelAndDelete((*it)->raTimeoutMsg);
-        delete (*it);
+    for (const auto & elem : advIfList) {
+        cancelAndDelete((elem)->raTimeoutMsg);
+        delete (elem);
     }
 }
 
@@ -295,8 +295,8 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
 {
-    for (auto it = advIfList.begin(); it != advIfList.end(); it++) {
-        AdvIfEntry *advIfEntry = (*it);
+    for (auto advIfEntry : advIfList) {
+        
         if (advIfEntry->interfaceId == ie->getInterfaceId()) {
             return advIfEntry;
         }
@@ -306,8 +306,8 @@ IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(Inte
 
 IPv6NeighbourDiscovery::RDEntry *IPv6NeighbourDiscovery::fetchRDEntry(InterfaceEntry *ie)
 {
-    for (auto it = rdList.begin(); it != rdList.end(); it++) {
-        RDEntry *rdEntry = (*it);
+    for (auto rdEntry : rdList) {
+        
         if (rdEntry->interfaceId == ie->getInterfaceId()) {
             return rdEntry;
         }

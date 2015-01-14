@@ -206,9 +206,9 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
 #ifdef AODV_USE_STL_RT
                     if (rerr_unicast_dest.s_addr.isUnspecified())
                     {
-                        for (unsigned int i = 0; i< rt->precursors.size(); i++)
+                        for (auto & elem : rt->precursors)
                         {
-                            precursor_t *pr = & rt->precursors[i];
+                            precursor_t *pr = & elem;
                             if (pr->neighbor.s_addr != rerr_unicast_dest.s_addr)
                             {
                                 rerr_unicast_dest.s_addr = L3Address();

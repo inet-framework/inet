@@ -63,9 +63,9 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
 
 int ProtocolMapping::findOutputGateForProtocol(int protocol) const
 {
-    for (Entries::const_iterator i = entries.begin(); i != entries.end(); ++i)
-        if (i->protocolNumber == protocol)
-            return i->outGateIndex;
+    for (const auto & elem : entries)
+        if (elem.protocolNumber == protocol)
+            return elem.outGateIndex;
 
 
     return -2;    // illegal gateindex

@@ -435,8 +435,8 @@ void Established::entry()
     }
 
     std::vector<RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
-    for (auto it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
-        session.updateSendProcess((*it));
+    for (auto & elem : BGPRoutingTable) {
+        session.updateSendProcess((elem));
     }
 
     //when all EGP Session is in established state, start IGP Session(s)

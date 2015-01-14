@@ -35,8 +35,8 @@ IPv6FragBuf::IPv6FragBuf()
 
 IPv6FragBuf::~IPv6FragBuf()
 {
-    for (auto it = bufs.begin(); it != bufs.end(); ++it) {
-        delete it->second.datagram;
+    for (auto & elem : bufs) {
+        delete elem.second.datagram;
     }
 }
 

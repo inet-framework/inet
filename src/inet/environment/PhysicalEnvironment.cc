@@ -40,12 +40,12 @@ PhysicalEnvironment::PhysicalEnvironment() :
 
 PhysicalEnvironment::~PhysicalEnvironment()
 {
-    for (auto it = shapes.begin(); it != shapes.end(); it++)
-        delete *it;
-    for (auto it = materials.begin(); it != materials.end(); it++)
-        delete *it;
-    for (auto it = objects.begin(); it != objects.end(); it++)
-        delete *it;
+    for (auto & elem : shapes)
+        delete elem;
+    for (auto & elem : materials)
+        delete elem;
+    for (auto & elem : objects)
+        delete elem;
 }
 
 void PhysicalEnvironment::initialize(int stage)
@@ -307,8 +307,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
             center.z = height / 2;
             std::vector<Coord> prismPoints;
-            for (auto it = points.begin(); it != points.end(); it++)
-                prismPoints.push_back(*it - center);
+            for (auto & point : points)
+                prismPoints.push_back(point - center);
             shape = new Prism(height, Polygon(prismPoints));
             shapes.push_back(shape);
         }
@@ -332,8 +332,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             Box boundingBox = Box::computeBoundingBox(points);
             Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
             std::vector<Coord> PolyhedronPoints;
-            for (auto it = points.begin(); it != points.end(); it++)
-                PolyhedronPoints.push_back(*it - center);
+            for (auto & point : points)
+                PolyhedronPoints.push_back(point - center);
             shape = new Polyhedron(PolyhedronPoints);
             shapes.push_back(shape);
         }
@@ -496,9 +496,9 @@ void PhysicalEnvironment::updateCanvas()
     // KLUDGE: TODO: sorting objects with their rotated position's z coordinate to draw them in a "better" order
     std::vector<const PhysicalObject *> objectsCopy = objects;
     std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
-    for (auto it = objectsCopy.begin(); it != objectsCopy.end(); it++)
+    for (auto object : objectsCopy)
     {
-        const PhysicalObject *object = *it;
+        
         const ShapeBase *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
@@ -575,9 +575,9 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
     {
         std::vector<cFigure::Point> canvasPoints;
         const std::vector<Coord>& facePoints = *it;
-        for (std::vector<Coord>::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
+        for (const auto & facePoint : facePoints)
         {
-            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, viewRotation);
+            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(facePoint) + position, viewRotation);
             canvasPoints.push_back(canvPoint);
         }
         cPolygonFigure *figure = new cPolygonFigure();
@@ -612,8 +612,8 @@ void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegmen
     if (objectCache)
         objectCache->visitObjects(visitor, lineSegment);
     else
-        for (std::vector<const PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
-            visitor->visit(*it);
+        for (const auto & elem : objects)
+            visitor->visit(elem);
 }
 
 void PhysicalEnvironment::handleParameterChange(const char* name)

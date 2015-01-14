@@ -83,8 +83,8 @@ void GridNeighborCache::fillCubeVector()
 {
     delete grid;
     grid = new SpatialGrid(cellSize, constraintAreaMin, constraintAreaMax);
-    for (unsigned int i = 0; i < radios.size(); i++) {
-        const IRadio *radio = radios[i];
+    for (auto & elem : radios) {
+        const IRadio *radio = elem;
         Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
         grid->insertPoint(check_and_cast<const cObject *>(radio), radioPos);
     }

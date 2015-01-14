@@ -60,16 +60,16 @@ void AlgorithmicDropperBase::sendOut(cPacket *packet)
 int AlgorithmicDropperBase::getLength() const
 {
     int len = 0;
-    for (std::set<IQueueAccess *>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
-        len += (*it)->getLength();
+    for (const auto & elem : outQueueSet)
+        len += (elem)->getLength();
     return len;
 }
 
 int AlgorithmicDropperBase::getByteLength() const
 {
     int len = 0;
-    for (std::set<IQueueAccess *>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
-        len += (*it)->getByteLength();
+    for (const auto & elem : outQueueSet)
+        len += (elem)->getByteLength();
     return len;
 }
 

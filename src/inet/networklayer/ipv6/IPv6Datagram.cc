@@ -39,8 +39,8 @@ IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)
 
 void IPv6Datagram::copy(const IPv6Datagram& other)
 {
-    for (ExtensionHeaders::const_iterator i = other.extensionHeaders.begin(); i != other.extensionHeaders.end(); ++i)
-        addExtensionHeader((*i)->dup());
+    for (const auto & elem : other.extensionHeaders)
+        addExtensionHeader((elem)->dup());
 }
 
 void IPv6Datagram::setExtensionHeaderArraySize(unsigned int size)
@@ -63,10 +63,10 @@ IPv6ExtensionHeaderPtr& IPv6Datagram::getExtensionHeader(unsigned int k)
 
 IPv6ExtensionHeader *IPv6Datagram::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
 {
-    for (ExtensionHeaders::const_iterator it = extensionHeaders.begin(); it != extensionHeaders.end(); ++it)
-        if ((*it)->getExtensionType() == extensionType) {
+    for (const auto & elem : extensionHeaders)
+        if ((elem)->getExtensionType() == extensionType) {
             if (index == 0)
-                return *it;
+                return elem;
             else
                 index--;
         }
@@ -140,8 +140,8 @@ int IPv6Datagram::getExtensionHeaderOrder(IPv6ExtensionHeader *eh)
 int IPv6Datagram::calculateHeaderByteLength() const
 {
     int len = 40;
-    for (unsigned int i = 0; i < extensionHeaders.size(); i++)
-        len += extensionHeaders[i]->getByteLength();
+    for (auto & elem : extensionHeaders)
+        len += elem->getByteLength();
     return len;
 }
 

@@ -967,8 +967,8 @@ void IPv4::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 
 INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHopAddr);
+    for (auto & elem : hooks) {
+        IHook::Result r = elem.second->datagramPreRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -993,8 +993,8 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagra
 
 INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
+    for (auto & elem : hooks) {
+        IHook::Result r = elem.second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1019,8 +1019,8 @@ INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv4::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHopAddr);
+    for (auto & elem : hooks) {
+        IHook::Result r = elem.second->datagramPostRoutingHook(datagram, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1080,15 +1080,15 @@ void IPv4::flush()
     queue.clear();
 
     EV_DEBUG << "IPv4::flush(): pending packets:\n";
-    for (auto it = pendingPackets.begin(); it != pendingPackets.end(); ++it) {
-        EV_DEBUG << "IPv4::flush():    " << it->first << ": " << it->second.info() << endl;
-        it->second.clear();
+    for (auto & elem : pendingPackets) {
+        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.info() << endl;
+        elem.second.clear();
     }
     pendingPackets.clear();
 
     EV_DEBUG << "IPv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (auto it = queuedDatagramsForHooks.begin(); it != queuedDatagramsForHooks.end(); ++it) {
-        delete it->datagram;
+    for (auto & elem : queuedDatagramsForHooks) {
+        delete elem.datagram;
     }
     queuedDatagramsForHooks.clear();
 }
@@ -1101,8 +1101,8 @@ bool IPv4::isNodeUp()
 
 INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
 {
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        IHook::Result r = iter->second->datagramLocalInHook(datagram, inIE);
+    for (auto & elem : hooks) {
+        IHook::Result r = elem.second->datagramLocalInHook(datagram, inIE);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1131,8 +1131,8 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, 
 
 INetfilter::IHook::Result IPv4::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHopAddr);
+    for (auto & elem : hooks) {
+        IHook::Result r = elem.second->datagramLocalOutHook(datagram, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration

@@ -91,8 +91,8 @@ void ARP::finish()
 
 ARP::~ARP()
 {
-    for (auto i = arpCache.begin(); i != arpCache.end(); ++i)
-        delete i->second;
+    for (auto & elem : arpCache)
+        delete elem.second;
 }
 
 void ARP::handleMessage(cMessage *msg)
@@ -474,9 +474,9 @@ L3Address ARP::getL3AddressFor(const MACAddress& macAddr) const
         return IPv4Address::UNSPECIFIED_ADDRESS;
 
     simtime_t now = simTime();
-    for (ARPCache::const_iterator it = arpCache.begin(); it != arpCache.end(); ++it)
-        if (it->second->macAddress == macAddr && it->second->lastUpdate + cacheTimeout >= now)
-            return it->first;
+    for (const auto & elem : arpCache)
+        if (elem.second->macAddress == macAddr && elem.second->lastUpdate + cacheTimeout >= now)
+            return elem.first;
 
 
     return IPv4Address::UNSPECIFIED_ADDRESS;

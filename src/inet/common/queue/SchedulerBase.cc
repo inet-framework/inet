@@ -53,8 +53,8 @@ void SchedulerBase::initialize()
 
 void SchedulerBase::finalize()
 {
-    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it)
-        (*it)->removeListener(this);
+    for (auto & elem : inputQueues)
+        (elem)->removeListener(this);
 }
 
 void SchedulerBase::handleMessage(cMessage *msg)
@@ -95,8 +95,8 @@ void SchedulerBase::sendOut(cMessage *msg)
 
 bool SchedulerBase::isEmpty()
 {
-    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it)
-        if (!(*it)->isEmpty())
+    for (auto & elem : inputQueues)
+        if (!(elem)->isEmpty())
             return false;
 
     return true;
@@ -104,8 +104,8 @@ bool SchedulerBase::isEmpty()
 
 void SchedulerBase::clear()
 {
-    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it)
-        (*it)->clear();
+    for (auto & elem : inputQueues)
+        (elem)->clear();
 
     packetsRequestedFromUs = 0;
     packetsToBeRequestedFromInputs = 0;
@@ -113,9 +113,9 @@ void SchedulerBase::clear()
 
 cMessage *SchedulerBase::pop()
 {
-    for (auto it = inputQueues.begin(); it != inputQueues.end(); ++it)
-        if (!(*it)->isEmpty())
-            return (*it)->pop();
+    for (auto & elem : inputQueues)
+        if (!(elem)->isEmpty())
+            return (elem)->pop();
 
     return nullptr;
 }
@@ -136,8 +136,8 @@ void SchedulerBase::removeListener(IPassiveQueueListener *listener)
 
 void SchedulerBase::notifyListeners()
 {
-    for (auto it = listeners.begin(); it != listeners.end(); ++it)
-        (*it)->packetEnqueued(this);
+    for (auto & elem : listeners)
+        (elem)->packetEnqueued(this);
 }
 
 } // namespace inet

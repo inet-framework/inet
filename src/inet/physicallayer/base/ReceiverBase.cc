@@ -39,8 +39,8 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         const IRadio *radio = reception->getReceiver();
         const IRadioMedium *radioMedium = radio->getMedium();
         const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-        for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-            const IReception *interferingReception = *it;
+        for (auto interferingReception : *interferingReceptions) {
+            
             bool isPrecedingReception = interferingReception->getStartTime() < reception->getStartTime() ||
                 (interferingReception->getStartTime() == reception->getStartTime() &&
                  interferingReception->getTransmission()->getId() < reception->getTransmission()->getId());

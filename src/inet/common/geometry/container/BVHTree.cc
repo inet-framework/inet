@@ -109,8 +109,8 @@ void BVHTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *v
 {
     if (isLeaf())
     {
-        for (unsigned int i = 0; i < objects.size(); i++)
-            visitor->visit(objects[i]);
+        for (auto & elem : objects)
+            visitor->visit(elem);
     }
     else if (intersectWithLineSegment(lineSegment))
     {

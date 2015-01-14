@@ -71,8 +71,8 @@ MoBANCoordinator::~MoBANCoordinator()
 {
     delete transitions;
     delete [] mobilityPattern;
-    for (unsigned int i = 0; i < postureList.size(); i++)
-        delete postureList[i];
+    for (auto & elem : postureList)
+        delete elem;
 }
 
 void MoBANCoordinator::initialize(int stage)
@@ -738,9 +738,9 @@ void MoBANCoordinator::computeMaxSpeed()
     }
     else
     {
-        for (unsigned int i = 0; i < postureList.size(); i++)
+        for (auto & elem : postureList)
         {
-            double postureMaxSpeed = postureList[i]->getMaxSpeed();
+            double postureMaxSpeed = elem->getMaxSpeed();
             if (maxSpeed < postureMaxSpeed)
                 maxSpeed = postureMaxSpeed;
         }

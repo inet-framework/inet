@@ -63,10 +63,10 @@ void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 void GroupCountRecorder::finish(cResultFilter *prev) {
     opp_string_map attributes = getStatisticAttributes();
 
-    for(auto i = groupcounts.begin(); i != groupcounts.end(); i++) {
+    for(auto & elem : groupcounts) {
         std::stringstream name;
-        name << getResultName().c_str() << ":" << i->first;
-        ev.recordScalar(getComponent(), name.str().c_str(), i->second, &attributes); // note: this is NaN if count==0
+        name << getResultName().c_str() << ":" << elem.first;
+        ev.recordScalar(getComponent(), name.str().c_str(), elem.second, &attributes); // note: this is NaN if count==0
     }
 }
 

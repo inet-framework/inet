@@ -149,8 +149,8 @@ void RSVP::readTrafficFromXML(const cXMLElement *traffic)
     ASSERT(!strcmp(traffic->getTagName(), "sessions"));
     checkTags(traffic, "session");
     cXMLElementList list = traffic->getChildrenByTagName("session");
-    for (auto it = list.begin(); it != list.end(); it++)
-        readTrafficSessionFromXML(*it);
+    for (auto & elem : list)
+        readTrafficSessionFromXML(elem);
 }
 
 EroVector RSVP::readTrafficRouteFromXML(const cXMLElement *route)
@@ -218,8 +218,8 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
     checkTags(paths, "path");
 
     cXMLElementList list = paths->getChildrenByTagName("path");
-    for (auto it = list.begin(); it != list.end(); it++) {
-        cXMLElement *path = *it;
+    for (auto path : list) {
+        
         checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
 
         int lspid = getParameterIntValue(path, "lspid");
@@ -423,9 +423,9 @@ void RSVP::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
 
     // send PATH_ERROR for existing paths
 
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface == tedmod->ted[index].local)
-            sendPathErrorMessage(&(*it), PATH_ERR_NEXTHOP_FAILED);
+    for (auto & elem : PSBList) {
+        if (elem.OutInterface == tedmod->ted[index].local)
+            sendPathErrorMessage(&(elem), PATH_ERR_NEXTHOP_FAILED);
     }
 }
 
@@ -525,9 +525,9 @@ bool RSVP::doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec
 
     double sharedBW = 0.0;
 
-    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if ((it->Session_Object == session) && (it->Flowspec_Object.req_bandwidth > sharedBW))
-            sharedBW = it->Flowspec_Object.req_bandwidth;
+    for (auto & elem : RSBList) {
+        if ((elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
+            sharedBW = elem.Flowspec_Object.req_bandwidth;
     }
 
     EV_DETAIL << "CACCheck: link=" << OI
@@ -580,23 +580,23 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
 
     IPAddressVector phops;
 
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface != rsbEle->OI)
+    for (auto & elem : PSBList) {
+        if (elem.OutInterface != rsbEle->OI)
             continue;
 
-        for (int i = 0; i < (int)rsbEle->FlowDescriptor.size(); i++) {
-            if ((FilterSpecObj_t&)it->Sender_Template_Object != rsbEle->FlowDescriptor[i].Filter_Spec_Object)
+        for (auto & _i : rsbEle->FlowDescriptor) {
+            if ((FilterSpecObj_t&)elem.Sender_Template_Object != _i.Filter_Spec_Object)
                 continue;
 
-            if (tedmod->isLocalAddress(it->Previous_Hop_Address))
+            if (tedmod->isLocalAddress(elem.Previous_Hop_Address))
                 continue; // IR nothing to refresh
 
-            if (!find(phops, it->Previous_Hop_Address))
-                phops.push_back(it->Previous_Hop_Address);
+            if (!find(phops, elem.Previous_Hop_Address))
+                phops.push_back(elem.Previous_Hop_Address);
         }
 
-        for (auto it = phops.begin(); it != phops.end(); it++)
-            refreshResv(rsbEle, *it);
+        for (auto & phop : phops)
+            refreshResv(rsbEle, phop);
     }
 }
 
@@ -615,25 +615,25 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     hop.Next_Hop_Address = PHOP;
     msg->setHop(hop);
 
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->Previous_Hop_Address != PHOP)
+    for (auto & elem : PSBList) {
+        if (elem.Previous_Hop_Address != PHOP)
             continue;
 
         //if (it->LIH != LIH)
         //  continue;
 
-        if (it->Session_Object != rsbEle->Session_Object)
+        if (elem.Session_Object != rsbEle->Session_Object)
             continue;
 
         for (unsigned int c = 0; c < rsbEle->FlowDescriptor.size(); c++) {
-            if ((FilterSpecObj_t&)it->Sender_Template_Object != rsbEle->FlowDescriptor[c].Filter_Spec_Object)
+            if ((FilterSpecObj_t&)elem.Sender_Template_Object != rsbEle->FlowDescriptor[c].Filter_Spec_Object)
                 continue;
 
             ASSERT(rsbEle->inLabelVector.size() == rsbEle->FlowDescriptor.size());
 
             FlowDescriptor_t flow;
-            flow.Filter_Spec_Object = (FilterSpecObj_t&)it->Sender_Template_Object;
-            flow.Flowspec_Object = (FlowSpecObj_t&)it->Sender_Tspec_Object;
+            flow.Filter_Spec_Object = (FilterSpecObj_t&)elem.Sender_Template_Object;
+            flow.Flowspec_Object = (FlowSpecObj_t&)elem.Sender_Tspec_Object;
             flow.RRO = rsbEle->FlowDescriptor[c].RRO;
             flow.RRO.push_back(routerId);
             flow.label = rsbEle->inLabelVector[c];
@@ -646,8 +646,8 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     msg->setFlowDescriptor(flows);
 
     int fd_length = 0;
-    for (unsigned int i = 0; i < flows.size(); i++)
-        fd_length += 28 + (flows[i].RRO.size() * 4);
+    for (auto & flow : flows)
+        fd_length += 28 + (flow.RRO.size() * 4);
 
     int length = 34 + fd_length;
 
@@ -665,25 +665,25 @@ void RSVP::preempt(IPv4Address OI, int priority, double bandwidth)
 
     unsigned int index = tedmod->linkIndex(OI);
 
-    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if (it->OI != OI)
+    for (auto & elem : RSBList) {
+        if (elem.OI != OI)
             continue;
 
-        if (it->Session_Object.holdingPri != priority)
+        if (elem.Session_Object.holdingPri != priority)
             continue;
 
-        if (it->Flowspec_Object.req_bandwidth == 0.0)
+        if (elem.Flowspec_Object.req_bandwidth == 0.0)
             continue;
 
         // preempt RSB
 
         for (int i = priority; i < 8; i++)
-            tedmod->ted[index].UnResvBandwidth[i] += it->Flowspec_Object.req_bandwidth;
+            tedmod->ted[index].UnResvBandwidth[i] += elem.Flowspec_Object.req_bandwidth;
 
-        bandwidth -= it->Flowspec_Object.req_bandwidth;
-        it->Flowspec_Object.req_bandwidth = 0.0;
+        bandwidth -= elem.Flowspec_Object.req_bandwidth;
+        elem.Flowspec_Object.req_bandwidth = 0.0;
 
-        scheduleCommitTimer(&(*it));
+        scheduleCommitTimer(&(elem));
 
         //
 
@@ -885,9 +885,9 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         }
 
         // schedule commit of merging backups too...
-        for (unsigned int j = 0; j < RSBList.size(); j++) {
-            if (RSBList[j].OI == IPv4Address(lspid))
-                scheduleCommitTimer(&RSBList[j]);
+        for (auto & elem : RSBList) {
+            if (elem.OI == IPv4Address(lspid))
+                scheduleCommitTimer(&elem);
         }
     }
 }
@@ -913,8 +913,8 @@ RSVP::ResvStateBlock_t *RSVP::createRSB(RSVPResvMsg *msg)
 
     ASSERT(rsbEle.inLabelVector.size() == rsbEle.FlowDescriptor.size());
 
-    for (unsigned int i = 0; i < msg->getFlowDescriptor().size(); i++) {
-        FlowDescriptor_t flow = msg->getFlowDescriptor()[i];
+    for (auto & elem : msg->getFlowDescriptor()) {
+        FlowDescriptor_t flow = elem;
         rsbEle.FlowDescriptor.push_back(flow);
         rsbEle.inLabelVector.push_back(-1);
     }
@@ -931,8 +931,8 @@ void RSVP::updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg)
 {
     ASSERT(rsb);
 
-    for (unsigned int k = 0; k < msg->getFlowDescriptor().size(); k++) {
-        FlowDescriptor_t flow = msg->getFlowDescriptor()[k];
+    for (auto & elem : msg->getFlowDescriptor()) {
+        FlowDescriptor_t flow = elem;
 
         unsigned int m;
         for (m = 0; m < rsb->FlowDescriptor.size(); m++) {
@@ -1567,17 +1567,17 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
     // find matching RSB *******************************************************
 
     ResvStateBlock_t *rsb = nullptr;
-    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if (!(msg->isInSession(&it->Session_Object)))
+    for (auto & elem : RSBList) {
+        if (!(msg->isInSession(&elem.Session_Object)))
             continue;
 
-        if (it->Next_Hop_Address != msg->getNHOP())
+        if (elem.Next_Hop_Address != msg->getNHOP())
             continue;
 
-        if (it->OI != msg->getLIH())
+        if (elem.OI != msg->getLIH())
             continue;
 
-        rsb = &(*it);
+        rsb = &(elem);
         break;
     }
 
@@ -1611,11 +1611,11 @@ void RSVP::recoveryEvent(IPv4Address peer)
         tedmod->rebuildRoutingTable();
 
     // refresh all paths towards this neighbour
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface != tedmod->ted[index].local)
+    for (auto & elem : PSBList) {
+        if (elem.OutInterface != tedmod->ted[index].local)
             continue;
 
-        scheduleRefreshTimer(&(*it), 0.0);
+        scheduleRefreshTimer(&(elem), 0.0);
     }
 }
 
@@ -1777,8 +1777,8 @@ void RSVP::delSession(const cXMLElement& node)
         if (paths) {
             remove = false;
 
-            for (auto p = pathList.begin(); p != pathList.end(); p++) {
-                if (it->sender.Lsp_Id == getParameterIntValue(*p, "lspid")) {
+            for (auto & elem : pathList) {
+                if (it->sender.Lsp_Id == getParameterIntValue(elem, "lspid")) {
                     // remove path from session
                     remove = true;
                     break;
@@ -1937,14 +1937,14 @@ void RSVP::scheduleCommitTimer(ResvStateBlock_t *rsbEle)
 
 RSVP::ResvStateBlock_t *RSVP::findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index)
 {
-    for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
-        if (it->Session_Object != session)
+    for (auto & elem : RSBList) {
+        if (elem.Session_Object != session)
             continue;
 
         index = 0;
-        for (auto fit = it->FlowDescriptor.begin(); fit != it->FlowDescriptor.end(); fit++) {
+        for (auto fit = elem.FlowDescriptor.begin(); fit != elem.FlowDescriptor.end(); fit++) {
             if ((SenderTemplateObj_t&)fit->Filter_Spec_Object == sender) {
-                return &(*it);
+                return &(elem);
             }
             ++index;
         }
@@ -1956,18 +1956,18 @@ RSVP::ResvStateBlock_t *RSVP::findRSB(const SessionObj_t& session, const SenderT
 
 RSVP::PathStateBlock_t *RSVP::findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender)
 {
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if ((it->Session_Object == session) && (it->Sender_Template_Object == sender))
-            return &(*it);
+    for (auto & elem : PSBList) {
+        if ((elem.Session_Object == session) && (elem.Sender_Template_Object == sender))
+            return &(elem);
     }
     return nullptr;
 }
 
 RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
 {
-    for (unsigned int i = 0; i < PSBList.size(); i++) {
-        if (PSBList[i].id == id)
-            return &PSBList[i];
+    for (auto & elem : PSBList) {
+        if (elem.id == id)
+            return &elem;
     }
     ASSERT(false);
     return nullptr;    // prevent warning
@@ -1975,9 +1975,9 @@ RSVP::PathStateBlock_t *RSVP::findPsbById(int id)
 
 RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
 {
-    for (unsigned int i = 0; i < RSBList.size(); i++) {
-        if (RSBList[i].id == id)
-            return &RSBList[i];
+    for (auto & elem : RSBList) {
+        if (elem.id == id)
+            return &elem;
     }
     ASSERT(false);
     return nullptr;    // prevent warning
@@ -1985,9 +1985,9 @@ RSVP::ResvStateBlock_t *RSVP::findRsbById(int id)
 
 RSVP::HelloState_t *RSVP::findHello(IPv4Address peer)
 {
-    for (auto it = HelloList.begin(); it != HelloList.end(); it++) {
-        if (it->peer == peer)
-            return &(*it);
+    for (auto & elem : HelloList) {
+        if (elem.peer == peer)
+            return &(elem);
     }
     return nullptr;
 }
@@ -2053,9 +2053,9 @@ void RSVP::print(RSVPPathMsg *p)
 void RSVP::print(RSVPResvMsg *r)
 {
     EV_INFO << "RESV_MESSAGE: " << endl;
-    for (unsigned int i = 0; i < r->getFlowDescriptor().size(); i++) {
-        EV_INFO << " lspid " << r->getFlowDescriptor()[i].Filter_Spec_Object.Lsp_Id
-                << " label " << r->getFlowDescriptor()[i].label << endl;
+    for (auto & elem : r->getFlowDescriptor()) {
+        EV_INFO << " lspid " << elem.Filter_Spec_Object.Lsp_Id
+                << " label " << elem.label << endl;
     }
 }
 

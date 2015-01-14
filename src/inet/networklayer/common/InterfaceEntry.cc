@@ -351,8 +351,8 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
 static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::vector<IPv4Address>& result)
 {
     result.reserve(addresses.size());
-    for (unsigned int i = 0; i < addresses.size(); ++i)
-        result.push_back(addresses[i].toIPv4());
+    for (auto & addresse : addresses)
+        result.push_back(addresse.toIPv4());
 }
 
 void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAddress,

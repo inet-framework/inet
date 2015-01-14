@@ -135,8 +135,8 @@ void Batman::activate_interface(BatmanIf *iface)
 void Batman::check_active_inactive_interfaces(void)
 {
     /* all available interfaces are deactive */
-    for (unsigned int i=0; i<if_list.size(); i++){
-        BatmanIf* batman_if = if_list[i];
+    for (auto & elem : if_list){
+        BatmanIf* batman_if = elem;
         if ((batman_if->if_active) && (!batman_if->dev->isUp()))
         {
             deactivate_interface(batman_if);
@@ -157,8 +157,8 @@ void Batman::check_inactive_interfaces(void)
     if (found_ifs == active_ifs)
         return;
 
-    for (unsigned int i=0; i<if_list.size(); i++){
-        BatmanIf* batman_if = if_list[i];
+    for (auto & elem : if_list){
+        BatmanIf* batman_if = elem;
 
         if ((!batman_if->if_active) && (batman_if->dev->isUp()))
         {
@@ -173,9 +173,9 @@ void Batman::check_active_interfaces(void)
     /* all available interfaces are deactive */
     if (active_ifs == 0)
         return;
-    for (unsigned int i=0; i<if_list.size(); i++)
+    for (auto & elem : if_list)
     {
-        BatmanIf* batman_if = if_list[i];
+        BatmanIf* batman_if = elem;
         if ((batman_if->if_active) && (!batman_if->dev->isUp()))
         {
             deactivate_interface(batman_if);

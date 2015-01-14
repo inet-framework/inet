@@ -505,10 +505,10 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     // now we send them
     std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
-    for (unsigned int i = 0; i < list.size(); i++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
          if (pending_rreq_remove(pending_rreq_find(auxAaddr)))
          {
              packet_queue_set_verdict(auxAaddr, PQ_SEND);
@@ -586,10 +586,10 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
     // now we send them
     std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
-    for (unsigned int i = 0; i < list.size(); i ++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
         if (pending_rreq_remove(pending_rreq_find(auxAaddr)))
         {
             packet_queue_set_verdict(auxAaddr, PQ_SEND);
@@ -672,9 +672,9 @@ int NS_CLASS rtable_expire_timeout_all(struct in_addr nxthop_addr, u_int32_t ifi
 {
     int count = 0;
 
-    for (auto it = dymoRoutingTable->begin(); it != dymoRoutingTable->end(); it++)
+    for (auto & elem : *dymoRoutingTable)
     {
-        rtable_entry_t *entry = (rtable_entry_t *) it->second;
+        rtable_entry_t *entry = (rtable_entry_t *) elem.second;
         if (entry->rt_nxthop_addr.s_addr == nxthop_addr.s_addr &&
                 entry->rt_ifindex == ifindex)
             count += rtable_expire_timeout(entry);

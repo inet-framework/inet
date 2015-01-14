@@ -78,10 +78,10 @@ Ieee80211Mac::~Ieee80211Mac()
         }
     }
     edcCAF.clear();
-    for (unsigned int i = 0; i < edcCAFOutVector.size(); i++) {
-        delete edcCAFOutVector[i].jitter;
-        delete edcCAFOutVector[i].macDelay;
-        delete edcCAFOutVector[i].throughput;
+    for (auto & elem : edcCAFOutVector) {
+        delete elem.jitter;
+        delete elem.macDelay;
+        delete elem.throughput;
     }
     edcCAFOutVector.clear();
     if (pendingRadioConfigMsg)
@@ -2376,8 +2376,8 @@ cMessage *Ieee80211Mac::endBackoff(int i)
 
 const bool Ieee80211Mac::isBackoffMsg(cMessage *msg)
 {
-    for (unsigned int i = 0; i < edcCAF.size(); i++) {
-        if (msg == edcCAF[i].endBackoff)
+    for (auto & elem : edcCAF) {
+        if (msg == elem.endBackoff)
             return true;
     }
     return false;
@@ -2660,8 +2660,8 @@ void Ieee80211Mac::promiscousFrame(cMessage *msg)
 
 bool Ieee80211Mac::isBackoffPending()
 {
-    for (unsigned int i = 0; i < edcCAF.size(); i++) {
-        if (edcCAF[i].backoff)
+    for (auto & elem : edcCAF) {
+        if (elem.backoff)
             return true;
     }
     return false;

@@ -192,8 +192,8 @@ void ConvolutionalCoder::memoryAllocations()
 
 void ConvolutionalCoder::computeMemorySizes()
 {
-    for (unsigned int i = 0; i < constraintLengths.size(); i++)
-        memorySizes.push_back(constraintLengths.at(i) - 1);
+    for (auto & elem : constraintLengths)
+        memorySizes.push_back(elem - 1);
 }
 
 void ConvolutionalCoder::computeNumberOfStates()
@@ -210,8 +210,8 @@ void ConvolutionalCoder::computeNumberOfInputAndOutputSymbols()
 void ConvolutionalCoder::computeMemorySizeSum()
 {
     memorySizeSum = 0;
-    for (unsigned int i = 0; i < memorySizes.size(); i++)
-        memorySizeSum += memorySizes.at(i);
+    for (auto & elem : memorySizes)
+        memorySizeSum += elem;
 }
 
 void ConvolutionalCoder::computeHammingDistanceLookupTable()
@@ -360,15 +360,15 @@ void ConvolutionalCoder::parseVector(const char* strVector, std::vector<int>& ve
 
 void ConvolutionalCoder::convertToShortBitVectorMatrix(std::vector<std::vector<int> >& matrix, std::vector<ShortBitVector>& boolMatrix) const
 {
-    for (unsigned int i = 0; i < matrix.size(); i++)
+    for (auto & elem : matrix)
     {
-        std::vector<int> matrixRow = matrix.at(i);
+        std::vector<int> matrixRow = elem;
         ShortBitVector row;
-        for (unsigned int j = 0; j < matrixRow.size(); j++)
+        for (auto & matrixRow_j : matrixRow)
         {
-            if (matrixRow.at(j) == 1)
+            if (matrixRow_j == 1)
                 row.appendBit(true);
-            else if (matrixRow.at(j) == 0)
+            else if (matrixRow_j == 0)
                 row.appendBit(false);
             else
                 throw cRuntimeError("A bool matrix only contains 0-1 values");
@@ -397,9 +397,9 @@ void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int> 
     {
         const std::vector<int>& row = transferFMatrix.at(i);
         std::vector<ShortBitVector> bitRow;
-        for (unsigned int j = 0; j < row.size(); j++)
+        for (auto & elem : row)
         {
-            ShortBitVector bin = octalToBinary(row.at(j), constraintLengths.at(i));
+            ShortBitVector bin = octalToBinary(elem, constraintLengths.at(i));
             ShortBitVector reverseBin;
             for (int k = bin.getSize() - 1; k >= 0; k--)
                 reverseBin.appendBit(bin.getBit(k));
@@ -412,11 +412,11 @@ void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int> 
 void ConvolutionalCoder::printTransferFunctionMatrix() const
 {
     std::cout << "Transfer function matrix" << endl;
-    for (unsigned int i = 0; i < transferFunctionMatrix.size(); i++)
+    for (auto & elem : transferFunctionMatrix)
     {
-        std::cout << transferFunctionMatrix.at(i).at(0);
-        for (unsigned int j = 1; j < transferFunctionMatrix.at(i).size(); j++)
-            std::cout << "," << transferFunctionMatrix.at(i).at(j);
+        std::cout << elem.at(0);
+        for (unsigned int j = 1; j < elem.size(); j++)
+            std::cout << "," << elem.at(j);
         std::cout << endl;
     }
 }

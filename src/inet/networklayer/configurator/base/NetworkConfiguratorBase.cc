@@ -130,10 +130,10 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
-        LinkInfo *linkInfo = topology.linkInfos.at(i);
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
-            InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos.at(j);
+    for (auto & elem : topology.linkInfos) {
+        LinkInfo *linkInfo = elem;
+        for (auto & _j : linkInfo->interfaceInfos) {
+            InterfaceInfo *interfaceInfo = _j;
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
                 const char *wirelessId = getWirelessId(interfaceEntry);
@@ -143,8 +143,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (auto it = wirelessIdToInterfaceInfosMap.begin(); it != wirelessIdToInterfaceInfosMap.end(); it++) {
-        std::vector<InterfaceInfo *>& interfaceInfos = it->second;
+    for (auto & elem : wirelessIdToInterfaceInfosMap) {
+        std::vector<InterfaceInfo *>& interfaceInfos = elem.second;
         for (int i = 0; i < (int)interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
             for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
@@ -165,8 +165,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++) {
-        LinkInfo *linkInfo = topology.linkInfos[linkIndex];
+    for (auto & elem : topology.linkInfos) {
+        LinkInfo *linkInfo = elem;
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
     }
 }
@@ -271,9 +271,9 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
 {
-    for (int i = 0; i < (int)node->interfaceInfos.size(); i++)
-        if (node->interfaceInfos.at(i)->interfaceEntry == interfaceEntry)
-            return node->interfaceInfos.at(i);
+    for (auto & elem : node->interfaceInfos)
+        if (elem->interfaceEntry == interfaceEntry)
+            return elem;
 
     return nullptr;
 }
@@ -383,8 +383,8 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElementList wirelessElements = configuration->getChildrenByTagName("wireless");
-    for (int i = 0; i < (int)wirelessElements.size(); i++) {
-        cXMLElement *wirelessElement = wirelessElements[i];
+    for (auto & wirelessElements_i : wirelessElements) {
+        cXMLElement *wirelessElement = wirelessElements_i;
         const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
         const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
         try {
@@ -428,8 +428,8 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = nullptr;
-    for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
-        InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
+    for (auto & elem : linkInfo->interfaceInfos) {
+        InterfaceInfo *interfaceInfo = elem;
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         IRoutingTable *routingTable = interfaceInfo->node->routingTable;
 
@@ -481,16 +481,16 @@ NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 
 NetworkConfiguratorBase::Matcher::~Matcher()
 {
-    for (int i = 0; i < (int)matchers.size(); i++)
-        delete matchers[i];
+    for (auto & elem : matchers)
+        delete elem;
 }
 
 bool NetworkConfiguratorBase::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
-    for (int i = 0; i < (int)matchers.size(); i++)
-        if (matchers[i]->matches(s))
+    for (auto & elem : matchers)
+        if (elem->matches(s))
             return true;
 
     return false;
@@ -513,10 +513,10 @@ NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 
 NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
 {
-    for (int i = 0; i < (int)nameMatchers.size(); i++)
-        delete nameMatchers[i];
-    for (int i = 0; i < (int)towardsMatchers.size(); i++)
-        delete towardsMatchers[i];
+    for (auto & elem : nameMatchers)
+        delete elem;
+    for (auto & elem : towardsMatchers)
+        delete elem;
 }
 
 bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfaceInfo)
@@ -525,23 +525,23 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
         return true;
 
     const char *interfaceName = interfaceInfo->interfaceEntry->getName();
-    for (int i = 0; i < (int)nameMatchers.size(); i++)
-        if (nameMatchers[i]->matches(interfaceName))
+    for (auto & elem : nameMatchers)
+        if (elem->matches(interfaceName))
             return true;
 
 
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
-    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
-        InterfaceInfo *candidateInfo = linkInfo->interfaceInfos[i];
+    for (auto & elem : linkInfo->interfaceInfos) {
+        InterfaceInfo *candidateInfo = elem;
         cModule *candidateModule = candidateInfo->interfaceEntry->getInterfaceTable()->getHostModule();
         if (candidateModule == ownerModule)
             continue;
         std::string candidateFullPath = candidateModule->getFullPath();
         std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
-        for (int j = 0; j < (int)towardsMatchers.size(); j++)
-            if (towardsMatchers[j]->matches(candidateShortenedFullPath.c_str()) ||
-                towardsMatchers[j]->matches(candidateFullPath.c_str()))
+        for (auto & _j : towardsMatchers)
+            if (_j->matches(candidateShortenedFullPath.c_str()) ||
+                _j->matches(candidateFullPath.c_str()))
                 return true;
 
     }

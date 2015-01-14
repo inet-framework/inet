@@ -41,9 +41,9 @@ Coord Prism::computeBoundingBoxSize() const
 {
     Coord min;
     Coord max;
-    for (std::vector<Coord>::const_iterator it = base.getPoints().begin(); it != base.getPoints().end(); it++) {
-        min = min.min(*it);
-        max = max.max(*it);
+    for (const auto & elem : base.getPoints()) {
+        min = min.min(elem);
+        max = max.max(elem);
     }
     return max - min + Coord(0, 0, height);
 }
@@ -55,9 +55,9 @@ void Prism::genereateFaces()
     Coord baseNormalUnitVector = base.getNormalUnitVector();
     const std::vector<Coord>& basePoints = base.getPoints();
     std::vector<Coord> translatedCopyPoints;
-    for (unsigned int i = 0; i < basePoints.size(); i++)
+    for (auto & basePoint : basePoints)
     {
-        Coord point = basePoints[i];
+        Coord point = basePoint;
         point.z += height;
         translatedCopyPoints.push_back(point);
     }
@@ -83,8 +83,8 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
     const std::vector<Coord>& testPoints = testFace.getPoints();
     // This is a good test point: for convex polygons, the centroid is always an interior point.
     Coord testCentroid;
-    for (unsigned int i = 0; i < testPoints.size(); i++)
-        testCentroid += testPoints[i];
+    for (auto & testPoint : testPoints)
+        testCentroid += testPoint;
     testCentroid /= testPoints.size();
     Coord facePoint = face.getPoints()[0];
     Coord faceNormal = face.getNormalVector();
@@ -218,8 +218,8 @@ void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const R
         {
             const std::vector<Coord>& facePoints = face.getPoints();
             std::vector<Coord> points;
-            for (Points::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
-                points.push_back(*pit);
+            for (const auto & facePoint : facePoints)
+                points.push_back(facePoint);
             faces.push_back(points);
         }
     }

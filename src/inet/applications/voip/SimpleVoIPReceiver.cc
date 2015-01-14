@@ -176,8 +176,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     if (finish) {
         unsigned int maxId = 0;
-        for (auto it = currentTalkspurt.packets.begin(); it != currentTalkspurt.packets.end(); it++)
-            maxId = std::max(maxId, (*it).packetID);
+        for (auto & elem : currentTalkspurt.packets)
+            maxId = std::max(maxId, (elem).packetID);
         channelLoss = maxId + 1 - currentTalkspurt.packets.size();
     }
     else
@@ -199,23 +199,23 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     // compute channelLoss, playoutLoss and tailDropLoss, needed for MOS and statistics
     PacketsList playoutQueue;
-    for (auto packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); ++packet) {
-        packet->playoutTime = (firstPlayoutTime + ((int)packet->packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
+    for (auto & elem : currentTalkspurt.packets) {
+        elem.playoutTime = (firstPlayoutTime + ((int)elem.packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
-        lastLateness = packet->arrivalTime - packet->playoutTime;    // >0: packet is too late (missed its playout time)
+        lastLateness = elem.arrivalTime - elem.playoutTime;    // >0: packet is too late (missed its playout time)
         if (maxLateness < lastLateness)
             maxLateness = lastLateness;
 
-        EV_DEBUG << "MEASURED PACKET LATENESS: " << lastLateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
+        EV_DEBUG << "MEASURED PACKET LATENESS: " << lastLateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << elem.packetID << "\n\n";
 
         // Management of duplicated packets
-        if (isArrived[packet->packetID]) {
+        if (isArrived[elem.packetID]) {
             ++channelLoss;    // duplicate packets may shadow lost packets in the channel loss calculation above, we correct that here.
-            EV_DEBUG << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
+            EV_DEBUG << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << elem.packetID << "\n\n";
         }
         else if (lastLateness > 0.0) {
             ++playoutLoss;
-            EV_DEBUG << "REMOVED LATE PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", LATENESS " << lastLateness * 1000.0 << "ms\n\n";
+            EV_DEBUG << "REMOVED LATE PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << elem.packetID << ", LATENESS " << lastLateness * 1000.0 << "ms\n\n";
         }
         else {
             // insert packet into playout buffer (if there is room in it)
@@ -223,7 +223,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             // remove packets from queue
             auto qi = playoutQueue.begin();
             while (qi != playoutQueue.end()) {
-                if ((*qi)->playoutTime < packet->arrivalTime) {
+                if ((*qi)->playoutTime < elem.arrivalTime) {
                     // EV_DEBUG << "REPRODUCED AND EXTRACT FROM BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";
                     qi = playoutQueue.erase(qi);
                 }
@@ -233,19 +233,19 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
             if (playoutQueue.size() < bufferSpace) {
                 EV_DEBUG << "PACKET INSERTED INTO PLAYOUT BUFFER: TALK "
-                         << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", "
-                         << "ARRIVAL TIME " << packet->arrivalTime << "s, "
-                         << "PLAYOUT TIME " << packet->playoutTime << "s\n\n";
+                         << currentTalkspurt.talkspurtID << " PACKET " << elem.packetID << ", "
+                         << "ARRIVAL TIME " << elem.arrivalTime << "s, "
+                         << "PLAYOUT TIME " << elem.playoutTime << "s\n\n";
 
-                isArrived[packet->packetID] = true;    // isArrived[] is needed for detecting duplicate packets
+                isArrived[elem.packetID] = true;    // isArrived[] is needed for detecting duplicate packets
 
-                playoutQueue.push_back(&(*packet));
+                playoutQueue.push_back(&(elem));
             }
             else {
                 // buffer full
                 ++tailDropLoss;
                 EV_DEBUG << "BUFFER FULL, PACKET DISCARDED: TALK " << currentTalkspurt.talkspurtID << " PACKET "
-                         << packet->packetID << " ARRIVAL TIME " << packet->arrivalTime << "s\n\n";
+                         << elem.packetID << " ARRIVAL TIME " << elem.arrivalTime << "s\n\n";
             }
         }
     }

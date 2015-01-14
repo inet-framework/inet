@@ -181,21 +181,21 @@ void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, boo
     EV_INFO << "sending LINK_STATE message to peers" << endl;
 
     // send "list" to every peer (linkid in our ted[] entries???) in a LinkStateMsg
-    for (unsigned int i = 0; i < tedmod->ted.size(); i++) {
-        if (tedmod->ted[i].advrouter != routerId)
+    for (auto & elem : tedmod->ted) {
+        if (elem.advrouter != routerId)
             continue;
 
-        if (tedmod->ted[i].linkid == exceptPeer)
+        if (elem.linkid == exceptPeer)
             continue;
 
-        if (!tedmod->ted[i].state)
+        if (!elem.state)
             continue;
 
-        if (find(peerIfAddrs.begin(), peerIfAddrs.end(), tedmod->ted[i].local) == peerIfAddrs.end())
+        if (find(peerIfAddrs.begin(), peerIfAddrs.end(), elem.local) == peerIfAddrs.end())
             continue;
 
         // send a copy
-        sendToPeer(tedmod->ted[i].linkid, list, req);
+        sendToPeer(elem.linkid, list, req);
     }
 }
 

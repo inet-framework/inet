@@ -32,8 +32,8 @@ HttpController::HttpController() :
 HttpController::~HttpController()
 {
     // Clean up the server references
-    for (auto it = webSiteList.begin(); it != webSiteList.end(); ++it)
-        delete it->second;
+    for (auto & elem : webSiteList)
+        delete elem.second;
 
     delete rdServerSelection;
 }
@@ -347,8 +347,8 @@ HttpController::WebServerEntry *HttpController::selectFromSpecialList()
     if (specialList.size() > 1) {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        for (auto i = specialList.begin(); i != specialList.end(); i++) {
-            en = (*i);
+        for (auto & elem : specialList) {
+            en = (elem);
             pcumulative += en->pvalue;
             if (pcumulative / pspecial > p)
                 break;
@@ -389,8 +389,8 @@ std::string HttpController::listSpecials()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    for (auto i = specialList.begin(); i != specialList.end(); i++) {
-        en = (*i);
+    for (auto & elem : specialList) {
+        en = (elem);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
     }
@@ -401,8 +401,8 @@ std::string HttpController::listPickOrder()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    for (auto i = pickList.begin(); i != pickList.end(); i++) {
-        en = (*i);
+    for (auto & elem : pickList) {
+        en = (elem);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
     }

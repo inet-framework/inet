@@ -37,10 +37,10 @@ uint8_t Batman::ring_buffer_avg(std::vector<uint8_t> &tq_recv)
     uint16_t count = 0;
     uint32_t sum = 0;
 
-    for (unsigned int i=0; i < tq_recv.size(); i++) {
-        if (tq_recv[i] != 0) {
+    for (auto & elem : tq_recv) {
+        if (elem != 0) {
             count++;
-            sum += tq_recv[i];
+            sum += elem;
         }
     }
 

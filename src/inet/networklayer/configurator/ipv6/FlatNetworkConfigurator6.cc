@@ -260,8 +260,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 
             // traverse through address of each node
             // add to route table
-            for (unsigned int k = 0; k < destPrefixes.size(); k++) {
-                rt->addStaticRoute(destPrefixes[k]->prefix, destPrefixes[k]->prefixLength,
+            for (auto & destPrefixe : destPrefixes) {
+                rt->addStaticRoute(destPrefixe->prefix, destPrefixe->prefixLength,
                         localIf->getInterfaceId(), nextHopLinkLocalAddr);
             }
         }

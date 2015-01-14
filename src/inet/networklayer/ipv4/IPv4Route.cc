@@ -109,8 +109,8 @@ IRoutingTable *IPv4Route::getRoutingTableAsGeneric() const
 IPv4MulticastRoute::~IPv4MulticastRoute()
 {
     delete inInterface;
-    for (auto it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
-        delete *it;
+    for (auto & elem : outInterfaces)
+        delete elem;
     outInterfaces.clear();
 }
 
@@ -141,11 +141,11 @@ std::string IPv4MulticastRoute::info() const
         out << inInterface->getInterface()->getName() << "  ";
     out << "out:";
     bool first = true;
-    for (unsigned int i = 0; i < outInterfaces.size(); ++i) {
+    for (auto & elem : outInterfaces) {
         if (!first)
             out << ",";
-        if (outInterfaces[i]->isEnabled()) {
-            out << outInterfaces[i]->getInterface()->getName();
+        if (elem->isEnabled()) {
+            out << elem->getInterface()->getName();
             first = false;
         }
     }
@@ -172,8 +172,8 @@ void IPv4MulticastRoute::setInInterface(InInterface *_inInterface)
 void IPv4MulticastRoute::clearOutInterfaces()
 {
     if (!outInterfaces.empty()) {
-        for (auto it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
-            delete *it;
+        for (auto & elem : outInterfaces)
+            delete elem;
         outInterfaces.clear();
         changed(F_OUT);
     }

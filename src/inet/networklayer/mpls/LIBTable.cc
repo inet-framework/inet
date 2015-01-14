@@ -45,16 +45,16 @@ bool LIBTable::resolveLabel(std::string inInterface, int inLabel,
 {
     bool any = (inInterface.length() == 0);
 
-    for (unsigned int i = 0; i < lib.size(); i++) {
-        if (!any && lib[i].inInterface != inInterface)
+    for (auto & elem : lib) {
+        if (!any && elem.inInterface != inInterface)
             continue;
 
-        if (lib[i].inLabel != inLabel)
+        if (elem.inLabel != inLabel)
             continue;
 
-        outLabel = lib[i].outLabel;
-        outInterface = lib[i].outInterface;
-        color = lib[i].color;
+        outLabel = elem.outLabel;
+        outInterface = elem.outInterface;
+        color = elem.color;
 
         return true;
     }
@@ -75,14 +75,14 @@ int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
         return newItem.inLabel;
     }
     else {
-        for (unsigned int i = 0; i < lib.size(); i++) {
-            if (lib[i].inLabel != inLabel)
+        for (auto & elem : lib) {
+            if (elem.inLabel != inLabel)
                 continue;
 
-            lib[i].inInterface = inInterface;
-            lib[i].outLabel = outLabel;
-            lib[i].outInterface = outInterface;
-            lib[i].color = color;
+            elem.inInterface = inInterface;
+            elem.outLabel = outLabel;
+            elem.outInterface = outInterface;
+            elem.color = color;
             return inLabel;
         }
         ASSERT(false);
@@ -110,8 +110,8 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
     ASSERT(!strcmp(libtable->getTagName(), "libtable"));
     checkTags(libtable, "libentry");
     cXMLElementList list = libtable->getChildrenByTagName("libentry");
-    for (auto it = list.begin(); it != list.end(); it++) {
-        const cXMLElement& entry = **it;
+    for (auto & elem : list) {
+        const cXMLElement& entry = *elem;
 
         checkTags(&entry, "inLabel inInterface outLabel outInterface color");
 
@@ -122,8 +122,8 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
         newItem.color = getParameterIntValue(&entry, "color", 0);
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
-        for (auto oit = ops.begin(); oit != ops.end(); oit++) {
-            const cXMLElement& op = **oit;
+        for (auto & ops_oit : ops) {
+            const cXMLElement& op = *ops_oit;
             const char *val = op.getAttribute("value");
             const char *code = op.getAttribute("code");
             ASSERT(code);

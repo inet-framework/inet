@@ -192,8 +192,8 @@ IGMPv2::HostInterfaceData::HostInterfaceData(IGMPv2 *owner)
 
 IGMPv2::HostInterfaceData::~HostInterfaceData()
 {
-    for (auto it = groups.begin(); it != groups.end(); ++it)
-        delete it->second;
+    for (auto & elem : groups)
+        delete elem.second;
 }
 
 IGMPv2::RouterInterfaceData::RouterInterfaceData(IGMPv2 *owner)
@@ -209,8 +209,8 @@ IGMPv2::RouterInterfaceData::~RouterInterfaceData()
 {
     owner->cancelAndDelete(igmpQueryTimer);
 
-    for (auto it = groups.begin(); it != groups.end(); ++it)
-        delete it->second;
+    for (auto & elem : groups)
+        delete elem.second;
 }
 
 IGMPv2::HostInterfaceData *IGMPv2::createHostInterfaceData()
@@ -711,8 +711,8 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPQue
         // general query
         EV_INFO << "IGMPv2: received General Membership Query on iface=" << ie->getName() << "\n";
         numGeneralQueriesRecv++;
-        for (auto it = interfaceData->groups.begin(); it != interfaceData->groups.end(); ++it)
-            processGroupQuery(ie, it->second, maxRespTime);
+        for (auto & elem : interfaceData->groups)
+            processGroupQuery(ie, elem.second, maxRespTime);
     }
     else {
         // group-specific query

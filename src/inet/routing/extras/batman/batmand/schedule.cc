@@ -80,9 +80,9 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
 
     batman_if->seqno++;
 
-    for (auto it = origMap.begin(); it != origMap.end(); ++it)
+    for (auto & elem : origMap)
     {
-        orig_node = it->second;
+        orig_node = elem.second;
 
         EV_DETAIL << "count own bcast (schedule_own_packet): old = " << (unsigned)orig_node->bcast_own_sum[batman_if->if_num] << ", ";
         std::vector<TYPE_OF_WORD>vectorAux;
@@ -274,8 +274,8 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
             goto packet_free;
         }
 
-        for (unsigned int i = 0; i<if_list.size(); i++) {
-            batman_if = if_list[i];
+        for (auto & elem : if_list) {
+            batman_if = elem;
 
             curr_packet_num = curr_packet_len = 0;
             bat_packet = forw_node->pack_buff->dup();

@@ -500,15 +500,15 @@ void DYMOFau::handleLowerRMForRelay(DYMO_RM *routingMsg)
         return;
     }
     routingMsg->getOrigNode().incrementDistIfAvailable();
-    for (unsigned int i = 0; i < additional_nodes.size(); i++)
+    for (auto & additional_node : additional_nodes)
     {
-        if (additional_nodes[i].hasDist() && (additional_nodes[i].getDist() >= 0xFF - 1))
+        if (additional_node.hasDist() && (additional_node.getDist() >= 0xFF - 1))
         {
             EV_INFO << "passing on additionalNode would overflow OrigNode.Dist -> dropping additionalNode" << endl;
             continue;
         }
-        additional_nodes[i].incrementDistIfAvailable();
-        additional_nodes_to_relay.push_back(additional_nodes[i]);
+        additional_node.incrementDistIfAvailable();
+        additional_nodes_to_relay.push_back(additional_node);
     }
 
     // append additional routing information about this node
@@ -578,17 +578,17 @@ void DYMOFau::handleLowerRERR(DYMO_RERR *my_rerr)
     // iterate over all unreachableNode entries
     std::vector<DYMO_AddressBlock> unreachableNodes = my_rerr->getUnreachableNodes();
     std::vector<DYMO_AddressBlock> unreachableNodesToForward;
-    for (unsigned int i = 0; i < unreachableNodes.size(); i++)
+    for (auto & unreachableNodes_i : unreachableNodes)
     {
-        const DYMO_AddressBlock& unreachableNode = unreachableNodes[i];
+        const DYMO_AddressBlock& unreachableNode = unreachableNodes_i;
 
         if (IPv4Address(unreachableNode.getAddress()).isMulticast()) continue;
 
         // check whether this invalidates entries in our routing table
         std::vector<DYMO_RoutingEntry *> RouteVector = dymo_routingTable->getRoutingTable();
-        for (unsigned int i = 0; i < RouteVector.size(); i++)
+        for (auto & elem : RouteVector)
         {
-            DYMO_RoutingEntry* entry = RouteVector[i];
+            DYMO_RoutingEntry* entry = elem;
 
             // skip if route has no associated Forwarding Route
             if (entry->routeBroken) continue;
@@ -930,9 +930,9 @@ void DYMOFau::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
 
         // add route entries with same routeNextHopAddress as broken route
         std::vector<DYMO_RoutingEntry *> RouteVector = dymo_routingTable->getRoutingTable();
-        for (unsigned int i = 0; i < RouteVector.size(); i++)
+        for (auto & elem : RouteVector)
         {
-            DYMO_RoutingEntry* entry = RouteVector[i];
+            DYMO_RoutingEntry* entry = elem;
             if ((entry->routeNextHopAddress != brokenEntry->routeNextHopAddress) || (entry->routeNextHopInterface != brokenEntry->routeNextHopInterface)) continue;
 
             EV_DETAIL << "Including in RERR route to " << entry->routeAddress << " via " << entry->routeNextHopAddress << endl;
@@ -1132,15 +1132,15 @@ DYMO_RM* DYMOFau::updateRoutes(DYMO_RM * pkt)
     if (pkt->getOrigNode().getAddress()==myAddr) return nullptr;
     bool origNodeEntryWasSuperior = updateRoutesFromAddressBlock(pkt->getOrigNode(), isRREQ, nextHopAddress, nextHopInterface);
 
-    for (unsigned int i = 0; i < additional_nodes.size(); i++)
+    for (auto & additional_node : additional_nodes)
     {
         // TODO: not specified in draft, but seems to make sense
-        if (additional_nodes[i].getAddress()==myAddr) return nullptr;
+        if (additional_node.getAddress()==myAddr) return nullptr;
 
-        if (updateRoutesFromAddressBlock(additional_nodes[i], isRREQ, nextHopAddress, nextHopInterface))
+        if (updateRoutesFromAddressBlock(additional_node, isRREQ, nextHopAddress, nextHopInterface))
         {
             /** read routing block is valid -> save block to the routing message **/
-            new_additional_nodes.push_back(additional_nodes[i]);
+            new_additional_nodes.push_back(additional_node);
         }
         else
         {

@@ -73,16 +73,16 @@ MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 
 MatrixCloudDelayer::Matcher::~Matcher()
 {
-    for (int i = 0; i < (int)matchers.size(); i++)
-        delete matchers[i];
+    for (auto & elem : matchers)
+        delete elem;
 }
 
 bool MatrixCloudDelayer::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
-    for (int i = 0; i < (int)matchers.size(); i++)
-        if (matchers[i]->matches(s))
+    for (auto & elem : matchers)
+        if (elem->matches(s))
             return true;
 
     return false;
@@ -126,8 +126,8 @@ bool MatrixCloudDelayer::MatrixEntry::matches(const char *src, const char *dest)
 
 MatrixCloudDelayer::~MatrixCloudDelayer()
 {
-    for (auto i = matrixEntries.begin(); i != matrixEntries.end(); ++i)
-        delete *i;
+    for (auto & elem : matrixEntries)
+        delete elem;
     matrixEntries.clear();
 }
 
@@ -148,8 +148,8 @@ void MatrixCloudDelayer::initialize(int stage)
         bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
         const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
         cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
-        for (int i = 0; i < (int)trafficEntities.size(); i++) {
-            cXMLElement *trafficEntity = trafficEntities[i];
+        for (auto & trafficEntitie : trafficEntities) {
+            cXMLElement *trafficEntity = trafficEntitie;
             MatrixEntry *matrixEntry = new MatrixEntry(trafficEntity, defaultSymmetric);
             matrixEntries.push_back(matrixEntry);
         }
@@ -191,8 +191,8 @@ MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int sr
 
     // find first matching node in XML
     MatrixEntry *reverseMatrixEntry = nullptr;
-    for (unsigned int i = 0; i < matrixEntries.size(); i++) {
-        MatrixEntry *matrixEntry = matrixEntries[i];
+    for (auto & elem : matrixEntries) {
+        MatrixEntry *matrixEntry = elem;
         if (matrixEntry->matches(src.c_str(), dest.c_str())) {
             MatrixCloudDelayer::Descriptor& descriptor = idPairToDescriptorMap[idPair];
             descriptor.delayPar = &matrixEntry->delayPar;

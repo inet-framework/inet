@@ -125,8 +125,8 @@ void PassiveQueueBase::removeListener(IPassiveQueueListener *listener)
 
 void PassiveQueueBase::notifyListeners()
 {
-    for (auto it = listeners.begin(); it != listeners.end(); ++it)
-        (*it)->packetEnqueued(this);
+    for (auto & elem : listeners)
+        (elem)->packetEnqueued(this);
 }
 
 } // namespace inet

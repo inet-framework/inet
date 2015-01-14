@@ -88,10 +88,10 @@ int NS_CLASS nb_remove(nb_t *nb)
 
 nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
 {
-    for (auto it =dymoNbList->begin();it !=dymoNbList->end();it++)
+    for (auto & elem : *dymoNbList)
     {
-        nb_t *nb = *it;
-        if (*it==nb)
+        nb_t *nb = elem;
+        if (elem==nb)
         {
             if (nb->nb_addr.s_addr == nb_addr.s_addr &&
                     nb->ifindex == ifindex)

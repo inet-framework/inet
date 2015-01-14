@@ -170,9 +170,9 @@ int MultiFieldClassifier::classifyPacket(cPacket *packet)
 #ifdef WITH_IPv4
         IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet);
         if (ipv4Datagram) {
-            for (auto it = filters.begin(); it != filters.end(); ++it)
-                if (it->matches(ipv4Datagram))
-                    return it->gateIndex;
+            for (auto & elem : filters)
+                if (elem.matches(ipv4Datagram))
+                    return elem.gateIndex;
 
             return -1;
         }
@@ -180,9 +180,9 @@ int MultiFieldClassifier::classifyPacket(cPacket *packet)
 #ifdef WITH_IPv6
         IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet);
         if (ipv6Datagram) {
-            for (auto it = filters.begin(); it != filters.end(); ++it)
-                if (it->matches(ipv6Datagram))
-                    return it->gateIndex;
+            for (auto & elem : filters)
+                if (elem.matches(ipv6Datagram))
+                    return elem.gateIndex;
 
             return -1;
         }
@@ -228,8 +228,8 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
 {
     L3AddressResolver addressResolver;
     cXMLElementList filterElements = config->getChildrenByTagName("filter");
-    for (int i = 0; i < (int)filterElements.size(); i++) {
-        cXMLElement *filterElement = filterElements[i];
+    for (auto & filterElements_i : filterElements) {
+        cXMLElement *filterElement = filterElements_i;
         try {
             const char *gateAttr = getRequiredAttribute(filterElement, "gate");
             const char *srcAddrAttr = filterElement->getAttribute("srcAddress");

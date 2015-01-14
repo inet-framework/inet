@@ -120,8 +120,8 @@ BMacLayer::~BMacLayer()
     cancelAndDelete(ack_timeout);
     cancelAndDelete(resend_data);
 
-    for (auto it = macQueue.begin(); it != macQueue.end(); ++it) {
-        delete (*it);
+    for (auto & elem : macQueue) {
+        delete (elem);
     }
     macQueue.clear();
 }

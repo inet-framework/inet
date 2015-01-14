@@ -36,8 +36,8 @@ inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::Vide
 
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
-    for (auto it = streams.begin(); it != streams.end(); ++it)
-        cancelAndDelete(it->second.timer);
+    for (auto & elem : streams)
+        cancelAndDelete(elem.second.timer);
 }
 
 void UDPVideoStreamSvr::initialize(int stage)
@@ -140,8 +140,8 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 
 void UDPVideoStreamSvr::clearStreams()
 {
-    for (auto it = streams.begin(); it != streams.end(); ++it)
-        cancelAndDelete(it->second.timer);
+    for (auto & elem : streams)
+        cancelAndDelete(elem.second.timer);
     streams.clear();
 }
 

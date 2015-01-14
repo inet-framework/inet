@@ -45,8 +45,8 @@ ostream& operator<<(ostream& out, const PIMDM::Route *route)
 
 PIMDM::~PIMDM()
 {
-    for (auto it = routes.begin(); it != routes.end(); ++it)
-        delete it->second;
+    for (auto & elem : routes)
+        delete elem.second;
     routes.clear();
 }
 
@@ -1180,8 +1180,8 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
-    for (unsigned int i = 0; i < route->downstreamInterfaces.size(); ++i) {
-        DownstreamInterface *downstream = route->downstreamInterfaces[i];
+    for (auto & elem : route->downstreamInterfaces) {
+        DownstreamInterface *downstream = elem;
         newRoute->addOutInterface(new PIMDMOutInterface(downstream->ie, downstream));
     }
 
@@ -1721,24 +1721,24 @@ void PIMDM::clearRoutes()
     }
 
     // clear local table
-    for (auto it = routes.begin(); it != routes.end(); ++it)
-        delete it->second;
+    for (auto & elem : routes)
+        delete elem.second;
     routes.clear();
 }
 
 PIMDM::Route::~Route()
 {
     delete upstreamInterface;
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); ++i)
-        delete downstreamInterfaces[i];
+    for (auto & elem : downstreamInterfaces)
+        delete elem;
     downstreamInterfaces.clear();
 }
 
 PIMDM::DownstreamInterface *PIMDM::Route::findDownstreamInterfaceByInterfaceId(int interfaceId) const
 {
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); ++i)
-        if (downstreamInterfaces[i]->ie->getInterfaceId() == interfaceId)
-            return downstreamInterfaces[i];
+    for (auto & elem : downstreamInterfaces)
+        if (elem->ie->getInterfaceId() == interfaceId)
+            return elem;
 
     return nullptr;
 }
@@ -1764,8 +1764,8 @@ PIMDM::DownstreamInterface *PIMDM::Route::removeDownstreamInterface(int interfac
 
 bool PIMDM::Route::isOilistNull()
 {
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++) {
-        if (downstreamInterfaces[i]->isInOlist())
+    for (auto & elem : downstreamInterfaces) {
+        if (elem->isInOlist())
             return false;
     }
     return true;

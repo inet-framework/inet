@@ -158,8 +158,8 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address 
             if ((pref_gateway == orig_node->orig) || (routing_class == 3) || (orig_node->router->tq_avg - curr_gateway->orig_node->router->tq_avg >= routing_class)) {
                 gw_node = nullptr;
 
-                for (unsigned int list_pos = 0; list_pos < gw_list.size(); list_pos++) {
-                    gw_node = gw_list[list_pos];
+                for (auto & elem : gw_list) {
+                    gw_node = elem;
 
                     if (gw_node->orig_node == orig_node)
                         break;
@@ -212,8 +212,8 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 delete node;
             }
 
-            for (unsigned int i = 0; i<gw_list.size(); i++) {
-                gw_node = gw_list[i];
+            for (auto & elem : gw_list) {
+                gw_node = elem;
 
                 if (SIMTIME_RAW(gw_node->deleted))
                     continue;
@@ -307,10 +307,10 @@ void OrigNode::clear()
     router = nullptr;
     batmanIf = nullptr;
     totalRec = 0;
-    for (unsigned int i=0; i<bcast_own.size(); i++)
-       bcast_own[i] = 0;
-    for (unsigned int i=0; i<bcast_own_sum.size(); i++)
-       bcast_own_sum[i] = 0;
+    for (auto & elem : bcast_own)
+       elem = 0;
+    for (auto & elem : bcast_own_sum)
+       elem = 0;
     tq_own = 0;
     tq_asym_penalty = 0;
     last_valid = 0;        /* when last packet from this node was received */
@@ -343,9 +343,9 @@ std::string OrigNode::info() const
     out << " \n neig info: \n";
 
     NeighNode *neigh_node = nullptr;
-    for (unsigned int i = 0; i < neigh_list.size(); i++)
+    for (auto & elem : neigh_list)
     {
-        NeighNode * tmp_neigh_node = neigh_list[i];
+        NeighNode * tmp_neigh_node = elem;
         if (tmp_neigh_node->addr == orig)
             neigh_node = tmp_neigh_node;
     }
@@ -354,9 +354,9 @@ std::string OrigNode::info() const
     else
         out << neigh_node->info();
 
-    for (unsigned int i = 0; i < neigh_list.size(); i++)
+    for (auto & elem : neigh_list)
     {
-        out << "list neig :" << neigh_list[i]->addr << " ";
+        out << "list neig :" << elem->addr << " ";
     }
 
     out << "\n router info:"; if (router==nullptr) out << "*  "; else out << router->info() << "  ";
@@ -420,15 +420,15 @@ void NeighNode::clear()
 {
     addr = L3Address();
     real_packet_count = 0;
-    for (unsigned int i=0; i<tq_recv.size(); i++)
-         tq_recv[i] = 0;
+    for (auto & elem : tq_recv)
+         elem = 0;
     tq_index = 0;
     tq_avg = 0;
     last_ttl = 0;
     num_hops = MAX_HOPS;
     last_valid = 0;            /* when last packet via this neighbour was received */
-    for (unsigned int i=0; i<real_bits.size(); i++)
-        real_bits[i] = 0;
+    for (auto & elem : real_bits)
+        elem = 0;
     orig_node = nullptr;
     owner_node = nullptr;
     if_incoming = nullptr;

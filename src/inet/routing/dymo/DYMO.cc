@@ -78,8 +78,8 @@ DYMO::DYMO() :
 
 DYMO::~DYMO()
 {
-    for (auto it = targetAddressToRREQTimer.begin(); it != targetAddressToRREQTimer.end(); it++)
-        cancelAndDelete(it->second);
+    for (auto & elem : targetAddressToRREQTimer)
+        cancelAndDelete(elem.second);
     cancelAndDelete(expungeTimer);
 }
 
@@ -835,8 +835,8 @@ int DYMO::computeRREPBitLength(RREP *rrep)
 RERR *DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
 {
     RERR *rerr = new RERR();
-    for (int i = 0; i < (int)unreachableAddresses.size(); i++) {
-        const L3Address& unreachableAddress = unreachableAddresses[i];
+    for (auto & unreachableAddresse : unreachableAddresses) {
+        const L3Address& unreachableAddress = unreachableAddresse;
         AddressBlock *addressBlock = new AddressBlock();
         addressBlock->setAddress(unreachableAddress);
         addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
@@ -1319,9 +1319,9 @@ bool DYMO::isClientAddress(const L3Address& address)
     if (routingTable->isLocalAddress(address))
         return true;
     else {
-        for (auto it = clientAddressAndPrefixLengthPairs.begin(); it != clientAddressAndPrefixLengthPairs.end(); it++)
+        for (auto & elem : clientAddressAndPrefixLengthPairs)
             // TODO: check for prefix length too
-            if (it->first == address)
+            if (elem.first == address)
                 return true;
 
         return false;
@@ -1424,8 +1424,8 @@ bool DYMO::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
             // TODO: send a RERR to notify peers about broken routes
-            for (auto it = targetAddressToRREQTimer.begin(); it != targetAddressToRREQTimer.end(); it++)
-                cancelRouteDiscovery(it->first);
+            for (auto & elem : targetAddressToRREQTimer)
+                cancelRouteDiscovery(elem.first);
 
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {

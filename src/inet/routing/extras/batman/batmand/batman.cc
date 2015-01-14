@@ -192,8 +192,8 @@ BatmanIf *Batman::is_batman_if(InterfaceEntry *dev)
 {
     BatmanIf *batman_if;
 
-    for (unsigned int if_pos = 0; if_pos < if_list.size(); if_pos++) {
-        batman_if = if_list[if_pos];
+    for (auto & elem : if_list) {
+        batman_if = elem;
 
         if (batman_if->dev == dev)
             return batman_if;
@@ -224,8 +224,8 @@ void Batman::choose_gw(void)
         return;
     }
 
-    for (unsigned int pos = 0; pos < gw_list.size(); pos++ ) {
-        gw_node = gw_list[pos];
+    for (auto & elem : gw_list) {
+        gw_node = elem;
 
         /* ignore this gateway if recent connection attempts were unsuccessful */
         /* if it is our only gateway retry immediately */
@@ -401,8 +401,8 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
     GwNode *gw_node;
     int download_speed, upload_speed;
 
-    for (unsigned int i = 0; i<gw_list.size(); i++) {
-        gw_node = gw_list[i];
+    for (auto & elem : gw_list) {
+        gw_node = elem;
 
         if (gw_node->orig_node == orig_node) {
             //addr_to_string(gw_node->orig_node->orig, orig_str, ADDR_STR_LEN);
@@ -490,8 +490,8 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
     uint8_t total_count;
 
     if (orig_node == orig_neigh_node) {
-        for (unsigned int list_pos = 0; list_pos < orig_node->neigh_list.size(); list_pos++ ) {
-            tmp_neigh_node = orig_node->neigh_list[list_pos];
+        for (auto & elem : orig_node->neigh_list) {
+            tmp_neigh_node = elem;
             if ((tmp_neigh_node->addr == orig_neigh_node->orig) && (tmp_neigh_node->if_incoming == if_incoming))
                 neigh_node = tmp_neigh_node;
         }

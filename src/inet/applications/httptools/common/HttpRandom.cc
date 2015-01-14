@@ -193,8 +193,8 @@ void rdHistogram::__parseBinString(std::string binstr)
     cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
     std::string curtuple, countstr, sumstr;
     std::vector<std::string> res = tokenizer.asVector();
-    for (auto i = res.begin(); i != res.end(); i++) {
-        curtuple = (*i);
+    for (auto & re : res) {
+        curtuple = (re);
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
         int pos = curtuple.find(',');
@@ -212,11 +212,11 @@ void rdHistogram::__parseBinString(std::string binstr)
 void rdHistogram::__normalizeBins()
 {
     double sum = 0;
-    for (unsigned int i = 0; i < m_bins.size(); i++)
-        sum += m_bins[i].sum;
+    for (auto & elem : m_bins)
+        sum += elem.sum;
     if (sum != 0)
-        for (unsigned int i = 0; i < m_bins.size(); i++)
-            m_bins[i].sum = m_bins[i].sum / sum;
+        for (auto & elem : m_bins)
+            elem.sum = elem.sum / sum;
 
 }
 

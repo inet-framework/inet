@@ -249,18 +249,18 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
 
 Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 {
-    for (auto it = apList.begin(); it != apList.end(); ++it)
-        if (it->address == address)
-            return &(*it);
+    for (auto & elem : apList)
+        if (elem.address == address)
+            return &(elem);
 
     return nullptr;
 }
 
 void Ieee80211MgmtSTA::clearAPList()
 {
-    for (auto it = apList.begin(); it != apList.end(); ++it)
-        if (it->authTimeoutMsg)
-            delete cancelEvent(it->authTimeoutMsg);
+    for (auto & elem : apList)
+        if (elem.authTimeoutMsg)
+            delete cancelEvent(elem.authTimeoutMsg);
 
     apList.clear();
 }

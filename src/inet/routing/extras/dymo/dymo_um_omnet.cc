@@ -1309,9 +1309,9 @@ void DYMOUM::packetFailed(IPv4Datagram *dgram)
             }
         }
 #else
-        for (auto it = dymoRoutingTable->begin(); it != dymoRoutingTable->end(); it++)
+        for (auto & elem : *dymoRoutingTable)
         {
-            rtable_entry_t * entry = it->second;
+            rtable_entry_t * entry = elem.second;
             if (entry->rt_nxthop_addr.s_addr == next_hop.s_addr)
             {
 #ifdef RERRPACKETFAILED
@@ -1373,9 +1373,9 @@ void DYMOUM::packetFailedMac(Ieee80211DataFrame *dgram)
         }
     }
 #else
-    for (auto it = dymoRoutingTable->begin(); it != dymoRoutingTable->end(); it++)
+    for (auto & elem : *dymoRoutingTable)
     {
-        rtable_entry_t *entry = it->second;
+        rtable_entry_t *entry = elem.second;
         if (entry->rt_nxthop_addr.s_addr == next_hop.s_addr)
         {
 #ifdef RERRPACKETFAILED
@@ -1629,10 +1629,10 @@ int  DYMOUM::getRouteGroup(const L3Address& dest, std::vector<L3Address> &add, L
 bool DYMOUM::getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address& gw)
 {
     int distance = 1000;
-    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
+    for (const auto & elem : gr)
     {
         struct in_addr destAddr;
-        destAddr.s_addr = *it;
+        destAddr.s_addr = elem;
         rtable_entry_t * fwd_rt = rtable_find(destAddr);
         if (!fwd_rt)
             continue;
@@ -1644,7 +1644,7 @@ bool DYMOUM::getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface,
         add = fwd_rt->rt_nxthop_addr.s_addr;
         InterfaceEntry * ie = getInterfaceEntry(fwd_rt->rt_ifindex);
         iface = ie->getInterfaceId();
-        gw = *it;
+        gw = elem;
     }
     if (distance==1000)
         return false;
@@ -1691,9 +1691,9 @@ cPacket * DYMOUM::get_packet_queue(struct in_addr dest_addr)
 #else
 cPacket * DYMOUM::get_packet_queue(struct in_addr dest_addr)
 {
-    for (unsigned int i = 0; i < PQ.pkQueue.size(); i++)
+    for (auto & elem : PQ.pkQueue)
     {
-        struct q_pkt *qp = PQ.pkQueue[i];
+        struct q_pkt *qp = elem;
         if (qp->dest_addr.s_addr == dest_addr.s_addr)
         {
             qp->inTransit = true;

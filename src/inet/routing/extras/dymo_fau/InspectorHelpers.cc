@@ -31,9 +31,9 @@ namespace inetmanet {
 ostream& operator<<(ostream& os, const std::vector<DYMO_AddressBlock>& abs)
 {
     os << "{" << std::endl;
-    for (std::vector<DYMO_AddressBlock>::const_iterator i = abs.begin(); i != abs.end(); i++)
+    for (const auto & ab : abs)
     {
-        const DYMO_AddressBlock& ab = *i;
+        
         os << "  " << ab << std::endl;
     }
     os << "}";

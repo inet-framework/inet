@@ -295,18 +295,18 @@ void TED::rebuildRoutingTable()
 
     // insert local peers
 
-    for (unsigned int i = 0; i < interfaceAddrs.size(); i++) {
+    for (auto & elem : interfaceAddrs) {
         IPv4Route *entry = new IPv4Route;
 
-        entry->setDestination(getPeerByLocalAddress(interfaceAddrs[i]));
+        entry->setDestination(getPeerByLocalAddress(elem));
         entry->setGateway(IPv4Address());
-        entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
+        entry->setInterface(rt->getInterfaceByAddress(elem));
         entry->setSourceType(IRoute::OSPF);
 
         entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
         entry->setMetric(0);    // XXX FIXME what's that?
 
-        EV_DETAIL << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
+        EV_DETAIL << "  inserting route: local=" << elem << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
 
         rt->addRoute(entry);
     }
@@ -314,9 +314,9 @@ void TED::rebuildRoutingTable()
 
 IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
 {
-    for (auto it = ted.begin(); it != ted.end(); it++)
-        if (it->linkid == peerIP && it->advrouter == routerId)
-            return it->local;
+    for (auto & elem : ted)
+        if (elem.linkid == peerIP && elem.advrouter == routerId)
+            return elem.local;
 
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
 }
@@ -324,17 +324,17 @@ IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
 IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
 {
     ASSERT(isLocalPeer(peerIP));
-    for (auto it = ted.begin(); it != ted.end(); it++)
-        if (it->linkid == peerIP && it->advrouter == routerId)
-            return it->remote;
+    for (auto & elem : ted)
+        if (elem.linkid == peerIP && elem.advrouter == routerId)
+            return elem.remote;
 
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
 }
 
 bool TED::isLocalPeer(IPv4Address inetAddr)
 {
-    for (auto it = ted.begin(); it != ted.end(); it++)
-        if (it->linkid == inetAddr && it->advrouter == routerId)
+    for (auto & elem : ted)
+        if (elem.linkid == inetAddr && elem.advrouter == routerId)
             return true;
 
     return false;
@@ -348,17 +348,17 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
 
     // select edges that have enough bandwidth left, and store them into edges[].
     // meanwhile, collect vertices in vectices[].
-    for (unsigned int i = 0; i < topology.size(); i++) {
-        if (!topology[i].state)
+    for (auto & elem : topology) {
+        if (!elem.state)
             continue;
 
-        if (topology[i].UnResvBandwidth[priority] < req_bandwidth)
+        if (elem.UnResvBandwidth[priority] < req_bandwidth)
             continue;
 
         edge_t edge;
-        edge.src = assignIndex(vertices, topology[i].advrouter);
-        edge.dest = assignIndex(vertices, topology[i].linkid);
-        edge.metric = topology[i].metric;
+        edge.src = assignIndex(vertices, elem.advrouter);
+        edge.dest = assignIndex(vertices, elem.linkid);
+        edge.metric = elem.metric;
         edges.push_back(edge);
     }
 
@@ -371,9 +371,9 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     for (unsigned int i = 1; i < vertices.size(); i++) {
         bool mod = false;
 
-        for (unsigned int j = 0; j < edges.size(); j++) {
-            int src = edges[j].src;
-            int dest = edges[j].dest;
+        for (auto & edge : edges) {
+            int src = edge.src;
+            int dest = edge.dest;
 
             ASSERT(src >= 0);
             ASSERT(dest >= 0);
@@ -381,10 +381,10 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
             ASSERT(dest < (int)vertices.size());
             ASSERT(src != dest);
 
-            if (vertices[src].dist + edges[j].metric >= vertices[dest].dist)
+            if (vertices[src].dist + edge.metric >= vertices[dest].dist)
                 continue;
 
-            vertices[dest].dist = vertices[src].dist + edges[j].metric;
+            vertices[dest].dist = vertices[src].dist + edge.metric;
             vertices[dest].parent = src;
 
             mod = true;
@@ -401,18 +401,18 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match)
 {
     match = nullptr;
 
-    for (auto it = ted.begin(); it != ted.end(); it++) {
-        if (it->sourceId == link.sourceId && it->messageId == link.messageId && it->timestamp == link.timestamp) {
+    for (auto & elem : ted) {
+        if (elem.sourceId == link.sourceId && elem.messageId == link.messageId && elem.timestamp == link.timestamp) {
             // we've already seen this message, ignore it
             return false;
         }
 
-        if (it->advrouter == link.advrouter && it->linkid == link.linkid) {
+        if (elem.advrouter == link.advrouter && elem.linkid == link.linkid) {
             // we've have info about this link
 
-            if (it->timestamp < link.timestamp || (it->timestamp == link.timestamp && it->messageId < link.messageId)) {
+            if (elem.timestamp < link.timestamp || (elem.timestamp == link.timestamp && elem.messageId < link.messageId)) {
                 // but it's older, use this new
-                match = &(*it);
+                match = &(elem);
                 break;
             }
             else {
@@ -448,8 +448,8 @@ unsigned int TED::linkIndex(IPv4Address advrouter, IPv4Address linkid)
 
 bool TED::isLocalAddress(IPv4Address addr)
 {
-    for (unsigned int i = 0; i < interfaceAddrs.size(); i++)
-        if (interfaceAddrs[i] == addr)
+    for (auto & elem : interfaceAddrs)
+        if (elem == addr)
             return true;
 
     return false;
@@ -470,12 +470,12 @@ IPAddressVector TED::getLocalAddress()
 
 IPv4Address TED::primaryAddress(IPv4Address localInf)    // only used in RSVP::processHelloMsg
 {
-    for (unsigned int i = 0; i < ted.size(); i++) {
-        if (ted[i].local == localInf)
-            return ted[i].advrouter;
+    for (auto & elem : ted) {
+        if (elem.local == localInf)
+            return elem.advrouter;
 
-        if (ted[i].remote == localInf)
-            return ted[i].linkid;
+        if (elem.remote == localInf)
+            return elem.linkid;
     }
     ASSERT(false);
     return IPv4Address();    // to eliminate warning

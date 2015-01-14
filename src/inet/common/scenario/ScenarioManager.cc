@@ -228,8 +228,8 @@ void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType 
         cChannel *channel = channelType->create("channel");
 
         // set parameters:
-        for (auto i = paramList.begin(); i != paramList.end(); i++) {
-            cXMLElement *child = *i;
+        for (auto child : paramList) {
+            
             const char *name = getRequiredAttribute(child, "name");
             const char *value = getRequiredAttribute(child, "value");
             channel->par(name).parse(value);

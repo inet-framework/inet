@@ -70,8 +70,8 @@ const INoise *ScalarAnalogModel::computeNoise(const IListening *listening, const
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-        const ScalarReception *reception = check_and_cast<const ScalarReception *>(*it);
+    for (const auto & interferingReception : *interferingReceptions) {
+        const ScalarReception *reception = check_and_cast<const ScalarReception *>(interferingReception);
         if (carrierFrequency == reception->getCarrierFrequency() && bandwidth == reception->getBandwidth()) {
             W power = reception->getPower();
             simtime_t startTime = reception->getStartTime();
@@ -98,12 +98,12 @@ const INoise *ScalarAnalogModel::computeNoise(const IListening *listening, const
     if (scalarBackgroundNoise) {
         if (carrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && bandwidth == scalarBackgroundNoise->getBandwidth()) {
             const std::map<simtime_t, W> *backgroundNoisePowerChanges = scalarBackgroundNoise->getPowerChanges();
-            for (std::map<simtime_t, W>::const_iterator it = backgroundNoisePowerChanges->begin(); it != backgroundNoisePowerChanges->end(); it++) {
-                auto jt = powerChanges->find(it->first);
+            for (const auto & backgroundNoisePowerChange : *backgroundNoisePowerChanges) {
+                auto jt = powerChanges->find(backgroundNoisePowerChange.first);
                 if (jt != powerChanges->end())
-                    jt->second += it->second;
+                    jt->second += backgroundNoisePowerChange.second;
                 else
-                    powerChanges->insert(std::pair<simtime_t, W>(it->first, it->second));
+                    powerChanges->insert(std::pair<simtime_t, W>(backgroundNoisePowerChange.first, backgroundNoisePowerChange.second));
             }
         }
         else if (areOverlappingBands(carrierFrequency, bandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))

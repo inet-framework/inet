@@ -522,9 +522,9 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        for (int i = 0; i < NUM_OF_ETHERDESCRS; i++) {
-            if (txRate == etherDescrs[i].txrate) {
-                curEtherDescr = &(etherDescrs[i]);
+        for (auto & etherDescr : etherDescrs) {
+            if (txRate == etherDescr.txrate) {
+                curEtherDescr = &(etherDescr);
                 if (interfaceEntry) {
                     interfaceEntry->setCarrier(true);
                     interfaceEntry->setDatarate(txRate);

@@ -125,8 +125,8 @@ const INoise *DimensionalAnalogModel::computeNoise(const IListening *listening, 
             receptionPowers.push_back(const_cast<ConstMapping *>(backgroundNoisePower));
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-        const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(*it);
+    for (const auto & interferingReception : *interferingReceptions) {
+        const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(interferingReception);
         const ConstMapping *receptionPower = dimensionalReception->getPower();
         if (receptionPower->getDimensionSet().hasDimension(Dimension::frequency) || (carrierFrequency == dimensionalReception->getCarrierFrequency() && bandwidth == dimensionalReception->getBandwidth())) {
             receptionPowers.push_back(const_cast<ConstMapping *>(receptionPower));

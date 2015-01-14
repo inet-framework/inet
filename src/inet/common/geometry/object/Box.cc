@@ -36,10 +36,10 @@ Box inet::Box::computeBoundingBox(const std::vector<Coord>& points)
         min = *points.begin();
         max = min;
     }
-    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
+    for (const auto & point : points)
     {
-        min = min.min(*it);
-        max = max.max(*it);
+        min = min.min(point);
+        max = max.max(point);
     }
     return Box(min, max);
 }

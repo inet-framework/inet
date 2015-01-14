@@ -392,11 +392,11 @@ void DHCPServer::sendOffer(DHCPLease *lease)
 
 DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
 {
-    for (auto it = leased.begin(); it != leased.end(); it++) {
+    for (auto & elem : leased) {
         // lease exist
-        if (it->second.mac == mac) {
+        if (elem.second.mac == mac) {
             EV_DETAIL << "Found lease for MAC " << mac << "." << endl;
-            return &(it->second);
+            return &(elem.second);
         }
     }
     EV_DETAIL << "Lease not found for MAC " << mac << "." << endl;

@@ -167,9 +167,9 @@ void NS_CLASS hello_send(void *arg)
 #ifdef AODV_USE_STL_RT
                 for (i = 0; i < RT_TABLESIZE; i++)
                 {
-                    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+                    for (auto & elem : aodvRtTableMap)
                     {
-                        rt_table_t *rt = it->second;
+                        rt_table_t *rt = elem.second;
                         /* If an entry has an active hello timer, we assume
                            that we are receiving hello messages from that
                            node... */

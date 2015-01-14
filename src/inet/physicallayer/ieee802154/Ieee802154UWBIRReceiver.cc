@@ -168,8 +168,8 @@ std::pair<double, double> Ieee802154UWBIRReceiver::integrateWindow(simtime_t_cre
         signalValue = measure * 0.5; // we capture half of the maximum possible pulse energy to account for self  interference
         resPower    = resPower + signalValue;
         // consider all interferers at this point in time
-        for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
-            const DimensionalReception *dimensionalInterferingReception = check_and_cast<const DimensionalReception *>(*it);
+        for (const auto & interferingReception : *interferingReceptions) {
+            const DimensionalReception *dimensionalInterferingReception = check_and_cast<const DimensionalReception *>(interferingReception);
             const ConstMapping *const interferingPower = dimensionalInterferingReception->getPower();
             double measure = interferingPower->getValue(arg) * peakPulsePower; //TODO: de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
 //          measure = measure * uniform(0, +1); // random point of Efield at sampling (due to pulse waveform and self interference)

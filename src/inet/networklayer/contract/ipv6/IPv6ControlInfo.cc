@@ -32,8 +32,8 @@ void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
         take(dgram);
     }
 
-    for (ExtensionHeaders::const_iterator i = other.extensionHeaders.begin(); i != other.extensionHeaders.end(); i++)
-        extensionHeaders.push_back((*i)->dup());
+    for (const auto & elem : other.extensionHeaders)
+        extensionHeaders.push_back((elem)->dup());
 #endif // ifdef WITH_IPv6
 }
 

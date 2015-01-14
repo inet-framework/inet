@@ -295,9 +295,9 @@ void IPv6Tunneling::destroyTunnels(const IPv6Address& entry)
 
 void IPv6Tunneling::destroyTunnelFromTrigger(const IPv6Address& trigger)
 {
-    for (auto it = tunnels.begin(); it != tunnels.end(); ++it) {
-        if (it->second.destTrigger == trigger) {
-            destroyTunnel(it->second.entry, it->second.exit, it->second.destTrigger);
+    for (auto & elem : tunnels) {
+        if (elem.second.destTrigger == trigger) {
+            destroyTunnel(elem.second.entry, elem.second.exit, elem.second.destTrigger);
 
             // reset the index if we do not have a single tunnel anymore
             resetVIfIndex();
@@ -330,25 +330,25 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress, TunnelType
 {
     int outInterfaceId = -1;
 
-    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto & elem : tunnels) {
         if (tunnelType == NORMAL || tunnelType == NON_SPLIT || tunnelType == SPLIT) {
             // we search here for tunnels which have a destination trigger and
             // check whether the trigger is equal to the destination
             // only "normal" tunnels, both split and non-split, are possible entry points
-            if ((it->second.tunnelType == NON_SPLIT) ||
-                (it->second.tunnelType == SPLIT && it->second.destTrigger == destAddress))
+            if ((elem.second.tunnelType == NON_SPLIT) ||
+                (elem.second.tunnelType == SPLIT && elem.second.destTrigger == destAddress))
             {
-                outInterfaceId = it->first;
+                outInterfaceId = elem.first;
                 break;
             }
         }
         else if (tunnelType == MOBILITY || tunnelType == HA_OPT || tunnelType == T2RH) {
-            if (it->second.tunnelType != NON_SPLIT &&
-                it->second.tunnelType != SPLIT &&
-                it->second.destTrigger == destAddress
+            if (elem.second.tunnelType != NON_SPLIT &&
+                elem.second.tunnelType != SPLIT &&
+                elem.second.destTrigger == destAddress
                 )
             {
-                outInterfaceId = it->first;
+                outInterfaceId = elem.first;
                 break;
             }
         }
@@ -533,9 +533,9 @@ int IPv6Tunneling::lookupTunnels(const IPv6Address& dest)
     // we search here for tunnels which have a destination trigger and
     // check whether the trigger is equal to the destination
     // only split tunnels or mobility paths are possible entry points
-    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
-        if ((it->second.tunnelType != NON_SPLIT) && (it->second.destTrigger == dest)) {
-            outInterfaceId = it->first;
+    for (auto & elem : tunnels) {
+        if ((elem.second.tunnelType != NON_SPLIT) && (elem.second.destTrigger == dest)) {
+            outInterfaceId = elem.first;
             break;
         }
     }
@@ -549,9 +549,9 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
     // we'll just stop at the first match, because it is assumed that not
     // more than a single non-split tunnel is possible
-    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
-        if (it->second.tunnelType == NON_SPLIT) {
-            outInterfaceId = it->first;
+    for (auto & elem : tunnels) {
+        if (elem.second.tunnelType == NON_SPLIT) {
+            outInterfaceId = elem.first;
             break;
         }
     }
@@ -561,11 +561,11 @@ int IPv6Tunneling::doPrefixMatch(const IPv6Address& dest)
 
 bool IPv6Tunneling::isTunnelExit(const IPv6Address& exit)
 {
-    for (auto it = tunnels.begin(); it != tunnels.end(); it++) {
+    for (auto & elem : tunnels) {
         // mobility "tunnels" are not relevant for decapsulation
         // 17.10.07 - same for Home Address Option
-        if (it->second.tunnelType != T2RH && it->second.tunnelType != HA_OPT
-            && it->second.exit == exit)
+        if (elem.second.tunnelType != T2RH && elem.second.tunnelType != HA_OPT
+            && elem.second.exit == exit)
         {
             return true;
         }

@@ -91,8 +91,8 @@ LDP::LDP()
 
 LDP::~LDP()
 {
-    for (unsigned int i = 0; i < myPeers.size(); i++)
-        cancelAndDelete(myPeers[i].timeout);
+    for (auto & elem : myPeers)
+        cancelAndDelete(elem.timeout);
 
     cancelAndDelete(sendHelloMsg);
     //this causes segfault at the end of simulation       -- Vojta
@@ -202,8 +202,8 @@ bool LDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            for (unsigned int i = 0; i < myPeers.size(); i++)
-                cancelAndDelete(myPeers[i].timeout);
+            for (auto & elem : myPeers)
+                cancelAndDelete(elem.timeout);
             myPeers.clear();
             cancelEvent(sendHelloMsg);
         }
@@ -374,29 +374,29 @@ void LDP::rebuildFecList()
     if (oldList.size() > 0) {
         EV_INFO << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
 
-        for (auto it = oldList.begin(); it != oldList.end(); it++) {
-            EV_DETAIL << "removing FEC= " << *it << endl;
+        for (auto & elem : oldList) {
+            EV_DETAIL << "removing FEC= " << elem << endl;
 
-            for (auto dit = fecDown.begin(); dit != fecDown.end(); dit++) {
-                if (dit->fecid != it->fecid)
+            for (auto & _dit : fecDown) {
+                if (_dit.fecid != elem.fecid)
                     continue;
 
-                EV_DETAIL << "sending release label=" << dit->label << " downstream to " << dit->peer << endl;
+                EV_DETAIL << "sending release label=" << _dit.label << " downstream to " << _dit.peer << endl;
 
-                sendMapping(LABEL_RELEASE, dit->peer, dit->label, it->addr, it->length);
+                sendMapping(LABEL_RELEASE, _dit.peer, _dit.label, elem.addr, elem.length);
             }
 
-            for (auto uit = fecUp.begin(); uit != fecUp.end(); uit++) {
-                if (uit->fecid != it->fecid)
+            for (auto & _uit : fecUp) {
+                if (_uit.fecid != elem.fecid)
                     continue;
 
-                EV_DETAIL << "sending withdraw label=" << uit->label << " upstream to " << uit->peer << endl;
+                EV_DETAIL << "sending withdraw label=" << _uit.label << " upstream to " << _uit.peer << endl;
 
-                sendMapping(LABEL_WITHDRAW, uit->peer, uit->label, it->addr, it->length);
+                sendMapping(LABEL_WITHDRAW, _uit.peer, _uit.label, elem.addr, elem.length);
 
-                EV_DETAIL << "removing entry inLabel=" << uit->label << " from LIB" << endl;
+                EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB" << endl;
 
-                lt->removeLibEntry(uit->label);
+                lt->removeLibEntry(_uit.label);
             }
         }
     }
@@ -408,11 +408,11 @@ void LDP::rebuildFecList()
 
 void LDP::updateFecList(IPv4Address nextHop)
 {
-    for (auto it = fecList.begin(); it != fecList.end(); it++) {
-        if (it->nextHop != nextHop)
+    for (auto & elem : fecList) {
+        if (elem.nextHop != nextHop)
             continue;
 
-        updateFecListEntry(*it);
+        updateFecListEntry(elem);
     }
 }
 
@@ -1194,16 +1194,16 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
 
     // regular traffic, classify, label etc.
 
-    for (auto it = fecList.begin(); it != fecList.end(); it++) {
-        if (!destAddr.prefixMatches(it->addr, it->length))
+    for (auto & elem : fecList) {
+        if (!destAddr.prefixMatches(elem.addr, elem.length))
             continue;
 
-        EV_DETAIL << "FEC matched: " << *it << endl;
+        EV_DETAIL << "FEC matched: " << elem << endl;
 
-        auto dit = findFecEntry(fecDown, it->fecid, it->nextHop);
+        auto dit = findFecEntry(fecDown, elem.fecid, elem.nextHop);
         if (dit != fecDown.end()) {
             outLabel = LIBTable::pushLabel(dit->label);
-            outInterface = findInterfaceFromPeerAddr(it->nextHop);
+            outInterface = findInterfaceFromPeerAddr(elem.nextHop);
             color = LDP_USER_TRAFFIC;
             EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterface << endl;
             return true;

@@ -30,8 +30,8 @@ Polygon::Polygon(const std::vector<Coord>& points)
 
 bool Polygon::isUnspecified() const
 {
-    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++) {
-        if ((*it).isUnspecified())
+    for (const auto & elem : points) {
+        if ((elem).isUnspecified())
             return true;
     }
     return false;
@@ -61,9 +61,9 @@ Coord Polygon::computeSize() const
 {
     Coord min;
     Coord max;
-    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++) {
-        min = min.min(*it);
-        max = max.max(*it);
+    for (const auto & elem : points) {
+        min = min.min(elem);
+        max = max.max(elem);
     }
     return max - min;
 }

@@ -69,8 +69,8 @@ std::string IPv4MulticastSourceList::info() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "I" : "E");
-    for (int i = 0; i < (int)sources.size(); ++i)
-        out << " " << sources[i];
+    for (auto & elem : sources)
+        out << " " << elem;
     return out.str();
 }
 
@@ -86,8 +86,8 @@ std::string IPv4MulticastSourceList::detailedInfo() const
 
 IPv4InterfaceData::HostMulticastData::~HostMulticastData()
 {
-    for (auto it = joinedMulticastGroups.begin(); it != joinedMulticastGroups.end(); ++it)
-        delete (*it);
+    for (auto & elem : joinedMulticastGroups)
+        delete (elem);
     joinedMulticastGroups.clear();
 }
 
@@ -109,9 +109,9 @@ std::string IPv4InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
-    for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i) {
-        out << " " << joinedMulticastGroups[i]->multicastGroup    // << "(" << refCounts[i] << ")";
-            << " " << joinedMulticastGroups[i]->sourceList.detailedInfo();
+    for (auto & elem : joinedMulticastGroups) {
+        out << " " << elem->multicastGroup    // << "(" << refCounts[i] << ")";
+            << " " << elem->sourceList.detailedInfo();
     }
     out << "\n";
     return out.str();
@@ -119,8 +119,8 @@ std::string IPv4InterfaceData::HostMulticastData::detailedInfo()
 
 IPv4InterfaceData::RouterMulticastData::~RouterMulticastData()
 {
-    for (auto it = reportedMulticastGroups.begin(); it != reportedMulticastGroups.end(); ++it)
-        delete *it;
+    for (auto & elem : reportedMulticastGroups)
+        delete elem;
     reportedMulticastGroups.clear();
 }
 
@@ -145,9 +145,9 @@ std::string IPv4InterfaceData::RouterMulticastData::detailedInfo()
     std::stringstream out;
     out << "TTL Threshold: " << multicastTtlThreshold << "\n";
     out << "Multicast Listeners:";
-    for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i) {
-        out << " " << reportedMulticastGroups[i]->multicastGroup
-            << " " << reportedMulticastGroups[i]->sourceList.detailedInfo();
+    for (auto & elem : reportedMulticastGroups) {
+        out << " " << elem->multicastGroup
+            << " " << elem->sourceList.detailedInfo();
     }
     out << "\n";
     return out.str();
@@ -234,8 +234,8 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
     }
 
     std::map<IPv4Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
-    for (IPv4AddressVector::const_iterator source = oldSourceList.begin(); source != oldSourceList.end(); ++source) {
-        auto count = counts->find(*source);
+    for (const auto & elem : oldSourceList) {
+        auto count = counts->find(elem);
         if (count == counts->end())
             throw cRuntimeError("Inconsistent reference counts in IPv4InterfaceData.");
         else if (count->second == 1)
@@ -245,10 +245,10 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
     }
 
     counts = newFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
-    for (IPv4AddressVector::const_iterator source = newSourceList.begin(); source != newSourceList.end(); ++source) {
-        auto count = counts->find(*source);
+    for (const auto & elem : newSourceList) {
+        auto count = counts->find(elem);
         if (count == counts->end())
-            (*counts)[*source] = 1;
+            (*counts)[elem] = 1;
         else
             count->second++;
     }
@@ -300,15 +300,15 @@ bool IPv4InterfaceData::HostMulticastGroupData::updateSourceList()
     IPv4AddressVector sourceList;
     if (numOfExcludeModeSockets == 0) {
         // If all socket is in INCLUDE mode, then the sourceList is the union of included sources
-        for (auto it = includeCounts.begin(); it != includeCounts.end(); ++it)
-            sourceList.push_back(it->first);
+        for (auto & elem : includeCounts)
+            sourceList.push_back(elem.first);
     }
     else {
         // If some socket is in EXCLUDE mode, then the sourceList contains the sources that are
         // excluded by all EXCLUDE mode sockets except if there is a socket including the source.
-        for (auto it = excludeCounts.begin(); it != excludeCounts.end(); ++it)
-            if (it->second == numOfExcludeModeSockets && includeCounts.find(it->first) == includeCounts.end())
-                sourceList.push_back(it->first);
+        for (auto & elem : excludeCounts)
+            if (elem.second == numOfExcludeModeSockets && includeCounts.find(elem.first) == includeCounts.end())
+                sourceList.push_back(elem.first);
 
     }
 
@@ -325,9 +325,9 @@ IPv4InterfaceData::RouterMulticastGroupData *IPv4InterfaceData::findRouterGroupD
 {
     ASSERT(multicastAddress.isMulticast());
     const RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
-    for (RouterMulticastGroupVector::const_iterator it = entries.begin(); it != entries.end(); ++it)
-        if ((*it)->multicastGroup == multicastAddress)
-            return *it;
+    for (const auto & entrie : entries)
+        if ((entrie)->multicastGroup == multicastAddress)
+            return entrie;
 
     return nullptr;
 }
@@ -467,9 +467,9 @@ IPv4InterfaceData::HostMulticastGroupData *IPv4InterfaceData::findHostGroupData(
 {
     ASSERT(multicastAddress.isMulticast());
     HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;
-    for (auto it = entries.begin(); it != entries.end(); ++it)
-        if ((*it)->multicastGroup == multicastAddress)
-            return *it;
+    for (auto & entrie : entries)
+        if ((entrie)->multicastGroup == multicastAddress)
+            return entrie;
 
     return nullptr;
 }

@@ -68,8 +68,8 @@ void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadi
     RadioEntry *radioEntry = it->second;
     Radios& neighborVector = radioEntry->neighborVector;
 
-    for (unsigned int i = 0; i < neighborVector.size(); i++)
-        radioMedium->sendToRadio(transmitter, neighborVector[i], frame);
+    for (auto & elem : neighborVector)
+        radioMedium->sendToRadio(transmitter, elem, frame);
 }
 
 void NeighborListNeighborCache::handleMessage(cMessage *msg)
@@ -89,8 +89,8 @@ void NeighborListNeighborCache::updateNeighborList(RadioEntry *radioEntry)
     double radius = maxSpeed * refillPeriod + range;
     radioEntry->neighborVector.clear();
 
-    for (unsigned int i = 0; i < radios.size(); i++) {
-        const IRadio *otherRadio = radios[i]->radio;
+    for (auto & elem : radios) {
+        const IRadio *otherRadio = elem->radio;
         Coord otherEntryPosition = otherRadio->getAntenna()->getMobility()->getCurrentPosition();
 
         if (otherRadio->getId() != radioEntry->radio->getId() &&
@@ -128,14 +128,14 @@ void NeighborListNeighborCache::removeRadio(const IRadio *radio)
 void NeighborListNeighborCache::updateNeighborLists()
 {
     EV_DETAIL << "Updating the neighbor lists" << endl;
-    for (unsigned int i = 0; i < radios.size(); i++)
-        updateNeighborList(radios[i]);
+    for (auto & elem : radios)
+        updateNeighborList(elem);
 }
 
 void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio)
 {
-    for (unsigned int i = 0; i < radios.size(); i++) {
-        Radios neighborVector = radios[i]->neighborVector;
+    for (auto & elem : radios) {
+        Radios neighborVector = elem->neighborVector;
         auto it = find(neighborVector.begin(), neighborVector.end(), radio);
         if (it != neighborVector.end())
             neighborVector.erase(it);
@@ -144,8 +144,8 @@ void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio
 
 NeighborListNeighborCache::~NeighborListNeighborCache()
 {
-    for (unsigned int i = 0; i < radios.size(); i++)
-        delete radios[i];
+    for (auto & elem : radios)
+        delete elem;
 
     cancelAndDelete(updateNeighborListsTimer);
 }

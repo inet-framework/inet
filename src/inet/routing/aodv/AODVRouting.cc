@@ -1217,8 +1217,8 @@ void AODVRouting::clearState()
 {
     rerrCount = rreqCount = rreqId = sequenceNum = 0;
     addressToRreqRetries.clear();
-    for (auto it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
-        cancelAndDelete(it->second);
+    for (auto & elem : waitForRREPTimers)
+        cancelAndDelete(elem.second);
 
     // FIXME: Drop the queued datagrams.
     //for (auto it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)

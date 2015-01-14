@@ -55,16 +55,16 @@ SCTPPeer::~SCTPPeer()
     cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
-    for (auto i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
-        delete i->second;
+    for (auto & elem : bytesPerAssoc)
+        delete elem.second;
     bytesPerAssoc.clear();
 
-    for (auto i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
-        delete i->second;
+    for (auto & elem : endToEndDelay)
+        delete elem.second;
     endToEndDelay.clear();
 
-    for (auto i = histEndToEndDelay.begin(); i != histEndToEndDelay.end(); ++i)
-        delete i->second;
+    for (auto & elem : histEndToEndDelay)
+        delete elem.second;
     histEndToEndDelay.clear();
 
     rcvdPacketsPerAssoc.clear();
@@ -722,8 +722,8 @@ void SCTPPeer::finish()
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    for (auto l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); ++l)
-        EV_DETAIL << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
+    for (auto & elem : rcvdBytesPerAssoc)
+        EV_DETAIL << getFullPath() << ": received " << elem.second << " bytes in assoc " << elem.first << "\n";
 
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV_INFO << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";

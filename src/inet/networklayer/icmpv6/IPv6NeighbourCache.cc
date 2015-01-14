@@ -166,11 +166,11 @@ void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 // Added by CB
 void IPv6NeighbourCache::invalidateEntriesForInterfaceID(int interfaceID)
 {
-    for (auto it = neighbourMap.begin(); it != neighbourMap.end(); it++) {
-        if (it->first.interfaceID == interfaceID) {
-            it->second.reachabilityState = PROBE;    // we make sure this neighbour is not used anymore in the future, unless reachability can be confirmed
-            neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent);    // 20.9.07 - CB
-            it->second.nudTimeoutEvent = nullptr;
+    for (auto & elem : neighbourMap) {
+        if (elem.first.interfaceID == interfaceID) {
+            elem.second.reachabilityState = PROBE;    // we make sure this neighbour is not used anymore in the future, unless reachability can be confirmed
+            neighbourDiscovery.cancelAndDelete(elem.second.nudTimeoutEvent);    // 20.9.07 - CB
+            elem.second.nudTimeoutEvent = nullptr;
         }
     }
 }

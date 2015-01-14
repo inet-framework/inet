@@ -200,10 +200,10 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
      * send them on the new route. */
     std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
-    for (unsigned int i = 0; i < list.size(); i++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
         if ((rt->state == VALID || rt->state == IMMORTAL)  && seek_list_remove(seek_list_find(auxAaddr)))
         {
             if (rt->flags & RT_INET_DEST)
@@ -251,9 +251,9 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
 rt_table_t *NS_CLASS rt_table_find_gateway()
 {
     rt_table_t *gw = nullptr;
-    for (auto it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+    for (auto & elem : aodvRtTableMap)
     {
-        rt_table_t *rt = it->second;
+        rt_table_t *rt = elem.second;
         if ((rt->flags & RT_GATEWAY) && rt->state == VALID)
         {
             if (!gw || rt->hcnt < gw->hcnt)
@@ -453,9 +453,9 @@ void NS_CLASS precursor_add(rt_table_t * rt, struct in_addr addr)
     /* Sanity check */
     if (!rt)
         return;
-    for (unsigned int i = 0; i < rt->precursors.size(); i++)
+    for (auto & elem : rt->precursors)
     {
-        if (rt->precursors[i].neighbor.s_addr == addr.s_addr)
+        if (elem.neighbor.s_addr == addr.s_addr)
             return;
     }
     precursor_t pr;
@@ -563,10 +563,10 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
 
-    for (unsigned int i = 0; i < list.size(); i++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
         if ((rt->state == VALID || rt->state == IMMORTAL) && seek_list_remove(seek_list_find(auxAaddr)))
         {
             if (rt->flags & RT_INET_DEST)
@@ -1351,10 +1351,10 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
      * them on the new route. */
     std::vector<L3Address> list;
     getListRelatedAp(rt->dest_addr.s_addr, list);
-    for (unsigned int i = 0; i < list.size(); i++)
+    for (auto & elem : list)
     {
         struct in_addr auxAaddr;
-        auxAaddr.s_addr = list[i];
+        auxAaddr.s_addr = elem;
         if ((rt->state == VALID || rt->state == IMMORTAL)&& seek_list_remove(seek_list_find(auxAaddr)))
         {
 #ifdef NS_PORT

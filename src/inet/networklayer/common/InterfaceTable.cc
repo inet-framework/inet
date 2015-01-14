@@ -61,8 +61,8 @@ InterfaceTable::InterfaceTable()
 
 InterfaceTable::~InterfaceTable()
 {
-    for (int i = 0; i < (int)idToInterface.size(); i++)
-        delete idToInterface[i];
+    for (auto & elem : idToInterface)
+        delete elem;
     delete[] tmpInterfaceList;
 }
 
@@ -120,8 +120,8 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
 {
     if (!address.isUnspecified()) {
         L3Address::AddressType addrType = address.getType();
-        for (int i = 0; i < (int)idToInterface.size(); i++) {
-            InterfaceEntry *ie = idToInterface[i];
+        for (auto & elem : idToInterface) {
+            InterfaceEntry *ie = elem;
             if (ie) {
 #ifdef WITH_GENERIC
                 if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
@@ -175,8 +175,8 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4:
-            for (int i = 0; i < (int)idToInterface.size(); i++) {
-                InterfaceEntry *ie = idToInterface[i];
+            for (auto & elem : idToInterface) {
+                InterfaceEntry *ie = elem;
                 if (ie && ie->ipv4Data()) {
                     IPv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
                     IPv4Address netmask = ie->ipv4Data()->getNetmask();
@@ -189,8 +189,8 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            for (int i = 0; i < (int)idToInterface.size(); i++) {
-                InterfaceEntry *ie = idToInterface[i];
+            for (auto & elem : idToInterface) {
+                InterfaceEntry *ie = elem;
                 if (ie && ie->ipv6Data()) {
                     IPv6InterfaceData *ipv6Data = ie->ipv6Data();
                     for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
