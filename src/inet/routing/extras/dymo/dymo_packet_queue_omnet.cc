@@ -340,7 +340,6 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     if (qp == nullptr)
     {
         throw cRuntimeError("Dymo packet queue, Malloc failed!\n");
-        exit(-1);
     }
 
     qp->p = p;
