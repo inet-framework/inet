@@ -45,7 +45,6 @@ class INET_API SCTPNatEntry : public cPolymorphic
     SCTPNatEntry();
     ~SCTPNatEntry();
 
-    cMessage *NatTimer;
     void setLocalAddress(L3Address addr) { localAddress = addr; };
     void setGlobalAddress(L3Address addr) { globalAddress = addr; };
     void setNattedAddress(L3Address addr) { nattedAddress = addr; };

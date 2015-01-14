@@ -146,6 +146,7 @@ SCTPNatEntry::SCTPNatEntry()
     nattedPort = 0;
     globalVtag = 0;
     localVtag = 0;
+    entryNumber = 0;
 }
 
 SCTPNatEntry::~SCTPNatEntry()
