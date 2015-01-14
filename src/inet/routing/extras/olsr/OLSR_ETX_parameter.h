@@ -30,6 +30,7 @@
 #define __OLSR_ETX_parameter_h__
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -52,13 +53,13 @@ class OLSR_ETX_parameter : public cObject
 #define OLSR_ETX_MPR_QOLSR           4
         // non-OLSR standard: use the MPR selection algorithm implemented in OLSRD (See FAQ)
 #define OLSR_ETX_MPR_OLSRD           5
-        int mpr_algorithm_;
+        int mpr_algorithm_ = 0;
         /// Determine which routing algorith is to be used
         // use the original hop count algorithm as proposed in RFC 3626
 #define OLSR_ETX_DEFAULT_ALGORITHM   1
         // non-OLSR standard: use Dijkstra algorithm to compute routes
 #define OLSR_ETX_DIJKSTRA_ALGORITHM  2
-        int routing_algorithm_;
+        int routing_algorithm_ = 0;
         /// Determines which heuristic should be used for link quality computation
         // default OLSR behavior, as defined in RFC 3626
 #define OLSR_ETX_BEHAVIOR_NONE       1
@@ -66,9 +67,9 @@ class OLSR_ETX_parameter : public cObject
 #define OLSR_ETX_BEHAVIOR_ETX        2
         // non-OLSR standard: use the ML metric to assert link quality between nodes
 #define OLSR_ETX_BEHAVIOR_ML         3
-        int link_quality_;
+        int link_quality_ = 0;
         /// non-OLSR standard: determine whether fish eye routing algorithm should be used
-        int fish_eye_;
+        int fish_eye_ = -1;
         /// Determine the redundancy level of TC messages
         // publish only nodes in mpr sel set (RFC 3626)
 #define OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET               0
@@ -78,18 +79,15 @@ class OLSR_ETX_parameter : public cObject
 #define OLSR_ETX_TC_REDUNDANCY_FULL                      2
         // non-OLSR standard: publish mpr set only
 #define OLSR_ETX_TC_REDUNDANCY_MPR_SET                   3
-        int tc_redundancy_;
+        int tc_redundancy_ = -1;
 
         /// non-OLSR standard: Link quality extension
-        int link_delay_; // Should link delay estimation be used
-        double c_alpha_; // Factor that will be used to smooth link delays
+        int link_delay_ = -1; // Should link delay estimation be used
+        double c_alpha_ = NaN; // Factor that will be used to smooth link delays
 
 
   public:
-    inline OLSR_ETX_parameter()
-    {
-        //
-    }
+    inline OLSR_ETX_parameter() {}
 
     inline int&     mpr_algorithm() { return mpr_algorithm_; }
     inline int&     routing_algorithm() { return routing_algorithm_; }
