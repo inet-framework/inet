@@ -122,7 +122,7 @@ void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, 
     if (signalID == NF_L2_BEACON_LOST) {
         //XXX should check details if it's about this NIC
         EV << "beacon lost, starting scanning again\n";
-        getParentModule()->getParentModule()->bubble("Beacon lost!");
+        getContainingNode(this)->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
         emit(NF_L2_DISASSOCIATED, myIface);
@@ -303,7 +303,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         EV << "Association successful\n";
         emit(acceptConfirmSignal, PR_ASSOCIATE_CONFIRM);
         // we are happy!
-        getParentModule()->getParentModule()->bubble("Associated with AP");
+        getContainingNode(this)->bubble("Associated with AP");
         if (prevAP.isUnspecified() || prevAP != resp->getAddress()) {
             emit(NF_L2_ASSOCIATED_NEWAP, myIface);    //XXX detail: InterfaceEntry?
             prevAP = resp->getAddress();

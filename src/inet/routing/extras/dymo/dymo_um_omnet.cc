@@ -215,7 +215,7 @@ void DYMOUM::initialize(int stage)
         path_acc_proactive = par("path_acc_proactive");
         propagateProactive = par("propagateProactive");
 
-        strcpy(nodeName, getParentModule()->getParentModule()->getFullName());
+        strcpy(nodeName, getContainingNode(this)->getFullName());
         dymo_socket_init();
         startDYMOUMAgent();
         is_init = true;
