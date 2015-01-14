@@ -180,7 +180,7 @@ OLSR_MidTimer::expire()
 void
 OLSR_DupTupleTimer::expire()
 {
-    OLSR_dup_tuple* tuple = dynamic_cast<OLSR_dup_tuple*> (tuple_);
+    OLSR_dup_tuple *tuple = check_and_cast<OLSR_dup_tuple*>(tuple_);
     double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
@@ -231,7 +231,7 @@ OLSR_LinkTupleTimer::expire()
 {
     double now;
     now = SIMTIME_DBL(simTime());
-    OLSR_link_tuple* tuple = dynamic_cast<OLSR_link_tuple*> (tuple_);
+    OLSR_link_tuple *tuple = check_and_cast<OLSR_link_tuple*>(tuple_);
     if (tuple->time() < now)
     {
         removeTimer();
@@ -258,7 +258,7 @@ OLSR_LinkTupleTimer::~OLSR_LinkTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_link_tuple* tuple = dynamic_cast<OLSR_link_tuple*> (tuple_);
+    OLSR_link_tuple *tuple = check_and_cast<OLSR_link_tuple*>(tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
@@ -278,7 +278,7 @@ OLSR_LinkTupleTimer::~OLSR_LinkTupleTimer()
 void
 OLSR_Nb2hopTupleTimer::expire()
 {
-    OLSR_nb2hop_tuple* tuple = dynamic_cast<OLSR_nb2hop_tuple*> (tuple_);
+    OLSR_nb2hop_tuple* tuple = check_and_cast<OLSR_nb2hop_tuple*> (tuple_);
     double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
@@ -297,7 +297,7 @@ OLSR_Nb2hopTupleTimer::~OLSR_Nb2hopTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_nb2hop_tuple* tuple = dynamic_cast<OLSR_nb2hop_tuple*> (tuple_);
+    OLSR_nb2hop_tuple* tuple = check_and_cast<OLSR_nb2hop_tuple*> (tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
@@ -319,7 +319,7 @@ OLSR_Nb2hopTupleTimer::~OLSR_Nb2hopTupleTimer()
 void
 OLSR_MprSelTupleTimer::expire()
 {
-    OLSR_mprsel_tuple* tuple = dynamic_cast<OLSR_mprsel_tuple*> (tuple_);
+    OLSR_mprsel_tuple* tuple = check_and_cast<OLSR_mprsel_tuple*> (tuple_);
     double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
@@ -338,7 +338,7 @@ OLSR_MprSelTupleTimer::~OLSR_MprSelTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_mprsel_tuple* tuple = dynamic_cast<OLSR_mprsel_tuple*> (tuple_);
+    OLSR_mprsel_tuple* tuple = check_and_cast<OLSR_mprsel_tuple*> (tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
@@ -359,7 +359,7 @@ OLSR_MprSelTupleTimer::~OLSR_MprSelTupleTimer()
 void
 OLSR_TopologyTupleTimer::expire()
 {
-    OLSR_topology_tuple* tuple = dynamic_cast<OLSR_topology_tuple*> (tuple_);
+    OLSR_topology_tuple* tuple = check_and_cast<OLSR_topology_tuple*> (tuple_);
     double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
@@ -378,7 +378,7 @@ OLSR_TopologyTupleTimer::~OLSR_TopologyTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_topology_tuple* tuple = dynamic_cast<OLSR_topology_tuple*> (tuple_);
+    OLSR_topology_tuple* tuple = check_and_cast<OLSR_topology_tuple*> (tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
@@ -396,7 +396,7 @@ OLSR_TopologyTupleTimer::~OLSR_TopologyTupleTimer()
 
 void OLSR_IfaceAssocTupleTimer::expire()
 {
-    OLSR_iface_assoc_tuple* tuple = dynamic_cast<OLSR_iface_assoc_tuple*> (tuple_);
+    OLSR_iface_assoc_tuple* tuple = check_and_cast<OLSR_iface_assoc_tuple*> (tuple_);
     double time = tuple->time();
     if (time < SIMTIME_DBL(simTime()))
     {
@@ -415,7 +415,7 @@ OLSR_IfaceAssocTupleTimer::~OLSR_IfaceAssocTupleTimer()
     removeTimer();
     if (!tuple_)
         return;
-    OLSR_iface_assoc_tuple* tuple = dynamic_cast<OLSR_iface_assoc_tuple*> (tuple_);
+    OLSR_iface_assoc_tuple* tuple = check_and_cast<OLSR_iface_assoc_tuple*> (tuple_);
     tuple->asocTimer = nullptr;
     if (agent_->state_ptr==nullptr)
         return;
@@ -586,14 +586,14 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
     index = getWlanInterfaceIndex(0);
     if (isInMacLayer())
     {
-        if (!dynamic_cast<OLSR_pkt  *>(msg)) // Check if olsr packet
+        op = dynamic_cast<OLSR_pkt  *>(msg);
+        if (!op) // Check if olsr packet
         {
             delete  msg;
             return nullptr;
         }
         else
         {
-            op = check_and_cast<OLSR_pkt  *>(msg);
             if (op->reduceFuncionality() && par("reduceFuncionality").boolValue())
             {
                 delete msg;
@@ -2779,12 +2779,9 @@ void OLSR:: processLinkBreak(const cObject *details)
 {
     if (use_mac())
     {
-        if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*>(details)))
-        {
-            IPv4Datagram * dgram = const_cast<IPv4Datagram *>(check_and_cast<const IPv4Datagram *>(details));
+        IPv4Datagram * dgram = dynamic_cast<IPv4Datagram *>(const_cast<cObject*>(details));
+        if (dgram)
             mac_failed(dgram);
-            return;
-        }
     }
 }
 
