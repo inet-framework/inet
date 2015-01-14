@@ -306,8 +306,8 @@ void DYMOFau::processPacket(const IPv4Datagram* datagram)
             // update routes to destination
             // send queued packets
             throw cRuntimeError("Dymo has a valid entry route but ip doesn't have a entry route");
-            delete datagram;
-            return;
+            //delete datagram;
+            //return;
         }
         TargetSeqNum = entry->routeSeqNum;
         TargetHopCount = entry->routeDist;
