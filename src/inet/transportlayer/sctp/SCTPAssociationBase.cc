@@ -301,6 +301,12 @@ SCTPDataVariables::SCTPDataVariables()
     numberOfTransmissions = 0;
     numberOfRetransmissions = 0;
     booksize = 0;
+    bbit = false;
+    ebit = false;
+    allowedNoRetransmissions = 0;
+    strReset = false;
+    prMethod = 0;
+    priority = 0;
 }
 
 SCTPDataVariables::~SCTPDataVariables()
