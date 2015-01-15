@@ -92,6 +92,7 @@ void SCTPPeer::initialize(int stage)
         echo = par("echo");
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
+        inboundStreams = par("inboundStreams");
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         lastStream = 0;
@@ -99,6 +100,7 @@ void SCTPPeer::initialize(int stage)
         SCTPSocket *socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));
         socket->setOutboundStreams(outboundStreams);
+        socket->setInboundStreams(inboundStreams);
 
         if (addresses.size() == 0) {
             socket->bind(port);

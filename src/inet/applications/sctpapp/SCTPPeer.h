@@ -55,6 +55,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     bool schedule;
     int queueSize;
     int outboundStreams;
+    int inboundStreams;
 
     // state
     SCTPPathStatus sctpPathStatus;
