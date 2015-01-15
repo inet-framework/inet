@@ -492,6 +492,23 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     bytes.packet = false;
     bytes.bytesToSend = 0;
 
+    fairTimer = false;
+    status = SCTP_S_CLOSED;
+    initTsn = 0;
+    initPeerTsn = 0;
+    sackFrequency = 2;
+    ccFunctions.ccInitParams = nullptr;
+    ccFunctions.ccUpdateBeforeSack = nullptr;
+    ccFunctions.ccUpdateAfterSack = nullptr;
+    ccFunctions.ccUpdateAfterCwndTimeout = nullptr;
+    ccFunctions.ccUpdateAfterRtxTimeout = nullptr;
+    ccFunctions.ccUpdateMaxBurst = nullptr;
+    ccFunctions.ccUpdateBytesAcked = nullptr;
+    ccModule = 0;
+    ssFunctions.ssInitStreams = nullptr;
+    ssFunctions.ssGetNextSid = nullptr;
+    ssFunctions.ssUsableStreams = nullptr;
+
     EV_INFO << "SCTPAssociationBase::SCTPAssociation(): new assocId="
             << assocId << endl;
 
