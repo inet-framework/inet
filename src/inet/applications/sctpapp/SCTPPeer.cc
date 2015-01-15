@@ -116,20 +116,20 @@ void SCTPPeer::initialize(int stage)
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         timeoutMsg = new cMessage("SrvAppTimer");
-        SCTPSocket *socket = new SCTPSocket();
-        socket->setOutputGate(gate("sctpOut"));
-        socket->setOutboundStreams(outboundStreams);
-        socket->setInboundStreams(inboundStreams);
+        SCTPSocket socket;
+        socket.setOutputGate(gate("sctpOut"));
+        socket.setOutboundStreams(outboundStreams);
+        socket.setInboundStreams(inboundStreams);
 
         if (addresses.size() == 0) {
-            socket->bind(port);
+            socket.bind(port);
             clientSocket.bind(port);
         }
         else {
-            socket->bindx(addresses, port);
+            socket.bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
-        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
+        socket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
         EV_DEBUG << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
