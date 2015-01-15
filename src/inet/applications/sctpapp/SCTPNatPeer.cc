@@ -42,6 +42,29 @@ SCTPNatPeer::SCTPNatPeer()
 {
     timeMsg = nullptr;
     timeoutMsg = nullptr;
+    numSessions = 0;
+    packetsSent = 0;
+    packetsRcvd = 0;
+    bytesSent = 0;
+    notifications = 0;
+    serverAssocId = 0;
+    delay = 0;
+    echo = false;
+    schedule = false;
+    shutdownReceived = false;
+    sendAllowed = true;
+    numRequestsToSend = 0;
+    ordered = true;
+    queueSize = 0;
+    outboundStreams = 1;
+    inboundStreams = 1;
+    bytesRcvd = 0;
+    echoedBytesSent = 0;
+    lastStream = 0;
+    chunksAbandoned = 0;
+    numPacketsToReceive = 1;
+    rendezvous = false;
+    peerPort = 0;
 }
 
 SCTPNatPeer::~SCTPNatPeer()
@@ -52,7 +75,6 @@ SCTPNatPeer::~SCTPNatPeer()
 
 void SCTPNatPeer::initialize()
 {
-    numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     WATCH(numSessions);
     WATCH(packetsSent);
     WATCH(packetsRcvd);
@@ -69,7 +91,6 @@ void SCTPNatPeer::initialize()
     inboundStreams = par("inboundStreams");
     ordered = (bool)par("ordered");
     queueSize = par("queueSize");
-    lastStream = 0;
     timeoutMsg = new cMessage("SrvAppTimer");
     if (addresses.size() == 0) {
         clientSocket.bind(port);
@@ -85,9 +106,6 @@ void SCTPNatPeer::initialize()
         msg->setKind(MSGKIND_CONNECT);
         scheduleAt((simtime_t)par("startTime"), msg);
     }
-    schedule = false;
-    shutdownReceived = false;
-    sendAllowed = true;
 }
 
 void SCTPNatPeer::sendOrSchedule(cPacket *msg)
