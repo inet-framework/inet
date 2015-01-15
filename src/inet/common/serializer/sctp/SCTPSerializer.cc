@@ -1493,16 +1493,28 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                 }
                 if (chunk->getHmacTypesArraySize() != 0) {
                     unsigned char *vector = (unsigned char *)malloc(64);
+                    if (rplen > 64) {
+                        EV_ERROR << "Random parameter too long. It will be truncated.\n";
+                        rplen = 64;
+                    }
                     sizePeerKeyVector = rplen;
                     memcpy(vector, rp, rplen);
                     for (unsigned int k = 0; k < sizePeerKeyVector; k++) {
                         peerKeyVector[k] = vector[k];
+                    }
+                    if (cplen > 64) {
+                        EV_ERROR << "Chunks parameter too long. It will be truncated.\n";
+                        cplen = 64;
                     }
                     memcpy(vector, cp, cplen);
                     for (unsigned int k = 0; k < cplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
                     sizePeerKeyVector += cplen;
+                    if (hplen > 64) {
+                        EV_ERROR << "HMac parameter too long. It will be truncated.\n";
+                        hplen = 64;
+                    }
                     memcpy(vector, hp, hplen);
                     for (unsigned int k = 0; k < hplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
