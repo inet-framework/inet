@@ -66,11 +66,9 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     bool shutdownReceived;
     bool sendAllowed;
     int serverAssocId;
-    int clientAssocId;
     int numRequestsToSend;    // requests to send in this session
     int lastStream;
     int numPacketsToReceive;
-    int ssn;
 
     // statistics
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;

@@ -48,6 +48,27 @@ SCTPPeer::SCTPPeer()
     timeoutMsg = nullptr;
     timeMsg = nullptr;
     connectTimer = nullptr;
+    delay = 0;
+    echo = false;
+    ordered = true;
+    schedule = false;
+    queueSize = 0;
+    outboundStreams = 1;
+    inboundStreams = 17;
+    shutdownReceived = false;
+    sendAllowed = true;
+    serverAssocId = 0;
+    numRequestsToSend = 0;
+    lastStream = 0;
+    numPacketsToReceive = 0;
+    bytesSent = 0;
+    echoedBytesSent = 0;
+    packetsSent = 0;
+    bytesRcvd = 0;
+    packetsRcvd = 0;
+    notificationsReceived = 0;
+    numSessions = 0;
+    chunksAbandoned = 0;
 }
 
 SCTPPeer::~SCTPPeer()
@@ -77,7 +98,6 @@ void SCTPPeer::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
@@ -95,7 +115,6 @@ void SCTPPeer::initialize(int stage)
         inboundStreams = par("inboundStreams");
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
-        lastStream = 0;
         timeoutMsg = new cMessage("SrvAppTimer");
         SCTPSocket *socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));
@@ -120,9 +139,6 @@ void SCTPPeer::initialize(int stage)
             connectTimer->setKind(MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
         }
-        schedule = false;
-        shutdownReceived = false;
-        sendAllowed = true;
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
