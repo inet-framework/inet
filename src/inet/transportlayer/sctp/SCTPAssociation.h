@@ -843,7 +843,6 @@ class INET_API SCTPAssociation : public cObject
     uint16 remotePort;    // Local port from last message
     uint32 localVTag;    // Local verification tag
     uint32 peerVTag;    // Remote verification tag
-    bool listen;
 
     // Timers
     cMessage *T1_InitTimer;
