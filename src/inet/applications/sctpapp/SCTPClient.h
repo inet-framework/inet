@@ -75,7 +75,6 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     unsigned long int bytesRcvd;
     unsigned long int numRequestsToSend;    // requests to send in this session
     unsigned long int numPacketsToReceive;
-    unsigned int numBytes;
     int numSessions;
     int numBroken;
     int chunksAbandoned;
