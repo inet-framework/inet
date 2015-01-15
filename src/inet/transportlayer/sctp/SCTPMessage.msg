@@ -104,7 +104,7 @@ message SCTPInitAckChunk extends SCTPChunk
 message SCTPCookieEchoChunk extends SCTPChunk
 {
     char cookie[];
-    cPacketPtr stateCookie;
+    cPacketPtr stateCookie = nullptr;
     uint8 unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
 }
 
