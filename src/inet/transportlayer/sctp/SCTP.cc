@@ -684,6 +684,9 @@ void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAsso
 
     EV_INFO << "addForkedConnection assocId=" << assoc->assocId << "    newId=" << newAssoc->assocId << "\n";
 
+    keyAssoc.localPort = 0;
+    keyAssoc.remotePort = 0;
+
     for (auto j = sctpAssocMap.begin(); j != sctpAssocMap.end(); ++j)
         if (assoc->assocId == j->second->assocId)
             keyAssoc = j->first;
