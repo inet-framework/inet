@@ -42,7 +42,6 @@ class INET_API SCTPSendStream : public cObject
     uint16 nextStreamSeqNum;
     cPacketQueue *streamQ;
     cPacketQueue *uStreamQ;
-    int32 ssn;
     uint64 totalLength;
 
   public:
