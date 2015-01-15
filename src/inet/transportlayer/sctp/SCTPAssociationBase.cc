@@ -418,6 +418,31 @@ SCTPStateVariables::SCTPStateVariables()
 
     count = 0;
     blockingTSNsMoved = 0;
+
+    cmtUseDAC = true;
+    cmtUseFRC = true;
+    cmtMovedChunksReduceCwnd = true;
+    movedChunkFastRTXFactor = 2.0;
+    strictCwndBooking = false;
+    cmtSackPath = CSP_Standard;
+    highSpeedCC = false;
+    cmtCCVariant = CCCV_Off;
+    rpPathBlocking = false;
+    rpScaleBlockingTimeout = false;
+    rpMinCwnd = 1;
+    checkSackSeqNumber = false;
+    outgoingSackSeqNum = 0;
+    incomingSackSeqNum = 0;
+    asconfSn = 0;
+    numberAsconfReceived = 0;
+    corrIdNum = 0;
+    streamResetSequenceNumber = 0;
+    expectedStreamResetSequenceNumber = 0;
+    peerRequestSn = 0;
+    inRequestSn = 0;
+    peerTsnAfterReset = 0;
+    osbWithHeader = false;
+    throughputInterval = 1.0;
 }
 
 SCTPStateVariables::~SCTPStateVariables()
@@ -1224,8 +1249,6 @@ void SCTPAssociation::stateEntered(int32 status)
             state->nrSack = (bool)sctpMain->par("nrSack");
             state->disableReneging = (bool)sctpMain->par("disableReneging");
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
-            state->outgoingSackSeqNum = 0;
-            state->incomingSackSeqNum = 0;
             state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
             state->initialWindow = (uint32)sctpMain->par("initialWindow");
             if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {

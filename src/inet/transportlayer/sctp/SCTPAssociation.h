@@ -699,8 +699,6 @@ class INET_API SCTPStateVariables : public cObject
     bool cmtUseSFR;    // Split Fast Retransmission (SFR) for CMT
     bool cmtUseDAC;    // Delayed Ack for CMT (DAC)
     bool cmtUseFRC;    // Fast Recovery for CMT (FRC)
-    bool cmtIntelligentReneging;    // Consider SACK path on reneging
-    bool cmtSuspendPathOnBlocking;    // After moving blocking chunk, do not use path for Timer-Based RTX during 1 RTO
     bool cmtMovedChunksReduceCwnd;    // Subtract moved chunk from cwnd of old path
     double movedChunkFastRTXFactor;
     unsigned int blockingTSNsMoved;
