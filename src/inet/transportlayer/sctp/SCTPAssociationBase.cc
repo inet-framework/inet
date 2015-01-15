@@ -100,6 +100,25 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     packetsInBurst = 0;
     highSpeedCCThresholdIdx = 0;
 
+    requiresRtx = false;
+    newCumAck = false;
+    outstandingBytesBeforeUpdate = 0;
+    newlyAckedBytes = 0;
+    findLowestTSN = true;
+    lowestTSNRetransmitted = false;
+    sawNewAck = false;
+    cmtGroupPaths = 0;
+    utilizedCwnd = 0;
+    cmtGroupTotalUtilizedCwnd = 0;
+    cmtGroupTotalCwnd = 0;
+    cmtGroupTotalSsthresh = 0;
+    cmtGroupTotalCwndBandwidth = 0.0;
+    cmtGroupTotalUtilizedCwndBandwidth = 0.0;
+    cmtGroupAlpha = 0.0;
+    gapAckedChunksInLastSACK = 0;
+    gapNRAckedChunksInLastSACK = 0;
+    gapUnackedChunksInLastSACK = 0;
+
     numberOfFastRetransmissions = 0;
     numberOfTimerBasedRetransmissions = 0;
     numberOfHeartbeatsSent = 0;
