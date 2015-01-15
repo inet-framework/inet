@@ -91,7 +91,7 @@ message SCTPInitAckChunk extends SCTPChunk
     L3Address addresses[];
     char cookie[];
     uint8 unrecognizedParameters[];
-    cPacketPtr stateCookie;
+    cPacketPtr stateCookie = nullptr;
     uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
