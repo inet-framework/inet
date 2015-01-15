@@ -15,6 +15,10 @@ Define_Module(SCTPNatHook);
 SCTPNatHook::SCTPNatHook()
 {
     ipLayer = nullptr;
+    natTable = nullptr;
+    rt = nullptr;
+    ift = nullptr;
+    nattedPackets = 0;
 }
 
 SCTPNatHook::~SCTPNatHook()
@@ -30,7 +34,6 @@ void SCTPNatHook::initialize()
     ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
     natTable = new SCTPNatTable();
-    nattedPackets = 0;
 
     ipLayer->registerHook(0, this);
 }
