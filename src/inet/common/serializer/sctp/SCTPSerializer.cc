@@ -458,7 +458,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + size_heartbeat_chunk);
                     L3Address addr = heartbeatChunk->getRemoteAddr();
                     simtime_t time = heartbeatChunk->getTimeField();
-                    int32 infolen;
+                    int32 infolen = 0;
 #ifdef WITH_IPv4
                     if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIPv4().getInt()) + sizeof(uint32);
