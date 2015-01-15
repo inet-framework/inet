@@ -61,7 +61,7 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
         asconfChunk->setByteLength(chunkLength);
 
         char typecopy[128];
-        strcpy(typecopy, type);
+        strncpy(typecopy, type, 128);
         char *token;
         token = strtok((char *)typecopy, ",");
         while (token != nullptr) {
