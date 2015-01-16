@@ -1502,6 +1502,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     for (unsigned int k = 0; k < sizePeerKeyVector; k++) {
                         peerKeyVector[k] = vector[k];
                     }
+                    free(rp);
                     if (cplen > 64) {
                         EV_ERROR << "Chunks parameter too long. It will be truncated.\n";
                         cplen = 64;
