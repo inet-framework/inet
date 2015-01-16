@@ -1521,6 +1521,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     }
                     sizePeerKeyVector += hplen;
                     calculateSharedKey();
+                    free(vector);
                 }
                 chunk->setBitLength(chunklen * 8);
                 dest->addChunk(chunk);
