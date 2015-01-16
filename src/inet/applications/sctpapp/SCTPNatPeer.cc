@@ -593,19 +593,18 @@ void SCTPNatPeer::socketClosed(int32, void *)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
-        SCTPSocket *socket = new SCTPSocket();
-        socket->setOutputGate(gate("sctpOut"));
-        socket->setOutboundStreams(outboundStreams);
-        socket->setInboundStreams(inboundStreams);
+        rendezvousSocket.setOutputGate(gate("sctpOut"));
+        rendezvousSocket.setOutboundStreams(outboundStreams);
+        rendezvousSocket.setInboundStreams(inboundStreams);
         if (addresses.size() == 0) {
-            socket->bind(port);
+            rendezvousSocket.bind(port);
             clientSocket.bind(port);
         }
         else {
             clientSocket.bindx(addresses, port);
-            socket->bindx(addresses, port);
+            rendezvousSocket.bindx(addresses, port);
         }
-        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
+        rendezvousSocket.listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
         if ((bool)par("multi"))
             connectx(peerAddressList, peerPort);
         else
