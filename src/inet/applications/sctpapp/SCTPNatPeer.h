@@ -33,6 +33,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     int32 serverAssocId;
     SCTPSocket clientSocket;
     SCTPSocket peerSocket;
+    SCTPSocket rendezvousSocket;
     double delay;
     bool echo;
     bool schedule;
