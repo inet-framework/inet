@@ -1325,6 +1325,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         EV_DETAIL << assocId << ": sendAll: packetFull: msg length = " << sctpMsg->getByteLength() + 20 << "\n";
                         datVar = nullptr;
                     }
+                    delete datVar;
                 }
 
                 // ====== Send packet ===========================================
