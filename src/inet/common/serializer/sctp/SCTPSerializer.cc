@@ -370,6 +370,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         sizeKeyVector = sizeVector;
 
                     calculateSharedKey();
+                    free(vector);
                 }
                 int32 cookielen = initAckChunk->getCookieArraySize();
                 if (cookielen == 0) {
