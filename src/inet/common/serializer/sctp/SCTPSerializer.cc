@@ -1511,6 +1511,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     for (unsigned int k = 0; k < cplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
+                    free(cp);
                     sizePeerKeyVector += cplen;
                     if (hplen > 64) {
                         EV_ERROR << "HMac parameter too long. It will be truncated.\n";
