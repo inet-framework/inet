@@ -957,9 +957,11 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
         }
         lastTSN = sackChunk->getGapStop(i);
     }
-    assocStat->sumRGapRanges += ((sackChunk->getCumTsnAck() <= lastTSN) ?
-                                 (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
-                                 (uint64)(sackChunk->getCumTsnAck() - lastTSN));
+    if (assocStat) {
+        assocStat->sumRGapRanges += ((sackChunk->getCumTsnAck() <= lastTSN) ?
+                                     (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
+                                     (uint64)(sackChunk->getCumTsnAck() - lastTSN));
+    }
     if (sackChunk->getNrSubtractRGaps() == false) {
         lastTSN = sackChunk->getCumTsnAck();
         for (uint32 i = 0; i < sackChunk->getNumNrGaps(); i++) {
@@ -990,9 +992,11 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
             lastTSN = sackChunk->getNrGapStop(i);
         }
     }
-    assocStat->sumNRGapRanges += (sackChunk->getCumTsnAck() <= lastTSN) ?
-        (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
-        (uint64)(sackChunk->getCumTsnAck() - lastTSN);
+    if (assocStat) {
+        assocStat->sumNRGapRanges += (sackChunk->getCumTsnAck() <= lastTSN) ?
+            (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
+            (uint64)(sackChunk->getCumTsnAck() - lastTSN);
+    }
     const uint16 numGaps = sackGapList.getNumGaps(SCTPGapList::GT_Any);
 
     // ====== Print some information =========================================
