@@ -360,6 +360,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                                 serverAssocStatMap[assocId].abortSent = true;
                                 j->second.stop = simulation.getSimTime();
                                 j->second.lifeTime = j->second.stop - j->second.start;
+                                delete msg;
                                 break;
                             }
                             else {
@@ -439,6 +440,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     cancelEvent(delayTimer);
                 if (finishEndsSimulation)
                     endSimulation();
+                delete command;
                 delete msg;
                 break;
             }
