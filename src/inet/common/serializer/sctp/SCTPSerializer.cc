@@ -357,7 +357,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     parPtr += ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize());
 
-                    for (unsigned int k = 0; k < sizeVector; k++) {
+                    for (unsigned int k = 0; k < min(sizeVector, 64); k++) {
                         if (sizeKeyVector != 0)
                             peerKeyVector[k] = vector[k];
                         else
