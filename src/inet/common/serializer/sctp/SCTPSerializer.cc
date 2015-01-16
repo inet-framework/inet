@@ -1520,6 +1520,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     for (unsigned int k = 0; k < hplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
+                    free(hp);
                     sizePeerKeyVector += hplen;
                     calculateSharedKey();
                     free(vector);
