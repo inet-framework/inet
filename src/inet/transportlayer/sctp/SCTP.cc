@@ -137,7 +137,6 @@ void SCTP::handleMessage(cMessage *msg)
     L3Address destAddr;
     L3Address srcAddr;
     bool findListen = false;
-    bool bitError = false;
 
     EV_DEBUG << "\n\nSCTPMain handleMessage at " << getFullPath() << "\n";
 
@@ -165,29 +164,25 @@ void SCTP::handleMessage(cMessage *msg)
         if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
             EV_WARN << "Packet has bit-error. delete it\n";
 
-            bitError = true;
             numPacketsDropped++;
             delete msg;
             return;
         }
 
-        {
-            if (par("udpEncapsEnabled")) {
-                EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
-                UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
-                srcAddr = ctrl->getSrcAddr();
-                destAddr = ctrl->getDestAddr();
-                delete ctrl;
-                EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
-                EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
-            }
-            else {
-                INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
-                srcAddr = controlInfo->getSourceAddress();
-                destAddr = controlInfo->getDestinationAddress();
-                delete controlInfo;
-                EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
-            }
+        if (par("udpEncapsEnabled")) {
+            EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
+            UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
+            srcAddr = ctrl->getSrcAddr();
+            destAddr = ctrl->getDestAddr();
+            delete ctrl;
+            EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
+            EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
+        } else {
+            INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+            srcAddr = controlInfo->getSourceAddress();
+            destAddr = controlInfo->getDestinationAddress();
+            delete controlInfo;
+            EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
         }
 
         EV_INFO << "srcAddr=" << srcAddr << " destAddr=" << destAddr << "\n";
@@ -204,15 +199,14 @@ void SCTP::handleMessage(cMessage *msg)
             }
             if (!assoc) {
                 EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
-                if (bitError) {
+                if (sctpmsg->hasBitError()) {
                     delete sctpmsg;
                     return;
                 }
                 if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == SHUTDOWN_ACK)
                     sendShutdownCompleteFromMain(sctpmsg, destAddr, srcAddr);
                 else if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != ABORT &&
-                         ((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != SHUTDOWN_COMPLETE)
-                {
+                         ((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != SHUTDOWN_COMPLETE) {
                     sendAbortFromMain(sctpmsg, destAddr, srcAddr);
                 }
                 delete sctpmsg;
