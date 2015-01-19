@@ -55,6 +55,10 @@ Radio::Radio() :
 
 Radio::~Radio()
 {
+    // NOTE: can't use the medium module here, because it may have been already deleted
+    cModule *medium = simulation.getModule(mediumModuleId);
+    if (medium != nullptr)
+        check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
     cancelAndDelete(endTransmissionTimer);
     cancelAndDelete(endSwitchTimer);
 }
@@ -68,6 +72,7 @@ void Radio::initialize(int stage)
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
         medium = check_and_cast<IRadioMedium *>(simulation.getModuleByPath("radioMedium"));
+        mediumModuleId = check_and_cast<cModule *>(medium)->getId();
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
