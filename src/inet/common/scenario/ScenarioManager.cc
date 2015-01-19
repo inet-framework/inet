@@ -70,8 +70,10 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processSetParamCommand(node);
     else if (!strcmp(tag, "set-channel-attr"))
         processSetChannelAttrCommand(node);
-    // else if (!strcmp(tag,"create-module"))
-    //    processCreateModuleCommand(node);
+    else if (!strcmp(tag, "create-module"))
+        processCreateModuleCommand(node);
+    else if (!strcmp(tag, "delete-module"))
+        processDeleteModuleCommand(node);
     else if (!strcmp(tag, "connect"))
         processConnectCommand(node);
     else if (!strcmp(tag, "disconnect"))
@@ -191,12 +193,31 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
 
 void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
 {
-    // FIXME finish and test
+    const char *moduleTypeName = getRequiredAttribute(node, "type");
+    const char *submoduleName = getRequiredAttribute(node, "submodule");
+    const char *parentModulePath = getRequiredAttribute(node, "parent");
+    cModuleType *moduleType = cModuleType::get(moduleTypeName);
+    if (moduleType == nullptr)
+        throw cRuntimeError("module type '%s' is not found", moduleType);
+    cModule *parentModule = simulation.getSystemModule()->getModuleByPath(parentModulePath);
+    if (parentModule == nullptr)
+        throw cRuntimeError("parent module '%s' is not found", parentModulePath);
+    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
+    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
+    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+    module->finalizeParameters();
+    module->buildInside();
+    module->callInitialize();
 }
 
 void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
 {
-    // FIXME finish and test
+    const char *modulePath = getRequiredAttribute(node, "module");
+    cModule *module = simulation.getSystemModule()->getModuleByPath(modulePath);
+    if (module == nullptr)
+        throw cRuntimeError("module '%s' is not found", modulePath);
+    module->callFinish();
+    module->deleteModule();
 }
 
 void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
