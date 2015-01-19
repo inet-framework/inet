@@ -119,18 +119,17 @@ static const HighSpeedCwndAdjustmentEntry HighSpeedCwndAdjustmentTable[] = {
 
 void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
 {
-    if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
-        while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-               (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry))))
-        {
-            path->highSpeedCCThresholdIdx++;
-        }
-    }
-    else {
-        while ((path->cwnd <= HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-               (path->highSpeedCCThresholdIdx > 0))
-        {
-            path->highSpeedCCThresholdIdx--;
+    if (path->highSpeedCCThresholdIdx <= 72) {
+        if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
+            while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
+                   (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry)))) {
+                path->highSpeedCCThresholdIdx++;
+            }
+        } else {
+            while ((path->cwnd <= HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
+                   (path->highSpeedCCThresholdIdx > 0)) {
+                path->highSpeedCCThresholdIdx--;
+            }
         }
     }
 }
