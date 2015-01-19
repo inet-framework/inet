@@ -42,7 +42,7 @@ void SCTPMessage::copy(const SCTPMessage& other)
     this->setDestPort(other.getDestPort());
     this->setChecksumOk(other.getChecksumOk());
     this->setByteLength(SCTP_COMMON_HEADER);
-    for (std::list<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i)
+    for (std::vector<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i)
         addChunk((cPacket *)(*i)->dup());
 }
 
@@ -73,10 +73,7 @@ uint32 SCTPMessage::getChunksArraySize() const
 
 cPacketPtr& SCTPMessage::getChunks(uint32 k)
 {
-    auto i = chunkList.begin();
-    while (k > 0 && i != chunkList.end())
-        (++i, --k);
-    return *i;
+    return chunkList.at(k);
 }
 
 void SCTPMessage::setChunks(uint32 k, const cPacketPtr& chunks_var)
@@ -103,7 +100,7 @@ cPacket *SCTPMessage::removeChunk()
         return nullptr;
 
     cPacket *msg = chunkList.front();
-    chunkList.pop_front();
+    chunkList.erase(chunkList.begin());
     drop(msg);
     this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
