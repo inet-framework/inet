@@ -264,7 +264,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     inboundStreams = connectInfo->getInboundStreams();
                     rcvdPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToReceivePerClient");
                     sentPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToSendPerClient");
-                    char text[30];
+                    char text[128];
                     sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
                     bytesPerAssoc[serverAssocId] = new cOutVector(text);
                     rcvdBytesPerAssoc[serverAssocId] = 0;
