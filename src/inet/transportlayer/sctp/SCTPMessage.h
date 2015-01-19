@@ -34,7 +34,7 @@ namespace sctp {
 class INET_API SCTPMessage : public SCTPMessage_Base
 {
   protected:
-    std::list<cPacket *> chunkList;
+    std::vector<cPacket *> chunkList;
 
   private:
     void copy(const SCTPMessage& other);
@@ -76,7 +76,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 {
   protected:
-    std::list<cPacket *> parameterList;
+    std::vector<cPacket *> parameterList;
 
   private:
     void copy(const SCTPErrorChunk& other);
