@@ -128,7 +128,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
         return INetfilter::IHook::ACCEPT;
     }
     natTable->printNatTable();
-    bool local = ((rt->isLocalAddress(dgram->getDestAddress()) & SCTPAssociation::getAddressLevel(dgram->getSrcAddress())) == 3);
+    bool local = ((rt->isLocalAddress(dgram->getDestAddress())) && (SCTPAssociation::getAddressLevel(dgram->getSrcAddress()) == 3));
     SCTPMessage *sctpMsg = check_and_cast<SCTPMessage *>(dgram->getEncapsulatedPacket());
     unsigned int numberOfChunks = sctpMsg->getChunksArraySize();
     if (numberOfChunks == 1)
