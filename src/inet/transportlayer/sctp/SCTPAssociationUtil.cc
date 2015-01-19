@@ -1606,9 +1606,11 @@ SCTPSackChunk *SCTPAssociation::createSack()
             }
             else {
                 if (sackLength > allowedLength) {
+                    double revokableFraction = 1.0;
                     const uint32 blocksBeRemoved = (sackLength - allowedLength) / 4;
-                    const double revokableFraction = numRevokableGaps / (double)(numRevokableGaps + numNonRevokableGaps);
-
+                    if (numRevokableGaps + numNonRevokableGaps > 0) {
+                        revokableFraction = numRevokableGaps / (double)(numRevokableGaps + numNonRevokableGaps);
+                    }
                     const uint32 removeRevokable = (uint32)ceil(blocksBeRemoved * revokableFraction);
                     const uint32 removeNonRevokable = (uint32)ceil(blocksBeRemoved * (1.0 - revokableFraction));
                     numRevokableGaps -= std::min(removeRevokable, numRevokableGaps);
