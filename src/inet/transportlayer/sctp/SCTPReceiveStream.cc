@@ -109,10 +109,10 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
             if (deliveryQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 2;
             }
-        }
-        else {
-            unorderedQ->checkAndInsertChunk(dchunk->tsn, dchunk);
-            delivery = 3;
+        } else {
+            if (unorderedQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
+                delivery = 3;
+            }
 
             /* try to reassemble here */
             uint32 reassembled = reassemble(unorderedQ, dchunk->tsn);
