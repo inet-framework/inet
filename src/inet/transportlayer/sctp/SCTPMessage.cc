@@ -76,6 +76,11 @@ cPacketPtr& SCTPMessage::getChunks(uint32 k)
     return chunkList.at(k);
 }
 
+void SCTPMessage::replaceChunk(cPacket *msg, uint32 k)
+{
+    chunkList[k] = msg;
+}
+
 void SCTPMessage::setChunks(uint32 k, const cPacketPtr& chunks_var)
 {
     throw new cException(this, "setChunks() not supported, use addChunk()");

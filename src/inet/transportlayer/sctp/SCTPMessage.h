@@ -71,6 +71,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base
     virtual cPacket *removeLastChunk();
     virtual cPacket *peekFirstChunk();
     virtual cPacket *peekLastChunk();
+    virtual void replaceChunk(cPacket *msg, uint32 k);
 };
 
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
