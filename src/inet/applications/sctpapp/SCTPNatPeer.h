@@ -102,7 +102,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void connectx(AddressVector connectAddressList, int32 connectPort);
 
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
-    void socketEstablished(int32, void *, uint64 buffer);
+    void socketEstablished(int32, void *, unsigned long int buffer);
 
     /**
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
