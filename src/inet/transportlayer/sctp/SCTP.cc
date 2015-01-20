@@ -285,7 +285,7 @@ void SCTP::handleMessage(cMessage *msg)
         updateDisplayString();
 }
 
-void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
+void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -311,19 +311,19 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address 
     msg->addChunk(abortChunk);
     if ((bool)par("udpEncapsEnabled")) {
         EV_DETAIL << "VTag=" << msg->getTag() << "\n";
-        udpSocket.sendTo(msg, destAddr, SCTP_UDP_PORT);
+        udpSocket.sendTo(msg, toAddr, SCTP_UDP_PORT);
     }
     else {
-        INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+        INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
         controlInfo->setTransportProtocol(IP_PROT_SCTP);
-        controlInfo->setSourceAddress(srcAddr);
-        controlInfo->setDestinationAddress(destAddr);
+        controlInfo->setSourceAddress(fromAddr);
+        controlInfo->setDestinationAddress(toAddr);
         msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
         send(msg, "to_ip");
     }
 }
 
-void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
+void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -342,10 +342,10 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address srcAddr,
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH * 8);
     msg->addChunk(scChunk);
 
-    INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+    INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_SCTP);
-    controlInfo->setSourceAddress(srcAddr);
-    controlInfo->setDestinationAddress(destAddr);
+    controlInfo->setSourceAddress(fromAddr);
+    controlInfo->setDestinationAddress(toAddr);
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     send(msg, "to_ip");
 }
