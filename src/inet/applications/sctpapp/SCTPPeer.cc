@@ -363,7 +363,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             auto j = rcvdBytesPerAssoc.find(id);
             if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else {
+            else if (j != rcvdBytesPerAssoc.end()) {
                 j->second += PK(msg)->getByteLength();
                 auto k = bytesPerAssoc.find(id);
                 k->second->record(j->second);
@@ -415,6 +415,8 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     delete msg;
                     sendOrSchedule(cmsg);
                 }
+            } else {
+                delete msg;
             }
             break;
         }
@@ -427,7 +429,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
             if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else {
+            else if (i != rcvdPacketsPerAssoc.end()) {
                 if (i->second == 0) {
                     cPacket *cmsg = new cPacket("Request");
                     SCTPInfo *qinfo = new SCTPInfo();
