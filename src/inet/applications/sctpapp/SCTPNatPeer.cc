@@ -382,7 +382,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     auto j = rcvdBytesPerAssoc.find(id);
                     if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                         clientSocket.processMessage(PK(msg));
-                    else {
+                    else if (j != rcvdBytesPerAssoc.end()) {
                         j->second += PK(msg)->getBitLength() / 8;
                         auto k = bytesPerAssoc.find(id);
                         k->second->record(j->second);
@@ -431,6 +431,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                             delete msg;
                             sendOrSchedule(cmsg);
                         }
+                    } else {
+                        delete msg;
                     }
                 }
                 break;
@@ -443,7 +445,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                 auto i = rcvdPacketsPerAssoc.find(id);
                 if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                     clientSocket.processMessage(PK(msg));
-                else {
+                else if (i != rcvdPacketsPerAssoc.end()) {
                     if (i->second == 0) {
                         cPacket *cmsg = new cPacket("Request");
                         SCTPInfo *qinfo = new SCTPInfo();
@@ -454,6 +456,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     }
 
                     shutdownReceived = true;
+                    delete msg;
+                } else {
                     delete msg;
                 }
                 delete command;
