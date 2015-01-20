@@ -890,16 +890,16 @@ void SCTPNatPeer::finish()
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
     for (auto j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++) {
         delete j->second;
-        bytesPerAssoc.erase(j);
     }
+    bytesPerAssoc.clear();
     for (auto k = endToEndDelay.begin(); k != endToEndDelay.end(); k++) {
         delete k->second;
-        endToEndDelay.erase(k);
     }
+    endToEndDelay.clear();
     for (auto l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++) {
         delete l->second;
-        histEndToEndDelay.erase(l);
     }
+    histEndToEndDelay.clear();
     rcvdPacketsPerAssoc.clear();
     sentPacketsPerAssoc.clear();
     rcvdBytesPerAssoc.clear();
