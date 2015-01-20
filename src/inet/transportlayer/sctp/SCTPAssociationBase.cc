@@ -777,6 +777,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         sendIndicationToApp(SCTP_I_CONN_LOST);
         sendAbort();
         sctpMain->removeAssociation(this);
+        return true;
     }
     else if (path != nullptr && msg == path->HeartbeatIntervalTimer) {
         process_TIMEOUT_HEARTBEAT_INTERVAL(path, path->forceHb);
