@@ -486,6 +486,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         HBI_ADDR(hbi).v6addr = *ipv6addr;
                     }
 #endif // ifdef WITH_IPv6
+                    ASSERT(infolen != 0);
                     HBI_TIME(hbi) = htonl((uint32)time.dbl());
                     hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
                     writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
