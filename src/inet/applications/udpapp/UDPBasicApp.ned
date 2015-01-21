@@ -54,6 +54,7 @@ simple UDPBasicApp like IUDPApp
         int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // if not empty, set the multicast output interface option on the socket (interface name expected)
         bool receiveBroadcast = default(false); // if true, makes the socket receive broadcast packets
+        bool routerAlert = default(false); // if true, sends packets with router alert option set
         bool joinLocalMulticastGroups = default(false); // if true, makes the socket receive packets from all multicast groups set on local interfaces
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
