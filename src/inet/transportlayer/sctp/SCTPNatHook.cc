@@ -46,7 +46,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
 
     dgram = dynamic_cast<IPv4Datagram *>(datagram);
     if (!dgram) {
-        return INetfilter::IHook::DROP;
+        return INetfilter::IHook::ACCEPT;
     }
     if (SCTPAssociation::getAddressLevel(dgram->getSrcAddress()) != 3) {
         return INetfilter::IHook::ACCEPT;
