@@ -1273,6 +1273,8 @@ void SCTPAssociation::stateEntered(int32 status)
             state->nrSack = (bool)sctpMain->par("nrSack");
             state->disableReneging = (bool)sctpMain->par("disableReneging");
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
+            state->outgoingSackSeqNum = 0;
+            state->incomingSackSeqNum = 0;
             state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
             state->initialWindow = (uint32)sctpMain->par("initialWindow");
             if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
