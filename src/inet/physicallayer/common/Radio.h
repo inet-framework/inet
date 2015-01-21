@@ -92,6 +92,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      */
     IRadioMedium *medium;
     /**
+     * The module id of the medim model.
+     */
+    int mediumModuleId = -1;
+    /**
      * Simulation time required to switch from one radio mode to another.
      */
     simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];

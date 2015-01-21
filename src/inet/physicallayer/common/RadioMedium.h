@@ -137,11 +137,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mps maxSpeed;
     /**
-     *
+     * The constraint area minimum among the radios is in the range [-infinity,
+     * +infinity] or NaN if unspecified.
      */
     Coord constraintAreaMin;
     /**
-     *
+     * The constraint area maximum among the radios is in the range [-infinity,
+     * +infinity] or NaN if unspecified.
      */
     Coord constraintAreaMax;
     /**
@@ -245,12 +247,15 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name State */
     //@{
     /**
-     * The list of radios that transmit and receive radio signals on the
-     * radio medium.
+     * The list of radios that can transmit and receive radio signals on the
+     * radio medium. The radios follow each other in the order of their unique
+     * id. This list may contain NULL pointers.
      */
     std::vector<const IRadio *> radios;
     /**
-     * The list of ongoing transmissions on the radio medium.
+     * The list of ongoing transmissions on the radio medium. The transmissions
+     * follow each other in the order of their unique id. Transmissions are only
+     * removed from the beginning. This list doesn't contain NULL pointers.
      */
     std::vector<const ITransmission *> transmissions;
     //@}

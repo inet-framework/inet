@@ -48,7 +48,7 @@ class INET_API SCTPSocket
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int assocId, void *yourPtr, cPacket *msg, bool urgent) = 0;
         virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
-        virtual void socketEstablished(int assocId, void *yourPtr, uint64 buffer) {}
+        virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
@@ -57,7 +57,7 @@ class INET_API SCTPSocket
         virtual void msgAbandonedArrived(int assocId) {}
         virtual void shutdownReceivedArrived(int connId) {}
         virtual void sendqueueFullArrived(int connId) {}
-        virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
+        virtual void sendqueueAbatedArrived(int connId, unsigned long int buffer) {}
         virtual void addressAddedArrived(int assocId, L3Address localAddr, L3Address remoteAddr) {}
     };
 
