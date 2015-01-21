@@ -40,6 +40,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #endif // ifdef WITH_IPv6
 
@@ -213,6 +214,8 @@ void UDP::processCommandFromApp(cMessage *msg)
                 setTypeOfService(sd, ((UDPSetTypeOfServiceCommand *)ctrl)->getTos());
             else if (dynamic_cast<UDPSetBroadcastCommand *>(ctrl))
                 setBroadcast(sd, ((UDPSetBroadcastCommand *)ctrl)->getBroadcast());
+            else if (dynamic_cast<UDPSetRouterAlertCommand*>(ctrl))
+                setRouterAlert(sd, ((UDPSetRouterAlertCommand*)ctrl)->getRouterAlert());
             else if (dynamic_cast<UDPSetMulticastInterfaceCommand *>(ctrl))
                 setMulticastOutputInterface(sd, ((UDPSetMulticastInterfaceCommand *)ctrl)->getInterfaceId());
             else if (dynamic_cast<UDPSetMulticastLoopCommand *>(ctrl))
@@ -305,7 +308,7 @@ void UDP::processPacketFromApp(cPacket *appData)
         auto membership = sd->findFirstMulticastMembership(destAddr);
         interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
     }
-    sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
+    sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService, sd->routerAlert);
 
     delete ctrl;    // cannot be deleted earlier, due to destAddr
 }
@@ -741,7 +744,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 }
 
 void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort,
-        int interfaceId, bool multicastLoop, int ttl, unsigned char tos)
+        int interfaceId, bool multicastLoop, int ttl, unsigned char tos, bool routerAlert)
 {
     if (destAddr.isUnspecified())
         throw cRuntimeError("send: unspecified destination address");
@@ -767,6 +770,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTimeToLive(ttl);
         ipControlInfo->setTypeOfService(tos);
+        if (routerAlert)
+            ipControlInfo->setOptions(IPOPTION_ROUTER_ALERT);
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
@@ -783,6 +788,13 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         ipControlInfo->setTrafficClass(tos);
+        if (routerAlert)
+        {
+            IPv6HopByHopOptionsHeader *hdr = new IPv6HopByHopOptionsHeader();
+            hdr->setOptionsArraySize(1);
+            hdr->setOptions(0, new IPv6OptionRouterAlert());
+            ipControlInfo->addExtensionHeader(hdr);
+        }
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
@@ -847,6 +859,11 @@ void UDP::setTypeOfService(SockDesc *sd, int typeOfService)
 void UDP::setBroadcast(SockDesc *sd, bool broadcast)
 {
     sd->isBroadcast = broadcast;
+}
+
+void UDP::setRouterAlert(SockDesc *sd, bool routerAlert)
+{
+    sd->routerAlert = routerAlert;
 }
 
 void UDP::setMulticastOutputInterface(SockDesc *sd, int interfaceId)

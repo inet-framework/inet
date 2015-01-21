@@ -145,6 +145,11 @@ class INET_API UDPSocket
     void setBroadcast(bool broadcast);
 
     /**
+     * Set the router alert option on all outgoing packets on this socket.
+     */
+    void setRouterAlert(bool routerAlert);
+
+    /**
      * The boolean value specifies whether sent multicast packets should be
      * looped back to the local sockets (like the Unix IP_MULTICAST_LOOP
      * socket option).

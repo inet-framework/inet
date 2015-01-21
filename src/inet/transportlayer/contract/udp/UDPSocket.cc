@@ -122,6 +122,16 @@ void UDPSocket::setBroadcast(bool broadcast)
     sendToUDP(msg);
 }
 
+void UDPSocket::setRouterAlert(bool routerAlert)
+{
+    cMessage *msg = new cMessage("SetRouterAlert", UDP_C_SETOPTION);
+    UDPSetRouterAlertCommand *ctrl = new UDPSetRouterAlertCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setRouterAlert(routerAlert);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
 void UDPSocket::setTimeToLive(int ttl)
 {
     cMessage *msg = new cMessage("SetTTL", UDP_C_SETOPTION);

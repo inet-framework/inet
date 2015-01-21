@@ -81,6 +81,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         int localPort = -1;
         int remotePort = -1;
         bool isBroadcast = false;
+        bool routerAlert = false;
         int multicastOutputInterfaceId = -1;
         bool multicastLoop = DEFAULT_MULTICAST_LOOP;
         int ttl = -1;
@@ -137,6 +138,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setTypeOfService(SockDesc *sd, int typeOfService);
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
+    virtual void setRouterAlert(SockDesc *sd, bool routerAlert);
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
@@ -157,7 +159,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual std::vector<SockDesc *> findSocketsForMcastBcastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
-    virtual void sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
+    virtual void sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos, bool routerAlert);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl);
     virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
