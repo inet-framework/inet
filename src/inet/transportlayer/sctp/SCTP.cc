@@ -675,15 +675,19 @@ bool SCTP::addRemoteAddress(SCTPAssociation *assoc, L3Address localAddress, L3Ad
 void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort)
 {
     SockPair keyAssoc;
+    bool found = false;
 
     EV_INFO << "addForkedConnection assocId=" << assoc->assocId << "    newId=" << newAssoc->assocId << "\n";
 
-    keyAssoc.localPort = 0;
-    keyAssoc.remotePort = 0;
-
-    for (auto j = sctpAssocMap.begin(); j != sctpAssocMap.end(); ++j)
-        if (assoc->assocId == j->second->assocId)
+    for (auto j = sctpAssocMap.begin(); j != sctpAssocMap.end(); ++j) {
+        if (assoc->assocId == j->second->assocId) {
             keyAssoc = j->first;
+            found = true;
+            break;
+        }
+    }
+
+    ASSERT(found == true);
 
     // update assoc's socket pair, and register newAssoc (which'll keep LISTENing)
     updateSockPair(assoc, localAddr, remoteAddr, localPort, remotePort);
