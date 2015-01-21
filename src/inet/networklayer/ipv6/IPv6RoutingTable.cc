@@ -28,7 +28,11 @@
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
+#include "inet/common/XMLUtils.h"
+
 namespace inet {
+
+using namespace xmlutils;
 
 Define_Module(IPv6RoutingTable);
 
@@ -296,23 +300,6 @@ void IPv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
     //o  The All-Routers Multicast Addresses defined in section 2.7.1.
 }
 
-static const char *getRequiredAttr(cXMLElement *elem, const char *attrName)
-{
-    const char *s = elem->getAttribute(attrName);
-    if (!s)
-        throw cRuntimeError("Element <%s> misses required attribute %s at %s",
-                elem->getTagName(), attrName, elem->getSourceLocation());
-    return s;
-}
-
-static bool toBool(const char *s, bool defaultValue = false)
-{
-    if (!s)
-        return defaultValue;
-
-    return !strcmp(s, "on") || !strcmp(s, "true") || !strcmp(s, "yes");
-}
-
 void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
 {
     /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific
@@ -323,24 +310,24 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
     IPv6InterfaceData *d = ie->ipv6Data();
 
     // parse basic config (attributes)
-    d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
+    d->setAdvSendAdvertisements(parseBool(getRequiredAttribute(*cfg, "AdvSendAdvertisements")));
     //TODO: leave this off first!! They overwrite stuff!
 
     /* TODO: Wei commented out the stuff below. To be checked why (Andras).
-       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
-       d->setMinRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
-       d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
-       d->setAdvOtherConfigFlag(toBool(getRequiredAttr(cfg, "AdvOtherConfigFlag")));
-       d->setAdvLinkMTU(utils::atoul(getRequiredAttr(cfg, "AdvLinkMTU")));
-       d->setAdvReachableTime(utils::atoul(getRequiredAttr(cfg, "AdvReachableTime")));
-       d->setAdvRetransTimer(utils::atoul(getRequiredAttr(cfg, "AdvRetransTimer")));
-       d->setAdvCurHopLimit(utils::atoul(getRequiredAttr(cfg, "AdvCurHopLimit")));
-       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttr(cfg, "AdvDefaultLifetime")));
-       ie->setMtu(utils::atoul(getRequiredAttr(cfg, "HostLinkMTU")));
-       d->setCurHopLimit(utils::atoul(getRequiredAttr(cfg, "HostCurHopLimit")));
-       d->setBaseReachableTime(utils::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
-       d->setRetransTimer(utils::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
-       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
+       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttribute(*cfg, "MaxRtrAdvInterval")));
+       d->setMinRtrAdvInterval(utils::atod(getRequiredAttribute(*cfg, "MinRtrAdvInterval")));
+       d->setAdvManagedFlag(parseBool(getRequiredAttribute(*cfg, "AdvManagedFlag")));
+       d->setAdvOtherConfigFlag(parseBool(getRequiredAttribute(*cfg, "AdvOtherConfigFlag")));
+       d->setAdvLinkMTU(utils::atoul(getRequiredAttribute(*cfg, "AdvLinkMTU")));
+       d->setAdvReachableTime(utils::atoul(getRequiredAttribute(*cfg, "AdvReachableTime")));
+       d->setAdvRetransTimer(utils::atoul(getRequiredAttribute(*cfg, "AdvRetransTimer")));
+       d->setAdvCurHopLimit(utils::atoul(getRequiredAttribute(*cfg, "AdvCurHopLimit")));
+       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttribute(*cfg, "AdvDefaultLifetime")));
+       ie->setMtu(utils::atoul(getRequiredAttribute(*cfg, "HostLinkMTU")));
+       d->setCurHopLimit(utils::atoul(getRequiredAttribute(*cfg, "HostCurHopLimit")));
+       d->setBaseReachableTime(utils::atoul(getRequiredAttribute(*cfg, "HostBaseReachableTime")));
+       d->setRetransTimer(utils::atoul(getRequiredAttribute(*cfg, "HostRetransTimer")));
+       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttribute(*cfg, "HostDupAddrDetectTransmits")));
      */
 
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
@@ -359,12 +346,12 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
                     node->getTagName(), node->getSourceLocation(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;
-        prefix.advValidLifetime = utils::atoul(getRequiredAttr(node, "AdvValidLifetime"));
-        prefix.advOnLinkFlag = toBool(getRequiredAttr(node, "AdvOnLinkFlag"));
-        prefix.advPreferredLifetime = utils::atoul(getRequiredAttr(node, "AdvPreferredLifetime"));
-        prefix.advAutonomousFlag = toBool(getRequiredAttr(node, "AdvAutonomousFlag"));
+        prefix.advValidLifetime = utils::atoul(getRequiredAttribute(*node, "AdvValidLifetime"));
+        prefix.advOnLinkFlag = parseBool(getRequiredAttribute(*node, "AdvOnLinkFlag"));
+        prefix.advPreferredLifetime = utils::atoul(getRequiredAttribute(*node, "AdvPreferredLifetime"));
+        prefix.advAutonomousFlag = parseBool(getRequiredAttribute(*node, "AdvAutonomousFlag"));
         d->addAdvPrefix(prefix);
-    }
+}
 
     // parse addresses
     cXMLElementList addrList = cfg->getChildrenByTagName("inetAddr");
@@ -372,7 +359,7 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
         cXMLElement *node = addrList[k];
         IPv6Address address = IPv6Address(node->getNodeValue());
         //We can now decide if the address is tentative or not.
-        d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), SIMTIME_ZERO, SIMTIME_ZERO);    // set up with infinite lifetimes
+        d->assignAddress(address, parseBool(getRequiredAttribute(*node, "tentative")), SIMTIME_ZERO, SIMTIME_ZERO);    // set up with infinite lifetimes
     }
 }
 
@@ -386,8 +373,8 @@ void IPv6RoutingTable::configureTunnelFromXML(cXMLElement *cfg)
         cXMLElement *node = tunnelList[i];
 
         IPv6Address entry, exit, trigger;
-        entry.set(getRequiredAttr(node, "entryPoint"));
-        exit.set(getRequiredAttr(node, "exitPoint"));
+        entry.set(getRequiredAttribute(*node, "entryPoint"));
+        exit.set(getRequiredAttribute(*node, "exitPoint"));
 
         cXMLElementList triggerList = node->getElementsByTagName("triggers");
 
@@ -396,7 +383,7 @@ void IPv6RoutingTable::configureTunnelFromXML(cXMLElement *cfg)
                     node->getTagName(), node->getSourceLocation());
 
         cXMLElement *triggerNode = triggerList[0];
-        trigger.set(getRequiredAttr(triggerNode, "destination"));
+        trigger.set(getRequiredAttribute(*triggerNode, "destination"));
 
         EV_INFO << "New tunnel: " << "entry=" << entry << ",exit=" << exit << ",trigger=" << trigger << endl;
         tunneling->createTunnel(IPv6Tunneling::NORMAL, entry, exit, trigger);

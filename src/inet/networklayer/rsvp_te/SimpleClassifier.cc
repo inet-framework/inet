@@ -142,8 +142,8 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
         FECEntry newFec;
 
         newFec.id = fecid;
-        newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
+        newFec.dest = getParameterIPv4AddressValue(fec, "destination");
+        newFec.src = getParameterIPv4AddressValue(fec, "source", IPv4Address());
 
         newFec.inLabel = getParameterIntValue(fec, "label");
 
@@ -165,12 +165,12 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
         FECEntry newFec;
 
         newFec.id = fecid;
-        newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
+        newFec.dest = getParameterIPv4AddressValue(fec, "destination");
+        newFec.src = getParameterIPv4AddressValue(fec, "source", IPv4Address());
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
-        newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();
-        newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest);    // ??? always use newFec.dest ???
+        newFec.session.Extended_Tunnel_Id = getParameterIPv4AddressValue(fec, "extened_tunnel_id", routerId).getInt();
+        newFec.session.DestAddress = getParameterIPv4AddressValue(fec, "endpoint", newFec.dest);    // ??? always use newFec.dest ???
 
         newFec.sender.Lsp_Id = getParameterIntValue(fec, "lspid");
         newFec.sender.SrcAddress = routerId;
