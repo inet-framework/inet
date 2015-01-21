@@ -60,6 +60,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     // state
     SCTPPathStatus sctpPathStatus;
     SCTPSocket clientSocket;
+    SCTPSocket listeningSocket;
     cMessage *timeoutMsg;
     cMessage *timeMsg;
     cMessage *connectTimer;
