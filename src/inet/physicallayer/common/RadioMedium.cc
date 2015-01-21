@@ -516,40 +516,55 @@ inline double maxIgnoreNaN(double a, double b)
 mps RadioMedium::computeMaxSpeed() const
 {
     mps maxSpeed = mps(par("maxSpeed"));
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        maxSpeed = maxIgnoreNaN(maxSpeed, mps((*it)->getAntenna()->getMobility()->getMaxSpeed()));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            maxSpeed = maxIgnoreNaN(maxSpeed, mps(radio->getAntenna()->getMobility()->getMaxSpeed()));
+    }
     return maxSpeed;
 }
 
 W RadioMedium::computeMaxTransmissionPower() const
 {
     W maxTransmissionPower = W(par("maxTransmissionPower"));
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        maxTransmissionPower = maxIgnoreNaN(maxTransmissionPower, (*it)->getTransmitter()->getMaxPower());
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            maxTransmissionPower = maxIgnoreNaN(maxTransmissionPower, radio->getTransmitter()->getMaxPower());
+    }
     return maxTransmissionPower;
 }
 
 W RadioMedium::computeMinInterferencePower() const
 {
     W minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        minInterferencePower = minIgnoreNaN(minInterferencePower, (*it)->getReceiver()->getMinInterferencePower());
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            minInterferencePower = minIgnoreNaN(minInterferencePower, radio->getReceiver()->getMinInterferencePower());
+    }
     return minInterferencePower;
 }
 
 W RadioMedium::computeMinReceptionPower() const
 {
     W minReceptionPower = mW(math::dBm2mW(par("minReceptionPower")));
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        minReceptionPower = minIgnoreNaN(minReceptionPower, (*it)->getReceiver()->getMinReceptionPower());
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            minReceptionPower = minIgnoreNaN(minReceptionPower, radio->getReceiver()->getMinReceptionPower());
+    }
     return minReceptionPower;
 }
 
 double RadioMedium::computeMaxAntennaGain() const
 {
     double maxAntennaGain = math::dB2fraction(par("maxAntennaGain"));
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        maxAntennaGain = maxIgnoreNaN(maxAntennaGain, (*it)->getAntenna()->getMaxGain());
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            maxAntennaGain = maxIgnoreNaN(maxAntennaGain, radio->getAntenna()->getMaxGain());
+    }
     return maxAntennaGain;
 }
 
@@ -655,11 +670,13 @@ void RadioMedium::removeNonInterferingTransmissions()
         const ITransmission *transmission = *it;
         for (std::vector<const IRadio *>::const_iterator jt = radios.begin(); jt != radios.end(); jt++) {
             const IRadio *radio = *jt;
-            RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
-            const IArrival *arrival = getCachedArrival(radio, transmission);
-            if (arrival) {
-                Interval interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
-                radioCacheEntry->receptionIntervals->deleteNode(&interval);
+            if (radio != nullptr) {
+                RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
+                const IArrival *arrival = getCachedArrival(radio, transmission);
+                if (arrival) {
+                    Interval interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
+                    radioCacheEntry->receptionIntervals->deleteNode(&interval);
+                }
             }
         }
         delete transmission;
@@ -867,11 +884,23 @@ void RadioMedium::addRadio(const IRadio *radio)
 
 void RadioMedium::removeRadio(const IRadio *radio)
 {
-    radios.erase(std::remove(radios.begin(), radios.end(), radio));
+    int radioIndex = radio->getId() - baseRadioId;
+    radios[radioIndex] = nullptr;
     if (initialized())
         updateLimits();
     if (neighborCache)
         neighborCache->removeRadio(radio);
+    int radioCount = 0;
+    for (; radios[radioCount] == nullptr && radioCount < (int)radios.size(); radioCount++);
+    if (radioCount != 0) {
+        baseRadioId += radioCount;
+        radios.erase(radios.begin(), radios.begin() + radioCount);
+        for (std::vector<TransmissionCacheEntry>::const_iterator it = transmissionCache.begin(); it != transmissionCache.end(); it++) {
+            const TransmissionCacheEntry& transmissionCacheEntry = *it;
+            std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
+            receptionCacheEntries->erase(receptionCacheEntries->begin(), receptionCacheEntries->begin() + radioCount);
+        }
+    }
 }
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
@@ -883,16 +912,18 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     simtime_t maxArrivalEndTime = simTime();
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
         const IRadio *receiverRadio = *it;
-        RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(receiverRadio);
-        if (receiverRadio != transmitterRadio) {
-            const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
-            const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-            const simtime_t arrivalEndTime = arrival->getEndTime();
-            if (arrivalEndTime > maxArrivalEndTime)
-                maxArrivalEndTime = arrivalEndTime;
-            setCachedArrival(receiverRadio, transmission, arrival);
-            setCachedListening(receiverRadio, transmission, listening);
-            radioCacheEntry->receptionIntervals->insert(new Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission));
+        if (receiverRadio != nullptr) {
+            RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(receiverRadio);
+            if (receiverRadio != transmitterRadio) {
+                const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+                const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+                const simtime_t arrivalEndTime = arrival->getEndTime();
+                if (arrivalEndTime > maxArrivalEndTime)
+                    maxArrivalEndTime = arrivalEndTime;
+                setCachedArrival(receiverRadio, transmission, arrival);
+                setCachedListening(receiverRadio, transmission, listening);
+                radioCacheEntry->receptionIntervals->insert(new Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission));
+            }
         }
     }
     getTransmissionCacheEntry(transmission)->interferenceEndTime = maxArrivalEndTime + maxTransmissionDuration;
@@ -1090,8 +1121,11 @@ bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission 
 
 void RadioMedium::sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame)
 {
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-        sendToRadio(transmitter, *it, frame);
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr)
+            sendToRadio(transmitter, radio, frame);
+    }
 }
 
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value)
@@ -1244,19 +1278,12 @@ void RadioMedium::scheduleUpdateCanvasTimer()
 Coord RadioMedium::computeConstraintAreaMin() const
 {
     Coord constraintAreaMin = Coord::NIL;
-    if (radios.size() > 0)
-        constraintAreaMin = radios[0]->getAntenna()->getMobility()->getConstraintAreaMin();
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-    {
-        const IMobility *mobility = (*it)->getAntenna()->getMobility();
-        Coord currConstreaintAreaMin = mobility->getConstraintAreaMin();
-
-        if (constraintAreaMin.x > currConstreaintAreaMin.x)
-            constraintAreaMin.x = currConstreaintAreaMin.x;
-        if (constraintAreaMin.y > currConstreaintAreaMin.y)
-            constraintAreaMin.y = currConstreaintAreaMin.y;
-        if (constraintAreaMin.z > currConstreaintAreaMin.z)
-            constraintAreaMin.z = currConstreaintAreaMin.z;
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr) {
+            const IMobility *mobility = radio->getAntenna()->getMobility();
+            constraintAreaMin = constraintAreaMin.min(mobility->getConstraintAreaMin());
+        }
     }
     return constraintAreaMin;
 }
@@ -1264,19 +1291,12 @@ Coord RadioMedium::computeConstraintAreaMin() const
 Coord RadioMedium::computeConstreaintAreaMax() const
 {
     Coord constraintAreaMax = Coord::NIL;
-    if (radios.size() > 0)
-        constraintAreaMax = radios[0]->getAntenna()->getMobility()->getConstraintAreaMax();
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-    {
-        const IMobility *mobility = (*it)->getAntenna()->getMobility();
-        Coord currConstraintAreaMax = mobility->getConstraintAreaMax();
-
-        if (constraintAreaMax.x < currConstraintAreaMax.x)
-            constraintAreaMax.x = currConstraintAreaMax.x;
-        if (constraintAreaMax.y < currConstraintAreaMax.y)
-            constraintAreaMax.y = currConstraintAreaMax.y;
-        if (constraintAreaMax.z < currConstraintAreaMax.z)
-            constraintAreaMax.z = currConstraintAreaMax.z;
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++) {
+        const IRadio *radio = *it;
+        if (radio != nullptr) {
+            const IMobility *mobility = radio->getAntenna()->getMobility();
+            constraintAreaMax = constraintAreaMax.max(mobility->getConstraintAreaMax());
+        }
     }
     return constraintAreaMax;
 }
