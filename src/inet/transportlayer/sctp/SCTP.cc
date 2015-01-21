@@ -199,7 +199,7 @@ void SCTP::handleMessage(cMessage *msg)
             }
             if (!assoc) {
                 EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
-                if (sctpmsg->hasBitError()) {
+                if (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk())) {
                     delete sctpmsg;
                     return;
                 }
