@@ -663,7 +663,7 @@ void SCTPNatPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SCTPNatPeer::socketEstablished(int32, void *, uint64 buffer)
+void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
 {
     int32 count = 0;
     // *redefine* to perform or schedule first sending
