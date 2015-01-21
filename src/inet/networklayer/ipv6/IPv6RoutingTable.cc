@@ -309,57 +309,92 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
        can be used for future protocols that requires different values. (MIPv6)*/
     IPv6InterfaceData *d = ie->ipv6Data();
 
+    EV << "XML configuration of interface " << ie->getName() << ":" << endl;
+
     // parse basic config (attributes)
-    d->setAdvSendAdvertisements(parseBool(getRequiredAttribute(*cfg, "AdvSendAdvertisements")));
+    if (cfg->getAttribute("sendAdvertisements"))
+        d->setAdvSendAdvertisements(getAttributeBoolValue(cfg, "sendAdvertisements"));
     //TODO: leave this off first!! They overwrite stuff!
 
     /* TODO: Wei commented out the stuff below. To be checked why (Andras).
-       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttribute(*cfg, "MaxRtrAdvInterval")));
-       d->setMinRtrAdvInterval(utils::atod(getRequiredAttribute(*cfg, "MinRtrAdvInterval")));
-       d->setAdvManagedFlag(parseBool(getRequiredAttribute(*cfg, "AdvManagedFlag")));
-       d->setAdvOtherConfigFlag(parseBool(getRequiredAttribute(*cfg, "AdvOtherConfigFlag")));
-       d->setAdvLinkMTU(utils::atoul(getRequiredAttribute(*cfg, "AdvLinkMTU")));
-       d->setAdvReachableTime(utils::atoul(getRequiredAttribute(*cfg, "AdvReachableTime")));
-       d->setAdvRetransTimer(utils::atoul(getRequiredAttribute(*cfg, "AdvRetransTimer")));
-       d->setAdvCurHopLimit(utils::atoul(getRequiredAttribute(*cfg, "AdvCurHopLimit")));
-       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttribute(*cfg, "AdvDefaultLifetime")));
-       ie->setMtu(utils::atoul(getRequiredAttribute(*cfg, "HostLinkMTU")));
-       d->setCurHopLimit(utils::atoul(getRequiredAttribute(*cfg, "HostCurHopLimit")));
-       d->setBaseReachableTime(utils::atoul(getRequiredAttribute(*cfg, "HostBaseReachableTime")));
-       d->setRetransTimer(utils::atoul(getRequiredAttribute(*cfg, "HostRetransTimer")));
-       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttribute(*cfg, "HostDupAddrDetectTransmits")));
+       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
+       d->setMinRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
+       d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
+       d->setAdvOtherConfigFlag(toBool(getRequiredAttr(cfg, "AdvOtherConfigFlag")));
+       d->setAdvLinkMTU(utils::atoul(getRequiredAttr(cfg, "AdvLinkMTU")));
+       d->setAdvReachableTime(utils::atoul(getRequiredAttr(cfg, "AdvReachableTime")));
+       d->setAdvRetransTimer(utils::atoul(getRequiredAttr(cfg, "AdvRetransTimer")));
+       d->setAdvCurHopLimit(utils::atoul(getRequiredAttr(cfg, "AdvCurHopLimit")));
+       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttr(cfg, "AdvDefaultLifetime")));
+       ie->setMtu(utils::atoul(getRequiredAttr(cfg, "HostLinkMTU")));
+       d->setCurHopLimit(utils::atoul(getRequiredAttr(cfg, "HostCurHopLimit")));
+       d->setBaseReachableTime(utils::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
+       d->setRetransTimer(utils::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
+       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
      */
 
-    // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
-    // element, but we don't check that)
-    cXMLElementList prefixList = cfg->getElementsByTagName("AdvPrefix");
-    for (unsigned int i = 0; i < prefixList.size(); i++) {
-        cXMLElement *node = prefixList[i];
+    // parse prefixes (advPrefix elements)
+    cXMLElement *prefixListElem = cfg->getFirstChildWithTag("advPrefixList");
+    cXMLElementList prefixList;
+    if (prefixListElem)
+        prefixList = prefixListElem->getElementsByTagName("advPrefix");
+
+    if (!prefixList.empty() && !d->getAdvSendAdvertisements())
+        EV << "WARNING: Advertisement prefixes specified even though interface is configured not to send advertisements" << endl;
+
+    for (cXMLElementList::iterator i = prefixList.begin(); i != prefixList.end(); i++)
+    {
+        cXMLElement *node = *i;
         IPv6InterfaceData::AdvPrefix prefix;
 
         // FIXME todo implement: advValidLifetime, advPreferredLifetime can
         // store (absolute) expiry time (if >0) or lifetime (delta) (if <0);
         // 0 should be treated as infinity
         int pfxLen;
-        if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(), pfxLen))
-            throw cRuntimeError("Element <%s> at %s: wrong IPv6Address/prefix syntax %s",
-                    node->getTagName(), node->getSourceLocation(), node->getNodeValue());
+        prefix.prefix = getElementIPv6AddressValue(node, &pfxLen);
 
         prefix.prefixLength = pfxLen;
-        prefix.advValidLifetime = utils::atoul(getRequiredAttribute(*node, "AdvValidLifetime"));
-        prefix.advOnLinkFlag = parseBool(getRequiredAttribute(*node, "AdvOnLinkFlag"));
-        prefix.advPreferredLifetime = utils::atoul(getRequiredAttribute(*node, "AdvPreferredLifetime"));
-        prefix.advAutonomousFlag = parseBool(getRequiredAttribute(*node, "AdvAutonomousFlag"));
+        // default values from FlatNetworkConfigurator6
+        prefix.advValidLifetime = getAttributeIntValue(node, "validLifetime", 2592000);
+        prefix.advPreferredLifetime = getAttributeIntValue(node, "preferredLifetime", 604800);
+        prefix.advOnLinkFlag = getAttributeBoolValue(node, "onLink");
+        prefix.advAutonomousFlag = getAttributeBoolValue(node, "autonomous");
+        EV << "* advertising prefix " << prefix.prefix << "/" << prefix.prefixLength << " (on-link: " << prefix.advOnLinkFlag << ", autonomous: " << prefix.advAutonomousFlag << ")" << endl;
         d->addAdvPrefix(prefix);
-}
+    }
 
     // parse addresses
     cXMLElementList addrList = cfg->getChildrenByTagName("inetAddr");
-    for (unsigned int k = 0; k < addrList.size(); k++) {
-        cXMLElement *node = addrList[k];
-        IPv6Address address = IPv6Address(node->getNodeValue());
+    for (cXMLElementList::iterator i = addrList.begin(); i != addrList.end(); i++)
+    {
+        cXMLElement *node = *i;
+        IPv6Address address = getElementIPv6AddressValue(node);
+        bool tentative = getAttributeBoolValue(node, "tentative", false);
+
+        EV << "* assigning address " << address << " (tentative: " << tentative << ")" << endl;
         //We can now decide if the address is tentative or not.
-        d->assignAddress(address, parseBool(getRequiredAttribute(*node, "tentative")), SIMTIME_ZERO, SIMTIME_ZERO);    // set up with infinite lifetimes
+        d->assignAddress(address, tentative, SIMTIME_ZERO, SIMTIME_ZERO);  // set up with infinite lifetimes
+    }
+
+    // Configure static routes
+    cXMLElement *routeListElem = cfg->getFirstChildWithTag("routeList");
+    cXMLElementList routeList;
+    if (routeListElem)
+        routeList = routeListElem->getElementsByTagName("route");
+
+    for (cXMLElementList::iterator i = routeList.begin(); i != routeList.end(); i++)
+    {
+        cXMLElement *node = *i;
+
+        int pfxLen;
+        IPv6Address destPrefix = getElementIPv6AddressValue(node, &pfxLen);
+        // default to unspecified address -> no next hop, direct delivery on this interface
+        IPv6Address nextHop = getAttributeIPv6AddressValue(node, "nextHop", IPv6Address::UNSPECIFIED_ADDRESS);
+        // default to undefined metric
+        int metric = getAttributeIntValue(node, "metric", 0);
+
+        EV << "* adding route to " << destPrefix << "/" << pfxLen << " (" << (nextHop.isUnspecified() ? "direct" : (std::string("via ") + nextHop.str())) << ", metric " << metric << ")" << endl;
+        addStaticRoute(destPrefix, pfxLen, ie->getInterfaceId(), nextHop, metric);
     }
 }
 
