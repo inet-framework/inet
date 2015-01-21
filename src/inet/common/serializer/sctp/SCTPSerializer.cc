@@ -451,7 +451,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 int16 numdups = sackChunk->getNumDupTsns();
                 int16 numnrgaps = 0;
                 for (int16 i = 0; i < numgaps; i++) {
-                    struct sack_gap *gap = (struct sack_gap *)(((unsigned char *)sac) +  size_nr_sack_chunk + i * sizeof(struct sack_gap));
+                    struct sack_gap *gap = (struct sack_gap *)(((unsigned char *)sac) + size_nr_sack_chunk + i * sizeof(struct sack_gap));
                     gap->start = htons(sackChunk->getGapStart(i) - cumtsnack);
                     gap->stop = htons(sackChunk->getGapStop(i) - cumtsnack);
                 }
