@@ -66,14 +66,14 @@ class INET_API RTPProfile : public cSimpleModule
     /**
      * Initializes variables. Must be overwritten by subclasses.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     virtual ~RTPProfile();
 
     /**
      * Creates and removes payload sender and receiver modules on demand.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Handles messages received from the rtp module.

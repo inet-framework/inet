@@ -30,7 +30,7 @@ class INET_API TrailFigure : public cGroupFigure
   public:
     TrailFigure(int maxCount, const char *name = nullptr);
 
-    virtual void addFigure(cFigure *figure);
+    virtual void addFigure(cFigure *figure) override;
 };
 
 } // namespace inet

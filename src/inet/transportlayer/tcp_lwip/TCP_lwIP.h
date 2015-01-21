@@ -58,26 +58,26 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
   protected:
     // called by the OMNeT++ simulation kernel:
 
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msgP);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msgP) override;
+    virtual void finish() override;
 
     // LwipTcpStackIf functions:
 
     // sometime pcb is nullptr (tipically when send a RESET )
     virtual void ip_output(LwipTcpLayer::tcp_pcb *pcb,
-            L3Address const& src, L3Address const& dest, void *tcpseg, int len);
+            L3Address const& src, L3Address const& dest, void *tcpseg, int len) override;
 
     virtual err_t lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
-            LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err);
+            LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err) override;
 
-    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb);
+    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb) override;
 
-    virtual netif *ip_route(L3Address const& ipAddr);
+    virtual netif *ip_route(L3Address const& ipAddr) override;
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
-            const void *dataptr, int len);
+            const void *dataptr, int len) override;
 
     // internal event functions:
 
@@ -126,7 +126,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     void sendEstablishedMsg(TcpLwipConnection& connP);
 
     // ILifeCycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     LwipTcpLayer *getLwipTcpLayer() { return pLwipTcpLayerM; }

@@ -50,13 +50,13 @@ class DYMO_OutstandingRREQList : public cObject
     ~DYMO_OutstandingRREQList();
 
     /** @brief inherited from cObject */
-    virtual const char* getFullName() const;
+    virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     /**
      * @returns DYMO_OutstandingRREQ with matching destAddr or 0 if none is found

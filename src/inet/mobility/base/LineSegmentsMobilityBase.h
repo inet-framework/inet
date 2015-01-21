@@ -41,9 +41,9 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     Coord targetPosition;
 
   protected:
-    virtual void initializePosition();
+    virtual void initializePosition() override;
 
-    virtual void move();
+    virtual void move() override;
 
     /**
      * @brief Should be redefined in subclasses. This method gets called

@@ -34,7 +34,7 @@ class NetworkDatagramMultiplexer : public cSimpleModule
     virtual ~NetworkDatagramMultiplexer() {}
 
   protected:
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
     int getProtocolIndex(cMessage *message);
 };
 

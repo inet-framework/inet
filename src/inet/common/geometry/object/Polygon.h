@@ -41,8 +41,8 @@ class INET_API Polygon : public GeometricObjectBase
 
     const std::vector<Coord>& getPoints() const { return points; }
 
-    virtual bool isNil() const { return this == &NIL; }
-    virtual bool isUnspecified() const;
+    virtual bool isNil() const override { return this == &NIL; }
+    virtual bool isUnspecified() const override;
 
     virtual Coord computeSize() const;
     Coord getNormalUnitVector() const;

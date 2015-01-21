@@ -80,9 +80,9 @@ class INET_API STP : public STPBase
      * Topology change handling
      */
     void handleTCN(BPDU *tcn);
-    virtual void handleMessage(cMessage *msg);
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /*
      * Send BPDU with specified parameters (portNum, TCA flag, etc.)
@@ -156,8 +156,8 @@ class INET_API STP : public STPBase
     // for lifecycle:
 
   protected:
-    virtual void start();
-    virtual void stop();
+    virtual void start() override;
+    virtual void stop() override;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortRole r)

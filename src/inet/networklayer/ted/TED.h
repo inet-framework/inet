@@ -68,9 +68,9 @@ class TED : public cSimpleModule, public ILifecycle
     virtual ~TED();
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void initializeTED();
 
@@ -93,7 +93,7 @@ class TED : public cSimpleModule, public ILifecycle
     virtual void rebuildRoutingTable();
     //@}
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     IIPv4RoutingTable *rt = nullptr;

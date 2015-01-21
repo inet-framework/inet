@@ -41,20 +41,20 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
     int step;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
     /** @brief Calculate a new target position to move to. */
-    void setTargetPosition();
+    void setTargetPosition() override;
 
   public:
     TractorMobility();
-    virtual double getMaxSpeed() const { return speed; }
+    virtual double getMaxSpeed() const override { return speed; }
 };
 
 } // namespace inet

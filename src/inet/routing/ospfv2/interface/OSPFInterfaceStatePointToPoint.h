@@ -27,8 +27,8 @@ namespace ospf {
 class InterfaceStatePointToPoint : public InterfaceState
 {
   public:
-    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState() const { return Interface::POINTTOPOINT_STATE; }
+    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;
+    virtual Interface::InterfaceStateType getState() const override { return Interface::POINTTOPOINT_STATE; }
 };
 
 } // namespace ospf

@@ -49,19 +49,19 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     MulticastRouteVector multicastRoutes;    // multicast route table, sorted by prefix match order
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
     /**
      * Raises an error.
      */
-    virtual void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *) override;
 
     /**
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
     virtual void configureRouterId();
 
@@ -85,27 +85,27 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Forwarding on/off
      */
-    virtual bool isForwardingEnabled() const;    //XXX IP modulba?
+    virtual bool isForwardingEnabled() const override;    //XXX IP modulba?
 
     /**
      * Multicast forwarding on/off
      */
-    virtual bool isMulticastForwardingEnabled() const;    //XXX IP modulba?
+    virtual bool isMulticastForwardingEnabled() const override;    //XXX IP modulba?
 
     /**
      * Returns routerId.
      */
-    virtual L3Address getRouterIdAsGeneric() const;
+    virtual L3Address getRouterIdAsGeneric() const override;
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const L3Address& dest) const;    //XXX maybe into InterfaceTable?
+    virtual bool isLocalAddress(const L3Address& dest) const override;    //XXX maybe into InterfaceTable?
 
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const;    //XXX should be find..., see next one
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
 
     /**
      * To be called from route objects whenever a field changes. Used for
@@ -122,7 +122,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
-    virtual GenericRoute *findBestMatchingRoute(const L3Address& dest) const;    //TODO make coveriant return types everywhere
+    virtual GenericRoute *findBestMatchingRoute(const L3Address& dest) const override;    //TODO make coveriant return types everywhere
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -130,7 +130,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const;    //XXX redundant
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -139,7 +139,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * address if the destination is not in routing table or the gateway field
      * is not filled in in the route.
      */
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const;    //XXX redundant AND unused
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override;    //XXX redundant AND unused
     //@}
 
     /** @name Multicast routing functions */
@@ -149,12 +149,12 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    virtual bool isLocalMulticastAddress(const L3Address& dest) const;
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const override;
 
     /**
      * Returns route for a multicast origin and group.
      */
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const;
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override;
     //@}
 
     /** @name Route table manipulation */
@@ -163,75 +163,75 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Returns the total number of unicast routes.
      */
-    virtual int getNumRoutes() const;
+    virtual int getNumRoutes() const override;
 
     /**
      * Returns the kth route.
      */
-    virtual IRoute *getRoute(int k) const;
+    virtual IRoute *getRoute(int k) const override;
 
     /**
      * Finds and returns the default route, or nullptr if it doesn't exist
      */
-    virtual IRoute *getDefaultRoute() const;    //XXX is this a universal concept?
+    virtual IRoute *getDefaultRoute() const override;    //XXX is this a universal concept?
 
     /**
      * Adds a route to the routing table. Routes are allowed to be modified
      * while in the routing table. (There is a notification mechanism that
      * allows routing table internals to be updated on a routing entry change.)
      */
-    virtual void addRoute(IRoute *entry);
+    virtual void addRoute(IRoute *entry) override;
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned if the route was not in the routing table.
      */
-    virtual IRoute *removeRoute(IRoute *entry);
+    virtual IRoute *removeRoute(IRoute *entry) override;
 
     /**
      * Deletes the given route from the routing table.
      * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
-    virtual bool deleteRoute(IRoute *entry);
+    virtual bool deleteRoute(IRoute *entry) override;
 
     /**
      * Returns the total number of multicast routes.
      */
-    virtual int getNumMulticastRoutes() const;
+    virtual int getNumMulticastRoutes() const override;
 
     /**
      * Returns the kth multicast route.
      */
-    virtual IMulticastRoute *getMulticastRoute(int k) const;
+    virtual IMulticastRoute *getMulticastRoute(int k) const override;
 
     /**
      * Adds a multicast route to the routing table. Routes are allowed to be modified
      * while in the routing table. (There is a notification mechanism that
      * allows routing table internals to be updated on a routing entry change.)
      */
-    virtual void addMulticastRoute(IMulticastRoute *entry);
+    virtual void addMulticastRoute(IMulticastRoute *entry) override;
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned of the route was not in the routing table.
      */
-    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry);
+    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override;
 
     /**
      * Deletes the given multicast route from the routing table.
      * Returns true if the route was deleted, and false if it was
      * not in the routing table.
      */
-    virtual bool deleteMulticastRoute(IMulticastRoute *entry);
+    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override;
     //@}
 
-    virtual IRoute *createRoute();
+    virtual IRoute *createRoute() override;
 
     /**
      * Prints routing table.
      */
-    virtual void printRoutingTable() const;
+    virtual void printRoutingTable() const override;
 };
 
 } // namespace inet

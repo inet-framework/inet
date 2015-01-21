@@ -35,14 +35,14 @@ class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagra
     FloodDatagram(const FloodDatagram& other) : FloodDatagram_Base(other) {}
     FloodDatagram& operator=(const FloodDatagram& other) { FloodDatagram_Base::operator=(other); return *this; }
 
-    virtual FloodDatagram *dup() const { return new FloodDatagram(*this); }
+    virtual FloodDatagram *dup() const override { return new FloodDatagram(*this); }
 
-    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) { setSrcAddr(address.toModuleId()); }
-    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const { return FloodDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) { FloodDatagram_Base::setTransportProtocol(protocol); };
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
+    virtual int getTransportProtocol() const override { return FloodDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { FloodDatagram_Base::setTransportProtocol(protocol); };
 };
 
 } // namespace inet

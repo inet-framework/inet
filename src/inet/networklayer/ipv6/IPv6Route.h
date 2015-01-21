@@ -93,8 +93,8 @@ class INET_API IPv6Route : public cObject, public IRoute
 
     virtual ~IPv6Route() { delete _protocolData; }
 
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IPv6RoutingTable *rt) { _rt = rt; }
@@ -102,30 +102,30 @@ class INET_API IPv6Route : public cObject, public IRoute
 
     void setNextHop(const IPv6Address& nextHop) { if (_nextHop != nextHop) { _nextHop = nextHop; changed(F_NEXTHOP); } }
     void setExpiryTime(simtime_t expiryTime) { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME); } }
-    void setMetric(int metric) { if (_metric != metric) { _metric = metric; changed(F_METRIC); } }
+    void setMetric(int metric) override { if (_metric != metric) { _metric = metric; changed(F_METRIC); } }
     void setAdminDist(unsigned int adminDist) { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
 
     const IPv6Address& getDestPrefix() const { return _destPrefix; }
-    virtual int getPrefixLength() const { return _prefixLength; }
-    virtual SourceType getSourceType() const { return _sourceType; }
+    virtual int getPrefixLength() const override { return _prefixLength; }
+    virtual SourceType getSourceType() const override { return _sourceType; }
     const IPv6Address& getNextHop() const { return _nextHop; }
     simtime_t getExpiryTime() const { return _expiryTime; }
-    virtual int getMetric() const { return _metric; }
+    virtual int getMetric() const override { return _metric; }
     unsigned int getAdminDist() const { return _adminDist; }
-    virtual IRoutingTable *getRoutingTableAsGeneric() const;
+    virtual IRoutingTable *getRoutingTableAsGeneric() const override;
 
-    virtual void setDestination(const L3Address& dest) { if (_destPrefix != dest.toIPv6()) { _destPrefix = dest.toIPv6(); changed(F_DESTINATION); } }
-    virtual void setPrefixLength(int prefixLength) { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const L3Address& nextHop) { if (_nextHop != nextHop.toIPv6()) { _nextHop = nextHop.toIPv6(); changed(F_NEXTHOP); } }
-    virtual void setSource(cObject *source) { if (_source != source) { _source = source; changed(F_SOURCE); } }
-    virtual void setSourceType(SourceType type) { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
-    virtual L3Address getDestinationAsGeneric() const { return getDestPrefix(); }    //TODO rename IPv6 method
-    virtual L3Address getNextHopAsGeneric() const { return getNextHop(); }
-    virtual InterfaceEntry *getInterface() const { return _interfacePtr; }
-    virtual void setInterface(InterfaceEntry *ie) { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
-    virtual cObject *getSource() const { return _source; }
-    virtual cObject *getProtocolData() const { return _protocolData; }
-    virtual void setProtocolData(cObject *protocolData) { _protocolData = protocolData; }
+    virtual void setDestination(const L3Address& dest) override { if (_destPrefix != dest.toIPv6()) { _destPrefix = dest.toIPv6(); changed(F_DESTINATION); } }
+    virtual void setPrefixLength(int prefixLength) override { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
+    virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIPv6()) { _nextHop = nextHop.toIPv6(); changed(F_NEXTHOP); } }
+    virtual void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
+    virtual void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
+    virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename IPv6 method
+    virtual L3Address getNextHopAsGeneric() const override { return getNextHop(); }
+    virtual InterfaceEntry *getInterface() const override { return _interfacePtr; }
+    virtual void setInterface(InterfaceEntry *ie) override { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
+    virtual cObject *getSource() const override { return _source; }
+    virtual cObject *getProtocolData() const override { return _protocolData; }
+    virtual void setProtocolData(cObject *protocolData) override { _protocolData = protocolData; }
 };
 
 } // namespace inet

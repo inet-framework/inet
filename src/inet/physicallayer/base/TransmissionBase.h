@@ -41,21 +41,21 @@ class INET_API TransmissionBase : public virtual ITransmission
   public:
     TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
-    virtual int getId() const { return id; }
+    virtual int getId() const override { return id; }
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IRadio *getTransmitter() const { return transmitter; }
-    virtual const cPacket *getMacFrame() const { return macFrame; }
+    virtual const IRadio *getTransmitter() const override { return transmitter; }
+    virtual const cPacket *getMacFrame() const override { return macFrame; }
 
-    virtual const simtime_t getStartTime() const { return startTime; }
-    virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
 
-    virtual const Coord getStartPosition() const { return startPosition; }
-    virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const override { return startPosition; }
+    virtual const Coord getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
 };
 
 } // namespace physicallayer

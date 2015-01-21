@@ -59,14 +59,14 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     VoIPStreamSender();
     ~VoIPStreamSender();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
     virtual void openSoundFile(const char *name);
     virtual VoIPStreamPacket *generatePacket();

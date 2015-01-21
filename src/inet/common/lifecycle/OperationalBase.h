@@ -29,14 +29,14 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     simtime_t lastChange;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
     virtual void handleMessageWhenDown(cMessage *msg);
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();

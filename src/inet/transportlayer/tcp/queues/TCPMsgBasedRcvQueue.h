@@ -59,22 +59,22 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
     /**
      * Set initial receive sequence number.
      */
-    virtual void init(uint32 startSeq);
+    virtual void init(uint32 startSeq) override;
 
     /**
      * Returns a string with region stored.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.
      */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
+    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) override;
 
     /**
      *
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq);
+    virtual cPacket *extractBytesUpTo(uint32 seq) override;
 };
 
 } // namespace tcp

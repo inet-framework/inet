@@ -33,9 +33,9 @@ class INET_API NoiseBase : public INoise
   public:
     NoiseBase(simtime_t startTime, simtime_t endTime);
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const simtime_t getStartTime() const { return startTime; }
-    virtual const simtime_t getEndTime() const { return endTime; }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
 };
 
 } // namespace physicallayer

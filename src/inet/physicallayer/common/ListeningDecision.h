@@ -33,11 +33,11 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
   public:
     ListeningDecision(const IListening *listening, bool isListeningPossible_);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IListening *getListening() const { return listening; }
+    virtual const IListening *getListening() const override { return listening; }
 
-    virtual bool isListeningPossible() const { return isListeningPossible_; }
+    virtual bool isListeningPossible() const override { return isListeningPossible_; }
 };
 
 } // namespace physicallayer

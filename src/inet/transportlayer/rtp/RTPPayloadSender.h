@@ -53,9 +53,9 @@ class INET_API RTPPayloadSender : public cSimpleModule
      * Chooses sequence number and time stamp base values and
      * reads the omnet parameter "mtu".
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * A sender module's transmission can be in different states.

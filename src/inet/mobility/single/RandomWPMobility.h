@@ -38,20 +38,20 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
     bool nextMoveIsWait;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void setTargetPosition();
+    virtual void setTargetPosition() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void move();
+    virtual void move() override;
 
   public:
     RandomWPMobility();
-    virtual double getMaxSpeed() const;
+    virtual double getMaxSpeed() const override;
 };
 
 } // namespace inet

@@ -30,14 +30,14 @@ class INET_API ConstantGainAntenna : public AntennaBase
     double gain;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     ConstantGainAntenna();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double getMaxGain() const { return gain; }
-    virtual double computeGain(const EulerAngles direction) const { return gain; }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double getMaxGain() const override { return gain; }
+    virtual double computeGain(const EulerAngles direction) const override { return gain; }
 };
 
 } // namespace physicallayer

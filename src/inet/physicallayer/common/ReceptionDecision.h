@@ -39,23 +39,23 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
   public:
     ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IReception *getReception() const { return reception; }
+    virtual const IReception *getReception() const override { return reception; }
 
-    virtual const ReceptionIndication *getIndication() const { return indication; }
+    virtual const ReceptionIndication *getIndication() const override { return indication; }
 
-    virtual bool isReceptionPossible() const { return isReceptionPossible_; }
+    virtual bool isReceptionPossible() const override { return isReceptionPossible_; }
 
-    virtual bool isReceptionAttempted() const { return isReceptionAttempted_; }
+    virtual bool isReceptionAttempted() const override { return isReceptionAttempted_; }
 
-    virtual bool isReceptionSuccessful() const { return isReceptionSuccessful_; }
+    virtual bool isReceptionSuccessful() const override { return isReceptionSuccessful_; }
 
-    virtual bool isSynchronizationPossible() const { return isSynchronizationPossible_; }
+    virtual bool isSynchronizationPossible() const override { return isSynchronizationPossible_; }
 
-    virtual bool isSynchronizationAttempted() const { return isSynchronizationAttempted_; }
+    virtual bool isSynchronizationAttempted() const override { return isSynchronizationAttempted_; }
 
-    virtual bool isSynchronizationSuccessful() const { return isSynchronizationSuccessful_; }
+    virtual bool isSynchronizationSuccessful() const override { return isSynchronizationSuccessful_; }
 };
 
 } // namespace physicallayer

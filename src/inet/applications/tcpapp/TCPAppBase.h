@@ -48,10 +48,10 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     static simsignal_t sentPkSignal;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
     /* Utility functions */
     virtual void connect();
@@ -61,12 +61,12 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
 
     /* TCPSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+    virtual void socketEstablished(int connId, void *yourPtr) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketPeerClosed(int connId, void *yourPtr) override;
+    virtual void socketClosed(int connId, void *yourPtr) override;
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override { delete status; }
 };
 
 } // namespace inet

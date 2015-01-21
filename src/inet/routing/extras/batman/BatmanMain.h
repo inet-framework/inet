@@ -145,22 +145,22 @@ class Batman : public ManetRoutingBase
     virtual simtime_t getTime();
 
   protected:
-    virtual void handleMessage(cMessage *msg);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void processLinkBreak(const cObject *details){};
+    virtual void handleMessage(cMessage *msg) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void processLinkBreak(const cObject *details) override{};
     virtual void packetFailed(IPv4Datagram *dgram) {}
     virtual void scheduleNextEvent();
 
   public:
     Batman();
     ~Batman();
-    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &add);
-    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &val);
-    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop, bool isReverse) {};
-    virtual bool isProactive() {return true;};
-    virtual bool supportGetRoute () {return false;}
-    virtual bool isOurType(cPacket * msg)
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &add) override;
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &val) override;
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop, bool isReverse) override {};
+    virtual bool isProactive() override {return true;};
+    virtual bool supportGetRoute () override {return false;}
+    virtual bool isOurType(cPacket * msg) override
     {
         if (dynamic_cast<BatmanPacket*>(msg))
             return true;
@@ -170,7 +170,7 @@ class Batman : public ManetRoutingBase
             return false;
     };
 
-    virtual bool getDestAddress(cPacket *, L3Address &) {return false;};
+    virtual bool getDestAddress(cPacket *, L3Address &) override {return false;};
 };
 
 } // namespace inetmanet

@@ -43,11 +43,11 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
 
   protected:
     using cListener::receiveSignal;
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void registerInterface();    // do not override! override createInterfaceEntry()
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void updateOperationalFlag(bool isNodeUp);
     virtual bool isNodeUp();
     virtual void handleMessageWhenDown(cMessage *msg);

@@ -84,12 +84,12 @@ class INET_API BindingCache : public cSimpleModule
     virtual ~BindingCache();
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Raises an error.
      */
-    virtual void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *) override;
 
   public:
     /**

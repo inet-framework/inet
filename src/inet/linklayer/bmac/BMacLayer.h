@@ -70,23 +70,23 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     virtual ~BMacLayer();
 
     /** @brief Initialization of the module and some variables*/
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int) override;
 
     /** @brief Delete all dynamically allocated objects of the module*/
-    virtual void finish();
+    virtual void finish() override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *);
+    virtual void handleLowerPacket(cPacket *) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *);
+    virtual void handleUpperPacket(cPacket *) override;
 
     /** @brief Handle self messages such as timers */
-    virtual void handleSelfMessage(cMessage *);
+    virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
 
   protected:
     typedef std::list<BMacFrame *> MacQueue;
@@ -227,7 +227,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     /** @brief Generate new interface address*/
     virtual void initializeMACAddress();
-    virtual InterfaceEntry *createInterfaceEntry();
+    virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
     /** @brief Internal function to change the color of the node */

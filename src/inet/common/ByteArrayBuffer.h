@@ -40,7 +40,7 @@ class ByteArrayBuffer : public cObject
     ByteArrayBuffer(const ByteArrayBuffer& other);
     ByteArrayBuffer& operator=(const ByteArrayBuffer& other);
 
-    virtual ByteArrayBuffer *dup() const { return new ByteArrayBuffer(*this); }
+    virtual ByteArrayBuffer *dup() const override { return new ByteArrayBuffer(*this); }
 
     /** Clear buffer */
     virtual void clear();

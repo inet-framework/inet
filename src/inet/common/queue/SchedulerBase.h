@@ -52,22 +52,22 @@ class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, publi
     virtual ~SchedulerBase();
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
     virtual void finalize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
     virtual void sendOut(cMessage *msg);
     virtual void notifyListeners();
     virtual bool schedulePacket() = 0;
 
   public:
-    virtual void requestPacket();
-    virtual int getNumPendingRequests() { return packetsRequestedFromUs; }
-    virtual bool isEmpty();
-    virtual void clear();
-    virtual cMessage *pop();
-    virtual void packetEnqueued(IPassiveQueue *inputQueue);
-    virtual void addListener(IPassiveQueueListener *listener);
-    virtual void removeListener(IPassiveQueueListener *listener);
+    virtual void requestPacket() override;
+    virtual int getNumPendingRequests() override { return packetsRequestedFromUs; }
+    virtual bool isEmpty() override;
+    virtual void clear() override;
+    virtual cMessage *pop() override;
+    virtual void packetEnqueued(IPassiveQueue *inputQueue) override;
+    virtual void addListener(IPassiveQueueListener *listener) override;
+    virtual void removeListener(IPassiveQueueListener *listener) override;
 };
 
 } // namespace inet

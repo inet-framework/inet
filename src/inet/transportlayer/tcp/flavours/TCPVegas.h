@@ -36,8 +36,8 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
   public:
     TCPVegasStateVariables();
     ~TCPVegasStateVariables();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     uint32 v_recoverypoint;
     simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.
@@ -68,7 +68,7 @@ class INET_API TCPVegas : public TCPBaseAlg
     TCPVegasStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
-    virtual TCPStateVariables *createStateVariables()
+    virtual TCPStateVariables *createStateVariables() override
     {
         return new TCPVegasStateVariables();
     }
@@ -77,22 +77,22 @@ class INET_API TCPVegas : public TCPBaseAlg
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event);
+    virtual void processRexmitTimer(TCPEventCode& event) override;
 
   public:
     /** Ctor */
     TCPVegas();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 
     /** Called after we send data */
-    virtual void dataSent(uint32 fromseq);
+    virtual void dataSent(uint32 fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
 };
 
 } // namespace tcp

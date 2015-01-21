@@ -40,15 +40,15 @@ class GridObjectCache : public IObjectCache, public cModule
     //@}
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
   public:
     GridObjectCache();
     virtual ~GridObjectCache();
 
-    bool insertObject(const PhysicalObject *object);
-    void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
+    bool insertObject(const PhysicalObject *object) override;
+    void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
 
 } // namespace inet

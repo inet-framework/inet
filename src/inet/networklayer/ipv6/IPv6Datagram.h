@@ -46,43 +46,43 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();
 
-    virtual IPv6Datagram *dup() const { return new IPv6Datagram(*this); }
+    virtual IPv6Datagram *dup() const override { return new IPv6Datagram(*this); }
 
     /**
      * Returns bits 0-5 of the Traffic Class field, a value in the 0..63 range
      */
-    virtual int getDiffServCodePoint() const { return getTrafficClass() & 0x3f; }
+    virtual int getDiffServCodePoint() const override { return getTrafficClass() & 0x3f; }
 
     /**
      * Sets bits 0-5 of the Traffic Class field; expects a value in the 0..63 range
      */
-    virtual void setDiffServCodePoint(int dscp) { setTrafficClass((getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
+    virtual void setDiffServCodePoint(int dscp) override { setTrafficClass((getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
 
     /**
      * Returns bits 6-7 of the Traffic Class field, a value in the range 0..3
      */
-    virtual int getExplicitCongestionNotification() const { return (getTrafficClass() >> 6) & 0x03; }
+    virtual int getExplicitCongestionNotification() const override { return (getTrafficClass() >> 6) & 0x03; }
 
     /**
      * Sets bits 6-7 of the Traffic Class field; expects a value in the 0..3 range
      */
-    virtual void setExplicitCongestionNotification(int ecn) { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
+    virtual void setExplicitCongestionNotification(int ecn) override { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeaderArraySize(unsigned int size);
+    virtual void setExtensionHeaderArraySize(unsigned int size) override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var);
+    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var) override;
 
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int getExtensionHeaderArraySize() const;
+    virtual unsigned int getExtensionHeaderArraySize() const override;
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k);
+    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
 
     /**
      * Returns the extension header of the specified type,
@@ -127,12 +127,12 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      */
     virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
 
-    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddress()); }
-    virtual void setSourceAddress(const L3Address& address) { setSrcAddress(address.toIPv6()); }
-    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddress()); }
-    virtual void setDestinationAddress(const L3Address& address) { setDestAddress(address.toIPv6()); }
-    virtual int getTransportProtocol() const { return IPv6Datagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) { IPv6Datagram_Base::setTransportProtocol(protocol); }
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
+    virtual int getTransportProtocol() const override { return IPv6Datagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { IPv6Datagram_Base::setTransportProtocol(protocol); }
 };
 
 std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);

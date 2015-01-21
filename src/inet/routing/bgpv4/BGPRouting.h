@@ -45,17 +45,17 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
     virtual ~BGPRouting();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    virtual void finish();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void finish() override;
 
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketPeerClosed(int connId, void *yourPtr) {}
-    virtual void socketClosed(int connId, void *yourPtr) {}
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketEstablished(int connId, void *yourPtr) override;
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketPeerClosed(int connId, void *yourPtr) override {}
+    virtual void socketClosed(int connId, void *yourPtr) override {}
 
     friend class BGPSession;
     //functions used by the BGPSession class

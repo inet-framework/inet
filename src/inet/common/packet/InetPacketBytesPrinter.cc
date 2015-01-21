@@ -29,8 +29,8 @@ class INET_API InetPacketBytesPrinter : public cMessagePrinter
   public:
     InetPacketBytesPrinter() { showEncapsulatedPackets = true; }
     virtual ~InetPacketBytesPrinter() {}
-    virtual int getScoreFor(cMessage *msg) const;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const;
+    virtual int getScoreFor(cMessage *msg) const override;
+    virtual void printMessage(std::ostream& os, cMessage *msg) const override;
 };
 
 Register_MessagePrinter(InetPacketBytesPrinter);

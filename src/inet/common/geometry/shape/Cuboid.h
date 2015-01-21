@@ -40,8 +40,8 @@ class INET_API Cuboid : public ShapeBase
     Cuboid(const Coord& size);
     const Coord& getSize() const { return size; }
     void setSize(const Coord& size) { this->size = size; }
-    virtual Coord computeBoundingBoxSize() const { return size; }
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
+    virtual Coord computeBoundingBoxSize() const override { return size; }
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const override;
     virtual void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
 };
 

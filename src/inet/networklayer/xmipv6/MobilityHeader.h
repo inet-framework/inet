@@ -40,7 +40,7 @@ class INET_API HomeAddressOption : public HomeAddressOption_Base
     HomeAddressOption(const HomeAddressOption& other) : HomeAddressOption_Base(other) {}
     HomeAddressOption& operator=(const HomeAddressOption& other) { HomeAddressOption_Base::operator=(other); return *this; }
 
-    virtual HomeAddressOption *dup() const { return new HomeAddressOption(*this); }
+    virtual HomeAddressOption *dup() const override { return new HomeAddressOption(*this); }
 };
 
 } // namespace inet

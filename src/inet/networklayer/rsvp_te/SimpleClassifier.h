@@ -63,16 +63,16 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
     SimpleClassifier() {}
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
 
     // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node);
+    virtual void processCommand(const cXMLElement& node) override;
 
     // IRSVPClassifier implementation
-    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
-    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel);
+    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) override;
 
   protected:
     virtual void readTableFromXML(const cXMLElement *fectable);

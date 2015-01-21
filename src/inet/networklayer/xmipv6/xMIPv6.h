@@ -191,9 +191,9 @@ class INET_API xMIPv6 : public cSimpleModule
 
   protected:
     /************************Miscellaneous Stuff***************************/
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     //================MIPv6 Related Functions=================================================
     /**

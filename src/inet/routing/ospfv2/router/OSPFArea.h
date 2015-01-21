@@ -122,8 +122,8 @@ class Area : public cObject
     void calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
     void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
 
-    std::string info() const;
-    std::string detailedInfo() const;
+    std::string info() const override;
+    std::string detailedInfo() const override;
 
   private:
     SummaryLSA *originateSummaryLSA(const SummaryLSA *summaryLSA);

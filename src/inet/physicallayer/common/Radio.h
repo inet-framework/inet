@@ -167,21 +167,21 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     void completeRadioModeSwitch(RadioMode newRadioMode);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
     virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
     virtual m computeMaxCommunicationRange() const;
     virtual m computeMaxInterferenceRange() const;
 
-    virtual void handleMessageWhenDown(cMessage *message);
-    virtual void handleMessageWhenUp(cMessage *message);
+    virtual void handleMessageWhenDown(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);
     virtual void handleUpperCommand(cMessage *command);
     virtual void handleLowerCommand(cMessage *command);
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
     virtual void startTransmission(cPacket *macFrame);
     virtual void endTransmission();
@@ -198,25 +198,25 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     Radio();
     virtual ~Radio();
 
-    virtual int getId() const { return id; }
+    virtual int getId() const override { return id; }
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IAntenna *getAntenna() const { return antenna; }
-    virtual const ITransmitter *getTransmitter() const { return transmitter; }
-    virtual const IReceiver *getReceiver() const { return receiver; }
-    virtual const IRadioMedium *getMedium() const { return medium; }
+    virtual const IAntenna *getAntenna() const override { return antenna; }
+    virtual const ITransmitter *getTransmitter() const override { return transmitter; }
+    virtual const IReceiver *getReceiver() const override { return receiver; }
+    virtual const IRadioMedium *getMedium() const override { return medium; }
 
-    virtual const cGate *getRadioGate() const { return radioIn; }
+    virtual const cGate *getRadioGate() const override { return radioIn; }
 
-    virtual RadioMode getRadioMode() const { return radioMode; }
-    virtual void setRadioMode(RadioMode newRadioMode);
+    virtual RadioMode getRadioMode() const override { return radioMode; }
+    virtual void setRadioMode(RadioMode newRadioMode) override;
 
-    virtual ReceptionState getReceptionState() const { return receptionState; }
-    virtual TransmissionState getTransmissionState() const { return transmissionState; }
+    virtual ReceptionState getReceptionState() const override { return receptionState; }
+    virtual TransmissionState getTransmissionState() const override { return transmissionState; }
 
-    virtual const ITransmission *getTransmissionInProgress() const;
-    virtual const ITransmission *getReceptionInProgress() const;
+    virtual const ITransmission *getTransmissionInProgress() const override;
+    virtual const ITransmission *getReceptionInProgress() const override;
 };
 
 } // namespace physicallayer

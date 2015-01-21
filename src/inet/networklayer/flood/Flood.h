@@ -108,19 +108,19 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     Flood() {}
 
     /** @brief Initialization of omnetpp.ini parameters*/
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
-    virtual void finish();
+    virtual void finish() override;
 
   protected:
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *);
+    virtual void handleUpperPacket(cPacket *) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *);
+    virtual void handleLowerPacket(cPacket *) override;
 
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(FloodDatagram *);

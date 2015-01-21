@@ -40,7 +40,7 @@ class INET_API TCPNewReno : public TCPTahoeRenoFamily
     TCPNewRenoStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPNewRenoStateVariables object. */
-    virtual TCPStateVariables *createStateVariables()
+    virtual TCPStateVariables *createStateVariables() override
     {
         return new TCPNewRenoStateVariables();
     }
@@ -49,17 +49,17 @@ class INET_API TCPNewReno : public TCPTahoeRenoFamily
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event);
+    virtual void processRexmitTimer(TCPEventCode& event) override;
 
   public:
     /** Ctor */
     TCPNewReno();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 };
 
 } // namespace tcp

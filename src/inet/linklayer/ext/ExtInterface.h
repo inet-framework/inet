@@ -66,21 +66,21 @@ class ExtInterface : public MACBase
     void updateDisplayString();
 
     // MACBase functions
-    InterfaceEntry *createInterfaceEntry();
-    virtual void flushQueue();
-    virtual void clearQueue();
-    virtual bool isUpperMsg(cMessage *msg) { return msg->arrivedOn("upperLayerIn"); }
+    InterfaceEntry *createInterfaceEntry() override;
+    virtual void flushQueue() override;
+    virtual void clearQueue() override;
+    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
   private:
     const char *tag_color;
     const char *tag_width;
 
   public:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
-    virtual void finish();
+    virtual void finish() override;
 };
 
 } // namespace inet

@@ -41,22 +41,22 @@ class INET_API RectangleMobility : public MovingMobilityBase
     double corner1, corner2, corner3, corner4;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.
      *
      * If the host is not stationary it calculates a random position on the rectangle.
      */
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
     /** @brief Move the host */
-    virtual void move();
+    virtual void move() override;
 
   public:
-    virtual double getMaxSpeed() const { return speed; }
+    virtual double getMaxSpeed() const override { return speed; }
     RectangleMobility();
 };
 

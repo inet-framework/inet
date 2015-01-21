@@ -29,16 +29,16 @@ namespace physicallayer {
 class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
   protected:
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
 
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 
   public:
     ReceiverBase() {}
 
-    virtual W getMinInterferencePower() const { return W(qNaN); }
-    virtual W getMinReceptionPower() const { return W(qNaN); }
+    virtual W getMinInterferencePower() const override { return W(qNaN); }
+    virtual W getMinReceptionPower() const override { return W(qNaN); }
 };
 
 } // namespace physicallayer

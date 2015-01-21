@@ -34,7 +34,7 @@ class RSVPPacket : public RSVPPacket_Base
     RSVPPacket(const char *name = nullptr, int kind = 0) : RSVPPacket_Base(name, RSVP_TRAFFIC) { this->rsvpKind_var = kind; }
     RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other) {}
     RSVPPacket& operator=(const RSVPPacket& other) { RSVPPacket_Base::operator=(other); return *this; }
-    virtual RSVPPacket *dup() const { return new RSVPPacket(*this); }
+    virtual RSVPPacket *dup() const override { return new RSVPPacket(*this); }
 
     inline IPv4Address getDestAddress() { return getSession().DestAddress; }
     inline int getTunnelId() { return getSession().Tunnel_Id; }

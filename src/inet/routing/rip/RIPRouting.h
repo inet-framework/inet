@@ -55,7 +55,7 @@ struct RIPRoute : public cObject
 
   public:
     RIPRoute(IRoute *route, RouteType type, int metric, uint16 tag);
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     RouteType getType() const { return type; }
     IRoute *getRoute() const { return route; }
@@ -188,11 +188,11 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     int getInterfaceMetric(InterfaceEntry *ie);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     virtual void startRIPRouting();
     virtual void stopRIPRouting();

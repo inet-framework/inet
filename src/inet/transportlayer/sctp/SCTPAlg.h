@@ -55,25 +55,25 @@ class INET_API SCTPAlg : public SCTPAlgorithm
     /**
      * Creates and returns a SCTPStateVariables object.
      */
-    virtual SCTPStateVariables *createStateVariables();
+    virtual SCTPStateVariables *createStateVariables() override;
 
-    virtual void established(bool active);
+    virtual void established(bool active) override;
 
-    virtual void connectionClosed();
+    virtual void connectionClosed() override;
 
-    virtual void processTimer(cMessage *timer, SCTPEventCode& event);
+    virtual void processTimer(cMessage *timer, SCTPEventCode& event) override;
 
-    virtual void sendCommandInvoked(SCTPPathVariables *path);
+    virtual void sendCommandInvoked(SCTPPathVariables *path) override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq);
+    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
 
-    virtual void sackSent();
+    virtual void sackSent() override;
 
-    virtual void dataSent(uint32 fromseq);
+    virtual void dataSent(uint32 fromseq) override;
 };
 
 } // namespace sctp

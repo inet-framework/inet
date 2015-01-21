@@ -40,10 +40,10 @@ class INET_API OrdinalBasedDuplicator : public cSimpleModule
 
     std::vector<unsigned int> duplicatesVector;
 
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void parseVector(const char *vector);
-    virtual void finish();
+    virtual void finish() override;
 };
 
 } // namespace inet

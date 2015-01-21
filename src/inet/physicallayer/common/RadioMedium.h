@@ -381,10 +381,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
   protected:
     /** @name Module */
     //@{
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *message);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *message) override;
     //@}
 
     /** @name Cache */
@@ -492,12 +492,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionDecision *computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IListeningDecision *computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
 
-    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
-    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
     //@}
 
@@ -511,37 +511,37 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMinInterferencePower() const { return minInterferencePower; }
-    virtual W getMinReceptionPower() const { return minReceptionPower; }
-    virtual double getMaxAntennaGain() const { return maxAntennaGain; }
+    virtual W getMinInterferencePower() const override { return minInterferencePower; }
+    virtual W getMinReceptionPower() const override { return minReceptionPower; }
+    virtual double getMaxAntennaGain() const override { return maxAntennaGain; }
     virtual mps getMaxSpeed() const { return maxSpeed; }
     virtual m getMaxInterferenceRange(const IRadio *radio) const;
     virtual m getMaxCommunicationRange(const IRadio *radio) const;
     virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
     virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
 
-    virtual const Material *getMaterial() const { return Material::getMaterial("air"); }
-    virtual const IPropagation *getPropagation() const { return propagation; }
-    virtual const IPathLoss *getPathLoss() const { return pathLoss; }
-    virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }
-    virtual const IAnalogModel *getAnalogModel() const { return analogModel; }
-    virtual const IBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
+    virtual const Material *getMaterial() const override { return Material::getMaterial("air"); }
+    virtual const IPropagation *getPropagation() const override { return propagation; }
+    virtual const IPathLoss *getPathLoss() const override { return pathLoss; }
+    virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }
+    virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
+    virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
 
-    virtual void addRadio(const IRadio *radio);
-    virtual void removeRadio(const IRadio *radio);
+    virtual void addRadio(const IRadio *radio) override;
+    virtual void removeRadio(const IRadio *radio) override;
 
     virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
 
-    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame);
-    virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame);
+    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) override;
+    virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) override;
 
-    virtual const IListeningDecision *listenOnMedium(const IRadio *radio, const IListening *listening) const;
+    virtual const IListeningDecision *listenOnMedium(const IRadio *radio, const IListening *listening) const override;
 
-    virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const;
+    virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const override;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value) override;
 };
 
 } // namespace physicallayer

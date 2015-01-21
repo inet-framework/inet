@@ -32,12 +32,12 @@ class INET_API Ieee80211ScalarTransmitter : public NarrowbandTransmitterBase
     Ieee80211PreambleMode preambleMode;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     Ieee80211ScalarTransmitter();
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

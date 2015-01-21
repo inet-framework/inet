@@ -92,34 +92,34 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
 
   protected:
 
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
     void handleTimer(cMessage *msg);
 
     void connect();
     void socketEstablished(int connId, void *yourPtr);
-    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
-    void socketPeerClosed(int connId, void *yourPtr);
-    void socketClosed(int connId, void *yourPtr);
-    void socketFailure(int connId, void *yourPtr, int code);
+    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg) override;
+    void socketPeerClosed(int connId, void *yourPtr) override;
+    void socketClosed(int connId, void *yourPtr) override;
+    void socketFailure(int connId, void *yourPtr, int code) override;
 
     /* Redefine to handle incoming SCTPStatusInfo */
-    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
+    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status) override;
 
     void sendRequest(bool last = true);
     void sendOrSchedule(cPacket *msg);
     void generateAndSend(SCTPConnectInfo *connectInfo);
-    void sendRequestArrived();
+    void sendRequestArrived() override;
     void sendQueueRequest();
-    void shutdownReceivedArrived(int connId);
-    void sendqueueFullArrived(int connId);
-    void msgAbandonedArrived(int assocId);
+    void shutdownReceivedArrived(int connId) override;
+    void sendqueueFullArrived(int connId) override;
+    void msgAbandonedArrived(int assocId) override;
     void setStatusString(const char *s);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:

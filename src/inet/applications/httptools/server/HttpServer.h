@@ -45,16 +45,16 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     unsigned long socketsOpened = 0;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
 
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual void socketEstablished(int connId, void *yourPtr) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketPeerClosed(int connId, void *yourPtr) override;
+    virtual void socketClosed(int connId, void *yourPtr) override;
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
 };
 
 } // namespace httptools

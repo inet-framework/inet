@@ -70,16 +70,16 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     virtual void processStreamRequest(cMessage *msg);
     virtual void sendStreamData(cMessage *timer);
 
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessageWhenUp(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void clearStreams();
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     UDPVideoStreamSvr() {}

@@ -57,10 +57,10 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     static simsignal_t rcvdPkSignal;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
     virtual bool isNodeUp();
     virtual bool isGenerator();
@@ -72,7 +72,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     virtual void sendPacket();
     virtual void receivePacket(cPacket *msg);
     virtual void registerDSAP(int dsap);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     EtherAppCli() {}

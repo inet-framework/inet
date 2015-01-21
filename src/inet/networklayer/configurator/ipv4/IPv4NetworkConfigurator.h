@@ -60,7 +60,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     class Topology : public NetworkConfiguratorBase::Topology
     {
       protected:
-        virtual Node *createNode(cModule *module) { return new IPv4NetworkConfigurator::Node(module); }
+        virtual Node *createNode(cModule *module) override { return new IPv4NetworkConfigurator::Node(module); }
     };
 
     /**
@@ -80,7 +80,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
 
         IPv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return IPv4Address(address); }
         IPv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return IPv4Address(netmask); }
-        virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
+        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
     };
 
     /**
@@ -161,9 +161,9 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void configureRoutingTable(IIPv4RoutingTable *routingTable);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void initialize(int stage) override;
 
     /**
      * Reads interface elements from the configuration file and stores result.
@@ -221,7 +221,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
-    virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+    virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
     virtual const char *getMandatoryAttribute(cXMLElement *element, const char *attr);
@@ -229,7 +229,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, IPv4Address address);
     virtual LinkInfo *findLinkOfInterface(Topology& topology, InterfaceEntry *interfaceEntry);
-    virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node);
+    virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node) override;
 
     // helpers for address assignment
     static bool compareInterfaceInfos(InterfaceInfo *i, InterfaceInfo *j);
@@ -254,7 +254,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
     // address resolver interface
-    bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask);
+    bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask) override;
 };
 
 } // namespace inet

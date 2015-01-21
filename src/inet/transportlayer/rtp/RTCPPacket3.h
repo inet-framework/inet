@@ -34,7 +34,7 @@ class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
     RTCPSenderReportPacket(const char *name = nullptr, int kind = 0);
     RTCPSenderReportPacket(const RTCPSenderReportPacket& other) : RTCPSenderReportPacket_Base(other) {}
     RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) { RTCPSenderReportPacket_Base::operator=(other); return *this; }
-    virtual RTCPSenderReportPacket *dup() const { return new RTCPSenderReportPacket(*this); }
+    virtual RTCPSenderReportPacket *dup() const override { return new RTCPSenderReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
 

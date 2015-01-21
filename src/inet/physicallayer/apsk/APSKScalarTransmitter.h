@@ -29,8 +29,8 @@ class INET_API APSKScalarTransmitter : public NarrowbandTransmitterBase
   public:
     APSKScalarTransmitter();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

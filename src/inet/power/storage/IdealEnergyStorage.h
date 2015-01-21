@@ -34,9 +34,9 @@ namespace power {
 class INET_API IdealEnergyStorage : public EnergyStorageBase
 {
   public:
-    virtual J getNominalCapacity() { return J(INFINITY); }
+    virtual J getNominalCapacity() override { return J(INFINITY); }
 
-    virtual J getResidualCapacity() { return J(INFINITY); }
+    virtual J getResidualCapacity() override { return J(INFINITY); }
 };
 
 } // namespace power

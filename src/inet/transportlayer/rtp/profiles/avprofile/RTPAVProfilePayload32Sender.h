@@ -40,7 +40,7 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
     /**
      * Initializes the module. It sets the values for clock rate and payload type.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * The main method.
@@ -51,13 +51,13 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
     /**
      * This method reads the gdf file header.
      */
-    virtual void initializeSenderModule(RTPInnerPacket *rinpIn);
+    virtual void initializeSenderModule(RTPInnerPacket *rinpIn) override;
 
     /**
      * This method sends one mpeg frame. It sends one or more
      * rtp data packet. Returns false if there were no more frames.
      */
-    virtual bool sendPacket();
+    virtual bool sendPacket() override;
 
     /**
      * The initial delay of the mpeg video.

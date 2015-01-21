@@ -38,18 +38,18 @@ class L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cList
     L2NodeConfigurator();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void initialize(int stage) override;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     virtual void prepareNode();
     virtual void prepareInterface(InterfaceEntry *interfaceEntry);
     virtual void configureNode();
 
     // cListener:
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 };
 
 } // namespace inet

@@ -49,7 +49,7 @@ class MessageHandler : public IMessageHandler
     void messageReceived(cMessage *message);
     void handleTimer(cMessage *timer);
 
-    void processPacket(OSPFPacket *packet, Interface *unused1 = nullptr, Neighbor *unused2 = nullptr);
+    void processPacket(OSPFPacket *packet, Interface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
 
     void sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl = 1);
     void clearTimer(cMessage *timer);

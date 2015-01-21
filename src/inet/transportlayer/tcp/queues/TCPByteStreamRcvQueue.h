@@ -53,15 +53,15 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
         virtual ~Region() {};
 
         /// Merge other to self
-        virtual bool merge(const TCPVirtualDataRcvQueue::Region *other);
+        virtual bool merge(const TCPVirtualDataRcvQueue::Region *other) override;
 
         /// Copy self to msg
-        virtual void copyTo(cPacket *msg) const;
+        virtual void copyTo(cPacket *msg) const override;
 
         /**
          * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
          */
-        virtual TCPByteStreamRcvQueue::Region *split(uint32 seq);
+        virtual TCPByteStreamRcvQueue::Region *split(uint32 seq) override;
     };
 
   public:
@@ -78,15 +78,15 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
     /**
      * Returns a string with region stored.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
-    cPacket *extractBytesUpTo(uint32 seq);
+    cPacket *extractBytesUpTo(uint32 seq) override;
 
     /**
      * Create a new Region from tcpseg.
      * Called from insertBytesFromSegment()
      */
-    virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg);
+    virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg) override;
 };
 
 } // namespace tcp

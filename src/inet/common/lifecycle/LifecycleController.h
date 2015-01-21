@@ -71,7 +71,7 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
         cModule *module;
 
         void init(LifecycleController *controller, LifecycleOperation *operation, cModule *module);
-        virtual void invoke();
+        virtual void invoke() override;
     };
 
     Callback *spareCallback;
@@ -84,9 +84,9 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
   public:
     LifecycleController() : spareCallback(nullptr) {}
     ~LifecycleController() { delete spareCallback; }
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void processCommand(const cXMLElement& node);    // IScriptable
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void processCommand(const cXMLElement& node) override;    // IScriptable
 
     /**
      * Initiate an operation. See the class documentation and ILifecycle for

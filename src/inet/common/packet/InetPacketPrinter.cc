@@ -58,8 +58,8 @@ class INET_API InetPacketPrinter : public cMessagePrinter
   public:
     InetPacketPrinter() {}
     virtual ~InetPacketPrinter() {}
-    virtual int getScoreFor(cMessage *msg) const;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const;
+    virtual int getScoreFor(cMessage *msg) const override;
+    virtual void printMessage(std::ostream& os, cMessage *msg) const override;
 };
 
 Register_MessagePrinter(InetPacketPrinter);

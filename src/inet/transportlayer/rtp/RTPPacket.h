@@ -37,13 +37,13 @@ class RTPPacket : public RTPPacket_Base
     RTPPacket(const char *name = nullptr, int kind = 0) : RTPPacket_Base(name, kind) {}
     RTPPacket(const RTPPacket& other) : RTPPacket_Base(other) {}
     RTPPacket& operator=(const RTPPacket& other) { RTPPacket_Base::operator=(other); return *this; }
-    virtual RTPPacket *dup() const { return new RTPPacket(*this); }
+    virtual RTPPacket *dup() const override { return new RTPPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTPPacket_Base
 
     /**
      * Writes a one line info about this RTPPacket into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes a longer description about this RTPPacket into the given stream.
@@ -54,14 +54,14 @@ class RTPPacket : public RTPPacket_Base
      * Returns the length of the header (fixed plus variable part)
      * of this RTPPacket.
      */
-    virtual int getHeaderLength() const;
-    virtual void setHeaderLength(int x) { throw cRuntimeError("Don't use SetHeaderLength()"); }
+    virtual int getHeaderLength() const override;
+    virtual void setHeaderLength(int x) override { throw cRuntimeError("Don't use SetHeaderLength()"); }
 
     /**
      * Returns the size of the payload stored in this RTPPacket.
      */
-    virtual int getPayloadLength() const;
-    virtual void setPayloadLength(int x) { throw cRuntimeError("Don't use SetPayloadLength()"); }
+    virtual int getPayloadLength() const override;
+    virtual void setPayloadLength(int x) override { throw cRuntimeError("Don't use SetPayloadLength()"); }
 };
 
 } // namespace rtp

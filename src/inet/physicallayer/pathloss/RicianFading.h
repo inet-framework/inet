@@ -35,12 +35,12 @@ class INET_API RicianFading : public FreeSpacePathLoss
     double k;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     RicianFading();
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 
 } // namespace physicallayer

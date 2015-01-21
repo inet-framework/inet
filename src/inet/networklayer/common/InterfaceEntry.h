@@ -86,8 +86,8 @@ class INET_API InterfaceEntryChangeDetails : public cObject
     InterfaceEntryChangeDetails(InterfaceEntry *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
     InterfaceEntry *getInterfaceEntry() const { return ie; }
     int getFieldId() const { return field; }
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 };
 
 /**
@@ -158,9 +158,9 @@ class INET_API InterfaceEntry : public cNamedObject
   public:
     InterfaceEntry(cModule *module);
     virtual ~InterfaceEntry();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
-    virtual std::string getFullPath() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
+    virtual std::string getFullPath() const override;
 
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
@@ -200,7 +200,7 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name Field setters */
     //@{
-    virtual void setName(const char *s) { cNamedObject::setName(s); configChanged(F_NAME); }
+    virtual void setName(const char *s) override { cNamedObject::setName(s); configChanged(F_NAME); }
     virtual void setNetworkLayerGateIndex(int i) { if (nwLayerGateIndex != i) { nwLayerGateIndex = i; configChanged(F_NETW_GATEIDX); } }
     virtual void setNodeOutputGateId(int i) { if (nodeOutputGateId != i) { nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID); } }
     virtual void setNodeInputGateId(int i) { if (nodeInputGateId != i) { nodeInputGateId = i; configChanged(F_NODE_IN_GATEID); } }

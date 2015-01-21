@@ -66,9 +66,9 @@ class INET_API LIBTable : public cSimpleModule
     std::vector<LIBEntry> lib;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
 
     // static configuration
     virtual void readTableFromXML(const cXMLElement *libtable);

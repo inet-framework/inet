@@ -81,10 +81,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     MobilityBase();
 
     /** @brief Returns the required number of initialize stages. */
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Initializes mobility position. */
     virtual void initializePosition();
@@ -99,7 +99,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void initializeOrientation();
 
     /** @brief This modules should only receive self-messages. */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
@@ -154,15 +154,15 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle);
 
   public:
-    virtual double getMaxSpeed() const { return NaN; }
+    virtual double getMaxSpeed() const override { return NaN; }
 
-    virtual EulerAngles getCurrentAngularPosition() { return EulerAngles::ZERO; }
+    virtual EulerAngles getCurrentAngularPosition() override { return EulerAngles::ZERO; }
 
     /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::ZERO; }
+    virtual EulerAngles getCurrentAngularSpeed() override { return EulerAngles::ZERO; }
 
-    virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
-    virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
+    virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
+    virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }
 };
 
 } // namespace inet

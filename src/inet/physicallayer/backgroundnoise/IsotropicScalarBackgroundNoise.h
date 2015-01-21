@@ -30,14 +30,14 @@ class INET_API IsotropicScalarBackgroundNoise : public cModule, public IBackgrou
     W power;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     IsotropicScalarBackgroundNoise();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
     virtual W getPower() const { return power; }
-    virtual const INoise *computeNoise(const IListening *listening) const;
+    virtual const INoise *computeNoise(const IListening *listening) const override;
 };
 
 } // namespace physicallayer

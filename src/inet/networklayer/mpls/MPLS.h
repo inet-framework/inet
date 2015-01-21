@@ -47,9 +47,9 @@ class INET_API MPLS : public cSimpleModule
     IClassifier *pct;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
 
   protected:
     virtual void processPacketFromL3(cMessage *msg);

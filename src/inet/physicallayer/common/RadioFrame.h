@@ -33,11 +33,11 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
     RadioFrame(const ITransmission *transmission);
     RadioFrame(const RadioFrame& other);
 
-    virtual RadioFrame *dup() const { return new RadioFrame(*this); }
+    virtual RadioFrame *dup() const override { return new RadioFrame(*this); }
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const ITransmission *getTransmission() const { return transmission; }
+    virtual const ITransmission *getTransmission() const override { return transmission; }
 };
 
 } // namespace physicallayer

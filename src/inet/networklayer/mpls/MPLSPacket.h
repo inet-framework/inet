@@ -45,12 +45,12 @@ class INET_API MPLSPacket : public cPacket
     /**
      * cloning function
      */
-    virtual MPLSPacket *dup() const { return new MPLSPacket(*this); }
+    virtual MPLSPacket *dup() const override { return new MPLSPacket(*this); }
 
     /**
      * Returns a string with the labels, starting with the top of stack.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Swap Label operation

@@ -40,7 +40,7 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
   protected:
     MACProtocolBase();
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     virtual void registerInterface();
     virtual InterfaceEntry *createInterfaceEntry() = 0;
@@ -48,12 +48,12 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
     virtual void sendUp(cMessage *message);
     virtual void sendDown(cMessage *message);
 
-    virtual bool isUpperMessage(cMessage *message);
-    virtual bool isLowerMessage(cMessage *message);
+    virtual bool isUpperMessage(cMessage *message) override;
+    virtual bool isLowerMessage(cMessage *message) override;
 
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 };
 
 } // namespace inet

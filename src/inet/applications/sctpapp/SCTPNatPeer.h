@@ -91,9 +91,9 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     typedef std::map<L3Address, pathStatus> SCTPPathStatus;
     SCTPPathStatus sctpPathStatus;
     //virtual void socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status);
-    void initialize();
-    void handleMessage(cMessage *msg);
-    void finish();
+    void initialize() override;
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
     void handleTimer(cMessage *msg);
     /*void setAssociation(SCTPAssociation *_assoc) {
        assoc = _assoc;};*/
@@ -102,37 +102,37 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void connectx(AddressVector connectAddressList, int32 connectPort);
 
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
-    void socketEstablished(int32, void *, unsigned long int buffer);
+    void socketEstablished(int32, void *, unsigned long int buffer) override;
 
     /**
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
      * Beware: this funcion deletes the incoming message, which might not be what you want.
      */
-    void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
+    void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent) override;
 
-    void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
+    void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg) override;
     /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
-    void socketPeerClosed(int32 connId, void *yourPtr);
+    void socketPeerClosed(int32 connId, void *yourPtr) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection. */
-    void socketClosed(int32 connId, void *yourPtr);
+    void socketClosed(int32 connId, void *yourPtr) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
-    void socketFailure(int32 connId, void *yourPtr, int32 code);
+    void socketFailure(int32 connId, void *yourPtr, int32 code) override;
 
     /** Redefine to handle incoming SCTPStatusInfo. */
-    void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
+    void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status) override;
     //@}
-    void msgAbandonedArrived(int32 assocId);
+    void msgAbandonedArrived(int32 assocId) override;
     //void setAssociation(SCTPAssociation *_assoc) {assoc = _assoc;};
 
     void setPrimaryPath();
     void sendStreamResetNotification();
-    void sendRequestArrived();
+    void sendRequestArrived() override;
     void sendQueueRequest();
-    void shutdownReceivedArrived(int32 connId);
-    void sendqueueFullArrived(int32 connId);
-    void addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr);
+    void shutdownReceivedArrived(int32 connId) override;
+    void sendqueueFullArrived(int32 connId) override;
+    void addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr) override;
     void setStatusString(const char *s);
 };
 

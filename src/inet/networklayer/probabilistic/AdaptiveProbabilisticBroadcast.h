@@ -34,16 +34,16 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
     {}
 
     /** @brief Initialization of the module and some variables*/
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
   protected:
     typedef std::map<L3Address, cMessage *> NeighborMap;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     /** @brief Handle self messages */
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
 
     void updateNeighMap(ProbabilisticBroadcastDatagram *m);
 

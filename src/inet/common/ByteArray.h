@@ -44,7 +44,7 @@ class ByteArray : public ByteArray_Base
     /**
      * Creates and returns an exact copy of this object.
      */
-    virtual ByteArray *dup() const { return new ByteArray(*this); }
+    virtual ByteArray *dup() const override { return new ByteArray(*this); }
 
     /**
      * Copy data from buffer

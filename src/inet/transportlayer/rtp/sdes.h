@@ -76,12 +76,12 @@ class INET_API SDESItem : public cObject
     /**
      * Duplicates theis SDESItem by calling the copy constructor.
      */
-    virtual SDESItem *dup() const;
+    virtual SDESItem *dup() const override;
 
     /**
      * Writes a short info about this SDESItem into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes an info about this SDESItem into the give output stream.
@@ -155,12 +155,12 @@ class INET_API SDESChunk : public cArray
     /**
      * Duplicates this SDESChunk by calling the copy constructor.
      */
-    virtual SDESChunk *dup() const;
+    virtual SDESChunk *dup() const override;
 
     /**
      * Writes a short info about this SDESChunk into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes a longer info about this SDESChunk into the given stream.

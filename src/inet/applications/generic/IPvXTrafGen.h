@@ -67,15 +67,15 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     virtual L3Address chooseDestAddr();
     virtual void sendPacket();
 
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void startApp();
 
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     IPvXTrafGen();

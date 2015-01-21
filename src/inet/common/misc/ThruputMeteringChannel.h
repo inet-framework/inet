@@ -103,12 +103,12 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
     /**
      * Add parameters and initialize the stat variables
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Adds statistics and live display to the channel.
      */
-    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
+    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result) override;
 };
 
 } // namespace inet

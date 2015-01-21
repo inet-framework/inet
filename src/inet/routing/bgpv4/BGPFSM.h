@@ -119,104 +119,104 @@ TOPSTATE(TopState) {
     virtual void UpdateMsgEvent() {}
 
   private:
-    void init();
+    void init() override;
 };
 
 // A superstate
 SUBSTATE(Idle, TopState) {
     STATE(Idle)
 
-    void ManualStart();
+    void ManualStart() override;
 
   private:
-    void entry() { std::cout << "Idle::entry" << std::endl; }
-    void exit() { std::cout << "Idle::exit" << std::endl; }
+    void entry() override { std::cout << "Idle::entry" << std::endl; }
+    void exit() override { std::cout << "Idle::exit" << std::endl; }
 };
 
 // A substate
 SUBSTATE(Connect, TopState) {
     STATE(Connect)
 
-    void ConnectRetryTimer_Expires();
-    void HoldTimer_Expires();
-    void KeepaliveTimer_Expires();
-    void TcpConnectionConfirmed();
-    void TcpConnectionFails();
-    void KeepAliveMsgEvent();
-    void UpdateMsgEvent();
+    void ConnectRetryTimer_Expires() override;
+    void HoldTimer_Expires() override;
+    void KeepaliveTimer_Expires() override;
+    void TcpConnectionConfirmed() override;
+    void TcpConnectionFails() override;
+    void KeepAliveMsgEvent() override;
+    void UpdateMsgEvent() override;
 
   private:
-    void entry() { std::cout << "Connect::entry" << std::endl; }
-    void exit() { std::cout << "Connect::exit" << std::endl; }
+    void entry() override { std::cout << "Connect::entry" << std::endl; }
+    void exit() override { std::cout << "Connect::exit" << std::endl; }
 };
 
 // A substate
 SUBSTATE(Active, TopState) {
     STATE(Active)
 
-    void ConnectRetryTimer_Expires();
-    void HoldTimer_Expires();
-    void KeepaliveTimer_Expires();
-    void TcpConnectionConfirmed();
-    void TcpConnectionFails();
-    void OpenMsgEvent();
-    void KeepAliveMsgEvent();
-    void UpdateMsgEvent();
+    void ConnectRetryTimer_Expires() override;
+    void HoldTimer_Expires() override;
+    void KeepaliveTimer_Expires() override;
+    void TcpConnectionConfirmed() override;
+    void TcpConnectionFails() override;
+    void OpenMsgEvent() override;
+    void KeepAliveMsgEvent() override;
+    void UpdateMsgEvent() override;
 
   private:
-    void entry() { std::cout << "Active::entry" << std::endl; }
-    void exit() { std::cout << "Active::exit" << std::endl; }
+    void entry() override { std::cout << "Active::entry" << std::endl; }
+    void exit() override { std::cout << "Active::exit" << std::endl; }
 };
 
 // A substate
 SUBSTATE(OpenSent, TopState) {
     STATE(OpenSent)
 
-    void ConnectRetryTimer_Expires();
-    void HoldTimer_Expires();
-    void KeepaliveTimer_Expires();
-    void TcpConnectionFails();
-    void OpenMsgEvent();
-    void KeepAliveMsgEvent();
-    void UpdateMsgEvent();
+    void ConnectRetryTimer_Expires() override;
+    void HoldTimer_Expires() override;
+    void KeepaliveTimer_Expires() override;
+    void TcpConnectionFails() override;
+    void OpenMsgEvent() override;
+    void KeepAliveMsgEvent() override;
+    void UpdateMsgEvent() override;
 
   private:
-    void entry() { std::cout << "OpenSent::entry" << std::endl; }
-    void exit() { std::cout << "OpenSent::exit" << std::endl; }
+    void entry() override { std::cout << "OpenSent::entry" << std::endl; }
+    void exit() override { std::cout << "OpenSent::exit" << std::endl; }
 };
 
 // A substate
 SUBSTATE(OpenConfirm, TopState) {
     STATE(OpenConfirm)
 
-    void ConnectRetryTimer_Expires();
-    void HoldTimer_Expires();
-    void KeepaliveTimer_Expires();
-    void TcpConnectionFails();
-    void OpenMsgEvent();
-    void KeepAliveMsgEvent();
-    void UpdateMsgEvent();
+    void ConnectRetryTimer_Expires() override;
+    void HoldTimer_Expires() override;
+    void KeepaliveTimer_Expires() override;
+    void TcpConnectionFails() override;
+    void OpenMsgEvent() override;
+    void KeepAliveMsgEvent() override;
+    void UpdateMsgEvent() override;
 
   private:
-    void entry() { std::cout << "OpenConfirm::entry" << std::endl; }
-    void exit() { std::cout << "OpenConfirm::exit" << std::endl; }
+    void entry() override { std::cout << "OpenConfirm::entry" << std::endl; }
+    void exit() override { std::cout << "OpenConfirm::exit" << std::endl; }
 };
 
 // A substate
 SUBSTATE(Established, TopState) {
     STATE(Established)
 
-    void ConnectRetryTimer_Expires();
-    void HoldTimer_Expires();
-    void KeepaliveTimer_Expires();
-    void TcpConnectionFails();
-    void OpenMsgEvent();
-    void KeepAliveMsgEvent();
-    void UpdateMsgEvent();
+    void ConnectRetryTimer_Expires() override;
+    void HoldTimer_Expires() override;
+    void KeepaliveTimer_Expires() override;
+    void TcpConnectionFails() override;
+    void OpenMsgEvent() override;
+    void KeepAliveMsgEvent() override;
+    void UpdateMsgEvent() override;
 
   private:
-    void entry();
-    void exit() { std::cout << "Established::exit" << std::endl; }
+    void entry() override;
+    void exit() override { std::cout << "Established::exit" << std::endl; }
 };
 
 } // namespace fsm

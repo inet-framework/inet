@@ -169,8 +169,8 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
   public:
     IPv4InterfaceData();
     virtual ~IPv4InterfaceData();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     /** @name Getters */
     //@{

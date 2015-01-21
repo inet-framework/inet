@@ -73,9 +73,9 @@ class INET_API SCTPNatServer : public cSimpleModule
         L3Address pid;
     };
 
-    void initialize();
-    void handleMessage(cMessage *msg);
-    void finish();
+    void initialize() override;
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
     void handleTimer(cMessage *msg);
     void generateAndSend();
     void sendInfo(NatInfo *info);

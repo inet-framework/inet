@@ -225,11 +225,11 @@ class DYMOUM : public ManetRoutingBase
     bool path_acc_proactive;
     bool propagateProactive;
 
-    virtual void processLinkBreak(const cObject *details);
-    virtual void processPromiscuous(const cObject *details);
-    virtual void processFullPromiscuous(const cObject *details);
-    virtual void processLocatorAssoc(const cObject *details);
-    virtual void processLocatorDisAssoc(const cObject *details);
+    virtual void processLinkBreak(const cObject *details) override;
+    virtual void processPromiscuous(const cObject *details) override;
+    virtual void processFullPromiscuous(const cObject *details) override;
+    virtual void processLocatorAssoc(const cObject *details) override;
+    virtual void processLocatorDisAssoc(const cObject *details) override;
 
   public:
     static int  log_file_fd;
@@ -238,20 +238,20 @@ class DYMOUM : public ManetRoutingBase
     ~DYMOUM();
     void packetFailed(IPv4Datagram *);
     void packetFailedMac(ieee80211::Ieee80211DataFrame *);
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     // Routing information access
-    virtual bool supportGetRoute() {return false;}
-    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &);
-    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &);
-    virtual bool isProactive();
-    virtual void setRefreshRoute(const L3Address &destination, const L3Address &nextHop,bool isReverse);
-    virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *, L3Address &);
-    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&);
-    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0);
-    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0);
+    virtual bool supportGetRoute() override {return false;}
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &) override;
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &) override;
+    virtual bool isProactive() override;
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address &nextHop,bool isReverse) override;
+    virtual bool isOurType(cPacket *) override;
+    virtual bool getDestAddress(cPacket *, L3Address &) override;
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&) override;
+    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&) override;
+    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0) override;
+    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0) override;
 
   protected:
     void drop(cPacket *p, int cause = 0)
@@ -264,10 +264,10 @@ class DYMOUM : public ManetRoutingBase
     const char *if_indextoname(int, char *);
     IPv4Datagram *pkt_encapsulate(IPv4Datagram *, IPv4Address);
     IPv4Datagram *pkt_decapsulate(IPv4Datagram *);
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);
     void processMacPacket(cPacket * p, const L3Address &, const L3Address &, int);

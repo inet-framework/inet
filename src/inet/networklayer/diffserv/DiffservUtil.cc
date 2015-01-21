@@ -221,9 +221,9 @@ class ColorAttribute : public cObject
 
   public:
     ColorAttribute(int color) : color(color) {}
-    virtual const char *getName() const { return "dscolor"; }
-    virtual std::string info() const { return colorToString(color); }
-    virtual cObject *dup() const { return new ColorAttribute(color); }
+    virtual const char *getName() const override { return "dscolor"; }
+    virtual std::string info() const override { return colorToString(color); }
+    virtual cObject *dup() const override { return new ColorAttribute(color); }
 };
 
 int getColor(cPacket *packet)

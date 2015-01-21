@@ -33,8 +33,8 @@ class INET_API Ieee80211ScalarReceiver : public NarrowbandReceiverBase
     Ieee80211PreambleMode preambleMode;
 
   protected:
-    virtual void initialize(int stage);
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
+    virtual void initialize(int stage) override;
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
 
   public:
     Ieee80211ScalarReceiver();

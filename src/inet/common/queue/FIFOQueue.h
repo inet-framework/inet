@@ -43,19 +43,19 @@ class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
     FIFOQueue() : outGate(nullptr), byteLength(0) {}
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual cMessage *enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg) override;
 
-    virtual cMessage *dequeue();
+    virtual cMessage *dequeue() override;
 
-    virtual void sendOut(cMessage *msg);
+    virtual void sendOut(cMessage *msg) override;
 
-    virtual bool isEmpty();
+    virtual bool isEmpty() override;
 
-    virtual int getLength() const { return queue.getLength(); }
+    virtual int getLength() const override { return queue.getLength(); }
 
-    virtual int getByteLength() const { return byteLength; }
+    virtual int getByteLength() const override { return byteLength; }
 };
 
 } // namespace inet

@@ -45,7 +45,7 @@ class INET_API IdealReception : public ReceptionBase
   public:
     IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
     virtual Power getPower() const { return power; }
 };
 

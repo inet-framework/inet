@@ -63,13 +63,13 @@ class DYMO_DataQueue : public cObject
     ~DYMO_DataQueue();
 
     /** @brief inherited from cObject */
-    virtual const char* getFullName() const;
+    virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     void queuePacket(const IPv4Datagram* datagram);
 

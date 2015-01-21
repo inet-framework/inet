@@ -34,17 +34,17 @@ class INET_API InterpolatingAntenna : public AntennaBase
     std::map<double, double> bankGainMap;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
     virtual void parseMap(std::map<double, double>& gainMap, const char *text);
     virtual double computeGain(const std::map<double, double>& gainMap, double angle) const;
 
   public:
     InterpolatingAntenna();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
     virtual double getMinGain() const { return minGain; }
-    virtual double getMaxGain() const { return maxGain; }
-    virtual double computeGain(const EulerAngles direction) const;
+    virtual double getMaxGain() const override { return maxGain; }
+    virtual double computeGain(const EulerAngles direction) const override;
 };
 
 } // namespace physicallayer

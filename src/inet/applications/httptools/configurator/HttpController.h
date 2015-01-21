@@ -93,16 +93,16 @@ class HttpController : public cSimpleModule
      * Multi-stage is required to properly initialize the object for random site selection after
      * all servers have been registered.
      */
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** Report final statistics */
-    virtual void finish();
+    virtual void finish() override;
 
     /** Handle incoming messages */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /** Returns the number of initialization stages. Two required. */
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     //@}
 
   public:

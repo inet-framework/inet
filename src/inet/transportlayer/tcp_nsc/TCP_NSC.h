@@ -62,19 +62,19 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // Implement NSC callbacks:
 
     //   Implement ISendCallback:
-    virtual void send_callback(const void *, int);
+    virtual void send_callback(const void *, int) override;
 
     //   Implement IInterruptCallback:
-    virtual void wakeup();
-    virtual void gettime(unsigned int *, unsigned int *);
+    virtual void wakeup() override;
+    virtual void gettime(unsigned int *, unsigned int *) override;
 
   protected:
     // called by the OMNeT++ simulation kernel:
 
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msgP);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msgP) override;
+    virtual void finish() override;
 
     // internal utility functions:
 
@@ -143,7 +143,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     virtual TCP_NSC_ReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
 
     // ILifeCycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     typedef std::map<int, TCP_NSC_Connection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection

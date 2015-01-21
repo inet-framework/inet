@@ -72,11 +72,11 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual ~MovingMobilityBase();
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void initializePosition();
+    virtual void initializePosition() override;
 
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message) override;
 
     /** @brief Schedules the move timer that will update the mobility state. */
     void scheduleUpdate();
@@ -84,7 +84,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief Moves and notifies listeners. */
     void moveAndUpdate();
 
-    void updateVisualRepresentation();
+    void updateVisualRepresentation() override;
 
     /** @brief Moves according to the mobility model to the current simulation time.
      *
@@ -95,10 +95,10 @@ class INET_API MovingMobilityBase : public MobilityBase
 
   public:
     /** @brief Returns the current position at the current simulation time. */
-    virtual Coord getCurrentPosition();
+    virtual Coord getCurrentPosition() override;
 
     /** @brief Returns the current speed at the current simulation time. */
-    virtual Coord getCurrentSpeed();
+    virtual Coord getCurrentSpeed() override;
 };
 
 } // namespace inet

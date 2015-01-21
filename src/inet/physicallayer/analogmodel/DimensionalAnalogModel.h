@@ -32,14 +32,14 @@ class INET_API DimensionalAnalogModel : public AnalogModelBase
     Mapping::InterpolationMethod interpolationMode;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer

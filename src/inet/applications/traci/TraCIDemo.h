@@ -41,10 +41,10 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
     static simsignal_t mobilityStateChangedSignal;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     void setupLowerLayer();
@@ -56,7 +56,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 
   public:
     TraCIDemo() { }
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 };
 
 } // namespace inet

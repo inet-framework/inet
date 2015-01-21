@@ -57,8 +57,8 @@ class INET_API STPTester : public cSimpleModule
     // Includes network topology extraction
     STPTester();
     ~STPTester();
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 
   protected:
     void dfsVisit(Topology::Node *node);

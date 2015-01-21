@@ -36,7 +36,7 @@ class INET_API DimensionalReception : public NarrowbandReceptionBase
     virtual ~DimensionalReception() { delete power; }
 
     virtual const ConstMapping *getPower() const { return power; }
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
 } // namespace physicallayer

@@ -32,9 +32,9 @@ class INET_API TCPGenericSrvThread : public TCPServerThreadBase
   public:
     TCPGenericSrvThread() {}
 
-    virtual void established();
-    virtual void dataArrived(cMessage *msg, bool urgent);
-    virtual void timerExpired(cMessage *timer);
+    virtual void established() override;
+    virtual void dataArrived(cMessage *msg, bool urgent) override;
+    virtual void timerExpired(cMessage *timer) override;
 };
 
 } // namespace inet

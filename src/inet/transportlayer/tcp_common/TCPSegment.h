@@ -43,7 +43,7 @@ class Sack : public Sack_Base
     Sack(unsigned int start_par, unsigned int end_par) { setSegment(start_par, end_par); }
     Sack(const Sack& other) : Sack_Base(other) {}
     Sack& operator=(const Sack& other) { Sack_Base::operator=(other); return *this; }
-    virtual Sack *dup() const { return new Sack(*this); }
+    virtual Sack *dup() const override { return new Sack(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from Sack_Base
     virtual bool empty() const;
     virtual bool contains(const Sack& other) const;
@@ -71,25 +71,25 @@ class INET_API TCPSegment : public TCPSegment_Base
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other) { copy(other); }
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
-    virtual TCPSegment *dup() const { return new TCPSegment(*this); }
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
+    virtual TCPSegment *dup() const override { return new TCPSegment(*this); }
+    virtual void parsimPack(cCommBuffer *b) override;
+    virtual void parsimUnpack(cCommBuffer *b) override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setPayloadArraySize(unsigned int size);
+    virtual void setPayloadArraySize(unsigned int size) override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var);
+    virtual void setPayload(unsigned int k, const TCPPayloadMessage& payload_var) override;
 
     /**
      * Returns the number of payload messages in this TCP segment
      */
-    virtual unsigned int getPayloadArraySize() const;
+    virtual unsigned int getPayloadArraySize() const override;
 
     /**
      * Returns the kth payload message in this TCP segment
      */
-    virtual TCPPayloadMessage& getPayload(unsigned int k);
+    virtual TCPPayloadMessage& getPayload(unsigned int k) override;
 
     /**
      * Adds a message object to the TCP segment. The sequence number + 1 of the

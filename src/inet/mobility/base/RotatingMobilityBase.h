@@ -52,11 +52,11 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
     virtual ~RotatingMobilityBase();
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void initializeOrientation();
+    virtual void initializeOrientation() override;
 
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message) override;
 
     /** @brief Schedules the move timer that will update the mobility state. */
     void scheduleUpdate();
@@ -73,10 +73,10 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
   public:
     /** @brief Returns the current angular position at the current simulation time. */
-    virtual EulerAngles getCurrentAngularPosition();
+    virtual EulerAngles getCurrentAngularPosition() override;
 
     /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed();
+    virtual EulerAngles getCurrentAngularSpeed() override;
 };
 
 } // namespace inet

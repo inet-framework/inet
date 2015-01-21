@@ -181,20 +181,20 @@ class INET_API PIMBase : public OperationalBase
     virtual ~PIMBase();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
     void sendHelloPackets();
     void sendHelloPacket(PIMInterface *pimInterface);
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(PIMHello *pkt);
 
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeStartStage(int stage) { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+    virtual bool isNodeStartStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 };
 
 }    // namespace inet

@@ -115,9 +115,9 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     long connectionsCount = 0;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void finish() override;
     virtual void handleMessage(cMessage *msg) = 0;
     void handleDataMessage(cMessage *msg);
     void handleSelfMessages(cMessage *msg);

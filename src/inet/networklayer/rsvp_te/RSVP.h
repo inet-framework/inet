@@ -283,15 +283,15 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual ~RSVP();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void clear();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // IScriptable implementation
-    virtual void processCommand(const cXMLElement& node);
+    virtual void processCommand(const cXMLElement& node) override;
 };
 
 bool operator==(const SessionObj_t& a, const SessionObj_t& b);

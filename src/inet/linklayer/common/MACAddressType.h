@@ -34,13 +34,13 @@ class INET_API MACAddressType : public IL3AddressType
     MACAddressType() {}
     virtual ~MACAddressType() {}
 
-    virtual int getMaxPrefixLength() const { return 0; }
-    virtual L3Address getUnspecifiedAddress() const { return MACAddress::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getBroadcastAddress() const { return MACAddress::BROADCAST_ADDRESS; }
-    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const { return MACAddress(-109); }    // TODO: constant
-    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const { return MACAddress(-9); }    // TODO: constant
-    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const { return MACAddress::UNSPECIFIED_ADDRESS; }
+    virtual int getMaxPrefixLength() const override { return 0; }
+    virtual L3Address getUnspecifiedAddress() const override { return MACAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const override { return MACAddress::BROADCAST_ADDRESS; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MACAddress(-109); }    // TODO: constant
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MACAddress(-9); }    // TODO: constant
+    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const override { return new GenericNetworkProtocolControlInfo(); }
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MACAddress::UNSPECIFIED_ADDRESS; }
 };
 
 } // namespace inet

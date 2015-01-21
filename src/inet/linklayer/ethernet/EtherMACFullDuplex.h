@@ -36,14 +36,14 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     EtherMACFullDuplex();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void initializeStatistics();
-    virtual void initializeFlags();
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void initializeStatistics() override;
+    virtual void initializeFlags() override;
+    virtual void handleMessage(cMessage *msg) override;
 
     // finish
-    virtual void finish();
+    virtual void finish() override;
 
     // event handlers
     virtual void handleEndIFGPeriod();

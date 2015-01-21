@@ -90,13 +90,13 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
 
   protected:
     virtual ~MatrixCloudDelayer();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
     /**
      * returns isDrop and delay for this msg
      */
-    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay);
+    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay) override;
 
     MatrixCloudDelayer::Descriptor *getOrCreateDescriptor(int srcID, int destID);
 

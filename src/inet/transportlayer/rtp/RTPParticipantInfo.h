@@ -69,7 +69,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     /**
      * Duplicates this RTPParticipantInfo by calling the copy constructor.
      */
-    virtual RTPParticipantInfo *dup() const;
+    virtual RTPParticipantInfo *dup() const override;
 
     /**
      * This method should be extended by a subclass for
@@ -154,12 +154,12 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     /**
      * Returns the ssrc identifier of the RTP endsystem.
      */
-    virtual uint32 getSsrc() const;
+    virtual uint32 getSsrc() const override;
 
     /**
      * Sets the ssrc identifier.
      */
-    virtual void setSsrc(uint32 ssrc);
+    virtual void setSsrc(uint32 ssrc) override;
 
     /**
      * Creates a new SDESItem and adds it to the SDESChunk stored in
@@ -167,8 +167,8 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
 
-    virtual void parsimPack(cCommBuffer *b) { throw cRuntimeError("The parsimPack() not implemented."); }
-    virtual void parsimUnpack(cCommBuffer *b) { throw cRuntimeError("The parsimUnpack() not implemented."); }
+    virtual void parsimPack(cCommBuffer *b) override { throw cRuntimeError("The parsimPack() not implemented."); }
+    virtual void parsimUnpack(cCommBuffer *b) override { throw cRuntimeError("The parsimUnpack() not implemented."); }
 
     /**
      * This method returns the given 32 bit ssrc identifier as

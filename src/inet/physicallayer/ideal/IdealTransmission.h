@@ -38,7 +38,7 @@ class INET_API IdealTransmission : public TransmissionBase
   public:
     IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
     virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
     virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }

@@ -40,16 +40,16 @@ class INET_API PIMHello : public PIMHello_Base
     PIMHello(const PIMHello& other);
     virtual ~PIMHello();
     PIMHello& operator=(const PIMHello& other);
-    virtual PIMHello *dup() const { return new PIMHello(*this); }
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
+    virtual PIMHello *dup() const override { return new PIMHello(*this); }
+    virtual void parsimPack(cCommBuffer *b) override;
+    virtual void parsimUnpack(cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual void setOptionsArraySize(unsigned int size);
-    virtual unsigned int getOptionsArraySize() const;
-    virtual HelloOptionPtr& getOptions(unsigned int k);
-    virtual const HelloOptionPtr& getOptions(unsigned int k) const { return const_cast<PIMHello *>(this)->getOptions(k); }
-    virtual void setOptions(unsigned int k, const HelloOptionPtr& options);
+    virtual void setOptionsArraySize(unsigned int size) override;
+    virtual unsigned int getOptionsArraySize() const override;
+    virtual HelloOptionPtr& getOptions(unsigned int k) override;
+    virtual const HelloOptionPtr& getOptions(unsigned int k) const override { return const_cast<PIMHello *>(this)->getOptions(k); }
+    virtual void setOptions(unsigned int k, const HelloOptionPtr& options) override;
 };
 
 }    // namespace inet

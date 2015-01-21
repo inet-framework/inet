@@ -70,10 +70,10 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     long numPongs = 0;    // number of received Ping requests
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
     virtual void startSendingPingRequests();
     virtual void stopSendingPingRequests();
@@ -85,7 +85,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual void sendToICMP(PingPayload *payload, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     PingApp();

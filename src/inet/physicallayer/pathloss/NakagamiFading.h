@@ -33,12 +33,12 @@ class INET_API NakagamiFading : public FreeSpacePathLoss
     double shapeFactor;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     NakagamiFading();
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 
 } // namespace physicallayer

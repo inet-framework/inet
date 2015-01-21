@@ -95,9 +95,9 @@ class ConvolutionalCoder : public cSimpleModule
         std::vector<std::vector<TrellisGraphNode> > trellisGraph; // the decoder's trellis graph
 
     protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage) override;
+        virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
         inline bool eXOR(bool alpha, bool beta) const
         {
             return (alpha || beta) && !(alpha && beta);

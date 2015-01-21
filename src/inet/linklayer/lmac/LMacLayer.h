@@ -100,19 +100,19 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     virtual ~LMacLayer();
 
     /** @brief Initialization of the module and some variables*/
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *);
+    virtual void handleLowerPacket(cPacket *) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *);
+    virtual void handleUpperPacket(cPacket *) override;
 
     /** @brief Handle self messages such as timers */
-    virtual void handleSelfMessage(cMessage *);
+    virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
 
     /** @brief Encapsulate the NetwPkt into an MacPkt */
     virtual LMacFrame *encapsMsg(cPacket *);
@@ -122,7 +122,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
   protected:
     /** @brief Generate new interface address*/
     virtual void initializeMACAddress();
-    virtual InterfaceEntry *createInterfaceEntry();
+    virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
     typedef std::list<LMacFrame *> MacQueue;

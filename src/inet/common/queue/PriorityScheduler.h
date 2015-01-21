@@ -32,7 +32,7 @@ namespace inet {
 class INET_API PriorityScheduler : public SchedulerBase
 {
   protected:
-    virtual bool schedulePacket();
+    virtual bool schedulePacket() override;
 };
 
 } // namespace inet

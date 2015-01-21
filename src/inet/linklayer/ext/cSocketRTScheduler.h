@@ -71,17 +71,17 @@ class cSocketRTScheduler : public cScheduler
     /**
      * Called at the beginning of a simulation run.
      */
-    virtual void startRun();
+    virtual void startRun() override;
 
     /**
      * Called at the end of a simulation run.
      */
-    virtual void endRun();
+    virtual void endRun() override;
 
     /**
      * Recalculates "base time" from current wall clock time.
      */
-    virtual void executionResumed();
+    virtual void executionResumed() override;
 
     /**
      * To be called from the module which wishes to receive data from the
@@ -109,7 +109,7 @@ class cSocketRTScheduler : public cScheduler
       /**
        * Scheduler function -- it comes from cScheduler interface.
        */
-    virtual cMessage *getNextEvent();
+    virtual cMessage *getNextEvent() override;
 #endif // if OMNETPP_VERSION >= 0x0500
 
     /**

@@ -33,8 +33,8 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
 {
   public:
     TCPTahoeRenoFamilyStateVariables();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     uint32 ssthresh;    ///< slow start threshold
 };

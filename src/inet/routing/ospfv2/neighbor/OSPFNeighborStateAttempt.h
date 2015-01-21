@@ -27,8 +27,8 @@ namespace ospf {
 class NeighborStateAttempt : public NeighborState
 {
   public:
-    virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event);
-    virtual Neighbor::NeighborStateType getState() const { return Neighbor::ATTEMPT_STATE; }
+    virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event) override;
+    virtual Neighbor::NeighborStateType getState() const override { return Neighbor::ATTEMPT_STATE; }
 };
 
 } // namespace ospf

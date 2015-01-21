@@ -45,18 +45,18 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     static simsignal_t rcvdPkSignal;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessageWhenUp(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void requestStream();
     virtual void receiveStream(cPacket *msg);
 
     // ApplicationBase:
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     UDPVideoStreamCli() { }

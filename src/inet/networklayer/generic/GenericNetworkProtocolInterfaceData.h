@@ -52,8 +52,8 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
   public:
     GenericNetworkProtocolInterfaceData() { metric = 0; }
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     /** @name Getters */
     //@{

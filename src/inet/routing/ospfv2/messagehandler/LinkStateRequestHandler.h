@@ -29,7 +29,7 @@ class LinkStateRequestHandler : public IMessageHandler
   public:
     LinkStateRequestHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor) override;
 };
 
 } // namespace ospf

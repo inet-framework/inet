@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 {
   public:
-    virtual W getMaxPower() const { return W(qNaN); }
+    virtual W getMaxPower() const override { return W(qNaN); }
 };
 
 } // namespace physicallayer

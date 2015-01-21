@@ -42,7 +42,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
 
   public:
     Ieee80211eClassifier();
-    virtual int getNumQueues();
+    virtual int getNumQueues() override;
     virtual void setDefaultClass(int i) { defaultAC = i; }
     virtual int getDefaultClass() { return defaultAC; }
     virtual void setDefaultManagementClass(int i) { defaultManagement = i; }
@@ -53,7 +53,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
      * for the given packet, a value between 0 and getNumQueues()-1
      * (inclusive).
      */
-    virtual int classifyPacket(cMessage *msg);
+    virtual int classifyPacket(cMessage *msg) override;
 };
 
 } // namespace ieee80211

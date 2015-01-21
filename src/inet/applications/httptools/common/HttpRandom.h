@@ -101,7 +101,7 @@ class rdNormal : public rdObject
     /*
      * Get a random value
      */
-    virtual double draw();
+    virtual double draw() override;
 };
 
 /**
@@ -128,7 +128,7 @@ class rdUniform : public rdObject
     /*
      * Get a random value
      */
-    virtual double draw();
+    virtual double draw() override;
 
     // Getters and setters
     double getBeginning() { return m_beginning; }
@@ -165,7 +165,7 @@ class rdExponential : public rdObject
     /*
      * Get a random value
      */
-    virtual double draw();
+    virtual double draw() override;
 
     // Getters and setters
     void setMinLimit(double min) { m_min = min; m_bMinLimit = true; }
@@ -209,7 +209,7 @@ class rdHistogram : public rdObject
     /*
      * Get a random value
      */
-    double draw();
+    double draw() override;
 };
 
 /**
@@ -237,7 +237,7 @@ class rdConstant : public rdObject
     /*
      * Get a random value
      */
-    double draw();
+    double draw() override;
 };
 
 /**
@@ -273,12 +273,12 @@ class rdZipf : public rdObject
     /*
      * Get a random value -- a element in the pick order (popularity order)
      */
-    virtual double draw();
+    virtual double draw() override;
 
     /*
      *  Return the object definition as a string
      */
-    virtual std::string toString();
+    virtual std::string toString() override;
 
     // Getters and setters
     void setN(int n) { m_number = n; __setup_c(); }

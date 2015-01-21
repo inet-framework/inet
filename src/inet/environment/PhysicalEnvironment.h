@@ -86,9 +86,9 @@ class INET_API PhysicalEnvironment : public cModule
   protected:
     static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation);
 
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleParameterChange(const char *name);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
 
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);

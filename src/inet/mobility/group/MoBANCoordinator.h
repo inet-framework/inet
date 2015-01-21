@@ -163,20 +163,20 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     PostureTransition *transitions;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
     /** @brief Set a new target position from the next posture. */
-    virtual void setTargetPosition();
+    virtual void setTargetPosition() override;
 
     /** @brief Returns the module that represents the object moved by this mobility module. */
-    virtual cModule *findVisualRepresentation() { return this; }
+    virtual cModule *findVisualRepresentation() override { return this; }
 
     /** @brief To be called at the end of simulation run. */
-    virtual void finish();
+    virtual void finish() override;
 
     /** @brief Function to select the next posture considering the current posture and the Markov model. */
     void selectPosture();
@@ -213,7 +213,7 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
   public:
     MoBANCoordinator();
     ~MoBANCoordinator();
-    virtual double getMaxSpeed() const { return maxSpeed; }
+    virtual double getMaxSpeed() const override { return maxSpeed; }
 };
 
 } // namespace inet

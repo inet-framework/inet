@@ -54,16 +54,16 @@ class OLSROPT : public OLSR
 
   protected:
 
-    virtual bool        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual bool        populate_nbset(OLSR_msg&);
-    virtual bool        populate_nb2hopset(OLSR_msg&);
+    virtual bool        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
+    virtual bool        populate_nbset(OLSR_msg&) override;
+    virtual bool        populate_nb2hopset(OLSR_msg&) override;
 
-    virtual void        recv_olsr(cMessage*);
+    virtual void        recv_olsr(cMessage*) override;
 
-    virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &);
+    virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
+    virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &) override;
     virtual int         update_topology_tuples(OLSR_msg& msg, int index);
-    virtual void nb_loss(OLSR_link_tuple* tuple);
+    virtual void nb_loss(OLSR_link_tuple* tuple) override;
 
 };
 

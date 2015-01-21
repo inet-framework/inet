@@ -54,10 +54,10 @@ class INET_API UDPBasicApp : public ApplicationBase
     static simsignal_t rcvdPkSignal;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessageWhenUp(cMessage *msg);
-    virtual void finish();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void finish() override;
 
     // chooses random destination address
     virtual L3Address chooseDestAddr();
@@ -69,9 +69,9 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void processSend();
     virtual void processStop();
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     UDPBasicApp() {}

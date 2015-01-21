@@ -43,19 +43,19 @@ class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
      */
     virtual ~TCP_NSC_VirtualDataSendQueue();
 
-    virtual void setConnection(TCP_NSC_Connection *connP);
+    virtual void setConnection(TCP_NSC_Connection *connP) override;
 
-    virtual void enqueueAppData(cPacket *msgP);
+    virtual void enqueueAppData(cPacket *msgP) override;
 
-    virtual int getBytesForTcpLayer(void *bufferP, int bufferLengthP) const;
+    virtual int getBytesForTcpLayer(void *bufferP, int bufferLengthP) const override;
 
-    virtual void dequeueTcpLayerMsg(int msgLengthP);
+    virtual void dequeueTcpLayerMsg(int msgLengthP) override;
 
-    virtual unsigned long getBytesAvailable() const;
+    virtual unsigned long getBytesAvailable() const override;
 
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) override;
 
-    virtual void discardUpTo(uint32 seqNumP);
+    virtual void discardUpTo(uint32 seqNumP) override;
 
   protected:
     long int unsentNscBytesM;
@@ -77,21 +77,21 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
      */
     virtual ~TCP_NSC_VirtualDataReceiveQueue();
 
-    virtual void setConnection(TCP_NSC_Connection *connP);
+    virtual void setConnection(TCP_NSC_Connection *connP) override;
 
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP);
+    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP) override;
 
-    virtual void enqueueNscData(void *dataP, int dataLengthP);
+    virtual void enqueueNscData(void *dataP, int dataLengthP) override;
 
-    virtual cPacket *extractBytesUpTo();
+    virtual cPacket *extractBytesUpTo() override;
 
-    virtual uint32 getAmountOfBufferedBytes() const;
+    virtual uint32 getAmountOfBufferedBytes() const override;
 
-    virtual uint32 getQueueLength() const;
+    virtual uint32 getQueueLength() const override;
 
-    virtual void getQueueStatus() const;
+    virtual void getQueueStatus() const override;
 
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP);
+    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
 
   protected:
     long int bytesInQueueM;

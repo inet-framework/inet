@@ -41,27 +41,27 @@ class INET_API DropTailQueue : public PassiveQueueBase
     static simsignal_t queueLengthSignal;
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual cMessage *enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg) override;
 
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual cMessage *dequeue();
+    virtual cMessage *dequeue() override;
 
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual void sendOut(cMessage *msg);
+    virtual void sendOut(cMessage *msg) override;
 
     /**
      * Redefined from IPassiveQueue.
      */
-    virtual bool isEmpty();
+    virtual bool isEmpty() override;
 };
 
 } // namespace inet

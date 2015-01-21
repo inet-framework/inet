@@ -35,10 +35,10 @@ class INET_API QueueBase : public AbstractQueue
     QueueBase() {}
 
   protected:
-    virtual void initialize();
-    virtual void arrival(cPacket *msg);
-    virtual cPacket *arrivalWhenIdle(cPacket *msg);
-    virtual simtime_t startService(cPacket *msg);
+    virtual void initialize() override;
+    virtual void arrival(cPacket *msg) override;
+    virtual cPacket *arrivalWhenIdle(cPacket *msg) override;
+    virtual simtime_t startService(cPacket *msg) override;
 };
 
 } // namespace inet

@@ -30,15 +30,15 @@ class INET_API DipoleAntenna : public AntennaBase
     m length;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     DipoleAntenna();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
     virtual m getLength() const { return length; }
-    virtual double getMaxGain() const { return 1.5; }
-    virtual double computeGain(const EulerAngles direction) const;
+    virtual double getMaxGain() const override { return 1.5; }
+    virtual double computeGain(const EulerAngles direction) const override;
 };
 
 } // namespace physicallayer

@@ -35,14 +35,14 @@ class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDat
     GenericDatagram(const char *name = nullptr, int kind = 0) : GenericDatagram_Base(name, kind) {}
     GenericDatagram(const GenericDatagram& other) : GenericDatagram_Base(other.getName()) { operator=(other); }
     GenericDatagram& operator=(const GenericDatagram& other) { GenericDatagram_Base::operator=(other); return *this; }
-    virtual GenericDatagram *dup() const { return new GenericDatagram(*this); }
+    virtual GenericDatagram *dup() const override { return new GenericDatagram(*this); }
 
-    virtual L3Address getSourceAddress() const { return GenericDatagram_Base::_getSrcAddr(); }
-    virtual void setSourceAddress(const L3Address& addr) { GenericDatagram_Base::setSourceAddress(addr); }
-    virtual L3Address getDestinationAddress() const { return GenericDatagram_Base::_getDestAddr(); }
-    virtual void setDestinationAddress(const L3Address& addr) { GenericDatagram_Base::setDestinationAddress(addr); }
-    virtual int getTransportProtocol() const { return GenericDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) { GenericDatagram_Base::setTransportProtocol(protocol); }
+    virtual L3Address getSourceAddress() const override { return GenericDatagram_Base::_getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& addr) override { GenericDatagram_Base::setSourceAddress(addr); }
+    virtual L3Address getDestinationAddress() const override { return GenericDatagram_Base::_getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& addr) override { GenericDatagram_Base::setDestinationAddress(addr); }
+    virtual int getTransportProtocol() const override { return GenericDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { GenericDatagram_Base::setTransportProtocol(protocol); }
 };
 
 } // namespace inet

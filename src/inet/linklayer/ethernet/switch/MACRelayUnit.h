@@ -38,8 +38,8 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
     bool isOperational = false;    // for lifecycle
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     /**
      * Updates address table with source address, determines output port
      * and sends out (or broadcasts) frame on ports. Includes calls to
@@ -59,17 +59,17 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
      * Calls handleIncomingFrame() for frames arrived from outside,
      * and processFrame() for self messages.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Writes statistics.
      */
-    virtual void finish();
+    virtual void finish() override;
 
     // for lifecycle:
 
   public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     virtual void start();

@@ -76,17 +76,17 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
     /**
      * Initialization
      */
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      *  Processing of messages that arrive in this module. Messages arrived here
      *  could be for ICMP ping requests or ICMPv6 messages that require processing.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
     virtual void processICMPv6Message(ICMPv6Message *);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      *  Respond to the machine that tried to ping us.

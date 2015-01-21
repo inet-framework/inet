@@ -37,8 +37,8 @@ class Ieee80211Scrambler : public cSimpleModule
         BitVector scramblingSequence;
 
     protected:
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+        virtual void initialize(int stage) override;
+        virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
         inline bool eXOR(bool alpha, bool beta) const
         {
             return (alpha || beta) && !(alpha && beta);

@@ -36,11 +36,11 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     std::ofstream f;
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
     virtual void dump();
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
     virtual bool isRelevantModule(cModule *mod);
     virtual void resolveNodeCoordinates(cModule *mod, double& x, double& y);
     virtual void addNode(cModule *mod);

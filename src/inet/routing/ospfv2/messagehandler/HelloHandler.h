@@ -29,7 +29,7 @@ class HelloHandler : public IMessageHandler
   public:
     HelloHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused = nullptr);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused = nullptr) override;
 };
 
 } // namespace ospf

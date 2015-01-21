@@ -63,13 +63,13 @@ struct DYMO_element : public cPacket
     ~DYMO_element();
     DYMO_element(const DYMO_element  &m);
     DYMO_element &  operator=(const DYMO_element &m);
-    virtual DYMO_element *dup() const {return new DYMO_element(*this);}
+    virtual DYMO_element *dup() const override {return new DYMO_element(*this);}
     char *  addExtension(int);
     char *  delExtension(int);
     void clearExtension();
     char * getFirstExtension() {return extension;}
     int getSizeExtension() {return extensionsize;}
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
   private:
     void copy(const DYMO_element& other);
@@ -129,7 +129,7 @@ struct Dymo_RE : public DYMO_element
 
     Dymo_RE(const Dymo_RE &m);
     Dymo_RE &   operator=(const Dymo_RE &m);
-    virtual Dymo_RE *dup() const {return new Dymo_RE(*this);}
+    virtual Dymo_RE *dup() const override {return new Dymo_RE(*this);}
 
     void newBocks(int n);
     void delBocks(int n);
@@ -155,7 +155,7 @@ struct Dymo_UERR : public DYMO_element
     explicit Dymo_UERR(const char *name = "UERR_DymoMsg") : DYMO_element(name) {}
     Dymo_UERR &     operator=(const Dymo_UERR &m);
     Dymo_UERR(const Dymo_UERR &m);
-    virtual Dymo_UERR *dup() const {return new Dymo_UERR(*this);}
+    virtual Dymo_UERR *dup() const override {return new Dymo_UERR(*this);}
     L3Address uelem_target_addr;
     L3Address uerr_node_addr;
     u_int8_t    uelem_type;
@@ -187,7 +187,7 @@ struct Dymo_RERR : public DYMO_element
 
     Dymo_RERR(const Dymo_RERR &m);
     Dymo_RERR &     operator=(const Dymo_RERR &m);
-    virtual Dymo_RERR *dup() const {return new Dymo_RERR(*this);}
+    virtual Dymo_RERR *dup() const override {return new Dymo_RERR(*this);}
 
     void newBocks(int n);
     void delBocks(int n);

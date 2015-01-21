@@ -83,15 +83,15 @@ class QueueElement : public cPacket
 class DYMOFau : public ManetRoutingBase
 {
   public:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int);
-    virtual void finish();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int) override;
+    virtual void finish() override;
 
     DYMOFau();
     ~DYMOFau();
 
     /** @brief Function called whenever a message arrives at the module */
-    void handleMessage(cMessage * msg);
+    void handleMessage(cMessage * msg) override;
 
     void onOutboundDataPacket(const cPacket* packet);
 
@@ -253,12 +253,12 @@ class DYMOFau : public ManetRoutingBase
     int BUFFER_SIZE_PACKETS = -1; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
     int BUFFER_SIZE_BYTES = -1; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
-    virtual bool supportGetRoute() {return false;}
-    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &add) {return 0;};
-    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &val) {return false;}
-    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) {};
-    virtual bool isProactive() {return false;};
-    virtual bool isOurType(cPacket * msg)
+    virtual bool supportGetRoute() override {return false;}
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &add) override {return 0;};
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &val) override {return false;}
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) override {};
+    virtual bool isProactive() override {return false;};
+    virtual bool isOurType(cPacket * msg) override
     {
         if (dynamic_cast<DYMO_PacketBBMessage*>(msg))
             return true;
@@ -267,9 +267,9 @@ class DYMOFau : public ManetRoutingBase
         else
             return false;
     };
-    virtual bool getDestAddress(cPacket *, L3Address &) {return false;};
+    virtual bool getDestAddress(cPacket *, L3Address &) override {return false;};
 
-    virtual void processLinkBreak(const cObject *details);
+    virtual void processLinkBreak(const cObject *details) override;
     void packetFailed(const IPv4Datagram *dgram);
     void rescheduleTimer();
 };

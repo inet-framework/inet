@@ -47,7 +47,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     virtual ~IPv6ControlInfo();
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
-    virtual IPv6ControlInfo *dup() const { return new IPv6ControlInfo(*this); }
+    virtual IPv6ControlInfo *dup() const override { return new IPv6ControlInfo(*this); }
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const { return dgram; }
@@ -56,38 +56,38 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     /**
      * Returns bits 0-5 of the Traffic Class field, a value in the 0..63 range
      */
-    virtual int getDiffServCodePoint() const { return getTrafficClass() & 0x3f; }
+    virtual int getDiffServCodePoint() const override { return getTrafficClass() & 0x3f; }
 
     /**
      * Sets bits 0-5 of the Traffic Class field; expects a value in the 0..63 range
      */
-    virtual void setDiffServCodePoint(int dscp) { setTrafficClass((getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
+    virtual void setDiffServCodePoint(int dscp) override { setTrafficClass((getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
 
     /**
      * Returns bits 6-7 of the Traffic Class field, a value in the range 0..3
      */
-    virtual int getExplicitCongestionNotification() const { return (getTrafficClass() >> 6) & 0x03; }
+    virtual int getExplicitCongestionNotification() const override { return (getTrafficClass() >> 6) & 0x03; }
 
     /**
      * Sets bits 6-7 of the Traffic Class field; expects a value in the 0..3 range
      */
-    virtual void setExplicitCongestionNotification(int ecn) { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
+    virtual void setExplicitCongestionNotification(int ecn) override { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
 
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int getExtensionHeaderArraySize() const;
+    virtual unsigned int getExtensionHeaderArraySize() const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeaderArraySize(unsigned int size);
+    virtual void setExtensionHeaderArraySize(unsigned int size) override;
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k);
+    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var);
+    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var) override;
 
     /**
      * Adds an extension header to the datagram, at the given position.
@@ -100,16 +100,16 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
      */
     IPv6ExtensionHeader *removeFirstExtensionHeader();
 
-    virtual short getTransportProtocol() const { return IPv6ControlInfo_Base::getProtocol(); }
-    virtual void setTransportProtocol(short protocol) { IPv6ControlInfo_Base::setProtocol(protocol); }
-    virtual L3Address getSourceAddress() const { return L3Address(srcAddr_var); }
-    virtual void setSourceAddress(const L3Address& address) { srcAddr_var = address.toIPv6(); }
-    virtual L3Address getDestinationAddress() const { return L3Address(destAddr_var); }
-    virtual void setDestinationAddress(const L3Address& address) { destAddr_var = address.toIPv6(); }
-    virtual int getInterfaceId() const { return IPv6ControlInfo_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) { IPv6ControlInfo_Base::setInterfaceId(interfaceId); }
-    virtual short getHopLimit() const { return IPv6ControlInfo_Base::getHopLimit(); }
-    virtual void setHopLimit(short hopLimit) { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
+    virtual short getTransportProtocol() const override { return IPv6ControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) override { IPv6ControlInfo_Base::setProtocol(protocol); }
+    virtual L3Address getSourceAddress() const override { return L3Address(srcAddr_var); }
+    virtual void setSourceAddress(const L3Address& address) override { srcAddr_var = address.toIPv6(); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(destAddr_var); }
+    virtual void setDestinationAddress(const L3Address& address) override { destAddr_var = address.toIPv6(); }
+    virtual int getInterfaceId() const override { return IPv6ControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) override { IPv6ControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual short getHopLimit() const override { return IPv6ControlInfo_Base::getHopLimit(); }
+    virtual void setHopLimit(short hopLimit) override { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };
 
 } // namespace inet

@@ -56,9 +56,9 @@ class INET_API ThruputMeter : public cSimpleModule
     virtual void beginNewInterval(simtime_t now);
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 };
 
 } // namespace inet

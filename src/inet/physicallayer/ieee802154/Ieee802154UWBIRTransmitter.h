@@ -44,7 +44,7 @@ class INET_API Ieee802154UWBIRTransmitter : public TransmitterBase
     Ieee802154UWBIRMode cfg;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     simtime_t getFrameDuration(int psduLength) const;
     simtime_t getMaxFrameDuration() const;
@@ -62,9 +62,9 @@ class INET_API Ieee802154UWBIRTransmitter : public TransmitterBase
   public:
     Ieee802154UWBIRTransmitter();
 
-    virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const override;
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 };
 
 } // namespace physicallayer

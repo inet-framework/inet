@@ -58,14 +58,14 @@ class INET_API StateBasedEnergyConsumer : public cSimpleModule, public IEnergyCo
   public:
     StateBasedEnergyConsumer();
 
-    virtual W getPowerConsumption() const;
+    virtual W getPowerConsumption() const override;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 };
 
 } // namespace physicallayer

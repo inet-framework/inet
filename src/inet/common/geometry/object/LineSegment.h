@@ -45,8 +45,8 @@ class INET_API LineSegment : public GeometricObjectBase
     void setPoint2(const Coord& point2) { this->point2 = point2; }
     double length() const { return point2.distance(point1); }
 
-    virtual bool isNil() const { return this == &NIL; }
-    virtual bool isUnspecified() const { return point1.isUnspecified() || point2.isUnspecified(); }
+    virtual bool isNil() const override { return this == &NIL; }
+    virtual bool isUnspecified() const override { return point1.isUnspecified() || point2.isUnspecified(); }
 
     bool computeIntersection(const LineSegment &lineSegment, Coord &intersection1, Coord &intersection2);
 };

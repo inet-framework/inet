@@ -48,13 +48,13 @@ class DYMO_Timer : public cObject
     ~DYMO_Timer();
 
     /** @brief inherited from cObject */
-    virtual const char* getFullName() const;
+    virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     /** @brief returns whether the given timeout was started, but is not yet expired */
     bool isRunning() const;

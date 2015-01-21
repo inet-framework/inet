@@ -33,18 +33,18 @@ class INET_API IdealReceiver : public ReceiverBase
     bool ignoreInterference;
 
   protected:
-    virtual void initialize(int stage);
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual void initialize(int stage) override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 
   public:
     IdealReceiver();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
-    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 };
 
 } // namespace physicallayer

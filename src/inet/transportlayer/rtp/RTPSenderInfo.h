@@ -56,12 +56,12 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
     /**
      * Duplicates this RTPSenderInfo by calling the copy constructor.
      */
-    virtual RTPSenderInfo *dup() const;
+    virtual RTPSenderInfo *dup() const override;
 
     /**
      * Stores information about this outgoing RTPPacket.
      */
-    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
+    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime) override;
 
     /**
      * Processes an incoming ReceptionReport for this sender.
@@ -73,7 +73,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      * If it hasn't sent rtp data packets during the
      * last 2 rtcp intervals, it returns nullptr.
      */
-    virtual SenderReport *senderReport(simtime_t now);
+    virtual SenderReport *senderReport(simtime_t now) override;
 
     /**
      * Sets the time (simTime) when this endsystem has

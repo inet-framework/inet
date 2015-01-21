@@ -44,19 +44,19 @@ class INET_API Loopback : public MACBase
     static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
-    virtual InterfaceEntry *createInterfaceEntry();
-    virtual void flushQueue();
-    virtual void clearQueue();
-    virtual bool isUpperMsg(cMessage *msg);
+    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void flushQueue() override;
+    virtual void clearQueue() override;
+    virtual bool isUpperMsg(cMessage *msg) override;
 
   public:
     Loopback() {}
     virtual ~Loopback();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void updateDisplayString();
 };
 

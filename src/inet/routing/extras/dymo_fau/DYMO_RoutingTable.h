@@ -41,13 +41,13 @@ class DYMO_RoutingTable : public cObject
     virtual ~DYMO_RoutingTable();
 
     /** @brief inherited from cObject */
-    virtual const char* getFullName() const;
+    virtual const char* getFullName() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /** @brief inherited from cObject */
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     //-----------------------------------------------------------------------
     //Route table manupilation operations

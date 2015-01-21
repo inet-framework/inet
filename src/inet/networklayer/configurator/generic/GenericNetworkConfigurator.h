@@ -42,9 +42,9 @@ class INET_API GenericNetworkConfigurator : public NetworkConfiguratorBase
     Topology topology;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual IRoutingTable *findRoutingTable(Node *node);
+    virtual IRoutingTable *findRoutingTable(Node *node) override;
 
     /**
      * Adds static routes to all routing tables in the network.

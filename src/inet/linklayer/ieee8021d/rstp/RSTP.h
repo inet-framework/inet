@@ -56,16 +56,16 @@ class INET_API RSTP : public STPBase
   public:
     RSTP();
     virtual ~RSTP();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
   protected:
-    virtual void initialize(int stage);
-    virtual void finish() {}
+    virtual void initialize(int stage) override;
+    virtual void finish() override {}
     virtual void initInterfacedata(unsigned int portNum);
 
-    virtual void start();
-    virtual void stop();
+    virtual void start() override;
+    virtual void stop() override;
 
     /**
      * @brief initialize RSTP dynamic information
@@ -91,7 +91,7 @@ class INET_API RSTP : public STPBase
     /**
      * @brief General processing
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * @brief BPDU processing.

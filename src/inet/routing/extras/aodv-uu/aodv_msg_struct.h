@@ -42,7 +42,7 @@ struct AODV_msg : public cPacket
     ~AODV_msg ();
     AODV_msg (const AODV_msg  &m);
     AODV_msg &  operator= (const AODV_msg &m);
-    virtual AODV_msg *dup() const {return new AODV_msg(*this);}
+    virtual AODV_msg *dup() const override {return new AODV_msg(*this);}
     uint8_t getType() const {return type;}
     uint8_t getTtl() const {return ttl;}
     bool getPrevFix() const {return prevFix;}
@@ -105,7 +105,7 @@ struct RERR : public AODV_msg
     RERR_udest *getUdest(int);
     RERR_udest& getUdestRef(int i) {return *getUdest(i);}
     RERR &  operator= (const RERR &m);
-    virtual RERR *dup() const {return new RERR(*this);}
+    virtual RERR *dup() const override {return new RERR(*this);}
   private:
     void copy(const RERR& other);
 };
@@ -151,8 +151,8 @@ struct RREP : public AODV_msg
     }
     RREP (const RREP &m);
     RREP &  operator= (const RREP &m);
-    virtual RREP *dup() const {return new RREP(*this);}
-    virtual std::string detailedInfo() const;
+    virtual RREP *dup() const override {return new RREP(*this);}
+    virtual std::string detailedInfo() const override;
     uint16_t getRes1() const {return res1;}
     uint16_t getA() const {return a;}
     uint16_t getR() const {return r;}
@@ -179,7 +179,7 @@ struct RREP_ack : public AODV_msg
     explicit RREP_ack (const char *name="RREPAckAodvMsg") : AODV_msg (name) {setBitLength(2*8);}
     RREP_ack (const RREP_ack  &m);
     RREP_ack &  operator= (const RREP_ack &m);
-    virtual RREP_ack *dup() const {return new RREP_ack(*this);}
+    virtual RREP_ack *dup() const override {return new RREP_ack(*this);}
     uint8_t getReserved() const {return reserved;}
   private:
     void copy(const RREP_ack& other) { reserved = other.reserved; }
@@ -225,8 +225,8 @@ struct RREQ : public AODV_msg
 
     RREQ (const RREQ &m);
     RREQ &  operator= (const RREQ &m);
-    virtual RREQ *dup() const {return new RREQ(*this);}
-    virtual std::string detailedInfo() const;
+    virtual RREQ *dup() const override {return new RREQ(*this);}
+    virtual std::string detailedInfo() const override;
     uint8_t getJ() const {return j;}
     uint8_t getR() const {return r;}
     uint8_t getG() const {return g;}

@@ -64,9 +64,9 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     cMessage *startTimer = nullptr;    // self message to start DHCP server
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     /*
      * Opens a UDP socket for client-server communication.
@@ -112,14 +112,14 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /*
      * Signal handler for cObject, override cListener function.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
     virtual void startApp();
     virtual void stopApp();
     /*
      * For lifecycle management.
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     DHCPServer();

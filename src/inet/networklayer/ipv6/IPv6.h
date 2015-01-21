@@ -201,30 +201,30 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     ~IPv6();
 
     // Netfilter:
-    virtual void registerHook(int priority, IHook *hook);
-    virtual void unregisterHook(int priority, IHook *hook);
-    virtual void dropQueuedDatagram(const INetworkDatagram *daragram);
-    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram);
+    virtual void registerHook(int priority, IHook *hook) override;
+    virtual void unregisterHook(int priority, IHook *hook) override;
+    virtual void dropQueuedDatagram(const INetworkDatagram *daragram) override;
+    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 
   protected:
     /**
      * Initialization
      */
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      * Handle message
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cPacket *msg);
+    virtual void endService(cPacket *msg) override;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      * Determines the correct interface for the specified destination address.

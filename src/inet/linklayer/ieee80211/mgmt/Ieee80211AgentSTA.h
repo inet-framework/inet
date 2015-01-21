@@ -62,11 +62,11 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     Ieee80211AgentSTA() {}
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int) override;
 
     /** Overridden cSimpleModule method */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /** Handle timers */
     virtual void handleTimer(cMessage *msg);
@@ -75,7 +75,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     virtual void handleResponse(cMessage *msg);
 
     /** Redefined from cListener; called by signal handler */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     virtual void sendRequest(Ieee80211PrimRequest *req);

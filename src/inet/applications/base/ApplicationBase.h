@@ -29,9 +29,9 @@ class INET_API ApplicationBase : public OperationalBase
     ApplicationBase();
 
   protected:
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_APPLICATION_LAYER; }
-    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
 };
 
 } // namespace inet

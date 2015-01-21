@@ -87,7 +87,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
 
-        virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
+        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
     };
 
     /**
@@ -118,8 +118,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         virtual ~Topology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
 
       protected:
-        virtual Node *createNode(cModule *module) { return new NetworkConfiguratorBase::Node(module); }
-        virtual Link *createLink() { return new NetworkConfiguratorBase::Link(); }
+        virtual Node *createNode(cModule *module) override { return new NetworkConfiguratorBase::Node(module); }
+        virtual Link *createLink() override { return new NetworkConfiguratorBase::Link(); }
     };
 
     class Matcher
@@ -159,9 +159,9 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     cXMLElement *configuration;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
      * Extracts network topology by walking through the module hierarchy.

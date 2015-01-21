@@ -114,12 +114,12 @@ class INET_API BindingUpdateList : public cSimpleModule
     virtual ~BindingUpdateList();
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Raises an error.
      */
-    virtual void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *) override;
 
   public:
     /**

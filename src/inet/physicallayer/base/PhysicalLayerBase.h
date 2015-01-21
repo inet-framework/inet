@@ -30,9 +30,9 @@ class INET_API PhysicalLayerBase : public OperationalBase, public IPhysicalLayer
     PhysicalLayerBase() {}
 
   protected:
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_PHYSICAL_LAYER; }
-    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_PHYSICAL_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_PHYSICAL_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
 };
 
 } // namespace inet

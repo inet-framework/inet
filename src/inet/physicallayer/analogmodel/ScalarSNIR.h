@@ -37,9 +37,9 @@ class INET_API ScalarSNIR : public SNIRBase
   public:
     ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual double getMin() const;
+    virtual double getMin() const override;
 };
 
 } // namespace physicallayer

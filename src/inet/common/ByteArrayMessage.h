@@ -43,7 +43,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     /**
      * Creates and returns an exact copy of this object.
      */
-    virtual ByteArrayMessage *dup() const { return new ByteArrayMessage(*this); }
+    virtual ByteArrayMessage *dup() const override { return new ByteArrayMessage(*this); }
 
     /**
      * Set data from buffer

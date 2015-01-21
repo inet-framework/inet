@@ -39,10 +39,10 @@ namespace httptools {
 class INET_API HttpServerDirect : public HttpServerBase
 {
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace httptools

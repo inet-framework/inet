@@ -35,7 +35,7 @@ class INET_API EtherFrameClassifier : public cSimpleModule
     /**
      * Sends the incoming packet to either pauseOut or defaultOut gate.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace inet

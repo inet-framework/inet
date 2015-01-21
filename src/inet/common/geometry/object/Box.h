@@ -40,8 +40,8 @@ class INET_API Box : public GeometricObjectBase
         const Coord& getMin() const { return min; }
         const Coord& getMax() const { return max; }
 
-        virtual bool isNil() const { return this == &NIL; }
-        virtual bool isUnspecified() const { return min.isUnspecified() || max.isUnspecified(); }
+        virtual bool isNil() const override { return this == &NIL; }
+        virtual bool isUnspecified() const override { return min.isUnspecified() || max.isUnspecified(); }
 };
 } /* namespace inet */
 

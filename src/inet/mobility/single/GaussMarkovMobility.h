@@ -41,22 +41,22 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
     double variance;    ///< variance
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief If the host is too close to the border it is repelled */
     void preventBorderHugging();
 
     /** @brief Move the host*/
-    virtual void move();
+    virtual void move() override;
 
     /** @brief Calculate a new target position to move to. */
-    virtual void setTargetPosition();
+    virtual void setTargetPosition() override;
 
   public:
-    virtual double getMaxSpeed() const { return speed; }
+    virtual double getMaxSpeed() const override { return speed; }
     GaussMarkovMobility();
 };
 

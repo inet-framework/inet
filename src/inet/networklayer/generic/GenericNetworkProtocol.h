@@ -154,27 +154,27 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     GenericNetworkProtocol();
     ~GenericNetworkProtocol();
 
-    virtual void registerHook(int priority, IHook *hook);
-    virtual void unregisterHook(int priority, IHook *hook);
-    virtual void dropQueuedDatagram(const INetworkDatagram *datagram);
-    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram);
+    virtual void registerHook(int priority, IHook *hook) override;
+    virtual void unregisterHook(int priority, IHook *hook) override;
+    virtual void dropQueuedDatagram(const INetworkDatagram *datagram) override;
+    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 
   protected:
     /**
      * Initialization
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Handle message.
      */
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
 
     /**
      * Processing of generic datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cPacket *packet);
+    virtual void endService(cPacket *packet) override;
 };
 
 } // namespace inet

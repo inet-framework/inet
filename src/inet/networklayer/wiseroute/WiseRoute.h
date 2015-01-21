@@ -61,11 +61,11 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
   public:
     WiseRoute() {}
     /** @brief Initialization of the module and some variables*/
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
-    virtual void finish();
+    virtual void finish() override;
 
     virtual ~WiseRoute();
 
@@ -155,13 +155,13 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     /*@{*/
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     /** @brief Handle self messages */
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
 
     /** @brief Update routing table.
      *

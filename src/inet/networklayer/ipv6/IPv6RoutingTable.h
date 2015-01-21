@@ -115,20 +115,20 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual ~IPv6RoutingTable();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     virtual void parseXMLConfigFile();
 
     /**
      * Raises an error.
      */
-    virtual void handleMessage(cMessage *);
+    virtual void handleMessage(cMessage *) override;
 
     /**
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
   public:
     /** @name Interfaces */
@@ -312,12 +312,12 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Return the number of routes.
      */
-    virtual int getNumRoutes() const;
+    virtual int getNumRoutes() const override;
 
     /**
      * Return the ith route.
      */
-    virtual IPv6Route *getRoute(int i) const;
+    virtual IPv6Route *getRoute(int i) const override;
     //@}
 
 #ifdef WITH_xMIPv6
@@ -370,36 +370,36 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * ILifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // IRoutingTable methods:
-    virtual bool isForwardingEnabled() const { return isRouter(); }    //XXX inconsistent names
-    virtual bool isMulticastForwardingEnabled() const { return true;    /*TODO isMulticastForwardingEnabled();*/ }
-    virtual L3Address getRouterIdAsGeneric() const { return L3Address(IPv6Address());    /*TODO getRouterId();*/ }
-    virtual bool isLocalAddress(const L3Address& dest) const { return isLocalAddress(dest.toIPv6()); }
+    virtual bool isForwardingEnabled() const override { return isRouter(); }    //XXX inconsistent names
+    virtual bool isMulticastForwardingEnabled() const override { return true;    /*TODO isMulticastForwardingEnabled();*/ }
+    virtual L3Address getRouterIdAsGeneric() const override { return L3Address(IPv6Address());    /*TODO getRouterId();*/ }
+    virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIPv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const { return getInterfaceByAddress(address.toIPv6()); }
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override { return getInterfaceByAddress(address.toIPv6()); }
     virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
-    virtual bool isLocalMulticastAddress(const L3Address& dest) const { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const { return nullptr;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
-    virtual IRoute *getDefaultRoute() const { return nullptr;    /*TODO getDefaultRoute();*/ }
-    virtual void addRoute(IRoute *entry) { addRoutingProtocolRoute(check_and_cast<IPv6Route *>(entry)); }    //XXX contrast that with addStaticRoute()!
-    virtual IRoute *removeRoute(IRoute *entry) { return removeRoute(check_and_cast<IPv6Route *>(entry)); }
-    virtual bool deleteRoute(IRoute *entry) { return deleteRoute(check_and_cast<IPv6Route *>(entry)); }
-    virtual IMulticastRoute *getMulticastRoute(int i) const { return nullptr;    /*TODO*/ }
-    virtual int getNumMulticastRoutes() const { return 0;    /*TODO getNumMulticastRoutes();*/ }
-    virtual void addMulticastRoute(IMulticastRoute *entry) {    /*TODO addMulticastRoute(entry);*/ }
-    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) {    /*TODO removeMulticastRoute(entry);*/ return entry; }
-    virtual bool deleteMulticastRoute(IMulticastRoute *entry) { return false;    /*TODO: deleteMulticastRoute(entry);*/ }
-    virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return nullptr;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
+    virtual IRoute *getDefaultRoute() const override { return nullptr;    /*TODO getDefaultRoute();*/ }
+    virtual void addRoute(IRoute *entry) override { addRoutingProtocolRoute(check_and_cast<IPv6Route *>(entry)); }    //XXX contrast that with addStaticRoute()!
+    virtual IRoute *removeRoute(IRoute *entry) override { return removeRoute(check_and_cast<IPv6Route *>(entry)); }
+    virtual bool deleteRoute(IRoute *entry) override { return deleteRoute(check_and_cast<IPv6Route *>(entry)); }
+    virtual IMulticastRoute *getMulticastRoute(int i) const override { return nullptr;    /*TODO*/ }
+    virtual int getNumMulticastRoutes() const override { return 0;    /*TODO getNumMulticastRoutes();*/ }
+    virtual void addMulticastRoute(IMulticastRoute *entry) override {    /*TODO addMulticastRoute(entry);*/ }
+    virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override {    /*TODO removeMulticastRoute(entry);*/ return entry; }
+    virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return false;    /*TODO: deleteMulticastRoute(entry);*/ }
+    virtual IRoute *createRoute() override { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
 
     /**
      * Prints the routing table.
      */
-    virtual void printRoutingTable() const;
+    virtual void printRoutingTable() const override;
 };
 
 } // namespace inet

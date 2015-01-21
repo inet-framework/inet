@@ -32,11 +32,11 @@ namespace inet {
 class INET_API HostAutoConfigurator : public cSimpleModule
 {
   public:
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
   protected:
     void setupNetworkLayer();

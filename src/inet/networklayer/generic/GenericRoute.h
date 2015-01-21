@@ -52,46 +52,46 @@ class INET_API GenericRoute : public cObject, public IRoute
         source(nullptr), protocolData(nullptr), metric(0) {}
     virtual ~GenericRoute() { delete protocolData; }
 
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     bool equals(const IRoute& route) const;
 
     virtual void setRoutingTable(GenericRoutingTable *owner) { this->owner = owner; }
-    virtual void setDestination(const L3Address& dest) { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
-    virtual void setPrefixLength(int l) { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const L3Address& nextHop) { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
-    virtual void setInterface(InterfaceEntry *ie) { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
-    virtual void setSourceType(SourceType sourceType) { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
-    virtual void setSource(cObject *source) { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
-    virtual void setMetric(int metric) { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
-    virtual void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
+    virtual void setDestination(const L3Address& dest) override { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
+    virtual void setPrefixLength(int l) override { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
+    virtual void setNextHop(const L3Address& nextHop) override { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
+    virtual void setInterface(InterfaceEntry *ie) override { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
+    virtual void setSourceType(SourceType sourceType) override { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
+    virtual void setSource(cObject *source) override { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
+    virtual void setMetric(int metric) override { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
+    virtual void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
     /** The routing table in which this route is inserted, or nullptr. */
-    virtual IRoutingTable *getRoutingTableAsGeneric() const;
+    virtual IRoutingTable *getRoutingTableAsGeneric() const override;
 
     /** Destination address prefix to match */
-    virtual L3Address getDestinationAsGeneric() const { return destination; }
+    virtual L3Address getDestinationAsGeneric() const override { return destination; }
 
     /** Represents length of prefix to match */
-    virtual int getPrefixLength() const { return prefixLength; }
+    virtual int getPrefixLength() const override { return prefixLength; }
 
     /** Next hop address */
-    virtual L3Address getNextHopAsGeneric() const { return nextHop; }
+    virtual L3Address getNextHopAsGeneric() const override { return nextHop; }
 
     /** Next hop interface */
-    virtual InterfaceEntry *getInterface() const { return interface; }
+    virtual InterfaceEntry *getInterface() const override { return interface; }
 
     /** Source type of the route */
-    SourceType getSourceType() const { return sourceType; }
+    SourceType getSourceType() const override { return sourceType; }
 
     /** Source of route */
-    virtual cObject *getSource() const { return source; }
+    virtual cObject *getSource() const override { return source; }
 
     /** Cost to reach the destination */
-    virtual int getMetric() const { return metric; }
+    virtual int getMetric() const override { return metric; }
 
-    virtual cObject *getProtocolData() const { return protocolData; }
+    virtual cObject *getProtocolData() const override { return protocolData; }
 };
 
 class GenericMulticastRoute : public cObject

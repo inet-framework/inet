@@ -34,13 +34,13 @@ namespace power {
 class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase, public EnergySinkBase, public virtual IEnergyStorage
 {
   public:
-    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer);
-    virtual void removeEnergyConsumer(int energyConsumerId);
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower);
+    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
+    virtual void removeEnergyConsumer(int energyConsumerId) override;
+    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
 
-    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator);
-    virtual void removeEnergyGenerator(int energyGeneratorId);
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower);
+    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
+    virtual void removeEnergyGenerator(int energyGeneratorId) override;
+    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
 };
 
 } // namespace power

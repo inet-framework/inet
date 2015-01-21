@@ -35,8 +35,8 @@ class INET_API ThresholdDropper : public AlgorithmicDropperBase
     int byteCapacity;
 
   protected:
-    virtual void initialize();
-    virtual bool shouldDrop(cPacket *packet);
+    virtual void initialize() override;
+    virtual bool shouldDrop(cPacket *packet) override;
 };
 
 } // namespace inet

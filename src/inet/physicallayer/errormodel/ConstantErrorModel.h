@@ -35,16 +35,16 @@ class INET_API ConstantErrorModel : public ErrorModelBase
     double symbolErrorRate;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     ConstantErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const;
-    virtual double computeBitErrorRate(const ISNIR *snir) const;
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const;
+    virtual double computePacketErrorRate(const ISNIR *snir) const override;
+    virtual double computeBitErrorRate(const ISNIR *snir) const override;
+    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer

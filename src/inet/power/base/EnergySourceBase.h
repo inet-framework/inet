@@ -67,19 +67,19 @@ class INET_API EnergySourceBase : public virtual IEnergySource
   public:
     EnergySourceBase();
 
-    virtual int getNumEnergyConsumers() const { return energyConsumers.size(); }
+    virtual int getNumEnergyConsumers() const override { return energyConsumers.size(); }
 
-    virtual const IEnergyConsumer *getEnergyConsumer(int energyConsumerId) const;
+    virtual const IEnergyConsumer *getEnergyConsumer(int energyConsumerId) const override;
 
-    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer);
+    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
 
-    virtual void removeEnergyConsumer(int energyConsumerId);
+    virtual void removeEnergyConsumer(int energyConsumerId) override;
 
-    virtual W getTotalPowerConsumption() const { return totalConsumedPower; }
+    virtual W getTotalPowerConsumption() const override { return totalConsumedPower; }
 
-    virtual W getPowerConsumption(int energyConsumerId) const;
+    virtual W getPowerConsumption(int energyConsumerId) const override;
 
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower);
+    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
 };
 
 } // namespace power

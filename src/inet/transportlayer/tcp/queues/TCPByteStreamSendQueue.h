@@ -51,19 +51,19 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
      */
     virtual ~TCPByteStreamSendQueue();
 
-    virtual void init(uint32 startSeq);
+    virtual void init(uint32 startSeq) override;
 
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
-    virtual void enqueueAppData(cPacket *msg);
+    virtual void enqueueAppData(cPacket *msg) override;
 
-    virtual uint32 getBufferStartSeq();
+    virtual uint32 getBufferStartSeq() override;
 
-    virtual uint32 getBufferEndSeq();
+    virtual uint32 getBufferEndSeq() override;
 
-    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes);
+    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
 
-    virtual void discardUpTo(uint32 seqNum);
+    virtual void discardUpTo(uint32 seqNum) override;
 };
 
 } // namespace tcp

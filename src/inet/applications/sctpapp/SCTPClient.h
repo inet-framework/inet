@@ -84,10 +84,10 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     static simsignal_t echoedPkSignal;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    void initialize(int stage);
-    void handleMessage(cMessage *msg);
-    void finish();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
 
     void connect();
     void close();
@@ -95,24 +95,24 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     void handleTimer(cMessage *msg);
 
     /* SCTPSocket::CallbackInterface callback methods */
-    void socketEstablished(int connId, void *yourPtr, unsigned long int buffer);    // TODO: needs a better name
-    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);    // TODO: needs a better name
-    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
-    void socketPeerClosed(int connId, void *yourPtr);
-    void socketClosed(int connId, void *yourPtr);
-    void socketFailure(int connId, void *yourPtr, int code);
-    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
+    void socketEstablished(int connId, void *yourPtr, unsigned long int buffer) override;    // TODO: needs a better name
+    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;    // TODO: needs a better name
+    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg) override;
+    void socketPeerClosed(int connId, void *yourPtr) override;
+    void socketClosed(int connId, void *yourPtr) override;
+    void socketFailure(int connId, void *yourPtr, int code) override;
+    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status) override;
 
     void setPrimaryPath(const char *addr);
-    void sendRequestArrived();
+    void sendRequestArrived() override;
     void sendQueueRequest();
-    void shutdownReceivedArrived(int connId);
-    void sendqueueAbatedArrived(int connId, unsigned long int buffer);
-    void msgAbandonedArrived(int assocId);
+    void shutdownReceivedArrived(int connId) override;
+    void sendqueueAbatedArrived(int connId, unsigned long int buffer) override;
+    void msgAbandonedArrived(int assocId) override;
     void sendStreamResetNotification();
     void sendRequest(bool last = true);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:

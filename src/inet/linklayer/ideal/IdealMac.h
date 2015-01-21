@@ -64,7 +64,7 @@ class INET_API IdealMac : public MACProtocolBase
     //@{
     virtual void flushQueue();
     virtual void clearQueue();
-    virtual InterfaceEntry *createInterfaceEntry();
+    virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
 
     virtual void startTransmitting(cPacket *msg);
@@ -78,13 +78,13 @@ class INET_API IdealMac : public MACProtocolBase
     virtual void getNextMsgFromHL();
 
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long value);
+    virtual void receiveSignal(cComponent *src, simsignal_t id, long value) override;
 
     /** implements MACProtocolBase functions */
     //@{
-    virtual void handleUpperPacket(cPacket *msg);
-    virtual void handleLowerPacket(cPacket *msg);
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleUpperPacket(cPacket *msg) override;
+    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleSelfMessage(cMessage *message) override;
     //@}
 
   public:
@@ -92,8 +92,8 @@ class INET_API IdealMac : public MACProtocolBase
     virtual ~IdealMac();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 };
 
 } // namespace inet

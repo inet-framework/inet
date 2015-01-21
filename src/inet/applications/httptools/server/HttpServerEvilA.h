@@ -45,9 +45,9 @@ class INET_API HttpServerEvilA : public HttpServer
     int badHigh = 0;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual std::string generateBody();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual std::string generateBody() override;
 };
 
 } // namespace httptools

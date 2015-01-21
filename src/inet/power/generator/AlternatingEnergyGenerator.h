@@ -42,9 +42,9 @@ class INET_API AlternatingEnergyGenerator : public cSimpleModule, public IEnergy
     cMessage *timer;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
 
     virtual void updatePowerGeneration();
 
@@ -54,7 +54,7 @@ class INET_API AlternatingEnergyGenerator : public cSimpleModule, public IEnergy
     AlternatingEnergyGenerator();
     virtual ~AlternatingEnergyGenerator();
 
-    virtual W getPowerGeneration() const { return powerGeneration; }
+    virtual W getPowerGeneration() const override { return powerGeneration; }
 };
 
 } // namespace power

@@ -447,8 +447,8 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
   public:
     IPv6InterfaceData();
     virtual ~IPv6InterfaceData();
-    std::string info() const;
-    std::string detailedInfo() const;
+    std::string info() const override;
+    std::string detailedInfo() const override;
 
     /** @name Addresses */
     //@{

@@ -59,11 +59,11 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     {}
 
     /** @brief Initialization of the module and some variables*/
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int);
+    virtual void initialize(int) override;
 
-    virtual void finish();
+    virtual void finish() override;
 
   protected:
     enum messagesTypes {
@@ -89,13 +89,13 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     typedef std::multimap<simtime_t, tMsgDesc *> TimeMsgMap;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     /** @brief Handle self messages */
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
 
     /** @brief Checks whether a message is known (= kept in memory) or not */
     virtual bool messageKnown(unsigned int msgId);

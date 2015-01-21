@@ -48,19 +48,19 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     double maxSpeed;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase. Invokes resumeScript().*/
-    virtual void setTargetPosition();
+    virtual void setTargetPosition() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void move();
+    virtual void move() override;
 
     /** @brief Process next statements from script */
     virtual void resumeScript();
@@ -80,7 +80,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
 
   public:
     TurtleMobility();
-    virtual double getMaxSpeed() const { return maxSpeed; }
+    virtual double getMaxSpeed() const override { return maxSpeed; }
 };
 
 } // namespace inet

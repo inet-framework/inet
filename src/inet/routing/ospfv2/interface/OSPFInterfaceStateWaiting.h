@@ -27,8 +27,8 @@ namespace ospf {
 class InterfaceStateWaiting : public InterfaceState
 {
   public:
-    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState() const { return Interface::WAITING_STATE; }
+    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;
+    virtual Interface::InterfaceStateType getState() const override { return Interface::WAITING_STATE; }
 };
 
 } // namespace ospf

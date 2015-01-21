@@ -74,21 +74,21 @@ class INET_API PPP : public MACBase
     virtual void refreshOutGateConnection(bool connected);
 
     // cListener function
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
     // MACBase functions
-    virtual InterfaceEntry *createInterfaceEntry();
-    virtual bool isUpperMsg(cMessage *msg) { return msg->arrivedOn("netwIn"); }
-    virtual void flushQueue();
-    virtual void clearQueue();
+    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("netwIn"); }
+    virtual void flushQueue() override;
+    virtual void clearQueue() override;
 
   public:
     virtual ~PPP();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace inet

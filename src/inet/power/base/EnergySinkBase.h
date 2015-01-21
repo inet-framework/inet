@@ -67,19 +67,19 @@ class INET_API EnergySinkBase : public virtual IEnergySink
   public:
     EnergySinkBase();
 
-    virtual int getNumEnergyGenerators() const { return energyGenerators.size(); }
+    virtual int getNumEnergyGenerators() const override { return energyGenerators.size(); }
 
-    virtual const IEnergyGenerator *getEnergyGenerator(int energyGeneratorId) const;
+    virtual const IEnergyGenerator *getEnergyGenerator(int energyGeneratorId) const override;
 
-    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator);
+    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
 
-    virtual void removeEnergyGenerator(int energyGeneratorId);
+    virtual void removeEnergyGenerator(int energyGeneratorId) override;
 
-    virtual W getTotalPowerGeneration() const { return totalGeneratedPower; }
+    virtual W getTotalPowerGeneration() const override { return totalGeneratedPower; }
 
-    virtual W getPowerGeneration(int energyGeneratorId) const;
+    virtual W getPowerGeneration(int energyGeneratorId) const override;
 
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower);
+    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
 };
 
 } // namespace power

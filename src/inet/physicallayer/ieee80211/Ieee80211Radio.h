@@ -37,9 +37,9 @@ class INET_API Ieee80211Radio : public NarrowbandRadioBase
     int channelNumber;
 
   protected:
-    void initialize(int stage);
+    void initialize(int stage) override;
 
-    void handleUpperCommand(cMessage *message);
+    void handleUpperCommand(cMessage *message) override;
 
   public:
     Ieee80211Radio();

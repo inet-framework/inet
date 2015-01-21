@@ -107,18 +107,18 @@ class INET_API SimpleEnergyStorage : public EnergyStorageBase
 
     virtual ~SimpleEnergyStorage();
 
-    virtual J getNominalCapacity() { return nominalCapacity; }
+    virtual J getNominalCapacity() override { return nominalCapacity; }
 
-    virtual J getResidualCapacity() { updateResidualCapacity(); return residualCapacity; }
+    virtual J getResidualCapacity() override { updateResidualCapacity(); return residualCapacity; }
 
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower);
+    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
 
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower);
+    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
 
     virtual void executeNodeOperation(J newResidualCapacity);
 

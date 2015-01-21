@@ -115,7 +115,7 @@ class INET_API FilteredMappingIterator : public BaseFilteredIterator<MappingIter
 
     virtual ~FilteredMappingIterator() {}
 
-    virtual void setValue(argument_value_cref_t value) { origIterator->setValue(value); }
+    virtual void setValue(argument_value_cref_t value) override { origIterator->setValue(value); }
 };
 
 /**
@@ -206,7 +206,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has logarithmic complexity.
      */
-    void jumpTo(const Argument& pos)
+    void jumpTo(const Argument& pos) override
     {
         atPreStep = false;
         valueIt.jumpTo(pos.getTime());
@@ -226,7 +226,7 @@ class TimeMappingIterator : public MappingIterator
      * passed position is near the current position the complexity is
      * nearly constant.
      */
-    void iterateTo(const Argument& pos)
+    void iterateTo(const Argument& pos) override
     {
         atPreStep = false;
         valueIt.iterateTo(pos.getTime());
@@ -243,7 +243,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual void next()
+    virtual void next() override
     {
         if (isStepMapping && !atPreStep) {
             valueIt.iterateTo(nextPosition.getTime());
@@ -266,7 +266,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * THis method has constant complexity.
      */
-    virtual bool inRange() const
+    virtual bool inRange() const override
     {
         return valueIt.inRange();
     }
@@ -276,7 +276,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual const Argument& getPosition() const
+    virtual const Argument& getPosition() const override
     {
         return position;
     }
@@ -286,7 +286,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual const Argument& getNextPosition() const
+    virtual const Argument& getNextPosition() const override
     {
         return nextPosition;
     }
@@ -297,7 +297,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual mapped_type getValue() const
+    virtual mapped_type getValue() const override
     {
         return *valueIt.getValue();
     }
@@ -310,7 +310,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual void jumpToBegin()
+    virtual void jumpToBegin() override
     {
         valueIt.jumpToBegin();
         position.setTime(valueIt.getPosition());
@@ -322,7 +322,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual bool hasNext() const
+    virtual bool hasNext() const override
     {
         return valueIt.hasNext();
     }
@@ -333,7 +333,7 @@ class TimeMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual void setValue(argument_value_cref_t value)
+    virtual void setValue(argument_value_cref_t value) override
     {
         valueIt.setValue(value);
     }
@@ -383,7 +383,7 @@ class TimeMapping : public Mapping
     /**
      * @brief returns a deep copy of this mapping instance.
      */
-    virtual Mapping *clone() const { return new TimeMapping<Interpolator>(*this); }
+    virtual Mapping *clone() const override { return new TimeMapping<Interpolator>(*this); }
 
     /**
      * @brief Returns the value of this Function at the position specified
@@ -391,7 +391,7 @@ class TimeMapping : public Mapping
      *
      * This method has logarithmic complexity.
      */
-    virtual argument_value_t getValue(const Argument& pos) const
+    virtual argument_value_t getValue(const Argument& pos) const override
     {
         return *entries.getIntplValue(pos.getTime());
     }
@@ -402,7 +402,7 @@ class TimeMapping : public Mapping
      *
      * This method has logarithmic complexity.
      */
-    virtual void setValue(const Argument& pos, argument_value_cref_t value)
+    virtual void setValue(const Argument& pos, argument_value_cref_t value) override
     {
         entries[pos.getTime()] = value;
     }
@@ -414,7 +414,7 @@ class TimeMapping : public Mapping
      * Note: The caller of this method has to delete the returned Iterator
      * pointer if it isn't used anymore.
      */
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new TimeMappingIterator<Interpolator>(entries.beginIntpl());
     }
@@ -426,7 +426,7 @@ class TimeMapping : public Mapping
      * Note: The caller of this method has to delete the returned Iterator
      * pointer if it isn't used anymore.
      */
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new TimeMappingIterator<Interpolator>(entries.findIntpl(pos.getTime()));
     }
@@ -520,7 +520,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has logarithmic complexity.
      */
-    void jumpTo(const Argument& pos)
+    void jumpTo(const Argument& pos) override
     {
         atPreStep = false;
         valueIt.jumpTo(pos.getArgValue(Dimension::frequency));
@@ -540,7 +540,7 @@ class FrequencyMappingIterator : public MappingIterator
      * passed position is near the current position the complexity is
      * nearly constant.
      */
-    void iterateTo(const Argument& pos)
+    void iterateTo(const Argument& pos) override
     {
         atPreStep = false;
         valueIt.iterateTo(pos.getArgValue(Dimension::frequency));
@@ -557,7 +557,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual void next()
+    virtual void next() override
     {
         if (isStepMapping && !atPreStep) {
             valueIt.iterateTo(nextPosition.getArgValue(Dimension::frequency));
@@ -580,7 +580,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * THis method has constant complexity.
      */
-    virtual bool inRange() const
+    virtual bool inRange() const override
     {
         return valueIt.inRange();
     }
@@ -590,7 +590,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual const Argument& getPosition() const
+    virtual const Argument& getPosition() const override
     {
         return position;
     }
@@ -600,7 +600,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual const Argument& getNextPosition() const
+    virtual const Argument& getNextPosition() const override
     {
         return nextPosition;
     }
@@ -611,7 +611,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual mapped_type getValue() const
+    virtual mapped_type getValue() const override
     {
         return *valueIt.getValue();
     }
@@ -624,7 +624,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual void jumpToBegin()
+    virtual void jumpToBegin() override
     {
         valueIt.jumpToBegin();
         position.setArgValue(Dimension::frequency, valueIt.getPosition());
@@ -636,7 +636,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual bool hasNext() const
+    virtual bool hasNext() const override
     {
         return valueIt.hasNext();
     }
@@ -647,7 +647,7 @@ class FrequencyMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual void setValue(argument_value_cref_t value)
+    virtual void setValue(argument_value_cref_t value) override
     {
         valueIt.setValue(value);
     }
@@ -697,7 +697,7 @@ class FrequencyMapping : public Mapping
     /**
      * @brief returns a deep copy of this mapping instance.
      */
-    virtual Mapping *clone() const { return new FrequencyMapping<Interpolator>(*this); }
+    virtual Mapping *clone() const override { return new FrequencyMapping<Interpolator>(*this); }
 
     /**
      * @brief Returns the value of this Function at the position specified
@@ -705,7 +705,7 @@ class FrequencyMapping : public Mapping
      *
      * This method has logarithmic complexity.
      */
-    virtual argument_value_t getValue(const Argument& pos) const
+    virtual argument_value_t getValue(const Argument& pos) const override
     {
         return *entries.getIntplValue(pos.getArgValue(Dimension::frequency));
     }
@@ -716,7 +716,7 @@ class FrequencyMapping : public Mapping
      *
      * This method has logarithmic complexity.
      */
-    virtual void setValue(const Argument& pos, argument_value_cref_t value)
+    virtual void setValue(const Argument& pos, argument_value_cref_t value) override
     {
         entries[pos.getArgValue(Dimension::frequency)] = value;
     }
@@ -728,7 +728,7 @@ class FrequencyMapping : public Mapping
      * Note: The caller of this method has to delete the returned Iterator
      * pointer if it isn't used anymore.
      */
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new FrequencyMappingIterator<Interpolator>(entries.beginIntpl());
     }
@@ -740,7 +740,7 @@ class FrequencyMapping : public Mapping
      * Note: The caller of this method has to delete the returned Iterator
      * pointer if it isn't used anymore.
      */
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new FrequencyMappingIterator<Interpolator>(entries.findIntpl(pos.getArgValue(Dimension::frequency)));
     }
@@ -791,27 +791,27 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
      * values, it only provides an fast way to get several values from an
      * Interpolated mapping.
      */
-    virtual bool hasNext() const { return false; }
+    virtual bool hasNext() const override { return false; }
     /**
      * @brief An interpolated mapping isn't really iterateable over specific
      * values, it only provides an fast way to get several values from an
      * Interpolated mapping.
      */
-    virtual bool inRange() const { return false; }
+    virtual bool inRange() const override { return false; }
 
     /**
      * @brief This method isn't supported by an interpolated Mapping.
      */
-    virtual void jumpToBegin() { assert(false); }
+    virtual void jumpToBegin() override { assert(false); }
     /**
      * @brief This method isn't supported by an interpolated Mapping.
      */
-    virtual void next() { assert(false); }
+    virtual void next() override { assert(false); }
 
     /**
      * @brief This method isn't supported by an interpolated Mapping.
      */
-    virtual void setValue(argument_value_cref_t) { assert(false); }
+    virtual void setValue(argument_value_cref_t) override { assert(false); }
 
     /**
      * @brief Lets the iterator point to the passed position.
@@ -819,7 +819,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
      * This method has logarithmic complexity over both of the
      * underlying Mappings used to interpolate.
      */
-    virtual void jumpTo(const Argument& pos)
+    virtual void jumpTo(const Argument& pos) override
     {
         leftIt->jumpTo(pos);
         rightIt->jumpTo(pos);
@@ -836,7 +836,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
      * interpolate. So if the passed position is near the current position this
      * method has nearly constant complexity.
      */
-    virtual void iterateTo(const Argument& pos)
+    virtual void iterateTo(const Argument& pos) override
     {
         leftIt->iterateTo(pos);
         rightIt->iterateTo(pos);
@@ -848,7 +848,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
      *
      * This method has constant complexity.
      */
-    virtual argument_value_t getValue() const
+    virtual argument_value_t getValue() const override
     {
         argument_value_cref_t v0 = leftIt->getValue();
         argument_value_cref_t v1 = rightIt->getValue();
@@ -860,7 +860,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual const Argument& getPosition() const
+    virtual const Argument& getPosition() const override
     {
         return leftIt->getPosition();
     }
@@ -868,7 +868,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
     /**
      * @brief This method isn't supported by an interpolated mapping.
      */
-    virtual const Argument& getNextPosition() const { assert(false); return *((Argument *)nullptr); }
+    virtual const Argument& getNextPosition() const override { assert(false); return *((Argument *)nullptr); }
 };
 
 /**
@@ -928,7 +928,7 @@ class INET_API LinearIntplMapping : public Mapping
     /**
      * @brief Interpolated mappings are not supposed to be cloned!
      */
-    virtual Mapping *clone() const { assert(false); return 0; }
+    virtual Mapping *clone() const override { assert(false); return 0; }
 
     /**
      * @brief Returns the linear interpolated value of this Mapping.
@@ -937,7 +937,7 @@ class INET_API LinearIntplMapping : public Mapping
      *
      * v = left + (right - left) * intplFactor
      */
-    virtual argument_value_t getValue(const Argument& pos) const
+    virtual argument_value_t getValue(const Argument& pos) const override
     {
         assert(left);
         assert(right);
@@ -952,7 +952,7 @@ class INET_API LinearIntplMapping : public Mapping
      * @brief An interpolated mapping doesn't have a valid "first"-entry,
      * so this method is not supported.
      */
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         assert(false);
         return 0;
@@ -966,7 +966,7 @@ class INET_API LinearIntplMapping : public Mapping
      * normal MappingIterator-methods. See LinearIntplMappingIterator for
      * details.
      */
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         assert(left);
         assert(right);
@@ -977,7 +977,7 @@ class INET_API LinearIntplMapping : public Mapping
     /**
      * @brief This method is not supported!
      */
-    virtual void setValue(const Argument&, argument_value_cref_t) { assert(false); }
+    virtual void setValue(const Argument&, argument_value_cref_t) override { assert(false); }
 };
 
 /**
@@ -1161,7 +1161,7 @@ class Linear<std::map<Argument::mapped_type, Mapping *> > : public InterpolatorB
     interpolated operator()(const const_iterator& first,
             const const_iterator& last,
             key_cref_type pos,
-            const_iterator upperBound) const
+            const_iterator upperBound) const override
     {
         if (first == last) {
             return base_class_type::outOfRangeVal;
@@ -1225,7 +1225,7 @@ class INET_API ConstantSimpleConstMapping : public SimpleConstMapping
 
     virtual ~ConstantSimpleConstMapping() {}
 
-    virtual argument_value_t getValue(const Argument&) const
+    virtual argument_value_t getValue(const Argument&) const override
     {
         return value;
     }
@@ -1243,7 +1243,7 @@ class INET_API ConstantSimpleConstMapping : public SimpleConstMapping
      */
     void setValue(argument_value_cref_t val) { value = val; }
 
-    ConstMapping *constClone() const
+    ConstMapping *constClone() const override
     {
         return new ConstantSimpleConstMapping(dimensions, value);
     }
@@ -1282,25 +1282,25 @@ class INET_API ConstMappingIteratorWrapper : public MappingIterator
             delete iterator;
     }
 
-    virtual void setValue(argument_value_cref_t) { assert(false); }
+    virtual void setValue(argument_value_cref_t) override { assert(false); }
 
-    virtual const Argument& getNextPosition() const { return iterator->getNextPosition(); }
+    virtual const Argument& getNextPosition() const override { return iterator->getNextPosition(); }
 
-    virtual void jumpTo(const Argument& pos) { iterator->jumpTo(pos); }
+    virtual void jumpTo(const Argument& pos) override { iterator->jumpTo(pos); }
 
-    virtual void jumpToBegin() { iterator->jumpToBegin(); }
+    virtual void jumpToBegin() override { iterator->jumpToBegin(); }
 
-    virtual void iterateTo(const Argument& pos) { iterator->iterateTo(pos); }
+    virtual void iterateTo(const Argument& pos) override { iterator->iterateTo(pos); }
 
-    virtual void next() { iterator->next(); }
+    virtual void next() override { iterator->next(); }
 
-    virtual bool inRange() const { return iterator->inRange(); }
+    virtual bool inRange() const override { return iterator->inRange(); }
 
-    virtual bool hasNext() const { return iterator->hasNext(); }
+    virtual bool hasNext() const override { return iterator->hasNext(); }
 
-    virtual const Argument& getPosition() const { return iterator->getPosition(); }
+    virtual const Argument& getPosition() const override { return iterator->getPosition(); }
 
-    virtual argument_value_t getValue() const { return iterator->getValue(); }
+    virtual argument_value_t getValue() const override { return iterator->getValue(); }
 };
 
 /**
@@ -1330,33 +1330,33 @@ class INET_API ConstMappingWrapper : public Mapping
 
     virtual ~ConstMappingWrapper() {}
 
-    virtual void setValue(const Argument&, argument_value_cref_t) { assert(false); }
+    virtual void setValue(const Argument&, argument_value_cref_t) override { assert(false); }
 
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new ConstMappingIteratorWrapper(mapping->createConstIterator());
     }
 
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new ConstMappingIteratorWrapper(mapping->createConstIterator(pos));
     }
 
-    virtual argument_value_t getValue(const Argument& pos) const { return mapping->getValue(pos); }
+    virtual argument_value_t getValue(const Argument& pos) const override { return mapping->getValue(pos); }
 
-    virtual ConstMappingIterator *createConstIterator() const
+    virtual ConstMappingIterator *createConstIterator() const override
     {
         return mapping->createConstIterator();
     }
 
-    virtual ConstMappingIterator *createConstIterator(const Argument& pos) const
+    virtual ConstMappingIterator *createConstIterator(const Argument& pos) const override
     {
         return mapping->createConstIterator(pos);
     }
 
-    virtual ConstMapping *constClone() const { return mapping->constClone(); }
+    virtual ConstMapping *constClone() const override { return mapping->constClone(); }
 
-    virtual Mapping *clone() const
+    virtual Mapping *clone() const override
     {
         return new ConstMappingWrapper(mapping->constClone());
     }
@@ -1586,7 +1586,7 @@ class MultiDimMappingIterator : public MappingIterator
      * Has logarithmic complexity in number of dimensions and number of
      * entries inside each dimension.
      */
-    void jumpTo(const Argument& pos)
+    void jumpTo(const Argument& pos) override
     {
         argument_value_cref_t argVal = pos.getArgValue(mapping.myDimension);
 
@@ -1614,7 +1614,7 @@ class MultiDimMappingIterator : public MappingIterator
      * position and the passed position. This leads to nearly constant
      * complexity for position close together.
      */
-    void iterateTo(const Argument& pos)
+    void iterateTo(const Argument& pos) override
     {
         argument_value_cref_t argVal = pos.getArgValue(mapping.myDimension);
 
@@ -1643,7 +1643,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Has constant complexity.
      */
-    virtual void next()
+    virtual void next() override
     {
         if (!subMapping.isInterpolated && subIterator && subIterator->hasNext()) {
             subIterator->next();
@@ -1670,7 +1670,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual bool inRange() const
+    virtual bool inRange() const override
     {
         return valueIt.inRange() && (subMapping.isInterpolated || (subIterator && subIterator->inRange()));
     }
@@ -1680,7 +1680,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual const Argument& getPosition() const
+    virtual const Argument& getPosition() const override
     {
         return position;
     }
@@ -1690,7 +1690,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual const Argument& getNextPosition() const
+    virtual const Argument& getNextPosition() const override
     {
         return nextPosition;
     }
@@ -1701,7 +1701,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Has constant complexity.
      */
-    virtual argument_value_t getValue() const
+    virtual argument_value_t getValue() const override
     {
         if (subIterator)
             return subIterator->getValue();
@@ -1717,7 +1717,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual void jumpToBegin()
+    virtual void jumpToBegin() override
     {
         valueIt.jumpToBegin();
         updateSubIterator();
@@ -1734,7 +1734,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual bool hasNext() const
+    virtual bool hasNext() const override
     {
         return valueIt.hasNext() || (subIterator && subIterator->hasNext() && valueIt.inRange());
     }
@@ -1745,7 +1745,7 @@ class MultiDimMappingIterator : public MappingIterator
      *
      * Constant complexity.
      */
-    virtual void setValue(argument_value_cref_t value)
+    virtual void setValue(argument_value_cref_t value) override
     {
         if (subMapping.isInterpolated) {
             valueIt.setValue(mapping.createSubSignal());
@@ -1988,7 +1988,7 @@ class MultiDimMapping : public Mapping
     /**
      * @brief returns a deep copy of this mapping instance.
      */
-    virtual Mapping *clone() const { return new MultiDimMapping<Interpolator>(*this); }
+    virtual Mapping *clone() const override { return new MultiDimMapping<Interpolator>(*this); }
 
     /**
      * @brief Frees the memory for the sub mappings.
@@ -2016,7 +2016,7 @@ class MultiDimMapping : public Mapping
      * Has logarithmic complexity over the number of dimensions and the number of
      * entries per dimension.
      */
-    virtual argument_value_t getValue(const Argument& pos) const
+    virtual argument_value_t getValue(const Argument& pos) const override
     {
         assert(pos.hasArgVal(myDimension));
         argument_value_cref_t argVal = pos.getArgValue(myDimension);
@@ -2035,7 +2035,7 @@ class MultiDimMapping : public Mapping
      * Has logarithmic complexity over the number of dimensions and the number of
      * entries per dimension.
      */
-    virtual void setValue(const Argument& pos, argument_value_cref_t value)
+    virtual void setValue(const Argument& pos, argument_value_cref_t value) override
     {
         argument_value_cref_t argVal = pos.getArgValue(myDimension);
         auto posIt = entries.lower_bound(argVal);
@@ -2053,7 +2053,7 @@ class MultiDimMapping : public Mapping
      * The caller of this method has to delete the Iterator if not needed
      * anymore.
      */
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new MultiDimMappingIterator<Interpolator>(*this);
     }
@@ -2065,7 +2065,7 @@ class MultiDimMapping : public Mapping
      * The caller of this method has to delete the Iterator if not needed
      * anymore.
      */
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new MultiDimMappingIterator<Interpolator>(*this, pos);
     }
@@ -2093,7 +2093,7 @@ class INET_API FilledUpMappingIterator : public MultiDimMappingIterator<Linear>
 
     FilledUpMappingIterator(FilledUpMapping& mapping, const Argument& pos);
 
-    virtual void setValue(argument_value_cref_t)
+    virtual void setValue(argument_value_cref_t) override
     {
         assert(false);
     }
@@ -2194,7 +2194,7 @@ class INET_API FilledUpMapping : public MultiDimMapping<Linear>
         }
     }
 
-    virtual void appendValue(const Argument& pos, argument_value_cref_t value)
+    virtual void appendValue(const Argument& pos, argument_value_cref_t value) override
     {
         if (fillRef != 0) {
             fillRef->appendValue(pos, value);
@@ -2209,12 +2209,12 @@ class INET_API FilledUpMapping : public MultiDimMapping<Linear>
         posIt->second->appendValue(pos, value);
     }
 
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new FilledUpMappingIterator(*this);
     }
 
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new FilledUpMappingIterator(*this, pos);
     }
@@ -2614,7 +2614,7 @@ class ConcatConstMapping : public ConstMapping
         mappings.push_back(m);
     }
 
-    virtual Argument::mapped_type getValue(const Argument& pos) const
+    virtual Argument::mapped_type getValue(const Argument& pos) const override
     {
         const MappingSet::const_iterator itEnd = mappings.end();
         Argument::mapped_type res = refMapping->getValue(pos);
@@ -2649,7 +2649,7 @@ class ConcatConstMapping : public ConstMapping
         return result;
     }
 
-    virtual ConstMappingIterator *createConstIterator() const
+    virtual ConstMappingIterator *createConstIterator() const override
     {
         if (mappings.empty()) {
             return refMapping->createConstIterator();
@@ -2657,7 +2657,7 @@ class ConcatConstMapping : public ConstMapping
         return new ConcatConstMappingIterator(createConcatenatedMapping());
     }
 
-    virtual ConstMappingIterator *createConstIterator(const Argument& pos) const
+    virtual ConstMappingIterator *createConstIterator(const Argument& pos) const override
     {
         if (mappings.empty()) {
             return refMapping->createConstIterator(pos);
@@ -2665,7 +2665,7 @@ class ConcatConstMapping : public ConstMapping
         return new ConcatConstMappingIterator(createConcatenatedMapping(), pos);
     }
 
-    virtual ConstMapping *constClone() const
+    virtual ConstMapping *constClone() const override
     {
         return new ConcatConstMapping(*this);
     }
@@ -2887,7 +2887,7 @@ class INET_API ConstDelayedMapping : public BaseDelayedMapping<const ConstMappin
 
     virtual ~ConstDelayedMapping() {}
 
-    virtual ConstMapping *constClone() const
+    virtual ConstMapping *constClone() const override
     {
         return new ConstDelayedMapping(mapping->constClone(), delay);
     }
@@ -2910,22 +2910,22 @@ class INET_API DelayedMapping : public BaseDelayedMapping<Mapping>
 
     virtual ~DelayedMapping() {}
 
-    virtual void setValue(const Argument& pos, Argument::mapped_type_cref value)
+    virtual void setValue(const Argument& pos, Argument::mapped_type_cref value) override
     {
         mapping->setValue(delayPosition(pos), value);
     }
 
-    virtual Mapping *clone() const
+    virtual Mapping *clone() const override
     {
         return new DelayedMapping(mapping->clone(), delay);
     }
 
-    virtual MappingIterator *createIterator()
+    virtual MappingIterator *createIterator() override
     {
         return new DelayedMappingIterator(mapping->createIterator(), delay);
     }
 
-    virtual MappingIterator *createIterator(const Argument& pos)
+    virtual MappingIterator *createIterator(const Argument& pos) override
     {
         return new DelayedMappingIterator(mapping->createIterator(delayPosition(pos)), delay);
     }

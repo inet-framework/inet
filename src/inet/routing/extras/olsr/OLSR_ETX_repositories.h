@@ -378,7 +378,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
         memcpy(this, e, sizeof(OLSR_ETX_link_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_ETX_link_tuple *dup() const {return new OLSR_ETX_link_tuple(this);}
+    virtual OLSR_ETX_link_tuple *dup() const override {return new OLSR_ETX_link_tuple(this);}
 
 } OLSR_ETX_link_tuple;
 
@@ -462,7 +462,7 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
         memcpy(this, e, sizeof(OLSR_ETX_nb2hop_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_ETX_nb2hop_tuple *dup() const {return new OLSR_ETX_nb2hop_tuple(this);}
+    virtual OLSR_ETX_nb2hop_tuple *dup() const override{return new OLSR_ETX_nb2hop_tuple(this);}
 
 } OLSR_ETX_nb2hop_tuple;
 
@@ -556,7 +556,7 @@ typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
         memcpy(this, e, sizeof(OLSR_ETX_topology_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_ETX_topology_tuple *dup() const {return new OLSR_ETX_topology_tuple(this);}
+    virtual OLSR_ETX_topology_tuple *dup() const override {return new OLSR_ETX_topology_tuple(this);}
 
 } OLSR_ETX_topology_tuple;
 

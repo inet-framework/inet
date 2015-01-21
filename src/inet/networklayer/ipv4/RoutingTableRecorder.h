@@ -95,12 +95,12 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) { receiveChangeNotification(source, signalID, obj); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override { receiveChangeNotification(source, signalID, obj); }
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *) override;
     virtual void hookListeners();
     virtual void ensureRoutingLogFileOpen();
     virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *details);

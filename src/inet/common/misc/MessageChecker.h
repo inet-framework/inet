@@ -30,11 +30,11 @@ class INET_API MessageChecker : public cSimpleModule
     MessageChecker();
 
   protected:
-    void initialize();
-    void handleMessage(cMessage *msg);
+    void initialize() override;
+    void handleMessage(cMessage *msg) override;
     void checkMessage(cMessage *msg);
     void forwardMessage(cMessage *msg);
-    void finish();
+    void finish() override;
 
     void checkFields(void *object, cClassDescriptor *descriptor, const cXMLElementList& msgPattern) const;
 

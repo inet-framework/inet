@@ -36,17 +36,17 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     simtime_t stopTime;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleTimer(cMessage *msg);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleTimer(cMessage *msg) override;
+    virtual void socketEstablished(int connId, void *yourPtr) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketClosed(int connId, void *yourPtr) override;
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
     virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     TelnetApp() {}

@@ -40,13 +40,13 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
 
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
     virtual void updateDisplay();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
@@ -66,12 +66,12 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
     TCPSocket *sock;    // ptr into socketMap managed by TCPSrvHostApp
 
     // internal: TCPSocket::CallbackInterface methods
-    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) { dataArrived(msg, urgent); }
-    virtual void socketEstablished(int, void *) { established(); }
-    virtual void socketPeerClosed(int, void *) { peerClosed(); }
-    virtual void socketClosed(int, void *) { closed(); }
-    virtual void socketFailure(int, void *, int code) { failure(code); }
-    virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) { statusArrived(status); }
+    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) override { dataArrived(msg, urgent); }
+    virtual void socketEstablished(int, void *) override { established(); }
+    virtual void socketPeerClosed(int, void *) override { peerClosed(); }
+    virtual void socketClosed(int, void *) override { closed(); }
+    virtual void socketFailure(int, void *, int code) override { failure(code); }
+    virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) override { statusArrived(status); }
 
   public:
 

@@ -76,21 +76,21 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
   public:
     GlobalARP();
     virtual ~GlobalARP();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /// IARPCache implementation  @{
-    virtual L3Address getL3AddressFor(const MACAddress& addr) const;
-    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie);
+    virtual L3Address getL3AddressFor(const MACAddress& addr) const override;
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
     /// @}
 
     // cListener
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
   protected:
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void finish() override;
 
     virtual void processSelfMessage(cMessage *msg);
     virtual void handleMessageWhenDown(cMessage *msg);

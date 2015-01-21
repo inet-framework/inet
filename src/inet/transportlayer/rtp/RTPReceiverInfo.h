@@ -60,13 +60,13 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     /**
      * Duplicates this RTPReceiverInfo by calling the copy constructor.
      */
-    virtual RTPReceiverInfo *dup() const;
+    virtual RTPReceiverInfo *dup() const override;
 
     /**
      * Extracts information of the given RTPPacket.
      * Also sets _inactiveIntervals to 0.
      */
-    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
+    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime) override;
 
     /**
      * Extracts information of the given SenderReport.
@@ -76,18 +76,18 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     /**
      * Extracts information of the given SDESChunk.
      */
-    virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime);
+    virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime) override;
 
     /**
      * Returns a ReceptionReport if this RTP end system is a sender,
      * nullptr otherwise.
      */
-    virtual ReceptionReport *receptionReport(simtime_t now);
+    virtual ReceptionReport *receptionReport(simtime_t now) override;
 
     /**
      * Informs this RTPReceiverInfo that one rtcp interval has past.
      */
-    virtual void nextInterval(simtime_t now);
+    virtual void nextInterval(simtime_t now) override;
 
     /**
      * Returns true if this RTP end system is regarded active.
@@ -104,7 +104,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
      * the list of known RTP session participant.
      * This method should be called directly after nextInterval().
      */
-    virtual bool toBeDeleted(simtime_t now);
+    virtual bool toBeDeleted(simtime_t now) override;
 
   private:
     void copy(const RTPReceiverInfo& other);

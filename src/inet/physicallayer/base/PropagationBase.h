@@ -31,14 +31,14 @@ class INET_API PropagationBase : public cModule, public IPropagation
     mutable long arrivalComputationCount;
 
   protected:
-    virtual void initialize(int stage);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
 
   public:
     PropagationBase();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual mps getPropagationSpeed() const { return propagationSpeed; }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual mps getPropagationSpeed() const override { return propagationSpeed; }
 };
 
 } // namespace physicallayer

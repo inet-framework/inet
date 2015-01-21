@@ -37,25 +37,25 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
     Hz bandwidth;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
 
   public:
     NarrowbandReceiverBase();
     virtual ~NarrowbandReceiverBase();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMinReceptionPower() const { return sensitivity; }
+    virtual W getMinReceptionPower() const override { return sensitivity; }
 
-    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
 
-    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 
     virtual const IModulation *getModulation() const { return modulation; }
     virtual const IErrorModel *getErrorModel() const { return errorModel; }

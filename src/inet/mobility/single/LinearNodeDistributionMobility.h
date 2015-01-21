@@ -42,16 +42,16 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
     double orientation;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
     /** @brief Save the host position. */
-    virtual void finish();
+    virtual void finish() override;
 
   public:
     LinearNodeDistributionMobility();

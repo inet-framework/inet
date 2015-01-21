@@ -33,13 +33,13 @@ class RTPInnerPacket : public RTPInnerPacket_Base
     RTPInnerPacket(const char *name = nullptr, int kind = 0) : RTPInnerPacket_Base(name, kind) {}
     RTPInnerPacket(const RTPInnerPacket& other) : RTPInnerPacket_Base(other) {}
     RTPInnerPacket& operator=(const RTPInnerPacket& other) { RTPInnerPacket_Base::operator=(other); return *this; }
-    virtual RTPInnerPacket *dup() const { return new RTPInnerPacket(*this); }
+    virtual RTPInnerPacket *dup() const override { return new RTPInnerPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTPInnerPacket_Base
     /**
      * Writes a short info about this RTPInnerPacket into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes a longer info about this RTPInnerPacket into the given output stream.

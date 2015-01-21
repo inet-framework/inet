@@ -36,15 +36,15 @@ class INET_API ListeningBase : public IListening
   public:
     ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IRadio *getReceiver() const { return receiver; }
+    virtual const IRadio *getReceiver() const override { return receiver; }
 
-    virtual const simtime_t getStartTime() const { return startTime; }
-    virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
 
-    virtual const Coord getStartPosition() const { return startPosition; }
-    virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const override { return startPosition; }
+    virtual const Coord getEndPosition() const override { return endPosition; }
 };
 
 } // namespace physicallayer

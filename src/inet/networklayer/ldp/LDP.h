@@ -177,12 +177,12 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     LDP();
     virtual ~LDP();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void sendHelloTo(IPv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);
@@ -200,19 +200,19 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+    virtual void socketEstablished(int connId, void *yourPtr) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketPeerClosed(int connId, void *yourPtr) override;
+    virtual void socketClosed(int connId, void *yourPtr) override;
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override { delete status; }
     //@}
 
     // IClassifier
-    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color);
+    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
 
     // cListener
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 };
 
 } // namespace inet

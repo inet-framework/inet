@@ -34,8 +34,8 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
 {
   public:
     TCPBaseAlgStateVariables();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     /// retransmit count
     //@{
@@ -145,7 +145,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
      * Converting uint32 echoedTS to simtime_t and calling rttMeasurementComplete()
      * to update state vars with new measured RTT value.
      */
-    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
+    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
 
     /**
      * Send data, observing Nagle's algorithm and congestion window
@@ -169,36 +169,36 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     /**
      * Create timers, etc.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual void established(bool active);
+    virtual void established(bool active) override;
 
-    virtual void connectionClosed();
+    virtual void connectionClosed() override;
 
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.
      */
-    virtual void processTimer(cMessage *timer, TCPEventCode& event);
+    virtual void processTimer(cMessage *timer, TCPEventCode& event) override;
 
-    virtual void sendCommandInvoked();
+    virtual void sendCommandInvoked() override;
 
-    virtual void receivedOutOfOrderSegment();
+    virtual void receivedOutOfOrderSegment() override;
 
-    virtual void receiveSeqChanged();
+    virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq);
+    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
 
-    virtual void ackSent();
+    virtual void ackSent() override;
 
-    virtual void dataSent(uint32 fromseq);
+    virtual void dataSent(uint32 fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
 
-    virtual void restartRexmitTimer();
+    virtual void restartRexmitTimer() override;
 };
 
 } // namespace tcp

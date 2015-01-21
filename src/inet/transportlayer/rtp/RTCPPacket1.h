@@ -34,15 +34,15 @@ class RTCPPacket : public RTCPPacket_Base
     RTCPPacket(const char *name = nullptr, int kind = 0) : RTCPPacket_Base(name, kind) {};
     RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other) {}
     RTCPPacket& operator=(const RTCPPacket& other) { RTCPPacket_Base::operator=(other); return *this; }
-    virtual RTCPPacket *dup() const { return new RTCPPacket(*this); }
+    virtual RTCPPacket *dup() const override { return new RTCPPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPPacket_Base
 
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
-    virtual int getRtcpLength() const { return (int)(getByteLength() / 4) - 1; }
-    virtual void setRtcpLength(int rtcpLength_var) { throw cRuntimeError("Don't use setRtcpLength()!"); };
+    virtual int getRtcpLength() const override { return (int)(getByteLength() / 4) - 1; }
+    virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
 };
 
 class RTCPCompoundPacket : public RTCPCompoundPacket_Base
@@ -51,7 +51,7 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
     RTCPCompoundPacket(const char *name = nullptr, int kind = 0) : RTCPCompoundPacket_Base(name, kind) {};
     RTCPCompoundPacket(const RTCPCompoundPacket& other) : RTCPCompoundPacket_Base(other) {}
     RTCPCompoundPacket& operator=(const RTCPCompoundPacket& other) { RTCPCompoundPacket_Base::operator=(other); return *this; }
-    virtual RTCPCompoundPacket *dup() const { return new RTCPCompoundPacket(*this); }
+    virtual RTCPCompoundPacket *dup() const override { return new RTCPCompoundPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base
     void addRTCPPacket(RTCPPacket *rtcpPacket);
 };

@@ -39,8 +39,8 @@ class WRRScheduler : public SchedulerBase
 
   protected:
     virtual ~WRRScheduler();
-    virtual void initialize();
-    virtual bool schedulePacket();
+    virtual void initialize() override;
+    virtual bool schedulePacket() override;
 };
 
 } // namespace inet

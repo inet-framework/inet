@@ -48,19 +48,19 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
   public:
     RTCP();
     virtual ~RTCP();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     /**
      * Initializes variables.
      */
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      * Message handling. Dispatches messages by arrival gate.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Handles messages from the RTP module.

@@ -41,23 +41,23 @@ class INET_API TCPNoCongestionControl : public TCPBaseAlg
     TCPNoCongestionControlStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPNoCongestionControlStateVariables object. */
-    virtual TCPStateVariables *createStateVariables()
+    virtual TCPStateVariables *createStateVariables() override
     {
         return new TCPNoCongestionControlStateVariables();
     }
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event);
+    virtual void processRexmitTimer(TCPEventCode& event) override;
 
   public:
     /** Ctor */
     TCPNoCongestionControl();
 
     /** Initialize state vars */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 };
 
 } // namespace tcp

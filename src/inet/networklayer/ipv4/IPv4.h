@@ -232,15 +232,15 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual ~IPv4();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Processing of IPv4 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cPacket *packet);
+    virtual void endService(cPacket *packet) override;
 
     // NetFilter functions:
 
@@ -274,22 +274,22 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     /**
      * registers a Hook to be executed during datagram processing
      */
-    virtual void registerHook(int priority, IHook *hook);
+    virtual void registerHook(int priority, IHook *hook) override;
 
     /**
      * unregisters a Hook to be executed during datagram processing
      */
-    virtual void unregisterHook(int priority, IHook *hook);
+    virtual void unregisterHook(int priority, IHook *hook) override;
 
     /**
      * drop a previously queued datagram
      */
-    void dropQueuedDatagram(const INetworkDatagram *datagram);
+    void dropQueuedDatagram(const INetworkDatagram *datagram) override;
 
     /**
      * re-injects a previously queued datagram
      */
-    void reinjectQueuedDatagram(const INetworkDatagram *datagram);
+    void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 
     /**
      * send packet on transportOut gate specified by protocolId
@@ -299,10 +299,10 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     /**
      * ILifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /// cListener method
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
   protected:
     virtual bool isNodeUp();

@@ -63,16 +63,16 @@ class INET_API APSKDimensionalTransmitter : public NarrowbandTransmitterBase
     std::vector<FrequencyGainEntry> frequencyGains;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
     APSKDimensionalTransmitter();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

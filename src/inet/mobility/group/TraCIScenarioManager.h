@@ -89,10 +89,10 @@ class INET_API TraCIScenarioManager : public cSimpleModule
     };
 
     ~TraCIScenarioManager();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void handleSelfMsg(cMessage *msg);
 
     std::pair<uint32_t, std::string> commandGetVersion();

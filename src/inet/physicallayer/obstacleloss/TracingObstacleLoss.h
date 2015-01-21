@@ -47,7 +47,7 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
 
       public:
         TotalObstacleLossComputation(const TracingObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition);
-        void visit(const cObject *object) const;
+        void visit(const cObject *object) const override;
         double getTotalLoss() const { return totalLoss; }
     };
 
@@ -89,8 +89,8 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     //@}
 
   protected:
-    virtual void initialize(int stage);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
 
     virtual double computeDielectricLoss(const Material *material, Hz frequency, m distance) const;
     virtual double computeReflectionLoss(const Material *incidentMaterial, const Material *refractiveMaterial, double angle) const;
@@ -98,8 +98,8 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
 
   public:
     TracingObstacleLoss();
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const override;
 };
 
 } // namespace physicallayer

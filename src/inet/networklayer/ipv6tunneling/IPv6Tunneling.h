@@ -136,15 +136,15 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     /**
      * Initialize tunnel manager.
      */
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      * Receive messages from IPv6 module and encapsulate/decapsulate them.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      * Creates a tunnel with given entry and exit point, which will be used for datagrams

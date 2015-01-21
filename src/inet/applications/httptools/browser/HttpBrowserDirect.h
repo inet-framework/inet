@@ -37,15 +37,15 @@ namespace httptools {
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
   protected:
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
-    int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void sendRequestToServer(BrowseEvent be);
-    virtual void sendRequestToServer(HttpRequestMessage *request);
-    virtual void sendRequestToRandomServer();
-    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
+    virtual void sendRequestToServer(BrowseEvent be) override;
+    virtual void sendRequestToServer(HttpRequestMessage *request) override;
+    virtual void sendRequestToRandomServer() override;
+    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 };
 
 } // namespace httptools

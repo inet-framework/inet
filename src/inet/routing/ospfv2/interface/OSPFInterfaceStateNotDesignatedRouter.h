@@ -27,8 +27,8 @@ namespace ospf {
 class InterfaceStateNotDesignatedRouter : public InterfaceState
 {
   public:
-    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event);
-    virtual Interface::InterfaceStateType getState() const { return Interface::NOT_DESIGNATED_ROUTER_STATE; }
+    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;
+    virtual Interface::InterfaceStateType getState() const override { return Interface::NOT_DESIGNATED_ROUTER_STATE; }
 };
 
 } // namespace ospf

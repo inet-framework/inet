@@ -78,7 +78,7 @@ class DSRPkt : public IPv4Datagram
     DSRPkt (const DSRPkt  &m);
     DSRPkt (struct dsr_pkt *dp,int interface_id);
     DSRPkt &    operator= (const DSRPkt &m);
-    virtual DSRPkt *dup() const {return new DSRPkt(*this);}
+    virtual DSRPkt *dup() const override {return new DSRPkt(*this);}
     //void addOption();
     //readOption();
 #ifdef MobilityFramework
@@ -101,7 +101,7 @@ class DSRPkt : public IPv4Datagram
 #endif
     struct dsr_opt_hdr * getOptions() const {return options;}
     void  setOptions(dsr_opt_hdr * op) {if (options !=nullptr) free(options);  options=op;}
-    virtual std::string detailedInfo() const;
+    virtual std::string detailedInfo() const override;
 
     void resetCostVector();
     virtual void getCostVector(EtxCost &cost,int &size); // Copy
@@ -144,7 +144,7 @@ class DSRPktExt: public IPv4Datagram
     EtxList * delExtension(int len);
     EtxList * getExtension() {return extension;}
     int getSizeExtension () {return size;}
-    virtual DSRPktExt *dup() const {return new DSRPktExt(*this);}
+    virtual DSRPktExt *dup() const override {return new DSRPktExt(*this);}
 
 };
 

@@ -56,9 +56,9 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     static simsignal_t queueingTimeSignal;
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
     virtual void notifyListeners();
 
@@ -84,32 +84,32 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      * If the queue is currently empty, it should send a packet when
      * when one becomes available.
      */
-    virtual void requestPacket();
+    virtual void requestPacket() override;
 
     /**
      * Returns number of pending requests.
      */
-    virtual int getNumPendingRequests() { return packetRequested; }
+    virtual int getNumPendingRequests() override { return packetRequested; }
 
     /**
      * Clear all queued packets and stored requests.
      */
-    virtual void clear();
+    virtual void clear() override;
 
     /**
      * Return a packet from the queue directly.
      */
-    virtual cMessage *pop();
+    virtual cMessage *pop() override;
 
     /**
      * Implementation of IPassiveQueue::addListener().
      */
-    virtual void addListener(IPassiveQueueListener *listener);
+    virtual void addListener(IPassiveQueueListener *listener) override;
 
     /**
      * Implementation of IPassiveQueue::removeListener().
      */
-    virtual void removeListener(IPassiveQueueListener *listener);
+    virtual void removeListener(IPassiveQueueListener *listener) override;
 };
 
 } // namespace inet

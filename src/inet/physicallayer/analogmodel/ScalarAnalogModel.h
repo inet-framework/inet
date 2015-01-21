@@ -30,11 +30,11 @@ class INET_API ScalarAnalogModel : public AnalogModelBase
     virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
 
   public:
-    virtual void printToStream(std::ostream& stream) const { stream << "ScalarAnalogModel"; }
+    virtual void printToStream(std::ostream& stream) const override { stream << "ScalarAnalogModel"; }
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer

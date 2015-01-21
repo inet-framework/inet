@@ -127,7 +127,7 @@ class OrigNode : public cObject
     void clear();
     OrigNode();
     ~OrigNode();
-    virtual std::string info() const;
+    virtual std::string info() const override;
 };
 
 
@@ -150,7 +150,7 @@ class NeighNode : public cObject
     ~NeighNode();
     NeighNode() {clear();}
     NeighNode(OrigNode *, OrigNode *, const L3Address &, BatmanIf *, const uint32_t&, const uint32_t&);
-    virtual std::string info() const;
+    virtual std::string info() const override;
 };
 
 

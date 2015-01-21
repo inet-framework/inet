@@ -151,7 +151,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
       public:
         PIMDMOutInterface(InterfaceEntry *ie, DownstreamInterface *downstream)
             : IMulticastRoute::OutInterface(ie), downstream(downstream) {}
-        virtual bool isEnabled() { return downstream->isInOlist(); }
+        virtual bool isEnabled() override { return downstream->isInOlist(); }
     };
 
   private:
@@ -186,7 +186,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
   private:
     // process signals
-    void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
     void unroutableMulticastPacketArrived(IPv4Address srcAddress, IPv4Address destAddress, unsigned short ttl);
     void multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
     void multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl);
@@ -238,12 +238,12 @@ class INET_API PIMDM : public PIMBase, protected cListener
     void clearRoutes();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessageWhenUp(cMessage *msg);
-    virtual void initialize(int stage);
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void initialize(int stage) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
     virtual void stopPIMRouting();
 };
 

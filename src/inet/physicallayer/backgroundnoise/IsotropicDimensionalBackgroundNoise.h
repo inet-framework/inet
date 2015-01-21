@@ -33,14 +33,14 @@ class INET_API IsotropicDimensionalBackgroundNoise : public cModule, public IBac
     W power;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     IsotropicDimensionalBackgroundNoise();
 
   public:
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const INoise *computeNoise(const IListening *listening) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const INoise *computeNoise(const IListening *listening) const override;
 };
 
 } // namespace physicallayer

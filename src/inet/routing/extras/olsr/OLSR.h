@@ -186,7 +186,7 @@ class OLSR_MsgTimer : public OLSR_Timer
   public:
     OLSR_MsgTimer(OLSR* agent) : OLSR_Timer(agent) {}
     OLSR_MsgTimer():OLSR_Timer() {}
-    void expire();
+    void expire() override;
 };
 
 /// Timer for sending HELLO messages.
@@ -195,7 +195,7 @@ class OLSR_HelloTimer : public OLSR_Timer
   public:
     OLSR_HelloTimer(OLSR* agent) : OLSR_Timer(agent) {}
     OLSR_HelloTimer():OLSR_Timer() {}
-    void expire();
+    void expire() override;
 };
 
 
@@ -205,7 +205,7 @@ class OLSR_TcTimer : public OLSR_Timer
   public:
     OLSR_TcTimer(OLSR* agent) : OLSR_Timer(agent) {}
     OLSR_TcTimer():OLSR_Timer() {}
-    void expire();
+    void expire() override;
 };
 
 
@@ -215,7 +215,7 @@ class OLSR_MidTimer : public OLSR_Timer
   public:
     OLSR_MidTimer(OLSR* agent) : OLSR_Timer(agent) {}
     OLSR_MidTimer():OLSR_Timer() {}
-    virtual void expire();
+    virtual void expire() override;
 };
 
 
@@ -232,7 +232,7 @@ class OLSR_DupTupleTimer : public OLSR_Timer
     }
     void setTuple(OLSR_dup_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_DupTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
 };
 
 /// Timer for removing link tuples: OLSR_link_tuple.
@@ -243,7 +243,7 @@ class OLSR_LinkTupleTimer : public OLSR_Timer
 
     void setTuple(OLSR_link_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_LinkTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
   protected:
     //OLSR_link_tuple*  tuple_; ///< OLSR_link_tuple which must be removed.
     bool            first_time_;
@@ -263,7 +263,7 @@ class OLSR_Nb2hopTupleTimer : public OLSR_Timer
 
     void setTuple(OLSR_nb2hop_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_Nb2hopTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
 //  protected:
 //  OLSR_nb2hop_tuple*  tuple_; ///< OLSR_link_tuple which must be removed.
 
@@ -283,7 +283,7 @@ class OLSR_MprSelTupleTimer : public OLSR_Timer
 
     void setTuple(OLSR_mprsel_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_MprSelTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
 
 //  protected:
 //  OLSR_mprsel_tuple*  tuple_; ///< OLSR_link_tuple which must be removed.
@@ -303,7 +303,7 @@ class OLSR_TopologyTupleTimer : public OLSR_Timer
 
     void setTuple(OLSR_topology_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_TopologyTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
 //  protected:
 //  OLSR_topology_tuple*    tuple_; ///< OLSR_link_tuple which must be removed.
 
@@ -320,7 +320,7 @@ class OLSR_IfaceAssocTupleTimer : public OLSR_Timer
 
     void setTuple(OLSR_iface_assoc_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
     ~OLSR_IfaceAssocTupleTimer();
-    virtual void expire();
+    virtual void expire() override;
 //  protected:
 //  OLSR_iface_assoc_tuple* tuple_; ///< OLSR_link_tuple which must be removed.
 
@@ -517,15 +517,15 @@ class OLSR : public ManetRoutingBase
     virtual int     degree(OLSR_nb_tuple*);
 
     static bool seq_num_bigger_than(uint16_t, uint16_t);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     virtual void    mac_failed(IPv4Datagram*);
     virtual void    recv(cMessage *p) {}
 
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
     //virtual void processPromiscuous(const cObject *details){};
-    virtual void processLinkBreak(const cObject *details);
+    virtual void processLinkBreak(const cObject *details) override;
     virtual void scheduleNextEvent();
 
     L3Address getIfaceAddressFromIndex(int index);
@@ -542,17 +542,17 @@ class OLSR : public ManetRoutingBase
     static int      node_id(const nsaddr_t&);
 
     // Routing information access
-    virtual bool supportGetRoute() {return true;}
-    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &);
-    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &);
-    virtual bool isProactive();
-    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) {}
-    virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *, L3Address &);
-    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&);
-    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0);
-    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0);
+    virtual bool supportGetRoute() override {return true;}
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &) override;
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &) override;
+    virtual bool isProactive() override;
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) override {}
+    virtual bool isOurType(cPacket *) override;
+    virtual bool getDestAddress(cPacket *, L3Address &) override;
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&) override;
+    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&) override;
+    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0) override;
+    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0) override;
 };
 
 } // namespace inetmanet

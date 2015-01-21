@@ -39,19 +39,19 @@ class INET_API Arrival : public virtual IArrival
   public:
     Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const simtime_t getStartPropagationTime() const { return startPropagationTime; }
-    virtual const simtime_t getEndPropagationTime() const { return endPropagationTime; }
+    virtual const simtime_t getStartPropagationTime() const override { return startPropagationTime; }
+    virtual const simtime_t getEndPropagationTime() const override { return endPropagationTime; }
 
-    virtual const simtime_t getStartTime() const { return startTime; }
-    virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
 
-    virtual const Coord getStartPosition() const { return startPosition; }
-    virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const override { return startPosition; }
+    virtual const Coord getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
 };
 
 } // namespace physicallayer

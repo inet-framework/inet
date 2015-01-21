@@ -63,7 +63,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
     /**
      * set connection queue.
      */
-    virtual void setConnection(TcpLwipConnection *connP);
+    virtual void setConnection(TcpLwipConnection *connP) override;
 
     /**
      * Called on SEND app command, it inserts in the queue the data the user
@@ -73,7 +73,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * The msg object should not be referenced after this point (sendQueue may
      * delete it.)
      */
-    virtual void enqueueAppData(cPacket *msgP);
+    virtual void enqueueAppData(cPacket *msgP) override;
 
     /**
      * Copy data to the buffer for send to LWIP.
@@ -82,19 +82,19 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      *
      * called before called socket->send_data()
      */
-    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const override;
 
     /**
      * Remove msgLengthP bytes from TCP Layer queue
      *
      * called with return value of socket->send_data() if larger than 0
      */
-    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP) override;
 
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    unsigned long getBytesAvailable() const;
+    unsigned long getBytesAvailable() const override;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -108,7 +108,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * @param tcpDataP: the tcp segment (with tcp header) created by LWIP
      * @param tcpLenthP: the length of tcp segment.
      */
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -148,20 +148,20 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
     /**
      * Set the connection.
      */
-    virtual void setConnection(TcpLwipConnection *connP);
+    virtual void setConnection(TcpLwipConnection *connP) override;
 
     /**
      * called back from lwip::tcp_input()
      */
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void *bufferP, size_t bufferLengthP);
+            const void *bufferP, size_t bufferLengthP) override;
 
     /**
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successful
      */
-    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP) override;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -171,22 +171,22 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
      *
      * called after socket->read_data() successful
      */
-    virtual cPacket *extractBytesUpTo();
+    virtual cPacket *extractBytesUpTo() override;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() const;
+    virtual uint32 getAmountOfBufferedBytes() const override;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const;
+    virtual uint32 getQueueLength() const override;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() const;
+    virtual void getQueueStatus() const override;
 
     /**
      * notify the queue about output messages
@@ -194,7 +194,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
      * called when connM send out a packet.
      * for read AckNo, if have
      */
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP);
+    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
 
   protected:
     long int bytesInQueueM;

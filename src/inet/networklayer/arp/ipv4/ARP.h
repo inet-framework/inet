@@ -92,19 +92,19 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
   public:
     ARP();
     virtual ~ARP();
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /// IARP implementation  @{
-    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie);
-    virtual L3Address getL3AddressFor(const MACAddress& addr) const;
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
+    virtual L3Address getL3AddressFor(const MACAddress& addr) const override;
     /// @}
 
   protected:
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void handleMessageWhenDown(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    virtual void finish();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void finish() override;
 
     virtual bool isNodeUp();
     virtual void stop();

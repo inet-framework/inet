@@ -840,25 +840,25 @@ class _RootInstance : public _StateInstance
     }
 
   public:
-    virtual ID id() { return 0; }
+    virtual ID id() override { return 0; }
 
-    virtual Key key()
+    virtual Key key() override
     {
         // Can't happen: key is only called by users, and they don't know about Root.
         assert(false);
         return 0;
     }
 
-    virtual void createBox() {}
-    virtual void deleteBox() {}
+    virtual void createBox() override {}
+    virtual void deleteBox() override {}
 #ifdef MACHO_SNAPSHOTS
     virtual void cloneBox(void *box) {}
 #endif // ifdef MACHO_SNAPSHOTS
 
-    virtual const char *name() { return "Root"; }
+    virtual const char *name() override { return "Root"; }
 
     // 'Virtual constructor' needed for cloning.
-    virtual _StateInstance *create(_MachineBase& machine, _StateInstance *parent)
+    virtual _StateInstance *create(_MachineBase& machine, _StateInstance *parent) override
     {
         return new _RootInstance(machine, parent);
     }
@@ -890,31 +890,31 @@ class _SubstateInstance : public _StateInstance
             Macho::_deleteBox<Box>(myBox, myBoxPlace);
     }
 
-    virtual const char *name() { return S::_state_name(); }
+    virtual const char *name() override { return S::_state_name(); }
 
-    virtual ID id()
+    virtual ID id() override
     {
         return StateID<S>::value;
     }
 
-    virtual Key key()
+    virtual Key key() override
     {
         return S::key();
     }
 
     // 'Virtual constructor' needed for cloning.
-    virtual _StateInstance *create(_MachineBase& machine, _StateInstance *parent)
+    virtual _StateInstance *create(_MachineBase& machine, _StateInstance *parent) override
     {
         return new _SubstateInstance<S>(machine, parent);
     }
 
-    virtual void createBox()
+    virtual void createBox() override
     {
         if (!this->myBox)
             this->myBox = Macho::_createBox<Box>(myBoxPlace);
     }
 
-    virtual void deleteBox()
+    virtual void deleteBox() override
     {
         assert(myBox);
         Macho::_deleteBox<Box>(myBox, myBoxPlace);
@@ -1281,10 +1281,10 @@ class _Initializer
 class _StaticInitializer : public _Initializer
 {
     // Copy of Singleton is Singleton.
-    virtual _Initializer *clone() { return this; }
+    virtual _Initializer *clone() override { return this; }
 
     // Singletons are never destroyed.
-    virtual void destroy() {}
+    virtual void destroy() override {}
 };
 
 // Default initializer: provides no parameters, calls state's 'init' method
@@ -1292,7 +1292,7 @@ class _StaticInitializer : public _Initializer
 class _DefaultInitializer : public _StaticInitializer
 {
   public:
-    virtual void execute(_StateInstance& instance)
+    virtual void execute(_StateInstance& instance) override
     {
         instance.init(false);
     }
@@ -1303,7 +1303,7 @@ class _DefaultInitializer : public _StaticInitializer
 class _HistoryInitializer : public _StaticInitializer
 {
   public:
-    virtual void execute(_StateInstance& instance)
+    virtual void execute(_StateInstance& instance) override
     {
         instance.init(true);
     }
@@ -1315,17 +1315,17 @@ class _AdaptingInitializer : public _Initializer
   public:
     _AdaptingInitializer(const _MachineBase& machine) : myMachine(machine) {}
 
-    virtual void execute(_StateInstance& instance)
+    virtual void execute(_StateInstance& instance) override
     {
         instance.init(true);
     }
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _AdaptingInitializer(myMachine);
     }
 
-    virtual Key adapt(Key key);
+    virtual Key adapt(Key key) override;
 
   protected:
     const _MachineBase& myMachine;
@@ -1340,12 +1340,12 @@ class _Initializer1 : public _Initializer
         : myParam1(p1)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer1<S, P1>(myParam1);
     }
 
-    virtual void execute(_StateInstance& instance)
+    virtual void execute(_StateInstance& instance) override
     {
         ::inet::_VS8_Bug_101615::execute<S, P1>(instance, myParam1);
     }
@@ -1362,12 +1362,12 @@ class _Initializer2 : public _Initializer
         , myParam2(p2)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer2<S, P1, P2>(myParam1, myParam2);
     }
 
-    void execute(_StateInstance& instance)
+    void execute(_StateInstance& instance) override
     {
         ::inet::_VS8_Bug_101615::execute<S, P1, P2>(instance, myParam1, myParam2);
     }
@@ -1386,12 +1386,12 @@ class _Initializer3 : public _Initializer
         , myParam3(p3)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer3<S, P1, P2, P3>(myParam1, myParam2, myParam3);
     }
 
-    void execute(_StateInstance& instance)
+    void execute(_StateInstance& instance) override
     {
         ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3>(instance, myParam1, myParam2, myParam3);
     }
@@ -1412,12 +1412,12 @@ class _Initializer4 : public _Initializer
         , myParam4(p4)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer4<S, P1, P2, P3, P4>(myParam1, myParam2, myParam3, myParam4);
     }
 
-    void execute(_StateInstance& instance)
+    void execute(_StateInstance& instance) override
     {
         ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3, P4>(instance, myParam1, myParam2, myParam3, myParam4);
     }
@@ -1440,12 +1440,12 @@ class _Initializer5 : public _Initializer
         , myParam5(p5)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer5<S, P1, P2, P3, P4, P5>(myParam1, myParam2, myParam3, myParam4, myParam5);
     }
 
-    void execute(_StateInstance& instance)
+    void execute(_StateInstance& instance) override
     {
         ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3, P4, P5>(instance, myParam1, myParam2, myParam3, myParam4, myParam5);
     }
@@ -1470,12 +1470,12 @@ class _Initializer6 : public _Initializer
         , myParam6(p6)
     {}
 
-    virtual _Initializer *clone()
+    virtual _Initializer *clone() override
     {
         return new _Initializer6<S, P1, P2, P3, P4, P5, P6>(myParam1, myParam2, myParam3, myParam4, myParam5, myParam6);
     }
 
-    void execute(_StateInstance& instance)
+    void execute(_StateInstance& instance) override
     {
         _VS8_Bug_101615::execute<S, P1, P2, P3, P4, P5, P6>(instance, myParam1, myParam2, myParam3, myParam4, myParam5, myParam6);
     }

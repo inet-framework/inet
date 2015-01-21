@@ -100,36 +100,36 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     virtual ~TCPVirtualDataRcvQueue();
 
     /** Method inherited from TCPReceiveQueue */
-    virtual void init(uint32 startSeq);
+    virtual void init(uint32 startSeq) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg);
+    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual cPacket *extractBytesUpTo(uint32 seq);
+    virtual cPacket *extractBytesUpTo(uint32 seq) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 getAmountOfBufferedBytes();
+    virtual uint32 getAmountOfBufferedBytes() override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer);
+    virtual uint32 getAmountOfFreeBytes(uint32 maxRcvBuffer) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 getQueueLength();
+    virtual uint32 getQueueLength() override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual void getQueueStatus();
+    virtual void getQueueStatus() override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 getLE(uint32 fromSeqNum);
+    virtual uint32 getLE(uint32 fromSeqNum) override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 getRE(uint32 toSeqNum);
+    virtual uint32 getRE(uint32 toSeqNum) override;
 
-    virtual uint32 getFirstSeqNo();
+    virtual uint32 getFirstSeqNo() override;
 };
 
 } // namespace tcp

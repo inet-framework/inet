@@ -39,7 +39,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
         const IRadioFrame *frame;
 
       public:
-        void visit(const cObject *radio) const;
+        void visit(const cObject *radio) const override;
         GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
             radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
     };
@@ -54,20 +54,20 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
     Coord cellSize;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     void fillCubeVector();
 
   public:
     GridNeighborCache();
     virtual ~GridNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual void addRadio(const IRadio *radio);
-    virtual void removeRadio(const IRadio *radio);
-    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
+    virtual void addRadio(const IRadio *radio) override;
+    virtual void removeRadio(const IRadio *radio) override;
+    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const override;
 };
 
 } // namespace physicallayer

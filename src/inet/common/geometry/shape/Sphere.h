@@ -36,8 +36,8 @@ class INET_API Sphere : public ShapeBase
     const double getRadius() const { return radius; }
     void setRadius(double radius) { this->radius = radius; }
 
-    virtual Coord computeBoundingBoxSize() const { return Coord(radius * 2, radius * 2, radius * 2); }
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
+    virtual Coord computeBoundingBoxSize() const override { return Coord(radius * 2, radius * 2, radius * 2); }
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const override;
 };
 
 } // namespace inet

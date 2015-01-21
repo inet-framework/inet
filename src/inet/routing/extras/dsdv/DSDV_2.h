@@ -70,9 +70,9 @@ class INET_API DSDV_2 : public cSimpleModule    // proactive protocol, don't nee
     ~DSDV_2();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 
 };
 
@@ -86,7 +86,7 @@ class INET_API DSDVIPv4Route : public IPv4Route
         simtime_t expiryTime;  // time the routing entry is valid until
 
     public:
-        virtual bool isValid() const { return expiryTime == 0 || expiryTime > simTime(); }
+        virtual bool isValid() const override { return expiryTime == 0 || expiryTime > simTime(); }
 
         simtime_t getExpiryTime() const {return expiryTime;}
         void setExpiryTime(simtime_t time) {expiryTime = time;}

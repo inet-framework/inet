@@ -30,12 +30,12 @@ class INET_API AntennaBase : public IAntenna, public cModule
     IMobility *mobility;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     AntennaBase();
 
-    virtual IMobility *getMobility() const { return mobility; }
+    virtual IMobility *getMobility() const override { return mobility; }
 };
 
 } // namespace physicallayer

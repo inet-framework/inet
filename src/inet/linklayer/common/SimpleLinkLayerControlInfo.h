@@ -35,14 +35,14 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
     SimpleLinkLayerControlInfo(const SimpleLinkLayerControlInfo& other) : SimpleLinkLayerControlInfo_Base(other) {}
     SimpleLinkLayerControlInfo& operator=(const SimpleLinkLayerControlInfo& other) { SimpleLinkLayerControlInfo_Base::operator=(other); return *this; }
 
-    virtual SimpleLinkLayerControlInfo *dup() const { return new SimpleLinkLayerControlInfo(*this); }
+    virtual SimpleLinkLayerControlInfo *dup() const override { return new SimpleLinkLayerControlInfo(*this); }
 
-    virtual MACAddress getSourceAddress() const { return getSrc(); }
-    virtual void setSourceAddress(const MACAddress& address) { setSrc(address); }
-    virtual MACAddress getDestinationAddress() const { return getDest(); }
-    virtual void setDestinationAddress(const MACAddress& address) { setDest(address); };
-    virtual int getInterfaceId() const { return SimpleLinkLayerControlInfo_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) { SimpleLinkLayerControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual MACAddress getSourceAddress() const override { return getSrc(); }
+    virtual void setSourceAddress(const MACAddress& address) override { setSrc(address); }
+    virtual MACAddress getDestinationAddress() const override { return getDest(); }
+    virtual void setDestinationAddress(const MACAddress& address) override { setDest(address); };
+    virtual int getInterfaceId() const override { return SimpleLinkLayerControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) override { SimpleLinkLayerControlInfo_Base::setInterfaceId(interfaceId); }
 };
 
 } // namespace inet

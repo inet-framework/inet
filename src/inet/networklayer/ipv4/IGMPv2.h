@@ -164,10 +164,10 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     int numLeavesRecv;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
     virtual ~IGMPv2();
 
   protected:

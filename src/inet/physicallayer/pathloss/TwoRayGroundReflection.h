@@ -34,12 +34,12 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
     m hr;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     TwoRayGroundReflection();
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 
 } // namespace physicallayer

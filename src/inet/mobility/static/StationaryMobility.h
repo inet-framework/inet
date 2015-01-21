@@ -34,7 +34,7 @@ class INET_API StationaryMobility : public MobilityBase
 {
   protected:
     /** @brief Never happens. */
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message) override;
 
   public:
     StationaryMobility()
@@ -44,15 +44,15 @@ class INET_API StationaryMobility : public MobilityBase
     StationaryMobility(Coord position) { lastPosition = position; }
 
     /** @brief Returns the current position at the current simulation time. */
-    virtual Coord getCurrentPosition() { return lastPosition; }
+    virtual Coord getCurrentPosition() override { return lastPosition; }
 
     /** @brief Returns the current speed at the current simulation time. */
-    virtual Coord getCurrentSpeed() { return Coord::ZERO; }
+    virtual Coord getCurrentSpeed() override { return Coord::ZERO; }
 
-    virtual double getMaxSpeed() const { return 0; }
+    virtual double getMaxSpeed() const override { return 0; }
 
-    virtual Coord getConstraintAreaMax() const { return lastPosition; }
-    virtual Coord getConstraintAreaMin() const { return lastPosition; }
+    virtual Coord getConstraintAreaMax() const override { return lastPosition; }
+    virtual Coord getConstraintAreaMin() const override { return lastPosition; }
 };
 
 } // namespace inet

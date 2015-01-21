@@ -34,19 +34,19 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
   protected:
     NetworkProtocolBase();
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleUpperCommand(cMessage *message);
+    virtual void handleUpperCommand(cMessage *message) override;
 
     virtual void sendUp(cMessage *message, int transportProtocol);
     virtual void sendDown(cMessage *message, int interfaceId = -1);
 
-    virtual bool isUpperMessage(cMessage *message);
-    virtual bool isLowerMessage(cMessage *message);
+    virtual bool isUpperMessage(cMessage *message) override;
+    virtual bool isLowerMessage(cMessage *message) override;
 
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_NETWORK_LAYER; }
-    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
 };
 
 } // namespace inet

@@ -70,11 +70,11 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     MultiFieldClassifier() {}
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual int classifyPacket(cPacket *packet);
 };

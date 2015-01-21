@@ -29,9 +29,9 @@ class INET_API TransportProtocolBase : public LayeredProtocolBase
     TransportProtocolBase() {};
 
   protected:
-    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
 };
 
 } // namespace inet

@@ -28,9 +28,9 @@ class IPv6RoutingHeader : public IPv6RoutingHeader_Base
     IPv6RoutingHeader() : IPv6RoutingHeader_Base() {}
     IPv6RoutingHeader(const IPv6RoutingHeader& other) : IPv6RoutingHeader_Base(other) {}
     IPv6RoutingHeader& operator=(const IPv6RoutingHeader& other) { IPv6RoutingHeader_Base::operator=(other); return *this; }
-    virtual IPv6RoutingHeader *dup() const { return new IPv6RoutingHeader(*this); }
+    virtual IPv6RoutingHeader *dup() const override { return new IPv6RoutingHeader(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from IPv6RoutingHeader_Base
-    virtual void setAddressArraySize(unsigned int size);
+    virtual void setAddressArraySize(unsigned int size) override;
 };
 
 } // namespace inet

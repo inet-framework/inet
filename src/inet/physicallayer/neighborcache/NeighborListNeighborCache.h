@@ -53,9 +53,9 @@ class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
     double maxSpeed;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     void updateNeighborList(RadioEntry *radioEntry);
     void updateNeighborLists();
     void removeRadioFromNeighborLists(const IRadio *radio);
@@ -64,10 +64,10 @@ class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
     NeighborListNeighborCache();
     ~NeighborListNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual void addRadio(const IRadio *radio);
-    virtual void removeRadio(const IRadio *radio);
-    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual void addRadio(const IRadio *radio) override;
+    virtual void removeRadio(const IRadio *radio) override;
+    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const override;
 };
 
 } // namespace physicallayer

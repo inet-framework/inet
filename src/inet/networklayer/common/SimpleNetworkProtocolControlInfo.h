@@ -33,18 +33,18 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     SimpleNetworkProtocolControlInfo() : SimpleNetworkProtocolControlInfo_Base() {}
     SimpleNetworkProtocolControlInfo(const SimpleNetworkProtocolControlInfo& other) : SimpleNetworkProtocolControlInfo_Base(other) { copy(other); }
     SimpleNetworkProtocolControlInfo& operator=(const SimpleNetworkProtocolControlInfo& other) { if (this == &other) return *this; SimpleNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
-    virtual SimpleNetworkProtocolControlInfo *dup() const { return new SimpleNetworkProtocolControlInfo(*this); }
+    virtual SimpleNetworkProtocolControlInfo *dup() const override { return new SimpleNetworkProtocolControlInfo(*this); }
 
-    virtual short getTransportProtocol() const { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
-    virtual void setTransportProtocol(short protocol) { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
-    virtual L3Address getSourceAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const L3Address& address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
-    virtual L3Address getDestinationAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const L3Address& address) { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
-    virtual int getInterfaceId() const { return SimpleNetworkProtocolControlInfo_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) { SimpleNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
-    virtual short getHopLimit() const { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }
-    virtual void setHopLimit(short hopLimit) { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
+    virtual short getTransportProtocol() const override { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) override { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
+    virtual L3Address getSourceAddress() const override { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
+    virtual void setSourceAddress(const L3Address& address) override { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
+    virtual L3Address getDestinationAddress() const override { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
+    virtual void setDestinationAddress(const L3Address& address) override { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
+    virtual int getInterfaceId() const override { return SimpleNetworkProtocolControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) override { SimpleNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual short getHopLimit() const override { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }
+    virtual void setHopLimit(short hopLimit) override { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
 
 } // namespace inet

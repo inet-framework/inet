@@ -48,9 +48,9 @@ class INET_API PIMSplitter : public cSimpleModule
     cGate *pimSMOut = nullptr;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual void processPIMPacket(PIMPacket *pkt);
 };
 

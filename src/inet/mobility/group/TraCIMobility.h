@@ -75,22 +75,22 @@ class INET_API TraCIMobility : public MobilityBase
     };
 
     TraCIMobility() : MobilityBase(), isPreInitialized(false) {}
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void setInitialPosition();
-    virtual void finish();
-    virtual Coord getCurrentPosition()
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void setInitialPosition() override;
+    virtual void finish() override;
+    virtual Coord getCurrentPosition() override
     {
         return getPosition();
     }
 
-    virtual Coord getCurrentSpeed()
+    virtual Coord getCurrentSpeed() override
     {
         Coord v = Coord(cos(getAngleRad()), -sin(getAngleRad()));
         return v * getSpeed();
     }
 
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
     virtual void preInitialize(std::string external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
     virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, TraCIScenarioManager::VehicleSignal signals = TraCIScenarioManager::VEH_SIGNAL_UNDEF);
     virtual void move();

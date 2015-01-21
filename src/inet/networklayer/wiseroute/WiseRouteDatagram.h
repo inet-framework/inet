@@ -34,14 +34,14 @@ class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetwor
     WiseRouteDatagram(const WiseRouteDatagram& other) : WiseRouteDatagram_Base(other) {}
     WiseRouteDatagram& operator=(const WiseRouteDatagram& other) { WiseRouteDatagram_Base::operator=(other); return *this; }
 
-    virtual WiseRouteDatagram *dup() const { return new WiseRouteDatagram(*this); }
+    virtual WiseRouteDatagram *dup() const override { return new WiseRouteDatagram(*this); }
 
-    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) { setSrcAddr(address.toModuleId()); }
-    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const { return WiseRouteDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
+    virtual int getTransportProtocol() const override { return WiseRouteDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
 };
 
 } // namespace inet

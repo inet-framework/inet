@@ -50,7 +50,7 @@ class INET_API PIMNeighbor : public cObject
   public:
     PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version);
     virtual ~PIMNeighbor();
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }
@@ -128,9 +128,9 @@ class INET_API PIMNeighborTable : public cSimpleModule
     virtual PIMNeighbor *getNeighbor(int interfaceId, int index);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *) override;
     virtual void processLivenessTimer(cMessage *timer);
 };
 

@@ -69,7 +69,7 @@ class INET_API UWBIRStochasticPathLoss : public cModule, public IPathLoss
     bool shadowing;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
     virtual double getFDPathLoss(Hz frequency, m distance) const;
     virtual double getGhassemzadehPathLoss(double gamma, double S, m distance) const;
     virtual double getNarrowBandFreeSpacePathLoss(Hz frequency, m distance) const;
@@ -77,9 +77,9 @@ class INET_API UWBIRStochasticPathLoss : public cModule, public IPathLoss
 
   public:
     UWBIRStochasticPathLoss();
-    virtual void printToStream(std::ostream& stream) const;
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
-    virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const { return m(NaN); }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
+    virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const override { return m(NaN); }
 };
 
 } // namespace physicallayer

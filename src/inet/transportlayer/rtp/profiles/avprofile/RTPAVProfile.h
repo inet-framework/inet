@@ -37,7 +37,7 @@ class INET_API RTPAVProfile : public RTPProfile
      * This initialisation method sets following values:
      * name, rtcpPercentage and preferredPort.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 };
 
 } // namespace rtp

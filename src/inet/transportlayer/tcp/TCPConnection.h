@@ -150,8 +150,8 @@ class INET_API TCPStateVariables : public cObject
 {
   public:
     TCPStateVariables();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
   public:
     bool active;    // set if the connection was initiated by an active open

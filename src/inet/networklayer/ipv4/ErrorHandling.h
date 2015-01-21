@@ -37,8 +37,8 @@ class INET_API ErrorHandling : public cSimpleModule
     long numTimeExceeded;
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace inet

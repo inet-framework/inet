@@ -45,8 +45,8 @@ class INET_API EtherEncap : public cSimpleModule
     bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void processPacketFromHigherLayer(cPacket *msg);
     virtual void processFrameFromMAC(EtherFrame *msg);

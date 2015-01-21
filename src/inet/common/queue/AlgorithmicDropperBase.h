@@ -39,14 +39,14 @@ class INET_API AlgorithmicDropperBase : public cSimpleModule, public IQueueAcces
     virtual ~AlgorithmicDropperBase() {};
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
     virtual bool shouldDrop(cPacket *packet) = 0;
     virtual void dropPacket(cPacket *packet);
     virtual void sendOut(cPacket *packet);
 
-    virtual int getLength() const;
-    virtual int getByteLength() const;
+    virtual int getLength() const override;
+    virtual int getByteLength() const override;
 };
 
 } // namespace inet

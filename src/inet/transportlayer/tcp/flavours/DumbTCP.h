@@ -51,7 +51,7 @@ class INET_API DumbTCP : public TCPAlgorithm
 
   protected:
     /** Creates and returns a DumbTCPStateVariables object. */
-    virtual TCPStateVariables *createStateVariables()
+    virtual TCPStateVariables *createStateVariables() override
     {
         return new DumbTCPStateVariables();
     }
@@ -62,35 +62,35 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual ~DumbTCP();
 
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual void established(bool active);
+    virtual void established(bool active) override;
 
-    virtual void connectionClosed();
+    virtual void connectionClosed() override;
 
-    virtual void processTimer(cMessage *timer, TCPEventCode& event);
+    virtual void processTimer(cMessage *timer, TCPEventCode& event) override;
 
-    virtual void sendCommandInvoked();
+    virtual void sendCommandInvoked() override;
 
-    virtual void receivedOutOfOrderSegment();
+    virtual void receivedOutOfOrderSegment() override;
 
-    virtual void receiveSeqChanged();
+    virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32 seq);
+    virtual void receivedAckForDataNotYetSent(uint32 seq) override;
 
-    virtual void ackSent();
+    virtual void ackSent() override;
 
-    virtual void dataSent(uint32 fromseq);
+    virtual void dataSent(uint32 fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
 
-    virtual void restartRexmitTimer();
+    virtual void restartRexmitTimer() override;
 
-    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
+    virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) override;
 };
 
 } // namespace tcp

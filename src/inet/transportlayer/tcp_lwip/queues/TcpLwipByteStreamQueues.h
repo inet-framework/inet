@@ -44,17 +44,17 @@ class INET_API TcpLwipByteStreamSendQueue : public TcpLwipSendQueue
      */
     virtual ~TcpLwipByteStreamSendQueue();
 
-    virtual void setConnection(TcpLwipConnection *connP);
+    virtual void setConnection(TcpLwipConnection *connP) override;
 
-    virtual void enqueueAppData(cPacket *msgP);
+    virtual void enqueueAppData(cPacket *msgP) override;
 
-    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const override;
 
-    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP) override;
 
-    unsigned long getBytesAvailable() const;
+    unsigned long getBytesAvailable() const override;
 
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
 
     virtual void discardAckedBytes(unsigned long bytesP);
 
@@ -79,32 +79,32 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     virtual ~TcpLwipByteStreamReceiveQueue();
 
     // see TcpLwipReceiveQueue
-    virtual void setConnection(TcpLwipConnection *connP);
+    virtual void setConnection(TcpLwipConnection *connP) override;
 
     // see TcpLwipReceiveQueue
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void *bufferP, size_t bufferLengthP);
+            const void *bufferP, size_t bufferLengthP) override;
 
     // see TcpLwipReceiveQueue
-    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP) override;
 
     // see TcpLwipReceiveQueue
     virtual unsigned long getExtractableBytesUpTo() const;
 
     // see TcpLwipReceiveQueue
-    virtual cPacket *extractBytesUpTo();
+    virtual cPacket *extractBytesUpTo() override;
 
     // see TcpLwipReceiveQueue
-    virtual uint32 getAmountOfBufferedBytes() const;
+    virtual uint32 getAmountOfBufferedBytes() const override;
 
     // see TcpLwipReceiveQueue
-    virtual uint32 getQueueLength() const;
+    virtual uint32 getQueueLength() const override;
 
     // see TcpLwipReceiveQueue
-    virtual void getQueueStatus() const;
+    virtual void getQueueStatus() const override;
 
     // see TcpLwipReceiveQueue
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP);
+    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
 
   protected:
     /// store bytes

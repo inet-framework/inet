@@ -39,14 +39,14 @@ class SenderReport : public SenderReport_Base
     SenderReport() : SenderReport_Base() {}
     SenderReport(const SenderReport& other) : SenderReport_Base(other) {}
     SenderReport& operator=(const SenderReport& other) { SenderReport_Base::operator=(other); return *this; }
-    virtual SenderReport *dup() const { return new SenderReport(*this); }
+    virtual SenderReport *dup() const override { return new SenderReport(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from SenderReport_Base
 
   public:
     /**
      * Writes a short info about this SenderReport into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes a longer info about this SenderReport into the given stream.
@@ -64,14 +64,14 @@ class ReceptionReport : public ReceptionReport_Base
     ReceptionReport() : ReceptionReport_Base() {}
     ReceptionReport(const ReceptionReport& other) : ReceptionReport_Base(other) {}
     ReceptionReport& operator=(const ReceptionReport& other) { ReceptionReport_Base::operator=(other); return *this; }
-    virtual ReceptionReport *dup() const { return new ReceptionReport(*this); }
+    virtual ReceptionReport *dup() const override { return new ReceptionReport(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from ReceptionReport_Base
 
   public:
     /**
      * Writes a short info about this ReceptionReport into the given string.
      */
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     /**
      * Writes a longer info about this ReceptionReport into the given stream.

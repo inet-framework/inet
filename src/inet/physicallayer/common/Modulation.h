@@ -31,8 +31,8 @@ namespace physicallayer {
 class INET_API BPSKModulation : public IModulation
 {
   public:
-    virtual const char *getName() { return "BPSK"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+    virtual const char *getName() override { return "BPSK"; }
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const override;
 };
 
 /**
@@ -41,8 +41,8 @@ class INET_API BPSKModulation : public IModulation
 class INET_API QAM16Modulation : public IModulation
 {
   public:
-    virtual const char *getName() { return "16-QAM"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+    virtual const char *getName() override { return "16-QAM"; }
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const override;
 };
 
 /**
@@ -51,8 +51,8 @@ class INET_API QAM16Modulation : public IModulation
 class INET_API QAM256Modulation : public IModulation
 {
   public:
-    virtual const char *getName() { return "256-QAM"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+    virtual const char *getName() override { return "256-QAM"; }
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const override;
 };
 
 /**
@@ -61,8 +61,8 @@ class INET_API QAM256Modulation : public IModulation
 class INET_API DSSSOQPSK16Modulation : public IModulation
 {
   public:
-    virtual const char *getName() { return "DSSS-OQPSK-16"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+    virtual const char *getName() override { return "DSSS-OQPSK-16"; }
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const override;
 };
 
 } // namespace physicallayer

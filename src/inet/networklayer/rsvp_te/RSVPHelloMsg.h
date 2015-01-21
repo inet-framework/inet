@@ -42,7 +42,7 @@ class RSVPHelloMsg : public RSVPHelloMsg_Base
     RSVPHelloMsg(const char *name = nullptr, int kind = RSVP_TRAFFIC) : RSVPHelloMsg_Base(name, kind) {}
     RSVPHelloMsg(const RSVPHelloMsg& other) : RSVPHelloMsg_Base(other) {}
     RSVPHelloMsg& operator=(const RSVPHelloMsg& other) { RSVPHelloMsg_Base::operator=(other); return *this; }
-    virtual RSVPHelloMsg *dup() const { return new RSVPHelloMsg(*this); }
+    virtual RSVPHelloMsg *dup() const override { return new RSVPHelloMsg(*this); }
 };
 
 } // namespace inet

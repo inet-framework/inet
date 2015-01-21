@@ -34,14 +34,14 @@ class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDat
     ProbabilisticBroadcastDatagram(const ProbabilisticBroadcastDatagram& other) : ProbabilisticBroadcastDatagram_Base(other) {}
     ProbabilisticBroadcastDatagram& operator=(const ProbabilisticBroadcastDatagram& other) { ProbabilisticBroadcastDatagram_Base::operator=(other); return *this; }
 
-    virtual ProbabilisticBroadcastDatagram *dup() const { return new ProbabilisticBroadcastDatagram(*this); }
+    virtual ProbabilisticBroadcastDatagram *dup() const override { return new ProbabilisticBroadcastDatagram(*this); }
 
-    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) { setSrcAddr(address.toModuleId()); }
-    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const { return ProbabilisticBroadcastDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
+    virtual int getTransportProtocol() const override { return ProbabilisticBroadcastDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
 };
 
 } // namespace inet

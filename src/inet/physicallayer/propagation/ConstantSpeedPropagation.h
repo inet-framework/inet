@@ -31,14 +31,14 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
     bool ignoreMovementDuringReception;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
     virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
 
   public:
     ConstantSpeedPropagation();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const override;
 };
 
 } // namespace physicallayer

@@ -153,13 +153,13 @@ class AODVUU : public ManetRoutingBase
     void packetFailedMac(ieee80211::Ieee80211DataFrame *);
 
     // Routing information access
-    virtual bool supportGetRoute() {return false;}
-    virtual uint32_t getRoute(const L3Address &,std::vector<L3Address> &);
-    virtual bool getNextHop(const L3Address &,L3Address &add,int &iface,double &);
-    virtual bool isProactive();
-    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse);
-    virtual bool setRoute(const L3Address & destination, const L3Address &nextHop, const int &ifaceIndex,const int &hops, const L3Address &mask=L3Address());
-    virtual bool setRoute(const L3Address & destination, const L3Address &nextHop, const char *ifaceName,const int &hops, const L3Address &mask=L3Address());
+    virtual bool supportGetRoute() override {return false;}
+    virtual uint32_t getRoute(const L3Address &,std::vector<L3Address> &) override;
+    virtual bool getNextHop(const L3Address &,L3Address &add,int &iface,double &) override;
+    virtual bool isProactive() override;
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) override;
+    virtual bool setRoute(const L3Address & destination, const L3Address &nextHop, const int &ifaceIndex,const int &hops, const L3Address &mask=L3Address()) override;
+    virtual bool setRoute(const L3Address & destination, const L3Address &nextHop, const char *ifaceName,const int &hops, const L3Address &mask=L3Address()) override;
 
   protected:
     bool is_init;
@@ -173,11 +173,11 @@ class AODVUU : public ManetRoutingBase
     const char *if_indextoname(int, char *);
     IPv4Datagram *pkt_encapsulate(IPv4Datagram *, IPv4Address);
     IPv4Datagram *pkt_decapsulate(IPv4Datagram *);
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
 
     cMessage * sendMessageEvent;
@@ -329,10 +329,10 @@ class AODVUU : public ManetRoutingBase
 #endif
 // used for break link notification
     //virtual void processPromiscuous(const cObject *details){};
-    virtual void processLinkBreak(const cObject *details);
+    virtual void processLinkBreak(const cObject *details) override;
     //virtual void processFullPromiscuous(const cObject *details){}
-    virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *,L3Address &);
+    virtual bool isOurType(cPacket *) override;
+    virtual bool getDestAddress(cPacket *,L3Address &) override;
 
 
 };

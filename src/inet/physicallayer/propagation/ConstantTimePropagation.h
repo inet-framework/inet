@@ -30,14 +30,14 @@ class INET_API ConstantTimePropagation : public PropagationBase
     simtime_t propagationTime;
 
   protected:
-    void initialize(int stage);
+    void initialize(int stage) override;
 
   public:
     ConstantTimePropagation();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
+    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const override;
 };
 
 } // namespace physicallayer

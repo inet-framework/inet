@@ -34,9 +34,9 @@ class INET_API Interference : public virtual IInterference
     Interference(const INoise *noise, const std::vector<const IReception *> *receptions);
     virtual ~Interference();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const INoise *getBackgroundNoise() const { return backgroundNoise; }
-    virtual const std::vector<const IReception *> *getInterferingReceptions() const { return interferingReceptions; }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const INoise *getBackgroundNoise() const override { return backgroundNoise; }
+    virtual const std::vector<const IReception *> *getInterferingReceptions() const override { return interferingReceptions; }
 };
 
 } // namespace physicallayer

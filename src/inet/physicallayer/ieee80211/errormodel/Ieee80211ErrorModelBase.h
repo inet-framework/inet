@@ -35,16 +35,16 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
     BerParseFile *berTableFile;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
 
   public:
     Ieee80211ErrorModelBase();
     virtual ~Ieee80211ErrorModelBase();
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const;
-    virtual double computeBitErrorRate(const ISNIR *snir) const;
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const;
+    virtual double computePacketErrorRate(const ISNIR *snir) const override;
+    virtual double computeBitErrorRate(const ISNIR *snir) const override;
+    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer

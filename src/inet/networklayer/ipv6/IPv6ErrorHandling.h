@@ -37,8 +37,8 @@ namespace inet {
 class INET_API IPv6ErrorHandling : public cSimpleModule
 {
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 
   protected:
     virtual void displayType1Msg(int code);

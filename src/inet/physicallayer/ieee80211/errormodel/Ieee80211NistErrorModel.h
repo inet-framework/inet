@@ -40,8 +40,8 @@ class Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
     Ieee80211NistErrorModel();
     virtual ~Ieee80211NistErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211NistErrorModel"; }
-    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
+    virtual void printToStream(std::ostream& stream) const override { stream << "Ieee80211NistErrorModel"; }
+    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const override;
 
   private:
     double CalculatePe(double p, uint32_t bValue) const;

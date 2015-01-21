@@ -38,9 +38,9 @@ class INET_API Sink : public cSimpleModule
     static simsignal_t rcvdPkSignal;
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 };
 
 } // namespace inet

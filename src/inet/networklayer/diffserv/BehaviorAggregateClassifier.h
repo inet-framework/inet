@@ -40,9 +40,9 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
     BehaviorAggregateClassifier() {}
 
   protected:
-    virtual void initialize();
+    virtual void initialize() override;
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual int classifyPacket(cPacket *packet);
 

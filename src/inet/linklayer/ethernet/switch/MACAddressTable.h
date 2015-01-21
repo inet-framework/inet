@@ -55,8 +55,8 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
 
   protected:
 
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * @brief Returns a MAC Address Table for a specified VLAN ID
@@ -77,60 +77,60 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
      * @param vid VLAN ID
      * @return Output port for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(MACAddress& address, unsigned int vid = 0);
+    virtual int getPortForAddress(MACAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int portno, MACAddress& address, unsigned int vid = 0);
+    virtual bool updateTableWithAddress(int portno, MACAddress& address, unsigned int vid = 0) override;
 
     /**
      *  @brief Clears portno cache
      */
     // TODO: find a better name
-    virtual void flush(int portno);
+    virtual void flush(int portno) override;
 
     /**
      *  @brief Prints cached data
      */
-    virtual void printState();
+    virtual void printState() override;
 
     /**
      * @brief Copy cache from portA to portB port
      */
-    virtual void copyTable(int portA, int portB);
+    virtual void copyTable(int portA, int portB) override;
 
     /**
      * @brief Remove aged entries from a specified VLAN
      */
-    virtual void removeAgedEntriesFromVlan(unsigned int vid = 0);
+    virtual void removeAgedEntriesFromVlan(unsigned int vid = 0) override;
     /**
      * @brief Remove aged entries from all VLANs
      */
-    virtual void removeAgedEntriesFromAllVlans();
+    virtual void removeAgedEntriesFromAllVlans() override;
 
     /*
      * It calls removeAgedEntriesFromAllVlans() if and only if at least
      * 1 second has passed since the method was last called.
      */
-    virtual void removeAgedEntriesIfNeeded();
+    virtual void removeAgedEntriesIfNeeded() override;
 
     /**
      * Pre-reads in entries for Address Table during initialization.
      */
-    virtual void readAddressTable(const char *fileName);
+    virtual void readAddressTable(const char *fileName) override;
 
     /**
      * For lifecycle: clears all entries from the vlanAddressTable.
      */
-    virtual void clearTable();
+    virtual void clearTable() override;
 
     /*
      * Some (eg.: STP, RSTP) protocols may need to change agingTime
      */
-    virtual void setAgingTime(simtime_t agingTime);
-    virtual void resetDefaultAging();
+    virtual void setAgingTime(simtime_t agingTime) override;
+    virtual void resetDefaultAging() override;
 };
 
 } // namespace inet

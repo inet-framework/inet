@@ -42,9 +42,9 @@ class INET_API EchoProtocol : public cSimpleModule
     virtual void sendEchoRequest(PingPayload *packet);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 } // namespace inet

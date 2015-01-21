@@ -33,11 +33,11 @@ class INET_API Ieee802154NarrowbandScalarReceiver : public NarrowbandReceiverBas
   public:
     Ieee802154NarrowbandScalarReceiver();
 
-    void initialize(int stage);
+    void initialize(int stage) override;
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMinInterferencePower() const { return minInterferencePower; }
+    virtual W getMinInterferencePower() const override { return minInterferencePower; }
 };
 
 } // namespace physicallayer

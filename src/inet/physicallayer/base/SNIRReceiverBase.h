@@ -31,7 +31,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
     double snirThreshold;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /**
      * Returns the physical properties of the reception including noise and
@@ -41,16 +41,16 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      */
     virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 
   public:
     SNIRReceiverBase();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
     virtual double getSNIRThreshold() const { return snirThreshold; }
 
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
 };
 
 } // namespace physicallayer

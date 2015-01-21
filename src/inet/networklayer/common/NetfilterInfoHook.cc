@@ -30,36 +30,36 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
     INetfilter *netfilter;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
   public:
     /**
      * called before a packet arriving from the network is routed
      */
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 
     /**
      * called before a packet is delivered via the network
      */
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
+    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE) override;
 
     /**
      * called before a packet arriving locally is delivered
      */
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 };
 
 Define_Module(NetfilterInfoHook);

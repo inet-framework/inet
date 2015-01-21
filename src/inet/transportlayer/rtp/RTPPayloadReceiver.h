@@ -47,13 +47,13 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
      * a queue for incoming packets.
      * Subclasses must overwrite it (but should call this method too)
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Method for handling incoming packets. At the moment only RTPInnerPackets
      * containing an encapsulated RTPPacket are handled.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Writes contents of this RTPPacket into the output file. Must be overwritten

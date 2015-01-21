@@ -35,14 +35,14 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControl
     Ieee802Ctrl(const Ieee802Ctrl& other) : Ieee802Ctrl_Base(other) {}
     Ieee802Ctrl& operator=(const Ieee802Ctrl& other) { Ieee802Ctrl_Base::operator=(other); return *this; }
 
-    virtual Ieee802Ctrl *dup() const { return new Ieee802Ctrl(*this); }
+    virtual Ieee802Ctrl *dup() const override { return new Ieee802Ctrl(*this); }
 
-    virtual MACAddress getSourceAddress() const { return getSrc(); }
-    virtual void setSourceAddress(const MACAddress& address) { setSrc(address); }
-    virtual MACAddress getDestinationAddress() const { return getDest(); }
-    virtual void setDestinationAddress(const MACAddress& address) { setDest(address); };
-    virtual int getInterfaceId() const { return Ieee802Ctrl_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
+    virtual MACAddress getSourceAddress() const override { return getSrc(); }
+    virtual void setSourceAddress(const MACAddress& address) override { setSrc(address); }
+    virtual MACAddress getDestinationAddress() const override { return getDest(); }
+    virtual void setDestinationAddress(const MACAddress& address) override { setDest(address); };
+    virtual int getInterfaceId() const override { return Ieee802Ctrl_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) override { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
 };
 
 } // namespace inet

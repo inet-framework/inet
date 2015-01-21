@@ -42,9 +42,9 @@ class INET_API AlternatingEnergyConsumer : public cSimpleModule, public IEnergyC
     cMessage *timer;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessage(cMessage *message) override;
 
     virtual void updatePowerConsumption();
 
@@ -54,7 +54,7 @@ class INET_API AlternatingEnergyConsumer : public cSimpleModule, public IEnergyC
     AlternatingEnergyConsumer();
     virtual ~AlternatingEnergyConsumer();
 
-    virtual W getPowerConsumption() const { return powerConsumption; }
+    virtual W getPowerConsumption() const override { return powerConsumption; }
 };
 
 } // namespace power

@@ -132,7 +132,7 @@ class OLSR_ETX_LinkQualityTimer : public OLSR_Timer
   public:
     OLSR_ETX_LinkQualityTimer(OLSR* agent) : OLSR_Timer(agent) {}
     OLSR_ETX_LinkQualityTimer():OLSR_Timer() {}
-    virtual void expire();
+    virtual void expire() override;
 };
 
 
@@ -201,7 +201,7 @@ class OLSR_ETX : public OLSR
 
 #define link_quality_timer_  (*linkQualityTimer)
 
-        virtual void recv_olsr(cMessage*);
+        virtual void recv_olsr(cMessage*) override;
 
         // void     mpr_computation();
         // void     rtable_computation();
@@ -215,41 +215,41 @@ class OLSR_ETX : public OLSR
         virtual void rtable_dijkstra_computation();
 
         virtual bool process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
-        virtual bool process_tc(OLSR_msg&, const nsaddr_t &, const int &);
+        virtual bool process_tc(OLSR_msg&, const nsaddr_t &, const int &) override;
         // void     process_mid(OLSR_msg&, const nsaddr_t &);
 
         //void      forward_default(OLSR_msg&, OLSR_dup_tuple*, nsaddr_t,nsaddr_t);
-        virtual void forward_data(cMessage* p) {}
+        virtual void forward_data(cMessage* p) override {}
 
 //  void        enque_msg(OLSR_msg&, double);
-        virtual void send_hello();
-        virtual void send_tc();
+        virtual void send_hello() override;
+        virtual void send_tc() override;
         //void      send_mid();
-        virtual void send_pkt();
+        virtual void send_pkt() override;
 
         virtual bool link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
         //void      populate_nbset(OLSR_msg&);
-        virtual bool populate_nb2hopset(OLSR_msg&);
+        virtual bool populate_nb2hopset(OLSR_msg&) override;
         //void      populate_mprselset(OLSR_msg&);
 
         //void      set_hello_timer();
         //void      set_tc_timer();
         //void      set_mid_timer();
 
-        virtual void nb_loss(OLSR_link_tuple*);
+        virtual void nb_loss(OLSR_link_tuple*) override;
 
         static bool seq_num_bigger_than(uint16_t, uint16_t);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage) override;
         // virtual void receiveChangeNotification(int category, cObject *details);
         // void mac_failed(IPv4Datagram*);
-        virtual void recv(cMessage *p) {};
+        virtual void recv(cMessage *p) override {};
         // virtual void handleMessage(cMessage *msg);
-        virtual void finish();
+        virtual void finish() override;
         virtual void link_quality();
 
     public:
-        bool getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost);
+        bool getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost) override;
         OLSR_ETX();
         ~OLSR_ETX();
         static double emf_to_seconds(uint8_t);

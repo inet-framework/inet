@@ -36,15 +36,15 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
     W power;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     NarrowbandTransmitterBase();
     virtual ~NarrowbandTransmitterBase();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMaxPower() const { return power; }
+    virtual W getMaxPower() const override { return power; }
     virtual const IModulation *getModulation() const { return modulation; }
 
     virtual int getHeaderBitLength() const { return headerBitLength; }

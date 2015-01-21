@@ -27,11 +27,11 @@ class LinearRotatingMobilityBase : public RotatingMobilityBase
     EulerAngles targetOrientation;
 
   protected:
-    virtual void initializeOrientation();
+    virtual void initializeOrientation() override;
 
     virtual EulerAngles slerp(EulerAngles from, EulerAngles to, double delta);
 
-    virtual void rotate();
+    virtual void rotate() override;
 
     /**
      * @brief Should be redefined in subclasses. This method gets called

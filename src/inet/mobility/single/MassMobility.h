@@ -48,20 +48,20 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
     Coord sourcePosition;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /** @brief Move the host according to the current simulation time. */
-    virtual void move();
+    virtual void move() override;
 
     /** @brief Calculate a new target position to move to. */
-    virtual void setTargetPosition();
+    virtual void setTargetPosition() override;
 
   public:
     MassMobility();
-    virtual double getMaxSpeed() const;
+    virtual double getMaxSpeed() const override;
 };
 
 } // namespace inet

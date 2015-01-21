@@ -44,8 +44,8 @@ class INET_API Plane : public GeometricObjectBase
     const Coord& getNormalVector() { return normalVector; }
     void setNormalVector(const Coord& normalVector) { this->normalVector = normalVector; }
 
-    virtual bool isNil() const { return this == &NIL; }
-    virtual bool isUnspecified() const { return basePoint.isUnspecified() || normalVector.isUnspecified(); }
+    virtual bool isNil() const override { return this == &NIL; }
+    virtual bool isUnspecified() const override { return basePoint.isUnspecified() || normalVector.isUnspecified(); }
 
     Coord computeIntersection(const LineSegment& lineSegment);
 };

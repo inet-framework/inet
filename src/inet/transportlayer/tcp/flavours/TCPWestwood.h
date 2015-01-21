@@ -36,8 +36,8 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
   public:
     TCPWestwoodStateVariables();
     ~TCPWestwoodStateVariables();
-    virtual std::string info() const;
-    virtual std::string detailedInfo() const;
+    virtual std::string info() const override;
+    virtual std::string detailedInfo() const override;
 
     uint32 ssthresh;    ///< slow start threshold
 
@@ -58,7 +58,7 @@ class INET_API TCPWestwood : public TCPBaseAlg
     TCPWestwoodStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
-    virtual TCPStateVariables *createStateVariables()
+    virtual TCPStateVariables *createStateVariables() override
     {
         return new TCPWestwoodStateVariables();
     }
@@ -67,7 +67,7 @@ class INET_API TCPWestwood : public TCPBaseAlg
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event);
+    virtual void processRexmitTimer(TCPEventCode& event) override;
 
     /** Recalculate BWE */
     virtual void recalculateBWE(uint32 cumul_ack);
@@ -77,15 +77,15 @@ class INET_API TCPWestwood : public TCPBaseAlg
     TCPWestwood();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck() override;
 
     /** Called after we send data */
-    virtual void dataSent(uint32 fromseq);
+    virtual void dataSent(uint32 fromseq) override;
 
-    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) override;
 };
 
 } // namespace tcp

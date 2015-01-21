@@ -56,8 +56,8 @@ class Ieee80211YansErrorModel : public Ieee80211ErrorModelBase
   public:
     Ieee80211YansErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211YansErrorModel"; }
-    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
+    virtual void printToStream(std::ostream& stream) const override { stream << "Ieee80211YansErrorModel"; }
+    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const override;
 
   private:
     double Log2(double val) const;

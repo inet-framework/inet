@@ -55,9 +55,9 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     int numDispatchedBDPUFrames = 0;
 
   protected:
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Updates address table (if the port is in learning state)
@@ -87,7 +87,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     // For lifecycle
     virtual void start();
     virtual void stop();
-    bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /*
      * Gets port data from the InterfaceTable
@@ -98,7 +98,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Returns the first non-loopback interface.
      */
     virtual InterfaceEntry *chooseInterface();
-    virtual void finish();
+    virtual void finish() override;
 };
 
 } // namespace inet

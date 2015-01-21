@@ -64,30 +64,30 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     unsigned long socketsOpened = 0;    // Counter for opened sockets
 
   protected:
-    virtual void initialize(int stage);
-    virtual void finish();
-    virtual void handleMessage(cMessage *msg);
-    int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void handleMessage(cMessage *msg) override;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /*
      * Sends a scripted browse event to a specific server
      */
-    virtual void sendRequestToServer(BrowseEvent be);
+    virtual void sendRequestToServer(BrowseEvent be) override;
 
     /*
      * Send a request to server. Uses the recipient stamped in the request.
      */
-    virtual void sendRequestToServer(HttpRequestMessage *request);
+    virtual void sendRequestToServer(HttpRequestMessage *request) override;
 
     /*
      * Sends a generic request to a randomly chosen server
      */
-    virtual void sendRequestToRandomServer();
+    virtual void sendRequestToRandomServer() override;
 
     /*
      *  Sends a number of queued messages to the specified server
      */
-    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
+    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 
     // TCPSocket::CallbackInterface callback methods
     /*
@@ -97,7 +97,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * open after the handler has completed. A counter for pending messages is incremented for each
      * request sent.
      */
-    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketEstablished(int connId, void *yourPtr) override;
 
     /*
      * Handler for socket data arrival.
@@ -105,34 +105,34 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * virtual method of the parent class. The counter for pending replies is decremented for each one handled.
      * Close is called on the socket once the counter reaches zero.
      */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
 
     /*
      * Handler for the socket closed by peer event.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketPeerClosed(int connId, void *yourPtr);
+    virtual void socketPeerClosed(int connId, void *yourPtr) override;
 
     /*
      * Socket closed handler.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketClosed(int connId, void *yourPtr) override;
 
     /*
      * Socket failure handler.
      * This method does nothing but reporting and statistics collection at this time.
      * @todo Implement reconnect if necessary. See the INET demos.
      */
-    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual void socketFailure(int connId, void *yourPtr, int code) override;
 
     /*
      * Socket status arrived handler.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status);
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override;
 
-    virtual void socketDeleted(int connId, void *yourPtr);
+    virtual void socketDeleted(int connId, void *yourPtr) override;
 
     // Socket establishment and data submission
     /*

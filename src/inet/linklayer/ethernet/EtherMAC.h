@@ -42,12 +42,12 @@ class INET_API EtherMAC : public EtherMACBase
     virtual ~EtherMAC();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void initializeFlags();
-    virtual void initializeStatistics();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void initializeFlags() override;
+    virtual void initializeStatistics() override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
 
   protected:
     // states
@@ -96,7 +96,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void handleRetransmission();
 
     // helpers
-    virtual void readChannelParameters(bool errorWhenAsymmetric);
+    virtual void readChannelParameters(bool errorWhenAsymmetric) override;
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
     virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void scheduleEndIFGPeriod();
@@ -111,7 +111,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processReceivedJam(EtherJam *jam);
     virtual void processReceivedPauseFrame(EtherPauseFrame *frame);
-    virtual void processConnectDisconnect();
+    virtual void processConnectDisconnect() override;
     virtual void addReception(simtime_t endRxTime);
     virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();

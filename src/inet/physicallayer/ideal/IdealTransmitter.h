@@ -36,15 +36,15 @@ class INET_API IdealTransmitter : public TransmitterBase
     m maxDetectionRange;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     IdealTransmitter();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
-    virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
-    virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
+    virtual m getMaxCommunicationRange() const override { return maxCommunicationRange; }
+    virtual m getMaxInterferenceRange() const override { return maxInterferenceRange; }
 };
 
 } // namespace physicallayer

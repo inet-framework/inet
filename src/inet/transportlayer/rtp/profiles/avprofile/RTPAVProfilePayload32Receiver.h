@@ -51,7 +51,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
      * Calls the method of the superclass RTPPayloadReceiver and sets the
      * payload type to 32.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
   protected:
     /**
@@ -73,7 +73,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
      * The only error correction provided is reordering packets
      * of one frame if needed.
      */
-    virtual void processPacket(RTPPacket *packet);
+    virtual void processPacket(RTPPacket *packet) override;
 };
 
 } // namespace rtp

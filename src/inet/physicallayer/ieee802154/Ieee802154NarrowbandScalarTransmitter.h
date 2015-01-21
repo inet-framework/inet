@@ -30,8 +30,8 @@ class INET_API Ieee802154NarrowbandScalarTransmitter : public NarrowbandTransmit
   public:
     Ieee802154NarrowbandScalarTransmitter();
 
-    virtual void printToStream(std::ostream& stream) const;
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual void printToStream(std::ostream& stream) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

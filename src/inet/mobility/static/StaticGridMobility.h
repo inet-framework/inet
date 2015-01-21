@@ -36,7 +36,7 @@ class INET_API StaticGridMobility : public StationaryMobility
 {
   protected:
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition();
+    virtual void setInitialPosition() override;
 
   public:
     StaticGridMobility() {};

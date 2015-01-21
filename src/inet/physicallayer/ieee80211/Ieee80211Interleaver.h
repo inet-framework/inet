@@ -39,8 +39,8 @@ class Ieee80211Interleaver : public cSimpleModule
     int s;
 
   protected:
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { cRuntimeError("This module doesn't handle self messages."); }
 
   public:
     BitVector interleaving(const BitVector bits) const;

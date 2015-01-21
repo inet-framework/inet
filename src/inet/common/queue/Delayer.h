@@ -33,8 +33,8 @@ class INET_API Delayer : public cSimpleModule
     Delayer() { delayPar = nullptr; }
 
   protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
 
     cPar *delayPar;
 

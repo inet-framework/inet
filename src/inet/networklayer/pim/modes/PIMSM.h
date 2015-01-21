@@ -131,7 +131,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
       public:
         PIMSMOutInterface(DownstreamInterface *downstream)
             : OutInterface(downstream->ie), downstream(downstream) {}
-        virtual bool isEnabled() { return downstream->isInInheritedOlist(); }
+        virtual bool isEnabled() override { return downstream->isInInheritedOlist(); }
     };
 
     enum RouteType {
@@ -232,14 +232,14 @@ class INET_API PIMSM : public PIMBase, protected cListener
     virtual ~PIMSM();
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
     virtual void stopPIMRouting();
-    virtual void handleMessageWhenUp(cMessage *msg);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
   private:
     // process PIM messages

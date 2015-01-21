@@ -49,7 +49,7 @@ class INET_API PIMInterface : public cObject
   public:
     PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
         : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
-    virtual std::string info() const;
+    virtual std::string info() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }
@@ -80,10 +80,10 @@ class INET_API PIMInterfaceTable : public cSimpleModule, protected cListener
     virtual PIMInterface *getInterfaceById(int interfaceId);
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
 
     virtual void configureInterfaces(cXMLElement *config);
     virtual PIMInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
