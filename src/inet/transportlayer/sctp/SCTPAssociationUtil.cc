@@ -1362,7 +1362,7 @@ static uint32 copyToNRGaps(SCTPSackChunk *sackChunk,
 {
     const uint32 count = gapList->getNumGaps(type);
     uint32 last = gapList->getCumAckTSN();
-    uint32 keys = (uint32)min((double)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
+    uint32 keys = min((uint32)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
     if (compression) {
         keys = count;    // Get all entries first, compress them later
     }
