@@ -1493,7 +1493,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     }
                 }
                 if (chunk->getHmacTypesArraySize() != 0) {
-                    unsigned char *vector = (unsigned char *)malloc(64);
+                    unsigned char vector[64];
                     if (rplen > 64) {
                         EV_ERROR << "Random parameter too long. It will be truncated.\n";
                         rplen = 64;
@@ -1525,7 +1525,6 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     free(hp);
                     sizePeerKeyVector += hplen;
                     calculateSharedKey();
-                    free(vector);
                 }
                 chunk->setBitLength(chunklen * 8);
                 dest->addChunk(chunk);
