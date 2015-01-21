@@ -25,5 +25,44 @@ void IPv6RoutingHeader::setAddressArraySize(unsigned int size)
     byteLength_var = 8 + 16 * size;
 }
 
+void IPv6HopByHopOptionsHeader::clean()
+{
+    // clean away the options
+    for (int i = getOptionsArraySize()-1; i >= 0; --i)
+    {
+        delete getOptions(i);
+    }
+}
+
+void IPv6HopByHopOptionsHeader::copy(const IPv6HopByHopOptionsHeader& other)
+{
+    if (getOptionsArraySize() > 0)
+    {
+        clean();
+    }
+    setOptionsArraySize(other.getOptionsArraySize());
+    for (int i = other.getOptionsArraySize()-1; i >= 0; --i)
+    {
+        setOptions(i, other.getOptions(i)->dup());
+    }
+}
+
+IPv6HopByHopOptionsHeader::~IPv6HopByHopOptionsHeader()
+{
+    clean();
+}
+
+IPv6HopByHopOptionsHeader::IPv6HopByHopOptionsHeader(const IPv6HopByHopOptionsHeader &other)
+{
+    setOptionsArraySize(0);
+    copy(other);
+}
+
+IPv6HopByHopOptionsHeader& IPv6HopByHopOptionsHeader::operator=(const IPv6HopByHopOptionsHeader& other)
+{
+    copy(other);
+    return *this;
+}
+
 } // namespace inet
 

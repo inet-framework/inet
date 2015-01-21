@@ -181,18 +181,49 @@ void IPv6::endService(cPacket *msg)
         // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
         ASSERT(!datagram->hasBitError());
 
-        const InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
-        const InterfaceEntry *destIE = nullptr;
-        L3Address nextHop(IPv6Address::UNSPECIFIED_ADDRESS);
-        if (fromHL) {
-            // remove control info
-            delete datagram->removeControlInfo();
-            if (datagramLocalOutHook(datagram, destIE, nextHop) == INetfilter::IHook::ACCEPT)
-                datagramLocalOut(datagram, destIE, nextHop.toIPv6());
+        cGate *rout = gate("routerAlertOut");
+        bool sentToRA = false;
+
+        // handle router alert options, if set
+        // only check if we have a handler, this datagram wasn't returned from it already and the datagram was not returned from neighbour discovery
+        if (!rt->isLocalAddress(datagram->getDestAddress())
+            && rout && rout->isConnected()
+            && !(datagram->arrivedOn("routerAlertReturn"))
+            && !(datagram->arrivedOn("ndIn"))
+            )
+        {
+            for (int i = datagram->getExtensionHeaderArraySize() - 1; i >= 0; --i) {
+                // check whether the router alert extension header is set
+                IPv6ExtensionHeaderPtr extHdr = datagram->getExtensionHeader(i);
+                if (extHdr->getExtensionType() == IP_PROT_IPv6EXT_HOP) {
+                    // check whether the router alert option is set
+                    IPv6HopByHopOptionsHeader *optHdr = check_and_cast<IPv6HopByHopOptionsHeader *>(extHdr);
+                    for (int hi = optHdr->getOptionsArraySize() - 1; hi >= 0; --hi) {
+                        if (optHdr->getOptions(hi)->getOptionType() == 5) { // FIXME implement symbolic constant
+                            // we have router alert set -> hand it over to the router alert handler
+                            send(datagram, rout);
+                            sentToRA = true;
+                        }
+                    }
+                }
+            }
         }
-        else {
-            if (datagramPreRoutingHook(datagram, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
-                preroutingFinish(datagram, fromIE, destIE, nextHop.toIPv6());
+
+        if (!sentToRA)
+        {
+            const InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
+            const InterfaceEntry *destIE = nullptr;
+            L3Address nextHop(IPv6Address::UNSPECIFIED_ADDRESS);
+            if (fromHL) {
+                // remove control info
+                delete datagram->removeControlInfo();
+                if (datagramLocalOutHook(datagram, destIE, nextHop) == INetfilter::IHook::ACCEPT)
+                    datagramLocalOut(datagram, destIE, nextHop.toIPv6());
+            }
+            else {
+                if (datagramPreRoutingHook(datagram, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
+                    preroutingFinish(datagram, fromIE, destIE, nextHop.toIPv6());
+            }
         }
     }
 
