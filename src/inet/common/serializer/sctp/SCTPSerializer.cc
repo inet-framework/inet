@@ -1322,9 +1322,9 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
 
             case INIT_ACK: {
                 const struct init_ack_chunk *iac = (struct init_ack_chunk *)(chunks + chunkPtr);
-                struct tlv *cp;
-                struct random_parameter *rp;
-                struct hmac_algo *hp;
+                struct tlv *cp = nullptr;
+                struct random_parameter *rp = nullptr;
+                struct hmac_algo *hp = nullptr;
                 unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitAckChunk *chunk = new SCTPInitAckChunk("INIT_ACK");
