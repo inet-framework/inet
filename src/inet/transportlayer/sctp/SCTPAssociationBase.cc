@@ -100,6 +100,25 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     packetsInBurst = 0;
     highSpeedCCThresholdIdx = 0;
 
+    requiresRtx = false;
+    newCumAck = false;
+    outstandingBytesBeforeUpdate = 0;
+    newlyAckedBytes = 0;
+    findLowestTSN = true;
+    lowestTSNRetransmitted = false;
+    sawNewAck = false;
+    cmtGroupPaths = 0;
+    utilizedCwnd = 0;
+    cmtGroupTotalUtilizedCwnd = 0;
+    cmtGroupTotalCwnd = 0;
+    cmtGroupTotalSsthresh = 0;
+    cmtGroupTotalCwndBandwidth = 0.0;
+    cmtGroupTotalUtilizedCwndBandwidth = 0.0;
+    cmtGroupAlpha = 0.0;
+    gapAckedChunksInLastSACK = 0;
+    gapNRAckedChunksInLastSACK = 0;
+    gapUnackedChunksInLastSACK = 0;
+
     numberOfFastRetransmissions = 0;
     numberOfTimerBasedRetransmissions = 0;
     numberOfHeartbeatsSent = 0;
@@ -282,6 +301,12 @@ SCTPDataVariables::SCTPDataVariables()
     numberOfTransmissions = 0;
     numberOfRetransmissions = 0;
     booksize = 0;
+    bbit = false;
+    ebit = false;
+    allowedNoRetransmissions = 0;
+    strReset = false;
+    prMethod = 0;
+    priority = 0;
 }
 
 SCTPDataVariables::~SCTPDataVariables()
@@ -399,6 +424,31 @@ SCTPStateVariables::SCTPStateVariables()
 
     count = 0;
     blockingTSNsMoved = 0;
+
+    cmtUseDAC = true;
+    cmtUseFRC = true;
+    cmtMovedChunksReduceCwnd = true;
+    movedChunkFastRTXFactor = 2.0;
+    strictCwndBooking = false;
+    cmtSackPath = CSP_Standard;
+    highSpeedCC = false;
+    cmtCCVariant = CCCV_Off;
+    rpPathBlocking = false;
+    rpScaleBlockingTimeout = false;
+    rpMinCwnd = 1;
+    checkSackSeqNumber = false;
+    outgoingSackSeqNum = 0;
+    incomingSackSeqNum = 0;
+    asconfSn = 0;
+    numberAsconfReceived = 0;
+    corrIdNum = 0;
+    streamResetSequenceNumber = 0;
+    expectedStreamResetSequenceNumber = 0;
+    peerRequestSn = 0;
+    inRequestSn = 0;
+    peerTsnAfterReset = 0;
+    osbWithHeader = false;
+    throughputInterval = 1.0;
 }
 
 SCTPStateVariables::~SCTPStateVariables()
@@ -441,6 +491,23 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     bytes.chunk = false;
     bytes.packet = false;
     bytes.bytesToSend = 0;
+
+    fairTimer = false;
+    status = SCTP_S_CLOSED;
+    initTsn = 0;
+    initPeerTsn = 0;
+    sackFrequency = 2;
+    ccFunctions.ccInitParams = nullptr;
+    ccFunctions.ccUpdateBeforeSack = nullptr;
+    ccFunctions.ccUpdateAfterSack = nullptr;
+    ccFunctions.ccUpdateAfterCwndTimeout = nullptr;
+    ccFunctions.ccUpdateAfterRtxTimeout = nullptr;
+    ccFunctions.ccUpdateMaxBurst = nullptr;
+    ccFunctions.ccUpdateBytesAcked = nullptr;
+    ccModule = 0;
+    ssFunctions.ssInitStreams = nullptr;
+    ssFunctions.ssGetNextSid = nullptr;
+    ssFunctions.ssUsableStreams = nullptr;
 
     EV_INFO << "SCTPAssociationBase::SCTPAssociation(): new assocId="
             << assocId << endl;
@@ -710,6 +777,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         sendIndicationToApp(SCTP_I_CONN_LOST);
         sendAbort();
         sctpMain->removeAssociation(this);
+        return true;
     }
     else if (path != nullptr && msg == path->HeartbeatIntervalTimer) {
         process_TIMEOUT_HEARTBEAT_INTERVAL(path, path->forceHb);

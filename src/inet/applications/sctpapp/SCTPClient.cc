@@ -44,6 +44,25 @@ SCTPClient::SCTPClient()
     timeMsg = nullptr;
     stopTimer = nullptr;
     primaryChangeTimer = nullptr;
+    numSessions = 0;
+    numBroken = 0;
+    packetsSent = 0;
+    packetsRcvd = 0;
+    bytesSent = 0;
+    echoedBytesSent = 0;
+    bytesRcvd = 0;
+    queueSize = 0;
+    outStreams = 1;
+    inStreams = 17;
+    echo = false;
+    ordered = true;
+    finishEndsSimulation = false;
+    bufferSize = 0;
+    timer = false;
+    sendAllowed = true;
+    numRequestsToSend = 0;    // requests to send in this session
+    numPacketsToReceive = 0;
+    chunksAbandoned = 0;
 }
 
 SCTPClient::~SCTPClient()
@@ -59,14 +78,9 @@ void SCTPClient::initialize(int stage)
 
     EV_DEBUG << "initialize SCTP Client stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = echoedBytesSent = bytesRcvd = 0;
-
         echo = par("echo").boolValue();
         ordered = par("ordered").boolValue();
         finishEndsSimulation = par("finishEndsSimulation").boolValue();
-
-        numRequestsToSend = 0;
-        numPacketsToReceive = 0;
         queueSize = par("queueSize");
         WATCH(numRequestsToSend);
         recordScalar("ums", (int)par("requestLength"));
@@ -75,9 +89,6 @@ void SCTPClient::initialize(int stage)
         timeMsg->setKind(MSGKIND_CONNECT);
         scheduleAt(par("startTime"), timeMsg);
 
-        sendAllowed = true;
-        bufferSize = 0;
-        timer = false;
         stopTimer = nullptr;
         primaryChangeTimer = nullptr;
 

@@ -31,10 +31,9 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     //SCTPAssociation* assoc;
     int32 notifications;
     int32 serverAssocId;
-    int32 clientAssocId;
-    //SCTPSocket *serverSocket;
     SCTPSocket clientSocket;
     SCTPSocket peerSocket;
+    SCTPSocket rendezvousSocket;
     double delay;
     bool echo;
     bool schedule;
@@ -77,7 +76,6 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     EndToEndDelay endToEndDelay;
     void sendOrSchedule(cPacket *msg);
     void sendRequest(bool last = true);
-    int32 ssn;
 
   public:
     SCTPNatPeer();

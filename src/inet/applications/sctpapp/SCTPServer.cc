@@ -40,7 +40,6 @@ void SCTPServer::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
@@ -54,14 +53,10 @@ void SCTPServer::initialize(int stage)
         outboundStreams = par("outboundStreams");
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
-        lastStream = 0;
-        //abort = nullptr;
-        //abortSent = false;
         timeoutMsg = new cMessage("SrvAppTimer");
         delayTimer = new cMessage("delayTimer");
         delayTimer->setContextPointer(this);
         delayFirstReadTimer = new cMessage("delayFirstReadTimer");
-        firstData = true;
 
         echo = par("echo");
         delay = par("echoDelay");
@@ -71,8 +66,6 @@ void SCTPServer::initialize(int stage)
             readInt = false;
         else
             readInt = true;
-        schedule = false;
-        shutdownReceived = false;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *addressesString = par("localAddress");
@@ -548,6 +541,28 @@ SCTPServer::SCTPServer()
     socket = nullptr;
     delayFirstReadTimer = nullptr;
     delayTimer = nullptr;
+    numSessions = 0;
+    packetsSent = 0;
+    packetsRcvd = 0;
+    bytesSent = 0;
+    notificationsReceived = 0;
+    inboundStreams = 17;
+    outboundStreams = 1;
+    queueSize = 0;
+    delay = 0;
+    delayFirstRead = 0;
+    finishEndsSimulation = true;
+    echo = false;
+    ordered = true;
+    lastStream = 0;
+    assocId = 0;
+    readInt = false;
+    schedule = false;
+    firstData = true;
+    shutdownReceived = false;
+    abortSent = false;
+    count = 0;
+    numRequestsToSend = 0;
 }
 
 } // namespace inet

@@ -34,7 +34,7 @@ namespace sctp {
 class INET_API SCTPMessage : public SCTPMessage_Base
 {
   protected:
-    std::list<cPacket *> chunkList;
+    std::vector<cPacket *> chunkList;
 
   private:
     void copy(const SCTPMessage& other);
@@ -71,12 +71,13 @@ class INET_API SCTPMessage : public SCTPMessage_Base
     virtual cPacket *removeLastChunk();
     virtual cPacket *peekFirstChunk();
     virtual cPacket *peekLastChunk();
+    virtual void replaceChunk(cPacket *msg, uint32 k);
 };
 
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 {
   protected:
-    std::list<cPacket *> parameterList;
+    std::vector<cPacket *> parameterList;
 
   private:
     void copy(const SCTPErrorChunk& other);
@@ -113,7 +114,7 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
 {
   protected:
-    std::list<cPacket *> parameterList;
+    std::vector<cPacket *> parameterList;
 
   public:
     SCTPStreamResetChunk(const char *name = nullptr, int32 kind = 0) : SCTPStreamResetChunk_Base(name, kind) {};
@@ -146,7 +147,7 @@ class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
 class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
 {
   protected:
-    std::list<cPacket *> parameterList;
+    std::vector<cPacket *> parameterList;
 
   public:
     SCTPAsconfChunk(const char *name = nullptr, int32 kind = 0) : SCTPAsconfChunk_Base(name, kind) {};
@@ -179,7 +180,7 @@ class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
 class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
 {
   protected:
-    std::list<cPacket *> parameterList;
+    std::vector<cPacket *> parameterList;
 
   public:
     SCTPAsconfAckChunk(const char *name = nullptr, int32 kind = 0) : SCTPAsconfAckChunk_Base(name, kind) {};

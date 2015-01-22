@@ -91,7 +91,7 @@ message SCTPInitAckChunk extends SCTPChunk
     L3Address addresses[];
     char cookie[];
     uint8 unrecognizedParameters[];
-    cPacketPtr stateCookie;
+    cPacketPtr stateCookie = nullptr;
     uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
@@ -104,7 +104,7 @@ message SCTPInitAckChunk extends SCTPChunk
 message SCTPCookieEchoChunk extends SCTPChunk
 {
     char cookie[];
-    cPacketPtr stateCookie;
+    cPacketPtr stateCookie = nullptr;
     uint8 unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
 }
 

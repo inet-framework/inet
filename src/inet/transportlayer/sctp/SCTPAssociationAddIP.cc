@@ -60,11 +60,9 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
 
         asconfChunk->setByteLength(chunkLength);
 
-        char typecopy[128];
-        strcpy(typecopy, type);
-        char *token;
-        token = strtok((char *)typecopy, ",");
-        while (token != nullptr) {
+        cStringTokenizer tokenizer(type);
+        while (tokenizer.hasMoreTokens()) {
+            const char *token = tokenizer.nextToken();
             switch (atoi(token)) {
                 case ADD_IP_ADDRESS: {
                     SCTPAddIPParameter *ipParam;
@@ -147,7 +145,6 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
                     printf("type %d not known\n", atoi(token));
                     break;
             }
-            token = strtok(nullptr, ",");
         }
         asconfChunk->setByteLength(chunkLength);
 

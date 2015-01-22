@@ -137,7 +137,6 @@ void SCTP::handleMessage(cMessage *msg)
     L3Address destAddr;
     L3Address srcAddr;
     bool findListen = false;
-    bool bitError = false;
 
     EV_DEBUG << "\n\nSCTPMain handleMessage at " << getFullPath() << "\n";
 
@@ -165,29 +164,25 @@ void SCTP::handleMessage(cMessage *msg)
         if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
             EV_WARN << "Packet has bit-error. delete it\n";
 
-            bitError = true;
             numPacketsDropped++;
             delete msg;
             return;
         }
 
-        {
-            if (par("udpEncapsEnabled")) {
-                EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
-                UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
-                srcAddr = ctrl->getSrcAddr();
-                destAddr = ctrl->getDestAddr();
-                delete ctrl;
-                EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
-                EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
-            }
-            else {
-                INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
-                srcAddr = controlInfo->getSourceAddress();
-                destAddr = controlInfo->getDestinationAddress();
-                delete controlInfo;
-                EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
-            }
+        if (par("udpEncapsEnabled")) {
+            EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
+            UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
+            srcAddr = ctrl->getSrcAddr();
+            destAddr = ctrl->getDestAddr();
+            delete ctrl;
+            EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
+            EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
+        } else {
+            INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+            srcAddr = controlInfo->getSourceAddress();
+            destAddr = controlInfo->getDestinationAddress();
+            delete controlInfo;
+            EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
         }
 
         EV_INFO << "srcAddr=" << srcAddr << " destAddr=" << destAddr << "\n";
@@ -204,15 +199,14 @@ void SCTP::handleMessage(cMessage *msg)
             }
             if (!assoc) {
                 EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
-                if (bitError) {
+                if (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk())) {
                     delete sctpmsg;
                     return;
                 }
                 if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == SHUTDOWN_ACK)
                     sendShutdownCompleteFromMain(sctpmsg, destAddr, srcAddr);
                 else if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != ABORT &&
-                         ((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != SHUTDOWN_COMPLETE)
-                {
+                         ((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() != SHUTDOWN_COMPLETE) {
                     sendAbortFromMain(sctpmsg, destAddr, srcAddr);
                 }
                 delete sctpmsg;
@@ -291,7 +285,7 @@ void SCTP::handleMessage(cMessage *msg)
         updateDisplayString();
 }
 
-void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
+void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -317,19 +311,19 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address 
     msg->addChunk(abortChunk);
     if ((bool)par("udpEncapsEnabled")) {
         EV_DETAIL << "VTag=" << msg->getTag() << "\n";
-        udpSocket.sendTo(msg, destAddr, SCTP_UDP_PORT);
+        udpSocket.sendTo(msg, toAddr, SCTP_UDP_PORT);
     }
     else {
-        INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+        INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
         controlInfo->setTransportProtocol(IP_PROT_SCTP);
-        controlInfo->setSourceAddress(srcAddr);
-        controlInfo->setDestinationAddress(destAddr);
+        controlInfo->setSourceAddress(fromAddr);
+        controlInfo->setDestinationAddress(toAddr);
         msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
         send(msg, "to_ip");
     }
 }
 
-void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
+void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -348,10 +342,10 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address srcAddr,
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH * 8);
     msg->addChunk(scChunk);
 
-    INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+    INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_SCTP);
-    controlInfo->setSourceAddress(srcAddr);
-    controlInfo->setDestinationAddress(destAddr);
+    controlInfo->setSourceAddress(fromAddr);
+    controlInfo->setDestinationAddress(toAddr);
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     send(msg, "to_ip");
 }
@@ -681,12 +675,19 @@ bool SCTP::addRemoteAddress(SCTPAssociation *assoc, L3Address localAddress, L3Ad
 void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort)
 {
     SockPair keyAssoc;
+    bool found = false;
 
     EV_INFO << "addForkedConnection assocId=" << assoc->assocId << "    newId=" << newAssoc->assocId << "\n";
 
-    for (auto j = sctpAssocMap.begin(); j != sctpAssocMap.end(); ++j)
-        if (assoc->assocId == j->second->assocId)
+    for (auto j = sctpAssocMap.begin(); j != sctpAssocMap.end(); ++j) {
+        if (assoc->assocId == j->second->assocId) {
             keyAssoc = j->first;
+            found = true;
+            break;
+        }
+    }
+
+    ASSERT(found == true);
 
     // update assoc's socket pair, and register newAssoc (which'll keep LISTENing)
     updateSockPair(assoc, localAddr, remoteAddr, localPort, remotePort);

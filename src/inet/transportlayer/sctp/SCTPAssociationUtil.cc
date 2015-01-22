@@ -1327,7 +1327,7 @@ static uint32 copyToRGaps(SCTPSackChunk *sackChunk,
 {
     const uint32 count = gapList->getNumGaps(type);
     uint32 last = gapList->getCumAckTSN();
-    uint32 keys = min(space / 4, count);    // Each entry occupies 2+2 bytes => at most space/4 entries
+    uint32 keys = min((uint32)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
     if (compression) {
         keys = count;    // Get all entries first, compress them later
     }
@@ -1362,7 +1362,7 @@ static uint32 copyToNRGaps(SCTPSackChunk *sackChunk,
 {
     const uint32 count = gapList->getNumGaps(type);
     uint32 last = gapList->getCumAckTSN();
-    uint32 keys = min(space / 4, count);    // Each entry occupies 2+2 bytes => at most space/4 entries
+    uint32 keys = min((uint32)(space / 4), count);    // Each entry occupies 2+2 bytes => at most space/4 entries
     if (compression) {
         keys = count;    // Get all entries first, compress them later
     }
@@ -1606,9 +1606,11 @@ SCTPSackChunk *SCTPAssociation::createSack()
             }
             else {
                 if (sackLength > allowedLength) {
+                    double revokableFraction = 1.0;
                     const uint32 blocksBeRemoved = (sackLength - allowedLength) / 4;
-                    const double revokableFraction = numRevokableGaps / (double)(numRevokableGaps + numNonRevokableGaps);
-
+                    if (numRevokableGaps + numNonRevokableGaps > 0) {
+                        revokableFraction = numRevokableGaps / (double)(numRevokableGaps + numNonRevokableGaps);
+                    }
                     const uint32 removeRevokable = (uint32)ceil(blocksBeRemoved * revokableFraction);
                     const uint32 removeNonRevokable = (uint32)ceil(blocksBeRemoved * (1.0 - revokableFraction));
                     numRevokableGaps -= std::min(removeRevokable, numRevokableGaps);

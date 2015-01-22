@@ -61,7 +61,6 @@ void SCTPSendStream::deleteQueue()
     }
     delete streamQ;
     delete uStreamQ;
-    totalLength = 0;
 }
 
 } // namespace sctp

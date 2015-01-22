@@ -15,6 +15,10 @@ Define_Module(SCTPNatHook);
 SCTPNatHook::SCTPNatHook()
 {
     ipLayer = nullptr;
+    natTable = nullptr;
+    rt = nullptr;
+    ift = nullptr;
+    nattedPackets = 0;
 }
 
 SCTPNatHook::~SCTPNatHook()
@@ -30,7 +34,6 @@ void SCTPNatHook::initialize()
     ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
     natTable = new SCTPNatTable();
-    nattedPackets = 0;
 
     ipLayer->registerHook(0, this);
 }
@@ -42,6 +45,9 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
     IPv4Datagram *dgram;
 
     dgram = dynamic_cast<IPv4Datagram *>(datagram);
+    if (!dgram) {
+        return INetfilter::IHook::ACCEPT;
+    }
     if (SCTPAssociation::getAddressLevel(dgram->getSrcAddress()) != 3) {
         return INetfilter::IHook::ACCEPT;
     }
@@ -122,7 +128,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
         return INetfilter::IHook::ACCEPT;
     }
     natTable->printNatTable();
-    bool local = ((rt->isLocalAddress(dgram->getDestAddress()) & SCTPAssociation::getAddressLevel(dgram->getSrcAddress())) == 3);
+    bool local = ((rt->isLocalAddress(dgram->getDestAddress())) && (SCTPAssociation::getAddressLevel(dgram->getSrcAddress()) == 3));
     SCTPMessage *sctpMsg = check_and_cast<SCTPMessage *>(dgram->getEncapsulatedPacket());
     unsigned int numberOfChunks = sctpMsg->getChunksArraySize();
     if (numberOfChunks == 1)

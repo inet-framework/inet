@@ -28,6 +28,8 @@ inline double rint(double x) { return floor(x + .5); }
 
 // #define sctpEV3 std::cout
 
+#define HIGHSPEED_ENTRIES 73
+
 static inline double GET_SRTT(const double srtt)
 {
     return floor(1000.0 * srtt * 8.0);
@@ -41,7 +43,7 @@ struct HighSpeedCwndAdjustmentEntry
     double decreaseFactor;
 };
 
-static const HighSpeedCwndAdjustmentEntry HighSpeedCwndAdjustmentTable[] = {
+static const HighSpeedCwndAdjustmentEntry HighSpeedCwndAdjustmentTable[HIGHSPEED_ENTRIES] = {
     { 38, 1, 0.50 },
     { 118, 2, 0.44 },
     { 221, 3, 0.41 },
@@ -119,17 +121,16 @@ static const HighSpeedCwndAdjustmentEntry HighSpeedCwndAdjustmentTable[] = {
 
 void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
 {
+    ASSERT(path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES);
+
     if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
         while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-               (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry))))
-        {
+                (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry)))) {
             path->highSpeedCCThresholdIdx++;
         }
-    }
-    else {
+    } else {
         while ((path->cwnd <= HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-               (path->highSpeedCCThresholdIdx > 0))
-        {
+                (path->highSpeedCCThresholdIdx > 0)) {
             path->highSpeedCCThresholdIdx--;
         }
     }

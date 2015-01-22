@@ -42,6 +42,29 @@ SCTPNatPeer::SCTPNatPeer()
 {
     timeMsg = nullptr;
     timeoutMsg = nullptr;
+    numSessions = 0;
+    packetsSent = 0;
+    packetsRcvd = 0;
+    bytesSent = 0;
+    notifications = 0;
+    serverAssocId = 0;
+    delay = 0;
+    echo = false;
+    schedule = false;
+    shutdownReceived = false;
+    sendAllowed = true;
+    numRequestsToSend = 0;
+    ordered = true;
+    queueSize = 0;
+    outboundStreams = 1;
+    inboundStreams = 1;
+    bytesRcvd = 0;
+    echoedBytesSent = 0;
+    lastStream = 0;
+    chunksAbandoned = 0;
+    numPacketsToReceive = 1;
+    rendezvous = false;
+    peerPort = 0;
 }
 
 SCTPNatPeer::~SCTPNatPeer()
@@ -52,7 +75,6 @@ SCTPNatPeer::~SCTPNatPeer()
 
 void SCTPNatPeer::initialize()
 {
-    numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
     WATCH(numSessions);
     WATCH(packetsSent);
     WATCH(packetsRcvd);
@@ -69,7 +91,6 @@ void SCTPNatPeer::initialize()
     inboundStreams = par("inboundStreams");
     ordered = (bool)par("ordered");
     queueSize = par("queueSize");
-    lastStream = 0;
     timeoutMsg = new cMessage("SrvAppTimer");
     if (addresses.size() == 0) {
         clientSocket.bind(port);
@@ -85,9 +106,6 @@ void SCTPNatPeer::initialize()
         msg->setKind(MSGKIND_CONNECT);
         scheduleAt((simtime_t)par("startTime"), msg);
     }
-    schedule = false;
-    shutdownReceived = false;
-    sendAllowed = true;
 }
 
 void SCTPNatPeer::sendOrSchedule(cPacket *msg)
@@ -246,7 +264,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     inboundStreams = connectInfo->getInboundStreams();
                     rcvdPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToReceivePerClient");
                     sentPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToSendPerClient");
-                    char text[30];
+                    char text[128];
                     sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
                     bytesPerAssoc[serverAssocId] = new cOutVector(text);
                     rcvdBytesPerAssoc[serverAssocId] = 0;
@@ -364,7 +382,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     auto j = rcvdBytesPerAssoc.find(id);
                     if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                         clientSocket.processMessage(PK(msg));
-                    else {
+                    else if (j != rcvdBytesPerAssoc.end()) {
                         j->second += PK(msg)->getBitLength() / 8;
                         auto k = bytesPerAssoc.find(id);
                         k->second->record(j->second);
@@ -413,6 +431,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                             delete msg;
                             sendOrSchedule(cmsg);
                         }
+                    } else {
+                        delete msg;
                     }
                 }
                 break;
@@ -425,7 +445,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                 auto i = rcvdPacketsPerAssoc.find(id);
                 if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                     clientSocket.processMessage(PK(msg));
-                else {
+                else if (i != rcvdPacketsPerAssoc.end()) {
                     if (i->second == 0) {
                         cPacket *cmsg = new cPacket("Request");
                         SCTPInfo *qinfo = new SCTPInfo();
@@ -436,6 +456,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     }
 
                     shutdownReceived = true;
+                    delete msg;
+                } else {
                     delete msg;
                 }
                 delete command;
@@ -543,19 +565,18 @@ void SCTPNatPeer::socketPeerClosed(int32, void *)
             const char *addressesString = par("localAddress");
             AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
             int32 port = par("localPort");
-            SCTPSocket *socket = new SCTPSocket();
-            socket->setOutputGate(gate("sctpOut"));
-            socket->setOutboundStreams(outboundStreams);
-            socket->setInboundStreams(inboundStreams);
+            rendezvousSocket.setOutputGate(gate("sctpOut"));
+            rendezvousSocket.setOutboundStreams(outboundStreams);
+            rendezvousSocket.setInboundStreams(inboundStreams);
             if (addresses.size() == 0) {
-                socket->bind(port);
+                rendezvousSocket.bind(port);
                 clientSocket.bind(port);
             }
             else {
                 clientSocket.bindx(addresses, port);
-                socket->bindx(addresses, port);
+                rendezvousSocket.bindx(addresses, port);
             }
-            socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
+            rendezvousSocket.listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
             if ((bool)par("multi"))
                 connectx(peerAddressList, peerPort);
             else
@@ -576,19 +597,18 @@ void SCTPNatPeer::socketClosed(int32, void *)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
-        SCTPSocket *socket = new SCTPSocket();
-        socket->setOutputGate(gate("sctpOut"));
-        socket->setOutboundStreams(outboundStreams);
-        socket->setInboundStreams(inboundStreams);
+        rendezvousSocket.setOutputGate(gate("sctpOut"));
+        rendezvousSocket.setOutboundStreams(outboundStreams);
+        rendezvousSocket.setInboundStreams(inboundStreams);
         if (addresses.size() == 0) {
-            socket->bind(port);
+            rendezvousSocket.bind(port);
             clientSocket.bind(port);
         }
         else {
             clientSocket.bindx(addresses, port);
-            socket->bindx(addresses, port);
+            rendezvousSocket.bindx(addresses, port);
         }
-        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
+        rendezvousSocket.listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
         if ((bool)par("multi"))
             connectx(peerAddressList, peerPort);
         else
@@ -874,16 +894,16 @@ void SCTPNatPeer::finish()
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
     for (auto j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++) {
         delete j->second;
-        bytesPerAssoc.erase(j);
     }
+    bytesPerAssoc.clear();
     for (auto k = endToEndDelay.begin(); k != endToEndDelay.end(); k++) {
         delete k->second;
-        endToEndDelay.erase(k);
     }
+    endToEndDelay.clear();
     for (auto l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++) {
         delete l->second;
-        histEndToEndDelay.erase(l);
     }
+    histEndToEndDelay.clear();
     rcvdPacketsPerAssoc.clear();
     sentPacketsPerAssoc.clear();
     rcvdBytesPerAssoc.clear();

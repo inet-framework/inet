@@ -357,7 +357,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     parPtr += ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize());
 
-                    for (unsigned int k = 0; k < sizeVector; k++) {
+                    for (unsigned int k = 0; k < min(sizeVector, 64); k++) {
                         if (sizeKeyVector != 0)
                             peerKeyVector[k] = vector[k];
                         else
@@ -370,6 +370,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         sizeKeyVector = sizeVector;
 
                     calculateSharedKey();
+                    free(vector);
                 }
                 int32 cookielen = initAckChunk->getCookieArraySize();
                 if (cookielen == 0) {
@@ -458,7 +459,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + size_heartbeat_chunk);
                     L3Address addr = heartbeatChunk->getRemoteAddr();
                     simtime_t time = heartbeatChunk->getTimeField();
-                    int32 infolen;
+                    int32 infolen = 0;
 #ifdef WITH_IPv4
                     if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIPv4().getInt()) + sizeof(uint32);
@@ -485,6 +486,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         HBI_ADDR(hbi).v6addr = *ipv6addr;
                     }
 #endif // ifdef WITH_IPv6
+                    ASSERT(infolen != 0);
                     HBI_TIME(hbi) = htonl((uint32)time.dbl());
                     hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
                     writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
@@ -1321,9 +1323,9 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
 
             case INIT_ACK: {
                 const struct init_ack_chunk *iac = (struct init_ack_chunk *)(chunks + chunkPtr);
-                struct tlv *cp;
-                struct random_parameter *rp;
-                struct hmac_algo *hp;
+                struct tlv *cp = nullptr;
+                struct random_parameter *rp = nullptr;
+                struct hmac_algo *hp = nullptr;
                 unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitAckChunk *chunk = new SCTPInitAckChunk("INIT_ACK");
@@ -1492,21 +1494,36 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                     }
                 }
                 if (chunk->getHmacTypesArraySize() != 0) {
-                    unsigned char *vector = (unsigned char *)malloc(64);
+                    unsigned char vector[64];
+                    if (rplen > 64) {
+                        EV_ERROR << "Random parameter too long. It will be truncated.\n";
+                        rplen = 64;
+                    }
                     sizePeerKeyVector = rplen;
                     memcpy(vector, rp, rplen);
                     for (unsigned int k = 0; k < sizePeerKeyVector; k++) {
                         peerKeyVector[k] = vector[k];
                     }
+                    free(rp);
+                    if (cplen > 64) {
+                        EV_ERROR << "Chunks parameter too long. It will be truncated.\n";
+                        cplen = 64;
+                    }
                     memcpy(vector, cp, cplen);
                     for (unsigned int k = 0; k < cplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
+                    free(cp);
                     sizePeerKeyVector += cplen;
+                    if (hplen > 64) {
+                        EV_ERROR << "HMac parameter too long. It will be truncated.\n";
+                        hplen = 64;
+                    }
                     memcpy(vector, hp, hplen);
                     for (unsigned int k = 0; k < hplen; k++) {
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
+                    free(hp);
                     sizePeerKeyVector += hplen;
                     calculateSharedKey();
                 }

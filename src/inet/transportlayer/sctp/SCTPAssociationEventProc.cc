@@ -187,7 +187,6 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         uint32 lowestPriority;
         cQueue *strq;
         int64 dropsize = state->sendBuffer - state->sendQueueLimit;
-        SCTPDataMsg *dropmsg;
 
         if (sendUnordered)
             strq = stream->getUnorderedStreamQ();
@@ -196,7 +195,6 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
         while (dropsize >= 0 && state->queuedDroppableBytes > 0) {
             lowestPriority = 0;
-            dropmsg = nullptr;
 
             // Find lowest priority
             for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
@@ -216,27 +214,6 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
                 delete msg;
                 sendIndicationToApp(SCTP_I_ABANDONED);
                 return;
-            }
-
-            // Find oldest message with lowest priority
-            for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
-                SCTPDataMsg *msg = (SCTPDataMsg *)iter();
-
-                if (msg->getPriority() == lowestPriority) {
-                    if (!dropmsg ||
-                        (dropmsg && dropmsg->getEnqueuingTime() < msg->getEnqueuingTime()))
-                        lowestPriority = msg->getPriority();
-                }
-            }
-
-            if (dropmsg) {
-                strq->remove(dropmsg);
-                dropsize -= dropmsg->getByteLength();
-                state->queuedDroppableBytes -= dropmsg->getByteLength();
-                SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((msg->decapsulate()));
-                delete smsg;
-                delete dropmsg;
-                sendIndicationToApp(SCTP_I_ABANDONED);
             }
         }
     }

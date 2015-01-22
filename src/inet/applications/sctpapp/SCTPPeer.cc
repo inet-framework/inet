@@ -48,6 +48,27 @@ SCTPPeer::SCTPPeer()
     timeoutMsg = nullptr;
     timeMsg = nullptr;
     connectTimer = nullptr;
+    delay = 0;
+    echo = false;
+    ordered = true;
+    schedule = false;
+    queueSize = 0;
+    outboundStreams = 1;
+    inboundStreams = 17;
+    shutdownReceived = false;
+    sendAllowed = true;
+    serverAssocId = 0;
+    numRequestsToSend = 0;
+    lastStream = 0;
+    numPacketsToReceive = 0;
+    bytesSent = 0;
+    echoedBytesSent = 0;
+    packetsSent = 0;
+    bytesRcvd = 0;
+    packetsRcvd = 0;
+    notificationsReceived = 0;
+    numSessions = 0;
+    chunksAbandoned = 0;
 }
 
 SCTPPeer::~SCTPPeer()
@@ -77,7 +98,6 @@ void SCTPPeer::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
@@ -92,23 +112,23 @@ void SCTPPeer::initialize(int stage)
         echo = par("echo");
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
+        inboundStreams = par("inboundStreams");
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
-        lastStream = 0;
         timeoutMsg = new cMessage("SrvAppTimer");
-        SCTPSocket *socket = new SCTPSocket();
-        socket->setOutputGate(gate("sctpOut"));
-        socket->setOutboundStreams(outboundStreams);
+        listeningSocket.setOutputGate(gate("sctpOut"));
+        listeningSocket.setOutboundStreams(outboundStreams);
+        listeningSocket.setInboundStreams(inboundStreams);
 
         if (addresses.size() == 0) {
-            socket->bind(port);
+            listeningSocket.bind(port);
             clientSocket.bind(port);
         }
         else {
-            socket->bindx(addresses, port);
+            listeningSocket.bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
-        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
+        listeningSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
         EV_DEBUG << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
@@ -118,9 +138,6 @@ void SCTPPeer::initialize(int stage)
             connectTimer->setKind(MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
         }
-        schedule = false;
-        shutdownReceived = false;
-        sendAllowed = true;
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -345,7 +362,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             auto j = rcvdBytesPerAssoc.find(id);
             if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else {
+            else if (j != rcvdBytesPerAssoc.end()) {
                 j->second += PK(msg)->getByteLength();
                 auto k = bytesPerAssoc.find(id);
                 k->second->record(j->second);
@@ -397,6 +414,8 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     delete msg;
                     sendOrSchedule(cmsg);
                 }
+            } else {
+                delete msg;
             }
             break;
         }
@@ -409,7 +428,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
             if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else {
+            else if (i != rcvdPacketsPerAssoc.end()) {
                 if (i->second == 0) {
                     cPacket *cmsg = new cPacket("Request");
                     SCTPInfo *qinfo = new SCTPInfo();

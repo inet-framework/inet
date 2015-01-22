@@ -55,21 +55,21 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     bool schedule;
     int queueSize;
     int outboundStreams;
+    int inboundStreams;
 
     // state
     SCTPPathStatus sctpPathStatus;
     SCTPSocket clientSocket;
+    SCTPSocket listeningSocket;
     cMessage *timeoutMsg;
     cMessage *timeMsg;
     cMessage *connectTimer;
     bool shutdownReceived;
     bool sendAllowed;
     int serverAssocId;
-    int clientAssocId;
     int numRequestsToSend;    // requests to send in this session
     int lastStream;
     int numPacketsToReceive;
-    int ssn;
 
     // statistics
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
