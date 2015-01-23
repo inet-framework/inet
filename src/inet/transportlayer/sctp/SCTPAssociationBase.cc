@@ -309,6 +309,7 @@ SCTPStateVariables::SCTPStateVariables()
     stopReceiving = false;
     stopOldData = false;
     stopSending = false;
+    stopReading = false;
     inOut = false;
     asconfOutstanding = false;
     streamReset = false;
@@ -874,10 +875,6 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
             process_SEND(event, sctpCommand, msg);
             break;
 
-        case SCTP_E_CLOSE:
-            process_CLOSE(event);
-            break;
-
         case SCTP_E_ABORT:
             process_ABORT(event);
             break;
@@ -913,6 +910,9 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
         case SCTP_E_QUEUE_MSGS_LIMIT:
             process_QUEUE_MSGS_LIMIT(sctpCommand);
             break;
+
+        case SCTP_E_CLOSE:
+            state->stopReading = true;
 
         case SCTP_E_SHUTDOWN:    /*sendShutdown*/
             EV_INFO << "SCTP_E_SHUTDOWN in state " << stateName(fsm->getState()) << "\n";
@@ -1042,6 +1042,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     FSM_Goto((*fsm), SCTP_S_CLOSED);
                     break;
 
+                case SCTP_E_CLOSE:
                 case SCTP_E_SHUTDOWN:
                     FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);
                     break;
@@ -1054,10 +1055,6 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
                 case SCTP_E_RCV_SHUTDOWN:
                     FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED);
-                    break;
-
-                case SCTP_E_CLOSE:
-                    FSM_Goto((*fsm), SCTP_S_CLOSED);
                     break;
 
                 default:
