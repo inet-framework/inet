@@ -913,6 +913,7 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
 
         case SCTP_E_CLOSE:
             state->stopReading = true;
+            /* fall through */
 
         case SCTP_E_SHUTDOWN:    /*sendShutdown*/
             EV_INFO << "SCTP_E_SHUTDOWN in state " << stateName(fsm->getState()) << "\n";
