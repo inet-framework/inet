@@ -230,6 +230,16 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
                     trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
                 }
+                if (state->stopReading) {
+                    if (state->shutdownChunk) {
+                        delete state->shutdownChunk;
+                    }
+                    delete header;
+                    sendAbort();
+                    sctpMain->removeAssociation(this);
+                    trans = true;
+                    break;
+                }
                 if (!(fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED || fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
                     SCTPDataChunk *dataChunk;
                     dataChunk = check_and_cast<SCTPDataChunk *>(header);

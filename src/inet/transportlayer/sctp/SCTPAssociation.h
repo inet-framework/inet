@@ -564,6 +564,7 @@ class INET_API SCTPStateVariables : public cObject
     bool peerWindowFull;
     bool zeroWindow;
     bool stopSending;    // will be called when SCTP_E_SHUTDOWN arrived
+    bool stopReading;    // will be called when CLOSE was called and no data will be accepted
     bool inOut;
     bool noMoreOutstanding;
     uint32 numGapReports;
