@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211BITDOMAINTEST_H_
 #define __INET_IEEE80211BITDOMAINTEST_H_
 
-#include "inet/physicallayer/common/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/Ieee80211Interleaver.h"
-#include "inet/physicallayer/ieee80211/Ieee80211Scrambler.h"
+#include "inet/physicallayer/common/layered/ConvolutionalCoderModule.h"
+#include "inet/physicallayer/ieee80211/layered/Ieee80211InterleaverModule.h"
+#include "inet/physicallayer/common/layered/AdditiveScramblerModule.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -28,12 +28,12 @@ using namespace inet::physicallayer;
 
 namespace inet {
 
-class Ieee80211BitDomainTest : public cSimpleModule
+class INET_API Ieee80211BitDomainTest : public cSimpleModule
 {
     protected:
-        Ieee80211Scrambler *scrambler;
-        Ieee80211Interleaver *interleaver;
-        ConvolutionalCoder *convCoder;
+        AdditiveScramblerModule *scrambler;
+        Ieee80211InterleaverModule *interleaver;
+        ConvolutionalCoderModule *convCoder;
         std::ifstream *fileStream;
         const char *testType;
 
@@ -45,9 +45,6 @@ class Ieee80211BitDomainTest : public cSimpleModule
         void testScrambler() const;
         void testInterleaver() const;
         void testIeee80211BitDomain() const;
-
-    public:
-        ~Ieee80211BitDomainTest();
 };
 
 } /* namespace inet */
