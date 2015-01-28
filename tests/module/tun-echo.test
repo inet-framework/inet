@@ -1,0 +1,39 @@
+%description:
+Testing the functionality of the TUN interface:
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+network = TunTest
+debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+
+**.hasTun = true
+**.testHost.numUdpTunApps = 1
+**.testHost.numTcpTunApps = 0
+**.testHost.tunApp.typename = "TunBasicApp"
+**.testHost.tunApp.thinkTime = 0.05s
+**.testHost.tunApp.packetsToSend = 10
+**.testHost.tunApp.messageLength = 100
+
+**.startTime = 2s
+
+
+**.testHost.routingTable.routingFile = "../../lib/tun.mrt"
+**.testHost.numPcapRecorders=1
+**.testHost.pcapRecorder[0].pcapFile="tunhost.pcap"
+**.testHost.pcapRecorder[0].moduleNamePatterns="tun"
+**.testHost.pcapRecorder[0].sendingSignalNames="packetSentToUpper"
+**.testHost.pcapRecorder[0].receivingSignalNames="packetReceivedFromUpper"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+packets sent to UDP: 10
+%contains-regex: stdout
+packets received via UDP: 10
+%contains-regex: stdout
+packets received via Tun: 10
+%#--------------------------------------------------------------------------------------------------------------

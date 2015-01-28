@@ -20,6 +20,7 @@ package inet.node.inet;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.PcapRecorder;
 import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.ITunNic;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
@@ -54,6 +55,7 @@ module NodeBase
         string routingTableType = default("IPv4RoutingTable");
         bool forwarding = default(true);
         bool multicastForwarding = default(false);
+        bool hasTun = default(false);
         string energyStorageType = default("");
         string energyGeneratorType = default("");
         routingTable.forwarding = forwarding;
@@ -120,6 +122,10 @@ module NodeBase
             parameters:
                 @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
         }
+        tun: <default("TunInterface")> like ITunNic if hasTun {
+            parameters:
+                @display("p=213,406,row,10;q=txQueue;i=block/ifcard");
+        }
 
     connections allowunconnected:
         // connections to network outside
@@ -148,5 +154,8 @@ module NodeBase
             ext[i].upperLayerOut --> networkLayer.ifIn++;
             ext[i].upperLayerIn <-- networkLayer.ifOut++;
         }
+
+        tun.upperLayerOut --> networkLayer.ifIn++ if hasTun;
+        tun.upperLayerIn <-- networkLayer.ifOut++ if hasTun;
 }
 
