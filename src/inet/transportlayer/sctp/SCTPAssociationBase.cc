@@ -375,6 +375,7 @@ SCTPStateVariables::SCTPStateVariables()
     peerRwnd = 0;
     initialPeerRwnd = 0;
     assocPmtu = 0;
+    fragPoint = 0;
     outstandingBytes = 0;
     messagesToPush = 0;
     pushMessagesLeft = 0;
@@ -1275,6 +1276,7 @@ void SCTPAssociation::stateEntered(int32 status)
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
             state->outgoingSackSeqNum = 0;
             state->incomingSackSeqNum = 0;
+            state->fragPoint = (uint32)sctpMain->par("fragPoint");
             state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
             state->initialWindow = (uint32)sctpMain->par("initialWindow");
             if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
