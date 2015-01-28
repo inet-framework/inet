@@ -20,6 +20,7 @@ package inet.node.inet;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.PcapRecorder;
 import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.ITunNic;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
@@ -49,6 +50,7 @@ module NodeBase
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
+        int numTunInterfaces = default(0);
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
         string networkLayerType = default("IPv4NetworkLayer");
         string routingTableType = default("IPv4RoutingTable");
@@ -120,6 +122,10 @@ module NodeBase
             parameters:
                 @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
         }
+        tun[numTunInterfaces]: <default("TunInterface")> like ITunNic {
+            parameters:
+                @display("p=213,406,row,10;q=txQueue;i=block/ifcard");
+        }
 
     connections allowunconnected:
         // connections to network outside
@@ -147,6 +153,11 @@ module NodeBase
         for i=0..numExtInterfaces-1 {
             ext[i].upperLayerOut --> networkLayer.ifIn++;
             ext[i].upperLayerIn <-- networkLayer.ifOut++;
+        }
+
+        for i=0..numTunInterfaces-1 {
+            tun[i].upperLayerOut --> networkLayer.ifIn++;
+            tun[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 }
 

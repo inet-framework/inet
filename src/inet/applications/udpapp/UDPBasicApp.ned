@@ -45,6 +45,7 @@ simple UDPBasicApp like IUDPApp
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort = default(-1);  // local port (-1: use ephemeral port)
         string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
+        string localAddress = default("");
         int destPort;
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
