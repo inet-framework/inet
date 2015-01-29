@@ -2457,7 +2457,7 @@ bool SCTPAssociation::nextChunkFitsIntoPacket(SCTPPathVariables *path, int32 byt
             int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
             /* Check if next message would be fragmented */
-            if (b > state->fragPoint) {
+            if (b > state->fragPoint + SCTP_DATA_CHUNK_LENGTH) {
                 /* Test if fragment fits */
                 if (bytes >= state->fragPoint)
                     return true;
