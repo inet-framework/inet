@@ -2593,7 +2593,8 @@ void SCTPAssociation::pmStartPathManagement()
         if (state->enableHeartbeats) {
             path->heartbeatTimeout = (double)sctpMain->par("hbInterval") + i * path->pathRto;
             stopTimer(path->HeartbeatTimer);
-            sendHeartbeat(path);
+            if (!path->confirmed)
+                sendHeartbeat(path);
             startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
             startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
         }
