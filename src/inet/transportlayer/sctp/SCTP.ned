@@ -59,6 +59,9 @@ simple SCTP like ISCTP
         bool nagleEnabled = default(true);
         int naglePoint = default(1468);
 
+        //#====== Fragmentation =============================================
+        int fragPoint = default(1452);    // size of a message that has to be fragmented, i.e. maximum size of a fragment
+
         //#====== Congestion Control ==========================================
         bool fastRecoverySupported = default(true);
         string sctpAlgorithmClass = default("SCTPAlg");

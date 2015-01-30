@@ -592,6 +592,7 @@ class INET_API SCTPStateVariables : public cObject
     uint64 queuedReceivedBytes;    // Number of bytes in receiver queue
     uint32 lastStreamScheduled;
     uint32 assocPmtu;    // smallest overall path mtu
+    uint32 fragPoint;    // maximum size of a fragment
     uint32 msgNum;    // indicates the sequence number of the message
     uint64 bytesRcvd;
     uint32 numRequests;
