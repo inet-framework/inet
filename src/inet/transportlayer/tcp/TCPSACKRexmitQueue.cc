@@ -122,6 +122,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
         }
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
+            ASSERT(!i->rexmitted); // ensure that a rexmitted segment is not sent multiples times
             i->rexmitted = true;
             fromSeqNum = i->endSeqNum;
             found = true;

@@ -576,7 +576,7 @@ void TCPConnection::sendFin()
 
 void TCPConnection::sendSegment(uint32 bytes)
 {
-    if (state->sack_enabled && state->afterRto) {
+    if (state->sack_enabled) {
         // check rexmitQ and try to forward snd_nxt before sending new data
         uint32 forward = rexmitQueue->checkRexmitQueueForSackedOrRexmittedSegments(state->snd_nxt);
 
