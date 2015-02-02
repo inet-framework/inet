@@ -44,7 +44,7 @@ class INET_API PIMBase : public OperationalBase
         int metric;
         IPv4Address address;
 
-        static const AssertMetric INFINITE;
+        static const AssertMetric PIM_INFINITE;
 
         AssertMetric() : rptBit(1), preference(-1), metric(0) {}
         AssertMetric(int preference, int metric, IPv4Address address) :
@@ -110,7 +110,7 @@ class INET_API PIMBase : public OperationalBase
         void deleteAssertInfo()
         {
             assertState = NO_ASSERT_INFO;
-            winnerMetric = AssertMetric::INFINITE;
+            winnerMetric = AssertMetric::PIM_INFINITE;
             owner->owner->cancelAndDelete(assertTimer);
             assertTimer = nullptr;
         }

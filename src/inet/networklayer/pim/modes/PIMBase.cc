@@ -31,7 +31,7 @@ using namespace std;
 
 const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
-const PIMBase::AssertMetric PIMBase::AssertMetric::INFINITE;
+const PIMBase::AssertMetric PIMBase::AssertMetric::PIM_INFINITE;
 
 simsignal_t PIMBase::sentHelloPkSignal = registerSignal("sentHelloPk");
 simsignal_t PIMBase::rcvdHelloPkSignal = registerSignal("rcvdHelloPk");
