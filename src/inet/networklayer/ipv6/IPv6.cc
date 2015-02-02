@@ -53,6 +53,7 @@ IPv6::~IPv6()
 {
 }
 
+#ifdef WITH_xMIPv6
 IPv6::ScheduledDatagram::ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
         datagram(datagram),
         ie(ie),
@@ -65,6 +66,7 @@ IPv6::ScheduledDatagram::~ScheduledDatagram()
 {
     delete datagram;
 }
+#endif /* WITH_xMIPv6 */
 
 void IPv6::initialize(int stage)
 {
