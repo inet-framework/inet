@@ -852,6 +852,22 @@ void IPv6RoutingTable::deletePrefixes(int interfaceID)
     updateDisplayString();
 }
 
+bool IPv6RoutingTable::isOnLinkAddress(const IPv6Address& address)
+{
+    for (int j = 0; j < ift->getNumInterfaces(); j++) {
+        InterfaceEntry *ie = ift->getInterface(j);
+
+        for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
+            if (address.matches(ie->ipv6Data()->getAdvPrefix(i).prefix, ie->ipv6Data()->getAdvPrefix(i).prefixLength))
+                return true;
+
+    }
+
+    return false;
+}
+
+#endif /* WITH_xMIPv6 */
+
 void IPv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 {
     bool changed = false;
@@ -876,22 +892,6 @@ void IPv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
         updateDisplayString();
     }
 }
-
-bool IPv6RoutingTable::isOnLinkAddress(const IPv6Address& address)
-{
-    for (int j = 0; j < ift->getNumInterfaces(); j++) {
-        InterfaceEntry *ie = ift->getInterface(j);
-
-        for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
-            if (address.matches(ie->ipv6Data()->getAdvPrefix(i).prefix, ie->ipv6Data()->getAdvPrefix(i).prefixLength))
-                return true;
-
-    }
-
-    return false;
-}
-
-#endif /* WITH_xMIPv6 */
 
 bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
