@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,21 +18,31 @@
 #ifndef __INET_IMODULATION_H
 #define __INET_IMODULATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/contract/IPrintableObject.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 /**
- * Abstract class to encapsulate bit error rate calculation of modulation schemes
+ * This interface represents the process of varying one or more physical
+ * properties of a periodic waveform, called the carrier signal, with a
+ * modulating signal that typically contains information to be transmitted.
  */
-class INET_API IModulation
+class INET_API IModulation : public IPrintableObject
 {
   public:
-    virtual ~IModulation() {}
-    virtual const char *getName() = 0;
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
+    /**
+     * Returns the bit error rate as a function of the signal to noise and
+     * interference ratio, the bandwidth, and the gross (physical) bitrate.
+     */
+    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const = 0;
+
+    /**
+     * Returns the symbol error rate as a function of the signal to noise
+     * and interference ratio, the bandwidth, and the gross (physical) bitrate.
+     */
+    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const = 0;
 };
 
 } // namespace physicallayer
