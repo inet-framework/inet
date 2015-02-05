@@ -23,6 +23,7 @@
 
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 
+#include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
@@ -175,7 +176,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // skip ethernet frames not encapsulating an IP packet.
     if (datalink == DLT_EN10MB) {
         ethernet_hdr = (struct serializer::ether_header *)bytes;
-        if (ntohs(ethernet_hdr->ether_type) != ETHERTYPE_IP)
+        if (ntohs(ethernet_hdr->ether_type) != ETHERTYPE_IPv4)
             return;
     }
 
