@@ -1,21 +1,69 @@
 %description:
 Test serializing frames
 
+%inifile: omnetpp.ini
+[General]
+#debugger-attach-on-startup=true
+#debugger-attach-on-error=true
+
 %includes:
 #include <stdio.h>
 #include <iostream>
-#include "inet/common/serializer/pcap.h"
-#include "inet/common/serializer/headerserializers/SerializerUtil.h"
+#include "inet/common/serializer/SerializerBase.h"
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
 %global:
+
+#define PCAP_MAGIC      0xa1b2c3d4
+
+/* "libpcap" file header (minus magic number). */
+struct pcap_hdr
+{
+    uint32 magic;    /* magic */
+    uint16 version_major;    /* major version number */
+    uint16 version_minor;    /* minor version number */
+    uint32 thiszone;    /* GMT to local correction */
+    uint32 sigfigs;    /* accuracy of timestamps */
+    uint32 snaplen;    /* max length of captured packets, in octets */
+    uint32 network;    /* data link type */
+};
+
+/* "libpcap" record header. */
+struct pcaprec_hdr
+{
+    int32 ts_sec;    /* timestamp seconds */
+    uint32 ts_usec;    /* timestamp microseconds */
+    uint32 incl_len;    /* number of octets of packet saved in file */
+    uint32 orig_len;    /* actual length of packet */
+};
+
+
+uint16_t swapByteOrder16(uint16_t v)
+{
+    return ((v & 0xFF) << 8) | ((v & 0xFF00) >> 8);
+}
+
+uint32_t swapByteOrder32(uint32_t v)
+{
+    return ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | ((v & 0xFF000000) >> 24);
+}
+
+using namespace inet::serializer;
+
 static void printobject(cObject* object)
 {
+    EV << object->getClassName() << ":" << endl;
     cClassDescriptor *descriptor = object->getDescriptor();
-    for (int i = 0; i<descriptor->getFieldCount(object); i++){
-        EV << descriptor->getFieldName(object, i) << ": ";
-        EV << descriptor->getFieldAsString(object,i,0) << endl;
+    for (int i = 0; i < descriptor->getFieldCount(object); i++) {
+        EV << "    " << descriptor->getFieldName(object, i) << ": ";
+        if (descriptor->getFieldIsArray(object, i)) {
+            for (int j = 0; j < descriptor->getArraySize(object, i); j++) {
+                EV << "      [" << j << "]: " << descriptor->getFieldAsString(object,i,j) << endl;
+            }
+        }
+        else
+            EV << descriptor->getFieldAsString(object,i,0) << endl;
     }
 }
 
@@ -24,15 +72,26 @@ static void testRecord(const char* filename, bool fcs = true)
     FILE *pcapFile;
     struct pcap_hdr fileHeader;
     struct pcaprec_hdr recordHeader;
-    uint8 readBuf[8192];
-    uint8 writeBuf[8192];
+    static uint8 readBuf[60000];
+    static uint8 writeBuf[60000];
 
     memset((void*)&readBuf, 0, sizeof(readBuf));
     memset((void*)&writeBuf, 0, sizeof(writeBuf));
 
+    EV << "=== Testing file " << filename << endl;
+
     pcapFile  = fopen(filename, "rb");
-    fread(&fileHeader, sizeof(fileHeader), 1, pcapFile);
-    if (fileHeader.magic != 0xa1b2c3d4)
+    if (!pcapFile)
+        throw cRuntimeError("pcap file '%s' can not opened.", filename);
+
+    size_t err = fread(&fileHeader, sizeof(fileHeader), 1, pcapFile);
+    if (err != 1)
+        throw cRuntimeError("Can not read pcap fileheader from file '%s', errno is %ld.", filename, err);
+
+    if (fileHeader.magic == 0xa1b2c3d4)
+    {
+    }
+    else if (fileHeader.magic == 0xd4c3b2a1)
     {
         fileHeader.version_major = swapByteOrder16(fileHeader.version_major);
         fileHeader.version_minor = swapByteOrder16(fileHeader.version_minor);
@@ -41,7 +100,12 @@ static void testRecord(const char* filename, bool fcs = true)
         fileHeader.snaplen = swapByteOrder32(fileHeader.snaplen);
         fileHeader.network = swapByteOrder32(fileHeader.network);
     }
-    fread(&recordHeader, sizeof(recordHeader), 1, pcapFile);
+    else
+        throw cRuntimeError("unknown pcap fileheader from file '%s'", filename);
+
+    err = fread(&recordHeader, sizeof(recordHeader), 1, pcapFile);
+    if (err != 1)
+        throw cRuntimeError("Can not read pcap recordheader from file '%s', errno is %ld.", filename, err);
     if (fileHeader.magic != 0xa1b2c3d4)
     {
         recordHeader.ts_sec = swapByteOrder32(recordHeader.ts_sec);
@@ -49,91 +113,43 @@ static void testRecord(const char* filename, bool fcs = true)
         recordHeader.orig_len = swapByteOrder32(recordHeader.orig_len);
         recordHeader.incl_len = swapByteOrder32(recordHeader.incl_len);
     }
-    fread(&readBuf, recordHeader.orig_len, 1, pcapFile);
+    fread(&readBuf, recordHeader.incl_len, 1, pcapFile);
     fclose(pcapFile);
 
     uint32 serializedLength = 0;
 
-    switch(fileHeader.network)
-    {
-        case LINKTYPE_ETHERNET:
-        {
-            cPacket *etherFrame = EthernetSerializer().parse(readBuf, recordHeader.incl_len);
-            cPacket *temp = etherFrame;
-            while (temp)
-            {
-                printobject(temp);
-                temp = temp->getEncapsulatedPacket();
-            }
-            serializedLength = EthernetSerializer().serialize((EthernetIIFrame *)etherFrame, writeBuf, sizeof(writeBuf));
-            delete etherFrame;
-            break;
-        }
-        case LINKTYPE_IEEE801_11:
-        {
-            cPacket *ieee80211Frame = Ieee80211Serializer().parse(readBuf, recordHeader.incl_len);
-            cPacket *temp = ieee80211Frame;
-            while (temp)
-            {
-                printobject(temp);
-                temp = temp->getEncapsulatedPacket();
-            }
-            serializedLength = Ieee80211Serializer().serialize((Ieee80211Frame *)ieee80211Frame, writeBuf, sizeof(writeBuf));
-            delete ieee80211Frame;
-            break;
-        }
-    }
-    
-    if (!fcs)
-        serializedLength -= 4;
-    if(recordHeader.incl_len == serializedLength && !memcmp(readBuf, writeBuf, serializedLength))
+    Buffer rb(readBuf, recordHeader.incl_len);
+    Buffer wb(writeBuf, sizeof(writeBuf));
+    Context c;
+    cPacket *frame = SerializerBase::parse(rb, c, LINKTYPE, fileHeader.network, 0);
+    for (cPacket *temp = frame; temp; temp = temp->getEncapsulatedPacket())
+        printobject(temp);
+    SerializerBase::serialize(frame, wb, c, LINKTYPE, fileHeader.network, 0);
+    serializedLength = wb.getPos();
+    delete frame;
+
+    if(recordHeader.incl_len == serializedLength)
+        EV << "Frame lengths are the same" << endl;
+    else
+        EV << "Frame lengths are not the same: " << recordHeader.incl_len << " ws " << serializedLength << endl;
+    if(recordHeader.incl_len == serializedLength && !memcmp(readBuf, writeBuf, fcs ? serializedLength : serializedLength - 4))
         EV << "Frames are the same" << endl;
     else
         EV << "Frames are not the same" << endl;
 }
 
 %activity:
-testRecord("../../arp.pcap", false);
-testRecord("../../tcp.pcap", false);
-testRecord("../../80211ack.pcap", false);
+testRecord("../../pcap/rarp_request.pcap", false);
+testRecord("../../pcap/rarp_req_reply.pcap", false);
+//testRecord("../../pcap/v6.pcap", false);
+testRecord("../../pcap/tcp_ok_capture.pcap", false);
+//testRecord("../../pcap/80211ack.pcap", false);
 
 %contains-regex: stdout
-dest: FF-FF-FF-FF-FF-FF
-src: 00-07-0D-AF-F4-54
-.*
-etherType: 2054
-.*
-srcMACAddress: 00-07-0D-AF-F4-54
-destMACAddress: 00-00-00-00-00-00
-srcIPAddress: 24.166.172.1
-destIPAddress: 24.166.173.159
+=== Testing file ../../pcap/rarp_request.pcap
 .*
 Frames are the same
-.*
-dest: 00-13-C6-00-55-A5
-src: 00-1D-60-B3-01-84
-.*
-etherType: 2048
-.*
-srcAddress: 192.168.1.140
-destAddress: 192.168.1.194
-transportProtocol: 6
-.*
-srcPort: 56760
-destPort: 23
-sequenceNo: 3671007701
-.*
-Frames are the same
-.*
-duration: 0
-type: 29
-toDS: false
-fromDS: false
-retry: false
-moreFragments: false
-duration: 0
-AID: -1
-receiverAddress: 00-01-E3-41-BD-6E
+=== Testing file ../../pcap/rarp_req_reply.pcap
 .*
 Frames are the same
 
