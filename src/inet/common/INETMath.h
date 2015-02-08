@@ -201,8 +201,8 @@ inline double n_choose_k(int n, int k) {
 
     const int       iK     = (k<<1) > n ? n-k : k;
     const double    dNSubK = (n-iK);
-    register int    i      = 1;
-    register double dRes   = i > iK ? 1.0 : (dNSubK+i);
+    int    i      = 1;
+    double dRes   = i > iK ? 1.0 : (dNSubK+i);
 
     for (++i; i <= iK; ++i) {
         dRes *= dNSubK+i;
