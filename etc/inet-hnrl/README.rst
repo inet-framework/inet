@@ -15,6 +15,13 @@ Simulation run (batch processing)
 	qsub -t 1:50 -o directoryForStandardOutput -j yes arrayrun.sh iniFile
 	configuration
 
+:condor.cmd:
+	Batch file used to submit inet-hnrl jobs to HTCondor job scheduler.
+
+:condor.sub:
+	Sample HTCondor submit description file for inet-hnrl jobs (used together
+	with "condorsub.cmd").
+
 Data analysis (pre- and post-processing)
 ----------------------------------------
 

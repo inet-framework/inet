@@ -1,0 +1,10 @@
+universe = vanilla
+executable = ./condor.cmd
+arguments = "-f omnetpp.ini -c Test1 -r $(Process)"
+log = .\results\Test1.log.$(process)
+error = .\results\Test1.err.$(process)
+output = .\results\Test1.out.$(process)
+run_as_owner = True
+getenv = True
+
+queue 4
