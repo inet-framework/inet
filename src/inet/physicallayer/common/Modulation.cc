@@ -47,7 +47,7 @@ double DSSSOQPSK16Modulation::calculateBER(double snir, double bandwidth, double
 	// calculations, formula 7). Here you can see that the factor of 20.0 is correct ;).
 	const double dSNRFct = 20.0 * snir * bandwidth / bitrate; // TODO is this correct?
 	double       dSumK   = 0;
-	register int k       = 2;
+	int k       = 2;
 
 	/* following loop was optimized by using n_choose_k symmetries
 	for (k=2; k <= 16; ++k) {
