@@ -1061,8 +1061,8 @@ uint32 SCTPSerializer::checksum(const uint8_t *buf, register uint32 len)
     uint32 h;
     unsigned char byte0, byte1, byte2, byte3;
     uint32 crc32c;
-    register uint32 i;
-    register uint32 res = (~0L);
+    uint32 i;
+    uint32 res = (~0L);
     for (i = 0; i < len; i++)
         CRC32C(res, buf[i]);
     h = ~res;
