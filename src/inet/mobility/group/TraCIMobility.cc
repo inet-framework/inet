@@ -84,6 +84,7 @@ void TraCIMobility::initialize(int stage)
     //TODO why call the base::initialize() at the end?
 
     if (stage == INITSTAGE_LOCAL) {
+        host = getContainingNode(this);
         accidentCount = par("accidentCount");
 
         currentPosXVec.setName("posx");
@@ -236,7 +237,7 @@ void TraCIMobility::updateDisplayString()
     ASSERT(-M_PI <= angle);
     ASSERT(angle < M_PI);
 
-    cDisplayString& ds = getParentModule()->getDisplayString();
+    cDisplayString& ds = host->getDisplayString();
     ds.setTagArg("b", 2, "rect");
     ds.setTagArg("b", 3, "red");
     ds.setTagArg("b", 4, "red");
