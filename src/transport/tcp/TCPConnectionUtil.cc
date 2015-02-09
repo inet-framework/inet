@@ -1426,7 +1426,7 @@ unsigned short TCPConnection::updateRcvWnd()
             scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
-    ASSERT(scaled_rcv_wnd == (unsigned short )scaled_rcv_wnd);
+    ASSERT(scaled_rcv_wnd == (unsigned short)scaled_rcv_wnd);
 
     return (unsigned short) scaled_rcv_wnd;
 }
