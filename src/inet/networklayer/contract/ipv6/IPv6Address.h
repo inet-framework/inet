@@ -28,6 +28,10 @@ namespace inet {
 
 class InterfaceToken;
 
+enum {
+    IPv6_ADDRESS_SIZE = 16  // bytes
+};
+
 /**
  * Stores a 128-bit IPv6 address in an efficient way. Complies to RFC 3513,
  * "Internet Protocol Version 6 (IPv6) Addressing Architecture."
