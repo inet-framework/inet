@@ -1355,13 +1355,9 @@ unsigned short TCPConnection::updateRcvWnd()
 
     // scale rcv_wnd:
     uint32 scaled_rcv_wnd = state->rcv_wnd;
-    state->rcv_wnd_scale = 0;
-
-    if (state->ws_enabled) {
-        while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
-            scaled_rcv_wnd = scaled_rcv_wnd >> 1;
-            state->rcv_wnd_scale++;
-        }
+    if (state->ws_enabled && state->rcv_wnd_scale) {
+        ASSERT(state->rcv_wnd_scale <= 14);   // RFC 1323, page 11: "the shift count must be limited to 14"
+        scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
     ASSERT(scaled_rcv_wnd == (unsigned short)scaled_rcv_wnd);
