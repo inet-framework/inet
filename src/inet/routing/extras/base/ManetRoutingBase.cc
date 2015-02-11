@@ -146,7 +146,7 @@ void ManetRoutingBase::registerRoutingModule()
     }
     else
     {
-        cModule *mod = getParentModule()->getParentModule();
+        cModule *mod = getContainingNode(this);
         char *interfaceName = new char[strlen(mod->getFullName()) + 1];
         char *d = interfaceName;
         for (const char *s = mod->getFullName(); *s; s++)
@@ -359,9 +359,7 @@ void ManetRoutingBase::registerPosition()
     if (!isRegistered)
         throw cRuntimeError("Manet routing protocol is not register");
     regPosition = true;
-    cModule *mod = findContainingNode(getParentModule());
-    if (!mod)
-        mod = getParentModule();
+    cModule *mod = getContainingNode(this);
     mod->subscribe(mobilityStateChangedSignal, this);
 }
 

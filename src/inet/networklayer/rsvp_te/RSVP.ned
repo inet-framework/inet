@@ -103,6 +103,7 @@ simple RSVP
         string routingTableModule;
         string libTableModule;
         string tedModule;
+        string classifierModule; // The path to the module which implements the IClassifier C++ interface
         xml traffic = default(xml("<sessions/>")); // specifies paths to set up
         string peers; // names of the interfaces towards RSVP peers
         double helloInterval @unit(s);

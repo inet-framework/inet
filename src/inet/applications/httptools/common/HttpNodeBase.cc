@@ -17,6 +17,8 @@
 
 #include "inet/applications/httptools/common/HttpNodeBase.h"
 
+#include "inet/common/ModuleAccess.h"
+
 namespace inet {
 
 namespace httptools {
@@ -27,6 +29,17 @@ HttpNodeBase::HttpNodeBase()
     m_bDisplayResponseContent = false;
 }
 
+void HttpNodeBase::initialize(int stage)
+{
+    EV_DEBUG << "Initializing base HTTP browser component -- stage " << stage << endl;
+
+    cSimpleModule::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL) {
+        host = getContainingNode(this);
+    }
+}
+
 void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay)
 {
     if (pckt == nullptr)
@@ -34,7 +47,7 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
     simtime_t delay = constdelay + transmissionDelay(pckt);
     if (rdDelay != nullptr)
         delay += rdDelay->draw();
-    EV_DEBUG << "Sending " << pckt->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
+    EV_DEBUG << "Sending " << pckt->getName() << " direct to " << getContainingNode(receiver)->getName() << " with a delay of " << delay << " s\n";
     sendDirect(pckt, receiver, "httpIn");
 }
 
@@ -81,7 +94,7 @@ void HttpNodeBase::logEntry(std::string line)
     outfile.open(logFileName.c_str(), std::ios::app);
     if (outfile.tellp() == 0)
         outfile << "time;simtime;logging-node;sending-node;type;originator-url;target-url;protocol;keep-alive;serial;heading;bad-req;result-code;content-type" << endl;
-    outfile << curtime << ";" << simTime() << ";" << getParentModule()->getName();
+    outfile << curtime << ";" << simTime() << ";" << host->getName();
     if (outputFormat == lf_short)
         outfile << ";";
     else
@@ -95,9 +108,9 @@ std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage *httpR
     std::ostringstream str;
 
     std::string originatorStr = "";
-    cModule *originator = httpRequest->getSenderModule();
-    if (originator != nullptr && originator->getParentModule() != nullptr)
-        originatorStr = originator->getParentModule()->getFullName();
+    cModule *originator = findContainingNode(httpRequest->getSenderModule());
+    if (originator != nullptr)
+        originatorStr = originator->getFullName();
 
     str << originatorStr << ";";
     str << "REQ;" << httpRequest->originatorUrl() << ";" << httpRequest->targetUrl() << ";";
@@ -112,9 +125,9 @@ std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage *httpRe
     std::ostringstream str;
 
     std::string originatorStr = "";
-    cModule *originator = httpResponse->getSenderModule();
-    if (originator != nullptr && originator->getParentModule() != nullptr)
-        originatorStr = originator->getParentModule()->getFullName();
+    cModule *originator = findContainingNode(httpResponse->getSenderModule());
+    if (originator != nullptr)
+        originatorStr = originator->getFullName();
 
     str << originatorStr << ";";
     str << "RESP;" << httpResponse->originatorUrl() << ";" << httpResponse->targetUrl() << ";";

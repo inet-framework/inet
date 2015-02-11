@@ -201,6 +201,7 @@ class INET_API TraCIMobility : public MobilityBase
     }
 
   protected:
+    cModule *host = nullptr;    /**< pointer to containing node */
     int accidentCount = 0;    /**< number of accidents */
 
     cOutVector currentPosXVec;    /**< vector plotting posx */

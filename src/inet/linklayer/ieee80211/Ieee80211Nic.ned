@@ -68,11 +68,12 @@ module Ieee80211Nic like IWirelessNic
         }
         mgmt: <mgmtType> like IIeee80211Mgmt {
             parameters:
+                macModule = "^.mac";
                 @display("p=157,131;q=wlanDataQueue");
         }
         mac: Ieee80211Mac {
             parameters:
-                queueModule = "mgmt";
+                queueModule = "^.mgmt";
                 @display("p=157,217");
         }
         radio: <radioType> like IRadio {

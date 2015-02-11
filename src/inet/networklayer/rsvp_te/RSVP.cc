@@ -61,8 +61,7 @@ void RSVP::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routerId = rt->getRouterId();
         lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
-
-        rpct = check_and_cast<IRSVPClassifier *>(getParentModule()->getSubmodule("classifier"));
+        rpct = getModuleFromPar<IRSVPClassifier>(par("classifierModule"), this);
 
         maxPsbId = 0;
         maxRsbId = 0;

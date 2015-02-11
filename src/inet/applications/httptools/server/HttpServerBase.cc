@@ -49,7 +49,7 @@ void HttpServerBase::initialize(int stage)
         hostName = (const char *)par("hostName");
         if (hostName.empty()) {
             hostName = "www.";
-            hostName += getParentModule()->getFullName();
+            hostName += host->getFullName();
             hostName += ".com";
         }
         EV_DEBUG << "Initializing HTTP server. Using WWW name " << hostName << endl;
@@ -182,15 +182,16 @@ void HttpServerBase::updateDisplay()
     if (ev.isGUI()) {
         char buf[1024];
         sprintf(buf, "%ld", htmlDocsServed);
-        getParentModule()->getDisplayString().setTagArg("t", 0, buf);
+        cDisplayString& ds = host->getDisplayString();
+        ds.setTagArg("t", 0, buf);
 
         if (activationTime <= simTime()) {
-            getParentModule()->getDisplayString().setTagArg("i2", 0, "status/up");
-            getParentModule()->getDisplayString().setTagArg("i2", 1, "green");
+            ds.setTagArg("i2", 0, "status/up");
+            ds.setTagArg("i2", 1, "green");
         }
         else {
-            getParentModule()->getDisplayString().setTagArg("i2", 0, "status/down");
-            getParentModule()->getDisplayString().setTagArg("i2", 1, "red");
+            ds.setTagArg("i2", 0, "status/down");
+            ds.setTagArg("i2", 1, "red");
         }
     }
 }
@@ -401,7 +402,7 @@ void HttpServerBase::registerWithController()
     HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
     if (controller == nullptr)
         throw cRuntimeError("Controller module not found");
-    controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(host->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

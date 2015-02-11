@@ -35,7 +35,7 @@ module EthTestHost
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = (queueType == "" ? "" : "queue");
+                queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=155,272;q=txQueue");
         }
     connections:

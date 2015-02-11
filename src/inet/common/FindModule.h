@@ -54,20 +54,12 @@ class FindModule
      * Assumes that every host module is a direct sub module of the
      * simulation.
      */
-    static cModule *findHost(cModule *const m)
+    static cModule *findHost(cModule *m)
     {
-        cModule *parent = m != nullptr ? m->getParentModule() : nullptr;
-        cModule *node = m;
-
-        // all nodes should be a sub module of the simulation which has no parent module!!!
-        while (parent != nullptr && parent->getParentModule() != nullptr) {
-            node = parent;
-            parent = node->getParentModule();
-        }
-        return node;
+        return findContainingNode(m);
     }
 
-    static cModule *findNetwork(cModule *const m)
+    static cModule *findNetwork(cModule *m)
     {
         cModule *node = findHost(m);
 
@@ -77,15 +69,7 @@ class FindModule
     // the constness version
     static const cModule *findHost(const cModule *const m)
     {
-        const cModule *parent = m != nullptr ? m->getParentModule() : nullptr;
-        const cModule *node = m;
-
-        // all nodes should be a sub module of the simulation which has no parent module!!!
-        while (parent != nullptr && parent->getParentModule() != nullptr) {
-            node = parent;
-            parent = node->getParentModule();
-        }
-        return node;
+        return const_cast<cModule *>(findContainingNode(const_cast<cModule *>(m)));
     }
 
     static const cModule *findNetwork(const cModule *const m)

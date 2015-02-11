@@ -103,7 +103,7 @@ module LDP_LSR
         mpls: MPLS {
             parameters:
                 //peers = peers,
-                classifier = "ldp";
+                classifierModule = "^.ldp";
                 @display("p=224,302");
             gates:
                 netwIn[sizeof(pppg)+1];

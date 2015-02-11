@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/configurator/ipv4/HostAutoConfigurator.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
@@ -56,16 +57,15 @@ void HostAutoConfigurator::setupNetworkLayer()
     IPv4Address addressBase = IPv4Address(par("addressBase").stringValue());
     IPv4Address netmask = IPv4Address(par("netmask").stringValue());
     std::string mcastGroups = par("mcastGroups").stringValue();
-    IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(getParentModule()->getId()));
+
+    // get our host module
+    cModule *host = getContainingNode(this);
+
+    IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(host->getId()));
 
     // address test
     if (!IPv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
         throw cRuntimeError("Generated IP address is out of specified address range");
-
-    // get our host module
-    cModule *host = getParentModule();
-    if (!host)
-        throw cRuntimeError("No parent module found");
 
     // get our routing table
     IIPv4RoutingTable *routingTable = L3AddressResolver().routingTableOf(host);

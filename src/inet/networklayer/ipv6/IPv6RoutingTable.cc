@@ -124,6 +124,8 @@ void IPv6RoutingTable::initialize(int stage)
 
 void IPv6RoutingTable::parseXMLConfigFile()
 {
+    cModule *host = getContainingNode(this);
+
     // configure interfaces from XML config file
     cXMLElement *config = par("routes");
     for (cXMLElement *child = config->getFirstChild(); child; child = child->getNextSibling()) {
@@ -133,7 +135,7 @@ void IPv6RoutingTable::parseXMLConfigFile()
         if (opp_strcmp(child->getTagName(), "local") != 0)
             continue;
         //ensure that this is the right parent module we are configuring.
-        if (opp_strcmp(child->getAttribute("node"), getParentModule()->getFullName()) != 0)
+        if (opp_strcmp(child->getAttribute("node"), host->getFullName()) != 0)
             continue;
         //Go one level deeper.
         //child = child->getFirstChild();

@@ -481,10 +481,6 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
-    // interface name: NetworkInterface module's name without special characters ([])
-    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
-    e->setName(interfaceName.c_str());
-
     // address
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
@@ -503,7 +499,7 @@ void Ieee80211Mac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
     if (par("queueModule").stringValue()[0]) {
-        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
+        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
         queueModule = check_and_cast<IPassiveQueue *>(module);
 
         EV_DEBUG << "Requesting first two frames from queue module\n";
@@ -2613,7 +2609,10 @@ const MACAddress& Ieee80211Mac::isInterfaceRegistered()
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
         return MACAddress::UNSPECIFIED_ADDRESS;
-    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
+    cModule *interfaceModule = findModuleUnderContainingNode(this);
+    if (!interfaceModule)
+        throw cRuntimeError("NIC module not found in the host");
+    std::string interfaceName = utils::stripnonalnum(interfaceModule->getFullName());
     InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();

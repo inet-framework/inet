@@ -51,7 +51,6 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     int serverPort = -1;
     int clientPort = -1;
     UDPSocket socket;    // UDP socket for client-server communication
-    std::string hostName;
     simtime_t startTime;    // application start time
     MACAddress macAddress;    // client's MAC address
     cModule *host = nullptr;    // containing host module (@node)

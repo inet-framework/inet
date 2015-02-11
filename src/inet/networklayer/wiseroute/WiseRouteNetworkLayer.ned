@@ -46,6 +46,7 @@ module WiseRouteNetworkLayer like INetworkLayer
         }
         np: WiseRoute {
             parameters:
+                arpModule = "^.arp";
                 @display("p=85,95;q=queue");
             gates:
                 lowerLayerIn[sizeof(ifIn)];

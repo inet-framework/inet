@@ -63,6 +63,7 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
     LOG_FORMAT outputFormat = lf_short;    // The format used to log message events to the log file (if enabled)
     bool m_bDisplayMessage = true;    // enable/disable logging of message events to the console
     bool m_bDisplayResponseContent = true;    // enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set
+    cModule *host = nullptr;
 
   protected:
     /* Direct message passing utilities */
@@ -95,6 +96,8 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
 
   public:
     HttpNodeBase();
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 };
 
 } // namespace httptools

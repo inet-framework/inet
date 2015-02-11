@@ -43,6 +43,7 @@ simple HttpBrowserDirect like IHttpDirectApp
         double activationTime @unit(s) = default(0s);  // The initial activation delay. Zero to disable (seconds).
         double linkSpeed @unit(bps) = default(11Mbps); // Used to model transmission delays (Bit/s)
         xml config;                                    // The XML configuration file for the browser
+        string httpBrowserControllerModule = default("controller"); // the absolute path to the http browser controller, @see HttpController
     gates:
         input httpIn @directIn;
 }

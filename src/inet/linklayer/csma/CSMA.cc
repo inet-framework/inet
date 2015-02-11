@@ -30,6 +30,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/common/FindModule.h"
@@ -102,7 +103,7 @@ void CSMA::initialize(int stage)
         initializeMACAddress();
         registerInterface();
 
-        cModule *radioModule = getParentModule()->getSubmodule("radio");
+        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
@@ -181,9 +182,6 @@ void CSMA::initializeMACAddress()
 InterfaceEntry *CSMA::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
-
-    // interface name: NIC module's name without special characters ([])
-    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     e->setDatarate(bitrate);

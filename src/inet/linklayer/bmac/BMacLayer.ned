@@ -73,5 +73,7 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
         // only used when usage of MAC acks is enabled
         int macMaxFrameRetries = default(3);
 
+        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+
         @class(BMacLayer);
 }

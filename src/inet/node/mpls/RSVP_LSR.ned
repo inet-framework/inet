@@ -74,6 +74,7 @@ module RSVP_LSR
         rsvp: RSVP {
             parameters:
                 peers = peers;
+                classifierModule = "^.classifier";
                 @display("p=156,67");
         }
         classifier: SimpleClassifier {
@@ -93,7 +94,7 @@ module RSVP_LSR
         }
         mpls: MPLS {
             parameters:
-                classifier = "classifier";
+                classifierModule = "^.classifier";
                 @display("p=192,270");
             gates:
                 netwIn[sizeof(pppg)+1];

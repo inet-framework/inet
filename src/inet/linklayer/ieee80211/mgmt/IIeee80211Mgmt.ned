@@ -27,6 +27,7 @@ moduleinterface IIeee80211Mgmt
 {
     parameters:
         @display("i=block/cogwheel");
+        string macModule;               // The path to the MAC module
     gates:
         input upperLayerIn;
         output upperLayerOut;
