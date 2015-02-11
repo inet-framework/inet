@@ -177,6 +177,7 @@ void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
 {
     switch (frame->getType()) {
         case ST_DATA:
+        case ST_DATA_WITH_QOS:
             numDataFramesReceived++;
             handleDataFrame(check_and_cast<Ieee80211DataFrame *>(frame));
             break;

@@ -320,6 +320,7 @@ std::string InetPacketPrinter2::formatIeee80211Frame(ieee80211::Ieee80211Frame *
             break;
 
         case ST_DATA:
+        case ST_DATA_WITH_QOS:
             os << " data";    //TODO
             break;
 

@@ -62,6 +62,7 @@ enum Ieee80211FrameType
 
     // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
+    ST_DATA_WITH_QOS = 0x28;
     //Feedback frame for multicast tramsmission
     ST_LBMS_REQUEST = 0x30;
     ST_LBMS_REPORT = 0x31;
@@ -155,8 +156,9 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //  For example, with Address 4 and without QoS the correct length is 38 bytes.
 //  Without Address 4 and QoS the correct value is indeed 34.
     byteLength = LENGTH_DATAHDR / 8;
-    type = ST_DATA;
-    MACAddress address4;
+    type = ST_DATA;         // or ST_DATA_WITH_QOS
+    MACAddress address4;    // optional field, exists when toDS and fromDS are true
+    uint16 qos;             // optional field, exists when type = ST_DATA_WITH_QOS
 }
 
 //
