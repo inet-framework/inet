@@ -1646,7 +1646,7 @@ void AODVRouting::handleBlackListTimer()
         auto current = it++;
 
         // Nodes are removed from the blacklist set after a BLACKLIST_TIMEOUT period
-        if (it->second <= simTime()) {
+        if (current->second <= simTime()) {
             EV_DETAIL << "Blacklist lifetime has expired for " << current->first << " removing it from the blacklisted addresses" << endl;
             blacklist.erase(current);
         }
