@@ -50,12 +50,12 @@ module NodeBase
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
+        int numTunInterfaces = default(0);
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
         string networkLayerType = default("IPv4NetworkLayer");
         string routingTableType = default("IPv4RoutingTable");
         bool forwarding = default(true);
         bool multicastForwarding = default(false);
-        bool hasTun = default(false);
         string energyStorageType = default("");
         string energyGeneratorType = default("");
         routingTable.forwarding = forwarding;
@@ -122,7 +122,7 @@ module NodeBase
             parameters:
                 @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
         }
-        tun: <default("TunInterface")> like ITunNic if hasTun {
+        tun[numTunInterfaces]: <default("TunInterface")> like ITunNic {
             parameters:
                 @display("p=213,406,row,10;q=txQueue;i=block/ifcard");
         }
@@ -155,7 +155,9 @@ module NodeBase
             ext[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
-        tun.upperLayerOut --> networkLayer.ifIn++ if hasTun;
-        tun.upperLayerIn <-- networkLayer.ifOut++ if hasTun;
+        for i=0..numTunInterfaces-1 {
+            tun[i].upperLayerOut --> networkLayer.ifIn++;
+            tun[i].upperLayerIn <-- networkLayer.ifOut++;
+        }
 }
 

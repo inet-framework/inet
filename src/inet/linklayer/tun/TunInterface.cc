@@ -15,12 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#define WANT_WINSOCK2
-
-#include <stdio.h>
-#include <string.h>
-
-#include <platdep/sockets.h>
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/tun/TunInterface.h"
@@ -62,13 +56,11 @@ void TunInterface::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGate()->isName("appIn")) {
         emit(packetSentToUpperSignal, msg);
-        send(msg->dup(), "upperLayerOut");
+       send(msg, "upperLayerOut");
     } else if (msg->getArrivalGate()->isName("upperLayerIn")) {
-        cMessage* msg2 = msg->dup();
-        emit(packetReceivedFromUpperSignal, msg2);
-        send(msg2, "appOut");
+        emit(packetReceivedFromUpperSignal, msg);
+        send(msg, "appOut");
     }
-    delete msg;
     if (ev.isGUI())
         updateDisplayString();
 }

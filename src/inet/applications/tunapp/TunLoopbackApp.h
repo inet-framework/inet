@@ -15,28 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TUNBASICAPP_H
-#define __INET_TUNBASICAPP_H
+#ifndef __INET_TUNLOOPBACKAPP_H
+#define __INET_TUNLOOPBACKAPP_H
 
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class INET_API TunBasicApp : public cSimpleModule
+class INET_API TunLoopbackApp : public cSimpleModule
 {
     public:
-        virtual ~TunBasicApp();
+        virtual ~TunLoopbackApp();
     private:
-        unsigned int packetsReceivedViaUdp;
-        unsigned int packetsToSend;
-        unsigned int packetsReceivedViaTun;
-        unsigned int packetsSentOverUdp;
-        int localPort;
-        int remotePort;
-        L3Address localAddress;
-        L3Address remoteAddress;
-        UDPSocket socket;
-        cMessage *timeMsg;
+        unsigned int packetsSent;
+        unsigned int packetsReceived;
 
         static simsignal_t sentPkSignal;
         static simsignal_t rcvdPkSignal;
@@ -45,9 +37,6 @@ class INET_API TunBasicApp : public cSimpleModule
         void initialize(int stage) override;
         void handleMessage(cMessage *msg) override;
         void finish() override;
-        void handleTimer(cMessage *msg);
-
-        void sendPacket();
 };
 
 } // namespace inet

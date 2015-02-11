@@ -19,21 +19,11 @@ package inet.applications.tunapp;
 
 import inet.applications.contract.ITunApp;
 
-simple TunBasicApp like ITunApp
+simple TunLoopbackApp like ITunApp
 {
     parameters:
-        int packetsToSend = default(1);
-        int localPort = default(1000);
-        int remotePort = default(2000);
-        string localAddress = default("192.168.0.1");
-        string remoteAddress = default("192.168.0.2");
-        double startTime @unit(s) = default(1s); // time session begins
-        double thinkTime @unit(s) = default(0s); // time gap between sends
-        int messageLength = default(1024);
         @display("i=block/app");
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
         input tunIn @labels(TunInterface/up);
         output tunOut @labels(TunInterface/down);
 }

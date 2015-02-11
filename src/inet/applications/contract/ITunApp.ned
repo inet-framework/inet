@@ -19,7 +19,7 @@ package inet.applications.contract;
 
 //
 // Not an actual module type. It only shows which gates a TUN app should have
-// to be able to be used in TunHost
+// to be able to be used in StandardHost
 //
 moduleinterface ITunApp
 {
