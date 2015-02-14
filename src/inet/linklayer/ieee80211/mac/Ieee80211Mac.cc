@@ -86,6 +86,7 @@ Ieee80211Mac::~Ieee80211Mac()
     edcCAFOutVector.clear();
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
+    delete classifier;
 }
 
 /****************************************************************
