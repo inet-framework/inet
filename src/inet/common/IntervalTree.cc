@@ -415,6 +415,14 @@ void IntervalTree::deleteFixup(IntervalTreeNode* x)
     x->red = false;
 }
 
+void IntervalTree::deleteAllBefore(simtime_t before)
+{
+    auto intervals = query(simtime_t(), before);
+    for (auto& interval : intervals) {
+        deleteNode(interval);
+    }
+}
+
 void IntervalTree::deleteNode(Interval* ivl)
 {
     IntervalTreeNode* node = recursiveSearch(root, ivl);
