@@ -661,19 +661,14 @@ void RadioMedium::removeNonInterferingTransmissions()
         transmissionIndex++;
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
     baseTransmissionId += transmissionIndex;
+    for (const auto* radio : radios) {
+        if (radio != nullptr) {
+            RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
+            radioCacheEntry->receptionIntervals->deleteAllBefore(now);
+        }
+    }
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.begin() + transmissionIndex; it++) {
         const ITransmission *transmission = *it;
-        for (std::vector<const IRadio *>::const_iterator jt = radios.begin(); jt != radios.end(); jt++) {
-            const IRadio *radio = *jt;
-            if (radio != nullptr) {
-                RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
-                const IArrival *arrival = getCachedArrival(radio, transmission);
-                if (arrival) {
-                    Interval interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
-                    radioCacheEntry->receptionIntervals->deleteNode(&interval);
-                }
-            }
-        }
         delete transmission;
     }
     transmissions.erase(transmissions.begin(), transmissions.begin() + transmissionIndex);
