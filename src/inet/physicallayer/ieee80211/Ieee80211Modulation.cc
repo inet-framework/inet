@@ -586,7 +586,7 @@ simtime_t Ieee80211Modulation::getPayloadDuration(uint64_t size, ModulationType 
             uint32_t numSymbols = lrint(ceil((16 + size + 6.0) / numDataBitsPerSymbol));
 
             // Add signal extension for ERP PHY
-            double aux;
+            simtime_t aux;
             if (payloadMode.getModulationClass() == MOD_CLASS_ERP_OFDM)
                 aux = numSymbols * symbolDurationUs + 6;
             else
@@ -595,13 +595,14 @@ simtime_t Ieee80211Modulation::getPayloadDuration(uint64_t size, ModulationType 
             return val;
         }
 
-        case MOD_CLASS_DSSS:
+        case MOD_CLASS_DSSS: {
             // IEEE Std 802.11-2007, section 18.2.3.5
-            double aux;
+            simtime_t aux;
             aux = lrint(ceil((size) / (payloadMode.getDataRate() / 1.0e6)));
             val = (aux / 1000000.0);
             return val;
             break;
+        }
 
         default:
             throw cRuntimeError("unsupported modulation class");
