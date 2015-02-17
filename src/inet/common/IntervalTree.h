@@ -133,6 +133,9 @@ class IntervalTree
     /// @brief delete node stored a given interval
     void deleteNode(Interval* ivl);
 
+    /// @brief delete all nodes with intervals ending before given time stamp
+    void deleteAllBefore(simtime_t before);
+
     /// @brief Insert one node of the interval tree
     IntervalTreeNode* insert(Interval* new_interval);
 
