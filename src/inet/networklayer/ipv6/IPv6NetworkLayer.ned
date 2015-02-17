@@ -22,6 +22,7 @@ package inet.networklayer.ipv6;
 import inet.networklayer.contract.IIPv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
+import inet.networklayer.contract.IRouterAlertHandler;
 import inet.networklayer.icmpv6.ICMPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 
@@ -37,6 +38,10 @@ module IPv6NetworkLayer like INetworkLayer
     parameters:
         bool xMIPv6Support = default(false);
         *.xmipv6Module = xMIPv6Support ? absPath(".mipv6support.xMobileIPv6") : "";
+        // router alert handler type. Put here a string naming the type of router alert handler
+        // module that you want to use (if any). The network layer will then instantiate and
+        // connect the respective module automatically.
+        string routerAlertHandlerType = default("");
         string interfaceTableModule;
         string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -81,6 +86,10 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=44,79");
         }
+        routerAlertHandler: <routerAlertHandlerType> like IRouterAlertHandler if routerAlertHandlerType != "" {
+            parameters:
+                @display("p=189,254");
+        }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
         for i=0..sizeof(transportIn)-1 {
@@ -102,6 +111,12 @@ module IPv6NetworkLayer like INetworkLayer
 
         // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;
+
+        // Router alert handling
+        if routerAlertHandlerType != "" {
+            ipv6.routerAlertOut --> routerAlertHandler.routerAlertIn;
+            routerAlertHandler.routerAlertReturn --> ipv6.routerAlertReturn;
+        }
 
         // ICMPv6 to ping I/O
         for i=0..sizeof(pingOut)-1 {

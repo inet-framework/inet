@@ -33,6 +33,20 @@ class IPv6RoutingHeader : public IPv6RoutingHeader_Base
     virtual void setAddressArraySize(unsigned int size) override;
 };
 
+class IPv6HopByHopOptionsHeader : public IPv6HopByHopOptionsHeader_Base
+{
+    private:
+      void clean();
+      void copy(const IPv6HopByHopOptionsHeader& other);
+    public:
+      IPv6HopByHopOptionsHeader() : IPv6HopByHopOptionsHeader_Base() {}
+      ~IPv6HopByHopOptionsHeader();
+      IPv6HopByHopOptionsHeader(const IPv6HopByHopOptionsHeader& other);
+      IPv6HopByHopOptionsHeader& operator=(const IPv6HopByHopOptionsHeader& other);
+      virtual IPv6HopByHopOptionsHeader *dup() const {return new IPv6HopByHopOptionsHeader(*this);}
+      // ADD CODE HERE to redefine and implement pure virtual functions from IPv6HopByHopOptionsHeader_Base
+};
+
 } // namespace inet
 
 #endif    // __INET_IPV6EXTENSIONHEADERS_H_

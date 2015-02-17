@@ -211,6 +211,18 @@ class UDPSetBroadcastCommand extends UDPSetOptionCommand
     bool broadcast;
 }
 
+ //
+// Control info for setting the router alert option on an UDP socket.
+// To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
+// and an and instance of this control info class attached.
+//
+// @see ~UDPCommandCode
+//
+class UDPSetRouterAlertCommand extends UDPSetOptionCommand
+{
+    bool routerAlert;
+}
+
 //
 // Control info for setting the multicast output interface for an UDP socket.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION

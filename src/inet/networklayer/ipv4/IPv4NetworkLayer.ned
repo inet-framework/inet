@@ -21,6 +21,7 @@ package inet.networklayer.ipv4;
 import inet.networklayer.arp.IARP;
 import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.contract.IRouterAlertHandler;
 
 
 //
@@ -34,6 +35,10 @@ module IPv4NetworkLayer like INetworkLayer
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
         string arpType = default("ARP");
+        // router alert handler type. Put here a string naming the type of router alert handler
+        // module that you want to use (if any). The network layer will then instantiate and
+        // connect the respective module automatically.
+        string routerAlertHandlerType = default("");
         string interfaceTableModule;
         string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -80,6 +85,10 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=239,70");
         }
+        routerAlertHandler: <routerAlertHandlerType> like IRouterAlertHandler if routerAlertHandlerType != "" {
+            parameters:
+                @display("p=294,103");
+        }
 
     connections allowunconnected:
         for i=0..sizeof(transportIn)-1 {
@@ -109,6 +118,11 @@ module IPv4NetworkLayer like INetworkLayer
 
         igmp.routerOut --> igmpOut;
         igmp.routerIn <-- igmpIn;
+
+        if routerAlertHandlerType != "" {
+            ip.routerAlertOut --> routerAlertHandler.routerAlertIn;
+            routerAlertHandler.routerAlertReturn --> ip.routerAlertReturn;
+        }
 
         for i=0..sizeof(ifIn)-1 {
             ip.queueIn[i] <-- { @display("m=s"); } <-- ifIn[i];

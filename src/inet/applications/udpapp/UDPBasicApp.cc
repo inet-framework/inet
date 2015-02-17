@@ -86,6 +86,10 @@ void UDPBasicApp::setSocketOptions()
     if (receiveBroadcast)
         socket.setBroadcast(true);
 
+    bool routerAlert = par("routerAlert");
+    if (routerAlert)
+        socket.setRouterAlert(true);
+
     bool joinLocalMulticastGroups = par("joinLocalMulticastGroups");
     if (joinLocalMulticastGroups) {
         MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
