@@ -152,6 +152,7 @@ class INET_API TCPStateVariables : public cObject
     TCPStateVariables();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
+    virtual void setSendQueueLimit(uint32 newLimit);
   public:
     bool active;         // set if the connection was initiated by an active open
     bool fork;           // if passive and in LISTEN: whether to fork on an incoming connection
@@ -686,7 +687,6 @@ class INET_API TCPConnection
      * Utility: checks if send queue is empty (no data to send).
      */
     virtual bool isSendQueueEmpty();
-
 };
 
 #endif

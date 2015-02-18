@@ -296,7 +296,8 @@ void TCPConnection::process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *t
     if(state == NULL)
         opp_error("Called process_QUEUE_BYTES_LIMIT on uninitialized TCPConnection!");
 
-    state->sendQueueLimit = tcpCommand->getUserId(); // Set queue size limit
+    state->setSendQueueLimit(tcpCommand->getUserId()); // Set queue size limit
+
     tcpEV << "state->sendQueueLimit set to " << state->sendQueueLimit << "\n";
     delete msg;
     delete tcpCommand;
