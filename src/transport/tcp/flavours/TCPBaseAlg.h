@@ -33,7 +33,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
     TCPBaseAlgStateVariables();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
-
+    virtual void reInitialState() {};
     /// retransmit count
     //@{
     int rexmit_count;         ///< number of retransmissions (=1 after first rexmit)
