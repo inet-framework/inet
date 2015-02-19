@@ -663,10 +663,10 @@ void AODVRouting::handleRREP(AODVRREP *rrep, const L3Address& sourceAddr)
                 // source (originator).
 
                 IRoute *nextHopToDestRoute = routingTable->findBestMatchingRoute(destRoute->getNextHopAsGeneric());
-                ASSERT(nextHopToDestRoute);
-                AODVRouteData *nextHopToDestRouteData = check_and_cast<AODVRouteData *>(nextHopToDestRoute->getProtocolData());
-                nextHopToDestRouteData->addPrecursor(originatorRoute->getNextHopAsGeneric());
-
+                if (nextHopToDestRoute && nextHopToDestRoute->getSource() == this) {
+                    AODVRouteData *nextHopToDestRouteData = check_and_cast<AODVRouteData *>(nextHopToDestRoute->getProtocolData());
+                    nextHopToDestRouteData->addPrecursor(originatorRoute->getNextHopAsGeneric());
+                }
                 AODVRREP *outgoingRREP = rrep->dup();
                 forwardRREP(outgoingRREP, originatorRoute->getNextHopAsGeneric(), 100);
             }
