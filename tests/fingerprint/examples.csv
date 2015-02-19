@@ -143,7 +143,7 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,             200s,            162c-e615
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,             200s,            445f-6780
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             d629-1f7c
-/examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             6ef3-fd86
+/examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             6327-5d2c
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           66a3-a647
 
@@ -152,7 +152,7 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            1dd5-9fda
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            1896-996d
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            0c08-7fc0
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            8a10-3768
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            493f-1497
 #/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            6597-eebe   # TCP_common extended
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            8d5e-2539
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0,                100s,            0000-0000    # object transfer not supported by TCP_NSC
@@ -391,7 +391,7 @@
 
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            4e60-0d17
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             d68a-0d6a
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             af55-b60a
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             2aba-530c
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000   # [Config Ping2] # __interactive__
