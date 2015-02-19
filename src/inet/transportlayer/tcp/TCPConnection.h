@@ -129,9 +129,7 @@ enum TCPEventCode {
 #define TCP_OPTION_TS_SIZE            12  // 12 bytes, option length = 10 bytes + 2 bytes (NOP)
 #define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
 
-#ifndef SACKS_AS_C_ARRAY
 typedef std::list<Sack> SackList;
-#endif // ifndef SACKS_AS_C_ARRAY
 
 /**
  * Contains state variables ("TCB") for TCP.
@@ -239,11 +237,7 @@ class INET_API TCPStateVariables : public cObject
     uint32 end_seqno;    // end sequence number of last received out-of-order segment
     bool snd_sack;    // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack;    // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
-#ifdef SACKS_AS_C_ARRAY
-    Sack sacks_array[MAX_SACK_BLOCKS];    // MAX_SACK_BLOCKS is set to 60
-#else // ifdef SACKS_AS_C_ARRAY
     SackList sacks_array;    // MAX_SACK_BLOCKS is set to 60
-#endif // ifdef SACKS_AS_C_ARRAY
     uint32 highRxt;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
     uint32 pipe;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
     uint32 recoveryPoint;    // RFC 3517
