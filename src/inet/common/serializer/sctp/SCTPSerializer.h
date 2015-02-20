@@ -18,19 +18,24 @@
 #ifndef __INET_SCTPSERIALIZER_H
 #define __INET_SCTPSERIALIZER_H
 
+#include "inet/common/serializer/SerializerBase.h"
 #include "inet/transportlayer/sctp/SCTPMessage.h"
 
 namespace inet {
 
-namespace sctp {
+namespace serializer {
 
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
-class SCTPSerializer
+class SCTPSerializer : public SerializerBase
 {
+  protected:
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual cPacket* parse(Buffer &b, Context& context) override;
+
   public:
-    SCTPSerializer() {}
+    SCTPSerializer(const char *name = nullptr) : SerializerBase(name) {}
 
     /**
      * Serializes an SCTPMessage for transmission on the wire.
@@ -38,12 +43,12 @@ class SCTPSerializer
      * the frame over a raw socket.)
      * Returns the length of data written into buffer.
      */
-    int32 serialize(const SCTPMessage *msg, uint8 *buf, uint32 bufsize);
+    int32 serialize(const sctp::SCTPMessage *msg, uint8 *buf, uint32 bufsize);
 
     /**
      * Puts a packet sniffed from the wire into an SCTPMessage.
      */
-    void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
+    void parse(const uint8 *buf, uint32 bufsize, sctp::SCTPMessage *dest);
 
     static uint32 checksum(const uint8 *buf, register uint32 len);
     static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
@@ -58,7 +63,7 @@ class SCTPSerializer
     static unsigned char sharedKey[512];
 };
 
-} // namespace sctp
+} // namespace serializer
 
 } // namespace inet
 
