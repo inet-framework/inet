@@ -127,6 +127,11 @@ std::string TCPStateVariables::info() const
     return out.str();
 }
 
+void TCPStateVariables::setSendQueueLimit(uint32 newLimit)
+{
+    sendQueueLimit = newLimit;
+}
+
 std::string TCPStateVariables::detailedInfo() const
 {
     std::stringstream out;

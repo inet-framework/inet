@@ -28,11 +28,11 @@ TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
     ssthresh = 0xFFFFFFFF;
 }
 
-void TCPTahoeRenoFamilyStateVariables::reInitialState(){
+void TCPTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
-    if(this->sendQueueLimit)
-        ssthresh = sendQueueLimit;
+    sendQueueLimit = newLimit;
+    ssthresh = sendQueueLimit;
 }
 
 std::string TCPTahoeRenoFamilyStateVariables::info() const
