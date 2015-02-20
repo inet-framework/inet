@@ -19,57 +19,42 @@
 #ifndef __INET_TCPSERIALIZER_H
 #define __INET_TCPSERIALIZER_H
 
-#include "inet/networklayer/common/L3Address.h"
-
 #include "inet/common/serializer/headers/defs.h"
-
+#include "inet/common/serializer/SerializerBase.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
 //forward declarations:
 namespace tcp { class TCPSegment; }
 
+namespace serializer {
+
 /**
  * Converts between TCPSegment and binary (network byte order) TCP header.
  */
-class TCPSerializer
+class TCPSerializer : public SerializerBase
 {
+  protected:
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual cPacket* parse(Buffer &b, Context& context) override;
+
   public:
-    TCPSerializer() {}
-
-    /**
-     * Serializes a TCPSegment for transmission on the wire.
-     * The checksum is NOT filled in.
-     * Returns the length of data written into buffer.
-     * TODO msg why not a const reference?
-     */
-    int serialize(const tcp::TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
-
-    /**
-     * Serializes a TCPSegment for transmission on the wire.
-     * The checksum is NOT filled in. (The kernel does that when sending
-     * the frame over a raw socket.)
-     * Returns the length of data written into buffer.
-     * TODO msg why not a const reference?
-     * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
-     */
-    int serialize(const tcp::TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
-            const L3Address& srcIp, const L3Address& destIp);
+    TCPSerializer(const char *name = nullptr) : SerializerBase(name) {}
 
     /**
      * Puts a packet sniffed from the wire into a TCPSegment.
-     * TODO dest why not reference?
      */
-    void parse(const unsigned char *srcbuf, unsigned int bufsize, tcp::TCPSegment *dest,
-            bool withBytes);
+    tcp::TCPSegment *parse(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
 
     /**
      * Calculate checksum with pseudo header.
      */
-    static uint16_t checksum(const void *addr, unsigned int count,
-            const L3Address& srcIp, const L3Address& destIp);
+    static uint16_t checksum(const void *addr, unsigned int count, const void *addr2, unsigned int count2);
 };
+
+} // namespace serializer
 
 } // namespace inet
 
