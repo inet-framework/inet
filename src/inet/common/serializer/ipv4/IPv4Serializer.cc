@@ -18,34 +18,18 @@
 //
 
 #include <algorithm>    // std::min
-#include <platdep/sockets.h>
 
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 
-#include "inet/common/serializer/headers/defs.h"
-#include "inet/common/serializer/headers/bsdint.h"
 #include "inet/common/serializer/headers/in.h"
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/common/serializer/ipv4/headers/ip.h"
-
 #include "inet/common/serializer/ipv4/ICMPSerializer.h"
 #include "inet/common/serializer/ipv4/IGMPSerializer.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
-
-#ifdef WITH_UDP
-#include "inet/common/serializer/udp/UDPSerializer.h"
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-#include "inet/common/serializer/sctp/SCTPSerializer.h"    //I.R.
-#endif // ifdef WITH_SCTP
-
 #include "inet/common/serializer/TCPIPchecksum.h"
-
-#ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"    //I.R.
-#endif // ifdef WITH_TCP_COMMON
+#include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 #if defined(_MSC_VER)
 #undef s_addr    /* MSVC #definition interferes with us */
@@ -62,15 +46,24 @@ namespace inet {
 
 namespace serializer {
 
-int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
-{
-    int packetLength;
-    struct ip *ip = (struct ip *)buf;
+Register_Serializer(IPv4Datagram, ETHERTYPE, ETHERTYPE_IPv4, IPv4Serializer);
 
-    ip->ip_hl = IP_HEADER_BYTES >> 2;
+void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
+{
+    ASSERT(b.getPos() == 0);
+
+    struct ip *ip = (struct ip *)b.accessNBytes(IP_HEADER_BYTES);
+    if (!ip) {
+        EV_ERROR << "IPv4Serializer: not enough space for IPv4 header.\n";
+        return;
+    }
+    const IPv4Datagram *dgram = check_and_cast<const IPv4Datagram *>(pkt);
+    ASSERT((dgram->getHeaderLength() & 3) == 0);
+    ip->ip_hl = dgram->getHeaderLength() >> 2;
     ip->ip_v = dgram->getVersion();
     ip->ip_tos = dgram->getTypeOfService();
     ip->ip_id = htons(dgram->getIdentification());
+    ASSERT((dgram->getFragmentOffset() & 7) == 0);
     uint16_t ip_off = dgram->getFragmentOffset() / 8;
     if (dgram->getMoreFragments())
         ip_off |= IP_MF;
@@ -81,65 +74,38 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
     ip->ip_p = dgram->getTransportProtocol();
     ip->ip_src.s_addr = htonl(dgram->getSrcAddress().getInt());
     ip->ip_dst.s_addr = htonl(dgram->getDestAddress().getInt());
+    ip->ip_len = htons(dgram->getByteLength());
     ip->ip_sum = 0;
+    c.l3AddressesPtr = &ip->ip_src.s_addr;
+    c.l3AddressesLength = sizeof(ip->ip_src.s_addr) + sizeof(ip->ip_dst.s_addr);
 
-    if (dgram->getHeaderLength() > IP_HEADER_BYTES)
-        EV << "Serializing an IPv4 packet with options. Dropping the options.\n";
-
-    packetLength = IP_HEADER_BYTES;
-
-    cMessage *encapPacket = dgram->getEncapsulatedPacket();
-
-    switch (dgram->getTransportProtocol()) {
-        case IP_PROT_ICMP:
-            packetLength += ICMPSerializer().serialize(check_and_cast<ICMPMessage *>(encapPacket),
-                        buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES);
-            break;
-
-        case IP_PROT_IGMP:
-            packetLength += IGMPSerializer().serialize(check_and_cast<IGMPMessage *>(encapPacket),
-                        buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES);
-            break;
-
-#ifdef WITH_UDP
-        case IP_PROT_UDP:
-            packetLength += UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
-                        buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES);
-            break;
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-        case IP_PROT_SCTP:    //I.R.
-            packetLength += sctp::SCTPSerializer().serialize(check_and_cast<sctp::SCTPMessage *>(encapPacket),
-                        buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES);
-            break;
-#endif // ifdef WITH_SCTP
-
-#ifdef WITH_TCP_COMMON
-        case IP_PROT_TCP:    //I.R.
-            packetLength += TCPSerializer().serialize(check_and_cast<tcp::TCPSegment *>(encapPacket),
-                        buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES,
-                        dgram->getSrcAddress(), dgram->getDestAddress());
-            break;
-#endif // ifdef WITH_TCP_COMMON
-
-        default:
-            throw cRuntimeError(dgram, "IPv4Serializer: cannot serialize protocol %d", dgram->getTransportProtocol());
+    if (dgram->getHeaderLength() > IP_HEADER_BYTES) {
+        EV_ERROR << "Serializing an IPv4 packet with options. Dropping the options.\n";
+        b.fillNBytes(dgram->getHeaderLength() - IP_HEADER_BYTES, 0);
     }
 
+    const cPacket *encapPacket = dgram->getEncapsulatedPacket();
+    SerializerBase::serialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+
+    packetLength = b.getPos();
     ip->ip_len = htons(packetLength);
-
-    if (hasCalcChkSum) {
-        ip->ip_sum = TCPIPchecksum::checksum(buf, IP_HEADER_BYTES);
-    }
-
-    return packetLength;
+    ip->ip_sum = TCPIPchecksum::checksum(ip, IP_HEADER_BYTES);
 }
 
-void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest)
+cPacket* IPv4Serializer::parse(Buffer &b, Context& c)
 {
-    const struct ip *ip = (const struct ip *)buf;
+    ASSERT(b.getPos() == 0);
+
+    IPv4Datagram *dest = new IPv4Datagram("parsed-ipv4");
+    unsigned int bufsize = b.getRemainder();
+    struct ip *ip = static_cast<struct ip *>(b.accessNBytes(sizeof(struct ip)));
+    if (!ip ) {
+        delete dest;
+        return nullptr;
+    }
     unsigned int totalLength, headerLength;
+    c.l3AddressesPtr = &ip->ip_src.s_addr;
+    c.l3AddressesLength = sizeof(ip->ip_src.s_addr) + sizeof(ip->ip_dst.s_addr);
 
     dest->setVersion(ip->ip_v);
     dest->setHeaderLength(IP_HEADER_BYTES);
@@ -156,56 +122,25 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;
 
-    if (headerLength > (unsigned int)IP_HEADER_BYTES)
-        EV << "Handling an captured IPv4 packet with options. Dropping the options.\n";
+    if (TCPIPchecksum::checksum(ip, IP_HEADER_BYTES) != 0)
+        dest->setBitError(true);
+
+    if (headerLength > sizeof(struct ip)) {
+        EV_ERROR << "Handling a captured IPv4 packet with options. Dropping the options.\n";
+    }
+    b.seek(headerLength);
 
     if (totalLength > bufsize)
         EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
     dest->setByteLength(IP_HEADER_BYTES);
 
-    cPacket *encapPacket = nullptr;
-    unsigned int encapLength = std::min(totalLength, bufsize) - headerLength;
-
-    switch (dest->getTransportProtocol()) {
-        case IP_PROT_ICMP:
-            encapPacket = new ICMPMessage("icmp-from-wire");
-            ICMPSerializer().parse(buf + headerLength, encapLength, (ICMPMessage *)encapPacket);
-            break;
-
-        case IP_PROT_IGMP:
-            encapPacket = IGMPSerializer().parse(buf + headerLength, encapLength);
-            encapPacket->setName("igmp-from-wire");
-            break;
-
-#ifdef WITH_UDP
-        case IP_PROT_UDP:
-            encapPacket = new UDPPacket("udp-from-wire");
-            UDPSerializer().parse(buf + headerLength, encapLength, (UDPPacket *)encapPacket);
-            break;
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-        case IP_PROT_SCTP:
-            encapPacket = new sctp::SCTPMessage("sctp-from-wire");
-            sctp::SCTPSerializer().parse(buf + headerLength, encapLength, (sctp::SCTPMessage *)encapPacket);
-            break;
-#endif // ifdef WITH_SCTP
-
-#ifdef WITH_TCP_COMMON
-        case IP_PROT_TCP:
-            encapPacket = new tcp::TCPSegment("tcp-from-wire");
-            TCPSerializer().parse(buf + headerLength, encapLength, (tcp::TCPSegment *)encapPacket, true);
-            break;
-#endif // ifdef WITH_TCP_COMMON
-
-        default:
-            throw cRuntimeError("IPv4Serializer: cannot parse protocol %d", dest->getTransportProtocol());
-    }
+    cPacket *encapPacket = SerializerBase::parse(b, c, IP_PROT, dest->getTransportProtocol(), 0);
 
     ASSERT(encapPacket);
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
+    return dest;
 }
 
 } // namespace serializer
