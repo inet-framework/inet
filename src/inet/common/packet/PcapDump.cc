@@ -23,6 +23,7 @@
 
 #include "inet/common/packet/PcapDump.h"
 
+#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_UDP
@@ -112,7 +113,11 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     // Write Ethernet header
     uint32 hdr = 2;    //AF_INET
 
-    int32 serialized_ip = serializer::IPv4Serializer().serialize(ipPacket, buf, sizeof(buf), true);
+    serializer::Buffer b(buf, sizeof(buf));
+    serializer::Context c;
+    serializer::IPv4Serializer().xSerialize(ipPacket, b, c);
+    int32 serialized_ip = b.getPos();
+
     ph.orig_len = serialized_ip + sizeof(uint32);
 
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
@@ -141,7 +146,12 @@ void PcapDump::writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket)
     // Write Ethernet header
     uint32 hdr = 2;    //AF_INET
 
-    int32 serialized_ip = serializer::IPv6Serializer().serialize(ipPacket, buf, sizeof(buf));
+    serializer::Buffer b(buf, sizeof(buf));
+    serializer::Context c;
+    c.throwOnSerializerNotFound = false;
+    serializer::IPv6Serializer().xSerialize(ipPacket, b, c);
+    int32 serialized_ip = b.getPos();
+
     if (serialized_ip > 0) {
         ph.orig_len = serialized_ip + sizeof(uint32);
 
