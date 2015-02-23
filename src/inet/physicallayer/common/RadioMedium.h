@@ -55,6 +55,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          */
         const IRadioFrame *frame;
         const IArrival *arrival;
+        const Interval *interval;
         const IListening *listening;
         const IReception *reception;
         const IInterference *interference;
@@ -397,6 +398,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
     virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission) const;
 
+    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission) const;
+    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval) const;
+    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission) const;
+
     virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission) const;
     virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) const;
     virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission) const;
@@ -481,6 +486,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual bool isInterferingTransmission(const ITransmission *transmission, const IListening *listening) const;
     virtual bool isInterferingTransmission(const ITransmission *transmission, const IReception *reception) const;
 
+    /**
+     * Removes all cached data related to past transmissions that don't have
+     * any effect on any ongoing transmission. Note that it's possible that a
+     * transmission is in the past but it's still needed to compute the total
+     * interference for another.
+     */
     virtual void removeNonInterferingTransmissions();
 
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;

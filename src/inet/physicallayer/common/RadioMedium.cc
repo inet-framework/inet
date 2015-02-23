@@ -328,6 +328,26 @@ void RadioMedium::removeCachedArrival(const IRadio *radio, const ITransmission *
         cacheEntry->arrival = nullptr;
 }
 
+const Interval *RadioMedium::getCachedInterval(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    return cacheEntry ? cacheEntry->interval : nullptr;
+}
+
+void RadioMedium::setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->interval = interval;
+}
+
+void RadioMedium::removeCachedInterval(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry)
+        cacheEntry->interval = nullptr;
+}
+
 const IListening *RadioMedium::getCachedListening(const IRadio *radio, const ITransmission *transmission) const
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
@@ -660,7 +680,6 @@ void RadioMedium::removeNonInterferingTransmissions()
     while (transmissionIndex < transmissionCache.size() && transmissionCache[transmissionIndex].interferenceEndTime <= now)
         transmissionIndex++;
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
-    baseTransmissionId += transmissionIndex;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.begin() + transmissionIndex; it++) {
         const ITransmission *transmission = *it;
         for (std::vector<const IRadio *>::const_iterator jt = radios.begin(); jt != radios.end(); jt++) {
@@ -668,22 +687,23 @@ void RadioMedium::removeNonInterferingTransmissions()
             if (radio != nullptr) {
                 RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
                 const IArrival *arrival = getCachedArrival(radio, transmission);
-                if (arrival) {
-                    Interval interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
-                    radioCacheEntry->receptionIntervals->deleteNode(&interval);
+                if (arrival != nullptr) {
+                    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+                    radioCacheEntry->receptionIntervals->deleteNode(cacheEntry->interval);
                 }
             }
         }
         delete transmission;
     }
     transmissions.erase(transmissions.begin(), transmissions.begin() + transmissionIndex);
+    baseTransmissionId += transmissionIndex;
     for (std::vector<TransmissionCacheEntry>::const_iterator it = transmissionCache.begin(); it != transmissionCache.begin() + transmissionIndex; it++) {
         const TransmissionCacheEntry& transmissionCacheEntry = *it;
         delete transmissionCacheEntry.frame;
         const std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries) {
             for (const auto & cacheEntry : *receptionCacheEntries) {
-                
+
                 delete cacheEntry.arrival;
                 delete cacheEntry.listening;
                 delete cacheEntry.reception;
@@ -917,7 +937,10 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
                     maxArrivalEndTime = arrivalEndTime;
                 setCachedArrival(receiverRadio, transmission, arrival);
                 setCachedListening(receiverRadio, transmission, listening);
-                radioCacheEntry->receptionIntervals->insert(new Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission));
+                const Interval *interval = new Interval(arrival->getStartTime(), arrival->getEndTime(), (void *)transmission);
+                ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiverRadio, transmission);
+                cacheEntry->interval = interval;
+                radioCacheEntry->receptionIntervals->insert(interval);
             }
         }
     }
