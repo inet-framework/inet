@@ -58,7 +58,7 @@ struct Interval
     {
     }
 
-    virtual void print()
+    virtual void print() const
     {
     }
 
@@ -80,13 +80,13 @@ class IntervalTreeNode
     IntervalTreeNode();
 
     /// @brief Create an node storing the interval
-    IntervalTreeNode(Interval* new_interval);
+    IntervalTreeNode(const Interval* new_interval);
 
     ~IntervalTreeNode();
 
   protected:
     /// @brief interval stored in the node
-    Interval* stored_interval = nullptr;
+    const Interval* stored_interval = nullptr;
 
     simtime_t key;
 
@@ -128,13 +128,13 @@ class IntervalTree
     void print() const;
 
     /// @brief Delete one node of the interval tree
-    Interval* deleteNode(IntervalTreeNode* node);
+    const Interval* deleteNode(IntervalTreeNode* node);
 
     /// @brief delete node stored a given interval
-    void deleteNode(Interval* ivl);
+    void deleteNode(const Interval* ivl);
 
     /// @brief Insert one node of the interval tree
-    IntervalTreeNode* insert(Interval* new_interval);
+    IntervalTreeNode* insert(const Interval* new_interval);
 
     /// @brief get the predecessor of a given node
     IntervalTreeNode* getPredecessor(IntervalTreeNode* node) const;
@@ -143,7 +143,7 @@ class IntervalTree
     IntervalTreeNode* getSuccessor(IntervalTreeNode* node) const;
 
     /// @brief Return result for a given query
-    std::deque<Interval*> query(simtime_t low, simtime_t high);
+    std::deque<const Interval*> query(simtime_t low, simtime_t high);
 
   protected:
 
@@ -164,7 +164,7 @@ class IntervalTree
     void recursivePrint(IntervalTreeNode* node) const;
 
     /// @brief recursively find the node corresponding to the interval
-    IntervalTreeNode* recursiveSearch(IntervalTreeNode* node, Interval* ivl) const;
+    IntervalTreeNode* recursiveSearch(IntervalTreeNode* node, const Interval* ivl) const;
 
     /// @brief Travels up to the root fixing the max_high fields after an insertion or deletion
     void fixupMaxHigh(IntervalTreeNode* node);

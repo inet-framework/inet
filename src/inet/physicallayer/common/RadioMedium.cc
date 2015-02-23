@@ -706,9 +706,9 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
 {
     const IRadio *radio = listening->getReceiver();
     RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
-    std::deque<Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(listening->getStartTime(), listening->getEndTime());
+    std::deque<const Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(listening->getStartTime(), listening->getEndTime());
     std::vector<const IReception *> *interferingReceptions = new std::vector<const IReception *>();
-    for (std::deque<Interval *>::const_iterator it = interferingIntervals.begin(); it != interferingIntervals.end(); it++) {
+    for (std::deque<const Interval *>::const_iterator it = interferingIntervals.begin(); it != interferingIntervals.end(); it++) {
         const ITransmission *interferingTransmission = (ITransmission *)((*it)->value);
         if (isInterferingTransmission(interferingTransmission, listening))
             interferingReceptions->push_back(getReception(radio, interferingTransmission));
@@ -721,9 +721,9 @@ const std::vector<const IReception *> *RadioMedium::computeInterferingReceptions
     const IRadio *radio = reception->getReceiver();
     const ITransmission *transmission = reception->getTransmission();
     RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
-    std::deque<Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(reception->getStartTime(), reception->getEndTime());
+    std::deque<const Interval *> interferingIntervals = radioCacheEntry->receptionIntervals->query(reception->getStartTime(), reception->getEndTime());
     std::vector<const IReception *> *interferingReceptions = new std::vector<const IReception *>();
-    for (std::deque<Interval *>::const_iterator it = interferingIntervals.begin(); it != interferingIntervals.end(); it++) {
+    for (std::deque<const Interval *>::const_iterator it = interferingIntervals.begin(); it != interferingIntervals.end(); it++) {
         const ITransmission *interferingTransmission = (ITransmission *)((*it)->value);
         if (transmission != interferingTransmission && isInterferingTransmission(interferingTransmission, reception))
             interferingReceptions->push_back(getReception(radio, interferingTransmission));
