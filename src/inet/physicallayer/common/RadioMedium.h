@@ -63,8 +63,15 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         const ISNIR *snir;
         const IReceptionDecision *decision;
 
+      private:
+        ReceptionCacheEntry(const ReceptionCacheEntry & other);
+        ReceptionCacheEntry & operator=(const ReceptionCacheEntry & other);
+
       public:
         ReceptionCacheEntry();
+        ReceptionCacheEntry(ReceptionCacheEntry && other);
+        ReceptionCacheEntry & operator=(ReceptionCacheEntry && other);
+        virtual ~ReceptionCacheEntry();
     };
 
     /**

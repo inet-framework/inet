@@ -223,18 +223,22 @@ void Radio::handleMessageWhenUp(cMessage *message)
     if (message->isSelfMessage())
         handleSelfMessage(message);
     else if (message->getArrivalGate() == upperLayerIn) {
-        if (!message->isPacket())
+        if (!message->isPacket()) {
             handleUpperCommand(message);
+            delete message;
+        }
         else if (radioMode == RADIO_MODE_TRANSMITTER || radioMode == RADIO_MODE_TRANSCEIVER)
             startTransmission(check_and_cast<cPacket *>(message));
         else {
-            EV << "Radio is not in transmitter or transceiver mode, dropping frame.\n";
+            EV_ERROR << "Radio is not in transmitter or transceiver mode, dropping frame.\n";
             delete message;
         }
     }
     else if (message->getArrivalGate() == radioIn) {
-        if (!message->isPacket())
+        if (!message->isPacket()) {
             handleLowerCommand(message);
+            delete message;
+        }
         else
             startReception(check_and_cast<RadioFrame *>(message));
     }
@@ -294,7 +298,7 @@ void Radio::startTransmission(cPacket *macFrame)
     if (endTransmissionTimer->isScheduled())
         throw cRuntimeError("Received frame from upper layer while already transmitting.");
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(medium->transmitPacket(this, macFrame));
-    EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
+    EV_INFO << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
     ASSERT(radioFrame->getDuration() != 0);
     endTransmissionTimer->setControlInfo(const_cast<RadioFrame *>(radioFrame));
     scheduleAt(simTime() + radioFrame->getDuration(), endTransmissionTimer);
@@ -305,7 +309,7 @@ void Radio::startTransmission(cPacket *macFrame)
 void Radio::endTransmission()
 {
     RadioFrame *radioFrame = static_cast<RadioFrame *>(endTransmissionTimer->removeControlInfo());
-    EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
+    EV_INFO << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     updateTransceiverState();
     delete radioFrame;
 }
@@ -318,7 +322,7 @@ void Radio::startReception(RadioFrame *radioFrame)
     timer->setControlInfo(radioFrame);
     if (arrival->getStartTime() == simTime()) {
         bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && medium->isReceptionAttempted(this, transmission);
-        EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
+        EV_INFO << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
         if (isReceptionAttempted)
             endReceptionTimer = timer;
     }
@@ -329,10 +333,10 @@ void Radio::startReception(RadioFrame *radioFrame)
 void Radio::endReception(cMessage *message)
 {
     RadioFrame *radioFrame = static_cast<RadioFrame *>(message->getControlInfo());
-    EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
+    EV_INFO << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer) {
         cPacket *macFrame = medium->receivePacket(this, radioFrame);
-        EV << "Sending up " << macFrame << ".\n";
+        EV_INFO << "Sending up " << macFrame << ".\n";
         const ReceptionIndication *indication = check_and_cast<const ReceptionIndication *>(macFrame->getControlInfo());
         emit(minSNIRSignal, indication->getMinSNIR());
         if (!isNaN(indication->getPacketErrorRate()))
@@ -381,7 +385,7 @@ void Radio::updateTransceiverState()
     else
         newRadioReceptionState = RECEPTION_STATE_IDLE;
     if (receptionState != newRadioReceptionState) {
-        EV << "Changing radio reception state from " << getRadioReceptionStateName(receptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
+        EV_INFO << "Changing radio reception state from " << getRadioReceptionStateName(receptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
         receptionState = newRadioReceptionState;
         emit(receptionStateChangedSignal, newRadioReceptionState);
     }
@@ -394,7 +398,7 @@ void Radio::updateTransceiverState()
     else
         newRadioTransmissionState = TRANSMISSION_STATE_IDLE;
     if (transmissionState != newRadioTransmissionState) {
-        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(transmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
+        EV_INFO << "Changing radio transmission state from " << getRadioTransmissionStateName(transmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
         transmissionState = newRadioTransmissionState;
         emit(transmissionStateChangedSignal, newRadioTransmissionState);
     }
