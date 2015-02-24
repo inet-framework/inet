@@ -980,6 +980,8 @@ typedef scale<kPa, 10> millibar;
 
 // Informatics
 typedef compose<b, pow<s, -1> > bps;
+typedef scale<bps, 1, 1000> kbps;
+typedef scale<bps, 1, 1000000> Mbps;
 
 // Other
 typedef scale<Hz, 60> rpm;
@@ -1134,6 +1136,8 @@ typedef value<double, units::psi> psi;
 typedef value<double, units::millibar> millibar;
 
 typedef value<double, units::bps> bps;
+typedef value<double, units::kbps> kbps;
+typedef value<double, units::Mbps> Mbps;
 
 typedef value<double, units::percent> percent;
 typedef value<double, units::rpm> rpm;
