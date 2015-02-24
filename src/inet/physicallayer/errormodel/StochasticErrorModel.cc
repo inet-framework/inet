@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/errormodel/ConstantErrorModel.h"
-#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/errormodel/StochasticErrorModel.h"
+#include "inet/physicallayer/base/FlatTransmissionBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ConstantErrorModel);
+Define_Module(StochasticErrorModel);
 
-ConstantErrorModel::ConstantErrorModel() :
+StochasticErrorModel::StochasticErrorModel() :
     packetErrorRate(NaN),
     bitErrorRate(NaN),
     symbolErrorRate(NaN)
 {
 }
 
-void ConstantErrorModel::initialize(int stage)
+void StochasticErrorModel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         packetErrorRate = par("packetErrorRate");
@@ -40,27 +40,27 @@ void ConstantErrorModel::initialize(int stage)
     }
 }
 
-void ConstantErrorModel::printToStream(std::ostream& stream) const
+void StochasticErrorModel::printToStream(std::ostream& stream) const
 {
-    stream << "ConstantErrorModel, "
+    stream << "StochasticErrorModel, "
            << "packetErrorRate = " << packetErrorRate << ", "
            << "bitErrorRate = " << bitErrorRate << ", "
            << "symbolErrorRate = " << symbolErrorRate;
 }
 
-double ConstantErrorModel::computePacketErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir) const
 {
     if (!isNaN(packetErrorRate))
         return packetErrorRate;
     else {
         double bitErrorRate = computeBitErrorRate(snir);
         const IReception *reception = snir->getReception();
-        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        return 1.0 - pow(1.0 - bitErrorRate, narrowbandTransmission->getPayloadBitLength());
+        const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
+        return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
     }
 }
 
-double ConstantErrorModel::computeBitErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     if (!isNaN(bitErrorRate))
         return bitErrorRate;
@@ -74,7 +74,7 @@ double ConstantErrorModel::computeBitErrorRate(const ISNIR *snir) const
     }
 }
 
-double ConstantErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
     return symbolErrorRate;
 }

@@ -24,11 +24,11 @@ import inet.physicallayer.base.ErrorModelBase;
 // rate, bit error rate, and symbol error rate for receptions independent of
 // any interfering transmission or noise.
 //
-module ConstantErrorModel extends ErrorModelBase
+module StochasticErrorModel extends ErrorModelBase
 {
     parameters:
         double packetErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
         double bitErrorRate = default(0/0);    // a probability in the range [0, 1] or NaN if not set
         double symbolErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
-        @class(ConstantErrorModel);
+        @class(StochasticErrorModel);
 }

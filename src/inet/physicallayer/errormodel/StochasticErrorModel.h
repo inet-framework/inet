@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CONSTANTERRORMODEL_H
-#define __INET_CONSTANTERRORMODEL_H
+#ifndef __INET_STOCHASTICERRORMODEL_H
+#define __INET_STOCHASTICERRORMODEL_H
 
 #include "inet/physicallayer/base/ErrorModelBase.h"
 
@@ -27,7 +27,7 @@ namespace physicallayer {
 /**
  * Implements the ConstantErrorModel model, see the NED file for details.
  */
-class INET_API ConstantErrorModel : public ErrorModelBase
+class INET_API StochasticErrorModel : public ErrorModelBase
 {
   protected:
     double packetErrorRate;
@@ -38,7 +38,7 @@ class INET_API ConstantErrorModel : public ErrorModelBase
     virtual void initialize(int stage) override;
 
   public:
-    ConstantErrorModel();
+    StochasticErrorModel();
 
     virtual void printToStream(std::ostream& stream) const override;
 
@@ -51,5 +51,5 @@ class INET_API ConstantErrorModel : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_CONSTANTERRORMODEL_H
+#endif // ifndef __INET_STOCHASTICERRORMODEL_H
 
