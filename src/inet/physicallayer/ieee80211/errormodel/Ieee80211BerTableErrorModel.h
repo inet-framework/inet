@@ -15,23 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211ERRORMODELBASE_H
-#define __INET_IEEE80211ERRORMODELBASE_H
+#ifndef __INET_IEEE80211BERTABLEERRORMODEL_H
+#define __INET_IEEE80211BERTABLEERRORMODEL_H
 
 #include "inet/physicallayer/base/ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/BerParseFile.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
+class INET_API Ieee80211BerTableErrorModel : public ErrorModelBase
 {
   protected:
-    virtual double GetChunkSuccessRate(const IIeee80211ChunkMode *chunkMode, double snr, uint32_t nbits) const = 0;
+    BerParseFile *berTableFile;
+
+  protected:
+    virtual void initialize(int stage) override;
 
   public:
-    Ieee80211ErrorModelBase();
+    Ieee80211BerTableErrorModel();
+    virtual ~Ieee80211BerTableErrorModel();
+
+    virtual void printToStream(std::ostream& stream) const override { stream << "Ieee80211BerTableErrorModel"; }
 
     virtual double computePacketErrorRate(const ISNIR *snir) const override;
     virtual double computeBitErrorRate(const ISNIR *snir) const override;
@@ -42,5 +49,5 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211ERRORMODELBASE_H
+#endif // ifndef __INET_IEEE80211BERTABLEERRORMODEL_H
 

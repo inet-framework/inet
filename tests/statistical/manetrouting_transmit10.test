@@ -158,7 +158,8 @@ description = "Aodv Simple test"
 
 **.wlan*.radio.transmitterPower=2.0mW
 **.wlan*.radio.sensitivity=-90dBm
-**.wlan*.radio.errorModel.berTableFile="../../files/per_table_80211g_Trivellato.dat"
+**.wlan*.radio.receiver.errorModelType = "Ieee80211BerTableErrorModel"
+**.wlan*.radio.receiver.errorModel.berTableFile="../../files/per_table_80211g_Trivellato.dat"
 
 
 **.broadCastDelay=uniform(0s,0.005s)

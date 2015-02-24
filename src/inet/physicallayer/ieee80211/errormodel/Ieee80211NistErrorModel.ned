@@ -17,8 +17,11 @@
 
 package inet.physicallayer.ieee80211.errormodel;
 
-module Ieee80211NistErrorModel extends Ieee80211ErrorModelBase
+import inet.physicallayer.base.ErrorModelBase;
+
+module Ieee80211NistErrorModel extends ErrorModelBase
 {
     parameters:
         @class(Ieee80211NistErrorModel);
+        @display("i=block/broadcast");
 }
