@@ -67,38 +67,10 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISNIR *snir) co
 {
     const ITransmission *transmission = snir->getReception()->getTransmission();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
-    const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
-    const IIeee80211Mode *mode = ieee80211Transmission->getMode();
-
-    Ieee80211NistErrorModel e;
-    // probability of no bit error in the header
+    double bitrate = flatTransmission->getBitrate().get();
     double minSNIR = snir->getMin();
-    int headerBitLength = flatTransmission->getHeaderBitLength();
-    double headerSuccessRate = e.GetChunkSuccessRate(mode->getHeaderMode(), minSNIR, headerBitLength);
-
-    // probability of no bit error in the MPDU
     int payloadBitLength = flatTransmission->getPayloadBitLength();
-    double payloadSuccessRate;
-    if (berTableFile) {
-        double bitrate = flatTransmission->getBitrate().get();
-        payloadSuccessRate = 1 - berTableFile->getPer(bitrate, minSNIR, payloadBitLength / 8);
-    }
-    else
-        payloadSuccessRate = e.GetChunkSuccessRate(mode->getDataMode(), minSNIR, payloadBitLength);
-
-    EV_DEBUG << "min SNIR = " << minSNIR << ", bit length = " << payloadBitLength << ", header error rate = " << 1 - headerSuccessRate << ", payload error rate = " << 1 - payloadSuccessRate << endl;
-
-    if (headerSuccessRate >= 1)
-        headerSuccessRate = 1;
-    if (payloadSuccessRate >= 1)
-        payloadSuccessRate = 1;
-    return 1 - headerSuccessRate * payloadSuccessRate;
-//    const ITransmission *transmission = snir->getReception()->getTransmission();
-//    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
-//    double bitrate = flatTransmission->getBitrate().get();
-//    double minSNIR = snir->getMin();
-//    int payloadBitLength = flatTransmission->getPayloadBitLength();
-//    return berTableFile->getPer(bitrate, minSNIR, payloadBitLength / 8);
+    return berTableFile->getPer(bitrate, minSNIR, payloadBitLength / 8);
 }
 
 double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISNIR *snir) const
