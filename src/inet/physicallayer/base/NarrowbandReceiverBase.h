@@ -18,9 +18,9 @@
 #ifndef __INET_NARROWBANDRECEIVERBASE_H
 #define __INET_NARROWBANDRECEIVERBASE_H
 
+#include "inet/physicallayer/base/SNIRReceiverBase.h"
 #include "inet/physicallayer/contract/IModulation.h"
 #include "inet/physicallayer/contract/IErrorModel.h"
-#include "inet/physicallayer/base/SNIRReceiverBase.h"
 
 namespace inet {
 
@@ -30,9 +30,6 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
 {
   protected:
     const IModulation *modulation;
-    const IErrorModel *errorModel;
-    W energyDetection;
-    W sensitivity;
     Hz carrierFrequency;
     Hz bandwidth;
 
@@ -41,24 +38,17 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
 
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
 
   public:
     NarrowbandReceiverBase();
-    virtual ~NarrowbandReceiverBase();
 
     virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMinReceptionPower() const override { return sensitivity; }
-
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
-
-    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
     virtual const IModulation *getModulation() const { return modulation; }
-    virtual const IErrorModel *getErrorModel() const { return errorModel; }
+    virtual void setModulation(const IModulation *) { this->modulation = modulation; }
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }

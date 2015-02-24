@@ -19,13 +19,13 @@
 #ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
 #define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
 
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154NarrowbandScalarReceiver : public NarrowbandReceiverBase
+class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
 {
   protected:
     W minInterferencePower;

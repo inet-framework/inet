@@ -28,14 +28,14 @@ namespace physicallayer {
 Define_Module(Ieee802154NarrowbandScalarTransmitter);
 
 Ieee802154NarrowbandScalarTransmitter::Ieee802154NarrowbandScalarTransmitter() :
-    NarrowbandTransmitterBase()
+    FlatTransmitterBase()
 {
 }
 
 void Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "Ieee802154NarrowbandScalarTransmitter, ";
-    NarrowbandTransmitterBase::printToStream(stream);
+    FlatTransmitterBase::printToStream(stream);
 }
 
 const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

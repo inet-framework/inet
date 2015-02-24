@@ -18,7 +18,7 @@
 #ifndef __INET_DIMENSIONALRECEPTION_H
 #define __INET_DIMENSIONALRECEPTION_H
 
-#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
+#include "inet/physicallayer/base/FlatReceptionBase.h"
 #include "inet/physicallayer/mapping/MappingBase.h"
 #include "inet/physicallayer/mapping/MappingUtils.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalReception : public NarrowbandReceptionBase
+class INET_API DimensionalReception : public FlatReceptionBase
 {
   protected:
     const ConstMapping *power;

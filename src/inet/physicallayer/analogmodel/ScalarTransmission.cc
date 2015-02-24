@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
-    NarrowbandTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate),
+    FlatTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, headerBitLength, payloadBitLength, bitrate, modulation, carrierFrequency, bandwidth),
     power(power)
 {
 }
@@ -31,7 +31,7 @@ void ScalarTransmission::printToStream(std::ostream& stream) const
 {
     stream << "ScalarTransmission, "
            << "power = " << power << ", ";
-    NarrowbandTransmissionBase::printToStream(stream);
+    FlatTransmissionBase::printToStream(stream);
 }
 
 } // namespace physicallayer

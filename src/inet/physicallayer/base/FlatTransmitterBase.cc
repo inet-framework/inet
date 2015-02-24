@@ -15,24 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
-    ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-    carrierFrequency(carrierFrequency),
-    bandwidth(bandwidth)
+FlatTransmitterBase::FlatTransmitterBase() :
+    NarrowbandTransmitterBase(),
+    headerBitLength(-1),
+    bitrate(bps(NaN)),
+    power(W(NaN))
 {
 }
 
-void NarrowbandReceptionBase::printToStream(std::ostream& stream) const
+void FlatTransmitterBase::initialize(int stage)
 {
-    stream << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
-    ReceptionBase::printToStream(stream);
+    NarrowbandTransmitterBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        headerBitLength = par("headerBitLength");
+        bitrate = bps(par("bitrate"));
+        power = W(par("power"));
+    }
+}
+
+void FlatTransmitterBase::printToStream(std::ostream& stream) const
+{
+    stream << "headerBitLength = " << headerBitLength << ", "
+           << "bitrate = " << bitrate << ", "
+           << "power = " << power;
+    NarrowbandTransmitterBase::printToStream(stream);
 }
 
 } // namespace physicallayer

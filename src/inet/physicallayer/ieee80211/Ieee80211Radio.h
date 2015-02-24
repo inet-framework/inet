@@ -18,13 +18,13 @@
 #ifndef __INET_IEEE80211RADIO_H
 #define __INET_IEEE80211RADIO_H
 
-#include "inet/physicallayer/base/NarrowbandRadioBase.h"
+#include "inet/physicallayer/base/FlatRadioBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public NarrowbandRadioBase
+class INET_API Ieee80211Radio : public FlatRadioBase
 {
   public:
     /**

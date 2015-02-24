@@ -203,7 +203,7 @@ const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = generateIEEE802154AUWBSignal(startTime, bits);
-    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, nullptr, -1, bitLength, cfg.centerFrequency, cfg.bandwidth, cfg.bitrate, powerMapping);
+    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, -1, bitLength, cfg.bitrate, nullptr, cfg.centerFrequency, cfg.bandwidth, powerMapping);
 }
 
 } // namespace physicallayer

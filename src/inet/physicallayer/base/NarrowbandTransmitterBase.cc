@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/common/Modulation.h"
+#include "inet/physicallayer/base/APSKModulationBase.h"
 
 namespace inet {
 
@@ -24,50 +24,26 @@ namespace physicallayer {
 
 NarrowbandTransmitterBase::NarrowbandTransmitterBase() :
     modulation(nullptr),
-    headerBitLength(-1),
-    carrierFrequency(Hz(sNaN)),
-    bandwidth(Hz(sNaN)),
-    bitrate(sNaN),
-    power(W(sNaN))
+    carrierFrequency(Hz(NaN)),
+    bandwidth(Hz(NaN))
 {
-}
-
-NarrowbandTransmitterBase::~NarrowbandTransmitterBase()
-{
-    delete modulation;
 }
 
 void NarrowbandTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        headerBitLength = par("headerBitLength");
+        modulation = APSKModulationBase::findModulation(par("modulation"));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "BPSK") == 0)
-            modulation = new BPSKModulation();
-        else if (strcmp(modulationName, "16-QAM") == 0)
-            modulation = new QAM16Modulation();
-        else if (strcmp(modulationName, "256-QAM") == 0)
-            modulation = new QAM256Modulation();
-        else if (strcmp(modulationName, "DSSS-OQPSK-16") == 0)
-            modulation = new DSSSOQPSK16Modulation();
-        else
-            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
-        bitrate = bps(par("bitrate"));
-        power = W(par("power"));
     }
 }
 
 void NarrowbandTransmitterBase::printToStream(std::ostream& stream) const
 {
     stream << "modulation = { " << modulation << " }, "
-           << "headerBitLength = " << headerBitLength << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", "
-           << "bitrate = " << bitrate << ", "
-           << "power = " << power;
+           << "bandwidth = " << bandwidth << ", ";
 }
 
 } // namespace physicallayer

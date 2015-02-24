@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,30 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/APSKScalarReceiver.h"
-#include "inet/physicallayer/analogmodel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/ScalarNoise.h"
-#include "inet/physicallayer/analogmodel/ScalarSNIR.h"
-#include "inet/physicallayer/common/BandListening.h"
+package inet.physicallayer.base;
 
-namespace inet {
+import inet.physicallayer.common.Radio;
 
-namespace physicallayer {
-
-Define_Module(APSKScalarReceiver);
-
-APSKScalarReceiver::APSKScalarReceiver() :
-    FlatReceiverBase()
+//
+// This module servces as a base module for flat radio models.
+//
+module FlatRadioBase extends NarrowbandRadioBase
 {
 }
-
-void APSKScalarReceiver::printToStream(std::ostream& stream) const
-{
-    stream << "APSKScalarReceiver, ";
-    FlatReceiverBase::printToStream(stream);
-}
-
-} // namespace physicallayer
-
-} // namespace inet
-

@@ -15,30 +15,44 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARTRANSMISSION_H
-#define __INET_SCALARTRANSMISSION_H
+#ifndef __INET_FLATTRANSMITTERBASE_H
+#define __INET_FLATTRANSMITTERBASE_H
 
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarTransmission : public FlatTransmissionBase, public virtual IScalarSignal
+class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
 {
   protected:
-    const W power;
+    int headerBitLength;
+    bps bitrate;
+    W power;
+
+  protected:
+    virtual void initialize(int stage) override;
 
   public:
-    ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power);
+    FlatTransmitterBase();
 
     virtual void printToStream(std::ostream& stream) const override;
+
+    virtual int getHeaderBitLength() const { return headerBitLength; }
+    virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }
+
+    virtual bps getBitrate() const { return bitrate; }
+    virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
+
+    virtual W getMaxPower() const override { return power; }
     virtual W getPower() const { return power; }
+    virtual void setPower(W power) { this->power = power; }
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARTRANSMISSION_H
+#endif // ifndef __INET_FLATTRANSMITTERBASE_H
 

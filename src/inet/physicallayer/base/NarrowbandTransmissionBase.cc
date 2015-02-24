@@ -21,25 +21,19 @@ namespace inet {
 
 namespace physicallayer {
 
-NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
+NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
     TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
     modulation(modulation),
-    headerBitLength(headerBitLength),
-    payloadBitLength(payloadBitLength),
     carrierFrequency(carrierFrequency),
-    bandwidth(bandwidth),
-    bitrate(bitrate)
+    bandwidth(bandwidth)
 {
 }
 
 void NarrowbandTransmissionBase::printToStream(std::ostream& stream) const
 {
     stream << "modulation = { " << modulation << " }, "
-           << "headerBitLength = " << headerBitLength << ", "
-           << "payloadBitLength = " << payloadBitLength << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", "
-           << "bitrate = " << bitrate << ", ";
+           << "bandwidth = " << bandwidth << ", ";
     TransmissionBase::printToStream(stream);
 }
 

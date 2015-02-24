@@ -28,8 +28,8 @@
 #ifdef WITH_RADIO
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
 #endif
 
 namespace inet {
@@ -324,7 +324,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         // compute the packet error rate between the two interfaces using a dummy transmission
         cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
-        const NarrowbandTransmitterBase *transmitter = dynamic_cast<const NarrowbandTransmitterBase *>(transmitterRadio->getTransmitter());
+        const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
         double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
         return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
 #else
@@ -340,7 +340,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-        const NarrowbandReceiverBase *receiver = dynamic_cast<const NarrowbandReceiverBase *>(receiverRadio->getReceiver());
+        const FlatReceiverBase *receiver = dynamic_cast<const FlatReceiverBase *>(receiverRadio->getReceiver());
         if (receiver) {
             cPacket *macFrame = new cPacket();
             macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());

@@ -29,38 +29,25 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
 {
   protected:
     const IModulation *modulation;
-    int headerBitLength;
     Hz carrierFrequency;
     Hz bandwidth;
-    bps bitrate;
-    W power;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
     NarrowbandTransmitterBase();
-    virtual ~NarrowbandTransmitterBase();
 
     virtual void printToStream(std::ostream& stream) const override;
 
-    virtual W getMaxPower() const override { return power; }
     virtual const IModulation *getModulation() const { return modulation; }
-
-    virtual int getHeaderBitLength() const { return headerBitLength; }
-    virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }
+    virtual void setModulation(const IModulation *) { this->modulation = modulation; }
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
 
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
-
-    virtual bps getBitrate() const { return bitrate; }
-    virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
-
-    virtual W getPower() const { return power; }
-    virtual void setPower(W power) { this->power = power; }
 };
 
 } // namespace physicallayer

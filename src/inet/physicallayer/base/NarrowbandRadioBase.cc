@@ -36,27 +36,43 @@ void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         Radio::handleUpperCommand(message);
-        W newPower = configureCommand->getPower();
-        if (!isNaN(newPower.get()))
-            setPower(newPower);
-        bps newBitrate = configureCommand->getBitrate();
-        if (!isNaN(newBitrate.get()))
-            setBitrate(newBitrate);
+        // TODO: add command subclass
+//        Hz newModulation = configureCommand->getModulation();
+//        if (newModulation != nullptr)
+//            setModulation(newModulation);
+//        Hz newCarrierFrequency = configureCommand->getCarrierFrequency();
+//        if (!isNaN(newCarrierFrequency.get()))
+//            setCarrierFrequency(newCarrierFrequency);
+//        Hz newBandwidth = configureCommand->getBandwidth();
+//        if (!isNaN(newBandwidth.get()))
+//            setBandwidth(newBandwidth);
     }
     else
         Radio::handleUpperCommand(message);
 }
 
-void NarrowbandRadioBase::setPower(W newPower)
+void NarrowbandRadioBase::setModulation(const IModulation *newModulation)
 {
     NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    narrowbandTransmitter->setPower(newPower);
+    narrowbandTransmitter->setModulation(newModulation);
+    NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
+    narrowbandReceiver->setModulation(newModulation);
 }
 
-void NarrowbandRadioBase::setBitrate(bps newBitrate)
+void NarrowbandRadioBase::setCarrierFrequency(Hz newCarrierFrequency)
 {
     NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-    narrowbandTransmitter->setBitrate(newBitrate);
+    narrowbandTransmitter->setCarrierFrequency(newCarrierFrequency);
+    NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
+    narrowbandReceiver->setCarrierFrequency(newCarrierFrequency);
+}
+
+void NarrowbandRadioBase::setBandwidth(Hz newBandwidth)
+{
+    NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
+    narrowbandTransmitter->setBandwidth(newBandwidth);
+    NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
+    narrowbandReceiver->setBandwidth(newBandwidth);
     endReceptionTimer = nullptr;
 }
 

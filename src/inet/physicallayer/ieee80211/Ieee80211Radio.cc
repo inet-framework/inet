@@ -32,14 +32,14 @@ Define_Module(Ieee80211Radio);
 simsignal_t Ieee80211Radio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 Ieee80211Radio::Ieee80211Radio() :
-    NarrowbandRadioBase(),
+    FlatRadioBase(),
     channelNumber(-1)
 {
 }
 
 void Ieee80211Radio::initialize(int stage)
 {
-    Radio::initialize(stage);
+    FlatRadioBase::initialize(stage);
     if (stage == INITSTAGE_PHYSICAL_LAYER)
         setChannelNumber(par("channelNumber"));
 }
@@ -48,14 +48,13 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
-        NarrowbandRadioBase::handleUpperCommand(message);
+        FlatRadioBase::handleUpperCommand(message);
         int newChannelNumber = configureCommand->getChannelNumber();
         if (newChannelNumber != -1)
             setChannelNumber(newChannelNumber);
-        delete message;
     }
     else
-        NarrowbandRadioBase::handleUpperCommand(message);
+        FlatRadioBase::handleUpperCommand(message);
 }
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)

@@ -18,9 +18,9 @@
 
 package inet.physicallayer.ieee802154;
 
-import inet.physicallayer.base.NarrowbandRadioBase;
+import inet.physicallayer.base.FlatRadioBase;
 
-module Ieee802154NarrowbandScalarRadio extends NarrowbandRadioBase
+module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
 {
     parameters:
         antennaType = default("IsotropicAntenna");

@@ -27,14 +27,14 @@ namespace physicallayer {
 Define_Module(APSKDimensionalTransmitter);
 
 APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
-    NarrowbandTransmitterBase(),
+    FlatTransmitterBase(),
     interpolationMode((Mapping::InterpolationMethod)-1)
 {
 }
 
 void APSKDimensionalTransmitter::initialize(int stage)
 {
-    NarrowbandTransmitterBase::initialize(stage);
+    FlatTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         // TODO: factor parsing?
@@ -122,7 +122,7 @@ void APSKDimensionalTransmitter::printToStream(std::ostream& stream) const
            << "interpolationMode = " << interpolationMode << ", ";
            // TODO: << "timeGains = { " << timeGains << " }, "
            // TODO: << "frequencyGains = { " << frequencyGains << " }, ";
-    NarrowbandTransmitterBase::printToStream(stream);
+    FlatTransmitterBase::printToStream(stream);
 }
 
 ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const
@@ -149,7 +149,7 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over timeGains and frequencyGains
         for (const auto & timeGainEntry : timeGains) {
-            
+
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -161,7 +161,7 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
                     throw cRuntimeError("Unknown time unit");
             }
             for (const auto & frequencyGainEntry : frequencyGains) {
-                
+
                 switch (frequencyGainEntry.frequencyUnit) {
                     case 's':
                         position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
@@ -192,7 +192,7 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over timeGains
         for (const auto & timeGainEntry : timeGains) {
-            
+
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -217,7 +217,7 @@ ConstMapping *APSKDimensionalTransmitter::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over frequencyGains
         for (const auto & frequencyGainEntry : frequencyGains) {
-            
+
             switch (frequencyGainEntry.frequencyUnit) {
                 case 's':
                     position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
@@ -249,7 +249,7 @@ const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, power);
-    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
+    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, headerBitLength, macFrame->getBitLength(), bitrate, modulation, carrierFrequency, bandwidth, powerMapping);
 }
 
 } // namespace physicallayer

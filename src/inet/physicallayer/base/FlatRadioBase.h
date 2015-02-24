@@ -15,27 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
+#ifndef __INET_FLATRADIOBASE_H
+#define __INET_FLATRADIOBASE_H
+
+#include "inet/physicallayer/base/NarrowbandRadioBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
-    ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-    carrierFrequency(carrierFrequency),
-    bandwidth(bandwidth)
+class INET_API FlatRadioBase : public NarrowbandRadioBase
 {
-}
+  protected:
+    void handleUpperCommand(cMessage *message);
 
-void NarrowbandReceptionBase::printToStream(std::ostream& stream) const
-{
-    stream << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
-    ReceptionBase::printToStream(stream);
-}
+  public:
+    FlatRadioBase();
+
+    virtual void setPower(W newPower);
+    virtual void setBitrate(bps newBitrate);
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_FLATRADIOBASE_H
 

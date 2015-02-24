@@ -18,14 +18,14 @@
 #ifndef __INET_APSKSCALARRECEIVER_H
 #define __INET_APSKSCALARRECEIVER_H
 
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/FlatReceiverBase.h"
 #include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKScalarReceiver : public NarrowbandReceiverBase
+class INET_API APSKScalarReceiver : public FlatReceiverBase
 {
   public:
     APSKScalarReceiver();

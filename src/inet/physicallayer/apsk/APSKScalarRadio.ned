@@ -17,7 +17,7 @@
 
 package inet.physicallayer.apsk;
 
-import inet.physicallayer.base.NarrowbandRadioBase;
+import inet.physicallayer.base.FlatRadioBase;
 
 //
 // This radio model provides a hypothetical radio that simply uses one of the
@@ -28,7 +28,7 @@ import inet.physicallayer.base.NarrowbandRadioBase;
 // See also ~APSKScalarRadioMedium, ~ScalarAnalogModel, ~APSKScalarTransmitter,
 // and ~APSKScalarReceiver.
 //
-module APSKScalarRadio extends NarrowbandRadioBase
+module APSKScalarRadio extends FlatRadioBase
 {
     parameters:
         antennaType = default("IsotropicAntenna");

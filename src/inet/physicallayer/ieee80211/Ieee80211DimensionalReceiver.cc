@@ -27,7 +27,7 @@ namespace physicallayer {
 Define_Module(Ieee80211DimensionalReceiver);
 
 Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
-    NarrowbandReceiverBase(),
+    FlatReceiverBase(),
     opMode('\0'),
     preambleMode((Ieee80211PreambleMode) - 1)
 {
@@ -35,7 +35,7 @@ Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
 
 void Ieee80211DimensionalReceiver::initialize(int stage)
 {
-    NarrowbandReceiverBase::initialize(stage);
+    FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))

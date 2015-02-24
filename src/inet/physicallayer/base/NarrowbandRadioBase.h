@@ -18,6 +18,7 @@
 #ifndef __INET_NARROWBANDRADIOBASE_H
 #define __INET_NARROWBANDRADIOBASE_H
 
+#include "inet/physicallayer/contract/IModulation.h"
 #include "inet/physicallayer/common/Radio.h"
 
 namespace inet {
@@ -32,8 +33,9 @@ class INET_API NarrowbandRadioBase : public Radio
   public:
     NarrowbandRadioBase();
 
-    virtual void setPower(W newPower);
-    virtual void setBitrate(bps newBitrate);
+    virtual void setModulation(const IModulation *newModulation);
+    virtual void setCarrierFrequency(Hz newCarrierFrequency);
+    virtual void setBandwidth(Hz newBandwidth);
 };
 
 } // namespace physicallayer

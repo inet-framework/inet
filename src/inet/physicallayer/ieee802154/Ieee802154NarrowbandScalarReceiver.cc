@@ -25,13 +25,13 @@ namespace physicallayer {
 Define_Module(Ieee802154NarrowbandScalarReceiver);
 
 Ieee802154NarrowbandScalarReceiver::Ieee802154NarrowbandScalarReceiver() :
-    NarrowbandReceiverBase()
+    FlatReceiverBase()
 {
 }
 
 void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
 {
-    NarrowbandReceiverBase::initialize(stage);
+    FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
     }
@@ -40,7 +40,7 @@ void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
 void Ieee802154NarrowbandScalarReceiver::printToStream(std::ostream& stream) const
 {
     stream << "Ieee802154NarrowbandScalarReceiver, ";
-    NarrowbandReceiverBase::printToStream(stream);
+    FlatReceiverBase::printToStream(stream);
 }
 
 } // namespace physicallayer
