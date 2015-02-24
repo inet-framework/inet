@@ -429,7 +429,7 @@
 #/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 200s,         2f90-ebb3
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              3c23-61e5
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              3a57-7028
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              ada0-2601
 
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             0375-8c7a
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             ff2f-9b56
