@@ -18,23 +18,18 @@
 #ifndef __INET_SCALARANALOGMODEL_H
 #define __INET_SCALARANALOGMODEL_H
 
-#include "inet/physicallayer/base/AnalogModelBase.h"
+#include "inet/physicallayer/base/ScalarAnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarAnalogModel : public AnalogModelBase
+class INET_API ScalarAnalogModel : public ScalarAnalogModelBase
 {
-  protected:
-    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
-
   public:
-    virtual void printToStream(std::ostream& stream) const override { stream << "ScalarAnalogModel"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "ScalarAnalogModel"; }
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
-    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
 };
 
 } // namespace physicallayer

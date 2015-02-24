@@ -24,5 +24,5 @@ package inet.physicallayer.contract;
 moduleinterface IErrorModel
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/broadcast");
 }

@@ -16,12 +16,14 @@
 //
 
 #include "inet/physicallayer/analogmodel/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/ScalarNoise.h"
+#include "inet/physicallayer/contract/IRadioSignal.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-ScalarSNIR::ScalarSNIR(const ScalarReception *reception, const ScalarNoise *noise) :
+ScalarSNIR::ScalarSNIR(const IReception *reception, const INoise *noise) :
     SNIRBase(reception, noise),
     minSNIR(NaN)
 {
@@ -35,9 +37,9 @@ void ScalarSNIR::printToStream(std::ostream& stream) const
 
 double ScalarSNIR::computeMin() const
 {
-    const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
-    const ScalarNoise *scalarNoise= check_and_cast<const ScalarNoise *>(noise);
-    return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
+    const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(reception->getAnalogModel());
+    const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
 double ScalarSNIR::getMin() const

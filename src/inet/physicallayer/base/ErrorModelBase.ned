@@ -25,5 +25,5 @@ import inet.physicallayer.contract.IErrorModel;
 module ErrorModelBase like IErrorModel
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/broadcast");
 }

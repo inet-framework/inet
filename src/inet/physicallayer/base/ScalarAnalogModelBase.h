@@ -15,34 +15,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARSNIR_H
-#define __INET_SCALARSNIR_H
+#ifndef __INET_SCALARANALOGMODELBASE_H
+#define __INET_SCALARANALOGMODELBASE_H
 
-#include "inet/physicallayer/base/SNIRBase.h"
+#include "inet/physicallayer/base/AnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarSNIR : public SNIRBase
+class INET_API ScalarAnalogModelBase : public AnalogModelBase
 {
   protected:
-    mutable double minSNIR;
-
-  protected:
-    virtual double computeMin() const;
+    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
 
   public:
-    ScalarSNIR(const IReception *reception, const INoise *noise);
-
-    virtual void printToStream(std::ostream& stream) const override;
-
-    virtual double getMin() const override;
+    virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_SCALARSNIR_H
+#endif // ifndef __INET_SCALARANALOGMODELBASE_H
 

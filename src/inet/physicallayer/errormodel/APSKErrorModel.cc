@@ -52,7 +52,9 @@ double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
 
 double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
-    return NaN;
+    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
+    const APSKModulationBase *modulation = dynamic_cast<const APSKModulationBase *>(flatTransmission->getModulation());
+    return modulation->calculateSER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
 } // namespace physicallayer

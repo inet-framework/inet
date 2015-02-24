@@ -20,6 +20,7 @@
 
 #include "inet/physicallayer/contract/IReception.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/layered/ISignalPacketModel.h"
 
 namespace inet {
 
@@ -30,7 +31,7 @@ namespace physicallayer {
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IReceptionDecision : public IPrintableObject
+class INET_API IReceptionDecision : public IPrintableObject // TODO: revise name
 {
   public:
     /**

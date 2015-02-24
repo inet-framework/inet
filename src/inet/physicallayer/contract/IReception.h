@@ -18,6 +18,7 @@
 #ifndef __INET_IRECEPTION_H
 #define __INET_IRECEPTION_H
 
+#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
 #include "inet/physicallayer/contract/ITransmission.h"
 
 namespace inet {
@@ -80,6 +81,11 @@ class INET_API IReception : public IPrintableObject
      * the corresponding transmission.
      */
     virtual const EulerAngles getEndOrientation() const = 0;
+
+    /**
+     * Returns the analog model of the received signal.
+     */
+    virtual const IReceptionAnalogModel *getAnalogModel() const = 0;
 };
 
 } // namespace physicallayer
