@@ -29,6 +29,7 @@ namespace physicallayer {
 class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
   protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
 
