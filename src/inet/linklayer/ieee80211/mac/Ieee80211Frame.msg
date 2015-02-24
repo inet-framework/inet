@@ -148,6 +148,12 @@ packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 //
 packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 {
+//  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
+//  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
+//  field is set to 1 (8.3.2.1 Data frame format)
+//  FIXME: byteLength is not a constant value (LENGTH_DATAHDR / 8 = 34).
+//  For example, with Address 4 and without QoS the correct length is 38 bytes.
+//  Without Address 4 and QoS the correct value is indeed 34.
     byteLength = LENGTH_DATAHDR / 8;
     type = ST_DATA;
     MACAddress address4;
