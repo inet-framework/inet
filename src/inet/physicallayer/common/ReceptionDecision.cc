@@ -42,6 +42,16 @@ void ReceptionDecision::printToStream(std::ostream& stream) const
            << "indication = { " << indication << " }";
 }
 
+const cPacket* inet::physicallayer::ReceptionDecision::getPhyFrame() const
+{
+    return reception->getTransmission()->getPhyFrame();
+}
+
+const cPacket* inet::physicallayer::ReceptionDecision::getMacFrame() const
+{
+    return reception->getTransmission()->getMacFrame();
+}
+
 } // namespace physicallayer
 
 } // namespace inet

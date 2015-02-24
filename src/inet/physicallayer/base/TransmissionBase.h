@@ -46,7 +46,8 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual void printToStream(std::ostream& stream) const override;
 
     virtual const IRadio *getTransmitter() const { return transmitter; }
-    virtual const cPacket *getMacFrame() const override { return macFrame; }
+    virtual const cPacket *getPhyFrame() const { return nullptr; }
+    virtual const cPacket *getMacFrame() const { return macFrame; }
 
     virtual const simtime_t getStartTime() const { return startTime; }
     virtual const simtime_t getEndTime() const { return endTime; }

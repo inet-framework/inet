@@ -1004,12 +1004,14 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 
 IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
 {
-    const ITransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime()); // TODO: memory leak
+    const ITransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime());
     addTransmission(radio, transmission);
+    cPacket *phyFrame = const_cast<cPacket *>(transmission->getPhyFrame());
+    cPacket *encapsulatedFrame = phyFrame != nullptr ? phyFrame : macFrame;
     RadioFrame *radioFrame = new RadioFrame(transmission);
-    radioFrame->setName(macFrame->getName());
+    radioFrame->setName(encapsulatedFrame->getName());
     radioFrame->setDuration(transmission->getEndTime() - transmission->getStartTime());
-    radioFrame->encapsulate(macFrame);
+    radioFrame->encapsulate(encapsulatedFrame);
     if (recordCommunicationLog) {
         const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
         communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmitterRadio->getId() << " "
@@ -1075,7 +1077,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
                          << "E " << reception->getEndTime() << " " << reception->getEndPosition() << " "
                          << "D " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
     }
-    cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
+    cPacket *macFrame = decision->getMacFrame()->dup();
     macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<ReceptionIndication *>(decision->getIndication()));
     delete listening;
