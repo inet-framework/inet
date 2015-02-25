@@ -21,19 +21,25 @@
 // Control info for controlling the physical layer (the radio).
 //
 cplusplus {{
-#include "inet/physicallayer/common/ModulationType.h"
+
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+
+using namespace inet::physicallayer;
+
+typedef IIeee80211Mode * IIeee80211ModePtr;
+
 }}
 
 namespace inet;
 
-class noncobject ModulationType;
+class noncobject IIeee80211ModePtr;
 
 class Radio80211aControlInfo
 {
     double snr;
     double lossRate;
     double recPow;
-    ModulationType modulationType;
+    IIeee80211ModePtr mode;
     bool airtimeMetric;
     double testFrameDuration;
     double testFrameError;

@@ -18,12 +18,9 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/IRadio.h"
 #include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmitter.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"
-#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211DataRate.h"
 
 namespace inet {
 
@@ -35,8 +32,8 @@ Define_Module(Ieee80211DimensionalTransmitter);
 
 Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
     APSKDimensionalTransmitter(),
-    opMode('\0'),
-    preambleMode((Ieee80211PreambleMode) - 1)
+    modeSet(nullptr),
+    mode(nullptr)
 {
 }
 
@@ -44,25 +41,9 @@ void Ieee80211DimensionalTransmitter::initialize(int stage)
 {
     APSKDimensionalTransmitter::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *opModeString = par("opMode");
-        if (!strcmp("b", opModeString))
-            opMode = 'b';
-        else if (!strcmp("g", opModeString))
-            opMode = 'g';
-        else if (!strcmp("a", opModeString))
-            opMode = 'a';
-        else if (!strcmp("p", opModeString))
-            opMode = 'p';
-        else
-            opMode = 'g';
-        const char *preambleModeString = par("preambleMode");
-        if (!strcmp("short", preambleModeString))
-            preambleMode = IEEE80211_PREAMBLE_SHORT;
-        else if (!strcmp("long", preambleModeString))
-            preambleMode = IEEE80211_PREAMBLE_LONG;
-        else
-            throw cRuntimeError("Unknown preamble mode");
         carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
+        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
+        mode = modeSet->getMode(bitrate);
     }
 }
 
@@ -71,8 +52,8 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    ModulationType modulationType = Ieee80211Descriptor::getModulationType(opMode, transmissionBitrate.get());
-    const simtime_t duration = Ieee80211Modulation::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode);
+    const IIeee80211Mode *transmissionMode = transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
+    const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -80,7 +61,10 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
-    return new Ieee80211DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, powerMapping, opMode, preambleMode);
+    int headerBitLength = mode->getHeaderMode()->getBitLength();
+    headerBitLength = 24; // KLUDGE:
+    int64_t payloadBitLength = macFrame->getBitLength();
+    return new Ieee80211DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, powerMapping, transmissionMode);
 }
 
 } // namespace physicallayer

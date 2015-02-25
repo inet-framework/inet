@@ -16,11 +16,13 @@
 //
 
 #include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
-#include "inet/physicallayer/common/ModulationType.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalReceiver.h"
 #include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
+
+using namespace ieee80211;
 
 namespace physicallayer {
 
@@ -28,8 +30,7 @@ Define_Module(Ieee80211DimensionalReceiver);
 
 Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
     FlatReceiverBase(),
-    opMode('\0'),
-    preambleMode((Ieee80211PreambleMode) - 1)
+    modeSet(nullptr)
 {
 }
 
@@ -37,31 +38,16 @@ void Ieee80211DimensionalReceiver::initialize(int stage)
 {
     FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *opModeString = par("opMode");
-        if (!strcmp("b", opModeString))
-            opMode = 'b';
-        else if (!strcmp("g", opModeString))
-            opMode = 'g';
-        else if (!strcmp("a", opModeString))
-            opMode = 'a';
-        else if (!strcmp("p", opModeString))
-            opMode = 'p';
-        else
-            opMode = 'g';
-        const char *preambleModeString = par("preambleMode");
-        if (!strcmp("short", preambleModeString))
-            preambleMode = IEEE80211_PREAMBLE_SHORT;
-        else if (!strcmp("long", preambleModeString))
-            preambleMode = IEEE80211_PREAMBLE_LONG;
-        else
-            throw cRuntimeError("Unknown preamble mode");
+        carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
+        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
     }
 }
 
 bool Ieee80211DimensionalReceiver::computeIsReceptionPossible(const ITransmission *transmission) const
 {
-    const Ieee80211DimensionalTransmission *ieee80211Transmission = check_and_cast<const Ieee80211DimensionalTransmission *>(transmission);
-    return NarrowbandReceiverBase::computeIsReceptionPossible(transmission) && ieee80211Transmission->getOpMode() == opMode && ieee80211Transmission->getPreambleMode() == preambleMode;
+    // TODO: check whether the mode on the transmission is receivable or not
+    // const Ieee80211DimensionalTransmission *ieee80211Transmission = check_and_cast<const Ieee80211DimensionalTransmission *>(transmission);
+    return NarrowbandReceiverBase::computeIsReceptionPossible(transmission);
 }
 
 } // namespace physicallayer

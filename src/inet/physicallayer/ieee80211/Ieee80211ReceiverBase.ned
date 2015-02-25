@@ -30,8 +30,8 @@ import inet.physicallayer.base.NarrowbandReceiverBase;
 module Ieee80211ReceiverBase extends NarrowbandReceiverBase
 {
     parameters:
+        int channelNumber;
         string opMode @enum("b","g","a","p");
-        string preambleMode @enum("long", "short");
         modulation = default("BPSK"); // TODO: this is false
         errorModelType = default("Ieee80211NistErrorModel");
         // TODO: remove when opMode is removed from the error model

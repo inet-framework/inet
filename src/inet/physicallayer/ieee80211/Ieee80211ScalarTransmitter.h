@@ -19,7 +19,8 @@
 #define __INET_IEEE80211SCALARTRANSMITTER_H
 
 #include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "inet/physicallayer/ieee80211/Ieee80211Modulation.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
 
@@ -28,8 +29,8 @@ namespace physicallayer {
 class INET_API Ieee80211ScalarTransmitter : public FlatTransmitterBase
 {
   protected:
-    char opMode;
-    Ieee80211PreambleMode preambleMode;
+    const Ieee80211ModeSet *modeSet;
+    const IIeee80211Mode *mode;
 
   protected:
     virtual void initialize(int stage) override;
