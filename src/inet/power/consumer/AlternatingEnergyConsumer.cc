@@ -39,8 +39,7 @@ AlternatingEnergyConsumer::~AlternatingEnergyConsumer()
 
 void AlternatingEnergyConsumer::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         timer = new cMessage("timer");
         const char *energySourceModule = par("energySourceModule");
         energySource = dynamic_cast<IEnergySource *>(getModuleByPath(energySourceModule));

@@ -39,8 +39,7 @@ AlternatingEnergyGenerator::~AlternatingEnergyGenerator()
 
 void AlternatingEnergyGenerator::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         timer = new cMessage("timer");
         const char *energySinkModule = par("energySinkModule");
         energySink = dynamic_cast<IEnergySink *>(getModuleByPath(energySinkModule));

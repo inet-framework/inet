@@ -97,16 +97,14 @@ void SimpleEnergyStorage::setPowerGeneration(int energyGeneratorId, W generatedP
 
 void SimpleEnergyStorage::executeNodeOperation(J newResidualCapacity)
 {
-    if (!isNaN(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP)
-    {
+    if (!isNaN(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
         EV_WARN << "Capacity reached node shutdown threshold" << endl;
         LifecycleOperation::StringMap params;
         NodeShutdownOperation *operation = new NodeShutdownOperation();
         operation->initialize(node, params);
         lifecycleController->initiateOperation(operation);
     }
-    else if (!isNaN(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN)
-    {
+    else if (!isNaN(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
         EV_INFO << "Capacity reached node start threshold" << endl;
         LifecycleOperation::StringMap params;
         NodeStartOperation *operation = new NodeStartOperation();
@@ -117,8 +115,7 @@ void SimpleEnergyStorage::executeNodeOperation(J newResidualCapacity)
 
 void SimpleEnergyStorage::setResidualCapacity(J newResidualCapacity)
 {
-    if (newResidualCapacity != residualCapacity)
-    {
+    if (newResidualCapacity != residualCapacity) {
         residualCapacity = newResidualCapacity;
         lastResidualCapacityUpdate = simTime();
         executeNodeOperation(newResidualCapacity);

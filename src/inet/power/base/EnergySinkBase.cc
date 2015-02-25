@@ -29,7 +29,7 @@ EnergySinkBase::EnergySinkBase() :
 W EnergySinkBase::computeTotalGeneratedPower()
 {
     W totalGeneratedPower = W(0);
-    for (auto & elem : energyGenerators)
+    for (auto& elem : energyGenerators)
         totalGeneratedPower += (elem).generatedPower;
     return totalGeneratedPower;
 }
