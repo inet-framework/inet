@@ -20,23 +20,51 @@
 
 namespace inet {
 
-const BitVector BitVector::UNDEF = BitVector();
-
 BitVector::BitVector()
 {
-    undef = true;
     size = 0;
-    fields.push_back(uint8(0));
+    bytes.push_back(uint8(0));
+}
+
+BitVector::BitVector(const char* bits)
+{
+    size = 0;
+    stringToBitVector(bits);
+}
+
+BitVector::BitVector(unsigned int bits)
+{
+    size = 0;
+    if (bits == 0)
+        appendBit(false);
+    while (bits > 0)
+    {
+        appendBit(bits % 2);
+        bits /= 2;
+    }
+}
+
+BitVector::BitVector(unsigned int bits, unsigned int size)
+{
+    this->size = 0;
+    if (bits == 0)
+        appendBit(false);
+    while (bits > 0)
+    {
+        appendBit(bits % 2);
+        bits /= 2;
+    }
+    if (getSize() < size)
+        appendBit(false, size - getSize());
 }
 
 void BitVector::setBit(int pos, bool value)
 {
-    undef = false;
     while (containerSize() <= pos)
-        fields.push_back(uint8(0));
+        bytes.push_back(uint8(0));
     if (pos + 1 > size)
         size = pos + 1;
-    uint8& field = fields[pos / UINT8_LENGTH];
+    uint8& field = bytes[pos / UINT8_LENGTH];
     if (value)
         field |= 1 << (pos % UINT8_LENGTH);
     else
@@ -45,41 +73,32 @@ void BitVector::setBit(int pos, bool value)
 
 void BitVector::toggleBit(int pos)
 {
-    if (undef)
-        throw cRuntimeError("You can't toggle bits in an undefined BitVector");
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8& field = fields[pos / UINT8_LENGTH];
+    uint8& field = bytes[pos / UINT8_LENGTH];
     field ^= 1 << (pos % UINT8_LENGTH);
 }
 
 bool BitVector::getBit(int pos) const
 {
-    if (undef)
-        throw cRuntimeError("You can't get bits from an undefined BitVector");
     if (pos >= size)
         throw cRuntimeError("Out of range with bit position %d", pos);
-    uint8 field = fields[pos / UINT8_LENGTH];
+    uint8 field = bytes[pos / UINT8_LENGTH];
     return field & (1 << (pos % UINT8_LENGTH));
 }
 
 std::ostream& operator<<(std::ostream& out, const BitVector& bitVector)
 {
-    if (bitVector.isUndef())
-        out << "**UNDEFINED BITVECTOR**";
+    if (bitVector.getBit(0))
+        out << "1";
     else
+        out << "0";
+    for (int i = 1; i < bitVector.size; i++)
     {
-        if (bitVector.getBit(0))
-            out << "1";
+        if (bitVector.getBit(i))
+            out << " 1";
         else
-            out << "0";
-        for (int i = 1; i < bitVector.size; i++)
-        {
-            if (bitVector.getBit(i))
-                out << " 1";
-            else
-                out << " 0";
-        }
+            out << " 0";
     }
     return out;
 }
@@ -95,19 +114,14 @@ void BitVector::appendBit(bool value, int n)
         appendBit(value);
 }
 
-bool BitVector::getBitAllowOutOfRange(int pos) const
+void BitVector::appendByte(uint8_t value)
 {
-    if (undef)
-        throw cRuntimeError("You can't get bits from an undefined BitVector");
-    if (pos >= size)
-        return false;
-    return getBit(pos);
+    for (unsigned int i = 0; i < 8; i++)
+        appendBit(value & (1 << i));
 }
 
 std::string BitVector::toString() const
 {
-    if (undef)
-        throw cRuntimeError("You can't convert an undefined BitVector to a string");
     std::string str;
     for (unsigned int i = 0; i < getSize(); i++)
     {
@@ -117,13 +131,6 @@ std::string BitVector::toString() const
             str += "0";
     }
     return str;
-}
-
-BitVector::BitVector(const char* str)
-{
-    undef = false;
-    size = 0;
-    stringToBitVector(str);
 }
 
 void BitVector::stringToBitVector(const char *str)
@@ -142,8 +149,6 @@ void BitVector::stringToBitVector(const char *str)
 
 unsigned int BitVector::toDecimal() const
 {
-    if (undef)
-        throw cRuntimeError("You can't compute the decimal value of an undefined BitVector");
     unsigned int dec = 0;
     unsigned int powerOfTwo = 1;
     for (unsigned int i = 0; i < getSize(); i++)
@@ -156,8 +161,6 @@ unsigned int BitVector::toDecimal() const
 }
 unsigned int BitVector::reverseToDecimal() const
 {
-    if (undef)
-        throw cRuntimeError("You can't compute the decimal value of an undefined BitVector");
     unsigned int dec = 0;
     unsigned int powerOfTwo = 1;
     for (int i = getSize() - 1; i >= 0; i--)
@@ -171,8 +174,6 @@ unsigned int BitVector::reverseToDecimal() const
 
 int BitVector::computeHammingDistance(const BitVector& u) const
 {
-    if (u.isUndef() || isUndef())
-        throw cRuntimeError("You can't compute the Hamming distance between undefined BitVectors");
     if (getSize() != u.getSize())
         throw cRuntimeError("You can't compute Hamming distance between two vectors with different sizes");
     int hammingDistance = 0;
@@ -180,19 +181,6 @@ int BitVector::computeHammingDistance(const BitVector& u) const
         if (u.getBit(i) != getBit(i))
             hammingDistance++;
     return hammingDistance;
-}
-
-BitVector::BitVector(unsigned int num)
-{
-    undef = false;
-    size = 0;
-    if (num == 0)
-        appendBit(false);
-    while (num > 0)
-    {
-        appendBit(num % 2);
-        num /= 2;
-    }
 }
 
 BitVector& BitVector::operator=(const BitVector& rhs)
@@ -205,10 +193,6 @@ BitVector& BitVector::operator=(const BitVector& rhs)
 
 bool BitVector::operator==(const BitVector& rhs) const
 {
-    if (rhs.isUndef() && isUndef())
-        return true;
-    if (rhs.isUndef() || isUndef())
-        throw cRuntimeError("You can't compare undefined BitVectors");
     if (rhs.getSize() != getSize())
         return false;
     for (unsigned int i = 0; i < getSize(); i++)
@@ -222,26 +206,10 @@ bool BitVector::operator!=(const BitVector& rhs) const
     return !(rhs == *this);
 }
 
-BitVector::BitVector(unsigned int num, unsigned int fixedSize)
-{
-    undef = false;
-    size = 0;
-    if (num == 0)
-        appendBit(false);
-    while (num > 0)
-    {
-        appendBit(num % 2);
-        num /= 2;
-    }
-    if (getSize() < fixedSize)
-        appendBit(false, fixedSize - getSize());
-}
-
 void BitVector::copy(const BitVector& other)
 {
-    undef = other.undef;
     size = 0;
-    fields.clear();
+    bytes.clear();
     for (unsigned int i = 0; i < other.getSize(); i++)
         appendBit(other.getBit(i));
 }

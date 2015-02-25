@@ -24,43 +24,43 @@ namespace inet {
 
 #define UINT8_LENGTH 8
 
-class BitVector
+class INET_API BitVector
 {
-    public:
-        static const BitVector UNDEF;
+  private:
+    std::vector<uint8> bytes;
+    int size;
 
-    protected:
-        std::vector<uint8> fields;
-        bool undef;
-        int size;
-        int containerSize() const { return fields.size() * 8; }
-        void stringToBitVector(const char *str);
-        void copy(const BitVector& other);
+  private:
+    int containerSize() const { return bytes.size() * 8; }
+    void stringToBitVector(const char *str);
+    void copy(const BitVector& other);
 
-    public:
-        unsigned int toDecimal() const;
-        unsigned int reverseToDecimal() const;
-        void appendBit(bool value);
-        void appendBit(bool value, int n);
-        void setBit(int pos, bool value);
-        void toggleBit(int pos);
-        bool getBit(int pos) const;
-        bool isUndef() const { return undef; }
-        bool getBitAllowOutOfRange(int pos) const;
-        unsigned int getSize() const { return size; }
-        int computeHammingDistance(const BitVector& u) const;
-        friend std::ostream& operator<<(std::ostream& out, const BitVector& bitVector);
-        BitVector& operator=(const BitVector& rhs);
-        bool operator==(const BitVector& rhs) const;
-        bool operator!=(const BitVector& rhs) const;
-        std::string toString() const;
-        BitVector();
-        BitVector(const char *str);
-        BitVector(unsigned int num);
-        BitVector(unsigned int num, unsigned int fixedSize);
-        BitVector(const BitVector& other) { copy(other); }
+  public:
+    BitVector();
+    BitVector(const char *bits);
+    BitVector(unsigned int bits);
+    BitVector(unsigned int bits, unsigned int fixedSize);
+    BitVector(const BitVector& other) { copy(other); }
+
+    unsigned int toDecimal() const;
+    unsigned int reverseToDecimal() const;
+    void appendBit(bool value);
+    void appendBit(bool value, int n);
+    void setBit(int pos, bool value);
+    void toggleBit(int pos);
+    bool getBit(int pos) const;
+    void appendByte(uint8_t value);
+    unsigned int getSize() const { return size; }
+    unsigned int getNumberOfBytes() const { return bytes.size(); }
+    const std::vector<uint8>& getBytes() const { return bytes; }
+    int computeHammingDistance(const BitVector& u) const;
+    friend std::ostream& operator<<(std::ostream& out, const BitVector& bitVector);
+    BitVector& operator=(const BitVector& rhs);
+    bool operator==(const BitVector& rhs) const;
+    bool operator!=(const BitVector& rhs) const;
+    std::string toString() const;
 };
 
-} /* namespace inet */
+} // namespace inet
 
-#endif /* __INET_BITVECTOR_H_ */
+#endif // ifndef __INET_BITVECTOR_H

@@ -15,54 +15,66 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ShortBitVector.h"
 #include <algorithm>
+#include "inet/common/ShortBitVector.h"
 
 namespace inet {
 
-const ShortBitVector ShortBitVector::UNDEF = ShortBitVector();
-
 ShortBitVector::ShortBitVector()
 {
-    undef = true;
     size = 0;
-    bitVector = 0;
+    bits = 0;
+}
+
+ShortBitVector::ShortBitVector(const char* bitString)
+{
+    size = 0;
+    bits = 0;
+    int strSize = strlen(bitString);
+    for (int i = 0; i < strSize; i++) {
+        if (bitString[i] == '1')
+            appendBit(true);
+        else if (bitString[i] == '0')
+            appendBit(false);
+        else
+            throw cRuntimeError("str must represent a binary number");
+    }
+}
+
+ShortBitVector::ShortBitVector(unsigned int num)
+{
+    if (num == 0)
+        size = 1;
+    else
+        size = (int)(log(num) / log(2)) + 1;
+    bits = num;
+}
+
+ShortBitVector::ShortBitVector(unsigned int bits, unsigned int size)
+{
+    if (size > sizeof(unsigned int) * 8)
+        throw cRuntimeError("size = %d must be less than %d", size, sizeof(unsigned int) * 8);
+    this->size = size;
+    this->bits = bits;
 }
 
 std::ostream& operator<<(std::ostream& out, const ShortBitVector& bitVector)
 {
-#ifndef NDEBUG
-    if (bitVector.isUndef())
-        out << "**UNDEFINED BITVECTOR**";
-    else
-    {
-#endif
-        if (bitVector.getBit(0))
+    for (unsigned int i = 0; i < bitVector.getSize(); i++) {
+        if (i != 0)
+            out << " ";
+        if (bitVector.getBit(i))
             out << "1";
         else
             out << "0";
-        for (unsigned int i = 1; i < bitVector.getSize(); i++)
-        {
-            if (bitVector.getBit(i))
-                out << " 1";
-            else
-                out << " 0";
-        }
-#ifndef NDEBUG
     }
-#endif
     return out;
 }
 
 std::string ShortBitVector::toString() const
 {
-#ifndef NDEBUG
-    if (undef)
-        throw cRuntimeError("You can't convert an undefined ShortBitVector to a string");
-#endif
     std::string str;
-    for (unsigned int i = 0; i < getSize(); i++)
-    {
+    for (unsigned int i = 0; i < getSize(); i++) {
         if (getBit(i))
             str += "1";
         else
@@ -71,32 +83,5 @@ std::string ShortBitVector::toString() const
     return str;
 }
 
-ShortBitVector::ShortBitVector(const char* str)
-{
-    undef = false;
-    size = 0;
-    bitVector = 0;
-    stringToBitVector(str);
-}
-
-ShortBitVector::ShortBitVector(unsigned int num)
-{
-    undef = false;
-    if (num == 0)
-        size = 1;
-    else
-        size = (int)(log(num) / log(2)) + 1;
-    bitVector = num;
-}
-
-ShortBitVector::ShortBitVector(unsigned int num, unsigned int fixedSize)
-{
-    undef = false;
-    if (fixedSize > MAX_LENGTH)
-        throw cRuntimeError("fixedSize = %d must be less then 32", fixedSize);
-    size = fixedSize;
-    bitVector = num;
-}
-
-} /* namespace inet */
+} // namespace inet
 
