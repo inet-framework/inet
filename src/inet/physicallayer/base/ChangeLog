@@ -1,3 +1,11 @@
+2015-02-25  Levente Meszaros
+
+	Added modulation base classes:
+	APSKModulationBase, DPSKModulationBase, GFSKModulationBase, MQAMModulationBase, PPMModulationBase
+
+	Extracted flat (i.e. non-layered) base classes:
+	FlatRadioBase, FlatTransmitterBase, FlatTransmissionBase, FlatReceiverBase, FlatReceptionBase
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

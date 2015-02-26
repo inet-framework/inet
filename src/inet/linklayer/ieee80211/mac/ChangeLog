@@ -1,3 +1,10 @@
+2015-02-25  Levente Meszaros
+
+	Refactored the MAC class to work with the new 802.11 mode descriptor classes.
+	- deleted obsolete Ieee80211DescriptorData, Ieee80211Descriptor classes
+	- replaced opMode field with Ieee80211ModeSet
+	- replaced various bitrate fields with Ieee80211Mode
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

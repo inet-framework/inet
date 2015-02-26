@@ -1,0 +1,11 @@
+2015-02-25  Levente Meszaros
+
+	Added a layered error model base class that provides functions to compute
+	the erroneous packet model, bit model and symbol model depending on the
+	simulated level of detail.
+
+	Added new class: LayeredErrorModelBase
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======

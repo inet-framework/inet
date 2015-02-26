@@ -1,3 +1,8 @@
+2015-02-25  Levente Meszaros
+
+	Refactored medium analog model to support layered implementation with
+	separate signal analog model without code duplication.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

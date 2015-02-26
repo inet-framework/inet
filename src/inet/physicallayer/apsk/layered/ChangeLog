@@ -1,0 +1,13 @@
+2015-02-25  Levente Meszaros
+
+	Added a simple hypothetical layered radio implementation that supports the
+	simulation of various packet domain, bit domain and symbol domain functions.
+	The main purpose of this radio is to show a simple but detailed physical
+	layer implementation that is easy to understand.
+
+	Added the new following new classes:
+	APSKCode, APSKEncoder, APSKDecoder, APSKModulator, APSKDemodulator,
+	APSKLayeredTransmitter, APSKLayeredReceiver,
+	APSKSerializer, APSKSymbol
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======

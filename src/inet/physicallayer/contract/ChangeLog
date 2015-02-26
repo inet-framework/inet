@@ -1,3 +1,11 @@
+2015-02-25  Levente Meszaros
+
+	Added new interfaces for analog domain representation of radio signals:
+	IRadioSignal, IScalarSignal, IDimensionalSignal
+
+	Extended ITransmission, and IReception interfaces to support optional
+	PHY frame representation used by the layered implementation.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

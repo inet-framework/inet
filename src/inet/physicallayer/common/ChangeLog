@@ -1,3 +1,15 @@
+2015-02-25  Levente Meszaros
+
+	Deleted obsolete ModulationClass, CodeRate, and ModulationType.
+	Moved BPSKModulation, QPSKModulation, QAM16Modulation, QAM64Modulation and
+	QAM256Modulation to modulation subdirectory and refactored them.
+
+	Extended RadioMedium and ReceptionDecision to support optional PHY frames
+	for the layered implementation.
+
+	Moved classes related to the layered implementation into the corresponding
+	layered directory: ConvolutionalCoder
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

@@ -1,0 +1,20 @@
+2015-02-25  Benjamin Seregi
+
+    Added a detail implementation for the IEEE 802.11 OFDM physical layer
+    according to the IEEE 802.11-2012 specification. The model supports various
+    packet domain, bit domain and symbol domain functions.
+
+    Added the following new classes:
+    Ieee80211OFDMTransmitter, Ieee80211OFDMReceiver
+    Ieee80211OFDMEncoder, Ieee80211OFDMEncoderModule,
+    Ieee80211OFDMDecoder, Ieee80211OFDMDecoderModule
+    Ieee80211ConvolutionalCode,
+    Ieee80211Interleaver, Ieee80211InterleaverModule, Ieee80211Interleaving
+    Ieee80211OFDMModulator, Ieee80211OFDMModulatorModule,
+    Ieee80211OFDMDemodulator, Ieee80211OFDMDemodulatorModule
+    Ieee80211OFDMSymbol, Ieee80211OFDMSymbolModel
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+

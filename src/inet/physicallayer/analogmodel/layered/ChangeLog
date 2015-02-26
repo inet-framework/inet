@@ -1,0 +1,9 @@
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+	Added Initial implementation for layered medium and signal analog models:
+	SignalAnalogModel, ScalarSignalAnalogModel, DimensionalSignalAnalogModel,
+	LayeredScalarAnalogModel
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======

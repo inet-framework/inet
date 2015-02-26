@@ -1,0 +1,18 @@
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+    Added initial implementation for various 802.11 PHY mode descriptors found
+    in the IEEE 802.11-2012 specification. Also added a new Ieee80211ModeSet
+    class that describes the usual Wifi modes: a, b, g, n, p, etc.
+
+    Added the following new classes:
+    Ieee80211DsssMode, Ieee80211PreambleDsssMode, Ieee80211DsssHeaderMode, Ieee80211DsssDataMode 
+    Ieee80211HrDsssMode, Ieee80211HrDsssPreambleMode, Ieee80211HrDsssHeaderMode, Ieee80211HrDsssDataMode 
+    Ieee80211FhssMode, Ieee80211FhssPreambleMode, Ieee80211FhssHeaderMode, Ieee80211FhssDataMode 
+    Ieee80211IrMode, Ieee80211IrPreambleMode, Ieee80211IrHeaderMode, Ieee80211IrDataMode
+    Ieee80211OfdmMode, Ieee80211OfdmPreambleMode, Ieee80211OfdmHeaderMode, Ieee80211OfdmDataMode 
+    Ieee80211ErpOfdmMode, Ieee80211DsssOfdmMode
+    Ieee80211ModeSet.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======

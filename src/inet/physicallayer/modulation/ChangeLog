@@ -1,0 +1,18 @@
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+    Moved existing modulation classes from common subdirectory: BPSKModulation,
+    QPSKModulation, QAM16Modulation, QAM64Modulation and QAM256Modulation.
+    Adapted these modulations to the new modulation interface. Reimplemented the
+    calculateBER and calculateSER functions according to formulas found on
+    wikipedia.
+
+    Added an initial implementation for modulations used by the 802.11 PHY:
+    DBPSKModulation, DQPSKModulation, 2GFSKModulation, 4GFSKModulation,
+    4PPMModulation, 16PPMModulation
+
+    Added an initial implementation for some other generic modulations:
+    MASKModulation, MFSKModulation, MPSKModulation.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======
