@@ -1,6 +1,78 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-2.99.1 (March, 2015)
+--------------------------
+
+This release is the next development snapshot of the upcoming INET-3.0 version.
+
+The highlights of this release are:
+
+1. Includes a new packet/bit/symbol level physical layer model for the 802.11
+   OFDM PHY according to the IEEE 802.11-2012 standard, and a hypothetical
+   generic packet/bit/symbol level APSK physical layer model for further
+   experimentation. The new implementations include forward error correction
+   encoding/decoding, scrambling/descrambling, interleaving/deinterleaving, and
+   modulation/demodulation.
+
+2. Contains fixes for more than 300 defects found by Coverity, an online C++
+   static code analysis tool. The reported Defect Density is decreased to
+   0.5/kLoC which is considered a result. You can find the detailed results at
+   https://scan.coverity.com/projects/3472
+
+Link layer:
+ - Updated the 802.11 MAC implementation to use the new 802.11 mode descriptors.
+ - Replaced the old 802.11 operational mode and modulation descriptor classes.
+   This change modifies the fingerprint of a few simulations, because the header
+   length was computed incorrectly.
+
+Physical layer:
+ - Extended the physical layer contract interfaces for layered implementations.
+ - Added signal representations for packet domain, bit domain, symbol domain,
+   sample domain and analog domain, and also added contracts for the processing
+   components in all of these domains.
+ - Added a detailed 802.11 OFDM physical layer implementation that supports
+   packet-level, bit-level, and symbol-level simulations in compliant, and also
+   in freely configurable non-compliant operational modes.
+ - Replaced the old 802.11 operational mode and modulation descriptor classes.
+   The new classes are more detailed and more complete implementations. They
+   supports both the flat and the layered physical layer models and provide PHY
+   characteristics. The implemented 802.11 modes are: DSSS, HR-DSSS, FHSS, IR,
+   OFDM, ERP-OFDM.
+ - Added a simple hypothetical APSK physical layer implementation that supports
+   packet-level, bit-level, and symbol-level simulations with widely configurable
+   bit-domain and symbol-domain parameters.
+ - Added a generic convolutional encoder/decoder, a generic additive
+   scrambler/descrambler, and a 802.11 specific interleaver/deinterleaver.
+ - Added a separate modulations folder that contains descriptor classes for
+   various keying techniques such as BPSK, QPSK, QAM16, QAM64, QAM256, MQAM,
+   DBPSK, DQPSK, MASK, MFSK, MPSK, etc.
+ - Reimplemented the computation of BER and SER based on the SNIR for the QAM-like
+   modulations according to wikipedia.
+ - Refactored the radio medium model to support the optional representation of
+   PHY frames for the layered physical layer models.
+ - Refactored the medium analog model to simultaneously support the new layered
+   and the already existing flat radio signal models.
+ - Refactored the existing 802.11 statistical error models to use the new
+   operation mode descriptors.
+ - Extracted the BER table based 802.11 statistical error model into a separate
+   class. This change modifies the fingerprint of simulations that use this
+   error model.
+ - Added a new detailed 802.11 error model that computes erroneous packet
+   domain, bit domain or symbol domain signal representations.
+ - Fixed the indefinite heap growth bug in the RadioMedium.
+
+Tests:
+ - Added separate automated tests for convolutional encoding/decoding,
+   interleaving/deinterleaving, scrambling/descrambling, modulation/demodulation
+   and various combinations.
+
+Examples:
+ - Added a new detailed 802.11 OFDM radio example that supports configurable
+   packet-level, bit-level, and symbol-level simulations for model verification.
+ - Also added a simple hypothetical APSK radio example that supports configurable
+   packet-level, bit-level, and symbol-level simulations for model verification.
+
 INET-2.99.0 (November 2014)
 ---------------------------
 
