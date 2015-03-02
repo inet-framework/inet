@@ -18,8 +18,6 @@
 #ifndef __INET_MATERIAL_H
 #define __INET_MATERIAL_H
 
-#include <string>
-#include <map>
 #include "inet/common/INETDefs.h"
 #include "inet/common/Units.h"
 
@@ -39,11 +37,6 @@ class INET_API Material : public cNamedObject
     const double relativePermittivity;
     const double relativePermeability;
 
-    static std::map<const std::string, const Material *> materials;
-
-  protected:
-    static void addMaterial(const Material *material);
-
   public:
     Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability);
 
@@ -53,8 +46,6 @@ class INET_API Material : public cNamedObject
     virtual double getDielectricLossTangent(Hz frequency) const;
     virtual double getRefractiveIndex() const;
     virtual mps getPropagationSpeed() const;
-
-    static const Material *getMaterial(const char *name);
 };
 
 } // namespace inet

@@ -22,7 +22,7 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/common/Rotation.h"
-#include "inet/environment/Material.h"
+#include "inet/environment/MaterialRegistry.h"
 #include <algorithm>
 
 namespace inet {
@@ -378,8 +378,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             throw cRuntimeError("Missing material attribute of object");
         else if (nameToMaterialMap.find(materialAttribute) != nameToMaterialMap.end())
             material = nameToMaterialMap[materialAttribute];
-        else if (Material::getMaterial(materialAttribute))
-            material = Material::getMaterial(materialAttribute);
+        else if (MaterialRegistry::getMaterial(materialAttribute))
+            material = MaterialRegistry::getMaterial(materialAttribute);
         else
             material = idToMaterialMap[atoi(materialAttribute)];
         if (!material)
@@ -498,7 +498,7 @@ void PhysicalEnvironment::updateCanvas()
     std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
     for (auto object : objectsCopy)
     {
-        
+
         const ShapeBase *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
