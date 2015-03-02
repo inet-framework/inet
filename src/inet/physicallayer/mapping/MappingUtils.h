@@ -2603,7 +2603,7 @@ class ConcatConstMapping : public ConstMapping
         mappings.push_back(other);
     }
 
-    virtual ~ConcatConstMapping() {}
+    virtual ~ConcatConstMapping() { delete refMapping; }
 
     /**
      * @brief Adds another Mapping to the list of Mappings to

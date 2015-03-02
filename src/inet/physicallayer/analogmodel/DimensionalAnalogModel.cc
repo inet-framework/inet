@@ -106,6 +106,7 @@ const IReception *DimensionalAnalogModel::computeReception(const IRadio *receive
         else
             break;
     }
+    delete it;
     EV_DEBUG << "Reception power begin " << endl;
     receptionPower->print(EVSTREAM);
     EV_DEBUG << "Reception power end" << endl;

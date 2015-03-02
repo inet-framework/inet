@@ -65,6 +65,7 @@ double DimensionalSNIR::computeMin() const
     EV_DEBUG << "SNIR end" << endl;
     double minSNIR = MappingUtils::findMin(*snirMapping, startArgument, endArgument);
     EV_DEBUG << "Computing minimum SNIR: start = " << startArgument << ", end = " << endArgument << " -> minimum SNIR = " << minSNIR << endl;
+    delete snirMapping;
     return minSNIR;
 }
 

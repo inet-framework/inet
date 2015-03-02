@@ -1041,6 +1041,7 @@ class INET_API ConstMapping
         if (!it->inRange()) {
             out << "Mapping is empty." << endl;
             out.flags(outFlags);
+            delete it;
             return out;
         }
 
@@ -1175,6 +1176,7 @@ class INET_API ConstMapping
                 it->next();
             }
         }
+        delete it;
         out << std::endl << osBorder.str() << std::endl;
         out.flags(outFlags);
         return out;
