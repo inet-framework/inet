@@ -21,6 +21,7 @@
 
 #include <omnetpp.h>
 #include <assert.h>
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

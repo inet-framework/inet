@@ -36,7 +36,6 @@
 #include <iostream>
 #include <errno.h>
 #include <math.h>
-#include <platdep/intxtypes.h>
 
 namespace inet {
 

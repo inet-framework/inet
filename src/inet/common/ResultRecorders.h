@@ -18,9 +18,9 @@
 #ifndef __RESULTRECORDERS_H
 #define __RESULTRECORDERS_H
 
-#include "cresultrecorder.h"
 #include <map>
 #include <string>
+#include <omnetpp.h>
 
 NAMESPACE_BEGIN
 

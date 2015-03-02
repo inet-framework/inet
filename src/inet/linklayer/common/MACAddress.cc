@@ -23,7 +23,7 @@
 namespace inet {
 
 unsigned int MACAddress::autoAddressCtr;
-bool MACAddress::simulationLifetimeListenerAdded;
+bool MACAddress::simulationLifecycleListenerAdded;
 
 const MACAddress MACAddress::UNSPECIFIED_ADDRESS;
 const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
@@ -143,10 +143,10 @@ InterfaceToken MACAddress::formInterfaceIdentifier() const
 MACAddress MACAddress::generateAutoAddress()
 {
 #if OMNETPP_VERSION >= 0x500
-    if (!simulationLifetimeListenerAdded) {
+    if (!simulationLifecycleListenerAdded) {
         // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
-        ev.addListener(new MACAddress::SimulationLifetimeListener());
-        simulationLifetimeListenerAdded = true;
+        ev.addLifecycleListener(new MACAddress::SimulationLifecycleListener());
+        simulationLifecycleListenerAdded = true;
     }
 #endif // if OMNETPP_VERSION >= 0x500
     ++autoAddressCtr;
