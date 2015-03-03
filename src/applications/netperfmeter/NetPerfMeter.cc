@@ -152,7 +152,7 @@ void NetPerfMeter::initialize()
    MaxReconnects          = par("maxReconnects");
    EstablishedConnections = 0;
 
-   ev << simTime() << ", " << getFullPath() << ": Initialize"
+   EV << simTime() << ", " << getFullPath() << ": Initialize"
       << "\tConnectTime=" << ConnectTime
       << "\tStartTime="   << StartTime
       << "\tResetTime="   << ResetTime
@@ -235,7 +235,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Disconnect timer ===============================================
    else if(msg == DisconnectTimer) {
-      ev << simTime() << ", " << getFullPath() << ": Disconnect" << endl;
+      EV << simTime() << ", " << getFullPath() << ": Disconnect" << endl;
 
       DisconnectTimer = NULL;
       assert(ActiveMode == true);
@@ -266,7 +266,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Reconnect timer ================================================
    else if(msg == ReconnectTimer) {
-      ev << simTime() << ", " << getFullPath() << ": Reconnect" << endl;
+      EV << simTime() << ", " << getFullPath() << ": Reconnect" << endl;
 
       ReconnectTimer = NULL;
       establishConnection();
@@ -274,7 +274,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Reset timer ====================================================
    else if(msg == ResetTimer) {
-      ev << simTime() << ", " << getFullPath() << ": Reset" << endl;
+      EV << simTime() << ", " << getFullPath() << ": Reset" << endl;
 
       ResetTimer = NULL;
       resetStatistics();
@@ -289,7 +289,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Stop timer =====================================================
    else if(msg == StopTimer) {
-      ev << simTime() << ", " << getFullPath() << ": STOP" << endl;
+      EV << simTime() << ", " << getFullPath() << ": STOP" << endl;
 
       StopTimer = NULL;
       if(DisconnectTimer) {
@@ -319,7 +319,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Start timer ====================================================
    else if(msg == StartTimer) {
-      ev << simTime() << ", " << getFullPath() << ": Start" << endl;
+      EV << simTime() << ", " << getFullPath() << ": Start" << endl;
 
       StartTimer = NULL;
       for(unsigned int streamID = 0; streamID < ActualOutboundStreams; streamID++) {
@@ -340,7 +340,7 @@ void NetPerfMeter::handleTimer(cMessage* msg)
 
    // ====== Connect timer ==================================================
    else if(msg == ConnectTimer) {
-      ev << simTime() << ", " << getFullPath() << ": Connect" << endl;
+      EV << simTime() << ", " << getFullPath() << ": Connect" << endl;
 
       ConnectTimer = NULL;
       establishConnection();
@@ -519,7 +519,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
                                                      const unsigned int queueSize)
 {
    if(HasFinished) {
-      ev << "Already finished -> no new connection!" << endl;
+      EV << "Already finished -> no new connection!" << endl;
       SCTPSocket newSocket(msg);
       newSocket.abort();
       return;
@@ -529,7 +529,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
    // ====== Update queue size ==============================================
    if(queueSize != 0) {
       QueueSize = queueSize;
-      ev << "Got queue size " << QueueSize << " from transport protocol" << endl;
+      EV << "Got queue size " << QueueSize << " from transport protocol" << endl;
    }
 
    // ====== Get connection ID ==============================================
@@ -1024,7 +1024,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
 
       // ====== Transmit frame ==============================================
 /*
-      ev << simTime() << ", " << getFullPath() << ": Stream #" << streamID
+      EV << simTime() << ", " << getFullPath() << ": Stream #" << streamID
          << ":\tframeRate=" << frameRate
          << "\tframeSize=" << frameSize << endl;
 */
@@ -1041,7 +1041,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
    TransmitTimerVector[streamID]->setStreamID(streamID);
    const double nextFrameTime = 1.0 / frameRate;
 /*
-   ev << simTime() << ", " << getFullPath()
+   EV << simTime() << ", " << getFullPath()
       << ": Next on stream #" << streamID << " in " << nextFrameTime << "s" << endl;
 */
    scheduleAt(simTime() + nextFrameTime, TransmitTimerVector[streamID]);
