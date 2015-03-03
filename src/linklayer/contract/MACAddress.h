@@ -43,9 +43,9 @@ class INET_API MACAddress
 
   public:
 #if OMNETPP_VERSION >= 0x500
-    class SimulationLifetimeListener : public cISimulationLifetimeListener
+    class SimulationLifecycleListener : public cISimulationLifecycleListener
     {
-        virtual void lifetimeEvent(SimulationLifetimeEventType eventType, cObject *details) {
+        virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
             if (eventType == LF_PRE_NETWORK_INITIALIZE)
                 autoAddressCtr = 0;
         }
