@@ -19,8 +19,9 @@
 #ifndef SCTPGAPLIST_H
 #define SCTPGAPLIST_H
 
-#include <omnetpp.h>
 #include <assert.h>
+
+#include "INETDefs.h"
 
 //#include "SCTPSeqNumbers.h"
 
