@@ -55,7 +55,9 @@ namespace inet {
 namespace serializer {
 
 using namespace tcp;
+#ifdef WITH_SCTP
 using namespace sctp;
+#endif // ifdef WITH_SCTP
 
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {

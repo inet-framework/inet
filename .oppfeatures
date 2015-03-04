@@ -723,6 +723,7 @@
         nedPackages = "
                        inet.linklayer.ieee80211
                        inet.physicallayer.ieee80211
+                       inet.common.serializer.headerserializers.ieee80211
                        inet.node.wireless
                       "
         extraSourceFolders = ""
