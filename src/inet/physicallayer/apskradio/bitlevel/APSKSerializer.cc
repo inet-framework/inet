@@ -28,16 +28,20 @@ using namespace inet::serializer;
 APSKSerializer::APSKSerializer()
 {
 }
+using namespace ieee80211;
 
 BitVector *APSKSerializer::serialize(const APSKPhyFrame *phyFrame) const
 {
-    Ieee80211Frame *macFrame = check_and_cast<Ieee80211Frame *>(phyFrame->getEncapsulatedPacket());
+    const Ieee80211Frame *macFrame = check_and_cast<const Ieee80211Frame*>(phyFrame->getEncapsulatedPacket());
     uint16_t macFrameLength = macFrame->getByteLength();
     // KLUDGE: the serializer sometimes produces more or less bytes than the precomputed macFrameLength
     unsigned char *buffer = new unsigned char[macFrameLength + 1000];
     memset(buffer, 0, macFrameLength + 1000);
     Ieee80211Serializer ieee80211Serializer;
-    int serializedLength = ieee80211Serializer.serialize(macFrame, buffer, macFrameLength);
+    Buffer b(buffer, macFrameLength);
+    Context c;
+    ieee80211Serializer.xSerialize(macFrame, b, c);
+    int serializedLength = b.getPos();
     // TODO: ASSERT(serializedLength == macFrameLength);
     uint32_t crc = ethernetCRC(buffer, serializedLength);
     BitVector *bits = new BitVector();
@@ -55,7 +59,6 @@ BitVector *APSKSerializer::serialize(const APSKPhyFrame *phyFrame) const
 
 APSKPhyFrame *APSKSerializer::deserialize(const BitVector *bits) const
 {
-    Ieee80211Serializer deserializer;
     const std::vector<uint8>& bytes = bits->getBytes();
     APSKPhyFrame *phyFrame = new APSKPhyFrame();
     cPacket *macFrame = nullptr;
@@ -81,14 +84,10 @@ APSKPhyFrame *APSKSerializer::deserialize(const BitVector *bits) const
                 phyFrame->setBitError(true);
             }
             else {
-                try {
-                    macFrame = deserializer.parse(buffer, macFrameLength);
-                }
-                catch (cRuntimeError& e) {
-                    EV_ERROR << "Deserializing packet failed" << endl;
-                    macFrame = new cPacket();
-                    phyFrame->setBitError(true);
-                }
+                Ieee80211Serializer deserializer;
+                Buffer b(buffer, macFrameLength);
+                Context c;
+                macFrame = deserializer.xParse(b, c);
             }
             delete[] buffer;
         }
