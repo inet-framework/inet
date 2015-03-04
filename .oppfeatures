@@ -685,6 +685,7 @@
                        inet.physicallayer.errormodel
                        inet.physicallayer.ideal
                        inet.physicallayer.mapping
+                       inet.physicallayer.modulation
                        inet.physicallayer.neighborcache
                        inet.physicallayer.obstacleloss
                        inet.physicallayer.pathloss
