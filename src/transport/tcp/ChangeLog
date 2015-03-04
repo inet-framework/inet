@@ -1,3 +1,8 @@
+2015-02-09  Martin Becke
+
+    Bugfix: an issue with too small initial value of 'ssthresh' in TCP
+    Bugfix: improper window scaling in TCP
+
 2014-11-07  ------ inet-2.5.1 released ------
 
 2014-10-29  ------ inet-2.5.0 released ------
