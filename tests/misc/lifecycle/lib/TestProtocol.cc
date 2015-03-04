@@ -22,7 +22,7 @@
 
 Define_Module(TestProtocol);
 
-bool TestProtocol::initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TestProtocol::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<TestNodeStartOperation *>(operation)) {

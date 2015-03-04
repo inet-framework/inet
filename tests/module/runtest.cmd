@@ -10,7 +10,7 @@ mkdir work 2>nul
 xcopy /i /y lib work\lib
 : del work\work.exe 2>nul
 
-call opp_test -g -v %TESTFILES% || goto end
+call opp_test gen -v %TESTFILES% || goto end
 
 echo.
 cd work || goto end
@@ -20,7 +20,7 @@ cd .. || goto end
 
 echo.
 path %~dp0\..\..\src;%PATH%
-call opp_test -r %OPT% -v %TESTFILES% || goto end
+call opp_test run %OPT% -v %TESTFILES% || goto end
 
 echo.
 echo Results can be found in work/

@@ -35,6 +35,7 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
     TCPTahoeRenoFamilyStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
+    virtual void setSendQueueLimit(uint32 newLimit);
 
     uint32 ssthresh;    ///< slow start threshold
 };

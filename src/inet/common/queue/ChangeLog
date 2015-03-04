@@ -40,6 +40,17 @@
 	Useful for flushing queues in MACs when they do down. clear() is not good
 	enough because we want to use packets as drop signal value.
 
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-10-29  Thomas Dreibholz
+
+    improved REDDropper, in order to provide a functionality similar to the old REDQueue.
+    (allows specifying avearge packet rate that is used for calculation when the queue is empty)
+
+2014-06-12  ------ inet-2.4.0 released ------
+
 2014-03-19  ------ inet-2.3.0 released ------
 
 2013-08-22  ------ inet-2.2.0 released ------

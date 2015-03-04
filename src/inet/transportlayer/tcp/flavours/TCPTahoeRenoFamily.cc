@@ -24,7 +24,17 @@ namespace tcp {
 
 TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
 {
-    ssthresh = 65535;
+    // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
+    // to the size of the largest possible advertised window)
+    // Without user interaction there is no limit...
+    ssthresh = 0xFFFFFFFF;
+}
+
+void TCPTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
+    // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
+    // to the size of the largest possible advertised window) -> defined by sendQueueLimit
+    sendQueueLimit = newLimit;
+    ssthresh = sendQueueLimit;
 }
 
 std::string TCPTahoeRenoFamilyStateVariables::info() const

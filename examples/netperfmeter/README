@@ -1,0 +1,19 @@
+This NetPerfMeter example contains a small test network with a bottleneck link
+of 10 Mbit/s that is shared by the SCTP connections of five endpoints. The goal
+is to show that the bandwidth is equally shared among the four flows. As
+example, the test scenario can be run and the scalars containing the bandwidths
+of the endpoints can be printed:
+
+./run -u Cmdenv -f omnetpp.ini && \
+grep "Total Reception Bit R" scalars.sca | grep testNetwork.serverMain
+
+(This is performed by the run-test-and-display-results script.)
+
+
+The resulting output should look like this:
+...
+scalar testNetwork.serverMain[0].netPerfMeterApp[0]     "Total Reception Bit Rate"      1919544
+scalar testNetwork.serverMain[1].netPerfMeterApp[0]     "Total Reception Bit Rate"      1951294.4
+scalar testNetwork.serverMain[2].netPerfMeterApp[0]     "Total Reception Bit Rate"      1943356.8
+scalar testNetwork.serverMain[3].netPerfMeterApp[0]     "Total Reception Bit Rate"      1840748.8
+scalar testNetwork.serverMain[4].netPerfMeterApp[0]     "Total Reception Bit Rate"      1961361.6

@@ -245,6 +245,17 @@ Directory reorganization:
  - applications/httptools/ has been split up to several subdirectories: browser/,
    server/, configurator/, common/.
 
+INET 2.5.1 (Nov 7, 2014)
+-------------------------
+
+   - fixed a crash in SCTP
+   - now builds with all features turned off
+
+INET 2.5.0 (Oct 29, 2014)
+-------------------------
+
+   - made the codebase compile in C++11 mode. (required by OMNeT++ 4.6)
+   - added netperfmeter application by Thomas Dreibholz
 
 INET-2.4.0 (June 12, 2014)
 --------------------------

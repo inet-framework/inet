@@ -184,6 +184,11 @@ void TCPSocket::send(cMessage *msg)
     sendToTCP(msg);
 }
 
+void TCPSocket::sendCommand(cMessage *msg)
+{
+    sendToTCP(msg);
+}
+
 void TCPSocket::close()
 {
     if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)

@@ -20,6 +20,14 @@
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-10-29  Thomas Dreibholz
+
+	tcp: added sendCommand API to the TCP socket
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------

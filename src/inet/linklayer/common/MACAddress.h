@@ -44,14 +44,12 @@ class INET_API MACAddress
 #if OMNETPP_VERSION >= 0x500
     class SimulationLifecycleListener : public cISimulationLifecycleListener
     {
-        virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details)
-        {
+        virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
             if (eventType == LF_PRE_NETWORK_INITIALIZE)
                 autoAddressCtr = 0;
         }
 
-        virtual void listenerRemoved()
-        {
+        virtual void listenerRemoved() {
             delete this;
         }
     };
@@ -147,7 +145,7 @@ class INET_API MACAddress
     /**
      * Returns true if this is a multicast logical address (first byte's lsb is 1).
      */
-    bool isMulticast() const { return getAddressByte(0) & 0x01; };
+    bool isMulticast() const  { return getAddressByte(0) & 0x01; };
 
     /**
      * Returns true if all address bytes are zero.

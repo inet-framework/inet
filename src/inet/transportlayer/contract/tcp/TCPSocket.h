@@ -306,6 +306,11 @@ class INET_API TCPSocket
     void send(cMessage *msg);
 
     /**
+     * Sends command.
+     */
+    void sendCommand(cMessage *msg);
+
+    /**
      * Closes the local end of the connection. With TCP, a CLOSE operation
      * means "I have no more data to send", and thus results in a one-way
      * connection until the remote TCP closes too (or the FIN_WAIT_1 timeout

@@ -32,8 +32,7 @@ class INET_API TestMobility : public cSimpleModule, public ILifecycle {
 
   public:
     TestMobility() { }
-    virtual bool initiateStateChange(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
   protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage * message);

@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2012 Opensim Ltd.
 // Author: Tamas Borbely
+// Copyright (C) 2013 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,6 +29,9 @@ REDDropper::~REDDropper()
     delete[] minths;
     delete[] maxths;
     delete[] maxps;
+    delete[] pkrates;
+    delete[] count;
+    q_time = 0;
 }
 
 void REDDropper::initialize()
@@ -41,10 +45,13 @@ void REDDropper::initialize()
     minths = new double[numGates];
     maxths = new double[numGates];
     maxps = new double[numGates];
+    pkrates = new double[numGates];
+    count = new double[numGates];
 
     cStringTokenizer minthTokens(par("minths"));
     cStringTokenizer maxthTokens(par("maxths"));
     cStringTokenizer maxpTokens(par("maxps"));
+    cStringTokenizer pkrateTokens(par("pkrates"));
     for (int i = 0; i < numGates; ++i) {
         minths[i] = minthTokens.hasMoreTokens() ? utils::atod(minthTokens.nextToken()) :
             (i > 0 ? minths[i - 1] : 5.0);
@@ -52,6 +59,9 @@ void REDDropper::initialize()
             (i > 0 ? maxths[i - 1] : 50.0);
         maxps[i] = maxpTokens.hasMoreTokens() ? utils::atod(maxpTokens.nextToken()) :
             (i > 0 ? maxps[i - 1] : 0.02);
+        pkrates[i] = pkrateTokens.hasMoreTokens() ? utils::atod(pkrateTokens.nextToken()) :
+            (i > 0 ? pkrates[i-1] : 150);
+        count[i] = -1;
 
         if (minths[i] < 0.0)
             throw cRuntimeError("minth parameter must not be negative");
@@ -61,39 +71,70 @@ void REDDropper::initialize()
             throw cRuntimeError("minth must be smaller than maxth");
         if (maxps[i] < 0.0 || maxps[i] > 1.0)
             throw cRuntimeError("Invalid value for maxp parameter: %g", maxps[i]);
+        if (pkrates[i] < 0.0)
+            throw cRuntimeError("Invalid value for pkrates parameter: %g", pkrates[i]);
     }
 }
 
 bool REDDropper::shouldDrop(cPacket *packet)
 {
-    int i = packet->getArrivalGate()->getIndex();
+    const int i = packet->getArrivalGate()->getIndex();
     ASSERT(i >= 0 && i < numGates);
-    double minth = minths[i];
-    double maxth = maxths[i];
-    double maxp = maxps[i];
+    const double minth = minths[i];
+    const double maxth = maxths[i];
+    const double maxp = maxps[i];
+    const double pkrate = pkrates[i];
+    const int queueLength = getLength();
 
-    int queueLength = getLength();
+    if (queueLength > 0)
+    {
+        // TD: This following calculation is only useful when the queue is not empty!
+        avg = (1 - wq) * avg + wq * queueLength;
+    }
+    else
+    {
+        // TD: Added behaviour for empty queue.
+        const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
+        avg = pow(1 - wq, m) * avg;
+    }
 
-    avg = (1 - wq) * avg + wq * queueLength;
-
-    if (minth <= avg && avg < maxth) {
-        double pb = maxp * (avg - minth) / (maxth - minth);
-        //double pa = pb / (1-count*pb);
-        if (dblrand() < pb) {
+    if (minth <= avg && avg < maxth)
+    {
+        count[i]++;
+        const double pb = maxp * (avg - minth) / (maxth - minth);
+        const double pa = pb / (1 - count[i] * pb); // TD: Adapted to work as in [Floyd93].
+        if (dblrand() < pa)
+        {
             EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pb << ")\n";
+            count[i] = 0;
             return true;
         }
     }
     else if (avg >= maxth) {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
+        count[i] = 0;
         return true;
     }
     else if (queueLength >= maxth) {    // maxth is also the "hard" limit
         EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
+        count[i] = 0;
         return true;
+    }
+    else
+    {
+        count[i] = -1;
     }
 
     return false;
+}
+
+void REDDropper::sendOut(cPacket *packet)
+{
+    AlgorithmicDropperBase::sendOut(packet);
+    // TD: Set the time stamp q_time when the queue gets empty.
+    const int queueLength = getLength();
+    if (queueLength == 0)
+        q_time = simTime();
 }
 
 } // namespace inet
