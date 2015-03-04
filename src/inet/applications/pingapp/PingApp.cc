@@ -192,11 +192,6 @@ void PingApp::sendPingRequest()
     msg->setOriginatorId(pid);
     msg->setSeqNo(sendSeqNo);
     msg->setByteLength(packetSize);
-    std::string time = SIMTIME_STR(simTime());
-    int timeLength = time.length();
-    msg->setDataArraySize(timeLength);
-    for (int i = 0; i < timeLength; i++)
-        msg->setData(i, time[i]);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
@@ -225,19 +220,6 @@ void PingApp::processPingResponse(PingPayload *msg)
 {
     if (msg->getOriginatorId() != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
-        delete msg;
-        return;
-    }
-
-    int timeLength = msg->getDataArraySize();
-    char time[timeLength + 1];    //FIXME visualC ???
-    for (int i = 0; i < timeLength; i++)
-        time[i] = msg->getData(i);
-    time[timeLength] = '\0';
-    simtime_t sendTime = STR_SIMTIME(time);    // Why converting to/from string?
-
-    if (sendTime < lastStart) {
-        EV_WARN << "Received response was not sent since last application start, dropping packet\n";
         delete msg;
         return;
     }
