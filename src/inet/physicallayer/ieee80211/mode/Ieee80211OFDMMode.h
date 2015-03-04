@@ -36,6 +36,9 @@ class INET_API Ieee80211OFDMModeBase
     Ieee80211OFDMModeBase(Hz channelSpacing, Hz bandwidth);
     virtual ~Ieee80211OFDMModeBase() {}
 
+    int getNumberOfDataSubcarriers() const { return 48; }
+    int getNumberOfPilotSubcarriers() const { return 4; }
+    int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
     Hz getSubcarrierFrequencySpacing() const { return channelSpacing / 64; }
     const simtime_t getFFTTransformPeriod() const { return simtime_t(1 / getSubcarrierFrequencySpacing().get()); }
     const simtime_t getGIDuration() const { return getFFTTransformPeriod() / 4; }
@@ -118,10 +121,6 @@ class INET_API Ieee80211OFDMMode : public Ieee80211OFDMModeBase, public IIeee802
 
   public:
     Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
-
-    int getNumberOfDataSubcarriers() const { return 48; }
-    int getNumberOfPilotSubcarriers() const { return 4; }
-    int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
 
     virtual const Ieee80211OFDMPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211OFDMSignalMode *getHeaderMode() const override { return signalMode; }

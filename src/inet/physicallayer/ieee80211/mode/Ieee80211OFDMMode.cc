@@ -25,7 +25,7 @@ namespace physicallayer {
 
 bps Ieee80211OFDMChunkMode::computeGrossBitrate(const Ieee80211OFDMModulation *modulation) const
 {
-    int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+    int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
     return bps(codedBitsPerOFDMSymbol / getSymbolInterval());
 }
 
@@ -136,22 +136,18 @@ const simtime_t Ieee80211OFDMMode::getRxTxTurnaroundTime() const
 
 int Ieee80211OFDMDataMode::getBitLength(int dataBitLength) const
 {
-    return getServiceBitLength() + dataBitLength + getTailBitLength();
+    return getServiceBitLength() + dataBitLength + getTailBitLength(); // TODO: padding?
 }
 
 const simtime_t Ieee80211OFDMDataMode::getDuration(int dataBitLength) const
 {
     // IEEE Std 802.11-2007, section 17.3.2.2, table 17-3
     // corresponds to N_{DBPS} in the table
-    int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+    unsigned int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
     const ConvolutionalCode *convolutionalCode = code ? code->getConvolutionalCode() : nullptr;
-    int dataBitsPerOFDMSymbol;
-    if (convolutionalCode)
-        dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol * convolutionalCode->getCodeRatePuncturingK() / convolutionalCode->getCodeRatePuncturingN();
-    else
-        dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol;
+    unsigned int dataBitsPerOFDMSymbol = convolutionalCode ? convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol) : codedBitsPerOFDMSymbol;
     // IEEE Std 802.11-2007, section 17.3.5.3, equation (17-11)
-    int numberOfSymbols = lrint(ceil((double)getBitLength(dataBitLength) / dataBitsPerOFDMSymbol));
+    unsigned int numberOfSymbols = lrint(ceil((double)getBitLength(dataBitLength) / dataBitsPerOFDMSymbol));
     // Add signal extension for ERP PHY
     return numberOfSymbols * getSymbolInterval();
 }
