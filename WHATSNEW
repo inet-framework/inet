@@ -20,11 +20,67 @@ The highlights of this release are:
    0.5/kLoC which is considered a result. You can find the detailed results at
    https://scan.coverity.com/projects/3472
 
+3. Contains several other memory leak and memory management fixes reported by
+   valgrind memcheck.
+
+4. Modernizes C++ source code using new C++11 features such as nullptr, auto
+   types, range loop, override, etc.
+
+Read on for further details.
+
+All components:
+ - Replaced all variants of findModuleWherever calls with module parameters,
+   because their behavior is non-predictable and less composable.
+ - Replaced most getParentModule calls with module parameters to make modules
+   less dependent on their context, and thus more reusable.
+ - Replaced UnimplementedModule and all related *_None modules with calls to
+   firstAvailableOrEmpty NED function, and changed affected submodules to be
+   present conditionally.
+ - Moved interface classes under contract subdirectories. Moved base classes
+   under base subdirectories.
+
+Common:
+ - Added create-module and delete-module commands to ScenarioManager.
+
+Mobility:
+ - Added a new StaticConcentricMobility similar to StaticGridMobility that places
+   nodes on concentric circles.
+
+Serializer:
+ - Refactored packet serializer classes to use a safe buffer class to read and
+   write binary data. This allows parsing incorrect binary representations without
+   runtime errors required by bit precise physical layer models.
+
+PCAP:
+ - Allow flushing the pcapFile after each write to ensure that all packets are
+   captured in case of a crash.
+
+SCTP:
+ - Added fragPoint parameter to limit the size of fragments.
+ - After the handshake only send heartbeats on unconfirmed paths.
+ - Fixed close command handling, i.e. stop reading when the command is sent.
+ - Handle SACK and NR_SACK separately and use getByteLength instead of getBitLength.
+
+TCP:
+ - Fixed scaling window bug (Martin Becke).
+
+Network Layer:
+ - Factored out the network topology extraction algorithm from IPv4NetworkConfigurator
+   into a base class.
+ - Added support to IPv4NetworkConfigurator for computing wireless shortest path
+   based on a simple packet error rate estimation.
+
 Link layer:
  - Updated the 802.11 MAC implementation to use the new 802.11 mode descriptors.
  - Replaced the old 802.11 operational mode and modulation descriptor classes.
    This change modifies the fingerprint of a few simulations, because the header
    length was computed incorrectly.
+ - Changed the 802.11 MAC to use asynchronous commands to set the radio mode.
+ - Updated the 802.11 MAC state machine diagram (graphviz) to reflect the current
+   state of the implementation.
+ - Added safety guard to the 802.11 MAC against recursively calling handleWithFSM.
+ - Fixed packet order in transmissionQueue.
+ - Renamed getNetworkInterfaceModule to getInterfaceModule in InterfaceEntry.
 
 Physical layer:
  - Extended the physical layer contract interfaces for layered implementations.
@@ -46,9 +102,12 @@ Physical layer:
    scrambler/descrambler, and a 802.11 specific interleaver/deinterleaver.
  - Added a separate modulations folder that contains descriptor classes for
    various keying techniques such as BPSK, QPSK, QAM16, QAM64, QAM256, MQAM,
-   DBPSK, DQPSK, MASK, MFSK, MPSK, etc.
+   DBPSK, DQPSK, MASK, MFSK, MPSK, DSSS-OQPSK-16, etc.
  - Reimplemented the computation of BER and SER based on the SNIR for the QAM-like
    modulations according to wikipedia.
+ - Added a special IntervalTree cache for efficiently computing arrival intervals
+   for transmissions. This change drastically increases the physical layer
+   performance for large networks with lots of ongoing transmissions.
  - Refactored the radio medium model to support the optional representation of
    PHY frames for the layered physical layer models.
  - Refactored the medium analog model to simultaneously support the new layered
@@ -60,6 +119,8 @@ Physical layer:
    error model.
  - Added a new detailed 802.11 error model that computes erroneous packet
    domain, bit domain or symbol domain signal representations.
+ - Added 802.11 OFDM PHY frame serializer.
+ - Renamed radio control info classes to TransmissionRequest and ReceptionIndication.
  - Fixed the indefinite heap growth bug in the RadioMedium.
 
 Tests:
