@@ -18,7 +18,7 @@
 #ifndef __INET_IPV6SERIALIZER_H
 #define __INET_IPV6SERIALIZER_H
 
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/common/serializer/SerializerBase.h"
 
 namespace inet {
 
@@ -27,21 +27,14 @@ namespace serializer {
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
-class IPv6Serializer
+class IPv6Serializer : public SerializerBase
 {
+  protected:
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual cPacket* parse(Buffer &b, Context& context) override;
+
   public:
-    IPv6Serializer() {}
-
-    /**
-     * Serializes an IPv6Datagram for transmission on the wire.
-     * Returns the length of data written into buffer.
-     */
-    int serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize);
-
-    /**
-     * Puts a packet sniffed from the wire into an IPv6Datagram.
-     */
-    void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
+    IPv6Serializer(const char *name = nullptr) : SerializerBase(name) {}
 };
 
 } // namespace serializer
