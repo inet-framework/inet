@@ -3,7 +3,7 @@
 2014-10-31  Levente Meszaros
 
 	Added initial implementation:
-	BreakpointPathLoss, FreeSpacePathLoss, LogNormalShadowing, NakagamiFading, 
+	BreakpointPathLoss, FreeSpacePathLoss, LogNormalShadowing, NakagamiFading,
 	RayleighFading, RicianFading, SUIPathLoss, TwoRayGroundReflection,
 	UWBIRStochasticPathLoss
 

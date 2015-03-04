@@ -11,7 +11,7 @@
 
 	  - IPvXAddress is replaced by L3Address
 	  - IPvXAddressResolver is L3AddressResolver
-          - new address types: MACAddress, ModuleIdAddress, ModulePathAddress
+	  - new address types: MACAddress, ModuleIdAddress, ModulePathAddress
 
 	- Motivation: allow uniform access to the IPv4, IPv6 and possibly other
 	  routing tables; e.g. some wireless networks may use MAC address as

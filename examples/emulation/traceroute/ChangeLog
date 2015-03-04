@@ -6,9 +6,8 @@
 
 2014-06-12  ------ inet-2.4.0 released ------
 
+	* modified the example to work correctly without a "configurator" node.
 
-        * modified the example to work correctly without a "configurator" node.
-        
 2014-03-19  ------ inet-2.3.0 released ------
 
 2013-08-22  ------ inet-2.2.0 released ------
@@ -25,8 +24,8 @@
 
 2009-08-05 Thomas Reschka
 
-    * moved here from examples/sctp
+	* moved here from examples/sctp
 
 2008-..-.. Irene Ruengeler
 
-    * initial implementation
+	* initial implementation

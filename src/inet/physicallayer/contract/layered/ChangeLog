@@ -1,21 +1,20 @@
 2015-02-25  Benjamin Seregi & Levente Meszaros
 
-        Added common interfaces for various detailed physical layer functions
-        such as FEC encoding/decoding, scrambling/descrambling,
-        interleaving/deinterleaving, modulation/demodulation, etc. Also added
-        generic interfaces for radio signal packet domain, bit domain, symbol
-        domain, sample domain and analog domain representations.
+	Added common interfaces for various detailed physical layer functions
+	such as FEC encoding/decoding, scrambling/descrambling,
+	interleaving/deinterleaving, modulation/demodulation, etc. Also added
+	generic interfaces for radio signal packet domain, bit domain, symbol
+	domain, sample domain and analog domain representations.
 
-        Added the following new interfaces:
-        ISignalPacketModel, ISignalBitModel, ISignalSymbolModel,
-        ISignalSampleModel, ISignalAnalogModel
-        ILayeredErrorModel, ISymbol
-        IEncoder ,IDecoder, IFECCoder, IInterleaver, IScrambler
-        IModulator, IDemodulator,
-        IPulseShaper, IPulseFilter
-        IDigitalAnalogConverter, IAnalogDigitalConverter
+	Added the following new interfaces:
+	ISignalPacketModel, ISignalBitModel, ISignalSymbolModel,
+	ISignalSampleModel, ISignalAnalogModel
+	ILayeredErrorModel, ISymbol
+	IEncoder ,IDecoder, IFECCoder, IInterleaver, IScrambler
+	IModulator, IDemodulator,
+	IPulseShaper, IPulseFilter
+	IDigitalAnalogConverter, IAnalogDigitalConverter
 
 2014-11-07  ------ inet-2.99.0 released ------
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
-

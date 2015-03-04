@@ -31,7 +31,6 @@
 	We must not send ICMP error in reply to any bcast/mcast packet, but
 	network-directed bcasts (e.g. 10.0.0.255) were checked for.
 
-
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-03  Alfonso Ariza Quintana

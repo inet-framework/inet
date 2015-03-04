@@ -1,10 +1,10 @@
 2014-11-07  ------ inet-2.99.0 released ------
 
-2014-10-31  Benjamin Seregi & Levente Meszaros 
+2014-10-31  Benjamin Seregi & Levente Meszaros
 
-    Added initial implementation:
-    EulerAngles, Quaternion, Rotation,
-    ShapeBase, GeometricObjectBase,
-    BVHTree, QuadTree, SpatialGrid,
-    Box, LineSegment, Plane, Polygon,
-    Sphere, Cuboid, Prism, Polyhedron
+	Added initial implementation:
+	EulerAngles, Quaternion, Rotation,
+	ShapeBase, GeometricObjectBase,
+	BVHTree, QuadTree, SpatialGrid,
+	Box, LineSegment, Plane, Polygon,
+	Sphere, Cuboid, Prism, Polyhedron

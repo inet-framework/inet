@@ -1,10 +1,10 @@
 2015-02-25  Benjamin Seregi
 
-    Added a detailed physical layer error model that is able to compute erroneous
-    packet domain, bit domain and symbol domain signal representations.
+	Added a detailed physical layer error model that is able to compute erroneous
+	packet domain, bit domain and symbol domain signal representations.
 
-    Added the following new classes:
-    Ieee80211OFDMErrorModel
+	Added the following new classes:
+	Ieee80211OFDMErrorModel
 
 2014-11-07  ------ inet-2.99.0 released ------
 

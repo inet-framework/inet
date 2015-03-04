@@ -39,4 +39,3 @@
 	- BehaviorAggregateClassifier, MultiFieldClassifier
 	- TokenBucketMeter, SingleRateThreeColorMeter, TwoRateThreeColorMeter
 	- DSCPMarker, DiffServUtil
-

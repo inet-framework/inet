@@ -1,18 +1,17 @@
 2015-02-25  Benjamin Seregi & Levente Meszaros
 
-        Added various common physical layer functions such as convolutional
-        coding, scrambling, and default signal representations for the packet
-        domain, bit domain, symbol domain, sample domain and analog domains.
+	Added various common physical layer functions such as convolutional
+	coding, scrambling, and default signal representations for the packet
+	domain, bit domain, symbol domain, sample domain and analog domains.
 
-        Added the following new classes:
-        LayeredTransmission, LayeredReception, LayeredReceptionDecision
-        SignalPacketModel, SignalBitModel, SignalSymbolModel, SignalSampleModel
-        AdditiveScrambler, AdditiveScramblerModule, AdditiveScrambling
-        ConvolutionalCode, ConvolutionalCoder, ConvolutionalCoderModule
-        PulseFilter, PulseShaper
-        AnalogDigitalConverter, DigitalAnalogConverter
+	Added the following new classes:
+	LayeredTransmission, LayeredReception, LayeredReceptionDecision
+	SignalPacketModel, SignalBitModel, SignalSymbolModel, SignalSampleModel
+	AdditiveScrambler, AdditiveScramblerModule, AdditiveScrambling
+	ConvolutionalCode, ConvolutionalCoder, ConvolutionalCoderModule
+	PulseFilter, PulseShaper
+	AnalogDigitalConverter, DigitalAnalogConverter
 
 2014-11-07  ------ inet-2.99.0 released ------
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
-

@@ -1,8 +1,8 @@
 2015-02-25  Levente Meszaros
 
-    Refactored existing Ieee80211NistErrorModel and Ieee80211YansErrorModel to
-    use the new 802.11 mode descriptor classes. Extracted Ieee80211BerTableErrorModel
-    from the base class as a separate error model.
+	Refactored existing Ieee80211NistErrorModel and Ieee80211YansErrorModel to
+	use the new 802.11 mode descriptor classes. Extracted Ieee80211BerTableErrorModel
+	from the base class as a separate error model.
 
 2014-11-07  ------ inet-2.99.0 released ------
 
@@ -60,4 +60,3 @@
 2011-04-15  Rudolf Hornig
 
 	Added new ieee802.11 model from INETMANET, supporting a,b,g,p modes.
-

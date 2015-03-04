@@ -5,7 +5,7 @@
 	Changes on the inet-3.x branch so far:
 
 	Network layer abstraction (Levente Meszaros, Andras Varga):
-	- added INetworkDatagram, INetworkLayer, INetworkProtocol, 
+	- added INetworkDatagram, INetworkLayer, INetworkProtocol,
 	  INetworkProtocolControlInfo, NetworkProtocolCommand
 
 	Directory restructuring:
