@@ -1,9 +1,10 @@
 Recent changes in the INET Framework
 ====================================
 
-INET 2.6 (March 04, 2015)
+INET 2.6 (March 05, 2015)
 -------------------------
 
+   - added OLIA for CMT-SCTP (by Martin Becke)
    - added a trace player feature to NetPerfMeter
    - fixed compile errors when using OMNeT++ 5.0b1
    - fixed an issue with too small initial value of 'ssthreshold' in TCP
