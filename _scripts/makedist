@@ -12,13 +12,24 @@
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
 INET_ROOT=`pwd`
 
-export VERSION=`cat Version | sed 's/^.*-//'` 
+INETDEFS_H='src/base/INETDefs.h'
+VERSION_LINE=`grep -E '^#define +INET_VERSION' $INETDEFS_H`
+VERSION=`echo $VERSION_LINE | perl -pe 's/#define +INET_VERSION +0x(..)(..)/hex($1) . "." . hex($2)/e'`
+if ! echo $VERSION | grep -qE '^[0-9]+\.[0-9]+$'; then
+   echo "Error: #define INET_VERSION cannot be found in $INETDEFS_H or not in the expected format 0xHHHH: \"$VERSION_LINE\"" 1>&2
+   exit 1
+fi
+
+echo "INET Version: $VERSION"
+
 if [ "$BUILDID" = "" ]; then
   # generate our own build identifier
   export BUILDDATE=`date +%Y%m%d`
   export BUILDHASH=`git describe --tags | awk -F '-g' '{print $2;}'`
   export BUILDID="$VERSION-$BUILDHASH"
 fi
+
+echo "inet-$BUILDID" > Version
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
 DIRNAME=inet

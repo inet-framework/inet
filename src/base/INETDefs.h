@@ -29,6 +29,8 @@
 #  error At least OMNeT++/OMNEST version 4.3 required
 #endif
 
+#define INET_VERSION  0x0206
+
 #if defined(INET_EXPORT)
 #  define INET_API OPP_DLLEXPORT
 #elif defined(INET_IMPORT)
