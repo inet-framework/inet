@@ -190,30 +190,32 @@ static uint32 updateMPTCP(const uint32 w,
 void SCTPAssociation::recalculateOLIABasis() {
     // it is necessary to calculate all flow information
     double assoc_best_paths_l_rXl_r__rtt_r = 0.0;
-    uint32 max_w = 0;
+    //max_w_paths: The set of paths in all_paths with largest congestion windows.
+    //https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
+    uint32 max_w_paths = 0;
     uint32 max_w_paths_cnt = 0;
     uint32 best_paths_cnt = 0;
 
     // Create the sets
     int cnt = 0;
-    assoc_collected_paths.clear();
-    assoc_best_paths.clear();
-    assoc_max_w_paths.clear();
+    assocCollectedPaths.clear();
+    assocBestPaths.clear();
+    assocMaxWndPaths.clear();
     for (SCTPPathMap::iterator iter = sctpPathMap.begin();
             iter != sctpPathMap.end(); iter++, cnt++) {
         SCTPPathVariables* path = iter->second;
         bool next = false;
         double r_sRTT = GET_SRTT(path->srtt.dbl());
-        double r_l_rXl_r__rtt_r = ((path->olia_sent_bytes
-                * path->olia_sent_bytes) / r_sRTT);
-        if (assoc_best_paths.empty()) {
+        double r_l_rXl_r__rtt_r = ((path->oliaSentBytes
+                * path->oliaSentBytes) / r_sRTT);
+        if (assocBestPaths.empty()) {
             assoc_best_paths_l_rXl_r__rtt_r = r_l_rXl_r__rtt_r;
-            assoc_best_paths.insert(std::make_pair(cnt, path));
+            assocBestPaths.insert(std::make_pair(cnt, path));
             next = true;
         }
-        if (assoc_max_w_paths.empty()) {
-            max_w = path->cwnd;
-            assoc_max_w_paths.insert(std::make_pair(cnt, path));
+        if (assocMaxWndPaths.empty()) {
+            max_w_paths = path->cwnd;
+            assocMaxWndPaths.insert(std::make_pair(cnt, path));
             next = true;
         }
         if (next)
@@ -221,23 +223,23 @@ void SCTPAssociation::recalculateOLIABasis() {
         // set up the sets
         if (r_l_rXl_r__rtt_r > assoc_best_paths_l_rXl_r__rtt_r) {
             assoc_best_paths_l_rXl_r__rtt_r = r_l_rXl_r__rtt_r;
-            assoc_best_paths.insert(std::make_pair(cnt, path));
-            assoc_best_paths.erase(best_paths_cnt);
+            assocBestPaths.insert(std::make_pair(cnt, path));
+            assocBestPaths.erase(best_paths_cnt);
 
             best_paths_cnt = cnt;
             next = true;
         }
-        if (path->cwnd > max_w) {
-            max_w = path->cwnd;
-            assoc_max_w_paths.insert(std::make_pair(cnt, path));
-            assoc_max_w_paths.erase(best_paths_cnt);
+        if (path->cwnd > max_w_paths) {
+            max_w_paths = path->cwnd;
+            assocMaxWndPaths.insert(std::make_pair(cnt, path));
+            assocMaxWndPaths.erase(best_paths_cnt);
             max_w_paths_cnt = cnt;
             next = true;
         }
         if (next)
             continue;
 
-        assoc_collected_paths.insert(std::make_pair(cnt, path));
+        assocCollectedPaths.insert(std::make_pair(cnt, path));
 
     }
 }
@@ -246,45 +248,45 @@ uint32 SCTPAssociation::updateOLIA(uint32 w, const uint32 s,
         const uint32 totalW, double a, const uint32 mtu,
         const uint32 ackedBytes, SCTPPathVariables* path) {
     int32 increase = 0;
-    bool is_in_collected_path = false;
-    bool is_max_w_paths = false;
+    bool isInCollectedPath = false;
+    bool isMaxWndPaths = false;
 
     if ((!(w < s)) && (!path->fastRecoveryActive)) {
         // in CA
         recalculateOLIABasis();
 
         int cnt = 0;
-        for (SCTP_Path_Collection::iterator it = assoc_collected_paths.begin();
-                it != assoc_collected_paths.end(); it++, cnt++) {
+        for (SCTPPathCollection::iterator it = assocCollectedPaths.begin();
+                it != assocCollectedPaths.end(); it++, cnt++) {
             if (it->second == path) {
-                is_in_collected_path = true;
+                isInCollectedPath = true;
                 break;
             }
         }
         cnt = 0;
-        for (SCTP_Path_Collection::iterator it = assoc_max_w_paths.begin();
-                it != assoc_max_w_paths.end(); it++, cnt++) {
+        for (SCTPPathCollection::iterator it = assocMaxWndPaths.begin();
+                it != assocMaxWndPaths.end(); it++, cnt++) {
             if (it->second == path) {
-                is_max_w_paths = true;
+                isMaxWndPaths = true;
                 break;
             }
         }
 
         double r_sRTT = GET_SRTT(path->srtt.dbl());
 
-        double numerator_1 = path->cwnd / (r_sRTT * r_sRTT);
-        double denominator_1 = 0;
+        double numerator1 = path->cwnd / (r_sRTT * r_sRTT);
+        double denominator1 = 0;
 
         for (SCTPPathMap::iterator iter = sctpPathMap.begin();
                 iter != sctpPathMap.end(); iter++) {
             SCTPPathVariables* p_path = iter->second;
             double p_sRTT = GET_SRTT(p_path->srtt.dbl());
-            denominator_1 += (p_path->cwnd / p_sRTT);
+            denominator1 += (p_path->cwnd / p_sRTT);
         }
-        denominator_1 = denominator_1 * denominator_1;
-        double term1 = numerator_1 / denominator_1;
+        denominator1 = denominator1 * denominator1;
+        double term1 = numerator1 / denominator1;
 
-        if (is_in_collected_path) {
+        if (isInCollectedPath) {
             /*
              For each ACK on the path r:
              - If r is in collected_paths, increase w_r by
@@ -296,15 +298,15 @@ uint32 SCTPAssociation::updateOLIA(uint32 w, const uint32 s,
              multiplied by MSS_r * bytes_acked.
              */
 
-            double numerator_2 = 1 / sctpPathMap.size();
-            double denominator_2 = assoc_collected_paths.size();
+            double numerator2 = 1 / sctpPathMap.size();
+            double denominator2 = assocCollectedPaths.size();
             double term2 = 0.0;
-            if (denominator_2 > 0.0) {
-                term2 = numerator_2 / denominator_2;
+            if (denominator2 > 0.0) {
+                term2 = numerator2 / denominator2;
             }
             increase = (uint32) ceil(
-                    (term1 * path->cwnd * path->pmtu) + (term2 * path->pmtu)); // TODO std::min(acked,
-        } else if ((is_max_w_paths) && (!assoc_collected_paths.empty())) {
+                    (term1 * path->cwnd * path->pmtu) + (term2 * path->pmtu));
+        } else if ((isMaxWndPaths) && (!assocCollectedPaths.empty())) {
             /*
              - If r is in max_w_paths and if collected_paths is not empty,
              increase w_r by
@@ -315,11 +317,11 @@ uint32 SCTPAssociation::updateOLIA(uint32 w, const uint32 s,
 
              multiplied by MSS_r * bytes_acked.
              */
-            double numerator_2 = 1 / sctpPathMap.size();
-            double denominator_2 = assoc_max_w_paths.size();
+            double numerator2 = 1 / sctpPathMap.size();
+            double denominator2 = assocMaxWndPaths.size();
             double term2 = 0.0;
-            if (denominator_2 > 0.0) {
-                term2 = numerator_2 / denominator_2;
+            if (denominator2 > 0.0) {
+                term2 = numerator2 / denominator2;
             }
             increase = (int32) ceil(
                     (term1 * path->cwnd * path->pmtu) - (term2 * path->pmtu)); // TODO
@@ -395,8 +397,8 @@ void SCTPAssociation::initCCParameters(SCTPPathVariables* path)
     sctpEV3 << simTime() << ":\tCC [initCCParameters]\t" << path->remoteAddress
             << " (cmtCCGroup=" << path->cmtCCGroup << ")"
             << "\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
-    assoc_best_paths.clear();
-    assoc_max_w_paths.clear();
+    assocBestPaths.clear();
+    assocMaxWndPaths.clear();
 }
 
 int32 SCTPAssociation::rpPathBlockingControl(SCTPPathVariables* path, const double reduction)
@@ -538,7 +540,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
                             }
                         }
                     }
-                    path->olia_sent_bytes = 0;
+                    path->oliaSentBytes = 0;
                     /* this can ONLY become TRUE, when Fast Recovery IS supported */
                     path->fastRecoveryActive = true;
                     path->fastRecoveryExitPoint = highestOutstanding;
@@ -825,7 +827,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
 void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
 {
     double decreaseFactor = 0.5;
-    path->olia_sent_bytes = 0;
+    path->oliaSentBytes = 0;
     sctpEV3 << assocId << ": " << simTime() << ":\tCC [cwndUpdateAfterRtxTimeout]\t" << path->remoteAddress
             << " (cmtCCGroup=" << path->cmtCCGroup << ")"
             << "\tsst="     << path->ssthresh

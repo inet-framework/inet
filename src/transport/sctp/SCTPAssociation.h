@@ -358,7 +358,7 @@ class INET_API SCTPPathVariables : public cObject
         simtime_t          txTimeForRTTCalculation;
         uint32             tsnForRTTCalculation;
         // ====== OLIA TMP Variable ===========================================
-        uint32 olia_sent_bytes;
+        uint32 oliaSentBytes;
         // ====== Path Status =================================================
         simtime_t           heartbeatTimeout;
         simtime_t           heartbeatIntervalTimeout;
@@ -828,11 +828,11 @@ class INET_API SCTPAssociation : public cObject
     } CCFunctions;
     typedef std::map<uint32, SCTPSendStream*>    SCTPSendStreamMap;
     typedef std::map<uint32, SCTPReceiveStream*> SCTPReceiveStreamMap;
-    typedef std::map<uint32,SCTPPathVariables*> SCTP_Path_Collection;
+    typedef std::map<uint32,SCTPPathVariables*> SCTPPathCollection;
 
-    SCTP_Path_Collection assoc_best_paths;
-    SCTP_Path_Collection assoc_max_w_paths;
-    SCTP_Path_Collection assoc_collected_paths;
+    SCTPPathCollection assocBestPaths;
+    SCTPPathCollection assocMaxWndPaths;
+    SCTPPathCollection assocCollectedPaths;
     public:
         // connection identification by apps: appgateIndex+assocId
         int32                   appGateIndex; // Application gate index
@@ -1344,6 +1344,15 @@ class INET_API SCTPAssociation : public cObject
         std::vector<SCTPPathVariables*> getSortedPathMap();
         void chunkReschedulingControl(SCTPPathVariables* path);
         void recalculateOLIABasis();
+        /**
+         * w: cwnd of the path
+         * s: ssthresh of the path
+         * totalW: Sum of all cwnds of the association
+         * a: factor alpha of olia calculation - see https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
+         * mtu: mtu of the path
+         * ackedBytes: ackednowlged bytes
+         * path: path variable (for further investigation, debug, etc)
+         */
         uint32 updateOLIA(uint32 w, const uint32 s, const uint32 totalW, double a, const uint32 mtu, const uint32 ackedBytes, SCTPPathVariables* path);
 
         inline bool addAuthChunkIfNecessary(SCTPMessage* sctpMsg,

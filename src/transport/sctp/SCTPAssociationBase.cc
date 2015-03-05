@@ -114,7 +114,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     blockingTimeout = simTime();
     packetsInBurst = 0;
     highSpeedCCThresholdIdx = 0;
-    olia_sent_bytes = 0;
+    oliaSentBytes = 0;
     numberOfFastRetransmissions = 0;
     numberOfTimerBasedRetransmissions = 0;
     numberOfHeartbeatsSent = 0;
