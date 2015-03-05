@@ -29,8 +29,6 @@ if [ "$BUILDID" = "" ]; then
   export BUILDID="$VERSION-$BUILDHASH"
 fi
 
-echo "inet-$BUILDID" > Version
-
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
 DIRNAME=inet
 
@@ -39,11 +37,13 @@ mkdir -p $INET_ROOT/out/$DIRNAME
 
 git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
 
+echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
+
 # copying documentation
-cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
