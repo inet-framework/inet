@@ -476,7 +476,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
                         path->cwnd     = path->ssthresh;
                     }
                     // ====== Like MPTCP Fast Retransmit =========================
-                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_Like_MPTCP) {
+                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_CMT_LIA) {
                         // Just like plain CMT-SCTP ...
                         const int32 reducedCwnd = rpPathBlockingControl(path, rint(decreaseFactor * (double)path->cwnd));
                         path->ssthresh = max(reducedCwnd, (int32)state->rpMinCwnd * (int32)path->pmtu);
@@ -650,7 +650,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
                         path->cwnd += (int32)ceil(min(path->pmtu, ackedBytes) * increaseRatio);
                     }
                     // ====== Like MPTCP Slow Start ==============================
-                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_Like_MPTCP) {
+                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_CMT_LIA) {
                         // T.D. 14.08.2011: Rewrote MPTCP-Like CC code
                         path->cwnd = updateMPTCP(path->cwnd, path->cmtGroupTotalCwnd,
                                                  path->cmtGroupAlpha, path->pmtu, ackedBytes);
@@ -754,7 +754,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
                         path->cwnd += (int32)ceil(increaseFactor * path->pmtu * increaseRatio);
                     }
                     // ====== Like MPTCP Congestion Avoidance ====================
-                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_Like_MPTCP) {
+                    else if(state->cmtCCVariant == SCTPStateVariables::CCCV_CMT_LIA) {
                         // T.D. 14.08.2011: Rewrote MPTCP-Like CC code
                         path->cwnd = updateMPTCP(path->cwnd, path->cmtGroupTotalCwnd,
                                                  path->cmtGroupAlpha, path->pmtu, path->pmtu);
@@ -867,7 +867,7 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
             path->cwnd = path->pmtu;
         }
         // ====== Like MPTCP RTX Timeout ======================================
-        else if(state->cmtCCVariant == SCTPStateVariables::CCCV_Like_MPTCP) {
+        else if(state->cmtCCVariant == SCTPStateVariables::CCCV_CMT_LIA) {
             path->ssthresh = max((int32)path->cwnd - (int32)rint(decreaseFactor * (double)path->cwnd),
                                  (int32)state->rpMinCwnd * (int32)path->pmtu);
             path->cwnd     = path->pmtu;
