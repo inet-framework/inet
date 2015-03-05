@@ -9,6 +9,32 @@
 	Moved classes related to the layered implementation into the layered directory:
 	Ieee80211Interleaver, Ieee80211Scrambler
 
+	Deleted obsolete 802.11 modulation.
+
+2015-02-24  Levente Mészáros
+
+	Removed kludgie header length calculation from 802.11 transmitters.
+	For example, the old code incorrectly calculated with 24 bits (instead of
+	48 bits) long header length in DSSS mode. Updated fingerprints.
+	Removed header success rate calculation from Ieee80211BerTableErrorModel.
+	The returned packet error rate value should already include all possible
+	header errors. Updated fingerprints.
+	Added new 802.11 PHY mode description classes.
+
+2015-02-17  Levente Mészáros
+
+	Replaced double with simtime_t in duration computations to avoid rounding
+	errors. Removed superfluous, weird and precision loosing time conversion.
+	Updated fingerprints.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-19  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

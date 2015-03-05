@@ -1,3 +1,18 @@
+2015-01-30  Irene Ruengeler
+
+	Added fragPoint parameter to limit the size of fragments.
+	Added data chunk header length.
+	After the handshake only send heartbeats on unconfirmed paths.
+	Handle close command, i.e. stop reading when the command is sent.
+
+2015-01-21  Irene Ruengeler
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

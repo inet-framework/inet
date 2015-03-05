@@ -1,3 +1,28 @@
+2015-01-06  Zoltan Bojthe
+
+	Replaced getParentModule calls with parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Added IGMPv3 implementation.
+
+2014-11-18  Levente Mészáros & Zoltan Bojthe
+
+	Fixed memory leaks detected by valgrind memcheck.
+
+2014-11-14  Zoltan Bojthe
+
+	Network Protocol module should delete queued datagrams, hooks shouldn't
+	delete/send/scheduleat/take dgrams
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

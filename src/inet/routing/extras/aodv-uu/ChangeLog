@@ -1,3 +1,23 @@
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-10  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2015-01-13  Zoltan Bojthe
+
+	Simplified cost calculation.
+
+2015-01-13  Zoltan Bojthe
+
+	Simplified sending one packet on more interfaces.
+
+2014-11-13  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

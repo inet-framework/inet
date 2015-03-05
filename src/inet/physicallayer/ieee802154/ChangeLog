@@ -1,3 +1,21 @@
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Florian Meier
+
+	Fixed physical layer characteristics.
+
+	Signed-off-by: Florian Meier <florian.meier@koalo.de>
+
+2014-12-02  Florian Meier
+
+	Added an IEEE 802.15.4 Narrowband Physical and Link Layer.
+
+	Default settings for the MAC are taken from the 802.15.4-2006 standard.
+	Uses BreakpointPathLoss taken from 802.15.4-2006 Standard Annex E.
+	Default radio settings are taken from the datasheet of the ATmega256RFR2.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

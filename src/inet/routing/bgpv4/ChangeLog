@@ -1,3 +1,19 @@
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-12  Zoltan Bojthe
+
+	Fixed router module fixes for disabled features.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

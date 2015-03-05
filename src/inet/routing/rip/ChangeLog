@@ -1,3 +1,15 @@
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-12  Zoltan Bojthe
+
+	Fixed router module for disabled features.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2013-08-29  Tamas Borbely

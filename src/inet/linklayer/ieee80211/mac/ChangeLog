@@ -1,9 +1,36 @@
 2015-02-25  Levente Meszaros
 
 	Refactored the MAC class to work with the new 802.11 mode descriptor classes.
-	- deleted obsolete Ieee80211DescriptorData, Ieee80211Descriptor classes
-	- replaced opMode field with Ieee80211ModeSet
-	- replaced various bitrate fields with Ieee80211Mode
+	Deleted obsolete Ieee80211DescriptorData, Ieee80211Descriptor classes.
+	Replaced opMode field with Ieee80211ModeSet.
+	Replaced various bitrate fields with Ieee80211Mode.
+
+2015-02-14  Raphael Riebl
+
+	Fixed memory leak, delete classifier in dtor.
+
+2015-02-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-12-17  Levente Mészáros
+
+	Changed setting radio mode to be asynchronous using a command.
+	Added guard against recursively calling handleWithFSM.
+	Updated mac state machine diagram to reflect current state.
+	Updated affected fingerprints.
+
+2014-11-18  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
 
 2014-11-07  ------ inet-2.99.0 released ------
 

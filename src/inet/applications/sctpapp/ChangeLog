@@ -1,3 +1,21 @@
+2015-01-22  Irene Ruengeler
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-20  Irene Ruengeler
+
+	Set the right signature for socketEstablished().
+	Delete messages classified as undisposed.
+	Fixed for incorrect through output.
+
+2014-11-13  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

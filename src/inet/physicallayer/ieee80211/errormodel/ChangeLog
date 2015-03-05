@@ -1,8 +1,18 @@
-2015-02-25  Levente Meszaros
+2015-02-24  Levente Mészáros
 
-	Refactored existing Ieee80211NistErrorModel and Ieee80211YansErrorModel to
-	use the new 802.11 mode descriptor classes. Extracted Ieee80211BerTableErrorModel
-	from the base class as a separate error model.
+	Removed header success rate calculation from Ieee80211BerTableErrorModel.
+	The returned packet error rate value should already include all possible
+	header errors. Updated fingerprints.
+
+	Refactored 802.11 error models to reflect recent changes in the mode descriptors.
+	Introduced bps and Hz units where appropriate. Extracted
+	Ieee80211BerTableErrorModel as a separate error model. Removed opMode and
+	autoHeaderSize parameters for Ieee80211NistErrorModel and
+	Ieee80211YansErrorModel. They rather use the meta data on the transmission.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
 
 2014-11-07  ------ inet-2.99.0 released ------
 

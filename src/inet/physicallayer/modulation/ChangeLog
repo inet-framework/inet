@@ -1,5 +1,11 @@
 2015-02-25  Benjamin Seregi & Levente Meszaros
 
+	Refactored the interface and implementation of modulations.
+
+	Modulations now support the calculation of BER and SER. Added a number of
+	new base classes, interfaces and various implementations. Some
+	implementations are still incomplete.
+
 	Moved existing modulation classes from common subdirectory: BPSKModulation,
 	QPSKModulation, QAM16Modulation, QAM64Modulation and QAM256Modulation.
 	Adapted these modulations to the new modulation interface. Reimplemented the

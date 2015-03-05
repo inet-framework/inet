@@ -1,3 +1,24 @@
+2015-02-02  Till Steinbach
+
+	Implementation is required for IPv6 feature and cannot be disabled when
+	xMIPv6 is disabled. (see header)
+
+2015-01-06  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Fixed memory leaks detected by valgrind memcheck.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

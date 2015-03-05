@@ -1,7 +1,18 @@
-2015-02-25  Levente Meszaros
+2015-03-02  Levente Mészáros
 
-	Refactored medium analog model to support layered implementation with
-	separate signal analog model without code duplication.
+	Fixed memory managements bugs found by valgrind memcheck.
+
+2015-02-24  Levente Mészáros
+
+	Updated analog model to support layered radio.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-04  Florian Meier
+
+	Added Arrival to computeReception of IAnalogModel.
 
 2014-11-07  ------ inet-2.99.0 released ------
 
