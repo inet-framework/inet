@@ -24,6 +24,9 @@ namespace serializer {
 
 GlobalSerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
 
+DefaultSerializer SerializerRegistrationList::defaultSerializer;
+ByteArraySerializer SerializerRegistrationList::byteArraySerializer;
+
 Buffer::Buffer(const Buffer& base, unsigned int trailerLength)
 {
     buf = base.buf + base.pos;
@@ -279,6 +282,31 @@ ByteArrayMessage *SerializerBase::parseByteArrayPacket(Buffer &b)
     return bam;
 }
 
+SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id)
+{
+    const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
+    if (bam != nullptr)
+        return serializers.getInstance()->byteArraySerializer;
+    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
+    if (serializer != nullptr)
+        return *serializer;
+    serializer = serializers.getInstance()->lookup(pkt->getClassName());
+    if (serializer != nullptr)
+        return *serializer;
+    if (context.throwOnSerializerNotFound)
+        throw cRuntimeError("Serializer not found for '%s' (%i, %i)", pkt->getClassName(), group, id);
+    return serializers.getInstance()->defaultSerializer;
+}
+
+SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGroup group, int id)
+{
+    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
+    if (serializer != nullptr)
+        return *serializer;
+    else
+        return serializers.getInstance()->byteArraySerializer;
+}
+
 cPacket *SerializerBase::parse(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
 {
     cPacket *encapPacket = nullptr;
@@ -293,6 +321,53 @@ cPacket *SerializerBase::parse(Buffer &b, Context& context, ProtocolGroup group,
     b.accessNBytes(subBuffer.getPos());
     ASSERT(subBuffer.hasError() || subBuffer.getPos() == encapPacket->getByteLength());
     return encapPacket;
+}
+
+//
+
+void DefaultSerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
+{
+    b.fillNBytes(pkt->getByteLength(), '?');
+    context.errorOccured = true;
+}
+
+cPacket *DefaultSerializer::deserialize(Buffer &b, Context& context)
+{
+    unsigned int byteLength = b.getRemainder();
+    if (byteLength) {
+        cPacket *pkt = new cPacket();
+        pkt->setByteLength(byteLength);
+        b.accessNBytes(byteLength);
+        context.errorOccured = true;
+        return pkt;
+    }
+    else
+        return nullptr;
+}
+
+//
+
+void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
+{
+    const ByteArrayMessage *bam = check_and_cast<const ByteArrayMessage *>(pkt);
+    unsigned int length = bam->getByteLength();
+    unsigned int wl = std::min(length, b.getRemainder());
+    length = bam->copyDataToBuffer(b.accessNBytes(0), wl);
+    b.accessNBytes(length);
+    if (pkt->getEncapsulatedPacket())
+        throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
+}
+
+cPacket *ByteArraySerializer::deserialize(Buffer &b, Context& context)
+{
+    ByteArrayMessage *bam = nullptr;
+    unsigned int bytes = b.getRemainder();
+    if (bytes) {
+        bam = new ByteArrayMessage("parsed-bytes");
+        bam->setDataFromBuffer(b.accessNBytes(bytes), bytes);
+        bam->setByteLength(bytes);
+    }
+    return bam;
 }
 
 //

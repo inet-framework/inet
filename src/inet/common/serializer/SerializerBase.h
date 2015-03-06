@@ -45,7 +45,7 @@ enum {  // from libpcap
 };
 
 /**
- * Buffer for serializer/parser
+ * Buffer for serializer/deserializer
  */
 class INET_API Buffer
 {
@@ -112,6 +112,7 @@ class Context
     bool throwOnSerializerNotFound = true;
     bool errorOccured = false;
 };
+
 /**
  * Converts between cPacket and binary (network byte order) packet.
  */
@@ -130,28 +131,41 @@ class INET_API SerializerBase : public cOwnedObject
 
     /**
      * Puts a packet sniffed from the wire into an EtherFrame.
-     *
      */
     virtual cPacket *deserialize(Buffer &b, Context& context) = 0;
 
   public:
     SerializerBase(const char *name = nullptr) : cOwnedObject(name) {}
 
-    //serializer:
-
+    static SerializerBase & lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id);
     static void serialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
     void serializePacket(const cPacket *pkt, Buffer &b, Context& context);
 
-
-    //parser:
-
+    static SerializerBase & lookupDeserializer(Context& context, ProtocolGroup group, int id);
     static cPacket *parse(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
     cPacket *deserializePacket(Buffer &b, Context& context);
+};
 
+class INET_API DefaultSerializer : public SerializerBase
+{
+  public:
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context);
+    virtual cPacket *deserialize(Buffer &b, Context& context);
+};
+
+class INET_API ByteArraySerializer : public SerializerBase
+{
+  public:
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context);
+    virtual cPacket *deserialize(Buffer &b, Context& context);
 };
 
 class INET_API SerializerRegistrationList : public cNamedObject, noncopyable
 {
+    public:
+      static DefaultSerializer defaultSerializer;
+      static ByteArraySerializer byteArraySerializer;
+
     protected:
         typedef std::pair<int, int> Key;
         typedef std::map<Key, SerializerBase*> KeyToSerializerMap;
