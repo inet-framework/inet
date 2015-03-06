@@ -225,7 +225,7 @@ void SerializerBase::serialize(const cPacket *pkt, Buffer &b, Context& context, 
         serializer = serializers.getInstance()->lookup(pkt->getClassName());
     }
     if (serializer) {
-        serializer->xSerialize(pkt, subBuffer, context);
+        serializer->serializePacket(pkt, subBuffer, context);
         b.accessNBytes(subBuffer.getPos());
         return;
     }
@@ -235,7 +235,7 @@ void SerializerBase::serialize(const cPacket *pkt, Buffer &b, Context& context, 
     b.fillNBytes(pkt->getByteLength(), '?');
 }
 
-void SerializerBase::xSerialize(const cPacket *pkt, Buffer &b, Context& context)
+void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
     const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
@@ -249,7 +249,7 @@ void SerializerBase::xSerialize(const cPacket *pkt, Buffer &b, Context& context)
         throw cRuntimeError("serializer error: packet %s (%s) length is %d but serialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
-cPacket *SerializerBase::xParse(Buffer &b, Context& context)
+cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
     cPacket *pkt = deserialize(b, context);
@@ -285,7 +285,7 @@ cPacket *SerializerBase::parse(Buffer &b, Context& context, ProtocolGroup group,
     SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
     Buffer subBuffer(b, trailerLength);
     if (serializer) {
-        encapPacket = serializer->xParse(subBuffer, context);
+        encapPacket = serializer->deserializePacket(subBuffer, context);
     }
     else {
         encapPacket = parseByteArrayPacket(subBuffer);

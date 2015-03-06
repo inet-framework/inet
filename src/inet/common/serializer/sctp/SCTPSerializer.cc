@@ -936,7 +936,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             if (check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()) != nullptr) {
                                 Buffer b((unsigned char *)error + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
                                 Context c;
-                                IPv4Serializer().xSerialize(ecp->getEncapsulatedPacket(), b, c);
+                                IPv4Serializer().serializePacket(ecp->getEncapsulatedPacket(), b, c);
                             }
                             errorc->length = htons(ecp->getByteLength());
                         }

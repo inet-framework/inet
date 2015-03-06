@@ -140,13 +140,13 @@ class INET_API SerializerBase : public cOwnedObject
     //serializer:
 
     static void serialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
-    void xSerialize(const cPacket *pkt, Buffer &b, Context& context);
+    void serializePacket(const cPacket *pkt, Buffer &b, Context& context);
 
 
     //parser:
 
     static cPacket *parse(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
-    cPacket *xParse(Buffer &b, Context& context);
+    cPacket *deserializePacket(Buffer &b, Context& context);
 
 };
 

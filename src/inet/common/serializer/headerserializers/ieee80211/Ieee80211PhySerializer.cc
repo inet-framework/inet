@@ -49,7 +49,7 @@ bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, Bit
         // Here we just write the header which is exactly 5 bytes in length.
         Buffer subBuffer(b, 0);
         Context c;
-        ieee80211Serializer.xSerialize(encapsulatedPacket, subBuffer, c);
+        ieee80211Serializer.serializePacket(encapsulatedPacket, subBuffer, c);
         b.accessNBytes(subBuffer.getPos());
         unsigned int numOfWrittenBytes = b.getPos();
         // TODO: This assertion must hold!
@@ -85,7 +85,7 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     Ieee80211Serializer serializer;
     Buffer subBuffer(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);
     Context c;
-    cPacket *payload = serializer.xParse(subBuffer, c);
+    cPacket *payload = serializer.deserializePacket(subBuffer, c);
     plcpFrame->setBitLength(OFDM_PLCP_HEADER_LENGTH);
     plcpFrame->encapsulate(payload);
 //    ASSERT(plcpFrame->getBitLength() == OFDM_PLCP_HEADER_LENGTH + 8 * hdr->length);

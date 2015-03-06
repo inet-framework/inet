@@ -111,7 +111,7 @@ void ExtInterface::handleMessage(cMessage *msg)
 
         Buffer b(const_cast<unsigned char *>(buffer), packetLength);
         Context c;
-        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(IPv4Serializer().xParse(b, c));
+        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(IPv4Serializer().deserializePacket(b, c));
         EV << "Delivering an IPv4 packet from "
            << ipPacket->getSrcAddress()
            << " to "
@@ -147,7 +147,7 @@ void ExtInterface::handleMessage(cMessage *msg)
             addr.sin_addr.s_addr = htonl(ipPacket->getDestAddress().getInt());
             Buffer b(const_cast<unsigned char *>(buffer), sizeof(buffer));
             Context c;
-            IPv4Serializer().xSerialize(ipPacket, b, c);
+            IPv4Serializer().serializePacket(ipPacket, b, c);
             int32 packetLength = b.getPos();
             EV << "Delivering an IPv4 packet from "
                << ipPacket->getSrcAddress()

@@ -40,7 +40,7 @@ BitVector *APSKSerializer::serialize(const APSKPhyFrame *phyFrame) const
     Ieee80211Serializer ieee80211Serializer;
     Buffer b(buffer, macFrameLength);
     Context c;
-    ieee80211Serializer.xSerialize(macFrame, b, c);
+    ieee80211Serializer.serializePacket(macFrame, b, c);
     int serializedLength = b.getPos();
     // TODO: ASSERT(serializedLength == macFrameLength);
     uint32_t crc = ethernetCRC(buffer, serializedLength);
@@ -87,7 +87,7 @@ APSKPhyFrame *APSKSerializer::deserialize(const BitVector *bits) const
                 Ieee80211Serializer deserializer;
                 Buffer b(buffer, macFrameLength);
                 Context c;
-                macFrame = deserializer.xParse(b, c);
+                macFrame = deserializer.deserializePacket(b, c);
             }
             delete[] buffer;
         }
