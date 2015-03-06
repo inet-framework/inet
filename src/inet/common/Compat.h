@@ -92,6 +92,9 @@ inline double fmax(double a, double b)
 } // namespace inet
 
 #if OMNETPP_VERSION < 0x0500
+
+NAMESPACE_BEGIN
+
 /**
  * A check_and_cast<> that accepts pointers other than cObject*, too.
  * For compatibility; OMNeT++ 5.0 and later already contain this.
@@ -139,6 +142,8 @@ T check_and_cast_nullable(P *p)
         return nullptr;
     return check_and_cast<T>(p);
 }
+
+NAMESPACE_END
 
 #endif    // OMNETPP_VERSION < 0x0500
 
