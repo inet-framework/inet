@@ -203,17 +203,6 @@ IPv6Address Buffer::readIPv6Address()
     return IPv6Address(d[0], d[1], d[2], d[3]);
 }
 
-void SerializerBase::serializeByteArrayPacket(const ByteArrayMessage *pkt, Buffer &b)
-{
-    unsigned int length = pkt->getByteLength();
-    unsigned int wl = std::min(length, b.getRemainder());
-    length = pkt->copyDataToBuffer(b.accessNBytes(0), wl);
-    b.accessNBytes(length);
-    if (pkt->getEncapsulatedPacket())
-        throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
-    return;
-}
-
 void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
@@ -235,18 +224,6 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
     if (b.hasError())
         pkt->setBitError(true);
     return pkt;
-}
-
-ByteArrayMessage *SerializerBase::parseByteArrayPacket(Buffer &b)
-{
-    ByteArrayMessage *bam = nullptr;
-    unsigned int bytes = b.getRemainder();
-    if (bytes) {
-        bam = new ByteArrayMessage("parsed-bytes");
-        bam->setDataFromBuffer(b.accessNBytes(bytes), bytes);
-        bam->setByteLength(bytes);
-    }
-    return bam;
 }
 
 SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id)

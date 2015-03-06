@@ -119,15 +119,11 @@ class Context
 class INET_API SerializerBase : public cOwnedObject
 {
   protected:
-    static void serializeByteArrayPacket(const ByteArrayMessage *pkt, Buffer &b);
-
     /**
      * Serializes a cPacket for transmission on the wire.
      * Returns the length of data written into buffer.
      */
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) = 0;
-
-    static ByteArrayMessage *parseByteArrayPacket(Buffer &b);
 
     /**
      * Puts a packet sniffed from the wire into an EtherFrame.

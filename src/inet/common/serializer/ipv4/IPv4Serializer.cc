@@ -147,7 +147,7 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
 
     cPacket *encapPacket = nullptr;
     if (dest->getMoreFragments() || dest->getFragmentOffset() != 0) {  // IP fragment
-        encapPacket = SerializerBase::parseByteArrayPacket(b);
+        encapPacket = serializers.getInstance()->byteArraySerializer.deserialize(b, c);
     }
     else
         encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), 0);
