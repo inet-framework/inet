@@ -4,26 +4,45 @@ Recent changes in the INET Framework
 INET 2.6 (March 05, 2015)
 -------------------------
 
+This release requires OMNeT++ 4.4 or later. It contains the following changes:
+
+   - made compatible with OMNeT++ 5.0b1
    - added OLIA for CMT-SCTP (by Martin Becke)
    - added a trace player feature to NetPerfMeter
    - fixed compile errors when using OMNeT++ 5.0b1
    - fixed an issue with too small initial value of 'ssthreshold' in TCP
    - fixed window scaling in TCP
+   - added INET_VERSION macro (in hexadecimal form e.g.: 0x0206)
+
 
 INET 2.5.1 (Nov 7, 2014)
 ------------------------
 
+This release requires OMNeT++ 4.4.
+
+Changes:
+
    - fixed a crash in SCTP
    - now builds with all features turned off
+
 
 INET 2.5.0 (Oct 29, 2014)
 -------------------------
 
+This release requires OMNeT++ 4.4.
+
+Changes:
+
    - made the codebase compile in C++11 mode. (required by OMNeT++ 4.6)
    - added netperfmeter application by Thomas Dreibholz
 
+
 INET-2.4.0 (June 12, 2014)
 --------------------------
+
+This release requires OMNeT++ 4.3.
+
+Changes:
 
    - Added support for link break detection in IdealWireless 
      (using the NF_LINK_BREAK signal)
@@ -37,11 +56,13 @@ Added new routing protocol:
    - Brand new AODV implementation in network/routing folder 
      backported from the integration branch.
 
+
 INET-2.3.0 (March 17, 2014)
 ---------------------------
 
 This release contains several new protocols, and a lot of changes that were
 backported from the current integration branch (destined to be INET 3.0).
+This release requires OMNeT++ 4.3.
 
 Application startTime/stopTime fixes:
 
@@ -158,6 +179,7 @@ INET-2.2.0 (August 22, 2013)
 
 The main highlight of this release is the long-sought support for
 simulating node shutdown/restart events for network nodes.
+This release requires OMNeT++ 4.2 or later.
 
 New features:
 
