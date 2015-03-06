@@ -89,6 +89,8 @@ inline double fmax(double a, double b)
 
 #endif    // _MSC_VER
 
+} // namespace inet
+
 #if OMNETPP_VERSION < 0x0500
 /**
  * A check_and_cast<> that accepts pointers other than cObject*, too.
@@ -139,8 +141,6 @@ T check_and_cast_nullable(P *p)
 }
 
 #endif    // OMNETPP_VERSION < 0x0500
-
-} // namespace inet
 
 #endif // ifndef __INET_COMPAT_H
 
