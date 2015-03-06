@@ -252,7 +252,7 @@ void SerializerBase::xSerialize(const cPacket *pkt, Buffer &b, Context& context)
 cPacket *SerializerBase::xParse(Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
-    cPacket *pkt = parse(b, context);
+    cPacket *pkt = deserialize(b, context);
 
     if (pkt) {
         pkt->setByteLength(b.getPos() - startPos);

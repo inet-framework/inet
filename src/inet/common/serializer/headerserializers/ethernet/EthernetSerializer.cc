@@ -87,7 +87,7 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     b.writeUint32(fcs);
 }
 
-cPacket* EthernetSerializer::parse(Buffer &b, Context& c)
+cPacket* EthernetSerializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 

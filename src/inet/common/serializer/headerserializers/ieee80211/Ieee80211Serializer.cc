@@ -412,7 +412,7 @@ void Ieee80211Serializer::parseDataOrMgmtFrame(Buffer &b, Ieee80211DataOrMgmtFra
     }
 }
 
-cPacket* Ieee80211Serializer::parse(Buffer &b, Context& c)
+cPacket* Ieee80211Serializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     cPacket *frame = nullptr;

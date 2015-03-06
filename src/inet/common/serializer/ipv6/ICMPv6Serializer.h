@@ -32,7 +32,7 @@ class ICMPv6Serializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket *parse(Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(Buffer &b, Context& context) override;
 
   public:
     ICMPv6Serializer(const char *name = nullptr) : SerializerBase(name) {}

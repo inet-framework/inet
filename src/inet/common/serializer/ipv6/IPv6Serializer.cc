@@ -144,7 +144,7 @@ void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     ip6h->ip6_plen = htons(encapEnd - encapStart);
 }
 
-cPacket* IPv6Serializer::parse(Buffer &b, Context& c)
+cPacket* IPv6Serializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     IPv6Datagram *dest = new IPv6Datagram("parsed-ipv6");

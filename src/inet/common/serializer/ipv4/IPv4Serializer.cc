@@ -102,7 +102,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     ip->ip_sum = TCPIPchecksum::checksum(ip, IP_HEADER_BYTES);
 }
 
-cPacket* IPv4Serializer::parse(Buffer &b, Context& c)
+cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 

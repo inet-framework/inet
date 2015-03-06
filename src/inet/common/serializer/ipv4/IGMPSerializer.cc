@@ -97,7 +97,7 @@ void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     igmp->igmp_cksum = TCPIPchecksum::checksum(igmp, b.getPos() - startPos);
 }
 
-cPacket *IGMPSerializer::parse(Buffer &b, Context& context)
+cPacket *IGMPSerializer::deserialize(Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
     struct igmp *igmp = (struct igmp *)b.accessNBytes(sizeof(struct igmp));

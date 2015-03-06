@@ -132,7 +132,7 @@ class INET_API SerializerBase : public cOwnedObject
      * Puts a packet sniffed from the wire into an EtherFrame.
      *
      */
-    virtual cPacket *parse(Buffer &b, Context& context) = 0;
+    virtual cPacket *deserialize(Buffer &b, Context& context) = 0;
 
   public:
     SerializerBase(const char *name = nullptr) : cOwnedObject(name) {}

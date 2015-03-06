@@ -120,7 +120,7 @@ void ICMPv6Serializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16To(startpos + 2, TCPIPchecksum::checksum(b._getBuf() + startpos, b.getPos() - startpos));
 }
 
-cPacket *ICMPv6Serializer::parse(Buffer &b, Context& context)
+cPacket *ICMPv6Serializer::deserialize(Buffer &b, Context& context)
 {
     ASSERT(b.getPos() == 0);
 

@@ -32,7 +32,7 @@ class UDPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket *parse(Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(Buffer &b, Context& context) override;
 
   public:
     UDPSerializer(const char *name = nullptr) : SerializerBase(name) {}

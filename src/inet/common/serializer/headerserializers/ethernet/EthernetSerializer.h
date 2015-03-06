@@ -38,7 +38,7 @@ class EthernetSerializer : public SerializerBase
     /**
      * Puts a packet sniffed from the wire into an EtherFrame.
      */
-    virtual cPacket *parse(Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(Buffer &b, Context& context) override;
 
   public:
     EthernetSerializer(const char *name = nullptr) : SerializerBase(name) {}
