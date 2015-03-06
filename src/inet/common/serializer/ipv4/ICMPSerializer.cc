@@ -76,7 +76,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeUint16(0);   // crc
             b.writeUint16(0);   // unused
             b.writeUint16(0);   // next hop MTU
-            SerializerBase::serialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
             break;
         }
 
@@ -85,7 +85,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeByte(ICMP_TIMXCEED_INTRANS);
             b.writeUint16(0);   // crc
             b.writeUint32(0);   // unused
-            SerializerBase::serialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
             break;
         }
 

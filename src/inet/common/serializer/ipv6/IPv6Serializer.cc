@@ -138,7 +138,7 @@ void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 
     const cPacket *encapPacket = dgram->getEncapsulatedPacket();
     unsigned int encapStart = b.getPos();
-    SerializerBase::serialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+    SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
     unsigned int encapEnd = b.getPos();
 
     ip6h->ip6_plen = htons(encapEnd - encapStart);
@@ -181,7 +181,7 @@ cPacket* IPv6Serializer::deserialize(Buffer &b, Context& c)
     cPacket *encapPacket = NULL;
     unsigned int encapLength = std::min(packetLength, b.getRemainder());
 
-    encapPacket = SerializerBase::parse(b, c, IP_PROT, dest->getTransportProtocol(), b.getRemainder() - encapLength);
+    encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), b.getRemainder() - encapLength);
     ASSERT(encapPacket);
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());

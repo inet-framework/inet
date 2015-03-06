@@ -67,7 +67,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     b.accessNBytes(2);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
-        SerializerBase::serialize(encapPkt, b, context, UNKNOWN, 0, 0);
+        SerializerBase::lookupAndSerialize(encapPkt, b, context, UNKNOWN, 0, 0);
     }
     else {
         b.fillNBytes(packetLength - 8, 0);   // payload place

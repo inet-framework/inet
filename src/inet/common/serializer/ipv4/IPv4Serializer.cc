@@ -90,14 +90,14 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         unsigned int totalLength = encapPacket->getByteLength();
         char *buf = new char[totalLength];
         Buffer tmpBuffer(buf, totalLength);
-        SerializerBase::serialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
+        SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
         unsigned int segmentLength = dgram->getByteLength() - b.getPos();
         tmpBuffer.seek(dgram->getFragmentOffset());
         b.writeNBytes(tmpBuffer, segmentLength);
         delete [] buf;
     }
     else
-        SerializerBase::serialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+        SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
 
     ip->ip_sum = TCPIPchecksum::checksum(ip, IP_HEADER_BYTES);
 }
@@ -150,7 +150,7 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
         encapPacket = SerializerBase::parseByteArrayPacket(b);
     }
     else
-        encapPacket = SerializerBase::parse(b, c, IP_PROT, dest->getTransportProtocol(), 0);
+        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), 0);
 
     ASSERT(encapPacket);
     dest->encapsulate(encapPacket);

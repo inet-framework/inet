@@ -44,7 +44,7 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         uint16_t ethType = frame->getEtherType();
         b.writeUint16(ethType);
         cPacket *encapPkt = frame->getEncapsulatedPacket();
-        SerializerBase::serialize(encapPkt, b, c, ETHERTYPE, ethType, 4);
+        SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, ethType, 4);
     }
     else if (dynamic_cast<const EtherFrameWithLLC *>(pkt)) {
         const EtherFrameWithLLC *frame = static_cast<const EtherFrameWithLLC *>(pkt);
@@ -60,12 +60,12 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeUint16(frame->getLocalcode());
             if (frame->getOrgCode() == 0) {
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::serialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), 4);
             }
             else {
                 //TODO
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::serialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
             }
         }
         else {
@@ -98,7 +98,7 @@ cPacket* EthernetSerializer::deserialize(Buffer &b, Context& c)
     etherPacket->setSrc(b.readMACAddress());
     etherPacket->setEtherType(b.readUint16());
 
-    cPacket *encapPacket = SerializerBase::parse(b, c, ETHERTYPE, etherPacket->getEtherType(), 4);
+    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, etherPacket->getEtherType(), 4);
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());

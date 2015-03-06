@@ -214,40 +214,10 @@ void SerializerBase::serializeByteArrayPacket(const ByteArrayMessage *pkt, Buffe
     return;
 }
 
-void SerializerBase::serialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
-{
-    Buffer subBuffer(b, trailerLength);
-    const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
-    if (bam) {
-        serializeByteArrayPacket(bam, subBuffer);
-        b.accessNBytes(subBuffer.getPos());
-        return;
-    }
-    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
-    if (!serializer) {
-        serializer = serializers.getInstance()->lookup(pkt->getClassName());
-    }
-    if (serializer) {
-        serializer->serializePacket(pkt, subBuffer, context);
-        b.accessNBytes(subBuffer.getPos());
-        return;
-    }
-    if (context.throwOnSerializerNotFound)
-        throw cRuntimeError("Serializer not found for '%s' (%i, %i)", pkt->getClassName(), group, id);
-    context.errorOccured = true;
-    b.fillNBytes(pkt->getByteLength(), '?');
-}
-
 void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
-    const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
-    if (bam) {
-        serializeByteArrayPacket(bam, b);
-    }
-    else {
-        serialize(pkt, b, context);
-    }
+    serialize(pkt, b, context);
     if (!b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
         throw cRuntimeError("serializer error: packet %s (%s) length is %d but serialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
@@ -256,17 +226,14 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
     cPacket *pkt = deserialize(b, context);
-
-    if (pkt) {
-        pkt->setByteLength(b.getPos() - startPos);
-        if (b.hasError())
-            pkt->setBitError(true);
-    }
-    else {
+    if (pkt == nullptr) {
         b.seek(startPos);
-        pkt = parseByteArrayPacket(b);
+        pkt = serializers.getInstance()->byteArraySerializer.deserialize(b, context);
     }
-
+    if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
+        throw cRuntimeError("deserializer error: packet %s (%s) length is %d but deserialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
+    if (b.hasError())
+        pkt->setBitError(true);
     return pkt;
 }
 
@@ -307,19 +274,21 @@ SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGr
         return serializers.getInstance()->byteArraySerializer;
 }
 
-cPacket *SerializerBase::parse(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+{
+    Buffer subBuffer(b, trailerLength);
+    SerializerBase & serializer = lookupSerializer(pkt, context, group, id);
+    serializer.serializePacket(pkt, subBuffer, context);
+    b.accessNBytes(subBuffer.getPos());
+}
+
+cPacket *SerializerBase::lookupAndDeserialize(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
 {
     cPacket *encapPacket = nullptr;
-    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
+    SerializerBase& serializer = lookupDeserializer(context, group, id);
     Buffer subBuffer(b, trailerLength);
-    if (serializer) {
-        encapPacket = serializer->deserializePacket(subBuffer, context);
-    }
-    else {
-        encapPacket = parseByteArrayPacket(subBuffer);
-    }
+    encapPacket = serializer.deserializePacket(subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
-    ASSERT(subBuffer.hasError() || subBuffer.getPos() == encapPacket->getByteLength());
     return encapPacket;
 }
 
