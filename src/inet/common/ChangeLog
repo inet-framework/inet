@@ -1,3 +1,46 @@
+2015-02-24  Levente Mészáros
+
+	Added new SI bps prefixes.
+
+2015-02-25  Benjamin Seregi & Levente Mészáros
+
+	Refactored BitVector classes.
+
+2015-01-21  Irene Ruengeler & Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-09  Irene Rüngeler
+
+	Allow flushing the pcapFile after each write to ensure that all packets are
+	captured in case of a crash
+
+2014-12-10  Levente Mészáros
+
+	Removed obsolete and unpredictable findModuleWherever* and ModuleAccess class.
+
+2014-12-04  Florian Meier
+
+	Added Group count result recorder to counts the occurrences of signals with
+	the same attribute. Can for example be used to count the number of packets
+	received per source.
+
+2014-12-04  Florian Meier
+
+	Added ResultFilter for source address.
+
+2014-11-18  Zoltan Bojthe & Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-19  Levente Mészáros
+
+	Added IntervalTree cache for efficiently computing intersecting intervals.
+
 2015-02-25  Benjamin Seregi
 
 	Added a Complex number implementation.

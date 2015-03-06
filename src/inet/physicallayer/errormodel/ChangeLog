@@ -6,6 +6,10 @@
 	Renamed ConstantErrorModel to StochasticErrorModel to better express its
 	behavior.
 
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======

@@ -1,3 +1,15 @@
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-10  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-18  Henrick
+
+	Fixed tosMask parsing in configureFilters function
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

@@ -6,6 +6,14 @@
 	Extended ITransmission, and IReception interfaces to support optional
 	PHY frame representation used by the layered implementation.
 
+2014-12-04  Florian Meier
+
+	Added Arrival to computeReception of IAnalogModel.
+
+2014-11-26  Levente Mészáros
+
+	Added computeIsReceptionSuccessful to IReceiver interface.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-10-31  Levente Meszaros

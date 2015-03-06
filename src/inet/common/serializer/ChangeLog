@@ -1,3 +1,19 @@
+2015-02-25  Benjamin Seregi
+
+	Added 802.11 OFDM PHY frame serializer.
+
+2015-01-28  Irene Ruengeler
+
+	Handle SACK and NR_SACK separately and use getByteLength instead of getBitLength.
+
+2015-01-21  Irene Ruengeler & Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Added implementation of IGMPv3.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-07-30  Andras Varga

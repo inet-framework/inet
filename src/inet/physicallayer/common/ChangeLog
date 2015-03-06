@@ -1,3 +1,7 @@
+2015-03-02  Levente Mészáros
+
+	Fixed memory managements bugs found by valgrind memcheck.
+
 2015-02-25  Levente Meszaros
 
 	Deleted obsolete ModulationClass, CodeRate, and ModulationType.
@@ -9,6 +13,49 @@
 
 	Moved classes related to the layered implementation into the corresponding
 	layered directory: ConvolutionalCoder
+
+2015-02-24  Levente Mészáros
+
+	Refactored transmitPacket/receivePacket to support layered radio.
+	Added separate and optional PHY frame representation.
+
+2015-02-23  Levente Mészáros
+
+	Fixed deleting interval entries from the interval tree.
+	This bug caused the heap to grow indefinitely with the number of
+	transmissions. Reported by Raphael Riebl <raphael.riebl@thi.de>
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-19  Levente Mészáros
+
+	Fixed removing dynamic radios.
+
+2015-01-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Renamed classes to TransmissionRequest and ReceptionIndication.
+	Moved them under the inet::physicallayer namespace.
+
+2014-11-19  Levente Mészáros
+
+	Added IntervalTree cache for efficiently computing arrivals.
+	This drastically increases physical layer performance for large networks.
+
+2014-11-17  Levente Mészáros
+
+	Added noise and SNIR cache counters.
+
+2014-11-12  Levente Mészáros
+
+	Ignore incoming reception messages when down. Ignore aborting ongoing
+	transmission when switching radio mode. Changed to switch radio mode
+	immediately during startup/shudown/crash ignoring switching times.
 
 2014-11-07  ------ inet-2.99.0 released ------
 
