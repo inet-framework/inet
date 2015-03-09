@@ -173,6 +173,8 @@ class INET_API SerializerRegistrationList : public cNamedObject, noncopyable
         SerializerRegistrationList(const char *name) : cNamedObject(name, false) {}
         virtual ~SerializerRegistrationList();
 
+        virtual void clear();
+
         /**
          * Adds an object to the container.
          */
@@ -191,29 +193,10 @@ class INET_API SerializerRegistrationList : public cNamedObject, noncopyable
         virtual SerializerBase *lookup(const char *name) const;
 };
 
-/**
- * Singleton class, used for registration lists.
- * Instances are supposed to be global variables.
- *
- * @ingroup Internals
- */
-class INET_API GlobalSerializerRegistrationList
-{
-  private:
-    SerializerRegistrationList *inst = nullptr;
-    const char *tmpname = nullptr;
-  public:
-    GlobalSerializerRegistrationList();
-    GlobalSerializerRegistrationList(const char *name);
-    ~GlobalSerializerRegistrationList();
-    SerializerRegistrationList *getInstance();
-    void clear();
-};
-
-INET_API extern GlobalSerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
+INET_API extern SerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
 
 #define Register_Serializer(SERIALIZABLECLASSNAME, PROTOCOLGROUP, PROTOCOLID, SERIALIZERCLASSNAME)   \
-        EXECUTE_ON_STARTUP(serializers.getInstance()->add(opp_typename(typeid(SERIALIZABLECLASSNAME)), \
+        EXECUTE_ON_STARTUP(serializers.add(opp_typename(typeid(SERIALIZABLECLASSNAME)), \
                 PROTOCOLGROUP, PROTOCOLID, new SERIALIZERCLASSNAME(#SERIALIZABLECLASSNAME)););
 
 } // namespace serializer

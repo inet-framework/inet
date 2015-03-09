@@ -22,7 +22,7 @@ namespace inet {
 
 namespace serializer {
 
-GlobalSerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
+SerializerRegistrationList serializers("default"); ///< List of packet serializers (SerializerBase)
 
 EXECUTE_ON_SHUTDOWN(
         serializers.clear();
@@ -220,7 +220,7 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
     cPacket *pkt = deserialize(b, context);
     if (pkt == nullptr) {
         b.seek(startPos);
-        pkt = serializers.getInstance()->byteArraySerializer.deserialize(b, context);
+        pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
     if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
         throw cRuntimeError("deserializer error: packet %s (%s) length is %d but deserialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
@@ -233,25 +233,25 @@ SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& c
 {
     const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
     if (bam != nullptr)
-        return serializers.getInstance()->byteArraySerializer;
-    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
+        return serializers.byteArraySerializer;
+    SerializerBase *serializer = serializers.lookup(group, id);
     if (serializer != nullptr)
         return *serializer;
-    serializer = serializers.getInstance()->lookup(pkt->getClassName());
+    serializer = serializers.lookup(pkt->getClassName());
     if (serializer != nullptr)
         return *serializer;
     if (context.throwOnSerializerNotFound)
         throw cRuntimeError("Serializer not found for '%s' (%i, %i)", pkt->getClassName(), group, id);
-    return serializers.getInstance()->defaultSerializer;
+    return serializers.defaultSerializer;
 }
 
 SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGroup group, int id)
 {
-    SerializerBase *serializer = serializers.getInstance()->lookup(group, id);
+    SerializerBase *serializer = serializers.lookup(group, id);
     if (serializer != nullptr)
         return *serializer;
     else
-        return serializers.getInstance()->byteArraySerializer;
+        return serializers.byteArraySerializer;
 }
 
 void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
@@ -323,9 +323,17 @@ cPacket *ByteArraySerializer::deserialize(Buffer &b, Context& context)
 
 SerializerRegistrationList::~SerializerRegistrationList()
 {
+    if (!stringToSerializerMap.empty())
+        throw cRuntimeError("SerializerRegistrationList not empty, should call the SerializerRegistrationList::clear() function");
+}
+
+void SerializerRegistrationList::clear()
+{
     for (auto elem : stringToSerializerMap) {
         dropAndDelete(elem.second);
     }
+    stringToSerializerMap.clear();
+    keyToSerializerMap.clear();
 }
 
 void SerializerRegistrationList::add(const char *name, int protocolGroup, int protocolId, SerializerBase *obj)
@@ -335,8 +343,9 @@ void SerializerRegistrationList::add(const char *name, int protocolGroup, int pr
     take(obj);
     if (protocolGroup && protocolId)
         keyToSerializerMap.insert(std::pair<Key,SerializerBase*>(key, obj));
-    if (name)
-        stringToSerializerMap.insert(std::pair<std::string,SerializerBase*>(name, obj));
+    if (!name)
+        throw cRuntimeError("missing 'name' of registered serializer");
+    stringToSerializerMap.insert(std::pair<std::string,SerializerBase*>(name, obj));
 }
 
 SerializerBase *SerializerRegistrationList::lookup(int protocolGroup, int protocolId) const
@@ -351,37 +360,6 @@ SerializerBase *SerializerRegistrationList::lookup(const char *name) const
     auto it = stringToSerializerMap.find(name);
     return it==stringToSerializerMap.end() ? NULL : it->second;
     return nullptr;
-}
-
-//
-
-GlobalSerializerRegistrationList::GlobalSerializerRegistrationList()
-{
-}
-
-GlobalSerializerRegistrationList::GlobalSerializerRegistrationList(const char *name)
-{
-    tmpname = name;
-}
-
-GlobalSerializerRegistrationList::~GlobalSerializerRegistrationList()
-{
-    // delete inst; -- this is usually not a good idea, as things may be
-    // in an inconsistent state by now; especially if the program is
-    // exiting via exit() or abort(), ie. not by returning from main().
-}
-
-SerializerRegistrationList *GlobalSerializerRegistrationList::getInstance()
-{
-    if (!inst)
-        inst = new SerializerRegistrationList(tmpname);
-    return inst;
-}
-
-void GlobalSerializerRegistrationList::clear()
-{
-    delete inst;
-    inst = NULL;
 }
 
 //

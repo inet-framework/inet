@@ -86,7 +86,7 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& context)
     uint16_t crc = b.readUint16();
     pkt->setByteLength(8);
     Context c;
-    cPacket *encapPacket = serializers.getInstance()->byteArraySerializer.deserialize(b, c);
+    cPacket *encapPacket = serializers.byteArraySerializer.deserialize(b, c);
     uint16_t calcCrc = TCPIPchecksum::checksum(b._getBuf(), b.getPos());
     pkt->encapsulate(encapPacket);
     if (crc != calcCrc || pkt->getByteLength() != length)
