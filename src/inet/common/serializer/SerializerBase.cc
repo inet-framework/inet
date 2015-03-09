@@ -211,7 +211,7 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& con
     unsigned int startPos = b.getPos();
     serialize(pkt, b, context);
     if (!b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
-        throw cRuntimeError("serializer error: packet %s (%s) length is %d but serialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
+        throw cRuntimeError("%s serializer error: packet %s (%s) length is %d but serialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
 cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
@@ -223,7 +223,7 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
         pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
     if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
-        throw cRuntimeError("deserializer error: packet %s (%s) length is %d but deserialized length is %d", pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
+        throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
     if (b.hasError())
         pkt->setBitError(true);
     return pkt;
