@@ -115,6 +115,7 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
 
     serializer::Buffer b(buf, sizeof(buf));
     serializer::Context c;
+    c.throwOnSerializerNotFound = false;
     serializer::IPv4Serializer().serializePacket(ipPacket, b, c);
     int32 serialized_ip = b.getPos();
 
