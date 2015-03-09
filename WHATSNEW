@@ -378,8 +378,17 @@ Directory reorganization:
  - applications/httptools/ has been split up to several subdirectories: browser/,
    server/, configurator/, common/.
 
-INET 2.5.1 (Nov 7, 2014)
+INET 2.6 (March 05, 2015)
 -------------------------
+
+   - added OLIA for CMT-SCTP (by Martin Becke)
+   - added a trace player feature to NetPerfMeter
+   - fixed compile errors when using OMNeT++ 5.0b1
+   - fixed an issue with too small initial value of 'ssthreshold' in TCP
+   - fixed window scaling in TCP
+
+INET 2.5.1 (Nov 7, 2014)
+------------------------
 
    - fixed a crash in SCTP
    - now builds with all features turned off

@@ -8,7 +8,7 @@
 // *
 // * --------------------------------------------------------------------------
 // *
-// *   Copyright (C) 2009-2014 by Thomas Dreibholz
+// *   Copyright (C) 2009-2015 by Thomas Dreibholz
 // *
 // *   This program is free software: you can redistribute it and/or modify
 // *   it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ simple NetPerfMeter like INetPerfMeterApp
         volatile double frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size
         string          frameRateString          = default("");        // Outgoing frame rate per stream, separated by ";"
         string          frameSizeString          = default("");        // Outgoing frame size per stream, separated by ";"
+        string          traceFile                = default("");        // Use trace file instead of frame rate/frame size
         double          maxMsgSize     @unit(B)  = default(1000 B);    // Maximum message size
         double          unordered                = default(0.0);       // Fraction of unordered messages (SCTP only)
         double          unreliable               = default(0.0);       // Fraction of unreliable messages (SCTP only)
