@@ -69,25 +69,25 @@
  * Structure of a 10Mb/s Ethernet header.
  */
 struct  ether_header {
-        u_char  ether_dhost[ETHER_ADDR_LEN];
-        u_char  ether_shost[ETHER_ADDR_LEN];
-        u_short ether_type;
+        uint8_t  ether_dhost[ETHER_ADDR_LEN];
+        uint8_t  ether_shost[ETHER_ADDR_LEN];
+        uint16_t ether_type;
 };
 
 /*
  * Structure of a 48-bit Ethernet address.
  */
 struct  ether_addr {
-        u_char octet[ETHER_ADDR_LEN];
+        uint8_t octet[ETHER_ADDR_LEN];
 };
 
 /*
  * Structure of SNAP header
  */
 struct snap_header {
-    u_char dsap;
-    u_char ssap;
-    u_char ctrl;
+    uint8_t dsap;
+    uint8_t ssap;
+    uint8_t ctrl;
     uint64_t snap;
 }__PACKED__;
 
