@@ -141,6 +141,12 @@ simple SCTP like ISCTP
 
         //#====== CMT/RP-SCTP =================================================
         bool strictCwndBooking = default(false);
+        // CMT Congestion Control Variant
+        // off     = use over every path the default RFC4960 CC (New Reno)
+        // lia     = First resource pooling congestion control RFC6356 adapted for SCTP - https://datatracker.ietf.org/doc/rfc6356/
+        // olia    = alternative MPTCP CC, adapted for SCTP- https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
+        // cmtrpv1 = First resource pooling based CC for SCTP - https://www.tdr.wiwi.uni-due.de/fileadmin/fileupload/I-TDR/SCTP/Paper/AINA2010.pdf
+        // cmtrpv2 = Updated version of cmtrpv1 - https://www.tdr.wiwi.uni-due.de/fileadmin/fileupload/I-TDR/SCTP/Paper/ConTEL2011.pdf
         string cmtCCVariant = default("off");
         string cmtCCPathGroups = default("");
         bool rpPathBlocking = default(false);

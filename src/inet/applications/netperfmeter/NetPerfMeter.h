@@ -8,7 +8,7 @@
 // *
 // * --------------------------------------------------------------------------
 // *
-// *   Copyright (C) 2009-2014 by Thomas Dreibholz
+// *   Copyright (C) 2009-2015 by Thomas Dreibholz
 // *
 // *   This program is free software: you can redistribute it and/or modify
 // *   it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 
 #include <omnetpp.h>
 #include <assert.h>
+#include <fstream>
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
@@ -130,6 +131,15 @@ class INET_API NetPerfMeter : public cSimpleModule
    int                   ConnectionID;
    L3Address             PrimaryPath;
 
+   // ====== Trace File Handling ============================================
+   struct TraceEntry {
+      double       InterFrameDelay;
+      unsigned int FrameSize;
+      unsigned int StreamID;
+   };
+   std::vector<TraceEntry> TraceVector;                // Frame trace from file
+   size_t                  TraceIndex;                 // Position in trace file
+
    // ====== Timers =========================================================
    simtime_t             TransmissionStartTime;        // Absolute transmission start time
    simtime_t             ConnectionEstablishmentTime;  // Absolute connection establishment time
@@ -190,6 +200,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    }
    double        getFrameRate(const unsigned int streamID);
    unsigned long getFrameSize(const unsigned int streamID);
+   void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
    void sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
                                    const SCTPSendQueueAbated* sendQueueAbatedIndication);
 

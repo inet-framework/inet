@@ -8,7 +8,7 @@
 // *
 // * --------------------------------------------------------------------------
 // *
-// *   Copyright (C) 2009-2012 by Thomas Dreibholz
+// *   Copyright (C) 2009-2015 by Thomas Dreibholz
 // *
 // *   This program is free software: you can redistribute it and/or modify
 // *   it under the terms of the GNU General Public License as published by
@@ -27,11 +27,12 @@
 
 package inet.examples.netperfmeter;
 
+import applications.netperfmeter.NetPerfMeterHost;
 import inet.common.queue.FIFOQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.REDDropper;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 
@@ -93,44 +94,40 @@ network testNetwork
         }
 
         // ------ Routers -----------------------------------------------------
-        westernBorderRouter: StandardHost {
+        westernBorderRouter: Router {
             parameters:
-                forwarding = true;
                 @display("p=500,150,c,150;i=abstract/router_l,gold");
             gates:
                 pppg[1 + systems];
         }
-        westernCoreRouter: StandardHost {
+        westernCoreRouter: Router {
             parameters:
-                forwarding = true;
                 @display("p=700,150,c,150;i=abstract/router_l,gold");
             gates:
                 pppg[2];
         }
-        easternCoreRouter: StandardHost {
+        easternCoreRouter: Router {
             parameters:
-                forwarding = true;
                 @display("p=1000,150,c,150;i=abstract/router_l,gold");
             gates:
                 pppg[2];
         }
-        easternBorderRouter: StandardHost {
+        easternBorderRouter: Router {
             parameters:
-                forwarding = true;
                 @display("p=1200,150,c,150;i=abstract/router_l,gold");
             gates:
                 pppg[1 + systems];
         }
 
         // ------ Systems -----------------------------------------------------
-        clientMain[systems]: StandardHost {
+        clientMain[systems]: NetPerfMeterHost {
             parameters:
                 forwarding = false;
                 @display("p=50,50,c,200;i=device/laptop_l,green");
             gates:
                 pppg[1];
         }
-        serverMain[systems]: StandardHost {
+        serverMain[systems]: NetPerfMeterHost {
             parameters:
                 forwarding = false;
                 @display("p=1650,50,c,200;i=device/server_l,green");

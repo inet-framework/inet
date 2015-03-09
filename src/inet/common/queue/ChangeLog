@@ -44,6 +44,8 @@
 	Useful for flushing queues in MACs when they do down. clear() is not good
 	enough because we want to use packets as drop signal value.
 
+2015-03-04  ------ inet-2.6 released ------
+
 2014-11-07  ------ inet-2.5.1 released ------
 
 2014-10-29  ------ inet-2.5.0 released ------

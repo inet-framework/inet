@@ -119,6 +119,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     gapNRAckedChunksInLastSACK = 0;
     gapUnackedChunksInLastSACK = 0;
 
+    oliaSentBytes = 0;
     numberOfFastRetransmissions = 0;
     numberOfTimerBasedRetransmissions = 0;
     numberOfHeartbeatsSent = 0;
@@ -1435,11 +1436,13 @@ void SCTPAssociation::stateEntered(int32 status)
                 state->cmtCCVariant = SCTPStateVariables::CCCV_CMT;
                 state->allowCMT = true;
             }
-            else if ((strcmp((const char *)sctpMain->par("cmtCCVariant"), "like-mptcp") == 0) ||
-                     (strcmp((const char *)sctpMain->par("cmtCCVariant"), "mptcp-like") == 0))
-            {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_Like_MPTCP;
-                state->allowCMT = true;
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "lia") == 0){
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMT_LIA;
+               state->allowCMT     = true;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "olia") == 0){
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMT_OLIA;
+               state->allowCMT     = true;
             }
             else if ((strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp") == 0) ||
                      (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrpv1") == 0))
