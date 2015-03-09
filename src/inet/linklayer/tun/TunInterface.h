@@ -21,7 +21,6 @@
 #define __TUNINTERFACE_H
 
 #include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/base/MACBase.h"
 
 namespace inet {
@@ -32,6 +31,12 @@ class InterfaceEntry;
 class TunInterface : public MACBase
 {
     protected:
+        static simsignal_t packetSentToLowerSignal;
+        static simsignal_t packetReceivedFromLowerSignal;
+        static simsignal_t packetSentToUpperSignal;
+        static simsignal_t packetReceivedFromUpperSignal;
+
+    protected:
         void updateDisplayString();
 
         // MACBase functions
@@ -39,11 +44,6 @@ class TunInterface : public MACBase
         virtual void flushQueue() override;
         virtual void clearQueue() override;
         virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
-
-        static simsignal_t packetSentToLowerSignal;
-        static simsignal_t packetReceivedFromLowerSignal;
-        static simsignal_t packetSentToUpperSignal;
-        static simsignal_t packetReceivedFromUpperSignal;
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

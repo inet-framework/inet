@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
-
-#include "inet/linklayer/tun/TunInterface.h"
-
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/INETUtils.h"
+#include "inet/linklayer/tun/TunInterface.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -34,30 +31,22 @@ simsignal_t TunInterface::packetReceivedFromUpperSignal = registerSignal("packet
 void TunInterface::initialize(int stage)
 {
     MACBase::initialize(stage);
-
-    // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL)
-    {
         registerInterface();
-    }
 }
 
 InterfaceEntry *TunInterface::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
-
-    // interface name: our module name without special characters ([])
-    e->setName(utils::stripnonalnum(getFullName()).c_str());
-
-    return e;
+    return new InterfaceEntry(this);
 }
 
 void TunInterface::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGate()->isName("appIn")) {
         emit(packetSentToUpperSignal, msg);
-       send(msg, "upperLayerOut");
-    } else if (msg->getArrivalGate()->isName("upperLayerIn")) {
+        send(msg, "upperLayerOut");
+    }
+    else if (msg->getArrivalGate()->isName("upperLayerIn")) {
         emit(packetReceivedFromUpperSignal, msg);
         send(msg, "appOut");
     }

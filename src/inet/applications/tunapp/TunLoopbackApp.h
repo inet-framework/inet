@@ -24,14 +24,16 @@ namespace inet {
 
 class INET_API TunLoopbackApp : public cSimpleModule
 {
-    public:
-        virtual ~TunLoopbackApp();
-    private:
+    protected:
         unsigned int packetsSent;
         unsigned int packetsReceived;
 
         static simsignal_t sentPkSignal;
         static simsignal_t rcvdPkSignal;
+
+    public:
+        TunLoopbackApp();
+        virtual ~TunLoopbackApp();
 
     protected:
         void initialize(int stage) override;
@@ -40,4 +42,6 @@ class INET_API TunLoopbackApp : public cSimpleModule
 };
 
 } // namespace inet
+
 # endif
+

@@ -18,9 +18,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
 #include "inet/applications/tunapp/TunLoopbackApp.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/contract/INetworkDatagram.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 
 namespace inet {
@@ -30,40 +29,42 @@ Define_Module(TunLoopbackApp);
 simsignal_t TunLoopbackApp::sentPkSignal = registerSignal("sentPk");
 simsignal_t TunLoopbackApp::rcvdPkSignal = registerSignal("rcvdPk");
 
+TunLoopbackApp::TunLoopbackApp() :
+    packetsSent(0),
+    packetsReceived(0)
+{
+}
+
+TunLoopbackApp::~TunLoopbackApp()
+{
+}
+
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
     if (stage == INITSTAGE_LOCAL) {
-        // parameters
-        packetsReceived = 0;
         packetsSent = 0;
+        packetsReceived = 0;
     }
 }
 
-
-void TunLoopbackApp::handleMessage(cMessage *msg)
+void TunLoopbackApp::handleMessage(cMessage *message)
 {
-    if (msg->getArrivalGate()->isName("tunIn")) {
-        EV_INFO << "msg " << msg->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
+    if (message->getArrivalGate()->isName("tunIn")) {
+        EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
-        IPv4Datagram *ip = check_and_cast<IPv4Datagram *>(msg);
-        if (msg) {
-            UDPPacket *udp = check_and_cast<UDPPacket *>(ip->decapsulate());
-            int remotePort = udp->getDestinationPort();
-            udp->setDestinationPort(udp->getSourcePort());
-            udp->setSourcePort(remotePort);
-            IPv4Datagram *echoMsg = ip->dup();
-            echoMsg->setSrcAddress(ip->getDestAddress());
-            echoMsg->setDestAddress(ip->getSrcAddress());
-            echoMsg->encapsulate(udp);
-            send(echoMsg, "tunOut");
-            packetsSent++;
-        }
-    } else {
-        EV_DEBUG << "unknown arrivalGate\n";
+        INetworkDatagram *networkDatagram = check_and_cast<INetworkDatagram *>(message);
+        // TODO: use ITransportPacket when subcassed by UDPPacket, etc.
+        UDPPacket *transportPacket = check_and_cast<UDPPacket *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
+        transportPacket->setDestinationPort(transportPacket->getSourcePort());
+        transportPacket->setSourcePort(transportPacket->getDestinationPort());
+        networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());
+        networkDatagram->setDestinationAddress(networkDatagram->getSourceAddress());
+        send(message, "tunOut");
+        packetsSent++;
     }
-    delete msg;
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 
@@ -71,11 +72,6 @@ void TunLoopbackApp::finish()
 {
     EV_INFO << "packets sent: " << packetsSent << endl;
     EV_INFO << "packets received: " << packetsReceived << endl;
-}
-
-
-TunLoopbackApp::~TunLoopbackApp()
-{
 }
 
 } // namespace inet
