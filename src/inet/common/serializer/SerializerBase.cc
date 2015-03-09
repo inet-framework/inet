@@ -40,7 +40,7 @@ Buffer::Buffer(const Buffer& base, unsigned int trailerLength)
     }
 }
 
-unsigned char Buffer::readByte()
+unsigned char Buffer::readByte() const
 {
     if (pos >= bufsize) {
         errorFound = true;
@@ -49,7 +49,7 @@ unsigned char Buffer::readByte()
     return buf[pos++];
 }
 
-void Buffer::readNBytes(unsigned int length, void *_dest)
+void Buffer::readNBytes(unsigned int length, void *_dest) const
 {
     unsigned char *dest = static_cast<unsigned char *>(_dest);
     while (length--) {
@@ -61,7 +61,7 @@ void Buffer::readNBytes(unsigned int length, void *_dest)
     }
 }
 
-uint16_t Buffer::readUint16()
+uint16_t Buffer::readUint16() const
 {
     if (pos + 2 > bufsize) {
         errorFound = true;
@@ -72,7 +72,7 @@ uint16_t Buffer::readUint16()
     return ret;
 }
 
-uint32_t Buffer::readUint32()
+uint32_t Buffer::readUint32() const
 {
     if (pos + 4 > bufsize) {
         errorFound = true;
@@ -178,12 +178,11 @@ void *Buffer::accessNBytes(unsigned int length)
     return nullptr;
 }
 
-MACAddress Buffer::readMACAddress()
+MACAddress Buffer::readMACAddress() const
 {
     MACAddress addr;
-    void *addrBytes = accessNBytes(MAC_ADDRESS_SIZE);
-    if (addrBytes)
-        addr.setAddressBytes((unsigned char *)addrBytes);
+    for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
+        addr.setAddressByte(i, readByte());
     return addr;
 }
 
@@ -194,10 +193,9 @@ void Buffer::writeMACAddress(const MACAddress& addr)
         addr.getAddressBytes((unsigned char *)addrBytes);
 }
 
-IPv6Address Buffer::readIPv6Address()
+IPv6Address Buffer::readIPv6Address() const
 {
     uint32_t d[4];
-    void *addrBytes = accessNBytes(MAC_ADDRESS_SIZE);
     for (int i = 0; i < 4; i++)
         d[i] = readUint32();
     return IPv6Address(d[0], d[1], d[2], d[3]);

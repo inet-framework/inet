@@ -52,29 +52,29 @@ class INET_API Buffer
   protected:
     unsigned char *buf = nullptr;
     unsigned int bufsize = 0;
-    unsigned int pos = 0;
-    bool errorFound = false;
+    mutable unsigned int pos = 0;
+    mutable bool errorFound = false;
 
   public:
     Buffer(const Buffer& base, unsigned int trailerLength);
     Buffer(void *buf, unsigned int bufLen) : buf(static_cast<unsigned char *>(buf)), bufsize(bufLen) {}
 
     // position
-    void seek(unsigned int newpos)  { if (newpos <= bufsize) { pos = newpos; } else { pos = bufsize; errorFound = true; } }
+    void seek(unsigned int newpos) const { if (newpos <= bufsize) { pos = newpos; } else { pos = bufsize; errorFound = true; } }
     unsigned int getPos() const  { return pos; }
     unsigned int getRemainder() const  { return bufsize - pos; }
 
     bool hasError() const  { return errorFound; }
-    void setError() { errorFound = true; }
+    void setError() const  { errorFound = true; }
 
     // read
-    unsigned char readByte();  // returns 0 when not enough space
-    void readNBytes(unsigned int length, void *dest);    // padding 0 when not enough space
-    uint16_t readUint16();    // ntoh, returns 0 when not enough space
-    uint32_t readUint32();    // ntoh, returns 0 when not enough space
-    MACAddress readMACAddress();
-    IPv4Address readIPv4Address()  { return IPv4Address(readUint32()); }
-    IPv6Address readIPv6Address();
+    unsigned char readByte() const;  // returns 0 when not enough space
+    void readNBytes(unsigned int length, void *dest) const;    // padding with 0 when not enough space
+    uint16_t readUint16() const;    // ntoh, returns 0 when not enough space
+    uint32_t readUint32() const;    // ntoh, returns 0 when not enough space
+    MACAddress readMACAddress() const;
+    IPv4Address readIPv4Address() const  { return IPv4Address(readUint32()); }
+    IPv6Address readIPv6Address() const;
 
     // write
     void writeByte(unsigned char data);
