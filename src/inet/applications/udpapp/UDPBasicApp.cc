@@ -125,11 +125,8 @@ void UDPBasicApp::sendPacket()
 void UDPBasicApp::processStart()
 {
     socket.setOutputGate(gate("udpOut"));
-    if (L3Address(par("localAddress")).isUnspecified()) {
-        socket.bind(localPort);
-    } else {
-        socket.bind(L3Address(par("localAddress")), localPort);
-    }
+    const char *localAddress = par("localAddress");
+    socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
 
     const char *destAddrs = par("destAddresses");
