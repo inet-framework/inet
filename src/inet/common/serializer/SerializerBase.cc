@@ -24,6 +24,11 @@ namespace serializer {
 
 GlobalSerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
 
+EXECUTE_ON_SHUTDOWN(
+        serializers.clear();
+        );
+
+
 DefaultSerializer SerializerRegistrationList::defaultSerializer;
 ByteArraySerializer SerializerRegistrationList::byteArraySerializer;
 
@@ -327,6 +332,7 @@ void SerializerRegistrationList::add(const char *name, int protocolGroup, int pr
 {
     Key key(protocolGroup, protocolId);
 
+    take(obj);
     if (protocolGroup && protocolId)
         keyToSerializerMap.insert(std::pair<Key,SerializerBase*>(key, obj));
     if (name)
