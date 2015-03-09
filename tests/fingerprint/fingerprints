@@ -275,7 +275,7 @@ class FingerprintTestCase(SimulationTestCase):
             " --result-dir=" + resultdir + \
             extraOppRunArgs;
 
-        anyFingerpintBad = False;
+        anyFingerprintBad = False;
         computedFingerprints = set()
         for rep in range(self.repeat):
             result = self.runSimulation(self.title, command, workingdir)
@@ -293,13 +293,13 @@ class FingerprintTestCase(SimulationTestCase):
                 raise Exception("other")
             elif result.isFingerprintOK == False:
                 computedFingerprints.add(result.computedFingerprint)
-                anyFingerpintBad = True
+                anyFingerprintBad = True
             else:
                 # fingerprint OK:
                 computedFingerprints.add(self.fingerprint)
 #                pass
 
-        if anyFingerpintBad:
+        if anyFingerprintBad:
             self.storeFingerprintCallback(",".join(computedFingerprints))
             assert False, "some fingerprint mismatch; actual " + " '" + ",".join(computedFingerprints) +"'"
 
