@@ -76,7 +76,9 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeUint16(0);   // crc
             b.writeUint16(0);   // unused
             b.writeUint16(0);   // next hop MTU
-            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            b.accessNBytes(std::min((unsigned int)(pkt->getByteLength() - ICMP_MINLEN), s.getPos()));
             break;
         }
 
@@ -85,11 +87,14 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeByte(ICMP_TIMXCEED_INTRANS);
             b.writeUint16(0);   // crc
             b.writeUint32(0);   // unused
-            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            b.accessNBytes(std::min((unsigned int)(pkt->getByteLength() - ICMP_MINLEN), s.getPos()));
             break;
         }
 
         default: {
+            //TODO if (c.throwOnSerializerNotFound)
             throw cRuntimeError("Can not serialize ICMP packet: type %d  not supported.", pkt->getType());
         }
     }
