@@ -144,7 +144,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     b.seek(writtenbytes);
 }
 
-TCPSegment *TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, bool withBytes)
+TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bufsize, bool withBytes)
 {
     Buffer b(const_cast<unsigned char *>(buf), bufsize);
     Context c;

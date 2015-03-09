@@ -863,7 +863,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
     else {
-        tcpseg = TCPSerializer().parse((const unsigned char *)tcph, totalLen - ipHdrLen, true);
+        tcpseg = TCPSerializer().deserialize((const unsigned char *)tcph, totalLen - ipHdrLen, true);
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 

@@ -46,7 +46,7 @@ class TCPSerializer : public SerializerBase
     /**
      * Puts a packet sniffed from the wire into a TCPSegment.
      */
-    tcp::TCPSegment *parse(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
+    tcp::TCPSegment *deserialize(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
 
     /**
      * Calculate checksum with pseudo header.

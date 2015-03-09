@@ -602,7 +602,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         tcpseg = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        tcpseg = TCPSerializer().parse((const unsigned char *)dataP, lenP, true);
+        tcpseg = TCPSerializer().deserialize((const unsigned char *)dataP, lenP, true);
         ASSERT(tcpseg->getPayloadLength() == 0);
     }
 
