@@ -260,6 +260,8 @@ void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& 
     SerializerBase & serializer = lookupSerializer(pkt, context, group, id);
     serializer.serializePacket(pkt, subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
+    if (subBuffer.hasError())
+        b.setError();
 }
 
 cPacket *SerializerBase::lookupAndDeserialize(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
