@@ -17,56 +17,87 @@
 #include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 
 #include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/common/serializer/headers/in.h"
 #include "inet/common/serializer/headers/in_systm.h"
-#include "inet/common/serializer/headers/ethernethdr.h"
-#include "inet/common/serializer/headerserializers/arp/headers/arp.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
-
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
+#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 
 namespace inet {
 namespace serializer {
 
-int ARPSerializer::serialize(const ARPPacket *pkt, unsigned char *buf, unsigned int bufsize)
+Register_Serializer(ARPPacket, ETHERTYPE, ETHERTYPE_ARP, ARPSerializer);
+
+/*
+struct arphdr {
+        uint16_t ar_hrd;                 // Hardware type (16 bits)
+        uint16_t ar_pro;                 // Protocol type (16 bits)
+        uint8_t ar_hln;                  // Byte length of each hardware address (n) (8 bits)
+        uint8_t ar_pln;                  // Byte length of each protocol address (m) (8 bits)
+        uint16_t ar_op;                  // Operation code (16 bits)
+        uint8_t ar_sha[ETHER_ADDR_LEN];  // source hardware address (n bytes)
+        uint32_t ar_spa;                 // source protocol address (m bytes)
+        uint8_t ar_tha[ETHER_ADDR_LEN];  // target hardware address (n bytes)
+        uint32_t ar_tpa;                 // target protocol address (m bytes)
+} __PACKED__;
+*/
+
+MACAddress ARPSerializer::readMACAddress(Buffer& b, unsigned int size)
 {
-    struct arphdr *arphdr = (struct arphdr *) (buf);
-
-    arphdr->ar_hrd = htons(1); //ethernet
-    arphdr->ar_pro = htons(ETHERTYPE_IPv4);
-    arphdr->ar_hln = ETHER_ADDR_LEN;
-    arphdr->ar_pln = 4; //IPv4
-    arphdr->ar_op = htons(pkt->getOpcode());
-    pkt->getSrcMACAddress().getAddressBytes(arphdr->ar_sha);
-    arphdr->ar_spa = htonl(pkt->getSrcIPAddress().getInt());
-    pkt->getDestMACAddress().getAddressBytes(arphdr->ar_tha);
-    arphdr->ar_tpa = htonl(pkt->getDestIPAddress().getInt());
-
-    int packetLength = 2+2+1+1+2+2*arphdr->ar_hln+2*arphdr->ar_pln;
-    return packetLength;
+    unsigned int curpos = b.getPos();
+    MACAddress addr = b.readMACAddress();
+    b.seek(curpos + size);
+    return addr;
 }
 
-void ARPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ARPPacket *pkt)
+IPv4Address ARPSerializer::readIPv4Address(Buffer& b, unsigned int size)
 {
-    struct arphdr *arphdr = (struct arphdr *) (buf);
+    unsigned int curpos = b.getPos();
+    IPv4Address addr = b.readIPv4Address();
+    b.seek(curpos + size);
+    return addr;
+}
 
-    //arphdr->ar_hrd
-    //arphdr->ar_pro
-    //arphdr->ar_hln
-    //arphdr->ar_pln
+void ARPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
+{
+    const ARPPacket *pkt = check_and_cast<const ARPPacket *>(_pkt);
+    b.writeUint16(1); //ethernet
+    b.writeUint16(ETHERTYPE_IPv4);
+    b.writeByte(ETHER_ADDR_LEN);
+    b.writeByte(4);  // size of IPv4 address
+    b.writeUint16(pkt->getOpcode());
+    b.writeMACAddress(pkt->getSrcMACAddress());
+    b.writeIPv4Address(pkt->getSrcIPAddress());
+    b.writeMACAddress(pkt->getDestMACAddress());
+    b.writeIPv4Address(pkt->getDestIPAddress());
+    if (pkt->getEncapsulatedPacket())
+        throw cRuntimeError("ARPSerializer: encapsulated packet not supported!");
+}
 
-    pkt->setOpcode(ntohs(arphdr->ar_op));
+cPacket* ARPSerializer::parse(Buffer &b, Context& context)
+{
+    ARPPacket *pkt = new ARPPacket("parsed ARP");
+
+    uint16_t x;
+    x = b.readUint16();   // 1
+    if (x != 1)
+        pkt->setBitError(true);
+    x = b.readUint16();   // ETHERTYPE_IP
+    if (x != ETHERTYPE_IPv4)
+        pkt->setBitError(true);
+    uint8_t n = b.readByte();     //ar_hln
+    uint8_t m = b.readByte();     //ar_pln
+    pkt->setOpcode(b.readUint16());   // arphdr->ar_op
     MACAddress temp;
-    temp.setAddressBytes(arphdr->ar_sha);
-    pkt->setSrcMACAddress(temp);
-    temp.setAddressBytes(arphdr->ar_tha);
-    pkt->setDestMACAddress(temp);
-    pkt->setSrcIPAddress(IPv4Address(ntohl(arphdr->ar_spa)));
-    pkt->setDestIPAddress(IPv4Address(ntohl(arphdr->ar_tpa)));
-    pkt->setByteLength(28);
+    pkt->setSrcMACAddress(readMACAddress(b, n));
+    pkt->setSrcIPAddress(readIPv4Address(b, m));    // ar_spa
+    pkt->setDestMACAddress(readMACAddress(b, n));
+    pkt->setDestIPAddress(readIPv4Address(b, m));   // ar_tpa
+    pkt->setByteLength(b.getPos());
+    return pkt;
 }
 
 } // namespace serializer
+
 } // namespace inet
+
