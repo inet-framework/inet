@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+#include "platdep/sockets.h"  // htonl, ntohl, etc. on Windows
 #include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff

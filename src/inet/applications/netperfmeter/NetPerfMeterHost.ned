@@ -25,7 +25,7 @@
 // *
 // *   Contact: dreibh@simula.no
 
-package applications.netperfmeter;
+package inet.applications.netperfmeter;
 
 import inet.applications.INetPerfMeterApp;
 import inet.node.inet.NodeBase;

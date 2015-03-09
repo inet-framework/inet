@@ -29,7 +29,7 @@
 #  error At least OMNeT++/OMNEST version 4.6 required
 #endif // if OMNETPP_VERSION < 0x0406
 
-#define INET_VERSION  0x0206
+#define INET_VERSION  0x0299
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT

@@ -27,7 +27,7 @@
 
 package inet.examples.netperfmeter;
 
-import applications.netperfmeter.NetPerfMeterHost;
+import inet.applications.netperfmeter.NetPerfMeterHost;
 import inet.common.queue.FIFOQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.REDDropper;
