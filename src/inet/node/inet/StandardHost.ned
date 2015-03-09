@@ -62,7 +62,7 @@ module StandardHost extends NodeBase
         forwarding = default(false);  // disable routing by default
         networkLayer.proxyARP = default(false);
     submodules:
-        tunApp: <> like ITunApp {
+        tunApp[numTunInterfaces]: <> like ITunApp {
             parameters:
                 @display("p=280,40");
         }
@@ -122,6 +122,8 @@ module StandardHost extends NodeBase
             networkLayer.pingIn++ <-- pingApp[i].pingOut;
         }
 
-        tunApp.tunOut --> tun.appIn if hasTun;
-        tunApp.tunIn <-- tun.appOut if hasTun;
+        for i=0..numTunInterfaces-1 {
+            tunApp[i].tunOut --> tun[i].appIn if hasTun;
+            tunApp[i].tunIn <-- tun[i].appOut if hasTun;
+        }
 }
