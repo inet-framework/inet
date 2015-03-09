@@ -384,7 +384,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     Context c;
     c.l3AddressesPtr = &ih->saddr;
     c.l3AddressesLength = 8;
-    TCPSerializer().xSerialize(tcpsegP, b, c);
+    TCPSerializer().serializePacket(tcpsegP, b, c);
     totalTcpLen = b.getPos();
 
     if (conn) {

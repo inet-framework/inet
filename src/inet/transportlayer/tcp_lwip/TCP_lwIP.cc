@@ -178,7 +178,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     Context c;
     //    c.l3AddressesPtr = ?;
     //    c.l3AddressesLength = ?;
-    TCPSerializer().xSerialize(tcpsegP, b, c);
+    TCPSerializer().serializePacket(tcpsegP, b, c);
     totalTcpLen = b.getPos();
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
