@@ -24,7 +24,7 @@ import inet.physicallayer.contract.layered.ILayeredErrorModel;
 // OFDM means that the physical layer uses OFDM modulation.
 //
 // The Ieee80211OFDMErrorModel, depending of the level of detail
-// (see @see ~Ieee80211OFDMTransmitter and @see ~Ieee80211OFDMReceiver),
+// (see @see ~Ieee80211LayeredOFDMTransmitter and @see ~Ieee80211LayeredOFDMReceiver),
 // produces erroneous bits, symbols, samples or just simply
 // determines whether a packet is erroneous or not.
 //

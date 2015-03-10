@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211OFDMTRANSMITTER_H
-#define __INET_IEEE80211OFDMTRANSMITTER_H
+#ifndef __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
+#define __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 
 #include "inet/physicallayer/contract/layered/IEncoder.h"
 #include "inet/physicallayer/contract/layered/IModulator.h"
@@ -30,7 +30,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMTransmitter : public ITransmitter, public cSimpleModule
+class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSimpleModule
 {
     // TODO: copy
 
@@ -85,7 +85,7 @@ class INET_API Ieee80211OFDMTransmitter : public ITransmitter, public cSimpleMod
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
 
   public:
-    virtual ~Ieee80211OFDMTransmitter();
+    virtual ~Ieee80211LayeredOFDMTransmitter();
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
@@ -103,5 +103,5 @@ class INET_API Ieee80211OFDMTransmitter : public ITransmitter, public cSimpleMod
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211OFDMTRANSMITTER_H
+#endif // ifndef __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 

@@ -29,11 +29,11 @@ import inet.physicallayer.contract.layered.IPulseFilter;
 // The implemenation details are based on the following standard:
 // IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY SPECIFICATIONS
 
-// Please check the @see ~Ieee80211OFDMTransmitter documentation first, since
+// Please check the @see ~Ieee80211LayeredOFDMTransmitter documentation first, since
 // this receiver module is symmetric to it.
 //
 //
-module Ieee80211OFDMReceiver like IReceiver
+module Ieee80211LayeredOFDMReceiver like IReceiver
 {
     parameters:
         bool isCompliant = default(true);
@@ -51,7 +51,7 @@ module Ieee80211OFDMReceiver like IReceiver
         double bandwidth @unit(Hz);
         double snirThreshold @unit(dB);
         double channelSpacing @unit(Hz);
-        @class(Ieee80211OFDMReceiver);
+        @class(Ieee80211LayeredOFDMReceiver);
 
         @display("i=block/rx");
     submodules:

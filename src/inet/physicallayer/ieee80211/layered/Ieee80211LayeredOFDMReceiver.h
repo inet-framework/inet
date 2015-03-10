@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211OFDMRECEIVER_H
-#define __INET_IEEE80211OFDMRECEIVER_H
+#ifndef __INET_IEEE80211LAYEREDOFDMRECEIVER_H
+#define __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 
 #include "inet/physicallayer/common/layered/SignalPacketModel.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
@@ -35,7 +35,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMReceiver : public SNIRReceiverBase
+class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
 {
   public:
     enum LevelOfDetail {
@@ -96,7 +96,7 @@ class INET_API Ieee80211OFDMReceiver : public SNIRReceiverBase
     double getCodeRateFromDecoderModule(const IDecoder *decoder) const;
 
   public:
-    virtual ~Ieee80211OFDMReceiver();
+    virtual ~Ieee80211LayeredOFDMReceiver();
 
     bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
     const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
@@ -107,5 +107,5 @@ class INET_API Ieee80211OFDMReceiver : public SNIRReceiverBase
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211OFDMRECEIVER_H
+#endif // ifndef __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 
