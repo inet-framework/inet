@@ -39,6 +39,13 @@ enum IPv6NDOptionLength {
                                                     // The original packet truncated to ensure that the size of the redirect message does not exceed 1280 octets.
     IPv6ND_MTU_OPTION_LENGTH = 8;                   // RFC 2461, Section 4.6.4. MTU
 }
+
+// TLB options (type, length, bytes), length must be divisible by eight, max value is 8*255
+// Type codes:
+enum IPv6NDOptionTypes {
+    IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION = 1;          // RFC 2461
+    IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION = 2;          // RFC 2461
+}
 //
 // IPv6ND Prefix Information
 // RFC 2461 / RFC 4861 Section 4.6.2

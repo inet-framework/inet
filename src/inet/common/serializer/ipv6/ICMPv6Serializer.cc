@@ -101,8 +101,12 @@ void ICMPv6Serializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeUint16(0);   // crc
             b.writeUint32(0);   // unused
             b.writeIPv6Address(frame->getTargetAddress());
-            if (frame->getByteLength() > 8 + 16)    // has optional sourceLinkLayerAddress
+            if (frame->getByteLength() > 8 + 16) {   // has optional sourceLinkLayerAddress    (TLB options)
+                b.writeByte(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION);
+                b.writeByte(1);         // length = 1 * 8byte
                 b.writeMACAddress(frame->getSourceLinkLayerAddress());
+                ASSERT(1 + 1 + MAC_ADDRESS_SIZE == 8);
+            }
             break;
         }
 
@@ -182,8 +186,19 @@ cPacket *ICMPv6Serializer::deserialize(Buffer &b, Context& context)
             pkt->setByteLength(b._getBufSize());
 
             pkt->setTargetAddress(b.readIPv6Address());
-            if (b.getRemainder())    // has optional sourceLinkLayerAddress
-                pkt->setSourceLinkLayerAddress(b.readMACAddress());
+            while (b.getRemainder()) {   // has options
+                unsigned int pos = b.getPos();
+                unsigned char type = b.readByte();
+                unsigned char length = b.readByte();
+                if (type == 0 || length == 0) {
+                    pkt->setBitError(true);
+                    break;
+                }
+                if (type == 1) {
+                    pkt->setSourceLinkLayerAddress(b.readMACAddress());     // sourceLinkLayerAddress
+                }
+                b.seek(pos + 8 * length);
+            }
             break;
         }
 
