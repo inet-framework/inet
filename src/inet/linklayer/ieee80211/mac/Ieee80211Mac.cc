@@ -210,7 +210,7 @@ void Ieee80211Mac::initialize(int stage)
 
         double controlBitRate = par("controlBitrate");
         if (controlBitRate == -1)
-            controlFrameMode = modeSet->getFastestMode();
+            controlFrameMode = modeSet->getSlowestMode();
         else
             controlFrameMode = modeSet->getMode(bps(controlBitRate));
 
