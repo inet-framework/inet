@@ -193,9 +193,9 @@ MACAddress Buffer::readMACAddress() const
 
 void Buffer::writeMACAddress(const MACAddress& addr)
 {
-    void *addrBytes = accessNBytes(MAC_ADDRESS_SIZE);
-    if (addrBytes)
-        addr.getAddressBytes((unsigned char *)addrBytes);
+    unsigned char buff[MAC_ADDRESS_SIZE];
+    addr.getAddressBytes(buff);
+    writeNBytes(MAC_ADDRESS_SIZE, buff);
 }
 
 IPv6Address Buffer::readIPv6Address() const
@@ -303,8 +303,10 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
     const ByteArrayMessage *bam = check_and_cast<const ByteArrayMessage *>(pkt);
     unsigned int length = bam->getByteLength();
     unsigned int wl = std::min(length, b.getRemainder());
-    length = bam->copyDataToBuffer(b.accessNBytes(0), wl);
-    b.accessNBytes(length);
+    wl = bam->copyDataToBuffer(b.accessNBytes(0), wl);
+    b.accessNBytes(wl);
+    if (length > wl)
+        b.fillNBytes(length - wl, '?');
     if (pkt->getEncapsulatedPacket())
         throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
 }
