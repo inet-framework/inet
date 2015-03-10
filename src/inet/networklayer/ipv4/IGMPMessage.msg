@@ -93,6 +93,7 @@ packet IGMPv3Query extends IGMPv2Query
     unsigned char robustnessVariable;
     unsigned char queryIntervalCode;
     IPv4AddressVector sourceList;
+    abstract unsigned char maxRespCode;
 }
 
 enum GroupRecordType

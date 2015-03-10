@@ -45,116 +45,160 @@ void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
 {
     unsigned int startPos = b.getPos();
     const IGMPMessage *pkt = check_and_cast<const IGMPMessage *>(_pkt);
-    struct igmp *igmp = (struct igmp *)(b.accessNBytes(sizeof(struct igmp)));
+    const void *igmp = b.accessNBytes(0);
 
     switch (pkt->getType())
     {
-        case IGMP_MEMBERSHIP_QUERY:
-            igmp->igmp_type = IGMP_MEMBERSHIP_QUERY;
-            igmp->igmp_code = 0;
-            igmp->igmp_cksum = 0;
-            igmp->igmp_group.s_addr = htonl(check_and_cast<const IGMPQuery*>(pkt)->getGroupAddress().getInt());
-            if (dynamic_cast<const IGMPv2Query*>(pkt))
+        case IGMP_MEMBERSHIP_QUERY: {
+            b.writeByte(IGMP_MEMBERSHIP_QUERY);    // type
+            b.writeByte(0);    // code
+            b.writeUint16(0);    // chksum
+            b.writeIPv4Address(check_and_cast<const IGMPQuery*>(pkt)->getGroupAddress());
+            if (dynamic_cast<const IGMPv3Query*>(pkt))
             {
-                igmp->igmp_code = static_cast<const IGMPv2Query*>(pkt)->getMaxRespTime();
+                const IGMPv3Query* v3pkt = static_cast<const IGMPv3Query*>(pkt);
+                b.writeByteTo(1, v3pkt->getMaxRespCode());
+                ASSERT(v3pkt->getRobustnessVariable() <= 7);
+                b.writeByte((v3pkt->getSuppressRouterProc() ? 0x8 : 0) | v3pkt->getRobustnessVariable());
+                b.writeByte(v3pkt->getQueryIntervalCode());
+                unsigned int vs = v3pkt->getSourceList().size();
+                b.writeUint16(vs);
+                for (unsigned int i = 0; i < vs; i++)
+                    b.writeIPv4Address(v3pkt->getSourceList()[i]);
             }
-            else if (dynamic_cast<const IGMPv3Query*>(pkt))
+            else if (dynamic_cast<const IGMPv2Query*>(pkt))
             {
-                igmp->igmp_code = static_cast<const IGMPv3Query*>(pkt)->getMaxRespCode();
-                // TODO source list
+                b.writeByteTo(1, static_cast<const IGMPv2Query*>(pkt)->getMaxRespTime());
             }
-            else
-                throw cRuntimeError("unknown IGMP_MEMBERSHIP_QUERY: %s", pkt->getClassName());
             break;
+        }
 
         case IGMPV1_MEMBERSHIP_REPORT:
-            igmp->igmp_type = IGMP_V1_MEMBERSHIP_REPORT;
-            igmp->igmp_code = 0;
-            igmp->igmp_cksum = 0;
-            igmp->igmp_group.s_addr = htonl(check_and_cast<const IGMPv1Report*>(pkt)->getGroupAddress().getInt());
+            b.writeByte(IGMPV1_MEMBERSHIP_REPORT);    // type
+            b.writeByte(0);    // code
+            b.writeUint16(0);    // chksum
+            b.writeIPv4Address(check_and_cast<const IGMPv1Report*>(pkt)->getGroupAddress());
             break;
 
         case IGMPV2_MEMBERSHIP_REPORT:
-            igmp->igmp_type = IGMP_V2_MEMBERSHIP_REPORT;
-            igmp->igmp_code = 0;
-            igmp->igmp_cksum = 0;
-            igmp->igmp_group.s_addr = htonl(check_and_cast<const IGMPv2Report*>(pkt)->getGroupAddress().getInt());
+            b.writeByte(IGMPV2_MEMBERSHIP_REPORT);    // type
+            b.writeByte(0);    // code
+            b.writeUint16(0);    // chksum
+            b.writeIPv4Address(check_and_cast<const IGMPv2Report*>(pkt)->getGroupAddress());
             break;
 
         case IGMPV2_LEAVE_GROUP:
-            igmp->igmp_type = IGMP_V2_LEAVE_GROUP;
-            igmp->igmp_code = 0;
-            igmp->igmp_cksum = 0;
-            igmp->igmp_group.s_addr = htonl(check_and_cast<const IGMPv2Leave*>(pkt)->getGroupAddress().getInt());
+            b.writeByte(IGMPV2_LEAVE_GROUP);    // type
+            b.writeByte(0);    // code
+            b.writeUint16(0);    // chksum
+            b.writeIPv4Address(check_and_cast<const IGMPv2Report*>(pkt)->getGroupAddress());
             break;
 
-        case IGMPV3_MEMBERSHIP_REPORT:
-            // TODO
+        case IGMPV3_MEMBERSHIP_REPORT: {
+            const IGMPv3Report* v3pkt = check_and_cast<const IGMPv3Report*>(pkt);
+            b.writeByte(IGMPV3_MEMBERSHIP_REPORT);    // type
+            b.writeByte(0);    // code
+            b.writeUint16(0);    // chksum
+            b.writeUint16(0);    // reserved
+            unsigned int s = v3pkt->getGroupRecordArraySize();
+            b.writeUint16(s);    // number of groups
+            for (unsigned int i = 0; i < s; i++) {
+                // serialize one group:
+                const GroupRecord& gr = v3pkt->getGroupRecord(i);
+                b.writeByte(gr.recordType);
+                b.writeByte(0);  // aux data len: RFC 3376 Section 4.2.6
+                b.writeUint16(gr.sourceList.size());
+                b.writeIPv4Address(gr.groupAddress);
+                for (auto src: gr.sourceList) {
+                    b.writeIPv4Address(src);
+                }
+                // write auxiliary data
+            }
+            break;
+        }
 
         default:
-            throw cRuntimeError("Can not serialize IGMP packet: type %d not supported.", pkt->getType());
+            throw cRuntimeError("Can not serialize IGMP packet (%s): type %d not supported.", pkt->getClassName(), pkt->getType());
     }
-    igmp->igmp_cksum = TCPIPchecksum::checksum(igmp, b.getPos() - startPos);
+    b.writeUint16To(2, TCPIPchecksum::checksum(igmp, b.getPos() - startPos));
 }
 
-cPacket *IGMPSerializer::deserialize(Buffer &b, Context& context)
+cPacket *IGMPSerializer::deserialize(Buffer &b, Context& c)
 {
     unsigned int startPos = b.getPos();
-    struct igmp *igmp = (struct igmp *)b.accessNBytes(sizeof(struct igmp));
-    if (!igmp) {
-        b.seek(startPos);
-        return nullptr;
-    }
+    void *igmp = b.accessNBytes(0);
+    unsigned char type = b.readByte();
+    unsigned char code = b.readByte();
+    uint16_t chksum = b.readUint16();
 
     cPacket *packet = nullptr;
 
-    switch (igmp->igmp_type) {
+    switch (type) {
         case IGMP_MEMBERSHIP_QUERY:
-            if (igmp->igmp_code == 0)
-            {
-                IGMPv1Query *pkt;
-                packet = pkt = new IGMPv1Query();
-                pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
+            if (code == 0) {
+                IGMPv1Query *pkt = new IGMPv1Query();
+                packet = pkt;
+                pkt->setGroupAddress(b.readIPv4Address());
+                pkt->setByteLength(8);
             }
-            else
-            {
-                IGMPv2Query *pkt;
-                packet = pkt = new IGMPv2Query();
-                pkt->setMaxRespTime(igmp->igmp_code);
-                pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
-                return pkt;
+            else if (b._getBufSize() - startPos == 8) {        // RFC 3376 Section 7.1
+                IGMPv2Query *pkt = new IGMPv2Query();
+                packet = pkt;
+                pkt->setMaxRespTime(code);
+                pkt->setGroupAddress(b.readIPv4Address());
+                pkt->setByteLength(8);
+            }
+            else {
+                IGMPv3Query *pkt = new IGMPv3Query();
+                packet = pkt;
+                pkt->setMaxRespCode(code);
+                pkt->setGroupAddress(b.readIPv4Address());
+                unsigned char x = b.readByte(); //
+                pkt->setSuppressRouterProc((x & 0x8) != 0);
+                pkt->setRobustnessVariable(x & 7);
+                pkt->setQueryIntervalCode(b.readByte());
+                unsigned int vs = b.readUint16();
+                for (unsigned int i = 0; i < vs && !b.hasError(); i++)
+                    pkt->getSourceList()[i] = b.readIPv4Address();
+                pkt->setByteLength(b.getPos() - startPos);
             }
             break;
 
-        case IGMP_V1_MEMBERSHIP_REPORT:
+        case IGMPV1_MEMBERSHIP_REPORT:
             {
                 IGMPv1Report *pkt;
                 packet = pkt = new IGMPv1Report();
-                pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
+                pkt->setGroupAddress(b.readIPv4Address());
+                pkt->setByteLength(8);
             }
             break;
 
-        case IGMP_V2_MEMBERSHIP_REPORT:
+        case IGMPV2_MEMBERSHIP_REPORT:
             {
                 IGMPv2Report *pkt;
                 packet = pkt = new IGMPv2Report();
-                pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
+                pkt->setGroupAddress(b.readIPv4Address());
+                pkt->setByteLength(8);
             }
             break;
 
-        case IGMP_V2_LEAVE_GROUP:
+        case IGMPV2_LEAVE_GROUP:
             {
                 IGMPv2Leave *pkt;
                 packet = pkt = new IGMPv2Leave();
-                pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
+                pkt->setGroupAddress(b.readIPv4Address());
+                pkt->setByteLength(8);
             }
             break;
 
         default:
-            throw cRuntimeError("IGMPSerializer: can not create IGMP packet: type %d not supported", (int)igmp->igmp_type);
+            EV_ERROR << "IGMPSerializer: can not create IGMP packet: type " << type << " not supported\n";
+            packet = SerializerRegistrationList::byteArraySerializer.deserializePacket(b, c);
+            packet->setBitError(true);
+            break;
     }
 
-    if (TCPIPchecksum::checksum(igmp, sizeof(struct igmp)) != 0)
+    if (TCPIPchecksum::checksum(igmp, packet->getByteLength()) != 0)
         packet->setBitError(true);
     return packet;
 }

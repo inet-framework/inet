@@ -67,9 +67,9 @@ struct igmp
  */
 //A FIXME the following line conflicts with enum in IGMPMessage.msg, resolve!
 // #define IGMP_MEMBERSHIP_QUERY       0x11    /* membership query         */
-#define IGMP_V1_MEMBERSHIP_REPORT          0x12    /* Ver. 1 membership report */
-#define IGMP_V2_MEMBERSHIP_REPORT          0x16    /* Ver. 2 membership report */
-#define IGMP_V2_LEAVE_GROUP                0x17    /* Leave-group message        */
+//#define IGMP_V1_MEMBERSHIP_REPORT          0x12    /* Ver. 1 membership report */
+//#define IGMP_V2_MEMBERSHIP_REPORT          0x16    /* Ver. 2 membership report */
+//#define IGMP_V2_LEAVE_GROUP                0x17    /* Leave-group message        */
 
 #define IGMP_DVMRP                         0x13    /* DVMRP routing message    */
 #define IGMP_PIM                           0x14    /* PIM routing message        */
