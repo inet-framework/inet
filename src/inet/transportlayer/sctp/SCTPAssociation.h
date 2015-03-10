@@ -211,6 +211,7 @@ enum SCTPStreamSchedulers {
 #define SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH    8   // without streams
 #define SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH     8
 #define SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH     12
+#define SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH      4
 #define SCTP_ADD_IP_CHUNK_LENGTH                        8
 #define SCTP_ADD_IP_PARAMETER_LENGTH                    8
 #define SCTP_AUTH_CHUNK_LENGTH                          8

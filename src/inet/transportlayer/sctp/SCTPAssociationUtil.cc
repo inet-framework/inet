@@ -630,7 +630,7 @@ void SCTPAssociation::sendInit()
         initChunk->setSepChunks(count - 1, ASCONF_ACK);
     }
     if (count > 0) {
-        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMTER_LENGTH + count);
+        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + count);
     }
     if (state->prMethod != 0) {
         initChunk->setForwardTsn(true);
@@ -836,7 +836,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         initAckChunk->setSepChunks(count - 1, ASCONF_ACK);
     }
     if (count > 0) {
-        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMTER_LENGTH + count);
+        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + count);
     }
     if (state->prMethod != 0) {
         initAckChunk->setForwardTsn(true);
