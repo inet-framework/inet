@@ -354,6 +354,10 @@ bool TCPConnection::processAppCommand(cMessage *msg)
             process_QUEUE_BYTES_LIMIT(event, tcpCommand, msg);
             break;
 
+        case TCP_E_REQUEST:
+            process_RECEIVE_REQUEST(event, tcpCommand, msg);
+            break;
+
         default:
             throw cRuntimeError(tcpMain, "wrong event code");
     }
@@ -385,6 +389,9 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
 
         case TCP_C_QUEUE_BYTES_LIMIT:
             return TCP_E_QUEUE_BYTES_LIMIT;
+
+        case TCP_C_REQUEST:
+            return TCP_E_REQUEST;
 
         default:
             throw cRuntimeError(tcpMain, "Unknown message kind in app command");

@@ -213,6 +213,8 @@ simple TCP like ITCP
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
+        bool useDataNotification = default(false); // turn the notifications for arrived data on or off
+        int windowScalingFactor = default(1);
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);

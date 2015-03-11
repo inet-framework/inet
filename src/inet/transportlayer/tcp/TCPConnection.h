@@ -90,6 +90,7 @@ enum TCPEventCode {
     TCP_E_ABORT,
     TCP_E_STATUS,
     TCP_E_QUEUE_BYTES_LIMIT,
+    TCP_E_REQUEST,
 
     // TPDU types
     TCP_E_RCV_DATA,
@@ -398,6 +399,7 @@ class INET_API TCPConnection
     virtual void process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     virtual void process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_RECEIVE_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
     //@}
 
     /** @name Processing TCP segment arrivals. Invoked from processTCPSegment(). */

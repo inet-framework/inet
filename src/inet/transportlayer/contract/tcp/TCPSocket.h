@@ -204,6 +204,12 @@ class INET_API TCPSocket
     int getState() { return sockstate; }
 
     /**
+     * Sets the socket state
+     */
+
+    void setState(enum State state) { sockstate = state; }
+
+    /**
      * Returns name of socket state code returned by getState().
      */
     static const char *stateName(int state);

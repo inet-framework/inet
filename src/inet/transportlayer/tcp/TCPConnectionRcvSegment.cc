@@ -539,14 +539,23 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     // as many bytes as requested. rcv_wnd should be decreased
                     // accordingly!
                     //
-                    cPacket *msg;
+                    cPacket *msg = nullptr;
 
-                    while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
-                        msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
+                    if (tcpMain->par("useDataNotification")) {
+                        msg = new cPacket("Data Notification");
+                        msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
                         TCPCommand *cmd = new TCPCommand();
                         cmd->setConnId(connId);
                         msg->setControlInfo(cmd);
                         sendToApp(msg);
+                    } else {
+                        while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
+                            msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
+                            TCPCommand *cmd = new TCPCommand();
+                            cmd->setConnId(connId);
+                            msg->setControlInfo(cmd);
+                            sendToApp(msg);
+                        }
                     }
 
                     // if this segment "filled the gap" until the previously arrived segment

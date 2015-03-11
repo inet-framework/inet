@@ -1116,14 +1116,17 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
 
             // Update WS variables
             //ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
-            ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
-            state->rcv_wnd_scale = 0;
+            if ((int)tcpMain->par("windowScalingFactor") == 1) {
+                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                state->rcv_wnd_scale = 0;
 
-            while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
-                scaled_rcv_wnd = scaled_rcv_wnd >> 1;
-                state->rcv_wnd_scale++;
+                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
+                    scaled_rcv_wnd = scaled_rcv_wnd >> 1;
+                    state->rcv_wnd_scale++;
+                }
+            } else {
+                state->rcv_wnd_scale = tcpMain->par("windowScalingFactor");
             }
-
             option.setValues(0, state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
