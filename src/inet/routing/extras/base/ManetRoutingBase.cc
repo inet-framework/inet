@@ -412,7 +412,6 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const L3Addres
     }
 
     UDPPacket *udpPacket = new UDPPacket(msg->getName());
-    udpPacket->setByteLength(UDP_HDR_LEN);
     udpPacket->encapsulate(msg);
     //Address srcAddr = interfaceWlanptr->ipv4Data()->getIPAddress();
 
