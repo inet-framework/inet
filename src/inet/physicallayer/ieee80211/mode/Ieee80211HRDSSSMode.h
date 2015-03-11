@@ -49,10 +49,10 @@ class INET_API Ieee80211HrDsssPreambleMode : public Ieee80211HrDsssChunkMode, pu
     inline int getSFDBitLength() const { return 16; }
     inline int getBitLength() const { return getSyncBitLength() + getSFDBitLength(); }
 
-    virtual inline bps getNetBitrate() const override { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
+    virtual inline bps getNetBitrate() const { return Mbps(1); }
+    virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
-    virtual const DBPSKModulation *getModulation() const override { return &DBPSKModulation::singleton; }
+    virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
 };
 
 class INET_API Ieee80211HrDsssHeaderMode : public Ieee80211HrDsssChunkMode, public IIeee80211HeaderMode

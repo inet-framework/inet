@@ -34,9 +34,8 @@ class INET_API Ieee80211FhssPreambleMode : public IIeee80211PreambleMode
     inline int getSFDBitLength() const { return 16; }
     inline int getBitLength() const { return getSYNCBitLength() + getSFDBitLength(); }
 
-    virtual inline bps getNetBitrate() const override { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual const IModulation *getModulation() const override { return nullptr; }
+    virtual inline bps getNetBitrate() const { return Mbps(1); }
+    virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
 };
 

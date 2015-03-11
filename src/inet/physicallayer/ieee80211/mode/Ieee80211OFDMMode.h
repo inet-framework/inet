@@ -54,9 +54,6 @@ class INET_API Ieee80211OFDMPreambleMode : public Ieee80211OFDMModeBase, public 
     const simtime_t getShortTrainingSequenceDuration() const { return 10 * getFFTTransformPeriod() / 4; }
     const simtime_t getLongTrainingSequenceDuration() const { return getTrainingSymbolGIDuration() + 2 * getFFTTransformPeriod(); }
 
-    virtual bps getGrossBitrate() const override { return bps(NaN); }
-    virtual bps getNetBitrate() const override { return bps(NaN); }
-    virtual IModulation *getModulation() const override { return nullptr; }
     virtual const simtime_t getDuration() const override { return getShortTrainingSequenceDuration() + getLongTrainingSequenceDuration(); }
 };
 

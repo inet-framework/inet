@@ -24,18 +24,18 @@ namespace inet {
 
 namespace physicallayer {
 
+class INET_API IIeee80211PreambleMode
+{
+  public:
+    virtual const simtime_t getDuration() const = 0;
+};
+
 class INET_API IIeee80211ChunkMode
 {
   public:
     virtual bps getNetBitrate() const = 0;
     virtual bps getGrossBitrate() const = 0;
     virtual const IModulation *getModulation() const = 0;
-};
-
-class INET_API IIeee80211PreambleMode : public virtual IIeee80211ChunkMode
-{
-  public:
-    virtual const simtime_t getDuration() const = 0;
 };
 
 class INET_API IIeee80211HeaderMode : public virtual IIeee80211ChunkMode

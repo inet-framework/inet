@@ -38,10 +38,7 @@ class INET_API Ieee80211IrPreambleMode : public IIeee80211PreambleMode
     inline int getSlotLength() const { return getSyncSlotLength() + getSFDSlotLength(); }
     inline const simtime_t getSlotDuration() const { return 250E-9; }
 
-    virtual inline bps getNetBitrate() const override { return bps(NaN); }
-    virtual inline bps getGrossBitrate() const override { return bps(NaN); }
     virtual inline const simtime_t getDuration() const override { return getSlotLength() * getSlotDuration(); }
-    virtual const IModulation *getModulation() const override { return nullptr; }
 };
 
 class INET_API Ieee80211IrHeaderMode : public IIeee80211HeaderMode
