@@ -984,6 +984,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                 state->sackAllowed = false;
                                 EV_DETAIL << "RTX: send only SACK\n";
                                 sendSACKviaSelectedPath(sctpMsg);
+                                sctpMsg = nullptr;
 
                                 // TD 17.02.2015: There is data to send (on current path) -> create new message structure!
                                 sctpMsg = new SCTPMessage("send");
@@ -1116,6 +1117,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                     state->sackAllowed = false;
                                     EV_DETAIL << assocId << ": send SACK and make new header for datMsg (" << &datMsg << "). scount=" << scount << "\n";
                                     sendSACKviaSelectedPath(sctpMsg);
+                                    sctpMsg = nullptr;
                                     if (datMsg != nullptr) {
                                         sctpMsg = new SCTPMessage("send");
                                         sctpMsg->setByteLength(SCTP_COMMON_HEADER);
