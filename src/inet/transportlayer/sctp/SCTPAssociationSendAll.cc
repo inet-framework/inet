@@ -706,7 +706,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
     unsigned int safetyCounter = 0;
     while (sendingAllowed) {
         if (safetyCounter++ >= 1000) {
-           throw cRuntimeError("Endless loop in SCTPAssociation::sendOnPath()?! This should not happen ...");
+            throw cRuntimeError("Endless loop in SCTPAssociation::sendOnPath()?! This should not happen ...");
         }
 
         headerCreated = false;
@@ -829,6 +829,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                 sctpAlgorithm->sackSent();
                 state->sackAllowed = false;
                 sendSACKviaSelectedPath(sctpMsg);
+                sctpMsg = NULL;
                 return;
             }
         }
