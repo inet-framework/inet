@@ -84,7 +84,6 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
     pkt->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();
     uint16_t chksum = b.readUint16();
-    pkt->setByteLength(8);
     cPacket *encapPacket = serializers.byteArraySerializer.deserialize(b, c);
     uint16_t calcChkSum = 0;
     if (chksum != 0)
