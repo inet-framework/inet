@@ -132,7 +132,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     bool optimizeRoutesParameter;
 
     // internal state
-    Topology topology;
+    Topology fullTopology;
 
   public:
     /**
