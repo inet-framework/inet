@@ -18,6 +18,7 @@
 //
 
 #include <algorithm>    // std::min
+#include <typeinfo>
 
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 
@@ -51,6 +52,14 @@ Register_Serializer(IPv4Datagram, ETHERTYPE, ETHERTYPE_IPv4, IPv4Serializer);
 void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
+
+    if (typeid(pkt) != typeid(IPv4Datagram)) {
+        if (c.throwOnSerializerNotFound)
+            throw cRuntimeError("IPv4Serializer: class '%s' not accepted", pkt->getClassName());
+        EV_ERROR << "IPv4Serializer: class '" << pkt->getClassName() << "' not accepted.\n";
+        b.fillNBytes(pkt->getByteLength(), '?');
+        return;
+    }
 
     struct ip *ip = (struct ip *)b.accessNBytes(IP_HEADER_BYTES);
     if (!ip) {
