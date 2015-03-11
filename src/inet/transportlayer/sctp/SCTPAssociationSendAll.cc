@@ -1360,6 +1360,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                 if (packetFull) {
                     if (chunksAdded == 0) {    // Nothing to send
                         delete sctpMsg;
+                        sctpMsg = nullptr;
                         sendingAllowed = false;    // sendingAllowed==false => leave outer while loop
                     }
                     else {
@@ -1380,6 +1381,10 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                 EV_DETAIL << "sendAll: RTX Timer already scheduled -> no need to schedule it\n";
                             }
                         }
+                        else {
+                            bytes.packet = false;   // TD 23.02.2015: no DATA chunks => done.
+                        }
+
                         if (sendOneMorePacket) {
                             sendOneMorePacket = false;
                             bytesToSend = 0;
@@ -1402,6 +1407,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         }
                         EV_DETAIL << assocId << ":sendToIP: packet size=" << sctpMsg->getByteLength() << " numChunks=" << sctpMsg->getChunksArraySize() << "\n";
                         sendToIP(sctpMsg, path->remoteAddress);
+                        sctpMsg = nullptr;
                         pmDataIsSentOn(path);
                         totalPacketsSent++;
                         path->lastTransmission = simTime();
@@ -1428,6 +1434,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
             else {
                 packetFull = true;    // Leave inner while loop
                 delete sctpMsg;    // T.D. 19.01.2010: Free unsent message
+                sctpMsg = nullptr;
             }
 
             EV_INFO << "packetFull=" << packetFull << endl;
