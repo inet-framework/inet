@@ -79,6 +79,19 @@ void IPv4NetworkConfigurator::initialize(int stage)
         dumpConfiguration();
 }
 
+void IPv4NetworkConfigurator::performConfigurations(Topology& topology, unsigned int networkID)
+{
+    // read and configure multicast groups from the XML configuration
+    TIME(readMulticastGroupConfiguration(topology));
+    // read and configure manual routes from the XML configuration
+    readManualRouteConfiguration(topology);
+    // read and configure manual multicast routes from the XML configuration
+    readManualMulticastRouteConfiguration(topology);
+    // calculate shortest paths, and add corresponding static routes
+    if (addStaticRoutesParameter)
+        TIME(addStaticRoutes(topology, networkID));
+}
+
 void IPv4NetworkConfigurator::computeConfiguration()
 {
     EV_INFO << "Computing static network configuration (addresses and routes).\n";
@@ -91,15 +104,9 @@ void IPv4NetworkConfigurator::computeConfiguration()
     // assign addresses to IPv4 nodes
     if (assignAddressesParameter)
         TIME(assignAddresses(fullTopology));
-    // read and configure multicast groups from the XML configuration
-    TIME(readMulticastGroupConfiguration(fullTopology));
-    // read and configure manual routes from the XML configuration
-    readManualRouteConfiguration(fullTopology);
-    // read and configure manual multicast routes from the XML configuration
-    readManualMulticastRouteConfiguration(fullTopology);
-    // calculate shortest paths, and add corresponding static routes
-    if (addStaticRoutesParameter)
-        TIME(addStaticRoutes(fullTopology, 0));
+    
+    performConfigurations(fullTopology, 0);
+    
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
 
