@@ -1187,6 +1187,12 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                     }
                     else if ((chunksAdded == 1 && sackAdded && sackOnly) || headerCreated) {
                         packetFull = true;
+                        /* TD 19.02.2015:
+                           If we are not on the primary path, and
+                           there is a small chunk to send (bytesToSend > 0),
+                           and Nagle turned on:
+                           leave inner loop. Otherwise, there will be an infinite loop! */
+                        bytesToSend = 0;
                     }
                 }
                 else if (chunksAdded == 1 && sackAdded && !sackOnly) {
