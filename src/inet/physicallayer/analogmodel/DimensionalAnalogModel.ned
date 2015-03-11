@@ -30,5 +30,4 @@ module DimensionalAnalogModel like IAnalogModel
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @display("i=block/cogwheel");
         @class(DimensionalAnalogModel);
-        @display("i=block/cogwheel");
 }
