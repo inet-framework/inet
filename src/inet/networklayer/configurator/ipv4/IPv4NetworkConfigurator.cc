@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -98,7 +99,7 @@ void IPv4NetworkConfigurator::computeConfiguration()
     readManualMulticastRouteConfiguration(topology);
     // calculate shortest paths, and add corresponding static routes
     if (addStaticRoutesParameter)
-        TIME(addStaticRoutes(topology));
+        TIME(addStaticRoutes(topology, 0));
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
 
@@ -1218,7 +1219,7 @@ bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& rout
     return false;
 }
 
-void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology)
+void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, unsigned int networkID)
 {
     // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables

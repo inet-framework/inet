@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -38,6 +39,7 @@ namespace inet {
 using namespace inet::physicallayer;
 #endif
 
+
 NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
 {
     this->node = node;
@@ -61,7 +63,7 @@ void NetworkConfiguratorBase::initialize(int stage)
     }
 }
 
-void NetworkConfiguratorBase::extractTopology(Topology& topology)
+void NetworkConfiguratorBase::extractTopology(Topology& topology, const unsigned int networkID)
 {
     // extract topology
     topology.extractByProperty("node");
@@ -568,5 +570,36 @@ void NetworkConfiguratorBase::dumpTopology(Topology& topology)
     }
 }
 
-} // namespace inet
+// ###### Get Network ID from InterfaceEntry ################################
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule*        module,
+                                                   InterfaceEntry* interfaceEntry)
+{
+   unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
+   int          outputGateID = interfaceEntry->getNodeOutputGateId();
+   cGate*       outputGate   = module->gate(outputGateID);
+   cChannel*    channel      = outputGate->getChannel();
+   if(channel) {
+      if(channel->hasPar("netID")) {
+         networkID = channel->par("netID");
+      }
+   }
+   return(networkID);
+}
 
+// ###### Get Network ID from LinkOut #######################################
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule*           module,
+                                                   Topology::LinkOut* link)
+{
+   unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
+   int          outputGateID = link->getLocalGateId();
+   cGate*       outputGate   = module->gate(outputGateID);
+   cChannel*    channel      = outputGate->getChannel();
+   if(channel) {
+      if(channel->hasPar("netID")) {
+         networkID = channel->par("netID");
+      }
+   }
+   return(networkID);
+}
+
+} // namespace inet
