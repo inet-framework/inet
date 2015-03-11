@@ -702,7 +702,13 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
         EV_INFO << pathId->remoteAddress;
     }
     EV_INFO << ") at t=" << simTime() << " #####" << endl;
+    
+    unsigned int safetyCounter = 0;
     while (sendingAllowed) {
+        if (safetyCounter++ >= 1000) {
+           throw cRuntimeError("Endless loop in SCTPAssociation::sendOnPath()?! This should not happen ...");
+        }
+
         headerCreated = false;
         if (state->bytesToRetransmit > 0) {
             // There are bytes in the transmissionQ. They have to be sent first.
