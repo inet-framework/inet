@@ -63,7 +63,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     b.writeUint16(pkt->getSourcePort());
     b.writeUint16(pkt->getDestinationPort());
     b.writeUint16(packetLength);
-    unsigned int crcPos = b.getPos();
+    unsigned int chksumPos = b.getPos();
     b.accessNBytes(2);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
@@ -73,7 +73,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
         b.fillNBytes(packetLength - 8, 0);   // payload place
     }
     unsigned int endPos = b.getPos();
-    b.writeUint16To(crcPos, TCPIPchecksum::checksum(b._getBuf(), endPos));
+    b.writeUint16To(chksumPos, TCPIPchecksum::checksum(b._getBuf(), endPos));      //FIXME pseudoheader needed for checksum calculation
 }
 
 cPacket *UDPSerializer::deserialize(Buffer &b, Context& context)
@@ -83,13 +83,13 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& context)
     pkt->setSourcePort(b.readUint16());
     pkt->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();
-    uint16_t crc = b.readUint16();
+    uint16_t chksum = b.readUint16();
     pkt->setByteLength(8);
     Context c;
     cPacket *encapPacket = serializers.byteArraySerializer.deserialize(b, c);
-    uint16_t calcCrc = TCPIPchecksum::checksum(b._getBuf(), b.getPos());
+    uint16_t calcChkSum = TCPIPchecksum::checksum(b._getBuf(), b.getPos());      //FIXME pseudoheader needed for checksum calculation
     pkt->encapsulate(encapPacket);
-    if (crc != calcCrc || pkt->getByteLength() != length)
+    if (calcChkSum != 0 || pkt->getByteLength() != length)
         pkt->setBitError(true);
     return pkt;
 }
