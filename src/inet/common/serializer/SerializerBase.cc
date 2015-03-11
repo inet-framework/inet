@@ -256,6 +256,7 @@ SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGr
 
 void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
 {
+    ASSERT(pkt);
     Buffer subBuffer(b, trailerLength);
     SerializerBase & serializer = lookupSerializer(pkt, context, group, id);
     serializer.serializePacket(pkt, subBuffer, context);
@@ -345,7 +346,7 @@ void SerializerRegistrationList::add(const char *name, int protocolGroup, int pr
     Key key(protocolGroup, protocolId);
 
     take(obj);
-    if (protocolGroup && protocolId)
+    if (protocolGroup != UNKNOWN)
         keyToSerializerMap.insert(std::pair<Key,SerializerBase*>(key, obj));
     if (!name)
         throw cRuntimeError("missing 'name' of registered serializer");

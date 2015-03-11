@@ -32,11 +32,11 @@ namespace inet {
 namespace serializer {
 
 enum ProtocolGroup {
+    UNKNOWN = -1,       // lookup serializer by classname only
     GLOBAL = 1,
     IP_PROT,
     ETHERTYPE,
-    LINKTYPE,
-    UNKNOWN
+    LINKTYPE
 };
 
 enum {  // from libpcap
