@@ -45,7 +45,7 @@ simple NetPerfMeter like INetPerfMeterApp
 
         double          onTime          @unit(s) = default(-1s);       // Online time; disconnect when timer expires
         double          offTime         @unit(s) = default(-1s);       // Offline time; reconnect when timer expires
-        int             maxReconnects            = default(0);         // Maximum number of reconnects
+        int             maxOnOffCycles           = default(0);         // Maximum number of on-off cycles (-1 for unlimited)
 
         int             outboundStreams          = default(1);         // Number of outbound streams (SCTP only)
         int             maxInboundStreams        = default(16);        // Maximum number of inbound streams (SCTP only)

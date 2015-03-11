@@ -27,12 +27,11 @@
 
 package inet.applications.netperfmeter;
 
+import inet.nodes.inet.NodeBase;
 import inet.applications.INetPerfMeterApp;
-import inet.node.inet.NodeBase;
-import inet.transportlayer.contract.ISCTP;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
-
+import inet.transport.ISCTP;
+import inet.transport.ITCP;
+import inet.transport.IUDP;
 
 //
 // NetPerfMeter application host.
@@ -45,7 +44,7 @@ module NetPerfMeterHost extends NodeBase
         string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailable("UDP", "UDP_None"));
         string sctpType = default(firstAvailable("SCTP", "SCTP_None"));
-        forwarding = default(false);  // disable routing by default
+        IPForward = default(false);  // disable routing by default
 
     submodules:
         netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like INetPerfMeterApp {  // T.D. 17.11.09
