@@ -52,21 +52,28 @@ void SCTPAssociation::storePacket(SCTPPathVariables *pathVar,
 {
     uint32 packetBytes = 0;
     for (uint16 i = 0; i < sctpMsg->getChunksArraySize(); i++) {
-        SCTPDataVariables *chunk = retransmissionQ->payloadQueue.find(((SCTPDataChunk *)sctpMsg->getChunks(i))->getTsn())->second;
-        decreaseOutstandingBytes(chunk);
-        chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-        chunk->queuedOnPath = nullptr;
-        packetBytes += chunk->booksize;
+        cPacketPtr& chunkPtr = sctpMsg->getChunks(i);
+        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        if(dataChunk != NULL) {
+            const uint32_t tsn = dataChunk->getTsn();
+            SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+            assert(chunk != NULL);
+            decreaseOutstandingBytes(chunk);
+            chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+            chunk->queuedOnPath = NULL;
+            packetBytes += chunk->booksize;
+        }
     }
+
     state->sctpMsg = sctpMsg;
     state->chunksAdded = chunksAdded;
     state->dataChunksAdded = dataChunksAdded;
     state->packetBytes = packetBytes;
     state->authAdded = authAdded;
     EV_INFO << "storePacket: path=" << pathVar->remoteAddress
-            << " state->packetBytes=" << state->packetBytes
-            << " osb=" << pathVar->outstandingBytes << " -> "
-            << pathVar->outstandingBytes - state->packetBytes << endl;
+              << " state->packetBytes=" << state->packetBytes
+              << " osb=" << pathVar->outstandingBytes << " -> "
+              << pathVar->outstandingBytes - state->packetBytes << endl;
     if (state->osbWithHeader)
         qCounter.roomSumSendStreams += state->packetBytes;
     else
@@ -95,12 +102,18 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
     qCounter.bookedSumSendStreams -= state->packetBytes;
 
     for (uint16 i = 0; i < (*sctpMsg)->getChunksArraySize(); i++) {
-        SCTPDataVariables *chunk = retransmissionQ->payloadQueue.find(((SCTPDataChunk *)(*sctpMsg)->getChunks(i))->getTsn())->second;
-        chunk->queuedOnPath = pathVar;
-        chunk->queuedOnPath->queuedBytes += chunk->booksize;
-        chunk->setLastDestination(pathVar);
-        increaseOutstandingBytes(chunk, pathVar);
-        chunk->countsAsOutstanding = true;
+        cPacketPtr& chunkPtr = (*sctpMsg)->getChunks(i);
+        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        if(dataChunk != NULL) {
+            const uint32_t tsn = dataChunk->getTsn();
+            SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+            assert(chunk != NULL);
+            chunk->queuedOnPath = pathVar;
+            chunk->queuedOnPath->queuedBytes += chunk->booksize;
+            chunk->setLastDestination(pathVar);
+            increaseOutstandingBytes(chunk, pathVar);
+            chunk->countsAsOutstanding = true;
+        }
     }
 }
 
