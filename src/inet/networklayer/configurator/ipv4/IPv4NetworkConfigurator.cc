@@ -94,6 +94,43 @@ void IPv4NetworkConfigurator::performConfigurations(Topology& topology, unsigned
         TIME(addStaticRoutes(topology, networkID));
 }
 
+// ###### Search filter to find nodes #######################################
+struct NodeFilterParameters
+{
+   unsigned int NetworkID;
+};
+
+static bool nodeFilter(cModule* module, void* userData)
+{
+   // ====== Check whether node qualifies for specified networkID ===========
+   const NodeFilterParameters* parameters   = (const NodeFilterParameters*)userData;
+   cProperty*                  nodeProperty = module->getProperties()->get("node");
+   if(nodeProperty) {
+      // ====== Are nodes in arbitrary networks requested? =====================
+      if(parameters->NetworkID == 0) {
+         return(true);   // return all nodes
+      }
+
+      // ====== Is there an interface in the right network? =================
+      IInterfaceTable* interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
+      if(interfaceTable) {
+         for(int k = 0;k < interfaceTable->getNumInterfaces(); k++) {
+            InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
+            if(!interfaceEntry->isLoopback()) {
+               const unsigned int interfaceNetworkID = NetworkConfiguratorBase::getNetworkID(module, interfaceEntry);
+               if( (interfaceNetworkID == 0) ||
+                   (interfaceNetworkID == parameters->NetworkID) ) {
+                  // Node has an interface in the right network => add it.
+                  return(true);
+               }
+            }
+         }
+      }
+   }
+
+   return(false);
+}
+
 void IPv4NetworkConfigurator::computeConfiguration()
 {
     EV_INFO << "Computing static network configuration (addresses and routes).\n";
@@ -1358,7 +1395,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, unsigned int n
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = static_cast<InterfaceInfo *>(destinationNode->interfaceInfos[j]);
-                        
+
                         // std::cout << sourceInterfaceEntry->getFullPath() << " --> "
                         //           << destinationInterfaceInfo->interfaceEntry->getFullPath() << endl;
                         if( (!destinationRoutingTable->isForwardingEnabled()) &&

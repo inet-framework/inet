@@ -63,7 +63,10 @@ void NetworkConfiguratorBase::initialize(int stage)
     }
 }
 
-void NetworkConfiguratorBase::extractTopology(Topology& topology, const unsigned int networkID)
+void NetworkConfiguratorBase::extractTopology(Topology&          topology,
+                                              const unsigned int networkID,
+                                              bool               (*nodeFilter)(cModule* module, void* userData),
+                                              void*              userData)
 {
     // extract topology
     topology.extractByProperty("node");
