@@ -33,7 +33,7 @@ unsigned int RawPacket::copyDataToBuffer(void *ptr, unsigned int length) const
 
 void RawPacket::removePrefix(unsigned int length)
 {
-    byteArray_var.truncateData(length);
+    byteArray_var.truncateData(length, 0);
 }
 
 } // namespace inet

@@ -68,7 +68,7 @@ TCPByteStreamRcvQueue::Region *TCPByteStreamRcvQueue::Region::split(uint32 seq)
 
     Region *reg = new Region(begin, seq);
     reg->data.setDataFromByteArray(data, 0, seq - begin);
-    data.truncateData(seq - begin);
+    data.truncateData(seq - begin, 0);
     begin = seq;
     return reg;
 }

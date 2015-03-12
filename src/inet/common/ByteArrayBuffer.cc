@@ -90,7 +90,7 @@ unsigned int ByteArrayBuffer::drop(unsigned int lengthP)
             length -= sliceLength;
         }
         else {
-            dataListM.front().truncateData(length);
+            dataListM.front().truncateData(length, 0);
             dataLengthM -= length;
             length = 0;
         }
