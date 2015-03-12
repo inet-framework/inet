@@ -18,95 +18,24 @@
 #ifndef __INET_MAPCOMMUNICATIONCACHE_H
 #define __INET_MAPCOMMUNICATIONCACHE_H
 
-#include "inet/common/IntervalTree.h"
-#include "inet/physicallayer/contract/ICommunicationCache.h"
+#include "inet/physicallayer/base/CommunicationCacheBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API MapCommunicationCache : public cModule, public ICommunicationCache
+class INET_API MapCommunicationCache : public CommunicationCacheBase
 {
   protected:
     /**
-     * Caches the intermediate computation results related to a radio.
-     */
-    class RadioCacheEntry {
-      public:
-        IntervalTree *receptionIntervals;
-
-      public:
-        RadioCacheEntry();
-    };
-
-    /**
-     * Caches the intermediate computation results related to a reception.
-     */
-    class ReceptionCacheEntry
-    {
-      public:
-        /**
-         * The radio frame that was sent to the receiver or nullptr if not yet sent.
-         */
-        const IRadioFrame *frame;
-        const IArrival *arrival;
-        const Interval *interval;
-        const IListening *listening;
-        const IReception *reception;
-        const IInterference *interference;
-        const INoise *noise;
-        const ISNIR *snir;
-        const IReceptionDecision *decision;
-
-      private:
-        ReceptionCacheEntry(const ReceptionCacheEntry &other);
-        ReceptionCacheEntry &operator=(const ReceptionCacheEntry &other);
-
-      public:
-        ReceptionCacheEntry();
-        ReceptionCacheEntry(ReceptionCacheEntry &&other);
-        ReceptionCacheEntry &operator=(ReceptionCacheEntry &&other);
-        virtual ~ReceptionCacheEntry();
-    };
-
-    /**
-     * Caches the intermediate computation results related to a transmission.
-     */
-    class TransmissionCacheEntry
-    {
-      public:
-        /**
-         * The last moment when this transmission may have any effect on
-         * other transmissions by interfering with them.
-         */
-        simtime_t interferenceEndTime;
-        /**
-         * The radio frame that was created by the transmitter is never nullptr.
-         */
-        const IRadioFrame *frame;
-        /**
-         * The figure representing this transmission.
-         */
-        cFigure *figure;
-        /**
-         * The list of intermediate reception computation results.
-         */
-        std::map<const IRadio *, ReceptionCacheEntry> *receptionCacheEntries;
-
-      public:
-        TransmissionCacheEntry();
-    };
-
-  protected:
-    /** @name Cache */
-    /**
-     * Caches pre-computed information for transmissions.
-     */
-    std::map<const ITransmission *, TransmissionCacheEntry> transmissionCache;
-    /**
-     * Caches pre-computed information for radios.
+     * Caches intermediate computation results for radios.
      */
     std::map<const IRadio *, RadioCacheEntry> radioCache;
+    /** @name Cache */
+    /**
+     * Caches intermediate computation results for transmissions.
+     */
+    std::map<const ITransmission *, TransmissionCacheEntry> transmissionCache;
     //@}
 
   protected:
@@ -134,62 +63,7 @@ class INET_API MapCommunicationCache : public cModule, public ICommunicationCach
 
     /** @name Interference cache */
     //@{
-    virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime);
     virtual void removeNonInterferingTransmissions();
-    //@}
-
-    /** @name Transmission cache */
-    //@{
-    virtual const simtime_t getCachedInterferenceEndTime(const ITransmission *transmission);
-    virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime);
-    virtual void removeCachedInterferenceEndTime(const ITransmission *transmission);
-
-    virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission);
-    virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame);
-    virtual void removeCachedFrame(const ITransmission *transmission);
-
-    virtual cFigure *getCachedFigure(const ITransmission *transmission);
-    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure);
-    virtual void removeCachedFigure(const ITransmission *transmission);
-    //@}
-
-    /** @name Reception cache */
-    //@{
-    virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival);
-    virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission);
-
-    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval);
-    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission);
-
-    virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening);
-    virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission);
-
-    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception);
-    virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission);
-
-    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference);
-    virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission);
-
-    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise);
-    virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission);
-
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir);
-    virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission);
-
-    virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision);
-    virtual void removeCachedDecision(const IRadio *radio, const ITransmission *transmission);
-
-    virtual const IRadioFrame *getCachedFrame(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *frame);
-    virtual void removeCachedFrame(const IRadio *radio, const ITransmission *transmission);
     //@}
 };
 

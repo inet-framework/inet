@@ -42,7 +42,7 @@ module RadioMedium like IRadioMedium
         string obstacleLossType = default("");    // NED type of the obstacle loss model
         string analogModelType;                   // NED type of the analog model
         string backgroundNoiseType = default(""); // NED type of the background noise model
-        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
+        string communicationCacheType = default("MapCommunicationCache"); // NED type of the communication cache model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
 
         // channel limit parameters
