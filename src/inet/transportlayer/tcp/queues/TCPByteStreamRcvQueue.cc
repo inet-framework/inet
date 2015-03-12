@@ -77,7 +77,7 @@ void TCPByteStreamRcvQueue::Region::copyTo(cPacket *msg_) const
 {
     ASSERT(getLength() == data.getDataArraySize());
 
-    ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msg_);
+    RawPacket *msg = check_and_cast<RawPacket *>(msg_);
     TCPVirtualDataRcvQueue::Region::copyTo(msg);
     msg->setByteArray(data);
 }
@@ -108,7 +108,7 @@ cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
     cPacket *msg = nullptr;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
     if (reg) {
-        msg = new ByteArrayMessage("data");
+        msg = new RawPacket("data");
         reg->copyTo(msg);
         delete reg;
     }

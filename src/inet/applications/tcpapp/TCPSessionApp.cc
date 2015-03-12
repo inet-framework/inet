@@ -154,7 +154,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
         }
 
         case TCP_TRANSFER_BYTESTREAM: {
-            ByteArrayMessage *msg = new ByteArrayMessage("data1");
+            RawPacket *msg = new RawPacket("data1");
             unsigned char *ptr = new unsigned char[sendBytes];
 
             for (int i = 0; i < sendBytes; i++)

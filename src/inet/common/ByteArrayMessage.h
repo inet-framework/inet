@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_BYTEARRAYMESSAGE_H
-#define __INET_BYTEARRAYMESSAGE_H
+#ifndef __INET_RAWPACKET_H
+#define __INET_RAWPACKET_H
 
 #include "inet/common/ByteArrayMessage_m.h"
 
@@ -22,28 +22,28 @@ namespace inet {
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */
-class ByteArrayMessage : public ByteArrayMessage_Base
+class RawPacket : public RawPacket_Base
 {
   public:
     /**
      * Constructor
      */
-    ByteArrayMessage(const char *name = nullptr, int kind = 0) : ByteArrayMessage_Base(name, kind) {}
+    RawPacket(const char *name = nullptr, int kind = 0) : RawPacket_Base(name, kind) {}
 
     /**
      * Copy constructor
      */
-    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other) {}
+    RawPacket(const RawPacket& other) : RawPacket_Base(other) {}
 
     /**
      * operator =
      */
-    ByteArrayMessage& operator=(const ByteArrayMessage& other) { ByteArrayMessage_Base::operator=(other); return *this; }
+    RawPacket& operator=(const RawPacket& other) { RawPacket_Base::operator=(other); return *this; }
 
     /**
      * Creates and returns an exact copy of this object.
      */
-    virtual ByteArrayMessage *dup() const override { return new ByteArrayMessage(*this); }
+    virtual RawPacket *dup() const override { return new RawPacket(*this); }
 
     /**
      * Set data from buffer
@@ -77,5 +77,5 @@ class ByteArrayMessage : public ByteArrayMessage_Base
 
 } // namespace inet
 
-#endif // ifndef __INET_BYTEARRAYMESSAGE_H
+#endif // ifndef __INET_RAWPACKET_H
 

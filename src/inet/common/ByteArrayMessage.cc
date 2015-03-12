@@ -16,22 +16,22 @@
 
 namespace inet {
 
-void ByteArrayMessage::setDataFromBuffer(const void *ptr, unsigned int length)
+void RawPacket::setDataFromBuffer(const void *ptr, unsigned int length)
 {
     byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);
 }
 
-void ByteArrayMessage::addDataFromBuffer(const void *ptr, unsigned int length)
+void RawPacket::addDataFromBuffer(const void *ptr, unsigned int length)
 {
     byteArray_var.addDataFromBuffer(ptr, length);
 }
 
-unsigned int ByteArrayMessage::copyDataToBuffer(void *ptr, unsigned int length) const
+unsigned int RawPacket::copyDataToBuffer(void *ptr, unsigned int length) const
 {
     return byteArray_var.copyDataToBuffer(ptr, length);
 }
 
-void ByteArrayMessage::removePrefix(unsigned int length)
+void RawPacket::removePrefix(unsigned int length)
 {
     byteArray_var.truncateData(length);
 }

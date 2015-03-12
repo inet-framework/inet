@@ -24,10 +24,10 @@ namespace inet;
 class noncobject ByteArray;
 
 //
-// Message that carries raw bytes.
+// Packet that carries raw network bytes.
 // Used with emulation-related features.
 //
-packet ByteArrayMessage
+packet RawPacket
 {
     @customize(true);
     ByteArray byteArray;

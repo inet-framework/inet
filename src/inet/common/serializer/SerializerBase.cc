@@ -231,7 +231,7 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
 
 SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id)
 {
-    const ByteArrayMessage *bam = dynamic_cast<const ByteArrayMessage *>(pkt);
+    const RawPacket *bam = dynamic_cast<const RawPacket *>(pkt);
     if (bam != nullptr)
         return serializers.byteArraySerializer;
     SerializerBase *serializer = serializers.lookup(group, id);
@@ -301,7 +301,7 @@ cPacket *DefaultSerializer::deserialize(Buffer &b, Context& context)
 
 void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
 {
-    const ByteArrayMessage *bam = check_and_cast<const ByteArrayMessage *>(pkt);
+    const RawPacket *bam = check_and_cast<const RawPacket *>(pkt);
     unsigned int length = bam->getByteLength();
     unsigned int wl = std::min(length, b.getRemainder());
     wl = bam->copyDataToBuffer(b.accessNBytes(0), wl);
@@ -314,10 +314,10 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
 
 cPacket *ByteArraySerializer::deserialize(Buffer &b, Context& context)
 {
-    ByteArrayMessage *bam = nullptr;
+    RawPacket *bam = nullptr;
     unsigned int bytes = b.getRemainder();
     if (bytes) {
-        bam = new ByteArrayMessage("parsed-bytes");
+        bam = new RawPacket("parsed-bytes");
         bam->setDataFromBuffer(b.accessNBytes(bytes), bytes);
         bam->setByteLength(bytes);
     }

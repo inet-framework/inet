@@ -122,7 +122,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 
             pkt->setByteLength(byteLen);
 
-            ByteArrayMessage *baMsg = dynamic_cast<ByteArrayMessage *>(pkt);
+            RawPacket *baMsg = dynamic_cast<RawPacket *>(pkt);
 
             // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
             if (baMsg) {
