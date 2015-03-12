@@ -18,15 +18,13 @@
 package inet.physicallayer.common;
 
 import inet.physicallayer.contract.IAnalogModel;
+import inet.physicallayer.contract.ICommunicationCache;
 import inet.physicallayer.contract.INeighborCache;
 import inet.physicallayer.contract.IObstacleLoss;
 import inet.physicallayer.contract.IPathLoss;
 import inet.physicallayer.contract.IPropagation;
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 import inet.physicallayer.contract.IRadioMedium;
-
-module dummy {
-}
 
 //
 // The medium model describes the shared physical medium where communication
@@ -44,6 +42,7 @@ module RadioMedium like IRadioMedium
         string obstacleLossType = default("");    // NED type of the obstacle loss model
         string analogModelType;                   // NED type of the analog model
         string backgroundNoiseType = default(""); // NED type of the background noise model
+        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
 
         // channel limit parameters
@@ -97,9 +96,12 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,450");
         }
-        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+        communicationCache: <communicationCacheType> like ICommunicationCache {
             parameters:
                 @display("p=100,550");
         }
-        communicationCache: dummy;
+        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+            parameters:
+                @display("p=100,650");
+        }
 }

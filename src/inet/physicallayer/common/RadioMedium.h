@@ -26,6 +26,7 @@
 #include "inet/environment/MaterialRegistry.h"
 #include "inet/physicallayer/contract/ISNIR.h"
 #include "inet/physicallayer/contract/INeighborCache.h"
+#include "inet/physicallayer/contract/ICommunicationCache.h"
 #include "inet/physicallayer/contract/IRadioMedium.h"
 #include "inet/physicallayer/contract/IArrival.h"
 #include "inet/physicallayer/contract/IInterference.h"
@@ -45,72 +46,6 @@ namespace physicallayer {
 class INET_API RadioMedium : public cSimpleModule, public cListener, public IRadioMedium
 {
   protected:
-    /**
-     * Caches the intermediate computation results related to a reception.
-     */
-    class ReceptionCacheEntry
-    {
-      public:
-        /**
-         * The radio frame that was sent to the receiver or nullptr.
-         */
-        const IRadioFrame *frame;
-        const IArrival *arrival;
-        const Interval *interval;
-        const IListening *listening;
-        const IReception *reception;
-        const IInterference *interference;
-        const INoise *noise;
-        const ISNIR *snir;
-        const IReceptionDecision *decision;
-
-      private:
-        ReceptionCacheEntry(const ReceptionCacheEntry & other);
-        ReceptionCacheEntry & operator=(const ReceptionCacheEntry & other);
-
-      public:
-        ReceptionCacheEntry();
-        ReceptionCacheEntry(ReceptionCacheEntry && other);
-        ReceptionCacheEntry & operator=(ReceptionCacheEntry && other);
-        virtual ~ReceptionCacheEntry();
-    };
-
-    /**
-     * Caches the intermediate computation results related to a transmission.
-     */
-    class TransmissionCacheEntry
-    {
-      public:
-        /**
-         * The last moment when this transmission may have any effect on
-         * other transmissions by interfering with them.
-         */
-        simtime_t interferenceEndTime;
-        /**
-         * The radio frame that was created by the transmitter is never nullptr.
-         */
-        const IRadioFrame *frame;
-        /**
-         * The figure representing this transmission.
-         */
-        cFigure *figure;
-        /**
-         * The list of intermediate reception computation results.
-         */
-        std::vector<ReceptionCacheEntry> *receptionCacheEntries;
-
-      public:
-        TransmissionCacheEntry();
-    };
-
-    class RadioCacheEntry {
-      public:
-        IntervalTree *receptionIntervals;
-
-      public:
-        RadioCacheEntry();
-    };
-
     enum RangeFilterKind {
         RANGE_FILTER_ANYWHERE,
         RANGE_FILTER_INTERFERENCE_RANGE,
@@ -258,7 +193,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The list of radios that can transmit and receive radio signals on the
      * radio medium. The radios follow each other in the order of their unique
-     * id. This list may contain NULL pointers.
+     * id. Radios are only removed from the beginning. This list may contain
+     * NULL pointers.
      */
     std::vector<const IRadio *> radios;
     /**
@@ -272,31 +208,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Cache */
     //@{
     /**
-     * The smallest radio id of all radios.
+     * Caches communication for all radios.
      */
-    int baseRadioId;
-    /**
-     * The smallest transmission id of all ongoing transmissions.
-     */
-    int baseTransmissionId;
+    mutable ICommunicationCache *communicationCache;
     /**
      * Caches neighbors for all radios or nullptr if turned off.
      */
     mutable INeighborCache *neighborCache;
-    /**
-     * Caches pre-computed information for transmissions. The outer vector is
-     * indexed by transmission id (offset with base transmission id) and the
-     * inner vector is indexed by radio id. Values that are no longer needed are
-     * removed from the beginning only. May contain nullptr values for not yet
-     * pre-computed information.
-     */
-    mutable std::vector<TransmissionCacheEntry> transmissionCache;
-    /**
-     * Caches pre-computed information for radios. The outer vector is indexed
-     * by radio id (offset with base transmission id) and the inner vector is
-     * indexed by transmission id.
-     */
-    mutable std::vector<RadioCacheEntry> radioCache;
     //@}
 
     /** @name Logging */
@@ -396,48 +314,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void handleMessage(cMessage *message) override;
     //@}
 
-    /** @name Cache */
-    //@{
-    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) const;
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) const;
-    virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
-    virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval) const;
-    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) const;
-    virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception) const;
-    virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) const;
-    virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission) const;
-
-    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) const;
-    virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) const;
-
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) const;
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) const;
-    virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) const;
-
-    virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission) const;
-    virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision) const;
-    virtual void removeCachedDecision(const IRadio *radio, const ITransmission *transmission) const;
-
-    virtual void invalidateCachedDecisions(const ITransmission *transmission);
-    virtual void invalidateCachedDecision(const IReceptionDecision *decision);
-    //@}
-
     /** @name Limits */
     //@{
     virtual mps computeMaxSpeed() const;
@@ -530,7 +406,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream &stream) const override;
 
     virtual W getMinInterferencePower() const override { return minInterferencePower; }
     virtual W getMinReceptionPower() const override { return minReceptionPower; }
