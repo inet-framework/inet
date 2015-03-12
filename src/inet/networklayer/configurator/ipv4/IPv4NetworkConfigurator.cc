@@ -75,8 +75,10 @@ void IPv4NetworkConfigurator::initialize(int stage)
         addDefaultRoutesParameter = par("addDefaultRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER)
+    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+        // TD 12.03.2015: 3rd stage, after IP address initialisation!
         ensureConfigurationComputed(fullTopology);
+    }
     else if (stage == INITSTAGE_LAST)
         dumpConfiguration();
 }
@@ -144,26 +146,11 @@ void IPv4NetworkConfigurator::computeConfiguration()
     if (assignAddressesParameter) {
         TIME(assignAddresses(fullTopology));
 
-        // NOTE: We need to configure the IP addresses already here.
-        // They are needed for the pruned topologies!
-        for (int i = 0; i < fullTopology.getNumNodes(); i++) {
-            Node *node = (Node *)fullTopology.getNode(i);
-            for (unsigned int i = 0; i < node->interfaceInfos.size(); i++) {
-                InterfaceInfo *interfaceInfo = dynamic_cast<InterfaceInfo*>(node->interfaceInfos.at(i));
-                ASSERT(interfaceInfo != NULL);
-                InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-                IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
-                if(interfaceData != NULL) {  // ??????
-                    if (interfaceInfo->configure) {
-                        interfaceData->setIPAddress(IPv4Address(interfaceInfo->address));                     
-                        interfaceData->setNetmask(IPv4Address(interfaceInfo->netmask));
-                    }
-                 puts("---OK!");
-                }
-                else {
-                 puts("???");
-                }
-            }
+        // NOTE: For multi-homed topologies, we need to configure the IP
+        // addresses already here. They are needed for the pruned
+        // per-network topologies!
+        if (fullTopology.networkSet.size() > 1) {
+            configureAllInterfaces();
         }
     }
 
@@ -277,6 +264,7 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
     IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
+    ASSERT(interfaceData != NULL);
     if (interfaceInfo->mtu != -1)
         interfaceEntry->setMtu(interfaceInfo->mtu);
     if (interfaceInfo->metric != -1)
