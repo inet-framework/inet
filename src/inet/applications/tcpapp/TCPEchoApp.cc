@@ -17,7 +17,7 @@
 
 #include "inet/applications/tcpapp/TCPEchoApp.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"

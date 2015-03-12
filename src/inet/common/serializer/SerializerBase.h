@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"

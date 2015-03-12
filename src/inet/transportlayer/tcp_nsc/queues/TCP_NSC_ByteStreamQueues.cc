@@ -18,7 +18,7 @@
 
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_ByteStreamQueues.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
 #include "inet/common/serializer/tcp/TCPSerializer.h"

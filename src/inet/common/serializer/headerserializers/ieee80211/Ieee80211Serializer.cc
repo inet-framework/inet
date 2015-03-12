@@ -18,7 +18,7 @@
 #include "platdep/sockets.h"  // htonl, ntohl, etc. on Windows
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/common/serializer/headerserializers/ieee80211/headers/ieee80211.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"

@@ -18,7 +18,7 @@
 
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"

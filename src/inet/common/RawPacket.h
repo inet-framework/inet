@@ -15,7 +15,7 @@
 #ifndef __INET_RAWPACKET_H
 #define __INET_RAWPACKET_H
 
-#include "inet/common/ByteArrayMessage_m.h"
+#include "inet/common/RawPacket_m.h"
 
 namespace inet {
 

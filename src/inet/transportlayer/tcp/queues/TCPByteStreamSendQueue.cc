@@ -17,7 +17,7 @@
 
 #include "inet/transportlayer/tcp/queues/TCPByteStreamSendQueue.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {

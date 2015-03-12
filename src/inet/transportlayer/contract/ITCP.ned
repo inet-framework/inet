@@ -61,7 +61,7 @@ package inet.transportlayer.contract;
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
 //   - TCP_TRANSFER_BYTESTREAM:
-//      This mode manages "raw bytes", that is, bytes of ~ByteArrayMessage are
+//      This mode manages "raw bytes", that is, bytes of ~RawPacket are
 //      transmitted over the TCP connection.
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind

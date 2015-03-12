@@ -1,3 +1,7 @@
+2015-03-12  Zoltan Bojthe
+
+	Renamed ByteArrayMessage to RawPacket.
+
 2015-02-24  Levente Mészáros
 
 	Added new SI bps prefixes.

@@ -12,7 +12,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 
 namespace inet {
 
