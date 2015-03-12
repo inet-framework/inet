@@ -100,8 +100,9 @@ class INET_API Ieee80211DsssMode : public IIeee80211Mode
 
     virtual inline const simtime_t getDuration(int dataBitLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataBitLength); }
 
-    // TODO: fill in
+    // Table 19-8—ERP characteristics
     virtual inline const simtime_t getSlotTime() const override { return 20E-6; }
+    virtual inline const simtime_t getShortSlotTime() const { return 9E-6; }
     virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
     virtual inline const simtime_t getCcaTime() const override { return 15E-6; }
     virtual inline const simtime_t getPhyRxStartDelay() const override { return 192E-6; }
