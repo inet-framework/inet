@@ -53,7 +53,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 
-    if (typeid(pkt) != typeid(IPv4Datagram)) {
+    if (typeid(*pkt) != typeid(IPv4Datagram)) {
         if (c.throwOnSerializerNotFound)
             throw cRuntimeError("IPv4Serializer: class '%s' not accepted", pkt->getClassName());
         EV_ERROR << "IPv4Serializer: class '" << pkt->getClassName() << "' not accepted.\n";
@@ -108,7 +108,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     else
         SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
 
-    ip->ip_sum = TCPIPchecksum::checksum(ip, IP_HEADER_BYTES);
+    ip->ip_sum = htons(TCPIPchecksum::checksum(ip, IP_HEADER_BYTES));
 }
 
 cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)

@@ -47,11 +47,6 @@ class TCPSerializer : public SerializerBase
      * Puts a packet sniffed from the wire into a TCPSegment.
      */
     tcp::TCPSegment *deserialize(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
-
-    /**
-     * Calculate checksum with pseudo header.
-     */
-    static uint16_t checksum(const void *addr, unsigned int count, const void *addr2, unsigned int count2);
 };
 
 } // namespace serializer

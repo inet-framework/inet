@@ -394,7 +394,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     size_t totalIpLen = ipHdrLen + totalTcpLen;
     ih->tot_len = htons(totalIpLen);
     ih->check = 0;
-    ih->check = TCPIPchecksum::checksum(ih, ipHdrLen);
+    ih->check = htons(TCPIPchecksum::checksum(ih, ipHdrLen));
 
     // receive msg from network
 

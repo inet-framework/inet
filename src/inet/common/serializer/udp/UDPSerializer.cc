@@ -54,7 +54,7 @@ struct udphdr
 };
 #endif
 
-void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
+void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     const UDPPacket *pkt = check_and_cast<const UDPPacket *>(_pkt);
@@ -67,16 +67,16 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     b.accessNBytes(2);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
-        SerializerBase::lookupAndSerialize(encapPkt, b, context, UNKNOWN, 0, 0);
+        SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 0);
     }
     else {
         b.fillNBytes(packetLength - 8, 0);   // payload place
     }
     unsigned int endPos = b.getPos();
-    b.writeUint16To(chksumPos, TCPIPchecksum::checksum(b._getBuf(), endPos));      //FIXME pseudoheader needed for checksum calculation
+    b.writeUint16To(chksumPos, TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), endPos, c.l3AddressesPtr, c.l3AddressesLength));
 }
 
-cPacket *UDPSerializer::deserialize(Buffer &b, Context& context)
+cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     UDPPacket *pkt = new UDPPacket("parsed-udp");
@@ -85,9 +85,10 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& context)
     unsigned int length = b.readUint16();
     uint16_t chksum = b.readUint16();
     pkt->setByteLength(8);
-    Context c;
     cPacket *encapPacket = serializers.byteArraySerializer.deserialize(b, c);
-    uint16_t calcChkSum = TCPIPchecksum::checksum(b._getBuf(), b.getPos());      //FIXME pseudoheader needed for checksum calculation
+    uint16_t calcChkSum = 0;
+    if (chksum != 0)
+        calcChkSum = TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), b.getPos(), c.l3AddressesPtr, c.l3AddressesLength);
     pkt->encapsulate(encapPacket);
     if (calcChkSum != 0 || pkt->getByteLength() != length)
         pkt->setBitError(true);

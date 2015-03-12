@@ -21,16 +21,14 @@
 namespace inet {
 namespace serializer {
 
-//#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-//#include <netinet/in.h>  // htonl, ntohl, ...
-//#endif
-
-uint16_t TCPIPchecksum::_checksum(const void *addr, unsigned int count)
+uint16_t TCPIPchecksum::_checksum(const void *_addr, unsigned int count)
 {
+    const unsigned char *addr = static_cast<const unsigned char *>(_addr);
     uint32_t sum = 0;
 
     while (count > 1) {
-        sum += *((const uint16_t *&)addr)++;
+        sum += (addr[0] << 8) | addr[1];
+        addr += 2;
         if (sum & 0x80000000)
             sum = (sum & 0xFFFF) + (sum >> 16);
         count -= 2;
@@ -44,6 +42,19 @@ uint16_t TCPIPchecksum::_checksum(const void *addr, unsigned int count)
 
     return (uint16_t)sum;
 }
+
+uint16_t TCPIPchecksum::checksum(unsigned int protocolId, const void *packet, unsigned int packetLength,
+        const void *addr, unsigned int addrLength)
+{
+    uint32_t sum = TCPIPchecksum::_checksum(packet, packetLength)
+            + TCPIPchecksum::_checksum(addr, addrLength) + packetLength + protocolId;
+
+    while (sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
+
+    return (uint16_t) ~sum;
+}
+
 
 } // namespace serializer
 } // namespace inet

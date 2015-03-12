@@ -140,7 +140,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         else
             memset(tcpData, 't', dataLength); // fill data part with 't'
     }
-    tcp->th_sum = checksum(tcp, writtenbytes, c.l3AddressesPtr, c.l3AddressesLength);
+    tcp->th_sum = htons(TCPIPchecksum::checksum(IP_PROT_TCP, tcp, writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
     b.seek(writtenbytes);
 }
 
@@ -151,7 +151,7 @@ TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bu
     return check_and_cast_nullable<TCPSegment *>(deserialize(b, c));
 }
 
-cPacket* TCPSerializer::deserialize(Buffer &b, Context& context)
+cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
 {
     struct tcphdr const *const tcp = static_cast<struct tcphdr const *>(b.accessNBytes(TCP_HEADER_OCTETS));
     if (!tcp) {
@@ -178,7 +178,7 @@ cPacket* TCPSerializer::deserialize(Buffer &b, Context& context)
     tcpseg->setUrgBit((flags & TH_URG) == TH_URG);
 
     tcpseg->setWindow(ntohs(tcp->th_win));
-    // Checksum (header checksum): modelled by cMessage::hasBitError()
+
     tcpseg->setUrgentPointer(ntohs(tcp->th_urp));
 
     if (hdrLength > TCP_HEADER_OCTETS) {    // options present?
@@ -231,18 +231,11 @@ cPacket* TCPSerializer::deserialize(Buffer &b, Context& context)
     unsigned int payloadLength = b.getRemainder();
     tcpseg->setPayloadLength(payloadLength);
     tcpseg->getByteArray().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
+
+    // Checksum: modelled by cMessage::hasBitError()
+    if (TCPIPchecksum::checksum(IP_PROT_TCP, tcp, b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
+        tcpseg->setBitError(true);
     return tcpseg;
-}
-
-uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
-        const void *addr2, unsigned int count2)
-{
-    uint32_t sum = TCPIPchecksum::_checksum(addr, count) + TCPIPchecksum::_checksum(addr2, count2);
-
-    while (sum >> 16)
-        sum = (sum & 0xFFFF) + (sum >> 16);
-
-    return (uint16_t) ~sum;
 }
 
 } // namespace inet
