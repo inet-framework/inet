@@ -106,7 +106,7 @@ static bool nodeFilter(cModule* module, void* userData)
    const NodeFilterParameters* parameters   = (const NodeFilterParameters*)userData;
    cProperty*                  nodeProperty = module->getProperties()->get("node");
    if(nodeProperty) {
-      // ====== Are nodes in arbitrary networks requested? =====================
+      // ====== Are nodes in arbitrary networks requested? ==================
       if(parameters->NetworkID == 0) {
          return(true);   // return all nodes
       }
@@ -175,7 +175,9 @@ void IPv4NetworkConfigurator::computeConfiguration()
            EV_INFO << "Computing configuration for network " << networkID << " ..." << endl;
 
            Topology prunedTopology;
-           TIME(extractTopology(prunedTopology, networkID));
+           NodeFilterParameters parameters;
+           parameters.NetworkID = networkID;
+           TIME(extractTopology(prunedTopology, networkID, &nodeFilter, &parameters));
            performConfigurations(prunedTopology, networkID);
 
            for (int i = 0; i < prunedTopology.getNumNodes(); i++) {

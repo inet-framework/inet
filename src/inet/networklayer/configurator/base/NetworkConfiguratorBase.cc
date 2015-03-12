@@ -118,7 +118,7 @@ void NetworkConfiguratorBase::extractTopology(Topology&          topology,
                         (linkNetworkID == 0) ||
                         (networkID == 0) ) {
                         topology.networkSet.insert(linkNetworkID);
-                 
+
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
                         linkInfo->networkID = linkNetworkID;
