@@ -80,56 +80,56 @@ class INET_API NetPerfMeter : public cSimpleModule
       UDP  = 2
    };
    enum TimerType {
-      TIMER_CONNECT    = 1,
-      TIMER_START      = 2,
-      TIMER_RESET      = 3,
-      TIMER_STOP       = 4,
-      TIMER_TRANSMIT   = 5,
-      TIMER_DISCONNECT = 6,
-      TIMER_RECONNECT  = 7
+      TIMER_CONNECT  = 1,
+      TIMER_START    = 2,
+      TIMER_RESET    = 3,
+      TIMER_STOP     = 4,
+      TIMER_TRANSMIT = 5,
+      TIMER_OFF      = 6,
+      TIMER_ON       = 7
    };
 
-   Protocol              TransportProtocol;
-   bool                  ActiveMode;
-   bool                  SendingAllowed;
-   bool                  HasFinished;
-   unsigned int          MaxMsgSize;
-   unsigned int          QueueSize;
-   double                UnorderedMode;
-   double                UnreliableMode;
-   bool                  DecoupleSaturatedStreams;
-   simtime_t             ConnectTime;
-   simtime_t             StartTime;
-   simtime_t             ResetTime;
-   simtime_t             StopTime;
-   cMessage*             ConnectTimer;
-   cMessage*             StartTimer;
-   cMessage*             StopTimer;
-   cMessage*             ResetTimer;
-   cMessage*             DisconnectTimer;
-   cMessage*             ReconnectTimer;
-   unsigned int          EstablishedConnections;
-   unsigned int          MaxReconnects;
+   Protocol                TransportProtocol;
+   bool                    ActiveMode;
+   bool                    SendingAllowed;
+   bool                    HasFinished;
+   unsigned int            MaxMsgSize;
+   unsigned int            QueueSize;
+   double                  UnorderedMode;
+   double                  UnreliableMode;
+   bool                    DecoupleSaturatedStreams;
+   simtime_t               ConnectTime;
+   simtime_t               StartTime;
+   simtime_t               ResetTime;
+   simtime_t               StopTime;
+   cMessage*               ConnectTimer;
+   cMessage*               StartTimer;
+   cMessage*               StopTimer;
+   cMessage*               ResetTimer;
+   cMessage*               OffTimer;
+   cMessage*               OnTimer;
+   unsigned int            OnOffCycleCounter;
+   int                     MaxOnOffCycles;
    std::vector<NetPerfMeterTransmitTimer*>
-                         TransmitTimerVector;
+                           TransmitTimerVector;
 
-   unsigned int          RequestedOutboundStreams;
-   unsigned int          MaxInboundStreams;
-   unsigned int          ActualOutboundStreams;
-   unsigned int          ActualInboundStreams;
+   unsigned int            RequestedOutboundStreams;
+   unsigned int            MaxInboundStreams;
+   unsigned int            ActualOutboundStreams;
+   unsigned int            ActualInboundStreams;
    std::vector<cDynamicExpression>
-                         FrameRateExpressionVector;
+                           FrameRateExpressionVector;
    std::vector<cDynamicExpression>
-                         FrameSizeExpressionVector;
+                           FrameSizeExpressionVector;
 
    // ====== Sockets and Connection Information =============================
-   SCTPSocket*           SocketSCTP;
-   SCTPSocket*           IncomingSocketSCTP;
-   TCPSocket*            SocketTCP;
-   TCPSocket*            IncomingSocketTCP;
-   UDPSocket*            SocketUDP;
-   int                   ConnectionID;
-   L3Address             PrimaryPath;
+   SCTPSocket*             SocketSCTP;
+   SCTPSocket*             IncomingSocketSCTP;
+   TCPSocket*              SocketTCP;
+   TCPSocket*              IncomingSocketTCP;
+   UDPSocket*              SocketUDP;
+   int                     ConnectionID;
+   L3Address               PrimaryPath;
 
    // ====== Trace File Handling ============================================
    struct TraceEntry {
@@ -137,19 +137,19 @@ class INET_API NetPerfMeter : public cSimpleModule
       unsigned int FrameSize;
       unsigned int StreamID;
    };
-   std::vector<TraceEntry> TraceVector;                // Frame trace from file
-   size_t                  TraceIndex;                 // Position in trace file
+   std::vector<TraceEntry> TraceVector;                  // Frame trace from file
+   size_t                  TraceIndex;                   // Position in trace file
 
    // ====== Timers =========================================================
-   simtime_t             TransmissionStartTime;        // Absolute transmission start time
-   simtime_t             ConnectionEstablishmentTime;  // Absolute connection establishment time
-   simtime_t             StatisticsResetTime;          // Absolute statistics reset time
+   simtime_t               TransmissionStartTime;        // Absolute transmission start time
+   simtime_t               ConnectionEstablishmentTime;  // Absolute connection establishment time
+   simtime_t               StatisticsResetTime;          // Absolute statistics reset time
 
    // ====== Variables ======================================================
-   unsigned int          LastStreamID;                 // Stream number of last message being sent
+   unsigned int            LastStreamID;                 // Stream number of last message being sent
 
    // ====== Statistics =====================================================
-   simtime_t             StatisticsStartTime;          // Absolute start time of statistics recording
+   simtime_t               StatisticsStartTime;          // Absolute start time of statistics recording
 
    private:
    class SenderStatistics {
@@ -200,6 +200,8 @@ class INET_API NetPerfMeter : public cSimpleModule
    }
    double        getFrameRate(const unsigned int streamID);
    unsigned long getFrameSize(const unsigned int streamID);
+   void startSending();
+   void stopSending();
    void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
    void sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
                                    const SCTPSendQueueAbated* sendQueueAbatedIndication);
