@@ -20,6 +20,8 @@
 
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 
+#include "inet/common/RawPacket.h"
+#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
@@ -79,13 +81,39 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     // content (getEncapsulatedPacket()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
     if (buf->datagram == nullptr) {
+        if (dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket())) {
+            RawPacket * rp = static_cast<RawPacket *>(datagram->getEncapsulatedPacket());
+            // move raw bytes to its offset in RawPacket
+            if (datagram->getFragmentOffset()) {
+                rp->getByteArray().expandData(datagram->getFragmentOffset(), 0);
+                rp->addByteLength(datagram->getFragmentOffset());
+            }
+        }
+
         buf->datagram = datagram;
     }
     else if (buf->datagram->getEncapsulatedPacket() == nullptr && datagram->getEncapsulatedPacket() != nullptr) {
         delete buf->datagram;
+
+        if (dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket())) {
+            RawPacket *rp = static_cast<RawPacket *>(datagram->getEncapsulatedPacket());
+            // move raw bytes to its offset in RawPacket
+            if (datagram->getFragmentOffset()) {
+                rp->getByteArray().expandData(datagram->getFragmentOffset(), 0);
+                rp->setByteLength(rp->getByteArray().getDataArraySize());
+            }
+        }
+
         buf->datagram = datagram;
     }
     else {
+        RawPacket *brp = dynamic_cast<RawPacket *>(buf->datagram->getEncapsulatedPacket());
+        RawPacket *rp = dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket());
+        if (brp && rp) {
+            // merge encapsulated raw data
+            brp->getByteArray().copyDataFromBuffer(datagram->getFragmentOffset(), rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
+            brp->setByteLength(rp->getByteArray().getDataArraySize());
+        }
         delete datagram;
     }
 
@@ -97,6 +125,23 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
         ret->setFragmentOffset(0);
         ret->setMoreFragments(false);
         bufs.erase(i);
+        if (dynamic_cast<RawPacket *>(ret->getEncapsulatedPacket())) {
+            using namespace serializer;
+            RawPacket *rp = static_cast<RawPacket *>(ret->getEncapsulatedPacket());
+            char ipv4addresses[8];    // 2 * 4 bytes for 2 IPv4 addresses
+            Buffer hdr(ipv4addresses, sizeof(ipv4addresses));
+            hdr.writeIPv4Address(ret->getSrcAddress());
+            hdr.writeIPv4Address(ret->getDestAddress());
+            Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
+            Context c;
+            c.l3AddressesPtr = ipv4addresses;
+            c.l3AddressesLength = sizeof(ipv4addresses);
+            cPacket *enc = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, ret->getTransportProtocol(), 0);
+            if (enc) {
+                delete ret->decapsulate();
+                ret->encapsulate(enc);
+            }
+        }
         return ret;
     }
     else {
