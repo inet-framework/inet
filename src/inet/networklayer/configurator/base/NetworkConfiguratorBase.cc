@@ -63,18 +63,50 @@ void NetworkConfiguratorBase::initialize(int stage)
     }
 }
 
+// ###### Search filter to find nodes #######################################
+struct NodeFilterParameters
+{
+   unsigned int NetworkID;
+};
+
+static bool nodeFilter(cModule* module, void* userData)
+{
+   // ====== Check whether node qualifies for specified networkID ===========
+   const NodeFilterParameters* parameters   = (const NodeFilterParameters*)userData;
+   cProperty*                  nodeProperty = module->getProperties()->get("node");
+   if(nodeProperty) {
+      // ====== Are nodes in arbitrary networks requested? ==================
+      if(parameters->NetworkID == 0) {
+         return(true);   // return all nodes
+      }
+
+      // ====== Is there an interface in the right network? =================
+      IInterfaceTable* interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
+      if(interfaceTable) {
+         for(int k = 0;k < interfaceTable->getNumInterfaces(); k++) {
+            InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
+            if(!interfaceEntry->isLoopback()) {
+               const unsigned int interfaceNetworkID = NetworkConfiguratorBase::getNetworkID(module, interfaceEntry);
+               if( (interfaceNetworkID == 0) ||
+                   (interfaceNetworkID == parameters->NetworkID) ) {
+                  // Node has an interface in the right network => add it.
+                  return(true);
+               }
+            }
+         }
+      }
+   }
+
+   return(false);
+}
+
 void NetworkConfiguratorBase::extractTopology(Topology&          topology,
-                                              const unsigned int networkID,
-                                              bool               (*nodeFilter)(cModule* module, void* userData),
-                                              void*              nodeFilterUserData)
+                                              const unsigned int networkID)
 {
     // extract topology
-    if(nodeFilter == NULL) {
-       topology.extractByProperty("node");   // default: just find nodes
-    }
-    else {
-        topology.extractFromNetwork(nodeFilter, nodeFilterUserData);   // apply custom filter
-    }
+    NodeFilterParameters parameters;
+    parameters.NetworkID = networkID;
+    topology.extractFromNetwork(&nodeFilter, &parameters);
 
     if(networkID != 0) {
        // The topology here is already pruned from nodes without connection in this network.

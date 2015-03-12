@@ -180,10 +180,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      * Creates vertices from modules having @node property.
      * Creates edges from connections (wired and wireless) between network interfaces.
      */
-    virtual void extractTopology(Topology&         topology,
-                                 const unsigned int networkID = 0,
-                                 bool              (*nodeFilter)(cModule* module, void* userData) = NULL,
-                                 void*             nodeFilterUserData = NULL);
+    virtual void extractTopology(Topology&          topology,
+                                 const unsigned int networkID = 0);
 
     // helper functions
     virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
