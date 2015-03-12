@@ -66,10 +66,31 @@ void NetworkConfiguratorBase::initialize(int stage)
 void NetworkConfiguratorBase::extractTopology(Topology&          topology,
                                               const unsigned int networkID,
                                               bool               (*nodeFilter)(cModule* module, void* userData),
-                                              void*              userData)
+                                              void*              nodeFilterUserData)
 {
     // extract topology
-    topology.extractByProperty("node");
+    if(nodeFilter == NULL) {
+       topology.extractByProperty("node");   // default: just find nodes
+    }
+    else {
+        topology.extractFromNetwork(nodeFilter, nodeFilterUserData);   // apply custom filter
+    }
+
+    if(networkID != 0) {
+       // The topology here is already pruned from nodes without connection in this network.
+       // However, the links have not been pruned yet (between still-existing nodes)!
+       for (int i = 0; i < topology.getNumNodes(); i++) {
+           Node* node = (Node *)topology.getNode(i);
+           for (int j = 0; j < node->getNumOutLinks(); j++) {
+               Topology::LinkOut* link          = node->getLinkOut(j);
+               const unsigned int linkNetworkID = getNetworkID(node->getModule(), link);
+               if( (linkNetworkID != 0) && (linkNetworkID != networkID) ) {
+                  link->disable();   // Not possible to prune in topology => disable link.
+               }
+           }
+       }
+    }
+
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
