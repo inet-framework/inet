@@ -25,6 +25,9 @@ import inet.physicallayer.contract.IPropagation;
 import inet.physicallayer.contract.IRadioBackgroundNoise;
 import inet.physicallayer.contract.IRadioMedium;
 
+module dummy {
+}
+
 //
 // The medium model describes the shared physical medium where communication
 // takes place. It keeps track of radios, noise sources, ongoing transmissions,
@@ -98,4 +101,5 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,550");
         }
+        communicationCache: dummy;
 }
