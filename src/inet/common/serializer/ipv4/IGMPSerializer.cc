@@ -91,7 +91,7 @@ void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
             b.writeByte(IGMPV2_LEAVE_GROUP);    // type
             b.writeByte(0);    // code
             b.writeUint16(0);    // chksum
-            b.writeIPv4Address(check_and_cast<const IGMPv2Report*>(pkt)->getGroupAddress());
+            b.writeIPv4Address(check_and_cast<const IGMPv2Leave*>(pkt)->getGroupAddress());
             break;
 
         case IGMPV3_MEMBERSHIP_REPORT: {
@@ -193,6 +193,7 @@ cPacket *IGMPSerializer::deserialize(Buffer &b, Context& c)
 
         default:
             EV_ERROR << "IGMPSerializer: can not create IGMP packet: type " << type << " not supported\n";
+            b.seek(startPos);
             packet = SerializerRegistrationList::byteArraySerializer.deserializePacket(b, c);
             packet->setBitError(true);
             break;
