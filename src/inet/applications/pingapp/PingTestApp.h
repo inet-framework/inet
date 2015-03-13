@@ -15,6 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_PINGTESTAPP_H
+#define __INET_PINGTESTAPP_H
+
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -83,3 +86,4 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 
 } // namespace inet
 
+#endif
