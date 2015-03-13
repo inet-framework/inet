@@ -126,17 +126,6 @@ void ExtInterface::handleMessage(cMessage *msg)
         memset(buffer, 0, sizeof(buffer));
         IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
 
-        if ((ipPacket->getTransportProtocol() != IP_PROT_ICMP) &&
-            (ipPacket->getTransportProtocol() != IP_PROT_SCTP) &&
-            (ipPacket->getTransportProtocol() != IP_PROT_TCP) &&
-            (ipPacket->getTransportProtocol() != IP_PROT_UDP))
-        {
-            EV << "Cannot send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
-            numDropped++;
-            delete (msg);
-            return;
-        }
-
         if (connected) {
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
@@ -147,7 +136,14 @@ void ExtInterface::handleMessage(cMessage *msg)
             addr.sin_addr.s_addr = htonl(ipPacket->getDestAddress().getInt());
             Buffer b(const_cast<unsigned char *>(buffer), sizeof(buffer));
             Context c;
+            c.throwOnSerializerNotFound = false;
             IPv4Serializer().serializePacket(ipPacket, b, c);
+            if (b.hasError() || c.errorOccured) {
+                EV_ERROR << "Cannot serialize and send packet << '" << ipPacket->getName() << "' with protocol " << ipPacket->getTransportProtocol() << ".\n";
+                numDropped++;
+                delete (msg);
+                return;
+            }
             int32 packetLength = b.getPos();
             EV << "Delivering an IPv4 packet from "
                << ipPacket->getSrcAddress()
