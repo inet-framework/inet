@@ -18,9 +18,12 @@
 
 #include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
 
-#include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/RawPacket.h"
+#include "inet/common/serializer/SerializerBase.h"
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -78,7 +81,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
+        processMsgFromNetwork(PK(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
 
@@ -188,8 +191,21 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
         startFrameTransmission();
 }
 
-void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
+void EtherMACFullDuplex::processMsgFromNetwork(cPacket *pk)
 {
+    if (dynamic_cast<RawPacket *>(pk)) {
+        using namespace serializer;
+        RawPacket *rp = static_cast<RawPacket *>(pk);
+        Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
+        Context c;
+        cPacket *deserializedPk = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET, 0);
+        if (deserializedPk) {
+            delete rp;
+            pk = deserializedPk;
+        }
+    }
+    EtherTraffic *msg = check_and_cast<EtherTraffic *>(pk);
+
     EV_INFO << "Reception of " << msg << " started." << endl;
 
     if (!connected || disabled) {
