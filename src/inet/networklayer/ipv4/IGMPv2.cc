@@ -579,7 +579,6 @@ void IGMPv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
 
     EV_INFO << "IGMPv2: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     IGMPv2Report *msg = new IGMPv2Report("IGMPv2 report");
-    msg->setType(IGMPV2_MEMBERSHIP_REPORT);
     msg->setGroupAddress(group->groupAddr);
     msg->setByteLength(8);
     sendToIP(msg, ie, group->groupAddr);
@@ -592,7 +591,6 @@ void IGMPv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
 
     EV_INFO << "IGMPv2: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     IGMPv2Leave *msg = new IGMPv2Leave("IGMPv2 leave");
-    msg->setType(IGMPV2_LEAVE_GROUP);
     msg->setGroupAddress(group->groupAddr);
     msg->setByteLength(8);
     sendToIP(msg, ie, IPv4Address::ALL_ROUTERS_MCAST);
