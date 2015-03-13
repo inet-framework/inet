@@ -148,7 +148,7 @@ cPacket* IPv6Serializer::deserialize(Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     IPv6Datagram *dest = new IPv6Datagram("parsed-ipv6");
-    const struct ip6_hdr *ip6h = (struct ip6_hdr *) b.accessNBytes(sizeof(struct ip6_hdr));
+    const struct ip6_hdr *ip6h = (struct ip6_hdr *) b.accessNBytes(IPv6_HEADER_BYTES);
     uint32_t flowinfo = ntohl(ip6h->ip6_flow);
     dest->setFlowLabel(flowinfo & 0xFFFFF);
     flowinfo >>= 20;
@@ -175,8 +175,11 @@ cPacket* IPv6Serializer::deserialize(Buffer &b, Context& c)
     c.l3AddressesPtr = &ip6h->ip6_src.__u6_addr.__u6_addr32[0];
     c.l3AddressesLength = 32;
 
-    if (packetLength + IPv6_HEADER_BYTES > b._getBufSize())
+    if (packetLength + IPv6_HEADER_BYTES > b._getBufSize()) {
         EV_ERROR << "Can not handle IPv6 packet of total length " << packetLength + IPv6_HEADER_BYTES << "(captured only " << b._getBufSize() << " bytes).\n";
+        b.setError();
+    }
+    dest->setByteLength(b.getPos());    // set header size
 
     cPacket *encapPacket = NULL;
     unsigned int encapLength = std::min(packetLength, b.getRemainder());
