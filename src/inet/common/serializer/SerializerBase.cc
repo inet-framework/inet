@@ -222,8 +222,10 @@ cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
         b.seek(startPos);
         pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
-    if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
-        throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
+    if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
+        const char *encclass = pkt->getEncapsulatedPacket() ? pkt->getEncapsulatedPacket()->getClassName() : "<nullptr>";
+        throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
+    }
     if (b.hasError())
         pkt->setBitError(true);
     return pkt;
