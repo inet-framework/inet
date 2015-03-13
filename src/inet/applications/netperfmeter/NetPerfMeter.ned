@@ -28,6 +28,23 @@
 package inet.applications.netperfmeter;
 import inet.applications.INetPerfMeterApp;
 
+//
+// Application model for comparing the performance of various transport
+// protocols.
+//
+// The NetPerfMeter model simultaneously transmits bidirectional flows to an
+// endpoint, and measures the resulting flow bandwidths and QoS. Since the
+// application behaviour is the same for all underlying transport layer
+// protocols, it allows for comparing the performance of various transport
+// protocols, e.g. TCP vs. SCTP.
+//
+// The model closely mimics the operation of the real-world NetPerfMeter
+// application (https://www.uni-due.de/~be0001/netperfmeter/), a tool for
+// measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
+// Since the parametrisation and features are similar to the real-world
+// application, the model also makes comparisons of simulation results and
+// real-world measurements easy.
+//
 simple NetPerfMeter like INetPerfMeterApp
 {
     parameters:
