@@ -139,7 +139,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAna
     unsigned int numberOfDataOFDMSymbols = numberOfDataAPSKSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
     simtime_t duration = preambleDuration + headerDuration + dataDuration;
-    return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getBandwidth(), power);
+    return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getDataMode()->getBandwidth(), power);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
@@ -302,7 +302,7 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
     const Ieee80211OFDMModulatorModule *ofdmDataModulatorModule = check_and_cast<const Ieee80211OFDMModulatorModule *>(dataModulator);
     const Ieee80211OFDMSignalMode *signalMode = new Ieee80211OFDMSignalMode(ofdmSignalEncoderModule->getCode(), ofdmSignalModulatorModule->getModulation(), channelSpacing, bandwidth, 0);
     const Ieee80211OFDMDataMode *dataMode = new Ieee80211OFDMDataMode(ofdmDataEncoderModule->getCode(), ofdmDataModulatorModule->getModulation(), channelSpacing, bandwidth);
-    return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing, bandwidth), signalMode, dataMode, channelSpacing, bandwidth);
+    return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

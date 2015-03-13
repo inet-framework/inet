@@ -93,7 +93,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     virtual const IPulseShaper *getPulseShaper() const { return pulseShaper; }
     virtual const IDigitalAnalogConverter *getDigitalAnalogConverter() const { return digitalAnalogConverter; }
     virtual W getMaxPower() const { return power; }
-    const Hz getBandwidth() const { return mode->getBandwidth(); }
+    const Hz getBandwidth() const { return mode->getDataMode()->getBandwidth(); }
     const Hz getCarrierFrequency() const { return carrierFrequency; }
     const Hz getCarrierSpacing() const { return mode->getChannelSpacing(); }
     virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Transmitter"; }
