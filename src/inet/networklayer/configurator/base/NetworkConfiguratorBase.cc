@@ -640,12 +640,14 @@ unsigned int NetworkConfiguratorBase::getNetworkID(cModule*        module,
                                                    InterfaceEntry* interfaceEntry)
 {
    unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
-   int          outputGateID = interfaceEntry->getNodeOutputGateId();
-   cGate*       outputGate   = module->gate(outputGateID);
-   cChannel*    channel      = outputGate->getChannel();
-   if(channel) {
-      if(channel->hasPar("netID")) {
-         networkID = channel->par("netID");
+   const int    outputGateID = interfaceEntry->getNodeOutputGateId();
+   if(outputGateID != -1) {
+      cGate*       outputGate   = module->gate(outputGateID);
+      cChannel*    channel      = outputGate->getChannel();
+      if(channel) {
+         if(channel->hasPar("netID")) {
+            networkID = channel->par("netID");
+         }
       }
    }
    return(networkID);
@@ -656,12 +658,14 @@ unsigned int NetworkConfiguratorBase::getNetworkID(cModule*           module,
                                                    Topology::LinkOut* link)
 {
    unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
-   int          outputGateID = link->getLocalGateId();
-   cGate*       outputGate   = module->gate(outputGateID);
-   cChannel*    channel      = outputGate->getChannel();
-   if(channel) {
-      if(channel->hasPar("netID")) {
-         networkID = channel->par("netID");
+   const int    outputGateID = link->getLocalGateId();
+   if(outputGateID != -1) {
+      cGate*       outputGate   = module->gate(outputGateID);
+      cChannel*    channel      = outputGate->getChannel();
+      if(channel) {
+         if(channel->hasPar("netID")) {
+            networkID = channel->par("netID");
+         }
       }
    }
    return(networkID);
