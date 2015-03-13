@@ -97,13 +97,17 @@ cPacket* EthernetSerializer::deserialize(Buffer &b, Context& c)
     etherPacket->setDest(b.readMACAddress());
     etherPacket->setSrc(b.readMACAddress());
     etherPacket->setEtherType(b.readUint16());
+    etherPacket->setByteLength(ETHER_MAC_FRAME_BYTES);
 
     cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, etherPacket->getEtherType(), 4);
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());
-    if (b.getRemainder() > 4)
+    if (b.getRemainder() > 4) { // padding
+        etherPacket->addByteLength(b.getRemainder() - 4);
         b.accessNBytes(b.getRemainder() - 4);
+    }
+    etherPacket->setFrameByteLength(etherPacket->getByteLength());
     uint32_t calcfcs = ethernetCRC(b._getBuf(), b.getPos());
     uint32_t storedfcs = b.readUint32();
     if (storedfcs && calcfcs != 0xC704DD7B)
