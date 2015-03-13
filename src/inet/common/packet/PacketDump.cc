@@ -522,9 +522,12 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
         out << buf;
         out << "[IPv4] " << dgram->getSrcAddress() << " > " << dgram->getDestAddress();
 
+        if (dgram->getMoreFragments() || dgram->getFragmentOffset())
+            out << ((dgram->getMoreFragments()) ? " inner" : " last") << " fragment from offset " << dgram->getFragmentOffset();
+
         if (encapmsg) {
             // packet class and name
-            out << "? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"";
+            out << " ? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"";
         }
 
         // comment
