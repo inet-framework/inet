@@ -179,12 +179,13 @@ cPacket *ICMPv6Serializer::deserialize(Buffer &b, Context& context)
             break;
         }
 
-        case ICMPv6_NEIGHBOUR_SOL: {
+        case ICMPv6_NEIGHBOUR_SOL: {    // RFC 4861 Section 4.3
             IPv6NeighbourSolicitation *pkt = new IPv6NeighbourSolicitation(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
             pkt->setByteLength(b._getBufSize());
 
+            b.readUint32(); // reserved
             pkt->setTargetAddress(b.readIPv6Address());
             while (b.getRemainder()) {   // has options
                 unsigned int pos = b.getPos();
