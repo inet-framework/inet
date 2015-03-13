@@ -117,7 +117,7 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
 
     IPv4Datagram *dest = new IPv4Datagram("parsed-ipv4");
     unsigned int bufsize = b.getRemainder();
-    struct ip *ip = static_cast<struct ip *>(b.accessNBytes(sizeof(struct ip)));
+    struct ip *ip = static_cast<struct ip *>(b.accessNBytes(IP_HEADER_BYTES));
     if (!ip ) {
         delete dest;
         return nullptr;
