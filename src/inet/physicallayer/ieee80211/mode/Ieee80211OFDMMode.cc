@@ -23,6 +23,41 @@ namespace inet {
 
 namespace physicallayer {
 
+
+Ieee80211OFDMModeBase::Ieee80211OFDMModeBase(const Ieee80211OFDMModulation *modulation, const Ieee80211OFDMCode *code, Hz channelSpacing, Hz bandwidth) :
+    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing),
+    modulation(modulation),
+    code(code),
+    bandwidth(bandwidth),
+    netBitrate(bps(NaN)),
+    grossBitrate(bps(NaN))
+{
+}
+
+Ieee80211OFDMMode::Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth) :
+    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing),
+    preambleMode(preambleMode),
+    signalMode(signalMode),
+    dataMode(dataMode)
+{
+}
+
+Ieee80211OFDMPreambleMode::Ieee80211OFDMPreambleMode(Hz channelSpacing) :
+    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing)
+{
+}
+
+Ieee80211OFDMSignalMode::Ieee80211OFDMSignalMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth, unsigned int rate) :
+    Ieee80211OFDMModeBase(modulation, code, channelSpacing, bandwidth),
+    rate(rate)
+{
+}
+
+Ieee80211OFDMDataMode::Ieee80211OFDMDataMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth) :
+    Ieee80211OFDMModeBase(modulation, code, channelSpacing, bandwidth)
+{
+}
+
 bps Ieee80211OFDMModeBase::computeGrossBitrate(const Ieee80211OFDMModulation *modulation) const
 {
     int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
@@ -49,25 +84,6 @@ bps Ieee80211OFDMModeBase::getNetBitrate() const
     if (isNaN(netBitrate.get()))
         netBitrate = computeNetBitrate(getGrossBitrate(), code);
     return netBitrate;
-}
-
-Ieee80211OFDMMode::Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth) :
-    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing),
-    preambleMode(preambleMode),
-    signalMode(signalMode),
-    dataMode(dataMode)
-{
-}
-
-Ieee80211OFDMSignalMode::Ieee80211OFDMSignalMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth, unsigned int rate) :
-    Ieee80211OFDMModeBase(modulation, code, channelSpacing, bandwidth),
-    rate(rate)
-{
-}
-
-Ieee80211OFDMDataMode::Ieee80211OFDMDataMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth) :
-    Ieee80211OFDMModeBase(modulation, code, channelSpacing, bandwidth)
-{
 }
 
 const simtime_t Ieee80211OFDMMode::getSlotTime() const
@@ -141,21 +157,6 @@ const simtime_t Ieee80211OFDMDataMode::getDuration(int dataBitLength) const
     unsigned int numberOfSymbols = lrint(ceil((double)getBitLength(dataBitLength) / dataBitsPerOFDMSymbol));
     // Add signal extension for ERP PHY
     return numberOfSymbols * getSymbolInterval();
-}
-
-Ieee80211OFDMModeBase::Ieee80211OFDMModeBase(const Ieee80211OFDMModulation *modulation, const Ieee80211OFDMCode *code, Hz channelSpacing, Hz bandwidth) :
-    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing),
-    modulation(modulation),
-    code(code),
-    bandwidth(bandwidth),
-    netBitrate(bps(NaN)),
-    grossBitrate(bps(NaN))
-{
-}
-
-Ieee80211OFDMPreambleMode::Ieee80211OFDMPreambleMode(Hz channelSpacing) :
-    Ieee80211OFDMTimingRelatedParametersBase(channelSpacing)
-{
 }
 
 const Ieee80211OFDMMode& Ieee80211OFDMCompliantModes::getCompliantMode(unsigned int signalRateField, Hz channelSpacing)
