@@ -788,7 +788,11 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
             initAckChunk->setAddressesArraySize(addrNum + 1);
             initAckChunk->setAddresses(addrNum++, (*k));
-            length += 8;
+            if ((*k).getType() == L3Address::IPv4) {
+                length += 8;
+            } else if ((*k).getType() == L3Address::IPv6) {
+                length += 20;
+            }
         }
 
     uint16 count = 0;
