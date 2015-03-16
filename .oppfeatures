@@ -73,6 +73,7 @@
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.arp.ipv4
                        inet.common.serializer.ipv4
+                       inet.common.serializer.headerserializers.arp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -253,6 +254,7 @@
         labels = ""
         nedPackages = "
                        inet.applications.sctpapp
+                       inet.applications.sctpapp
                        inet.transportlayer.sctp
                        inet.common.serializer.sctp
                       "
@@ -316,6 +318,7 @@
                        inet.applications.ethernet
                        inet.linklayer.ethernet
                        inet.node.ethernet
+                       inet.common.serializer.headerserializers.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
