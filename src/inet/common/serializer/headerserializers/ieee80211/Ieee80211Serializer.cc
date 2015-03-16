@@ -36,13 +36,13 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #ifdef WITH_IPv4
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
+#include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 #endif
 
 #ifdef WITH_IPv6
 #include "inet/common/serializer/ipv6/IPv6Serializer.h"
 #endif
 
-#include "inet/common/serializer/headerserializers/arp/ARPSerializer.h"
 
 #include "inet/common/serializer/headerserializers/EthernetCRC.h"
 
@@ -579,10 +579,12 @@ cPacket* Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsi
                     break;
 #endif
 
+#ifdef WITH_IPv4
                 case ETHERTYPE_ARP:
                     encapPacket = new ARPPacket("arp-from-wire");
                     ARPSerializer().parse(buf+packetLength, bufsize-packetLength, (ARPPacket *)encapPacket);
                     break;
+#endif
 
                 default:
                     throw cRuntimeError("Ieee80211Serializer: cannot parse protocol %x", dataFrame->getEtherType());
