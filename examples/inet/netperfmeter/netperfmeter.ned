@@ -25,7 +25,7 @@
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
-package inet.examples.netperfmeter;
+package inet.examples.inet.netperfmeter;
 
 import inet.applications.netperfmeter.NetPerfMeterHost;
 import inet.common.queue.FIFOQueue;
