@@ -13,14 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef ARP_H_
-#define ARP_H_
+#ifndef __INET_ARP_H_
+#define __INET_ARP_H_
 
 #ifdef _MSC_VER
 #define __PACKED__
 #else
 #define __PACKED__  __attribute__((packed))
 #endif
+
+namespace inet {
+
+namespace serializer {
 
 struct arphdr {
         uint16_t ar_hrd;                 // Hardware type (16 bits)
@@ -34,6 +38,8 @@ struct arphdr {
         uint32_t ar_tpa;                 // target protocol address (m bytes)
 } __PACKED__;
 
+} // namespace serializer
 
+} // namespace inet
 
-#endif /* ARP_H_ */
+#endif /* __INET_ARP_H_ */
