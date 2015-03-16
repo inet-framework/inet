@@ -21,10 +21,12 @@
 
 #include "inet/linklayer/ethernet/EtherMAC.h"
 
+#include "inet/common/RawPacket.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/common/serializer/SerializerBase.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -190,7 +192,7 @@ void EtherMAC::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
+        processMsgFromNetwork(check_and_cast<cPacket *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate");
 
@@ -328,13 +330,13 @@ void EtherMAC::processReceivedJam(EtherJam *jam)
     processDetectedCollision();
 }
 
-void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
+void EtherMAC::processMsgFromNetwork(cPacket *msg)
 {
     EV_DETAIL << "Received " << msg << " from network.\n";
 
     if (!connected || disabled) {
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
-        if (dynamic_cast<EtherFrame *>(msg)) {    // do not count JAM and IFG packets
+        if (dynamic_cast<EtherFrame *>(msg) || dynamic_cast<RawPacket *>(msg)) {    // do not count JAM and IFG packets
             emit(dropPkIfaceDownSignal, msg);
             numDroppedIfaceDown++;
         }
@@ -577,7 +579,7 @@ void EtherMAC::handleEndTxPeriod()
     }
 }
 
-void EtherMAC::scheduleEndRxPeriod(EtherTraffic *frame)
+void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
 {
     ASSERT(frameBeingReceived == nullptr);
     ASSERT(!endRxMsg->isScheduled());
@@ -748,7 +750,18 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete()
 {
-    EtherTraffic *msg = frameBeingReceived;
+    if (dynamic_cast<RawPacket *>(frameBeingReceived)) {
+        using namespace serializer;
+        RawPacket *rp = static_cast<RawPacket *>(frameBeingReceived);
+        Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
+        Context c;
+        cPacket *deserializedPk = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET, 0);
+        if (deserializedPk) {
+            delete rp;
+            frameBeingReceived = deserializedPk;
+        }
+    }
+    EtherTraffic *msg = check_and_cast<EtherTraffic *>(frameBeingReceived);
     frameBeingReceived = nullptr;
 
     if (dynamic_cast<EtherIFG *>(msg) != nullptr) {
