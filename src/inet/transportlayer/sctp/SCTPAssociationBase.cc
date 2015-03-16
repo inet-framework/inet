@@ -1545,6 +1545,10 @@ void SCTPAssociation::stateEntered(int32 status)
             switch (ccModule) {
                 case RFC4960: {
                     ccFunctions.ccInitParams = &SCTPAssociation::initCCParameters;
+<<<<<<< HEAD
+=======
+                    ccFunctions.ccUpdateBeforeSack = &SCTPAssociation::cwndUpdateBeforeSack;
+>>>>>>> 79de7f8... Bugfix: ccFunctions.ccUpdateBeforeSack = &SCTPAssociation::cwndUpdateBeforeSack.
                     ccFunctions.ccUpdateAfterSack = &SCTPAssociation::cwndUpdateAfterSack;
                     ccFunctions.ccUpdateAfterCwndTimeout = &SCTPAssociation::cwndUpdateAfterCwndTimeout;
                     ccFunctions.ccUpdateAfterRtxTimeout = &SCTPAssociation::cwndUpdateAfterRtxTimeout;
