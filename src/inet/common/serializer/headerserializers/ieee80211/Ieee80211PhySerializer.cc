@@ -23,6 +23,7 @@
 namespace inet {
 namespace serializer {
 
+using namespace ieee80211;
 using namespace physicallayer;
 
 bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, BitVector* serializedPacket) const
@@ -34,7 +35,9 @@ bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, Bit
         unsigned char *buf = new unsigned char[byteLength];
         for (unsigned int i = 0; i < byteLength; i++)
             buf[i] = 0;
-        Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) buf;
+        Buffer b(buf, byteLength);
+        Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) b.accessNBytes(OFDM_PLCP_HEADER_LENGTH);
+        ASSERT(hdr);
         hdr->length = ofdmPhyFrame->getLength(); // Byte length of the payload
         hdr->rate = ofdmPhyFrame->getRate();
         hdr->parity = 0; // TODO What is the correct value for this? Check the reference.
@@ -44,7 +47,11 @@ bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, Bit
         Ieee80211Frame *encapsulatedPacket = check_and_cast<Ieee80211Frame*>(ofdmPhyFrame->getEncapsulatedPacket());
         Ieee80211Serializer ieee80211Serializer;
         // Here we just write the header which is exactly 5 bytes in length.
-        unsigned int numOfWrittenBytes = ieee80211Serializer.serialize(encapsulatedPacket, buf + OFDM_PLCP_HEADER_LENGTH, byteLength - OFDM_PLCP_HEADER_LENGTH) + OFDM_PLCP_HEADER_LENGTH;
+        Buffer subBuffer(b, 0);
+        Context c;
+        ieee80211Serializer.xSerialize(encapsulatedPacket, subBuffer, c);
+        b.accessNBytes(subBuffer.getPos());
+        unsigned int numOfWrittenBytes = b.getPos();
         // TODO: This assertion must hold!
 //        ASSERT(numOfWrittenBytes == byteLength);
         writeToBitVector(buf, numOfWrittenBytes, serializedPacket);
@@ -75,11 +82,12 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     unsigned char *buf = new unsigned char[hdr->length + OFDM_PLCP_HEADER_LENGTH];
     for (unsigned int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
         buf[i] = bitFields[i];
-    Ieee80211Serializer deserializer;
-    cPacket *payload = deserializer.parse(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);
-    Ieee80211Frame *ieee80211Frame = check_and_cast<Ieee80211Frame *>(payload);
+    Ieee80211Serializer serializer;
+    Buffer subBuffer(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);
+    Context c;
+    cPacket *payload = serializer.xParse(subBuffer, c);
     plcpFrame->setBitLength(OFDM_PLCP_HEADER_LENGTH);
-    plcpFrame->encapsulate(ieee80211Frame);
+    plcpFrame->encapsulate(payload);
 //    ASSERT(plcpFrame->getBitLength() == OFDM_PLCP_HEADER_LENGTH + 8 * hdr->length);
     delete[] buf;
     delete[] hdrBuf;

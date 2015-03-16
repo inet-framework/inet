@@ -18,30 +18,28 @@
 #ifndef __INET_IEEE80211SERIALIZER_H
 #define __INET_IEEE80211SERIALIZER_H
 
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/SerializerBase.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
+
+
+namespace inet {
+
+namespace serializer {
 
 /**
  * Converts between Ieee802.11Frame and binary (network byte order)  Ieee802.11 header.
  */
-namespace inet {
-namespace serializer {
-
-using namespace ieee80211;
-
-class INET_API Ieee80211Serializer
+class INET_API Ieee80211Serializer : public SerializerBase
 {
-    public:
-        /**
-         * Serializes an Ieee802.11Frame for transmission on the network card.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(Ieee80211Frame *pkt, unsigned char *buf, unsigned int bufsize);
+    protected:
+        void parseDataOrMgmtFrame(Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
+        virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+        virtual cPacket* parse(Buffer &b, Context& context) override;
 
-        /**
-         * Puts a packet sniffed from the network card into an Ieee802.11Frame.
-         */
-        cPacket* parse(const unsigned char *buf, unsigned int bufsize);
+    public:
+        Ieee80211Serializer(const char *name = nullptr) : SerializerBase(name) {}
 };
 
 } // namespace serializer
