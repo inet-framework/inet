@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154;
+package inet.physicallayer.ieee802154.packetlevel;
 
-import inet.physicallayer.common.RadioMedium;
+import inet.physicallayer.common.packetlevel.RadioMedium;
 
 module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
 {

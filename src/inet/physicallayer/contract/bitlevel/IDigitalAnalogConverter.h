@@ -18,8 +18,8 @@
 #ifndef __INET_IDIGITALANALOGCONVERTER_H
 #define __INET_IDIGITALANALOGCONVERTER_H
 
-#include "inet/physicallayer/contract/layered/ISignalSampleModel.h"
-#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.errormodel;
+package inet.physicallayer.ieee80211.packetlevel.errormodel;
 
-import inet.physicallayer.base.ErrorModelBase;
+import inet.physicallayer.base.packetlevel.ErrorModelBase;
 
 module Ieee80211YansErrorModel extends ErrorModelBase
 {

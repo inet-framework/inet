@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALTRANSMISSION_H
 #define __INET_IDEALTRANSMISSION_H
 
-#include "inet/physicallayer/base/TransmissionBase.h"
+#include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
 
 namespace inet {
 

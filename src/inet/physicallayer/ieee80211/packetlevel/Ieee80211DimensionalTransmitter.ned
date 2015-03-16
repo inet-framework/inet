@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.apsk.APSKDimensionalTransmitter;
+import inet.physicallayer.apskradio.packetlevel.APSKDimensionalTransmitter;
 
 //
 // This transmitter model produces IEEE 802.11 transmissions that have

@@ -18,7 +18,7 @@
 #ifndef __INET_INEIGHBORCACHE_H
 #define __INET_INEIGHBORCACHE_H
 
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

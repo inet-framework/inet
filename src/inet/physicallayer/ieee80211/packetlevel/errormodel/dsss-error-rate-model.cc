@@ -20,7 +20,7 @@
 
 #include <math.h>
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/errormodel/dsss-error-rate-model.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/dsss-error-rate-model.h"
 
 namespace inet {
 

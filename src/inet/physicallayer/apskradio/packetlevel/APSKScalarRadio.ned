@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk;
+package inet.physicallayer.apskradio.packetlevel;
 
-import inet.physicallayer.base.FlatRadioBase;
+import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
 //
 // This radio model provides a hypothetical radio that simply uses one of the

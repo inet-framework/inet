@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.base.FlatRadioBase;
+import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
 //
 // This radio model is part of the IEEE 802.11 physical layer model. It supports

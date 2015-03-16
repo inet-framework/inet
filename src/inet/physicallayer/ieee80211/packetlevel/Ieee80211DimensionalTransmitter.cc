@@ -16,10 +16,10 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmitter.h"
-#include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmitter.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {

@@ -20,7 +20,7 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/physicallayer/contract/IPhysicalLayer.h"
+#include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
 
 namespace inet {
 

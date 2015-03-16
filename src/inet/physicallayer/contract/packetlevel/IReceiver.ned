@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract;
+package inet.physicallayer.contract.packetlevel;
 
 //
 // The receiver model describes the physical process which converts electric

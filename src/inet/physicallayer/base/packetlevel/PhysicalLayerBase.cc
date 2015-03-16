@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/PhysicalLayerBase.h"
+#include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
 
 namespace inet {
 

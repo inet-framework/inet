@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/AntennaBase.h"
+#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

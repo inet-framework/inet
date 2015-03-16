@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract;
+package inet.physicallayer.contract.packetlevel;
 
 //
 // The background noise model describes the thermal noise, the cosmic background

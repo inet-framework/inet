@@ -18,7 +18,7 @@
 #ifndef __INET_IAPSKMODULATION_H
 #define __INET_IAPSKMODULATION_H
 
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

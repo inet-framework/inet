@@ -17,7 +17,7 @@
 
 package inet.physicallayer.antenna;
 
-import inet.physicallayer.base.AntennaBase;
+import inet.physicallayer.base.packetlevel.AntennaBase;
 
 //
 // This antenna model describes an antenna that has an antenna gain indepent of

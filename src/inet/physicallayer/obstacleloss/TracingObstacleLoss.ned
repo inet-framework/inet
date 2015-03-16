@@ -17,7 +17,7 @@
 
 package inet.physicallayer.obstacleloss;
 
-import inet.physicallayer.contract.IObstacleLoss;
+import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 
 //
 // This obstacle loss model determines the power loss by computing the accurate

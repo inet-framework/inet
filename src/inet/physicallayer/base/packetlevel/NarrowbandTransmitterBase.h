@@ -18,8 +18,8 @@
 #ifndef __INET_NARROWBANDTRANSMITTERBASE_H
 #define __INET_NARROWBANDTRANSMITTERBASE_H
 
-#include "inet/physicallayer/base/TransmitterBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

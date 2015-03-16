@@ -15,7 +15,7 @@
 
 package inet.physicallayer.communicationcache;
 
-import inet.physicallayer.contract.ICommunicationCache;
+import inet.physicallayer.contract.packetlevel.ICommunicationCache;
 
 module MapCommunicationCache like ICommunicationCache
 {

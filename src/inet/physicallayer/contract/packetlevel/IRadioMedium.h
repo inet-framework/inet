@@ -19,17 +19,17 @@
 #define __INET_IRADIOMEDIUM_H
 
 #include "inet/environment/Material.h"
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/contract/IRadioFrame.h"
-#include "inet/physicallayer/contract/IArrival.h"
-#include "inet/physicallayer/contract/IPropagation.h"
-#include "inet/physicallayer/contract/IPathLoss.h"
-#include "inet/physicallayer/contract/IObstacleLoss.h"
-#include "inet/physicallayer/contract/IAnalogModel.h"
-#include "inet/physicallayer/contract/IBackgroundNoise.h"
-#include "inet/physicallayer/contract/ISNIR.h"
-#include "inet/physicallayer/contract/IReceptionDecision.h"
-#include "inet/physicallayer/contract/IListeningDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/contract/packetlevel/IPropagation.h"
+#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
 
 namespace inet {
 

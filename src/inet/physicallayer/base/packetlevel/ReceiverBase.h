@@ -18,9 +18,9 @@
 #ifndef __INET_RECEIVERBASE_H
 #define __INET_RECEIVERBASE_H
 
-#include "inet/physicallayer/contract/IReceiver.h"
-#include "inet/physicallayer/contract/ITransmission.h"
-#include "inet/physicallayer/contract/IReception.h"
+#include "inet/physicallayer/contract/packetlevel/IReceiver.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/contract/packetlevel/IReception.h"
 
 namespace inet {
 

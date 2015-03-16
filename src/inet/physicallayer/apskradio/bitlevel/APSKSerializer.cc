@@ -17,7 +17,7 @@
 
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 #include "inet/common/serializer/headerserializers/EthernetCRC.h"
-#include "inet/physicallayer/apsk/layered/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
 
 namespace inet {
 

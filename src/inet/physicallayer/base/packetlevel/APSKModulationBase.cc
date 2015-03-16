@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"

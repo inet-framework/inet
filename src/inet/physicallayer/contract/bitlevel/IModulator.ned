@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract.layered;
+package inet.physicallayer.contract.bitlevel;
 
 moduleinterface IModulator
 {

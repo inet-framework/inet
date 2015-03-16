@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.errormodel.layered;
+package inet.physicallayer.errormodel.bitlevel;
 
-import inet.physicallayer.base.layered.LayeredErrorModelBase;
+import inet.physicallayer.base.bitlevel.LayeredErrorModelBase;
 
 module StochasticLayeredErrorModel extends LayeredErrorModelBase
 {

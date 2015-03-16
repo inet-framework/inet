@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 
 namespace inet {
 

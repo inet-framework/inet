@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211SCALARTRANSMITTER_H
 #define __INET_IEEE80211SCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 

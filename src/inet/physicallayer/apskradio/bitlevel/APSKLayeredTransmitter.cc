@@ -16,14 +16,14 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
-#include "inet/physicallayer/common/layered/LayeredTransmission.h"
-#include "inet/physicallayer/analogmodel/layered/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apsk/layered/APSKLayeredTransmitter.h"
-#include "inet/physicallayer/apsk/layered/APSKEncoder.h"
-#include "inet/physicallayer/apsk/layered/APSKModulator.h"
-#include "inet/physicallayer/apsk/layered/APSKSerializer.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKModulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
 
 namespace inet {
 

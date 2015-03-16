@@ -3,7 +3,7 @@ package inet.examples.wireless.power;
 import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network PowerNetwork

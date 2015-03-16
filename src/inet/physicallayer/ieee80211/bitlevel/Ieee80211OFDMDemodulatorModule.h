@@ -19,8 +19,8 @@
 #define __INET_IEEE80211OFDMDEMODULATORMODULE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/layered/IDemodulator.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDemodulator.h"
+#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulator.h"
 
 namespace inet {
 

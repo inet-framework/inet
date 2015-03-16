@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/Radio.h"
-#include "inet/physicallayer/common/RadioMedium.h"
-#include "inet/physicallayer/common/Interference.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ModuleAccess.h"

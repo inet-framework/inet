@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/ScalarSNIR.h"
-#include "inet/physicallayer/analogmodel/ScalarNoise.h"
-#include "inet/physicallayer/contract/IRadioSignal.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 

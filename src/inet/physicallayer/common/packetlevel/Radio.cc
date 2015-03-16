@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/Radio.h"
-#include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 

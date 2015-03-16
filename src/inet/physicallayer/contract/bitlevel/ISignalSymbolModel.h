@@ -18,9 +18,9 @@
 #ifndef __INET_ISIGNALSYMBOLMODEL_H
 #define __INET_ISIGNALSYMBOLMODEL_H
 
-#include "inet/physicallayer/contract/layered/ISymbol.h"
-#include "inet/physicallayer/contract/IPrintableObject.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.layered;
+package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.IReceiver;
-import inet.physicallayer.contract.layered.IAnalogDigitalConverter;
-import inet.physicallayer.contract.layered.IDecoder;
-import inet.physicallayer.contract.layered.IDemodulator;
-import inet.physicallayer.contract.layered.ILayeredErrorModel;
-import inet.physicallayer.contract.layered.IPulseFilter;
+import inet.physicallayer.contract.packetlevel.IReceiver;
+import inet.physicallayer.contract.bitlevel.IAnalogDigitalConverter;
+import inet.physicallayer.contract.bitlevel.IDecoder;
+import inet.physicallayer.contract.bitlevel.IDemodulator;
+import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
+import inet.physicallayer.contract.bitlevel.IPulseFilter;
 
 //
 // This module implements an IEEE 802.11 OFDM receiver.

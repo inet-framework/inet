@@ -18,10 +18,10 @@ of SIGNAL field with pilots inserted.
 %file: test.ned
 
 import ieee80211.Ieee80211SymbolDomainTest;
-import inet.physicallayer.ieee80211.layered.Ieee80211OFDMDecoder;
-import inet.physicallayer.ieee80211.layered.Ieee80211OFDMDemodulator;
-import inet.physicallayer.ieee80211.layered.Ieee80211OFDMEncoder;
-import inet.physicallayer.ieee80211.layered.Ieee80211OFDMModulator;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMDecoder;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMDemodulator;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMEncoder;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMModulator;
 
 network SymbolDomainTest
 {

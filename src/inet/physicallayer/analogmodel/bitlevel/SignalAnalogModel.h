@@ -18,8 +18,8 @@
 #ifndef __INET_SIGNALANALOGMODEL_H
 #define __INET_SIGNALANALOGMODEL_H
 
-#include "inet/physicallayer/contract/IRadioSignal.h"
-#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_TRANSMITTERBASE_H
 #define __INET_TRANSMITTERBASE_H
 
-#include "inet/physicallayer/contract/ITransmitter.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
 

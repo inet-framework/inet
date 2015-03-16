@@ -18,7 +18,7 @@
 #ifndef __INET_RADIOFRAME_H
 #define __INET_RADIOFRAME_H
 
-#include "inet/physicallayer/contract/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 
 namespace inet {
 

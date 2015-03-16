@@ -18,8 +18,8 @@
 #ifndef __INET_IDECODER_H
 #define __INET_IDECODER_H
 
-#include "inet/physicallayer/contract/layered/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/layered/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
 
 namespace inet {
 

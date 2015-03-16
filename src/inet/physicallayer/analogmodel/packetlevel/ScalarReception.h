@@ -18,8 +18,8 @@
 #ifndef __INET_SCALARRECEPTION_H
 #define __INET_SCALARRECEPTION_H
 
-#include "inet/physicallayer/contract/IRadioSignal.h"
-#include "inet/physicallayer/base/FlatReceptionBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
 
 namespace inet {
 

@@ -30,7 +30,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/linklayer/base/MACProtocolBase.h"

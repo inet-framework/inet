@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/layered/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 
 namespace inet {
 

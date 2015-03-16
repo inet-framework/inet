@@ -18,8 +18,8 @@
 #ifndef __INET_IPULSEFILTER_H
 #define __INET_IPULSEFILTER_H
 
-#include "inet/physicallayer/contract/layered/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/layered/ISignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 #define __INET_ILISTENING_H
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/physicallayer/contract/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 

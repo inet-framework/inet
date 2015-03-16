@@ -20,7 +20,7 @@
 
 //#include "inet/common/Complex.h"
 #include <complex>
-#include "inet/physicallayer/contract/layered/ISymbol.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 
 namespace inet {
 

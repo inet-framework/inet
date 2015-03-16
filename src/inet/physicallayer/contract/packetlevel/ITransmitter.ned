@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract;
+package inet.physicallayer.contract.packetlevel;
 
 //
 // The transmitter model describes the physical process which converts packets

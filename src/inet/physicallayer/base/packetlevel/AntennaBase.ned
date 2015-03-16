@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base;
+package inet.physicallayer.base.packetlevel;
 
-import inet.physicallayer.contract.IAntenna;
+import inet.physicallayer.contract.packetlevel.IAntenna;
 
 //
 // This module servces as the base module for antenna models.

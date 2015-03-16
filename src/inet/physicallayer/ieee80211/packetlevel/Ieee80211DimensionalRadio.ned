@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
 //
 // This radio model uses dimensional transmission power (that changes over time

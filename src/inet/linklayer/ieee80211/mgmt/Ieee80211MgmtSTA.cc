@@ -17,13 +17,13 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/common/NotifierConsts.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/Ieee80211aControlInfo_m.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211aControlInfo_m.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {

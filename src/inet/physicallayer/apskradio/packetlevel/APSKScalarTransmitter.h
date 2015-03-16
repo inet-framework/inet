@@ -18,7 +18,7 @@
 #ifndef __INET_APSKSCALARTRANSMITTER_H
 #define __INET_APSKSCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 

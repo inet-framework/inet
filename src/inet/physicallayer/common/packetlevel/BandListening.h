@@ -18,7 +18,7 @@
 #ifndef __INET_BANDLISTENING_H
 #define __INET_BANDLISTENING_H
 
-#include "inet/physicallayer/base/ListeningBase.h"
+#include "inet/physicallayer/base/packetlevel/ListeningBase.h"
 
 namespace inet {
 

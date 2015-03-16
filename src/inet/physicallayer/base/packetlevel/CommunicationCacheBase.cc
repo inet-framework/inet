@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/base/CommunicationCacheBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/base/packetlevel/CommunicationCacheBase.h"
 
 namespace inet {
 

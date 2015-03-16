@@ -18,7 +18,7 @@
 #ifndef __INET_ISIGNALANALOGMODEL_H
 #define __INET_ISIGNALANALOGMODEL_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 

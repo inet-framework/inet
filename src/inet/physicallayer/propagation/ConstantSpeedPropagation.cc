@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/propagation/ConstantSpeedPropagation.h"
-#include "inet/physicallayer/common/Arrival.h"
+#include "inet/physicallayer/common/packetlevel/Arrival.h"
 
 namespace inet {
 

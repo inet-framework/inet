@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 #define __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/apsk/APSKDimensionalTransmitter.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmitter.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 

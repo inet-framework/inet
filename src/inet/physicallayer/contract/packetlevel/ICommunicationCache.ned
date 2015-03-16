@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.contract;
+package inet.physicallayer.contract.packetlevel;
 
 moduleinterface ICommunicationCache
 {

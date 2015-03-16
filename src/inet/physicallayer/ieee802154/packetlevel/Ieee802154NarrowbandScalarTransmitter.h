@@ -19,7 +19,7 @@
 #ifndef __INET_IEEE802154NARROWBANDSCALARTRANSMITTER_H
 #define __INET_IEEE802154NARROWBANDSCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 

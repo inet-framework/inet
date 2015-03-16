@@ -16,7 +16,7 @@
 //
 
 #include <assert.h>
-#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/common/mapping/MappingBase.h"
 
 namespace inet {
 namespace physicallayer {

@@ -18,7 +18,7 @@
 #ifndef __INET_INOISE_H
 #define __INET_INOISE_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 

@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 // 
 
-package inet.physicallayer.apsk.layered;
+package inet.physicallayer.apskradio.bitlevel;
 
-import inet.physicallayer.contract.layered.IEncoder;
-import inet.physicallayer.contract.layered.IFECCoder;
-import inet.physicallayer.contract.layered.IInterleaver;
-import inet.physicallayer.contract.layered.IScrambler;
+import inet.physicallayer.contract.bitlevel.IEncoder;
+import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IInterleaver;
+import inet.physicallayer.contract.bitlevel.IScrambler;
 
 //
 // This module is part of a simple hypothetical layered transmitter. It computes

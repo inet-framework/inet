@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.layered;
+package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.layered.IDemodulator;
+import inet.physicallayer.contract.bitlevel.IDemodulator;
 
 //
 // @see ~Ieee80211OFDMModulator

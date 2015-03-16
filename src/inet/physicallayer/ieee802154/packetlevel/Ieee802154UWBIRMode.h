@@ -23,7 +23,7 @@
 #ifndef __INET_IEEE802154UWBIRMODE_H
 #define __INET_IEEE802154UWBIRMODE_H
 
-#include "inet/physicallayer/base/PhysicalLayerDefs.h"
+#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 
 namespace inet {
 

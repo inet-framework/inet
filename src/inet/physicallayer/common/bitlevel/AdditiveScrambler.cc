@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/layered/AdditiveScrambler.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/common/ShortBitVector.h"
 
 namespace inet {

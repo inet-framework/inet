@@ -18,7 +18,7 @@
 #ifndef __INET_LISTENINGDECISION_H
 #define __INET_LISTENINGDECISION_H
 
-#include "inet/physicallayer/contract/IListeningDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
 
 namespace inet {
 

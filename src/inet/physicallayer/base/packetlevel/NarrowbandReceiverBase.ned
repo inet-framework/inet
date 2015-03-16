@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base;
+package inet.physicallayer.base.packetlevel;
 
-import inet.physicallayer.contract.IErrorModel;
-import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.contract.packetlevel.IErrorModel;
+import inet.physicallayer.contract.packetlevel.IReceiver;
 
 //
 // This module servces as a base module for narrowband receiver models.

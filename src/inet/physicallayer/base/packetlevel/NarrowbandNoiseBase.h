@@ -18,7 +18,7 @@
 #ifndef __INET_NARROWBANDNOISEBASE_H
 #define __INET_NARROWBANDNOISEBASE_H
 
-#include "inet/physicallayer/base/NoiseBase.h"
+#include "inet/physicallayer/base/packetlevel/NoiseBase.h"
 
 namespace inet {
 

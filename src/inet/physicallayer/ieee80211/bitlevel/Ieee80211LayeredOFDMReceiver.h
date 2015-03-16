@@ -18,17 +18,17 @@
 #ifndef __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 #define __INET_IEEE80211LAYEREDOFDMRECEIVER_H
 
-#include "inet/physicallayer/common/layered/SignalPacketModel.h"
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/base/SNIRReceiverBase.h"
-#include "inet/physicallayer/contract/layered/IDecoder.h"
-#include "inet/physicallayer/contract/layered/IDemodulator.h"
-#include "inet/physicallayer/contract/layered/IPulseFilter.h"
-#include "inet/physicallayer/contract/layered/IAnalogDigitalConverter.h"
-#include "inet/physicallayer/contract/IErrorModel.h"
-#include "inet/physicallayer/contract/layered/ILayeredErrorModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
+#include "inet/physicallayer/contract/bitlevel/IDecoder.h"
+#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"
+#include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
+#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
+#include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 
 namespace inet {

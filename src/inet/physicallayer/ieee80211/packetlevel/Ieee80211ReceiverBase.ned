@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.base.NarrowbandReceiverBase;
+import inet.physicallayer.base.packetlevel.NarrowbandReceiverBase;
 
 //
 // This receiver model serves as the base module for IEEE 802.11 receivers. It

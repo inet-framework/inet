@@ -18,8 +18,8 @@
 #ifndef __INET_TRACINGOBSTACLELOSS_H
 #define __INET_TRACINGOBSTACLELOSS_H
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/contract/IObstacleLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 #include "inet/common/TrailFigure.h"
 #include "inet/environment/PhysicalEnvironment.h"
 

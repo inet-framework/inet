@@ -15,16 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common;
+package inet.physicallayer.common.packetlevel;
 
-import inet.physicallayer.contract.IAnalogModel;
-import inet.physicallayer.contract.ICommunicationCache;
-import inet.physicallayer.contract.INeighborCache;
-import inet.physicallayer.contract.IObstacleLoss;
-import inet.physicallayer.contract.IPathLoss;
-import inet.physicallayer.contract.IPropagation;
-import inet.physicallayer.contract.IRadioBackgroundNoise;
-import inet.physicallayer.contract.IRadioMedium;
+import inet.physicallayer.contract.packetlevel.IAnalogModel;
+import inet.physicallayer.contract.packetlevel.ICommunicationCache;
+import inet.physicallayer.contract.packetlevel.INeighborCache;
+import inet.physicallayer.contract.packetlevel.IObstacleLoss;
+import inet.physicallayer.contract.packetlevel.IPathLoss;
+import inet.physicallayer.contract.packetlevel.IPropagation;
+import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 //
 // The medium model describes the shared physical medium where communication

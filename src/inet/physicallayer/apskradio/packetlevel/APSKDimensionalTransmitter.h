@@ -18,8 +18,8 @@
 #ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
 #define __INET_APSKDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/common/mapping/MappingBase.h"
 
 namespace inet {
 

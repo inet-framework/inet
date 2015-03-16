@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALANALOGMODEL_H
 #define __INET_IDEALANALOGMODEL_H
 
-#include "inet/physicallayer/contract/IAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 
 namespace inet {
 

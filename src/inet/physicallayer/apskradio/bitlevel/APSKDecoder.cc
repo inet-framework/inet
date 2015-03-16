@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/layered/APSKDecoder.h"
-#include "inet/physicallayer/common/layered/SignalPacketModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 
 namespace inet {
 

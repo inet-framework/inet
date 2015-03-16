@@ -25,7 +25,7 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/errormodel/Ieee80211YansErrorModel.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211YansErrorModel.h"
 #include <math.h>
 
 namespace inet {

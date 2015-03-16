@@ -18,9 +18,9 @@
 #ifndef __INET_DIMENSIONALSNIR_H
 #define __INET_DIMENSIONALSNIR_H
 
-#include "inet/physicallayer/base/SNIRBase.h"
-#include "inet/physicallayer/analogmodel/DimensionalReception.h"
-#include "inet/physicallayer/analogmodel/DimensionalNoise.h"
+#include "inet/physicallayer/base/packetlevel/SNIRBase.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
 
 namespace inet {
 

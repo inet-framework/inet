@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALRECEIVER_H
 #define __INET_IDEALRECEIVER_H
 
-#include "inet/physicallayer/base/ReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
 
 namespace inet {
 

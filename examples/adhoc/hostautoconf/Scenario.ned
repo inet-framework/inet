@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network Scenario

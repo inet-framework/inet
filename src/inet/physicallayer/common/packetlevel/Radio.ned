@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common;
+package inet.physicallayer.common.packetlevel;
 
-import inet.physicallayer.contract.IRadio;
-import inet.physicallayer.contract.IAntenna;
-import inet.physicallayer.contract.IReceiver;
-import inet.physicallayer.contract.ITransmitter;
+import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.contract.packetlevel.IAntenna;
+import inet.physicallayer.contract.packetlevel.IReceiver;
+import inet.physicallayer.contract.packetlevel.ITransmitter;
 import inet.power.contract.IEnergyConsumer;
 
 //

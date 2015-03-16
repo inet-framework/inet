@@ -18,8 +18,8 @@
 #ifndef __INET_FLATRECEIVERBASE_H
 #define __INET_FLATRECEIVERBASE_H
 
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
-#include "inet/physicallayer/contract/IErrorModel.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 
 namespace inet {
 

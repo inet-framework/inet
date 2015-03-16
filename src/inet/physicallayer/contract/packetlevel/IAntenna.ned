@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.contract;
+package inet.physicallayer.contract.packetlevel;
 
 //
 // The antenna model describes the physical device (a part of the radio) which

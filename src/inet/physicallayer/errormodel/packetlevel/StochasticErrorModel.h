@@ -18,7 +18,7 @@
 #ifndef __INET_STOCHASTICERRORMODEL_H
 #define __INET_STOCHASTICERRORMODEL_H
 
-#include "inet/physicallayer/base/ErrorModelBase.h"
+#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
 
 namespace inet {
 

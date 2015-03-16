@@ -18,10 +18,10 @@
 #ifndef __INET_ISIGNALBITMODEL_H
 #define __INET_ISIGNALBITMODEL_H
 
-#include "inet/physicallayer/contract/layered/IFECCoder.h"
-#include "inet/physicallayer/contract/layered/IScrambler.h"
-#include "inet/physicallayer/contract/layered/IInterleaver.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/bitlevel/IFECCoder.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

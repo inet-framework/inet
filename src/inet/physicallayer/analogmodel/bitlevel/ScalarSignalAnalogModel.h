@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARSIGNALANALOGMODEL_H
 #define __INET_SCALARSIGNALANALOGMODEL_H
 
-#include "inet/physicallayer/analogmodel/layered/SignalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/bitlevel/SignalAnalogModel.h"
 
 namespace inet {
 

@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
-#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
-#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
-#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/common/ListeningDecision.h"
-#include "inet/physicallayer/common/ReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandReceptionBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 
 namespace inet {
 

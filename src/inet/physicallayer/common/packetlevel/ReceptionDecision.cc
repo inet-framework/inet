@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/ReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 
 namespace inet {
 

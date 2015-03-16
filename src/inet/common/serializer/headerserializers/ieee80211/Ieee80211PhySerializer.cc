@@ -17,7 +17,7 @@
 
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMPLCPFrame_m.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PLCPHeaders.h"
 
 namespace inet {

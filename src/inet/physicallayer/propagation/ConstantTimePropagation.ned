@@ -17,7 +17,7 @@
 
 package inet.physicallayer.propagation;
 
-import inet.physicallayer.base.PropagationBase;
+import inet.physicallayer.base.packetlevel.PropagationBase;
 
 //
 // This propagation model computes the propagation time to be independent of

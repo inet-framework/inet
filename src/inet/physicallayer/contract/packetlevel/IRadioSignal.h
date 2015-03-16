@@ -19,9 +19,9 @@
 #define __INET_IRADIOSIGNAL_H
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/physicallayer/contract/IPrintableObject.h"
-#include "inet/physicallayer/mapping/MappingBase.h"
-#include "inet/physicallayer/mapping/MappingUtils.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/mapping/MappingBase.h"
+#include "inet/common/mapping/MappingUtils.h"
 
 namespace inet {
 

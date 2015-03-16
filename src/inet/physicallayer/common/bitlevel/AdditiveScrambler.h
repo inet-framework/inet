@@ -19,8 +19,8 @@
 #define __INET_ADDITIVESCRAMBLER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/common/layered/AdditiveScrambler.h"
-#include "inet/physicallayer/common/layered/AdditiveScrambling.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
 

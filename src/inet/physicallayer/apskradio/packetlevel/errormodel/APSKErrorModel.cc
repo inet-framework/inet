@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/errormodel/APSKErrorModel.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/apskradio/packetlevel/errormodel/APSKErrorModel.h"
 
 namespace inet {
 

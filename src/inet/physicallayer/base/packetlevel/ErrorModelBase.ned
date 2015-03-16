@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base;
+package inet.physicallayer.base.packetlevel;
 
-import inet.physicallayer.contract.IErrorModel;
+import inet.physicallayer.contract.packetlevel.IErrorModel;
 
 //
 // This module servces as the base module for error models.

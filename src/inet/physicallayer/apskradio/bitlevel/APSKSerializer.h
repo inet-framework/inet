@@ -19,7 +19,7 @@
 #define __INET_APSKSERIALIZER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/apsk/layered/APSKPhyFrame_m.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
 
 namespace inet {
 

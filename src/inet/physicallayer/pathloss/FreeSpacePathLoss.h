@@ -18,7 +18,7 @@
 #ifndef __INET_FREESPACEPATHLOSS_H
 #define __INET_FREESPACEPATHLOSS_H
 
-#include "inet/physicallayer/contract/IPathLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 
 namespace inet {
 

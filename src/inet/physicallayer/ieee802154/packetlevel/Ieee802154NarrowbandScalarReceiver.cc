@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee802154/Ieee802154NarrowbandScalarReceiver.h"
+#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154NarrowbandScalarReceiver.h"
 
 namespace inet {
 

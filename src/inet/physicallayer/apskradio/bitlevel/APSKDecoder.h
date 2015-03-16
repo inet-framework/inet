@@ -18,8 +18,8 @@
 #ifndef __INET_APSKDECODER_H
 #define __INET_APSKDECODER_H
 
-#include "inet/physicallayer/contract/layered/IDecoder.h"
-#include "inet/physicallayer/apsk/layered/APSKCode.h"
+#include "inet/physicallayer/contract/bitlevel/IDecoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKCode.h"
 
 namespace inet {
 

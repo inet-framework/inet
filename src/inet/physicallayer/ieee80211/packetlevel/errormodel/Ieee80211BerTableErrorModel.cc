@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/FlatTransmissionBase.h"
-#include "inet/physicallayer/ieee80211/Ieee80211TransmissionBase.h"
-#include "inet/physicallayer/ieee80211/errormodel/Ieee80211BerTableErrorModel.h"
-#include "inet/physicallayer/ieee80211/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211BerTableErrorModel.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {

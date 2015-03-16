@@ -20,9 +20,9 @@
  * 				Foundation under grant number 5005-67322.
  ***************************************************************************/
 
-#include "inet/physicallayer/ieee802154/Ieee802154UWBIRTransmitter.h"
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/analogmodel/DimensionalTransmission.h"
+#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154UWBIRTransmitter.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 
 namespace inet {
 

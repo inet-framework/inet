@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/layered/Ieee80211PLCPFrame_m.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211PLCPFrame_m.h"
 }};
 
 class noncobject Ieee80211PLCPFrame;

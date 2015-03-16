@@ -18,7 +18,7 @@
 #ifndef __INET_VECTORCOMMUNICATIONCACHE_H
 #define __INET_VECTORCOMMUNICATIONCACHE_H
 
-#include "inet/physicallayer/base/CommunicationCacheBase.h"
+#include "inet/physicallayer/base/packetlevel/CommunicationCacheBase.h"
 
 namespace inet {
 

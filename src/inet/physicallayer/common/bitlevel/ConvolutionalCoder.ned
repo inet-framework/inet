@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.common.layered;
+package inet.physicallayer.common.bitlevel;
 
-import inet.physicallayer.contract.layered.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IFECCoder;
 
 // Transfer function (octal) matrix
 // ================================

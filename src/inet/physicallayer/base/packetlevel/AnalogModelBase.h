@@ -18,9 +18,9 @@
 #ifndef __INET_ANALOGMODELBASE_H
 #define __INET_ANALOGMODELBASE_H
 
-#include "inet/physicallayer/contract/IAnalogModel.h"
-#include "inet/physicallayer/contract/IArrival.h"
-#include "inet/physicallayer/contract/ITransmission.h"
+#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

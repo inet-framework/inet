@@ -18,7 +18,7 @@
 #ifndef __INET_FLATRADIOBASE_H
 #define __INET_FLATRADIOBASE_H
 
-#include "inet/physicallayer/base/NarrowbandRadioBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandRadioBase.h"
 
 namespace inet {
 

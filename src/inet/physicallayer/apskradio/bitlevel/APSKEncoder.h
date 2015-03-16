@@ -18,14 +18,14 @@
 #ifndef __INET_APSKENCODER_H
 #define __INET_APSKENCODER_H
 
-#include "inet/physicallayer/contract/layered/IEncoder.h"
-#include "inet/physicallayer/contract/layered/IFECCoder.h"
-#include "inet/physicallayer/contract/layered/IScrambler.h"
-#include "inet/physicallayer/contract/layered/IInterleaver.h"
-#include "inet/physicallayer/common/layered/SignalPacketModel.h"
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/apsk/layered/APSKCode.h"
+#include "inet/physicallayer/contract/bitlevel/IEncoder.h"
+#include "inet/physicallayer/contract/bitlevel/IFECCoder.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKCode.h"
 
 namespace inet {
 

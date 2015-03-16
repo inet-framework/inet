@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154;
+package inet.physicallayer.ieee802154.packetlevel;
 
-import inet.physicallayer.base.FlatRadioBase;
+import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
 module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
 {

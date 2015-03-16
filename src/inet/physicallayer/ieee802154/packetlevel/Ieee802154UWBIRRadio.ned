@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154;
+package inet.physicallayer.ieee802154.packetlevel;
 
-import inet.physicallayer.common.Radio;
+import inet.physicallayer.common.packetlevel.Radio;
 
 module Ieee802154UWBIRRadio extends Radio
 {

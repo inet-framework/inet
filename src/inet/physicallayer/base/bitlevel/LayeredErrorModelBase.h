@@ -18,7 +18,7 @@
 #ifndef __INET_LAYEREDERRORMODELBASE_H
 #define __INET_LAYEREDERRORMODELBASE_H
 
-#include "inet/physicallayer/contract/layered/ILayeredErrorModel.h"
+#include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
 
 namespace inet {
 

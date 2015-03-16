@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211PHYSERIALIZER_H
 #define __INET_IEEE80211PHYSERIALIZER_H
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211PLCPFrame_m.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211PLCPFrame_m.h"
 #include "inet/common/BitVector.h"
 
 namespace inet {

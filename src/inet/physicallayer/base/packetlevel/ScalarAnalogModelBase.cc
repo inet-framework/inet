@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/base/ScalarAnalogModelBase.h"
-#include "inet/physicallayer/analogmodel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/ScalarNoise.h"
-#include "inet/physicallayer/analogmodel/ScalarSNIR.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 package inet.physicallayer.pathloss;
 
-import inet.physicallayer.contract.IPathLoss;
+import inet.physicallayer.contract.packetlevel.IPathLoss;
 
 module SUIPathLoss like IPathLoss
 {

@@ -19,7 +19,7 @@
 #define __INET_STATEBASEDENERGYCONSUMER_H
 
 #include "inet/power/contract/IEnergySource.h"
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 

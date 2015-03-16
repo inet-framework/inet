@@ -18,7 +18,7 @@
 #ifndef __INET_IMODULATION_H
 #define __INET_IMODULATION_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 

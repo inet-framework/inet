@@ -18,10 +18,10 @@
 #ifndef __INET_ISIGNALPACKETMODEL_H
 #define __INET_ISIGNALPACKETMODEL_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
-#include "inet/physicallayer/contract/layered/IFECCoder.h"
-#include "inet/physicallayer/contract/layered/IScrambler.h"
-#include "inet/physicallayer/contract/layered/IInterleaver.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/bitlevel/IFECCoder.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 
 namespace inet {
 

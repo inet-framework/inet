@@ -19,7 +19,7 @@ package inet.examples.wireless.layered80211;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.layered.Ieee80211LayeredScalarRadioMedium;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211LayeredScalarRadioMedium;
 
 network Layered80211
 {

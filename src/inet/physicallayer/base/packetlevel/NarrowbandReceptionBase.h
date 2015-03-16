@@ -18,8 +18,8 @@
 #ifndef __INET_NARROWBANDRECEPTIONBASE_H
 #define __INET_NARROWBANDRECEPTIONBASE_H
 
-#include "inet/physicallayer/contract/IRadioSignal.h"
-#include "inet/physicallayer/base/ReceptionBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/base/packetlevel/ReceptionBase.h"
 
 namespace inet {
 

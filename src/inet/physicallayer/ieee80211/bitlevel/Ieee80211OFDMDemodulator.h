@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211OFDMDEMODULATOR_H
 #define __INET_IEEE80211OFDMDEMODULATOR_H
 
-#include "inet/physicallayer/contract/layered/ISignalBitModel.h"
-#include "inet/physicallayer/contract/layered/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/layered/IDemodulator.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMSymbol.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaving.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
 
 namespace inet {
 

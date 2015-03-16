@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandTransmissionBase.h"
-#include "inet/physicallayer/ieee80211/Ieee80211DimensionalReceiver.h"
-#include "inet/physicallayer/ieee80211/Ieee80211DimensionalTransmission.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalReceiver.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {

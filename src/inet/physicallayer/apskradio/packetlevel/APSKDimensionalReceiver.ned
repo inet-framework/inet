@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk;
+package inet.physicallayer.apskradio.packetlevel;
 
-import inet.physicallayer.base.NarrowbandReceiverBase;
+import inet.physicallayer.base.packetlevel.NarrowbandReceiverBase;
 
 //
 // This receiver model receives a transmission succesfully if the minimum of the

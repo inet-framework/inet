@@ -18,8 +18,8 @@
 #ifndef __INET_ILISTENINGDECISION_H
 #define __INET_ILISTENINGDECISION_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
-#include "inet/physicallayer/contract/IListening.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IListening.h"
 
 namespace inet {
 

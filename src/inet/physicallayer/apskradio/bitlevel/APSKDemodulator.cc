@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/layered/APSKDemodulator.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/apsk/layered/APSKSymbol.h"
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
 
 namespace inet {
 

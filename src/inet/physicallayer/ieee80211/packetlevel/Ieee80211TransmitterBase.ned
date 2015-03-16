@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.base.NarrowbandTransmitterBase;
+import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 
 //
 // This transmitter model serves as the base module for IEEE 802.11 transmitters.

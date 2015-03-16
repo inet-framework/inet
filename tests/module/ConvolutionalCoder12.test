@@ -4,7 +4,7 @@
 %file: test.ned
 
 import ieee80211.Ieee80211BitDomainTest;
-import inet.physicallayer.common.layered.ConvolutionalCoder;
+import inet.physicallayer.common.bitlevel.ConvolutionalCoder;
 
 network ConvCoder
 {

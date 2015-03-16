@@ -15,16 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/errormodel/layered/Ieee80211OFDMErrorModel.h"
-#include "inet/physicallayer/contract/IAPSKModulation.h"
+#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OFDMErrorModel.h"
+#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/common/layered/SignalPacketModel.h"
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
-#include "inet/physicallayer/common/layered/SignalSampleModel.h"
-#include "inet/physicallayer/common/layered/SignalSymbolModel.h"
-#include "inet/physicallayer/analogmodel/layered/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/common/layered/LayeredTransmission.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 
 namespace inet {
 

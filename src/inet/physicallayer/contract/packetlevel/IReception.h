@@ -18,8 +18,8 @@
 #ifndef __INET_IRECEPTION_H
 #define __INET_IRECEPTION_H
 
-#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
-#include "inet/physicallayer/contract/ITransmission.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 

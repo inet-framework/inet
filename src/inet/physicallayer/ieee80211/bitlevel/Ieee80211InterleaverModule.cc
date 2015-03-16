@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211InterleaverModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211InterleaverModule.h"
 
 namespace inet {
 

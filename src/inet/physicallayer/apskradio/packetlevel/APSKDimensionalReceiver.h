@@ -18,8 +18,8 @@
 #ifndef __INET_APSKDIMENSIONALRECEIVER_H
 #define __INET_APSKDIMENSIONALRECEIVER_H
 
-#include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

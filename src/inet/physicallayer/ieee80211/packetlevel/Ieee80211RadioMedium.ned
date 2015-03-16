@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211;
+package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.common.RadioMedium;
+import inet.physicallayer.common.packetlevel.RadioMedium;
 
 //
 // This radio medium model is part of thee IEEE 802.11 physical layer model. It

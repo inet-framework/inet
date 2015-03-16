@@ -18,7 +18,7 @@
 #ifndef __INET_ANTENNABASE_H
 #define __INET_ANTENNABASE_H
 
-#include "inet/physicallayer/contract/IAntenna.h"
+#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 
 namespace inet {
 

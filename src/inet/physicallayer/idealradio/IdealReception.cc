@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ideal/IdealReception.h"
+#include "inet/physicallayer/idealradio/IdealReception.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_SIGNALSYMBOLMODEL_H
 #define __INET_SIGNALSYMBOLMODEL_H
 
-#include "inet/physicallayer/contract/layered/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 
 namespace inet {
 

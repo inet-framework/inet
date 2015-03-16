@@ -19,7 +19,7 @@
 #define __INET_MAPPINGUTILS_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/common/mapping/MappingBase.h"
 
 namespace inet {
 

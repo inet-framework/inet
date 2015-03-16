@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ideal;
+package inet.physicallayer.idealradio;
 
-import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.contract.packetlevel.IReceiver;
 
 //
 // This receiver model receives a transmission succesfully within communication

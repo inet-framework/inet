@@ -11,7 +11,7 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.ideal.IdealRadioMedium;
+import inet.physicallayer.idealradio.IdealRadioMedium;
 
 network Test
 {

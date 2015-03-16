@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/layered/LayeredReception.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 
 namespace inet {
 

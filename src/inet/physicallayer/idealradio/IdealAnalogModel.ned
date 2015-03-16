@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ideal;
+package inet.physicallayer.idealradio;
 
-import inet.physicallayer.contract.IAnalogModel;
+import inet.physicallayer.contract.packetlevel.IAnalogModel;
 
 //
 // This analog model provides a very simple and predictable physical layer

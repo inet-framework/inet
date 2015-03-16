@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDecoder.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/contract/IAPSKModulation.h"
-#include "inet/physicallayer/common/layered/SignalPacketModel.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 
 namespace inet {
 

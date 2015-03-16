@@ -18,13 +18,13 @@
 #ifndef __INET_LAYEREDRECEPTIONDECISION_H
 #define __INET_LAYEREDRECEPTIONDECISION_H
 
-#include "inet/physicallayer/contract/IReceptionDecision.h"
-#include "inet/physicallayer/common/ReceptionDecision.h"
-#include "inet/physicallayer/contract/layered/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/layered/ISignalBitModel.h"
-#include "inet/physicallayer/contract/layered/ISignalSymbolModel.h"
-#include "inet/physicallayer/contract/layered/ISignalSampleModel.h"
-#include "inet/physicallayer/contract/layered/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalSampleModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 
 namespace inet {
 

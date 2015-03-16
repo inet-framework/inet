@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.layered;
+package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.layered.IDecoder;
-import inet.physicallayer.contract.layered.IFECCoder;
-import inet.physicallayer.contract.layered.IInterleaver;
-import inet.physicallayer.contract.layered.IScrambler;
+import inet.physicallayer.contract.bitlevel.IDecoder;
+import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IInterleaver;
+import inet.physicallayer.contract.bitlevel.IScrambler;
 
 // This is the decoder module for the layered IEEE 802.11
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).

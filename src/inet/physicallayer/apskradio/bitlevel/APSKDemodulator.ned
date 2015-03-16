@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk.layered;
+package inet.physicallayer.apskradio.bitlevel;
 
-import inet.physicallayer.contract.layered.IDemodulator;
+import inet.physicallayer.contract.bitlevel.IDemodulator;
 
 //
 // This module is part of a simple hypothetical layered receiver. It computes

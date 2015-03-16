@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMEncoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
 #include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaver.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/common/layered/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaver.h"
-#include "inet/physicallayer/common/layered/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_IANTENNA_H
 #define __INET_IANTENNA_H
 
-#include "inet/physicallayer/contract/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {

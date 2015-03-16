@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 
 namespace inet {
 

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.layered;
+package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.layered.IInterleaver;
+import inet.physicallayer.contract.bitlevel.IInterleaver;
 
 // The Ieee80211Interleaver is defined by a two-step permutation.
 // The first permutation ensures that adjacent coded bits are mapped

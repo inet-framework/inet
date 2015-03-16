@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.layered;
+package inet.physicallayer.ieee80211.bitlevel;
 
-import inet.physicallayer.contract.layered.IModulator;
+import inet.physicallayer.contract.bitlevel.IModulator;
 
 // This is an IEEE 802.11 OFDM modulator module, the
 // implementation is based on 18.3.5.8 Subcarrier modulation

@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211BERTABLEERRORMODEL_H
 #define __INET_IEEE80211BERTABLEERRORMODEL_H
 
-#include "inet/physicallayer/base/ErrorModelBase.h"
+#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/BerParseFile.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/BerParseFile.h"
 
 namespace inet {
 

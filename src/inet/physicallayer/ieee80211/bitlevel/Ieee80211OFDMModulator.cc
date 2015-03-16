@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMModulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDefs.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 
 namespace inet {
 

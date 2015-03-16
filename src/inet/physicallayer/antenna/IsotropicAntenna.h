@@ -18,7 +18,7 @@
 #ifndef __INET_ISOTROPICANTENNA_H
 #define __INET_ISOTROPICANTENNA_H
 
-#include "inet/physicallayer/base/AntennaBase.h"
+#include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 namespace inet {
 

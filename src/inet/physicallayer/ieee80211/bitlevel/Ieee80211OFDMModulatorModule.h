@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211OFDMMODULATORMODULE_H
 #define __INET_IEEE80211OFDMMODULATORMODULE_H
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMModulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
 
 namespace inet {
 

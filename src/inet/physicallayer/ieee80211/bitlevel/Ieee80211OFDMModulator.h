@@ -18,12 +18,12 @@
 #ifndef __INET_IEEE80211OFDMMODULATOR_H
 #define __INET_IEEE80211OFDMMODULATOR_H
 
-#include "inet/physicallayer/contract/layered/IModulator.h"
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
-#include "inet/physicallayer/common/layered/SignalSymbolModel.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMSymbol.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/contract/bitlevel/IModulator.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 
 namespace inet {
 

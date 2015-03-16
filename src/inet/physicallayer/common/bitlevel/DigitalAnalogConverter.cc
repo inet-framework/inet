@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/layered/DigitalAnalogConverter.h"
+#include "inet/physicallayer/common/bitlevel/DigitalAnalogConverter.h"
 
 namespace inet {
 

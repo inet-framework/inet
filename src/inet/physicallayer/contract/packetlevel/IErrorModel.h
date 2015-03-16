@@ -18,7 +18,7 @@
 #ifndef __INET_IERRORMODEL_H
 #define __INET_IERRORMODEL_H
 
-#include "inet/physicallayer/contract/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 
 namespace inet {
 

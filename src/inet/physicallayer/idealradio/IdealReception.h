@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALRECEPTION_H
 #define __INET_IDEALRECEPTION_H
 
-#include "inet/physicallayer/base/ReceptionBase.h"
+#include "inet/physicallayer/base/packetlevel/ReceptionBase.h"
 
 namespace inet {
 

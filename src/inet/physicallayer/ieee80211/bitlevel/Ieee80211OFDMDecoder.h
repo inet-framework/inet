@@ -18,16 +18,16 @@
 #ifndef __INET_IEEE80211OFDMDECODER_H
 #define __INET_IEEE80211OFDMDECODER_H
 
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaver.h"
-#include "inet/physicallayer/common/layered/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaving.h"
-#include "inet/physicallayer/common/layered/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMCode.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/base/APSKModulationBase.h"
-#include "inet/physicallayer/contract/layered/ISignalPacketModel.h"
-#include "inet/physicallayer/contract/layered/ISignalBitModel.h"
-#include "inet/physicallayer/contract/layered/IDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
+#include "inet/physicallayer/contract/bitlevel/IDecoder.h"
 
 namespace inet {
 

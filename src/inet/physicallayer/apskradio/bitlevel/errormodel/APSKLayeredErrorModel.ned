@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.errormodel.layered;
+package inet.physicallayer.apskradio.bitlevel.errormodel;
 
-import inet.physicallayer.base.layered.LayeredErrorModelBase;
+import inet.physicallayer.base.bitlevel.LayeredErrorModelBase;
 
 //
 // This error model computes the erroneous bits, symbols, or simply whether the

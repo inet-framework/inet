@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/analogmodel/ScalarAnalogModel.h"
-#include "inet/physicallayer/analogmodel/ScalarReception.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 
 namespace inet {
 

@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211DIMENSIONALRECEIVER_H
 #define __INET_IEEE80211DIMENSIONALRECEIVER_H
 
-#include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/ieee80211/BerParseFile.h"
+#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/BerParseFile.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {

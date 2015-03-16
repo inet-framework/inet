@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/GFSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/GFSKModulationBase.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_QUADTREENEIGHBORCACHE_H
 #define __INET_QUADTREENEIGHBORCACHE_H
 
-#include "inet/physicallayer/common/RadioMedium.h"
+#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/common/geometry/container/QuadTree.h"
 
 namespace inet {

@@ -20,7 +20,7 @@
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 
 namespace inet {
 

@@ -19,12 +19,12 @@
 #define __INET_IEEE80211OFDMDECODERMODULE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/layered/IDecoder.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211OFDMDecoder.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaver.h"
-#include "inet/physicallayer/common/layered/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaving.h"
-#include "inet/physicallayer/common/layered/ConvolutionalCoder.h"
+#include "inet/physicallayer/contract/bitlevel/IDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
 

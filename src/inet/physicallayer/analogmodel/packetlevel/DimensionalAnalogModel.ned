@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.analogmodel;
+package inet.physicallayer.analogmodel.packetlevel;
 
-import inet.physicallayer.contract.IAnalogModel;
+import inet.physicallayer.contract.packetlevel.IAnalogModel;
 
 //
 // This analog model computes with dimensional analog power representation. In

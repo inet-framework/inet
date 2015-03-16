@@ -18,7 +18,7 @@
 #ifndef __INET_CONVOLUTIONALCODERMODULE_H
 #define __INET_CONVOLUTIONALCODERMODULE_H
 
-#include "inet/physicallayer/common/layered/ConvolutionalCoder.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {
 

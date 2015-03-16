@@ -15,22 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/layered/ISymbol.h"
-#include "inet/physicallayer/common/BandListening.h"
-#include "inet/physicallayer/common/ListeningDecision.h"
-#include "inet/physicallayer/common/layered/LayeredReceptionDecision.h"
-#include "inet/physicallayer/common/layered/LayeredReception.h"
-#include "inet/physicallayer/common/layered/SignalSymbolModel.h"
-#include "inet/physicallayer/common/layered/SignalSampleModel.h"
-#include "inet/physicallayer/common/layered/SignalBitModel.h"
-#include "inet/physicallayer/analogmodel/ScalarAnalogModel.h"
-#include "inet/physicallayer/analogmodel/layered/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apsk/layered/APSKLayeredReceiver.h"
-#include "inet/physicallayer/apsk/layered/APSKDecoder.h"
-#include "inet/physicallayer/apsk/layered/APSKDemodulator.h"
-#include "inet/physicallayer/apsk/layered/APSKSerializer.h"
-#include "inet/physicallayer/apsk/layered/APSKPhyFrame_m.h"
-#include "inet/physicallayer/base/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionDecision.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredReceiver.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 
 namespace inet {
 

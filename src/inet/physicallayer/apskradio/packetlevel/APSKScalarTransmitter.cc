@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/APSKScalarTransmitter.h"
-#include "inet/physicallayer/analogmodel/ScalarTransmission.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {

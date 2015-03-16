@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandRadioBase.h"
-#include "inet/physicallayer/base/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/base/NarrowbandReceiverBase.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandRadioBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

@@ -18,13 +18,13 @@
 #ifndef __INET_IRECEIVER_H
 #define __INET_IRECEIVER_H
 
-#include "inet/physicallayer/contract/IListening.h"
-#include "inet/physicallayer/contract/INoise.h"
-#include "inet/physicallayer/contract/IReception.h"
-#include "inet/physicallayer/contract/IInterference.h"
-#include "inet/physicallayer/contract/IListeningDecision.h"
-#include "inet/physicallayer/contract/IReceptionDecision.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
+#include "inet/physicallayer/contract/packetlevel/IListening.h"
+#include "inet/physicallayer/contract/packetlevel/INoise.h"
+#include "inet/physicallayer/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 

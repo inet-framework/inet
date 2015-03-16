@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/layered/ConvolutionalCoder.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
 

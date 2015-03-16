@@ -15,7 +15,7 @@
 
 package inet.physicallayer.neighborcache;
 
-import inet.physicallayer.contract.INeighborCache;
+import inet.physicallayer.contract.packetlevel.INeighborCache;
 
 //
 // This neighbor cache model organizes radios in a 3 dimensional grid with

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ideal;
+package inet.physicallayer.idealradio;
 
-import inet.physicallayer.common.Radio;
+import inet.physicallayer.common.packetlevel.Radio;
 
 //
 // This radio model provides a very simple but fast and predictable physical

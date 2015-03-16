@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.analogmodel.layered;
+package inet.physicallayer.analogmodel.bitlevel;
 
-import inet.physicallayer.contract.IAnalogModel;
+import inet.physicallayer.contract.packetlevel.IAnalogModel;
 
 module LayeredScalarAnalogModel like IAnalogModel
 {

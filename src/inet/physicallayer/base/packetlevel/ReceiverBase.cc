@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/ReceiverBase.h"
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/contract/IRadioMedium.h"
+#include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 

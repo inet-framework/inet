@@ -20,7 +20,7 @@
  * 				Foundation under grant number 5005-67322.
  ***************************************************************************/
 
-#include "inet/physicallayer/ieee802154/Ieee802154UWBIRMode.h"
+#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154UWBIRMode.h"
 
 namespace inet {
 

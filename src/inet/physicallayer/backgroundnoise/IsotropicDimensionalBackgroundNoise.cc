@@ -16,8 +16,8 @@
 //
 
 #include "inet/physicallayer/backgroundnoise/IsotropicDimensionalBackgroundNoise.h"
-#include "inet/physicallayer/analogmodel/DimensionalNoise.h"
-#include "inet/physicallayer/common/BandListening.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
 
 namespace inet {
 

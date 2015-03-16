@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base;
+package inet.physicallayer.base.packetlevel;
 
-import inet.physicallayer.contract.IPropagation;
+import inet.physicallayer.contract.packetlevel.IPropagation;
 
 //
 // This module servces as a base module for propagation models.

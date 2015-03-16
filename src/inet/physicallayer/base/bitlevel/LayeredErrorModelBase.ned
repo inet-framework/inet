@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.base.layered;
+package inet.physicallayer.base.bitlevel;
 
-import inet.physicallayer.contract.layered.ILayeredErrorModel;
+import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
 
 module LayeredErrorModelBase like ILayeredErrorModel
 {

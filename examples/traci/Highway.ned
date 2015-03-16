@@ -21,7 +21,7 @@
 package inet.examples.traci;
 
 import inet.mobility.group.TraCIScenarioManager;
-import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 module Highway

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apsk.layered;
+package inet.physicallayer.apskradio.bitlevel;
 
-import inet.physicallayer.common.RadioMedium;
+import inet.physicallayer.common.packetlevel.RadioMedium;
 
 //
 // This medium model is used by a simple hypothetical layered radio.

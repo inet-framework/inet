@@ -18,13 +18,13 @@
 #ifndef __INET_ICOMMUNICATIONCACHE_H
 #define __INET_ICOMMUNICATIONCACHE_H
 
-#include "inet/physicallayer/contract/ISNIR.h"
-#include "inet/physicallayer/contract/IArrival.h"
-#include "inet/physicallayer/contract/IInterference.h"
-#include "inet/physicallayer/contract/IBackgroundNoise.h"
-#include "inet/physicallayer/contract/IRadioFrame.h"
-#include "inet/physicallayer/contract/IReceptionDecision.h"
-#include "inet/physicallayer/contract/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 
 namespace inet {
 

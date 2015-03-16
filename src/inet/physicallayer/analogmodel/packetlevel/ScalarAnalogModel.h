@@ -18,7 +18,7 @@
 #ifndef __INET_SCALARANALOGMODEL_H
 #define __INET_SCALARANALOGMODEL_H
 
-#include "inet/physicallayer/base/ScalarAnalogModelBase.h"
+#include "inet/physicallayer/base/packetlevel/ScalarAnalogModelBase.h"
 
 namespace inet {
 

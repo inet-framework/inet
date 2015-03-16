@@ -18,9 +18,9 @@
 #ifndef __INET_NARROWBANDTRANSMISSIONBASE_H
 #define __INET_NARROWBANDTRANSMISSIONBASE_H
 
-#include "inet/physicallayer/base/TransmissionBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
-#include "inet/physicallayer/contract/IRadioSignal.h"
+#include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 

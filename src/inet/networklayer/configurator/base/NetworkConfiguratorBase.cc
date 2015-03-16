@@ -26,10 +26,10 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/contract/IRadio.h"
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "inet/physicallayer/base/FlatReceiverBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 #endif
 
 namespace inet {

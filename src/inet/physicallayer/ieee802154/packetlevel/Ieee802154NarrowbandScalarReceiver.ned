@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154;
+package inet.physicallayer.ieee802154.packetlevel;
 
-import inet.physicallayer.base.NarrowbandReceiverBase;
+import inet.physicallayer.base.packetlevel.NarrowbandReceiverBase;
 
 module Ieee802154NarrowbandScalarReceiver extends NarrowbandReceiverBase
 {

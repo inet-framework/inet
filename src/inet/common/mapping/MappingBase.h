@@ -28,7 +28,7 @@
 #include <iomanip>
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/mapping/Interpolation.h"
+#include "inet/common/mapping/Interpolation.h"
 
 namespace inet {
 

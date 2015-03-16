@@ -20,8 +20,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/contract/layered/IInterleaver.h"
-#include "inet/physicallayer/ieee80211/layered/Ieee80211Interleaving.h"
+#include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
 
 namespace inet {
 

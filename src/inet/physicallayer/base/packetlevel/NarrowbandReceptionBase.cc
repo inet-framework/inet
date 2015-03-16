@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/NarrowbandReceptionBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandReceptionBase.h"
 
 namespace inet {
 

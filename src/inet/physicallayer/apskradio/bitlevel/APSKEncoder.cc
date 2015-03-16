@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apsk/layered/APSKEncoder.h"
-#include "inet/physicallayer/apsk/layered/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
 
 namespace inet {
 
