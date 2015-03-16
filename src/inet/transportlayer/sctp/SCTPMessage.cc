@@ -106,7 +106,7 @@ cPacket *SCTPMessage::removeChunk()
     cPacket *msg = chunkList.front();
     chunkList.erase(chunkList.begin());
     drop(msg);
-    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() - ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
