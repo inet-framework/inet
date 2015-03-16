@@ -17,7 +17,7 @@
 
 package inet.physicallayer.ieee80211.packetlevel;
 
-import inet.physicallayer.apskradio.packetlevel.APSKDimensionalTransmitter;
+import inet.physicallayer.base.packetlevel.DimensionalTransmitterBase;
 
 //
 // This transmitter model produces IEEE 802.11 transmissions that have
@@ -28,8 +28,7 @@ import inet.physicallayer.apskradio.packetlevel.APSKDimensionalTransmitter;
 // See also ~Ieee80211DimensionalReceiver, ~Ieee80211DimensionalRadio, and
 // ~Ieee80211DimensionalRadioMedium.
 //
-// TODO: remove APSK dependency and extend Ieee80211TransmitterBase, factor out common part
-module Ieee80211DimensionalTransmitter extends APSKDimensionalTransmitter
+module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
 {
     parameters:
         // TODO: remove parameters when base module is changed

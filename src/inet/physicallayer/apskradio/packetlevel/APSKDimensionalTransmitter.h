@@ -18,55 +18,14 @@
 #ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
 #define __INET_APSKDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/common/mapping/MappingBase.h"
+#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDimensionalTransmitter : public FlatTransmitterBase
+class INET_API APSKDimensionalTransmitter : public DimensionalTransmitterBase
 {
-  protected:
-    class TimeGainEntry {
-      public:
-        char timeUnit;
-        double time;
-        double gain;
-
-      public:
-        TimeGainEntry(char timeUnit, double time, double gain) :
-            timeUnit(timeUnit),
-            time(time),
-            gain(gain)
-        {}
-    };
-
-    class FrequencyGainEntry {
-      public:
-        char frequencyUnit;
-        double frequency;
-        double gain;
-
-      public:
-        FrequencyGainEntry(char frequencyUnit, double frequency, double gain) :
-            frequencyUnit(frequencyUnit),
-            frequency(frequency),
-            gain(gain)
-        {}
-    };
-
-  protected:
-    DimensionSet dimensions;
-    Mapping::InterpolationMethod interpolationMode;
-    std::vector<TimeGainEntry> timeGains;
-    std::vector<FrequencyGainEntry> frequencyGains;
-
-  protected:
-    virtual void initialize(int stage) override;
-
-    ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
-
   public:
     APSKDimensionalTransmitter();
 

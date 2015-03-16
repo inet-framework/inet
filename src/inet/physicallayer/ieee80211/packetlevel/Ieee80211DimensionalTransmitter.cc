@@ -31,7 +31,7 @@ namespace physicallayer {
 Define_Module(Ieee80211DimensionalTransmitter);
 
 Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
-    APSKDimensionalTransmitter(),
+    DimensionalTransmitterBase(),
     modeSet(nullptr),
     mode(nullptr)
 {
@@ -39,7 +39,7 @@ Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
 
 void Ieee80211DimensionalTransmitter::initialize(int stage)
 {
-    APSKDimensionalTransmitter::initialize(stage);
+    DimensionalTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
         modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());

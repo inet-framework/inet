@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 #define __INET_IEEE80211DIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmitter.h"
+#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -26,8 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: remove APSK dependency, factor out common part
-class INET_API Ieee80211DimensionalTransmitter : public APSKDimensionalTransmitter
+class INET_API Ieee80211DimensionalTransmitter : public DimensionalTransmitterBase
 {
   protected:
     const Ieee80211ModeSet *modeSet;
