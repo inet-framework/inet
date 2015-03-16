@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "inet/applications/tunapp/TunLoopbackApp.h"
 #include "inet/networklayer/contract/INetworkDatagram.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/contract/ITransportPacket.h"
 
 namespace inet {
 
@@ -54,8 +54,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
         INetworkDatagram *networkDatagram = check_and_cast<INetworkDatagram *>(message);
-        // TODO: use ITransportPacket when subcassed by UDPPacket, etc.
-        UDPPacket *transportPacket = check_and_cast<UDPPacket *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
+        ITransportPacket *transportPacket = check_and_cast<ITransportPacket *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
         transportPacket->setDestinationPort(transportPacket->getSourcePort());
         transportPacket->setSourcePort(transportPacket->getDestinationPort());
         networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());
