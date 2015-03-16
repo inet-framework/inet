@@ -18,12 +18,13 @@
 
 package inet.networklayer.pim;
 
+import inet.routing.contract.IPIMRouting;
 import inet.networklayer.pim.modes.PIMDM;
 import inet.networklayer.pim.modes.PIMSM;
 import inet.networklayer.pim.tables.PIMInterfaceTable;
 import inet.networklayer.pim.tables.PIMNeighborTable;
 
-module PIMRouting
+module PIMRouting like IPIMRouting
 {
     parameters:
         @display("i=block/network2;bgl=4;bgb=350,207");
