@@ -25,13 +25,11 @@
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
-#ifndef __NETPERFMETER_H
-#define __NETPERFMETER_H
+#ifndef __INET_NETPERFMETER_H
+#define __INET_NETPERFMETER_H
 
-#include <omnetpp.h>
 #include <assert.h>
 #include <fstream>
-
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
@@ -44,6 +42,10 @@
 
 namespace inet {
 
+
+/**
+ * Implementation of NetPerfMeter. See NED file for more details.
+ */
 class INET_API NetPerfMeter : public cSimpleModule
 {
    public:
