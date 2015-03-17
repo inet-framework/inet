@@ -9,8 +9,8 @@ package inet.transport.rtp;
 moduleinterface IRTPPayloadReceiver
 {
     parameters:
-        string outputFileName;
-        string outputLogFileName;
+        string outputFileName;  // use an empty string to disable this logging
+        string outputLogFileName;   // use an empty string to disable this logging
 
     gates:
         input profileIn @labels(RTPInnerPacket);

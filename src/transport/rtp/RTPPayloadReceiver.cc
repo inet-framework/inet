@@ -38,10 +38,13 @@ void RTPPayloadReceiver::initialize()
 {
     const char *fileName = par("outputFileName");
     const char *logFileName = par("outputLogFileName");
-    openOutputFile(fileName);
-    char logName[200];
-    sprintf(logName, logFileName, getId());
-    _outputLogLoss.open(logName);
+    if (strcmp(fileName, "")) openOutputFile(fileName);
+    if (strcmp(logFileName, ""))
+    {
+        char logName[200];
+        sprintf(logName, logFileName, getId());
+        _outputLogLoss.open(logName);
+    }
 }
 
 void RTPPayloadReceiver::handleMessage(cMessage *msg)
