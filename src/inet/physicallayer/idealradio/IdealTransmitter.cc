@@ -26,6 +26,7 @@ namespace physicallayer {
 Define_Module(IdealTransmitter);
 
 IdealTransmitter::IdealTransmitter() :
+    headerBitLength(-1),
     bitrate(sNaN),
     maxCommunicationRange(sNaN),
     maxInterferenceRange(sNaN),
@@ -36,6 +37,7 @@ IdealTransmitter::IdealTransmitter() :
 void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        headerBitLength = par("headerBitLength");
         bitrate = bps(par("bitrate"));
         maxCommunicationRange = m(par("maxCommunicationRange"));
         maxInterferenceRange = m(par("maxInterferenceRange"));
@@ -46,6 +48,7 @@ void IdealTransmitter::initialize(int stage)
 void IdealTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "IdealTransmitter, "
+           << "headerBitLength = " << headerBitLength << ", "
            << "bitrate = " << bitrate << ", "
            << "maxCommunicationRange = " << maxCommunicationRange << ", "
            << "maxInterferenceRange = " << maxInterferenceRange << ", "
@@ -54,7 +57,9 @@ void IdealTransmitter::printToStream(std::ostream& stream) const
 
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    const simtime_t duration = (b(macFrame->getBitLength()) / bitrate).get();
+    TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
+    bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
+    const simtime_t duration = (macFrame->getBitLength() + headerBitLength) / transmissionBitrate.get();
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();

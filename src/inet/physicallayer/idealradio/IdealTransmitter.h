@@ -30,6 +30,7 @@ namespace physicallayer {
 class INET_API IdealTransmitter : public TransmitterBase
 {
   protected:
+    int headerBitLength;
     bps bitrate;
     m maxCommunicationRange;
     m maxInterferenceRange;
