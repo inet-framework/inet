@@ -20,8 +20,8 @@
 
 #include "inet/environment/objectcache/IObjectCache.h"
 #include "inet/common/geometry/container/BVHTree.h"
-#include "inet/environment/PhysicalEnvironment.h"
-#include "inet/environment/PhysicalObject.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
+#include "inet/environment/common/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
 
 namespace inet {

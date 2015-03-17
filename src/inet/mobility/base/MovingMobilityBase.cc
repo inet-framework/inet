@@ -21,7 +21,7 @@
  **************************************************************************/
 
 #include "inet/mobility/base/MovingMobilityBase.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 

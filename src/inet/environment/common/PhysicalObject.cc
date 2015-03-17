@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/environment/PhysicalObject.h"
+#include "inet/environment/common/PhysicalObject.h"
 
 namespace inet {
 

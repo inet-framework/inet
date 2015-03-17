@@ -23,7 +23,7 @@
 #include <fstream>
 #include "inet/common/IntervalTree.h"
 #include "inet/common/TrailFigure.h"
-#include "inet/environment/MaterialRegistry.h"
+#include "inet/environment/common/MaterialRegistry.h"
 #include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"

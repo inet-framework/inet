@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/object/LineSegment.h"
-#include "inet/environment/PhysicalObject.h"
+#include "inet/environment/common/PhysicalObject.h"
 
 namespace inet {
 

@@ -22,7 +22,7 @@
 
 #include "inet/mobility/base/MobilityBase.h"
 #include "inet/common/INETMath.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 

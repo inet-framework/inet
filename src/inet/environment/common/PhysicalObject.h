@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/environment/Material.h"
+#include "inet/environment/common/Material.h"
 
 namespace inet {
 

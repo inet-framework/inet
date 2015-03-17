@@ -18,7 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
-#include "inet/environment/Material.h"
+#include "inet/environment/common/Material.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"

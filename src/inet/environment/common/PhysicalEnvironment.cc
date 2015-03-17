@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 #include "inet/common/geometry/object/Box.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/common/Rotation.h"
-#include "inet/environment/MaterialRegistry.h"
+#include "inet/environment/common/MaterialRegistry.h"
 #include <algorithm>
 
 namespace inet {

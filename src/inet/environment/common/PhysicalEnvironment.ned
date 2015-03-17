@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.environment;
+package inet.environment.common;
 
 import inet.environment.objectcache.IObjectCache;
 

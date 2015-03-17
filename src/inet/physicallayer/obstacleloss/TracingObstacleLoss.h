@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 #include "inet/common/TrailFigure.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 
