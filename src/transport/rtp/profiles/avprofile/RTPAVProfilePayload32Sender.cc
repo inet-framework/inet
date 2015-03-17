@@ -87,7 +87,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     int pictureType;
     char *ptr;
 
-    for (ptr = description; *ptr == ' '; ptr++)
+    for (ptr = description; *ptr == ' ' || *ptr == '\t' ; ptr++)
         ;
     switch (*ptr)
     {
@@ -111,7 +111,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             mpegPacket->setPictureType(pictureType);
 
             // the maximum number of real data bytes
-            int maxDataSize = _mtu - rtpPacket->getBitLength() - mpegPacket->getBitLength();
+            int maxDataSize = _mtu - rtpPacket->getByteLength() - mpegPacket->getByteLength();
 
             if (bytesRemaining > maxDataSize)
             {
@@ -121,7 +121,8 @@ bool RTPAVProfilePayload32Sender::sendPacket()
                 // has a length of 64 bytes
                 int slicedDataSize = (maxDataSize / 64) * 64;
 
-                mpegPacket->addBitLength(slicedDataSize);
+                mpegPacket->setPayloadLength(slicedDataSize);
+                mpegPacket->addByteLength(slicedDataSize);
 
 
                 rtpPacket->encapsulate(mpegPacket);
@@ -130,7 +131,8 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             }
             else
             {
-                mpegPacket->addBitLength(bytesRemaining);
+                mpegPacket->setPayloadLength(bytesRemaining);
+                mpegPacket->addByteLength(bytesRemaining);
                 rtpPacket->encapsulate(mpegPacket);
                 // set marker because this is
                 // the last packet of the frame
