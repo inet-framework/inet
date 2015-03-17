@@ -27,7 +27,7 @@ network Test
 
 [General]
 network = Test
-sim-time-limit = 400us
+sim-time-limit = 500us
 record-eventlog = true
 ned-path = .;../../../../src
 
@@ -54,6 +54,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].mac.fullDuplex = false
 *.host*.wlan[*].radioType = "IdealRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
 *.hostSender1.wlan[*].radio.transmitter.maxCommunicationRange = 300m
 *.hostSender1.wlan[*].radio.transmitter.maxInterferenceRange = 600m

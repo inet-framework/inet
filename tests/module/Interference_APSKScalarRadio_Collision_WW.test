@@ -25,7 +25,7 @@ network Test
 
 [General]
 network = Test
-sim-time-limit = 400us
+sim-time-limit = 500us
 record-eventlog = true
 ned-path = .;../../../../src
 
