@@ -1465,6 +1465,8 @@ bool xMIPv6::validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInf
   */
 void xMIPv6::triggerRouteOptimization(const IPv6Address& destAddress, const IPv6Address& HoA, InterfaceEntry* ie)
 {
+    return;
+
     if (bul->getMobilityState(destAddress) == BindingUpdateList::NONE)
         bul->setMobilityState(destAddress, BindingUpdateList::RR);
 

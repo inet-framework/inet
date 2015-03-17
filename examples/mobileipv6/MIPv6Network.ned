@@ -66,15 +66,15 @@ network mIPv6Network
         }
         Home_Agent: HomeAgent6 {
             parameters:
-                @display("p=249,229;i=abstract/router");
+                @display("p=290,229;i=abstract/router");
         }
         R_1: Router6 {
             parameters:
-                @display("p=566,227");
+                @display("p=510,227");
         }
         R_2: Router6 {
             parameters:
-                @display("p=406,355");
+                @display("p=400,355");
         }
         MN[total_mn]: WirelessHost6 {
             parameters:
@@ -83,11 +83,11 @@ network mIPv6Network
         CN[total_cn]: CorrespondentNode6;
         AP_Home: AccessPoint {
             parameters:
-                @display("p=249,172;i=device/accesspoint_s");
+                @display("p=290,172;i=device/accesspoint_s");
         }
         AP_1: AccessPoint {
             parameters:
-                @display("p=566,172;i=device/accesspoint_s");
+                @display("p=510,172;i=device/accesspoint_s");
         }
         hub: EtherHub {
             parameters:
@@ -128,4 +128,3 @@ network mIPv6Network
                                                         //AP_3.ethIn++ <-- ethernetline <-- R_3.ethOut++;
 
 }
-
