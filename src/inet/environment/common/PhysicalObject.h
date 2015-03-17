@@ -20,16 +20,19 @@
 
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/environment/contract/IPhysicalObject.h"
 #include "inet/environment/common/Material.h"
 
 namespace inet {
+
+namespace physicalenvironment {
 
 /**
  * This class represents an immobile physical object, a rigid body and its
  * physical properties. The properties of physical objects cannot change over
  * time.
  */
-class INET_API PhysicalObject : public cNamedObject
+class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
 {
   protected:
     /**
@@ -74,18 +77,20 @@ class INET_API PhysicalObject : public cNamedObject
 
     virtual int getId() const { return id; }
 
-    virtual const Coord& getPosition() const { return position; }
-    virtual const EulerAngles& getOrientation() const { return orientation; }
+    virtual const Coord& getPosition() const override { return position; }
+    virtual const EulerAngles& getOrientation() const override { return orientation; }
 
-    virtual const ShapeBase *getShape() const { return shape; }
-    virtual const Material *getMaterial() const { return material; }
+    virtual const ShapeBase *getShape() const override { return shape; }
+    virtual const Material *getMaterial() const override { return material; }
 
-    virtual double getLineWidth() const { return lineWidth; }
-    virtual const cFigure::Color& getLineColor() const { return lineColor; }
-    virtual const cFigure::Color& getFillColor() const { return fillColor; }
-    virtual double getOpacity() const { return opacity; }
-    virtual const char *getTags() const { return tags; }
+    virtual double getLineWidth() const override { return lineWidth; }
+    virtual const cFigure::Color& getLineColor() const override { return lineColor; }
+    virtual const cFigure::Color& getFillColor() const override { return fillColor; }
+    virtual double getOpacity() const override { return opacity; }
+    virtual const char *getTags() const override { return tags; }
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

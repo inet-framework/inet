@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace physicalenvironment {
+
 Define_Module(GridObjectCache);
 
 GridObjectCache::GridObjectCache() :
@@ -55,11 +57,12 @@ void GridObjectCache::initialize(int stage)
     }
 }
 
-bool GridObjectCache::insertObject(const PhysicalObject *object)
+bool GridObjectCache::insertObject(const IPhysicalObject *object)
 {
     Coord pos = object->getPosition();
     Coord boundingBoxSize = object->getShape()->computeBoundingBoxSize();
-    grid->insertObject(object, pos, boundingBoxSize);
+    // TODO: avoid dynamic cast
+    grid->insertObject(dynamic_cast<const cObject *>(object), pos, boundingBoxSize);
     return true;
 }
 
@@ -67,6 +70,8 @@ void GridObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& l
 {
     grid->lineSegmentQuery(lineSegment, visitor);
 }
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

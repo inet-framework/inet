@@ -18,12 +18,12 @@
 #ifndef __INET_RADIOMEDIUM_H
 #define __INET_RADIOMEDIUM_H
 
-#include <vector>
 #include <algorithm>
 #include <fstream>
 #include "inet/common/IntervalTree.h"
 #include "inet/common/TrailFigure.h"
-#include "inet/environment/common/MaterialRegistry.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
@@ -75,6 +75,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The background noise model or nullptr if unused.
      */
     const IBackgroundNoise *backgroundNoise;
+    /**
+     * The physical environment model or nullptr if unused.
+     */
+    const IPhysicalEnvironment *environment;
+    /**
+     * The physical material of the medium.
+     */
+    const IMaterial *material;
     /**
      * The maximum speed among the radios is in the range [0, +infinity) or
      * NaN if unspecified.
@@ -417,7 +425,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
     virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
 
-    virtual const Material *getMaterial() const override { return MaterialRegistry::getMaterial("air"); }
+    virtual const IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }
     virtual const IPathLoss *getPathLoss() const override { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }

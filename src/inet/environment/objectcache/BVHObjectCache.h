@@ -18,13 +18,15 @@
 #ifndef __INET_BVHOBJECTCACHE_H
 #define __INET_BVHOBJECTCACHE_H
 
-#include "inet/environment/objectcache/IObjectCache.h"
-#include "inet/common/geometry/container/BVHTree.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
-#include "inet/environment/common/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
+#include "inet/common/geometry/container/BVHTree.h"
+#include "inet/environment/contract/IObjectCache.h"
+#include "inet/environment/contract/IPhysicalObject.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
+
+namespace physicalenvironment {
 
 class BVHObjectCache : public IObjectCache, public cModule
 {
@@ -39,7 +41,7 @@ class BVHObjectCache : public IObjectCache, public cModule
     /** @name Cache */
     //@{
     mutable BVHTree *bvhTree;
-    mutable std::vector<const PhysicalObject *> objects;
+    mutable std::vector<const IPhysicalObject *> objects;
     //@}
 
   protected:
@@ -50,9 +52,11 @@ class BVHObjectCache : public IObjectCache, public cModule
     BVHObjectCache();
     virtual ~BVHObjectCache();
 
-    bool insertObject(const PhysicalObject *object) override;
+    bool insertObject(const IPhysicalObject *object) override;
     void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

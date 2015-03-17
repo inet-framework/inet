@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace physicalenvironment {
+
 PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags) :
     cNamedObject(name),
     id(id),
@@ -33,6 +35,8 @@ PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, 
     tags(tags)
 {
 }
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

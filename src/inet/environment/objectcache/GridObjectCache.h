@@ -18,13 +18,15 @@
 #ifndef __INET_GRIDOBJECTCACHE_H
 #define __INET_GRIDOBJECTCACHE_H
 
-#include "inet/environment/objectcache/IObjectCache.h"
-#include "inet/common/geometry/container/SpatialGrid.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
-#include "inet/environment/common/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
+#include "inet/common/geometry/container/SpatialGrid.h"
+#include "inet/environment/contract/IObjectCache.h"
+#include "inet/environment/contract/IPhysicalObject.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
+
+namespace physicalenvironment {
 
 class GridObjectCache : public IObjectCache, public cModule
 {
@@ -47,9 +49,11 @@ class GridObjectCache : public IObjectCache, public cModule
     GridObjectCache();
     virtual ~GridObjectCache();
 
-    bool insertObject(const PhysicalObject *object) override;
+    bool insertObject(const IPhysicalObject *object) override;
     void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

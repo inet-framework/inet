@@ -18,7 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
-#include "inet/environment/common/Material.h"
+#include "inet/environment/contract/IMaterial.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
@@ -34,6 +34,8 @@
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::physicalenvironment;
 
 /**
  * This interface represents the whole radio medium. It keeps track of all radio
@@ -66,7 +68,7 @@ class INET_API IRadioMedium : public IPrintableObject
     /**
      * Returns the material of the radio medium. This function never returns nullptr.
      */
-    virtual const Material *getMaterial() const = 0;
+    virtual const IMaterial *getMaterial() const = 0;
 
     /**
      * Returns the radio signal propagation model of this radio medium. This

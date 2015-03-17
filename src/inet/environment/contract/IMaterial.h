@@ -15,37 +15,33 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETMath.h"
-#include "inet/environment/common/Material.h"
+#ifndef __INET_IMATERIAL_H
+#define __INET_IMATERIAL_H
+
+#include "inet/common/INETDefs.h"
+#include "inet/common/Units.h"
 
 namespace inet {
 
 namespace physicalenvironment {
 
-Material::Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability) :
-    cNamedObject(name, false),
-    resistivity(resistivity),
-    relativePermittivity(relativePermittivity),
-    relativePermeability(relativePermeability)
-{
-}
+using namespace units::values;
+using namespace units::constants;
 
-double Material::getDielectricLossTangent(Hz frequency) const
+class INET_API IMaterial
 {
-    return unit(1.0 / (2 * M_PI * frequency * resistivity * relativePermittivity * e0)).get();
-}
-
-double Material::getRefractiveIndex() const
-{
-    return std::sqrt(relativePermittivity * relativePermeability);
-}
-
-mps Material::getPropagationSpeed() const
-{
-    return mps(SPEED_OF_LIGHT) / getRefractiveIndex();
-}
+  public:
+    virtual Ohmm getResistivity() const = 0;
+    virtual double getRelativePermittivity() const = 0;
+    virtual double getRelativePermeability() const = 0;
+    virtual double getDielectricLossTangent(Hz frequency) const = 0;
+    virtual double getRefractiveIndex() const = 0;
+    virtual mps getPropagationSpeed() const = 0;
+};
 
 } // namespace physicalenvironment
 
 } // namespace inet
+
+#endif // ifndef __INET_IMATERIAL_H
 

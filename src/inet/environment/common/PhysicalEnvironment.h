@@ -18,14 +18,18 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
-#include "inet/environment/objectcache/IObjectCache.h"
-#include "inet/environment/common/PhysicalObject.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/common/Rotation.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/environment/contract/IObjectCache.h"
+#include "inet/environment/common/PhysicalObject.h"
+#include "inet/environment/common/MaterialRegistry.h"
 
 namespace inet {
+
+namespace physicalenvironment {
 
 /**
  * This class represents the physical environment. The physical environment
@@ -35,7 +39,7 @@ namespace inet {
  * The physical environment draws the physical objects on the canvas of its
  * parent module.
  */
-class INET_API PhysicalEnvironment : public cModule
+class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 {
   protected:
     class ObjectPositionComparator
@@ -84,8 +88,6 @@ class INET_API PhysicalEnvironment : public cModule
     //@}
 
   protected:
-    static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation);
-
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
@@ -103,22 +105,24 @@ class INET_API PhysicalEnvironment : public cModule
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
-    // TODO: eventually delete this function?
-    static cFigure::Point computeCanvasPoint(Coord point);
+    virtual cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation) const override;
 
     virtual K getTemperature() const { return temperature; }
-    virtual const Coord& getSpaceMin() const { return spaceMin; }
-    virtual const Coord& getSpaceMax() const { return spaceMax; }
+    virtual const Coord& getSpaceMin() const override { return spaceMin; }
+    virtual const Coord& getSpaceMax() const override { return spaceMax; }
 
-    virtual const EulerAngles& getViewAngle() const { return viewAngle; }
-    virtual const Rotation& getViewRotation() const { return viewRotation; }
+    virtual const EulerAngles& getViewAngle() const override { return viewAngle; }
+    virtual const Rotation& getViewRotation() const override { return viewRotation; }
+    virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::singleton; }
 
     virtual int getNumObjects() const { return objects.size(); }
     virtual const PhysicalObject *getObject(int index) const { return objects[index]; }
     virtual const PhysicalObject *getObjectById(int id) const;
 
-    virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
+    virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

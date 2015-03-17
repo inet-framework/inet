@@ -15,37 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETMath.h"
-#include "inet/environment/common/Material.h"
+#ifndef __INET_IPHYSICALOBJECT_H
+#define __INET_IPHYSICALOBJECT_H
+
+#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/base/ShapeBase.h"
+#include "inet/environment/contract/IMaterial.h"
 
 namespace inet {
 
 namespace physicalenvironment {
 
-Material::Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability) :
-    cNamedObject(name, false),
-    resistivity(resistivity),
-    relativePermittivity(relativePermittivity),
-    relativePermeability(relativePermeability)
+class INET_API IPhysicalObject
 {
-}
+  public:
+    virtual const Coord& getPosition() const = 0;
+    virtual const EulerAngles& getOrientation() const = 0;
 
-double Material::getDielectricLossTangent(Hz frequency) const
-{
-    return unit(1.0 / (2 * M_PI * frequency * resistivity * relativePermittivity * e0)).get();
-}
+    virtual const ShapeBase *getShape() const = 0;
+    virtual const IMaterial *getMaterial() const = 0;
 
-double Material::getRefractiveIndex() const
-{
-    return std::sqrt(relativePermittivity * relativePermeability);
-}
-
-mps Material::getPropagationSpeed() const
-{
-    return mps(SPEED_OF_LIGHT) / getRefractiveIndex();
-}
+    virtual double getLineWidth() const = 0;
+    virtual const cFigure::Color& getLineColor() const = 0;
+    virtual const cFigure::Color& getFillColor() const = 0;
+    virtual double getOpacity() const = 0;
+    virtual const char *getTags() const = 0;
+};
 
 } // namespace physicalenvironment
 
 } // namespace inet
+
+#endif // ifndef __INET_IPHYSICALOBJECT_H
 

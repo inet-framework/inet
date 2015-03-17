@@ -17,7 +17,8 @@
 
 package inet.environment.common;
 
-import inet.environment.objectcache.IObjectCache;
+import inet.environment.contract.IObjectCache;
+import inet.environment.contract.IPhysicalEnvironment;
 
 //
 // The propagation of communication signals, the movement of communicating
@@ -151,7 +152,7 @@ import inet.environment.objectcache.IObjectCache;
 //       material as a unitless quantity. Relative permeability is used to
 //       compute the refractive index of the material.
 //
-module PhysicalEnvironment
+module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
         string objectCacheType = default("GridObjectCache");

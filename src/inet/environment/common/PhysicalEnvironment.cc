@@ -22,10 +22,11 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 #include "inet/common/geometry/common/Rotation.h"
-#include "inet/environment/common/MaterialRegistry.h"
 #include <algorithm>
 
 namespace inet {
+
+namespace physicalenvironment {
 
 Define_Module(PhysicalEnvironment);
 
@@ -378,8 +379,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             throw cRuntimeError("Missing material attribute of object");
         else if (nameToMaterialMap.find(materialAttribute) != nameToMaterialMap.end())
             material = nameToMaterialMap[materialAttribute];
-        else if (MaterialRegistry::getMaterial(materialAttribute))
-            material = MaterialRegistry::getMaterial(materialAttribute);
+        else if (MaterialRegistry::singleton.getMaterial(materialAttribute))
+            material = MaterialRegistry::singleton.getMaterial(materialAttribute);
         else
             material = idToMaterialMap[atoi(materialAttribute)];
         if (!material)
@@ -474,21 +475,12 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     if (isNaN(spaceMax.z)) spaceMax.z = computedSpaceMax.z;
 }
 
-cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation)
+cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation) const
 {
     Coord rotatedPoint = rotation.rotateVectorClockwise(point);
     return cFigure::Point(rotatedPoint.x, rotatedPoint.y);
 }
 
-cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
-{
-    // KLUDGE: TODO: don't lookup the environment this way
-    PhysicalEnvironment *environment = dynamic_cast<PhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
-    if (environment)
-        return environment->computeCanvasPoint(point, environment->viewRotation);
-    else
-        return environment->computeCanvasPoint(point, Rotation(EulerAngles(0,0,0)));
-}
 void PhysicalEnvironment::updateCanvas()
 {
     while (objectsLayer->getNumFigures())
@@ -556,10 +548,10 @@ void PhysicalEnvironment::updateCanvas()
         {
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
             cLabelFigure *nameFigure = new cLabelFigure();
-            nameFigure->setPosition(computeCanvasPoint(position));
+            nameFigure->setPosition(computeCanvasPoint(position, viewRotation));
 #else
             cTextFigure *nameFigure = new cTextFigure();
-            nameFigure->setLocation(computeCanvasPoint(position));
+            nameFigure->setLocation(computeCanvasPoint(position, viewRotation));
 #endif
             nameFigure->setTags("physical_object object_name label");
             nameFigure->setText(name);
@@ -655,6 +647,8 @@ EulerAngles PhysicalEnvironment::computeViewAngle(const char* viewAngle)
         throw cRuntimeError("viewAngle must be a triplet representing three degrees");
     return EulerAngles(x, y, z);
 }
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

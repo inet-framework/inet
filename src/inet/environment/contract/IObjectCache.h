@@ -19,10 +19,12 @@
 #define __INET_IOBJECTCACHE_H
 
 #include "inet/common/IVisitor.h"
-#include "inet/environment/common/PhysicalObject.h"
 #include "inet/common/geometry/object/LineSegment.h"
+#include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
+
+namespace physicalenvironment {
 
 /**
  * This interface provides abstractions for efficient physical object cache data
@@ -34,7 +36,7 @@ class IObjectCache
     /**
      * Inserts a new physical object into the cache data structure.
      */
-    virtual bool insertObject(const PhysicalObject *object) = 0;
+    virtual bool insertObject(const IPhysicalObject *object) = 0;
 
     /**
      * Calls the visitor with at least all physical objects that intersect
@@ -42,6 +44,8 @@ class IObjectCache
      */
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

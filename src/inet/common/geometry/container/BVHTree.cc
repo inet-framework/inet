@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/container/BVHTree.h"
 #include <limits>
 #include <algorithm>
+#include "inet/common/geometry/container/BVHTree.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ bool BVHTree::isLeaf() const
     return objects.size() != 0;
 }
 
-BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
+BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
 {
     this->left = nullptr;
     this->right = nullptr;
@@ -38,7 +38,7 @@ BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector
     buildHierarchy(objects, start, end, axis);
 }
 
-void BVHTree::buildHierarchy(std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
+void BVHTree::buildHierarchy(std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
 {
     if (end - start + 1 <= leafCapacity)
     {
@@ -61,7 +61,7 @@ void BVHTree::buildHierarchy(std::vector<const PhysicalObject*>& objects, unsign
     }
 }
 
-void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end) const
+void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end) const
 {
     double xMin = std::numeric_limits<double>::max();
     double yMin = xMin;
@@ -71,7 +71,7 @@ void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::ve
     double zMax = xMax;
     for (unsigned int i = start; i <= end; i++)
     {
-        const PhysicalObject *phyObj = objects[i];
+        const IPhysicalObject *phyObj = objects[i];
         Coord pos = phyObj->getPosition();
         Coord size = phyObj->getShape()->computeBoundingBoxSize();
         size /= 2;
@@ -110,7 +110,8 @@ void BVHTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *v
     if (isLeaf())
     {
         for (auto & elem : objects)
-            visitor->visit(elem);
+            // TODO: avoid dynamic_cast
+            visitor->visit(dynamic_cast<const cObject *>(elem));
     }
     else if (intersectWithLineSegment(lineSegment))
     {

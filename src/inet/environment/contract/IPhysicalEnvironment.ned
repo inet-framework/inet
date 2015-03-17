@@ -15,14 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.environment.objectcache;
+package inet.environment.contract;
 
-//
-// An object cache is a data structure that is used by the physical environment
-// to store physical objects.
-//
-moduleinterface IObjectCache
+moduleinterface IPhysicalEnvironment
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=misc/town_s");
 }

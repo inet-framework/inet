@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace physicalenvironment {
+
 MaterialRegistry MaterialRegistry::singleton;
 
 MaterialRegistry::MaterialRegistry()
@@ -32,14 +34,14 @@ MaterialRegistry::~MaterialRegistry()
         delete entry.second;
 }
 
-void MaterialRegistry::addMaterial(const Material *material)
+void MaterialRegistry::addMaterial(const Material *material) const
 {
-    singleton.materials.insert(std::pair<const std::string, const Material *>(material->getName(), material));
+    materials.insert(std::pair<const std::string, const Material *>(material->getName(), material));
 }
 
-const Material *MaterialRegistry::getMaterial(const char *name)
+const Material *MaterialRegistry::getMaterial(const char *name) const
 {
-    if (singleton.materials.size() == 0)
+    if (materials.size() == 0)
     {
         // TODO: verify values
         addMaterial(new Material("vacuum", Ohmm(NaN), 1, 1));
@@ -51,9 +53,11 @@ const Material *MaterialRegistry::getMaterial(const char *name)
         addMaterial(new Material("concrete", Ohmm(1E+2), 4.5, 1));
         addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));
     }
-    auto it = singleton.materials.find(name);
-    return it != singleton.materials.end() ? it->second : nullptr;
+    auto it = materials.find(name);
+    return it != materials.end() ? it->second : nullptr;
 }
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

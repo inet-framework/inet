@@ -15,6 +15,8 @@
 
 package inet.environment.objectcache;
 
+import inet.environment.contract.IObjectCache;
+
 //
 // This object cache model stores physical objects in a spatial grid. Each cell
 // maintains a list of intersecting physical objects. The grid is aligned with

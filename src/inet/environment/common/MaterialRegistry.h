@@ -19,25 +19,31 @@
 #define __INET_MATERIALREGISTRY_H
 
 #include <map>
-#include "inet/environment/common/Material.h"
+#include "inet/environment/contract/IMaterialRegistry.h"
 
 namespace inet {
 
-class INET_API MaterialRegistry
+namespace physicalenvironment {
+
+class INET_API MaterialRegistry : public IMaterialRegistry
 {
   protected:
-    std::map<const std::string, const Material *> materials;
+    mutable std::map<const std::string, const Material *> materials;
+
+  public:
     static MaterialRegistry singleton;
 
   protected:
-    static void addMaterial(const Material *material);
+    void addMaterial(const Material *material) const;
 
   public:
     MaterialRegistry();
     virtual ~MaterialRegistry();
 
-    static const Material *getMaterial(const char *name);
+    virtual const Material *getMaterial(const char *name) const override;
 };
+
+} // namespace physicalenvironment
 
 } // namespace inet
 
