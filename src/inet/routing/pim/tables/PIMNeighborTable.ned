@@ -16,7 +16,7 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-package inet.networklayer.pim.tables;
+package inet.routing.pim.tables;
 
 //
 // The PIMNeighborTable module contains information about neighboring PIM routers.

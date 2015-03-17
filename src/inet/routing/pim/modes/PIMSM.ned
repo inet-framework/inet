@@ -16,7 +16,7 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-package inet.networklayer.pim.modes;
+package inet.routing.pim.modes;
 
 //
 // Implementation of PIM-SM protocol (RFC 4601).

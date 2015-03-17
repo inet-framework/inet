@@ -19,7 +19,7 @@
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
+#include "inet/routing/pim/tables/PIMInterfaceTable.h"
 
 using namespace std;
 

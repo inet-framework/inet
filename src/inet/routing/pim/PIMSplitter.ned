@@ -16,7 +16,7 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-package inet.networklayer.pim;
+package inet.routing.pim;
 
 //
 // PIMSplitter module dispatches PIM packets received from the network layer

@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/pim/tables/PIMNeighborTable.h"
+#include "inet/routing/pim/tables/PIMNeighborTable.h"
 
 namespace inet {
 Register_Abstract_Class(PIMNeighbor);

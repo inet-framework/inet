@@ -22,7 +22,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/ipv4/IPv4Route.h"
-#include "inet/networklayer/pim/modes/PIMBase.h"
+#include "inet/routing/pim/modes/PIMBase.h"
 
 namespace inet {
 

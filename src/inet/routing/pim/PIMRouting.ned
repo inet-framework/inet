@@ -16,13 +16,13 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-package inet.networklayer.pim;
+package inet.routing.pim;
 
 import inet.routing.contract.IPIMRouting;
-import inet.networklayer.pim.modes.PIMDM;
-import inet.networklayer.pim.modes.PIMSM;
-import inet.networklayer.pim.tables.PIMInterfaceTable;
-import inet.networklayer.pim.tables.PIMNeighborTable;
+import inet.routing.pim.modes.PIMDM;
+import inet.routing.pim.modes.PIMSM;
+import inet.routing.pim.tables.PIMInterfaceTable;
+import inet.routing.pim.tables.PIMNeighborTable;
 
 module PIMRouting like IPIMRouting
 {

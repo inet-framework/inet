@@ -18,7 +18,7 @@
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/pim/modes/PIMDM.h"
+#include "inet/routing/pim/modes/PIMDM.h"
 
 namespace inet {
 Define_Module(PIMDM);

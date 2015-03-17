@@ -18,7 +18,7 @@
 #ifndef __INET_PIMPACKET_H
 #define __INET_PIMPACKET_H
 
-#include "inet/networklayer/pim/PIMPacket_m.h"
+#include "inet/routing/pim/PIMPacket_m.h"
 
 namespace inet {
 

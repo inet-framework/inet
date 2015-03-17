@@ -24,9 +24,9 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/networklayer/pim/tables/PIMNeighborTable.h"
-#include "inet/networklayer/pim/tables/PIMInterfaceTable.h"
-#include "inet/networklayer/pim/PIMPacket.h"
+#include "inet/routing/pim/tables/PIMNeighborTable.h"
+#include "inet/routing/pim/tables/PIMInterfaceTable.h"
+#include "inet/routing/pim/PIMPacket.h"
 
 namespace inet {
 

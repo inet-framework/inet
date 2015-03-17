@@ -22,7 +22,7 @@
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
-#include "inet/networklayer/pim/PIMSplitter.h"
+#include "inet/routing/pim/PIMSplitter.h"
 
 namespace inet {
 using namespace std;

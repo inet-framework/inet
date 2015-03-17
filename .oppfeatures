@@ -470,6 +470,34 @@
         linkerFlags = ""
         />
     <feature
+        id="PIM"
+        name="PIM"
+        description = "PIM support"
+        initiallyEnabled = "true"
+        requires = "IPv4"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.pim
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PIM"
+        linkerFlags = ""
+        />
+    <feature
+        id="PIM_examples"
+        name="PIM examples"
+        description = "Examples for PIM"
+        initiallyEnabled = "true"
+        requires = "PIM PPP Ethernet"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.pim
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="DYMO"
         name="DYMO"
         description = "Dynamic MANET On-demand Routing"

@@ -23,7 +23,7 @@
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/pim/modes/PIMBase.h"
+#include "inet/routing/pim/modes/PIMBase.h"
 
 namespace inet {
 

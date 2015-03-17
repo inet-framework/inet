@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/pim/PIMPacket.h"
+#include "inet/routing/pim/PIMPacket.h"
 
 namespace inet {
 

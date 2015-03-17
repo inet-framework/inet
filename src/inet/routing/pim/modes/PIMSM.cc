@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
-#include "inet/networklayer/pim/modes/PIMSM.h"
+#include "inet/routing/pim/modes/PIMSM.h"
 
 namespace inet {
 Define_Module(PIMSM);

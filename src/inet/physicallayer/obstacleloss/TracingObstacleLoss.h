@@ -18,10 +18,10 @@
 #ifndef __INET_TRACINGOBSTACLELOSS_H
 #define __INET_TRACINGOBSTACLELOSS_H
 
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 #include "inet/common/TrailFigure.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 
@@ -61,7 +61,7 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     /**
      * The physical environment that provides to obstacles.
      */
-    PhysicalEnvironment *environment;
+    IPhysicalEnvironment *environment;
     /**
      * Leaves graphical trail of obstacle intersections.
      */
