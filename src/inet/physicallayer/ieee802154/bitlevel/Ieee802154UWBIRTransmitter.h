@@ -27,7 +27,7 @@
 #include "inet/common/mapping/MappingBase.h"
 #include "inet/common/mapping/MappingUtils.h"
 #include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/ieee802154/packetlevel/Ieee802154UWBIRMode.h"
+#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UWBIRMode.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154.packetlevel;
+package inet.physicallayer.ieee802154.bitlevel;
 
 import inet.physicallayer.contract.packetlevel.ITransmitter;
 
