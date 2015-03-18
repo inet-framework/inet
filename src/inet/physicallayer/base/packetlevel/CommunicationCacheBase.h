@@ -38,8 +38,15 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          */
         IntervalTree *receptionIntervals;
 
+      private:
+        RadioCacheEntry(const RadioCacheEntry &other);
+        RadioCacheEntry &operator=(const RadioCacheEntry &other);
+
       public:
         RadioCacheEntry();
+        RadioCacheEntry(RadioCacheEntry &&other);
+        RadioCacheEntry &operator=(RadioCacheEntry &&other);
+        virtual ~RadioCacheEntry();
     };
 
     /**

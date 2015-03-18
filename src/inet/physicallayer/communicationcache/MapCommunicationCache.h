@@ -27,11 +27,12 @@ namespace physicallayer {
 class INET_API MapCommunicationCache : public CommunicationCacheBase
 {
   protected:
+    /** @name Cache */
+    //@{
     /**
      * Caches intermediate computation results for radios.
      */
     std::map<const IRadio *, RadioCacheEntry> radioCache;
-    /** @name Cache */
     /**
      * Caches intermediate computation results for transmissions.
      */

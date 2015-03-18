@@ -30,8 +30,6 @@ MapCommunicationCache::MapCommunicationCache()
 
 MapCommunicationCache::~MapCommunicationCache()
 {
-    for (auto &radioIt : radioCache)
-        delete radioIt.second.receptionIntervals;
     for (auto &transmissionIt : transmissionCache) {
         delete transmissionIt.second.frame;
         delete static_cast<std::map<const IRadio *, ReceptionCacheEntry> *>(transmissionIt.second.receptionCacheEntries);

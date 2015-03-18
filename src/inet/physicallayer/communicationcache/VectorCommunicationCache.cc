@@ -36,8 +36,6 @@ VectorCommunicationCache::~VectorCommunicationCache()
         delete transmissionCacheEntry.frame;
         delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
     }
-    for (auto &radioCacheEntry : radioCache)
-        delete radioCacheEntry.receptionIntervals;
 }
 
 VectorCommunicationCache::RadioCacheEntry *VectorCommunicationCache::getRadioCacheEntry(const IRadio *radio)
