@@ -319,9 +319,9 @@
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             d65a-e46c
 
 /examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,            169e-4789
-/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,            ee04-9b54
-/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,            790e-0b5e
-/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,            ee04-9b54
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,            0f82-0e58
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,            6fe3-fd41
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,            0f82-0e58
 
 /examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,         04ac-d5ad
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,         04ac-d5ad
