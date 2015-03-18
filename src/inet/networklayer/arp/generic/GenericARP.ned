@@ -17,7 +17,7 @@
 
 package inet.networklayer.arp.generic;
 
-import inet.networklayer.arp.IARP;
+import inet.networklayer.contract.IARP;
 
 
 //

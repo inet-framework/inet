@@ -24,7 +24,7 @@
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/IARP.h"
 
 namespace inet {
 

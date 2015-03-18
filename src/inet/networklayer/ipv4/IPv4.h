@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/INetfilter.h"

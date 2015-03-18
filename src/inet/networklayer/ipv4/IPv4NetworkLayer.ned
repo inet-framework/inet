@@ -18,7 +18,7 @@
 
 package inet.networklayer.ipv4;
 
-import inet.networklayer.arp.IARP;
+import inet.networklayer.contract.IARP;
 import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
 

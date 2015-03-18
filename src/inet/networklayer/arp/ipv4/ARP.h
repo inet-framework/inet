@@ -23,7 +23,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/IARP.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/linklayer/common/MACAddress.h"

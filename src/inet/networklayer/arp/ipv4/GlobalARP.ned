@@ -18,7 +18,7 @@
 
 package inet.networklayer.arp.ipv4;
 
-import inet.networklayer.arp.IARP;
+import inet.networklayer.contract.IARP;
 
 
 //
