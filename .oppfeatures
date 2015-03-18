@@ -200,6 +200,21 @@
         linkerFlags = ""
         />
     <feature
+        id="Flood"
+        name="Flood"
+        description = ""
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.flood
+                       inet.networklayer.probabilistic
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="UDP"
         name="UDP protocol"
         description = "UDP protocol"
