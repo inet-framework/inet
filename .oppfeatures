@@ -1024,4 +1024,61 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="TUN"
+        name="TUN"
+        description = "Provides TUN/TAP virtual network interfaces"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.tunapp
+                       inet.linklayer.tun
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TUN"
+        linkerFlags = ""
+        />
+    <feature
+        id="BMAC"
+        name="BMAC"
+        description = "Provides the B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.bmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_BMAC"
+        linkerFlags = ""
+        />
+    <feature
+        id="LMAC"
+        name="LMAC"
+        description = "Provides the L-MAC, a Lightweight Medium Access Protocol for Wireless Sensor Networks"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.lmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_LMAC"
+        linkerFlags = ""
+        />
+    <feature
+        id="CSMA"
+        name="CSMA"
+        description = "Provides link layer support for Carrier Sense Multiple Access protocols"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.csma
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CSMA"
+        linkerFlags = ""
+        />
 </features>
