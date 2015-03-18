@@ -695,7 +695,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.environment
+                       inet.environment.common
                        inet.environment.objectcache
                       "
         extraSourceFolders = ""
@@ -717,10 +717,26 @@
         linkerFlags = ""
         />
     <feature
+        id="power"
+        name="Power"
+        description = "Power supply / Battery / Etc."
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.power.base
+                       inet.power.consumer
+                       inet.power.generator
+                       inet.power.storage
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_POWER"
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"
-        requires = ""
+        requires = "power"
         labels = ""
         nedPackages = "
                        inet.physicallayer.analogmodel
@@ -742,38 +758,9 @@
         linkerFlags = ""
         />
     <feature
-        id="apskradio"
-        name="APSK radio"
-        description = "APSK radio support for wireless simulations"
-        requires = ""
-        labels = ""
-        nedPackages = "
-                       inet.physicallayer.apskradio
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_RADIO"
-        linkerFlags = ""
-        />
-    <feature
-        id="power"
-        name="Power"
-        description = "Power supply / Battery / Etc."
-        requires = ""
-        labels = ""
-        nedPackages = "
-                       inet.power.base
-                       inet.power.consumer
-                       inet.power.generator
-                       inet.power.storage
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_POWER"
-        linkerFlags = ""
-        />
-    <feature
         id="Ieee80211"
-        name="802.11a/b/g/e (ad-hoc and infrastructure mode)"
-        description = "IEEE 802.11a/b/g/e ad-hoc and infrastucture mode NIC"
+        name="802.11 a/b/g/e/p/n (ad-hoc and infrastructure mode)"
+        description = "IEEE 802.11 a/b/g/e/p/n ad-hoc and infrastucture mode NIC"
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
@@ -803,6 +790,19 @@
         linkerFlags = ""
         />
     <feature
+        id="apskradio"
+        name="APSK radio"
+        description = "APSK radio support for wireless simulations"
+        requires = "mobility radio"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.apskradio
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_APSKRADIO"
+        linkerFlags = ""
+        />
+    <feature
         id="idealwireless"
         name="Ideal Wireless Communication"
         description = "Provides a simple (dummy) wireless interface that consists
@@ -826,7 +826,7 @@
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 idealwireless"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio idealwireless physicalenvironment AODV"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
