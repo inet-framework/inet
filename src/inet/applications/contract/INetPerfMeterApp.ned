@@ -16,12 +16,8 @@
 //
 
 
-package inet.applications;
+package inet.applications.contract;
 
-//
-// Template for ping applications. It shows what gates a ping app
-// needs, to be able to be used in ~StandardHost etc.
-//
 moduleinterface INetPerfMeterApp
 {
     parameters:

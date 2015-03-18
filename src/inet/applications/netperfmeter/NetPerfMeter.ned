@@ -26,7 +26,7 @@
 // *   Contact: dreibh@iem.uni-due.de
 
 package inet.applications.netperfmeter;
-import inet.applications.INetPerfMeterApp;
+import inet.applications.contract.INetPerfMeterApp;
 
 //
 // Application model for comparing the performance of various transport
