@@ -105,8 +105,6 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
-    virtual cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation) const override;
-
     virtual K getTemperature() const { return temperature; }
     virtual const Coord& getSpaceMin() const override { return spaceMin; }
     virtual const Coord& getSpaceMax() const override { return spaceMax; }

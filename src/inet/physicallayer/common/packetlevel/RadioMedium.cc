@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/linklayer/contract/IMACFrame.h"
-#include "inet/common/NotifierConsts.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 
@@ -885,10 +885,10 @@ void RadioMedium::updateCanvas()
             if (drawCommunication2D) {
                 // determine the rotated 2D canvas points of the four corners of flat 3D circle's bounding box
                 // it defines a 2D rotated parallelogram that needs to be filled with an oval
-                cFigure::Point topLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-startRadius, -startRadius, 0));
-                cFigure::Point topRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(startRadius, -startRadius, 0));
-                cFigure::Point bottomLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-startRadius, startRadius, 0));
-                cFigure::Point bottomRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(startRadius, startRadius, 0));
+                cFigure::Point topLeft = environment->computeCanvasPoint(transmissionStart + Coord(-startRadius, -startRadius, 0));
+                cFigure::Point topRight = environment->computeCanvasPoint(transmissionStart + Coord(startRadius, -startRadius, 0));
+                cFigure::Point bottomLeft = environment->computeCanvasPoint(transmissionStart + Coord(-startRadius, startRadius, 0));
+                cFigure::Point bottomRight = environment->computeCanvasPoint(transmissionStart + Coord(startRadius, startRadius, 0));
                 cFigure::Point bottomDirectionVector = bottomLeft - bottomRight;
                 LineSegment bottomHeight(Coord(topLeft.x, topLeft.y, 0), Coord(topLeft.x, topLeft.y, 0) + Coord(-bottomDirectionVector.y, bottomDirectionVector.x, 0));
                 LineSegment bottomSide(Coord(bottomLeft.x, bottomLeft.y, 0), Coord(bottomRight.x, bottomRight.y, 0));
@@ -906,7 +906,7 @@ void RadioMedium::updateCanvas()
                 double bottomRightCosAlpha = leftSideVector * bottomSideVector / leftSideVector.getLength() / bottomSideVector.getLength();
                 double skewXAngle = acos(bottomRightCosAlpha);
                 double rotationAngle = atan2(topRight.y - topLeft.y, topRight.x - topLeft.x);
-                cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
+                cFigure::Point center = environment->computeCanvasPoint(transmissionStart);
                 communicationFigure->setTransform(cFigure::Transform());
                 communicationFigure->skewx(-skewXAngle, center.y);
                 communicationFigure->rotate(rotationAngle, center.x, center.y);

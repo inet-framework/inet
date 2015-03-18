@@ -475,12 +475,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     if (isNaN(spaceMax.z)) spaceMax.z = computedSpaceMax.z;
 }
 
-cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation) const
-{
-    Coord rotatedPoint = rotation.rotateVectorClockwise(point);
-    return cFigure::Point(rotatedPoint.x, rotatedPoint.y);
-}
-
 void PhysicalEnvironment::updateCanvas()
 {
     while (objectsLayer->getNumFigures())

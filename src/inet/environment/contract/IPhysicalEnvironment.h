@@ -40,14 +40,19 @@ class INET_API IPhysicalEnvironment
 
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
 
-    virtual cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation) const = 0;
+    static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation)
+    {
+        Coord rotatedPoint = rotation.rotateVectorClockwise(point);
+        return cFigure::Point(rotatedPoint.x, rotatedPoint.y);
+    }
+
     static cFigure::Point computeCanvasPoint(Coord point)
     {
         IPhysicalEnvironment *environment = dynamic_cast<IPhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
         if (environment != nullptr)
-            return environment->computeCanvasPoint(point, environment->getViewRotation());
+            return computeCanvasPoint(point, environment->getViewRotation());
         else
-            return environment->computeCanvasPoint(point, Rotation(EulerAngles(0,0,0)));
+            return computeCanvasPoint(point, Rotation(EulerAngles(0,0,0)));
     }
 };
 
