@@ -50,6 +50,13 @@ Serializer:
  - Refactored packet serializer classes to use a safe buffer class to read and
    write binary data. This allows parsing incorrect binary representations without
    runtime errors required by bit precise physical layer models.
+ - Refactored recursion in serializers to be extensible with new packet formats
+   without modifying existing code. 
+ - Fixed a number of packet length bugs and inconsistencies between serialized
+   and non-serialized forms.
+
+Application:
+ - Merged NetPerfMeter application from the master branch added by Thomas Dreibholz.
 
 PCAP:
  - Allow flushing the pcapFile after each write to ensure that all packets are
@@ -71,6 +78,8 @@ Network Layer:
    based on a simple packet error rate estimation.
 
 Link layer:
+ - Added TUN/TAP virtual network interfaces thanks to Irene Ruengeler. This kind
+   of interfaces send/receive packets to/from TUN applications.
  - Updated the 802.11 MAC implementation to use the new 802.11 mode descriptors.
  - Replaced the old 802.11 operational mode and modulation descriptor classes.
    This change modifies the fingerprint of a few simulations, because the header
@@ -120,6 +129,7 @@ Physical layer:
  - Added a new detailed 802.11 error model that computes erroneous packet
    domain, bit domain or symbol domain signal representations.
  - Added 802.11 OFDM PHY frame serializer.
+ - Extracted separate communication cache classes from radio medium.
  - Renamed radio control info classes to TransmissionRequest and ReceptionIndication.
  - Fixed the indefinite heap growth bug in the RadioMedium.
 
