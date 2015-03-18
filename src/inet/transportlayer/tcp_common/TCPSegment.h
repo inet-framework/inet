@@ -20,6 +20,7 @@
 
 #include <list>
 #include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 
 namespace inet {
@@ -56,7 +57,7 @@ class Sack : public Sack_Base
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
  */
-class INET_API TCPSegment : public TCPSegment_Base
+class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
 {
   protected:
     typedef std::list<TCPPayloadMessage> PayloadList;
@@ -122,6 +123,11 @@ class INET_API TCPSegment : public TCPSegment_Base
      * Calculate Length of Options Array in bytes
      */
     virtual unsigned short getOptionsArrayLength();
+
+    virtual unsigned int getSourcePort() const override { return TCPSegment_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { TCPSegment_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return TCPSegment_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { TCPSegment_Base::setDestPort(port); }
 
   protected:
     /**

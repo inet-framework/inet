@@ -5,7 +5,7 @@
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {

@@ -31,8 +31,10 @@ enum UdpConstants{
 //
 packet UDPPacket
 {
-    unsigned short sourcePort;
-    unsigned short destinationPort;
+    @customize(true);
+
+    unsigned short srcPort;
+    unsigned short destPort;
     byteLength = UDP_HDR_LEN;
 }
 

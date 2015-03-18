@@ -29,7 +29,7 @@
   #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 #ifdef WITH_UDP
-  #include "inet/transportlayer/udp/UDPPacket_m.h"
+  #include "inet/transportlayer/udp/UDPPacket.h"
 #endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
   #include "inet/transportlayer/tcp_common/TCPSegment.h"
