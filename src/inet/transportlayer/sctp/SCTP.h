@@ -255,7 +255,7 @@ class INET_API SCTP : public cSimpleModule
     SCTPAssociation *getAssoc(int32 assocId);
     SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
 
-    SCTPAssociation *verifySourceAddr(SCTPInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+    SCTPAssociation *findAssocForInitAck(SCTPInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
 
     SctpVTagMap getVTagMap() { return sctpVTagMap; };
 

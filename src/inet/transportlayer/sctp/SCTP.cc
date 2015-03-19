@@ -193,7 +193,7 @@ void SCTP::handleMessage(cMessage *msg)
             SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
             if (!assoc && sctpAssocMap.size() > 0 && (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == INIT_ACK)) {
                 SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk *>((SCTPChunk *)(sctpmsg->getChunks(0)));
-                assoc = verifySourceAddr(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+                assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
             }
             if (!assoc && sctpAssocMap.size() > 0 && (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == ERRORTYPE
                                                       || (sctpmsg->getChunksArraySize() > 1 &&
@@ -454,7 +454,7 @@ SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uin
     return nullptr;
 }
 
-SCTPAssociation *SCTP::verifySourceAddr(SCTPInitAckChunk *initAckChunk, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
+SCTPAssociation *SCTP::findAssocForInitAck(SCTPInitAckChunk *initAckChunk, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
 {
     SCTPAssociation *assoc = nullptr;
     int numberAddresses = initAckChunk->getAddressesArraySize();
