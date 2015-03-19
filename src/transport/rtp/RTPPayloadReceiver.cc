@@ -38,7 +38,8 @@ void RTPPayloadReceiver::initialize()
 {
     const char *fileName = par("outputFileName");
     const char *logFileName = par("outputLogFileName");
-    if (strcmp(fileName, "")) openOutputFile(fileName);
+    if (strcmp(fileName, ""))
+        openOutputFile(fileName);
     if (strcmp(logFileName, ""))
     {
         char logName[200];
@@ -75,6 +76,8 @@ void RTPPayloadReceiver::openOutputFile(const char *fileName)
 
 void RTPPayloadReceiver::closeOutputFile()
 {
-    _outputFileStream.close();
-    _outputLogLoss.close();
+    if (_outputFileStream.is_open())
+        _outputFileStream.close();
+    if (_outputLogLoss.is_open())
+        _outputLogLoss.close();
 }

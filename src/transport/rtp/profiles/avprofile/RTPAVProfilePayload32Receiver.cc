@@ -56,9 +56,10 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
     {
         _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
         _highestSequenceNumber = rtpPacket->getSequenceNumber();
-        _outputLogLoss <<"sequenceNumberBase"<< rtpPacket->getSequenceNumber() << endl;
+        if (_outputLogLoss.is_open())
+            _outputLogLoss <<"sequenceNumberBase"<< rtpPacket->getSequenceNumber() << endl;
     }
-    else
+    else if (_outputLogLoss.is_open())
     {
         for (int i = _highestSequenceNumber+1; i < rtpPacket->getSequenceNumber(); i++ )
         {
@@ -125,7 +126,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
             }
 
             // we have calculated a frame
-            if (frameSize > 0)
+            if (frameSize > 0 && _outputFileStream.is_open())
             {
                 char line[100];
                 // what picture type is it
