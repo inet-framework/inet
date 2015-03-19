@@ -31,9 +31,6 @@ class INET_API Ieee80211OFDMSymbol : public ISymbol
     std::vector<const APSKSymbol *> subcarrierSymbols;
 
   public:
-    Ieee80211OFDMSymbol(const Ieee80211OFDMSymbol& otherSymbol);
-    ~Ieee80211OFDMSymbol();
-
     friend std::ostream& operator<<(std::ostream& out, const Ieee80211OFDMSymbol& symbol);
     Ieee80211OFDMSymbol(const std::vector<const APSKSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
     Ieee80211OFDMSymbol() { subcarrierSymbols.resize(53, nullptr); } // (48 + 4 + 1), but one of them is skipped.

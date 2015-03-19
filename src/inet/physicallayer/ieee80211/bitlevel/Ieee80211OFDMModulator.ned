@@ -39,6 +39,7 @@ simple Ieee80211OFDMModulator like IModulator
 {
     parameters:
         string subcarrierModulation;
+        int pilotSubcarrierPolarityVectorOffset;
         @display("i=block/mac");
         @class(Ieee80211OFDMModulatorModule);
 }

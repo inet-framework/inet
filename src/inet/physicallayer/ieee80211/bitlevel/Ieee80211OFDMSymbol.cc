@@ -42,26 +42,6 @@ std::ostream& operator<<(std::ostream& out, const Ieee80211OFDMSymbol& symbol)
     return out;
 }
 
-Ieee80211OFDMSymbol::Ieee80211OFDMSymbol(const Ieee80211OFDMSymbol& otherSymbol)
-{
-    subcarrierSymbols.resize(53, nullptr);
-    for (unsigned int i = 0; i < subcarrierSymbols.size(); i++)
-        subcarrierSymbols[i] = otherSymbol.subcarrierSymbols[i];
-    // Default copy constructor doesn't work here since the data below is not static data.
-    subcarrierSymbols[5] = new APSKSymbol(*otherSymbol.subcarrierSymbols[5]);
-    subcarrierSymbols[19] = new APSKSymbol(*otherSymbol.subcarrierSymbols[19]);
-    subcarrierSymbols[33] = new APSKSymbol(*otherSymbol.subcarrierSymbols[33]);
-    subcarrierSymbols[47] = new APSKSymbol(*otherSymbol.subcarrierSymbols[47]);
-}
-
-Ieee80211OFDMSymbol::~Ieee80211OFDMSymbol()
-{
-    // Dynamically created pilot symbols need to be deleted
-    delete subcarrierSymbols[5];
-    delete subcarrierSymbols[19];
-    delete subcarrierSymbols[33];
-    delete subcarrierSymbols[47];
-}
 } /* namespace physicallayer */
 } /* namespace inet */
 

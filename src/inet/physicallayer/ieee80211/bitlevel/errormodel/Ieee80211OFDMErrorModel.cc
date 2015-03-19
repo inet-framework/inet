@@ -53,7 +53,7 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     const IModulation *signalModulation = transmission->getSymbolModel()->getHeaderModulation();
     const IModulation *dataModulation = transmission->getSymbolModel()->getPayloadModulation();
     const BitVector *bits = transmissionBitModel->getBits();
-    BitVector *corruptedBits = new BitVector(*bits); // FIXME: memory leak
+    BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = dynamic_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     if (dynamic_cast<const IAPSKModulation *>(signalModulation)) {
         const IAPSKModulation *apskSignalModulation = (const IAPSKModulation *)signalModulation;
@@ -109,7 +109,7 @@ void Ieee80211OFDMErrorModel::corruptBits(BitVector *bits, double ber, int begin
 
 Ieee80211OFDMSymbol *Ieee80211OFDMErrorModel::corruptOFDMSymbol(const Ieee80211OFDMSymbol *symbol, double ser, int constellationSize, const std::vector<APSKSymbol> *constellation) const
 {
-    std::vector<const APSKSymbol *> subcarrierSymbols = copySubcarriers(symbol->getSubCarrierSymbols());
+    std::vector<const APSKSymbol *> subcarrierSymbols = symbol->getSubCarrierSymbols();
     for (int j = 0; j < symbol->symbolSize(); j++) {
         double p = uniform(0, 1);
         if (p <= ser) {
@@ -119,16 +119,6 @@ Ieee80211OFDMSymbol *Ieee80211OFDMErrorModel::corruptOFDMSymbol(const Ieee80211O
         }
     }
     return new Ieee80211OFDMSymbol(subcarrierSymbols);
-}
-
-std::vector<const APSKSymbol *> Ieee80211OFDMErrorModel::copySubcarriers(const std::vector<const APSKSymbol *>& subcarrierSymbols) const
-{
-    std::vector<const APSKSymbol *> copiedSubcarrierSymbols = subcarrierSymbols;
-    copiedSubcarrierSymbols[5] = new APSKSymbol(*subcarrierSymbols[5]);
-    copiedSubcarrierSymbols[19] = new APSKSymbol(*subcarrierSymbols[19]);
-    copiedSubcarrierSymbols[33] = new APSKSymbol(*subcarrierSymbols[33]);
-    copiedSubcarrierSymbols[47] = new APSKSymbol(*subcarrierSymbols[47]);
-    return copiedSubcarrierSymbols;
 }
 
 const IReceptionSampleModel *Ieee80211OFDMErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const

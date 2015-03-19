@@ -188,7 +188,7 @@ void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacke
                 fieldSymbolModel = modulator->modulate(fieldBitModel);
             else { // compliant mode
                 const Ieee80211OFDMModulation *ofdmModulation = isSignalField ? mode->getSignalMode()->getModulation() : mode->getDataMode()->getModulation();
-                Ieee80211OFDMModulator modulator(ofdmModulation);
+                Ieee80211OFDMModulator modulator(ofdmModulation, isSignalField ? 0 : 1);
                 fieldSymbolModel = modulator.modulate(fieldBitModel);
             }
         }
