@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalTransmission : public FlatTransmissionBase
+class INET_API DimensionalTransmission : public FlatTransmissionBase, public IDimensionalSignal
 {
   protected:
     const ConstMapping *power;

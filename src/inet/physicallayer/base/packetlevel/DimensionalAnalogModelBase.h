@@ -15,27 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALANALOGMODEL_H
-#define __INET_DIMENSIONALANALOGMODEL_H
+#ifndef __INET_DIMENSIONALANALOGMODELBASE_H
+#define __INET_DIMENSIONALANALOGMODELBASE_H
 
-#include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 #include "inet/common/mapping/MappingBase.h"
+#include "inet/physicallayer/base/packetlevel/AnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalAnalogModel : public DimensionalAnalogModelBase
+class INET_API DimensionalAnalogModelBase : public AnalogModelBase
 {
+  protected:
+    bool attenuateWithCarrierFrequency;
+    Mapping::InterpolationMethod interpolationMode;
+
+  protected:
+    virtual void initialize(int stage) override;
+
   public:
     virtual void printToStream(std::ostream& stream) const override;
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual const ConstMapping *computeReceptionPower(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
+    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALANALOGMODEL_H
+#endif // ifndef __INET_DIMENSIONALANALOGMODELBASE_H
 

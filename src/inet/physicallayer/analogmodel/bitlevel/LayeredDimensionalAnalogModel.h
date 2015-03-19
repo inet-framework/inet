@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,27 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALANALOGMODEL_H
-#define __INET_DIMENSIONALANALOGMODEL_H
+#ifndef __INET_LAYEREDDIMENSIONALANALOGMODEL_H
+#define __INET_LAYEREDDIMENSIONALANALOGMODEL_H
 
 #include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
-#include "inet/common/mapping/MappingBase.h"
+#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalAnalogModel : public DimensionalAnalogModelBase
+class INET_API LayeredDimensionalAnalogModel : public DimensionalAnalogModelBase
 {
   public:
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream) const;
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_DIMENSIONALANALOGMODEL_H
+#endif // ifndef __INET_LAYEREDDIMENSIONALANALOGMODEL_H
 

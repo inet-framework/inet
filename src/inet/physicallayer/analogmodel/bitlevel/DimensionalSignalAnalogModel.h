@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel
+class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel, public IDimensionalSignal
 {
   protected:
     const ConstMapping *power;
