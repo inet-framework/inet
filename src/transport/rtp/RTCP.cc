@@ -563,8 +563,8 @@ void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Addres
 
 RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 {
-    char *ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
-    return (RTPParticipantInfo *)(_participantInfos.get(ssrcString));
+    std::string ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
+    return (RTPParticipantInfo *)(_participantInfos.get(ssrcString.c_str()));
 }
 
 void RTCP::calculateAveragePacketSize(int size)

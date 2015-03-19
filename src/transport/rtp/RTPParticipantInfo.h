@@ -174,7 +174,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * an 8 character hexadecimal number which is used as name
      * of an RTPParticipantInfo object.
      */
-    static char *ssrcToName(uint32 ssrc);
+    static std::string ssrcToName(uint32 ssrc);
 
   private:
     void copy(const RTPParticipantInfo& other);
