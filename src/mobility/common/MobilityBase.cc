@@ -31,13 +31,12 @@ static bool parseIntTo(const char *s, double& destValue)
     if (!s || !*s)
         return false;
 
-    char *endptr;
-    int value = strtol(s, &endptr, 10);
-
-    if (*endptr)
+    /* This method is only used to convert positions from the display strings,
+     * which can contain floating point values.
+     */
+    if(sscanf(s, "%lf", &destValue) != 1)
         return false;
 
-    destValue = value;
     return true;
 }
 
@@ -137,8 +136,16 @@ void MobilityBase::updateVisualRepresentation()
     EV_INFO << "current position = " << lastPosition << endl;
     if (ev.isGUI() && visualRepresentation)
     {
-        visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
-        visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
+        char buf[32];
+
+        /* The display string can handle floating point numbers for positions. */
+        snprintf(buf, sizeof(buf), "%lf", lastPosition.x);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
+
+        snprintf(buf, sizeof(buf), "%lf", lastPosition.y);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
     }
 }
 
