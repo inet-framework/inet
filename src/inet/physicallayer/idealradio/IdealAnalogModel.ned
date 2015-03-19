@@ -32,5 +32,5 @@ module IdealAnalogModel like IAnalogModel
 {
     parameters:
         @class(IdealAnalogModel);
-        @display("i=block/cogwheel");
+        @display("i=block/tunnel");
 }

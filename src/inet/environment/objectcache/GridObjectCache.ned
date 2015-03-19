@@ -33,6 +33,6 @@ module GridObjectCache like IObjectCache
         int cellCountX = default(10); // divide space to so many cells
         int cellCountY = default(10); // divide space to so many cells
         int cellCountZ = default(10); // divide space to so many cells
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
         @class(GridObjectCache);
 }

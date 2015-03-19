@@ -20,6 +20,6 @@ import inet.physicallayer.contract.packetlevel.ICommunicationCache;
 module VectorCommunicationCache like ICommunicationCache
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
         @class(VectorCommunicationCache);
 }

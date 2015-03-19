@@ -27,6 +27,6 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 module ScalarAnalogModel like IAnalogModel
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/tunnel");
         @class(ScalarAnalogModel);
 }

@@ -24,5 +24,5 @@ package inet.environment.contract;
 moduleinterface IObjectCache
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
 }

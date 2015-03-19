@@ -24,5 +24,5 @@ package inet.physicallayer.contract.packetlevel;
 moduleinterface IAnalogModel
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/tunnel");
 }

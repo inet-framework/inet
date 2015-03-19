@@ -28,6 +28,6 @@ module DimensionalAnalogModel like IAnalogModel
     parameters:
         bool attenuateWithCarrierFrequency = default(true); // true means frequency selectivity will always use the carrier frequencey as opposed to using the frequency where the change in power occurs
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
-        @display("i=block/cogwheel");
+        @display("i=block/tunnel");
         @class(DimensionalAnalogModel);
 }

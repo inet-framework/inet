@@ -32,6 +32,6 @@ module GridNeighborCache like INeighborCache
         int cellCountY = default(10); // divide space to so many cells
         int cellCountZ = default(10); // divide space to so many cells
         double refillPeriod @unit(s) = default(1s);
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
         @class(GridNeighborCache);
 }

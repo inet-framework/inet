@@ -23,5 +23,5 @@ moduleinterface INeighborCache
 {
     parameters:
         double refillPeriod @unit(s);
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
 }

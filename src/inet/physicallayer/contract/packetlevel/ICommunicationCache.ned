@@ -18,5 +18,5 @@ package inet.physicallayer.contract.packetlevel;
 moduleinterface ICommunicationCache
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
 }
