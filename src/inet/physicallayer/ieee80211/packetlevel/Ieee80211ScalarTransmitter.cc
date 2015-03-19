@@ -55,6 +55,8 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     W transmissionPower = transmissionRequest && !isNaN(transmissionRequest->getPower().get()) ? transmissionRequest->getPower() : power;
     bps transmissionBitrate = transmissionRequest && !isNaN(transmissionRequest->getBitrate().get()) ? transmissionRequest->getBitrate() : bitrate;
     const IIeee80211Mode *transmissionMode = ieee80211TransmissionRequest != nullptr ? ieee80211TransmissionRequest->getMode() : transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
+    if (!modeSet->containsMode(transmissionMode))
+        throw cRuntimeError("Unsupported mode requested");
     const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
