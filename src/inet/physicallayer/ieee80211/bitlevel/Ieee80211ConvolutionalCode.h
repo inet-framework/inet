@@ -37,6 +37,10 @@ namespace physicallayer {
  *  - k = 3, n = 4 with puncturing matrix: |1 1 0|
  *                                         |1 0 1|
  *
+ *  - k = 5, n = 6 with puncturing matrix: |1 1 0 1 0|
+ *                                         |1 0 1 0 1|
+ *
+ *
  * We use industry-standard generator polynomials : (133)_8, (171)_8.
  */
 class INET_API Ieee80211ConvolutionalCode : public ConvolutionalCode
