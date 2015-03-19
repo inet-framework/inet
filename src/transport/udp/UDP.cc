@@ -477,6 +477,8 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         error("(%s)%s arrived from lower layer with unrecognized control info %s",
                 udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
     }
+
+    delete ctrl;
 }
 
 void UDP::bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort)
