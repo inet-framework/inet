@@ -28,6 +28,7 @@ typedef IIeee80211Mode * IIeee80211ModePtr;
 
 class noncobject IIeee80211ModePtr;
 class noncobject TransmissionRequest;
+class noncobject ReceptionIndication;
 
 //
 // Control info attached to a mac frame that is sent down to the ~Ieee80211Radio.
@@ -35,4 +36,20 @@ class noncobject TransmissionRequest;
 class Ieee80211TransmissionRequest extends TransmissionRequest
 {
     IIeee80211ModePtr mode;
+}
+
+//
+// Control info attached to a mac frame that is sent up from the ~Ieee80211Radio.
+//
+class Ieee80211ReceptionIndication extends ReceptionIndication
+{
+    IIeee80211ModePtr mode;
+    // TODO: remove already inherited fields
+    double snr;
+    double lossRate;
+    double recPow;
+    bool airtimeMetric;
+    double testFrameDuration;
+    double testFrameError;
+    int    testFrameSize;
 }

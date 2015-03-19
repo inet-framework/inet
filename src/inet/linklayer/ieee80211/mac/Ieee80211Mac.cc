@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211aControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211eClassifier.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -664,7 +664,7 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     EV_TRACE << "->Enter handleLowerMsg...\n";
     EV_DEBUG << "received message from lower layer: " << msg << endl;
-    Radio80211aControlInfo *cinfo = dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo());
+    Ieee80211ReceptionIndication *cinfo = dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo());
     if (cinfo && cinfo->getAirtimeMetric()) {
         double rtsTime = 0;
         if (rtsThreshold * 8 < cinfo->getTestFrameSize())
@@ -687,8 +687,8 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame *>(msg);
 
-    if (msg->getControlInfo() && dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo())) {
-        Radio80211aControlInfo *cinfo = (Radio80211aControlInfo *)msg->removeControlInfo();
+    if (msg->getControlInfo() && dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo())) {
+        Ieee80211ReceptionIndication *cinfo = (Ieee80211ReceptionIndication *)msg->removeControlInfo();
         if (contJ % 10 == 0) {
             snr = _snr;
             contJ = 0;
