@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKSERIALIZER_H
-#define __INET_APSKSERIALIZER_H
+#ifndef __INET_APSKPHYFRAMESERIALIZER_H
+#define __INET_APSKPHYFRAMESERIALIZER_H
 
 #include "inet/common/BitVector.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
@@ -27,10 +27,10 @@ namespace physicallayer {
 
 #define APSK_PHY_FRAME_HEADER_BYTE_LENGTH    6
 
-class INET_API APSKSerializer
+class INET_API APSKPhyFrameSerializer
 {
   public:
-    APSKSerializer();
+    APSKPhyFrameSerializer();
 
     virtual BitVector *serialize(const APSKPhyFrame *phyFrame) const;
     virtual APSKPhyFrame *deserialize(const BitVector *bits) const;
@@ -40,5 +40,5 @@ class INET_API APSKSerializer
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSERIALIZER_H
+#endif // ifndef __INET_APSKPHYFRAMESERIALIZER_H
 

@@ -17,20 +17,20 @@
 
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 #include "inet/common/serializer/headerserializers/EthernetCRC.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
 
 namespace inet {
 
 namespace physicallayer {
 
+using namespace ieee80211;
 using namespace inet::serializer;
 
-APSKSerializer::APSKSerializer()
+APSKPhyFrameSerializer::APSKPhyFrameSerializer()
 {
 }
-using namespace ieee80211;
 
-BitVector *APSKSerializer::serialize(const APSKPhyFrame *phyFrame) const
+BitVector *APSKPhyFrameSerializer::serialize(const APSKPhyFrame *phyFrame) const
 {
     const Ieee80211Frame *macFrame = check_and_cast<const Ieee80211Frame*>(phyFrame->getEncapsulatedPacket());
     uint16_t macFrameLength = macFrame->getByteLength();
@@ -57,7 +57,7 @@ BitVector *APSKSerializer::serialize(const APSKPhyFrame *phyFrame) const
     return bits;
 }
 
-APSKPhyFrame *APSKSerializer::deserialize(const BitVector *bits) const
+APSKPhyFrame *APSKPhyFrameSerializer::deserialize(const BitVector *bits) const
 {
     const std::vector<uint8>& bytes = bits->getBytes();
     APSKPhyFrame *phyFrame = new APSKPhyFrame();

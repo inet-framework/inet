@@ -28,7 +28,7 @@
 #include "inet/physicallayer/apskradio/bitlevel/APSKLayeredReceiver.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 
@@ -137,7 +137,7 @@ const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketMo
 {
     const BitVector *bits = packetModel->getSerializedPacket();
     if (bits != nullptr)
-        return APSKSerializer().deserialize(bits);
+        return APSKPhyFrameSerializer().deserialize(bits);
     else
         return check_and_cast<const APSKPhyFrame *>(packetModel->getPacket()->dup());
 }

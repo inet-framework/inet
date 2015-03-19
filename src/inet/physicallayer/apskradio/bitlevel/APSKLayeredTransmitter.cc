@@ -23,7 +23,7 @@
 #include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKModulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
 
 namespace inet {
 
@@ -98,7 +98,7 @@ const APSKPhyFrame *APSKLayeredTransmitter::createPhyFrame(const cPacket *macFra
 const ITransmissionPacketModel *APSKLayeredTransmitter::createPacketModel(const APSKPhyFrame *phyFrame) const
 {
     if (levelOfDetail >= PACKET_DOMAIN) {
-        BitVector *bits = APSKSerializer().serialize(phyFrame);
+        BitVector *bits = APSKPhyFrameSerializer().serialize(phyFrame);
         bits->appendBit(0, computePaddingLength(bits));
         return new TransmissionPacketModel(phyFrame, bits, bitrate);
     }

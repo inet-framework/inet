@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
 
 namespace inet {
 
