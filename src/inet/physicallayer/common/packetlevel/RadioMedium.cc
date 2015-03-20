@@ -123,7 +123,7 @@ void RadioMedium::initialize(int stage)
         // initialize logging
         recordCommunicationLog = par("recordCommunicationLog");
         if (recordCommunicationLog)
-            communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+            communicationLog.open();
         // initialize graphics
         displayCommunication = par("displayCommunication");
         drawCommunication2D = par("drawCommunication2D");
@@ -488,6 +488,11 @@ const IArrival *RadioMedium::getArrival(const IRadio *receiver, const ITransmiss
     return communicationCache->getCachedArrival(receiver, transmission);
 }
 
+const IListening *RadioMedium::getListening(const IRadio *receiver, const ITransmission *transmission) const
+{
+    return communicationCache->getCachedListening(receiver, transmission);
+}
+
 const IReception *RadioMedium::getReception(const IRadio *receiver, const ITransmission *transmission) const
 {
     cacheReceptionGetCount++;
@@ -694,13 +699,8 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     radioFrame->setName(encapsulatedFrame->getName());
     radioFrame->setDuration(transmission->getEndTime() - transmission->getStartTime());
     radioFrame->encapsulate(encapsulatedFrame);
-    if (recordCommunicationLog) {
-        const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
-        communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmitterRadio->getId() << " "
-                         << "M " << radioFrame->getName() << " " << transmission->getId() << " "
-                         << "S " << transmission->getStartTime() << " " << transmission->getStartPosition() << " -> "
-                         << "E " << transmission->getEndTime() << " " << transmission->getEndPosition() << endl;
-    }
+    if (recordCommunicationLog)
+        communicationLog.writeTransmission(radio, radioFrame);
     sendToAffectedRadios(const_cast<IRadio *>(radio), radioFrame);
     cMethodCallContextSwitcher contextSwitcher(this);
     communicationCache->setCachedFrame(transmission, radioFrame->dup());
@@ -744,22 +744,14 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
 cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
 {
     const ITransmission *transmission = radioFrame->getTransmission();
-    const IArrival *arrival = getArrival(radio, transmission);
-    const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+    const IListening *listening = communicationCache->getCachedListening(radio, transmission);
+    if (recordCommunicationLog)
+        communicationLog.writeReception(radio, radioFrame);
     const IReceptionDecision *decision = getReceptionDecision(radio, listening, transmission);
     communicationCache->removeCachedDecision(radio, transmission);
-    if (recordCommunicationLog) {
-        const IReception *reception = decision->getReception();
-        communicationLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
-                         << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
-                         << "S " << reception->getStartTime() << " " << reception->getStartPosition() << " -> "
-                         << "E " << reception->getEndTime() << " " << reception->getEndPosition() << " "
-                         << "D " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
-    }
     cPacket *macFrame = decision->getMacFrame()->dup();
     macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<ReceptionIndication *>(decision->getIndication()));
-    delete listening;
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
         cLineFigure *communicationFigure = new cLineFigure();
         communicationFigure->setTags("successful_reception recent_history");

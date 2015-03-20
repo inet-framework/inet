@@ -19,7 +19,6 @@
 #define __INET_RADIOMEDIUM_H
 
 #include <algorithm>
-#include <fstream>
 #include "inet/common/IntervalTree.h"
 #include "inet/common/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
@@ -33,6 +32,7 @@
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
 #include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
@@ -228,9 +228,9 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Logging */
     //@{
     /**
-     * The output file where communication log is written to.
+     * The output communication log is written to.
      */
-    std::ofstream communicationLog;
+    CommunicationLog communicationLog;
     //@}
 
     /** @name Graphics */
@@ -389,19 +389,20 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     virtual const std::vector<const IReception *> *computeInterferingReceptions(const IReception *reception, const std::vector<const ITransmission *> *transmissions) const;
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IListeningDecision *computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
 
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IReceptionDecision *getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
+    virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
     //@}
 
     /** @name Graphics */
@@ -440,7 +441,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) override;
     virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) override;
 
-    virtual const IListeningDecision *listenOnMedium(const IRadio *radio, const IListening *listening) const override;
+    virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const override;
 
