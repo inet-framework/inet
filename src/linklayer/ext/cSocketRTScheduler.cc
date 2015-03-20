@@ -31,7 +31,6 @@
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
 #define PCAP_TIMEOUT 10    /* Timeout in ms */
-#define PCAP_IMMEDIATE 1   /*Set the pcap immediate mode*/
 
 #ifdef HAVE_PCAP
 std::vector<cModule *>cSocketRTScheduler::modules;
@@ -71,7 +70,6 @@ void cSocketRTScheduler::startRun()
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 #endif
-
 }
 
 
@@ -119,23 +117,17 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
-#ifdef PCAP_IMMEDIATE
     if((pd = pcap_create(dev,errbuf)) == NULL)
-#else
-    if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
-#endif
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot open pcap device, error = %s", errbuf);
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
         EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
 
     /* apply the immediate mode to pcap */
-#ifdef PCAP_IMMEDIATE
     if(pcap_set_immediate_mode(pd,1) != 0)
-            throw cRuntimeError("middleRTscheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
 
     if(pcap_activate(pd) != 0)
-        throw cRuntimeError("middleRTscheduler::setInterfaceModule(): Cannot activate pcap device");
-#endif
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
@@ -235,11 +227,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
 
     found = false;
     timeout.tv_sec = 0;
-#ifdef PCAP_IMMEDIATE
     timeout.tv_usec = 100;
-#else
-    timeout.tv_usec = 1000*PCAP_TIMEOUT;
-#endif
 
 
 #ifdef HAVE_PCAP
