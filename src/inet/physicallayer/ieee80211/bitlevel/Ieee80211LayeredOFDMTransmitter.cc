@@ -83,9 +83,7 @@ BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) con
     const Ieee80211OFDMPLCPFrame *phyFrame = check_and_cast<const Ieee80211OFDMPLCPFrame *>(packet);
     phySerializer.serialize(phyFrame, serializedPacket);
     unsigned int byteLength = phyFrame->getLength();
-    unsigned int rate = phyFrame->getRate();
-    int dataBitsLength = 6 + byteLength * 8 + 16;
-    appendPadding(serializedPacket, dataBitsLength, rate);
+    appendPadding(serializedPacket, byteLength);
     return serializedPacket;
 }
 
@@ -239,18 +237,22 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
     return new TransmissionBitModel(-1, mode->getSignalMode()->getGrossBitrate(), -1, mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
-void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int dataBitsLength, uint8_t rate) const
+void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int length) const
 {
+    // 18.3.5.4 Pad bits (PAD), 1597p.
     // TODO: in non-compliant mode: header padding.
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OFDMCode *code = mode->getDataMode()->getCode();
-    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol;
-    if (code && code->getConvolutionalCode()) {
+    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
+    if (code->getConvolutionalCode()) {
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int appendedBitsLength = dataBitsPerOFDMSymbol - dataBitsLength % dataBitsPerOFDMSymbol;
-    serializedPacket->appendBit(0, appendedBitsLength);
+    unsigned int dataBitsLength = 6 + length * 8 + 16;
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
+    unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
+    serializedPacket->appendBit(0, numberOfPadBits);
 }
 
 const ITransmissionSampleModel *Ieee80211LayeredOFDMTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
