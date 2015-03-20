@@ -65,7 +65,7 @@ void PhysicalEnvironment::initialize(int stage)
         viewRotation = Rotation(viewAngle);
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
-        canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
+        canvas->addFigureBelow(objectsLayer, canvas->getSubmodulesLayer());
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
     {
