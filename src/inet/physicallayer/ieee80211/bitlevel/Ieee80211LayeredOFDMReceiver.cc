@@ -322,7 +322,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
         mergedBits->appendBit(dataBits->getBit(i));
     Ieee80211PhySerializer deserializer;
     cPacket *phyFrame = deserializer.deserialize(mergedBits);
-    return new ReceptionPacketModel(phyFrame, mergedBits, bps(NaN), 0, true);
+    return new ReceptionPacketModel(phyFrame, mergedBits, bps(NaN), 0, !phyFrame->hasBitError());
 }
 
 const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
