@@ -117,10 +117,17 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
-    if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot open pcap device, error = %s", errbuf);
+    if((pd = pcap_create(dev,errbuf)) == NULL)
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
         EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+
+    /* apply the immediate mode to pcap */
+    if(pcap_set_immediate_mode(pd,1) != 0)
+            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+
+    if(pcap_activate(pd) != 0)
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
@@ -220,7 +227,9 @@ bool cSocketRTScheduler::receiveWithTimeout()
 
     found = false;
     timeout.tv_sec = 0;
-    timeout.tv_usec = PCAP_TIMEOUT * 1000;
+    timeout.tv_usec = 100;
+
+
 #ifdef HAVE_PCAP
 #ifdef LINUX
     FD_ZERO(&rdfds);
