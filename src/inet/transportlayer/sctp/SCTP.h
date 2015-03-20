@@ -31,6 +31,7 @@
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/transportlayer/sctp/SCTPMessage_m.h"
 
 namespace inet {
 
@@ -253,6 +254,9 @@ class INET_API SCTP : public cSimpleModule
 
     SCTPAssociation *getAssoc(int32 assocId);
     SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
+
+    SCTPAssociation *findAssocForInitAck(SCTPInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+
     SctpVTagMap getVTagMap() { return sctpVTagMap; };
 
     void bindPortForUDP();

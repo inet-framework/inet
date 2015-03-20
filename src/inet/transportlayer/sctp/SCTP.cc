@@ -193,6 +193,10 @@ void SCTP::handleMessage(cMessage *msg)
                 findListen = true;
 
             SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+            if (!assoc && sctpAssocMap.size() > 0 && (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == INIT_ACK)) {
+                SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk *>((SCTPChunk *)(sctpmsg->getChunks(0)));
+                assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+            }
             if (!assoc && sctpAssocMap.size() > 0 && (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == ERRORTYPE
                                                       || (sctpmsg->getChunksArraySize() > 1 &&
                                                           (((SCTPChunk *)(sctpmsg->getChunks(1)))->getChunkType() == ASCONF || ((SCTPChunk *)(sctpmsg->getChunks(1)))->getChunkType() == ASCONF_ACK))))
@@ -451,6 +455,22 @@ SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uin
     }
     return nullptr;
 }
+
+SCTPAssociation *SCTP::findAssocForInitAck(SCTPInitAckChunk *initAckChunk, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
+{
+    SCTPAssociation *assoc = nullptr;
+    int numberAddresses = initAckChunk->getAddressesArraySize();
+    for (uint32 j = 0; j < numberAddresses; j++) {
+        if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
+            continue;
+        assoc = findAssocForMessage(initAckChunk->getAddresses(j), destAddr, srcPort, destPort, findListen);
+        if (assoc) {
+            break;
+        }
+    }
+    return assoc;
+}
+
 
 SCTPAssociation *SCTP::findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
 {
