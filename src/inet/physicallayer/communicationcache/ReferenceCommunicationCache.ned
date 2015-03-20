@@ -18,8 +18,10 @@ package inet.physicallayer.communicationcache;
 import inet.physicallayer.contract.packetlevel.ICommunicationCache;
 
 //
-// This communication cache model allows validating other implementations as a
-// reference.
+// This communication cache model allows validating other implementations. It
+// can be used to provide a reference for communication logs, simulation
+// fingerprints, and statistical results that can be compared with results of
+// other communication cache implementations.
 //
 module ReferenceCommunicationCache like ICommunicationCache
 {
