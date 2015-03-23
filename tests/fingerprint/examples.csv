@@ -267,7 +267,7 @@
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             4d85-4b10
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           a073-799c
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           3d51-a49c
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            340b-1165
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            e674-1180
 
 ### /examples/manetrouting/* : see manet.csv
 
@@ -368,9 +368,9 @@
 # /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b    # unstable fingerprint
 
 # /examples/sctp/cmttest/,             -f fingerprints.ini -c General -r 0,           ---100s,         0000-0000
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            f216-9749
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            949c-4711
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            4788-ca87
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            8b35-54b4
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            db21-a060
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            b1c5-f6db
 
 # /examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 # /examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
