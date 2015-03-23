@@ -66,8 +66,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     static PositionTable globalPositionTable;    // KLUDGE: implement position registry protocol
 
     // packet size
-    int addressByteLength = -1;
-    int coordByteLength = -1;
+    int positionByteLength = -1;
 
     // internal
     cMessage *beaconTimer = nullptr;

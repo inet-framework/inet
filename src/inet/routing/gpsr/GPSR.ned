@@ -57,8 +57,7 @@ simple GPSR like IGPSR
         double beaconInterval @unit("s") = default(10s);
         double maxJitter @unit("s") = default(1s);
         double neighborValidityInterval @unit("s") = default(30s);
-        int addressByteLength @unit(B) = default(4B);
-        int coordByteLength @unit(B) = default(3 * 4B);
+        int positionByteLength @unit(B) = default(2 * 4B);
 
     gates:
         input ipIn;
@@ -91,15 +90,12 @@ module MultiGPSR like IGPSR
 
     submodules:
         ipv4: GPSR if enableIPv4 {
-            addressByteLength = default(4B);
             @display("p=100,100");
         }
         ipv6: GPSR if enableIPv6 {
-            addressByteLength = default(16B);
             @display("p=200,100");
         }
         generic: GPSR if enableGeneric {
-            addressByteLength = default(8B);
             @display("p=300,100");
         }
         multiplexer: NetworkDatagramMultiplexer {
