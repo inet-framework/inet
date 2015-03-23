@@ -34,6 +34,7 @@ class INET_API MACAddressType : public IL3AddressType
     MACAddressType() {}
     virtual ~MACAddressType() {}
 
+    virtual int getAddressBitLength() const override { return 48; }
     virtual int getMaxPrefixLength() const override { return 0; }
     virtual L3Address getUnspecifiedAddress() const override { return MACAddress::UNSPECIFIED_ADDRESS; }
     virtual L3Address getBroadcastAddress() const override { return MACAddress::BROADCAST_ADDRESS; }
