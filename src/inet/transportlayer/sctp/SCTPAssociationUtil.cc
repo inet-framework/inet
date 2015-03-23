@@ -498,6 +498,16 @@ void SCTPAssociation::sendInit()
     state->asconfSn = 1000;
 
     initTsn = initChunk->getInitTSN();
+#ifdef WITH_IPv4
+    initChunk->setIpv4Supported(true);
+#else
+    initChunk->setIpv4Supported(false);
+#endif
+#ifdef WITH_IPv6
+    initChunk->setIpv6Supported(true);
+#else
+    initChunk->setIpv6Supported(false);
+#endif
     EV_INFO << "add local address\n";
     if (localAddressList.front().isUnspecified()) {
         for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
@@ -522,6 +532,9 @@ void SCTPAssociation::sendInit()
     else {
         adv = localAddressList;
         EV_DETAIL << "gebundene Adresse " << localAddr << " wird hinzugefuegt\n";    // todo
+    }
+    if (initChunk->getIpv4Supported() || initChunk->getIpv6Supported()) {
+        length += 8;
     }
     uint32 addrNum = 0;
     bool friendly = false;
@@ -599,7 +612,7 @@ void SCTPAssociation::sendInit()
         state->sizeKeyVector++;
         initChunk->setHmacTypesArraySize(1);
         initChunk->setHmacTypes(0, 1);
-        length += initChunk->getChunkTypesArraySize() + 46;
+        length += initChunk->getChunkTypesArraySize() + 50;
     }
 
     if (sctpMain->pktdrop) {
@@ -616,8 +629,12 @@ void SCTPAssociation::sendInit()
         initChunk->setSepChunksArraySize(++count);
         initChunk->setSepChunks(count - 1, ASCONF_ACK);
     }
+    if (count > 0) {
+        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + count);
+    }
     if (state->prMethod != 0) {
         initChunk->setForwardTsn(true);
+        length += 4;
     }
 
     sctpMain->printInfoAssocMap();
@@ -740,7 +757,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         }
         sctpinitack->setTag(initChunk->getInitTag());
     }
-    cookie->setByteLength(SCTP_COOKIE_LENGTH);
+    cookie->setByteLength(SCTP_COOKIE_LENGTH + 4);
     initAckChunk->setStateCookie(cookie);
     initAckChunk->setCookieArraySize(0);
     initAckChunk->setA_rwnd(sctpMain->par("arwnd"));
@@ -749,6 +766,19 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
     initAckChunk->setNoOutStreams((unsigned int)min(outboundStreams, initChunk->getNoInStreams()));
     initAckChunk->setNoInStreams((unsigned int)min(inboundStreams, initChunk->getNoOutStreams()));
     initTsn = initAckChunk->getInitTSN();
+#ifdef WITH_IPv4
+    initAckChunk->setIpv4Supported(true);
+#else
+    initAckChunk->setIpv4Supported(false);
+#endif
+#ifdef WITH_IPv6
+    initAckChunk->setIpv6Supported(true);
+#else
+    initAckChunk->setIpv6Supported(false);
+#endif
+    if (initAckChunk->getIpv4Supported() || initAckChunk->getIpv6Supported()) {
+        length += 8;
+    }
     uint32 addrNum = 0;
     bool friendly = false;
     if (sctpMain->hasPar("natFriendly")) {
@@ -758,7 +788,11 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
             initAckChunk->setAddressesArraySize(addrNum + 1);
             initAckChunk->setAddresses(addrNum++, (*k));
-            length += 8;
+            if ((*k).getType() == L3Address::IPv4) {
+                length += 8;
+            } else if ((*k).getType() == L3Address::IPv6) {
+                length += 20;
+            }
         }
 
     uint16 count = 0;
@@ -777,7 +811,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         }
         initAckChunk->setHmacTypesArraySize(1);
         initAckChunk->setHmacTypes(0, 1);
-        length += initAckChunk->getChunkTypesArraySize() + 46;
+        length += initAckChunk->getChunkTypesArraySize() + 50;
     }
     uint32 unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen > 0) {
@@ -805,10 +839,13 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         initAckChunk->setSepChunksArraySize(++count);
         initAckChunk->setSepChunks(count - 1, ASCONF_ACK);
     }
+    if (count > 0) {
+        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + count);
+    }
     if (state->prMethod != 0) {
         initAckChunk->setForwardTsn(true);
+        length += 4;
     }
-    length += count;
 
     initAckChunk->setByteLength(length + initAckChunk->getCookieArraySize() + cookie->getByteLength());
     inboundStreams = ((initChunk->getNoOutStreams() < initAckChunk->getNoInStreams()) ? initChunk->getNoOutStreams() : initAckChunk->getNoInStreams());
