@@ -1,3 +1,9 @@
+2015-03-22  Artur Scussel
+
+	cSocketScheduler is now using immediate mode and calling the UI every 100us.
+	This allows getting much smaller response times when a component receives
+	a packet from the outside world.
+
 2015-03-04  ------ inet-2.6 released ------
 
 2014-11-07  ------ inet-2.5.1 released ------
