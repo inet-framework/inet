@@ -718,6 +718,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFillColor(color);
         communicationFigure->setLineWidth(1);
+        communicationFigure->setScaleLineWidth(false);
         communicationFigure->setLineColor(cFigure::BLACK);
         groupFigure->addFigure(communicationFigure);
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
@@ -761,6 +762,8 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         communicationFigure->setEnd(end);
         communicationFigure->setLineColor(cFigure::BLUE);
         communicationFigure->setEndArrowHead(cFigure::ARROW_SIMPLE);
+        communicationFigure->setLineWidth(1);
+        communicationFigure->setScaleLineWidth(false);
         communicationTrail->addFigure(communicationFigure);
     }
     if (displayCommunication)

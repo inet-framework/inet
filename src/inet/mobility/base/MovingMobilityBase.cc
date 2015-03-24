@@ -96,6 +96,8 @@ void MovingMobilityBase::updateVisualRepresentation()
             movementLine->setStart(startPosition);
             movementLine->setEnd(endPosition);
             movementLine->setLineColor(cFigure::BLACK);
+            movementLine->setLineWidth(1);
+            movementLine->setScaleLineWidth(false);
             movementTrail->addFigure(movementLine);
         }
     }

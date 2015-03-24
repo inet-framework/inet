@@ -508,6 +508,7 @@ void PhysicalEnvironment::updateCanvas()
             cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), viewRotation);
             figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineWidth(object->getLineWidth());
+            figure->setScaleLineWidth(false);
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
@@ -570,6 +571,7 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());
+        figure->setScaleLineWidth(false);
         figure->setLineColor(object->getLineColor());
         figure->setFillColor(object->getFillColor());
 #if OMNETPP_CANVAS_VERSION >= 0x20140908

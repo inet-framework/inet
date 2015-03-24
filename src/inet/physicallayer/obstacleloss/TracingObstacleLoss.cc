@@ -116,18 +116,24 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
             intersectionLine->setStart(environment->computeCanvasPoint(rotatedIntersection1 + position));
             intersectionLine->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + position));
             intersectionLine->setLineColor(cFigure::RED);
+            intersectionLine->setLineWidth(1);
+            intersectionLine->setScaleLineWidth(false);
             intersectionTrail->addFigure(intersectionLine);
             cLineFigure *normal1Line = new cLineFigure();
             normal1Line->setStart(environment->computeCanvasPoint(rotatedIntersection1 + position));
             normal1Line->setEnd(environment->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVectorClockwise(normal1)));
             normal1Line->setLineColor(cFigure::GREY);
             normal1Line->setTags("obstacle_intersection face_normal_vector recent_history");
+            normal1Line->setLineWidth(1);
+            normal1Line->setScaleLineWidth(false);
             intersectionTrail->addFigure(normal1Line);
             cLineFigure *normal2Line = new cLineFigure();
             normal2Line->setStart(environment->computeCanvasPoint(rotatedIntersection2 + position));
             normal2Line->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVectorClockwise(normal2)));
             normal2Line->setLineColor(cFigure::GREY);
             normal2Line->setTags("obstacle_intersection face_normal_vector recent_history");
+            normal2Line->setLineWidth(1);
+            normal2Line->setScaleLineWidth(false);
             intersectionTrail->addFigure(normal2Line);
         }
         const IMaterial *material = object->getMaterial();
