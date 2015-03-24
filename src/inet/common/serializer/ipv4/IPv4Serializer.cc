@@ -165,9 +165,10 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     else
         encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), 0);
 
-    ASSERT(encapPacket);
-    dest->encapsulate(encapPacket);
-    dest->setName(encapPacket->getName());
+    if (encapPacket) {
+        dest->encapsulate(encapPacket);
+        dest->setName(encapPacket->getName());
+    }
     return dest;
 }
 
