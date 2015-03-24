@@ -91,11 +91,12 @@ void MovingMobilityBase::updateVisualRepresentation()
         double dx = startPosition.x - endPosition.x;
         double dy = startPosition.y - endPosition.y;
         if (movementTrail->getNumFigures() == 0 || (dx * dx + dy * dy) > 100) {
+            cFigure::Color color = cFigure::GOOD_DARK_COLORS[getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
             cLineFigure *movementLine = new cLineFigure();
             movementLine->setTags("movement_trail recent_history");
             movementLine->setStart(startPosition);
             movementLine->setEnd(endPosition);
-            movementLine->setLineColor(cFigure::BLACK);
+            movementLine->setLineColor(color);
             movementLine->setLineWidth(1);
             movementLine->setScaleLineWidth(false);
             movementTrail->addFigure(movementLine);
