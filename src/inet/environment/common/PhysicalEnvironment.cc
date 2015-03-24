@@ -34,6 +34,7 @@ PhysicalEnvironment::PhysicalEnvironment() :
     temperature(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
+    displayAxes(false),
     objectCache(nullptr),
     objectsLayer(nullptr)
 {
@@ -61,6 +62,7 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
+        displayAxes = par("displayAxes");
         viewAngle = computeViewAngle(par("viewAngle"));
         viewRotation = Rotation(viewAngle);
         objectsLayer = new cGroupFigure();
@@ -552,6 +554,38 @@ void PhysicalEnvironment::updateCanvas()
             nameFigure->setText(name);
             objectsLayer->addFigure(nameFigure);
         }
+    }
+    if (displayAxes) {
+        cLineFigure *xAxis = new cLineFigure();
+        cLineFigure *yAxis = new cLineFigure();
+        cLineFigure *zAxis = new cLineFigure();
+        xAxis->setLineWidth(1);
+        yAxis->setLineWidth(1);
+        zAxis->setLineWidth(1);
+        xAxis->setScaleLineWidth(false);
+        yAxis->setScaleLineWidth(false);
+        zAxis->setScaleLineWidth(false);
+        xAxis->setStart(computeCanvasPoint(Coord::ZERO));
+        yAxis->setStart(computeCanvasPoint(Coord::ZERO));
+        zAxis->setStart(computeCanvasPoint(Coord::ZERO));
+        xAxis->setEnd(computeCanvasPoint(Coord(1000, 0, 0)));
+        yAxis->setEnd(computeCanvasPoint(Coord(0, 1000, 0)));
+        zAxis->setEnd(computeCanvasPoint(Coord(0, 0, 1000)));
+        objectsLayer->addFigure(xAxis);
+        objectsLayer->addFigure(yAxis);
+        objectsLayer->addFigure(zAxis);
+        cLabelFigure *xLabel = new cLabelFigure();
+        cLabelFigure *yLabel = new cLabelFigure();
+        cLabelFigure *zLabel = new cLabelFigure();
+        xLabel->setText("X");
+        yLabel->setText("Y");
+        zLabel->setText("Z");
+        xLabel->setPosition(computeCanvasPoint(Coord(1000, 0, 0)));
+        yLabel->setPosition(computeCanvasPoint(Coord(0, 1000, 0)));
+        zLabel->setPosition(computeCanvasPoint(Coord(0, 0, 1000)));
+        objectsLayer->addFigure(xLabel);
+        objectsLayer->addFigure(yLabel);
+        objectsLayer->addFigure(zLabel);
     }
 }
 
