@@ -27,7 +27,7 @@ network ObstacleTest
 {
     parameters:
         int numHosts;
-        @display("bgb=1000,500");
+        @display("bgb=0,0");
     submodules:
         environment: PhysicalEnvironment {
             parameters:
