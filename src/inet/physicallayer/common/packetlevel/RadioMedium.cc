@@ -134,7 +134,7 @@ void RadioMedium::initialize(int stage)
         }
         leaveCommunicationTrail = par("leaveCommunicationTrail");
         if (leaveCommunicationTrail) {
-            communicationTrail = new TrailFigure(100, "communication trail");
+            communicationTrail = new TrailFigure(100, true, "communication trail");
             canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
         }
         updateCanvasInterval = par("updateCanvasInterval");

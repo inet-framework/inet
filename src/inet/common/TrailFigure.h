@@ -26,9 +26,10 @@ class INET_API TrailFigure : public cGroupFigure
 {
   protected:
     int maxCount;
+    bool fadeOut;
 
   public:
-    TrailFigure(int maxCount, const char *name = nullptr);
+    TrailFigure(int maxCount, bool fadeOut, const char *name = nullptr);
 
     virtual void addFigure(cFigure *figure) override;
 };

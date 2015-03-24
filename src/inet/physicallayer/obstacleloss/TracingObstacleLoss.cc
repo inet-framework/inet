@@ -43,7 +43,7 @@ void TracingObstacleLoss::initialize(int stage)
         environment = check_and_cast<IPhysicalEnvironment *>(simulation.getModuleByPath(par("environmentModule")));
         leaveIntersectionTrail = par("leaveIntersectionTrail");
         if (leaveIntersectionTrail) {
-            intersectionTrail = new TrailFigure(100, "obstacle intersection trail");
+            intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
             cCanvas *canvas = simulation.getSystemModule()->getCanvas();
             canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
         }

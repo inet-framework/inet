@@ -53,7 +53,7 @@ void MovingMobilityBase::initialize(int stage)
         updateInterval = par("updateInterval");
         leaveMovementTrail = par("leaveMovementTrail");
         if (leaveMovementTrail) {
-            movementTrail = new TrailFigure(100, "movement trail");
+            movementTrail = new TrailFigure(100, true, "movement trail");
             cCanvas *canvas = visualRepresentation->getParentModule()->getCanvas();
             canvas->addFigureBelow(movementTrail, canvas->getSubmodulesLayer());
         }

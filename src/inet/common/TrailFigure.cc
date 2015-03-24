@@ -19,9 +19,10 @@
 
 namespace inet {
 
-TrailFigure::TrailFigure(int maxCount, const char *name) :
+TrailFigure::TrailFigure(int maxCount, bool fadeOut, const char *name) :
     cGroupFigure(name),
-    maxCount(maxCount)
+    maxCount(maxCount),
+    fadeOut(false)
 {
 }
 
@@ -30,6 +31,15 @@ void TrailFigure::addFigure(cFigure *figure)
     cGroupFigure::addFigure(figure);
     if (getNumFigures() > maxCount)
         delete removeFigure(0);
+    if (fadeOut) {
+        int count = getNumFigures();
+        for (int i = 0; i < count; i++) {
+            cFigure *figure = getFigure(i);
+            cAbstractLineFigure *lineFigure = dynamic_cast<cAbstractLineFigure *>(figure);
+            if (lineFigure)
+                lineFigure->setLineOpacity((double)i / count);
+        }
+    }
 }
 
 } // namespace inet
