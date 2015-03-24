@@ -878,47 +878,20 @@ void RadioMedium::updateCanvas()
                 endRadius = 10000;
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
             if (drawCommunication2D) {
-                // determine the rotated 2D canvas points of the four corners of flat 3D circle's bounding box
-                // it defines a 2D rotated parallelogram that needs to be filled with an oval
-                cFigure::Point topLeft = environment->computeCanvasPoint(transmissionStart + Coord(-startRadius, -startRadius, 0));
-                cFigure::Point topRight = environment->computeCanvasPoint(transmissionStart + Coord(startRadius, -startRadius, 0));
-                cFigure::Point bottomLeft = environment->computeCanvasPoint(transmissionStart + Coord(-startRadius, startRadius, 0));
-                cFigure::Point bottomRight = environment->computeCanvasPoint(transmissionStart + Coord(startRadius, startRadius, 0));
-                cFigure::Point bottomDirectionVector = bottomLeft - bottomRight;
-                LineSegment bottomHeight(Coord(topLeft.x, topLeft.y, 0), Coord(topLeft.x, topLeft.y, 0) + Coord(-bottomDirectionVector.y, bottomDirectionVector.x, 0));
-                LineSegment bottomSide(Coord(bottomLeft.x, bottomLeft.y, 0), Coord(bottomRight.x, bottomRight.y, 0));
-                Coord intersection1, intersection2;
-                // TODO: use the real intersection
-//                bool intersectionFound = heightLineSegment.computeIntersection(bottomLineSegment, intersection1, intersection2);
-//                ASSERT(intersectionFound);
-//                cFigure::Point intersection(intersection1.x, intersection1.y);
-                // KLUDGE: for the simple case when the top and bottom sides are horizontal
-                cFigure::Point bottomHeightIntersection(topLeft.x, bottomLeft.y);
-                double width = (topLeft - topRight).getLength();
-                double height = (topLeft - bottomHeightIntersection).getLength();
-                cFigure::Point leftSideVector = topLeft - bottomLeft;
-                cFigure::Point bottomSideVector = bottomRight - bottomLeft;
-                double bottomRightCosAlpha = leftSideVector * bottomSideVector / leftSideVector.getLength() / bottomSideVector.getLength();
-                double skewXAngle = acos(bottomRightCosAlpha);
-                double rotationAngle = atan2(topRight.y - topLeft.y, topRight.x - topLeft.x);
-                cFigure::Point center = environment->computeCanvasPoint(transmissionStart);
-                communicationFigure->setTransform(cFigure::Transform());
-                communicationFigure->skewx(-skewXAngle, center.y);
-                communicationFigure->rotate(rotationAngle, center.x, center.y);
-                communicationFigure->setBounds(cFigure::Rectangle(center.x - width / 2, center.y - height / 2, width, height));
-                communicationFigure->setInnerRx(width * endRadius / startRadius / 2);
-                communicationFigure->setInnerRy(height * endRadius / startRadius / 2);
-                // TODO: delete debug code (this is the parallelogram where the oval should fit in)
-//                std::cout << "ANGLE " << math::rad2deg(skewXAngle) << endl;
-//                std::vector<cFigure::Point> points;
-//                points.push_back(topLeft);
-//                points.push_back(topRight);
-//                points.push_back(bottomRight);
-//                points.push_back(bottomLeft);
-//                cPolygonFigure *f = new cPolygonFigure();
-//                f->setLineColor(cFigure::RED);
-//                f->setPoints(points);
-//                communcationTrail->addFigure(f);
+                // determine the rotated 2D canvas points by computing the 2D affine trasnformation from the 3D transformation of the environment
+                cFigure::Point o = environment->computeCanvasPoint(transmissionStart);
+                cFigure::Point x = environment->computeCanvasPoint(transmissionStart + Coord(1, 0, 0));
+                cFigure::Point y = environment->computeCanvasPoint(transmissionStart + Coord(0, 1, 0));
+                double t1 = o.x;
+                double t2 = o.y;
+                double a = x.x - t1;
+                double b = x.y - t2;
+                double c = y.x - t1;
+                double d = y.y - t2;
+                communicationFigure->setTransform(cFigure::Transform(a, b, c, d, t1, t2));
+                communicationFigure->setBounds(cFigure::Rectangle(-startRadius, -startRadius, startRadius * 2, startRadius * 2));
+                communicationFigure->setInnerRx(endRadius);
+                communicationFigure->setInnerRy(endRadius);
             }
             else {
 #else
