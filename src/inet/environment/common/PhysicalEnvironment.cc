@@ -670,6 +670,24 @@ EulerAngles PhysicalEnvironment::computeViewAngle(const char* viewAngle)
     {
         x = y = z = 0;
     }
+    else if (!strncmp(viewAngle, "isometric", 9))
+    {
+        int v;
+        int l = strlen(viewAngle);
+        switch (l) {
+            case 9: v = 0; break;
+            case 10: v = viewAngle[9] - '0'; break;
+            case 11: v = (viewAngle[9] - '0') * 10 + viewAngle[10] - '0'; break;
+            default: throw cRuntimeError("Invalid isometric viewAngle parameter");
+        }
+        // 1st axis can point on the 2d plane in 6 directions
+        // 2nd axis can point on the 2d plane in 4 directions (the opposite direction is forbidden)
+        // 3rd axis can point on the 2d plane in 2 directions
+        // this results in 6 * 4 * 2 = 48 different configurations
+        x = math::deg2rad(45 + v % 4 * 90);
+        y = math::deg2rad(v / 24 % 2 ? 35.27 : -35.27);
+        z = math::deg2rad(30 + v / 4 % 6 * 60);
+    }
     else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
     {
         x = math::deg2rad(x);
@@ -677,7 +695,7 @@ EulerAngles PhysicalEnvironment::computeViewAngle(const char* viewAngle)
         z = math::deg2rad(z);
     }
     else
-        throw cRuntimeError("viewAngle must be a triplet representing three degrees");
+        throw cRuntimeError("The viewAngle parameter must be a predefined string or a triplet representing three degrees");
     return EulerAngles(x, y, z);
 }
 
