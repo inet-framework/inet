@@ -45,7 +45,7 @@ void TracingObstacleLoss::initialize(int stage)
         if (leaveIntersectionTrail) {
             intersectionTrail = new TrailFigure(100, "obstacle intersection trail");
             cCanvas *canvas = simulation.getSystemModule()->getCanvas();
-            canvas->addFigure(intersectionTrail, canvas->findFigure("submodules"));
+            canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
         }
     }
 }

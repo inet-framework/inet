@@ -130,12 +130,12 @@ void RadioMedium::initialize(int stage)
         cCanvas *canvas = getParentModule()->getCanvas();
         if (displayCommunication) {
             communicationLayer = new cGroupFigure("communication");
-            canvas->addFigure(communicationLayer, canvas->findFigure("submodules"));
+            canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
         }
         leaveCommunicationTrail = par("leaveCommunicationTrail");
         if (leaveCommunicationTrail) {
             communicationTrail = new TrailFigure(100, "communication trail");
-            canvas->addFigure(communicationTrail, canvas->findFigure("submodules"));
+            canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
         }
         updateCanvasInterval = par("updateCanvasInterval");
     }
