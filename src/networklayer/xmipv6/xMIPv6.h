@@ -32,6 +32,7 @@
 #include "BindingUpdateList.h"
 #include "IPv6Tunneling.h"
 #include "MobilityHeader.h" // for HAOpt & RH2
+#include "NemoBindingUpdateList.h"
 
 // Foreign declarations:
 class BindingCache;
@@ -41,6 +42,8 @@ class IPv6ControlInfo;
 class IPv6Datagram;
 class IPv6NeighbourDiscovery;
 class IPv6Tunneling;
+class NemoBindingCache;
+class NemoBindingUpdate;
 class RoutingTable6;
 class NotificationBoard;
 
@@ -80,6 +83,8 @@ class INET_API xMIPv6 : public cSimpleModule
     BindingCache* bc; //31.07.07
     IPv6Tunneling* tunneling; // 21.08.07 - CB
     IPv6NeighbourDiscovery* ipv6nd;
+    NemoBindingUpdateList* nbul;
+    NemoBindingCache* nbc;
 
     // statistic collection
     cOutVector statVectorBUtoHA, statVectorBUtoCN, statVectorBUtoMN;
@@ -239,6 +244,9 @@ class INET_API xMIPv6 : public cSimpleModule
     void updateBUL(BindingUpdate* bu, const IPv6Address& dest, const IPv6Address& CoA,
             InterfaceEntry* ie, const simtime_t sendTime); //04.06.07
 
+    void updateNBUL(NemoBindingUpdate* nbu, const IPv6Address& dest, const IPv6Address& CoA,
+                InterfaceEntry* ie, const simtime_t sendTime);
+
     /**
      * This method takes an interface and a destination address and returns the appropriate IfEntry for an BU.
      * Is supposed to be used until the valid BA is received for the respective BU.
@@ -257,6 +265,8 @@ class INET_API xMIPv6 : public cSimpleModule
      * Process a BU - only applicable to HAs and CNs.
      */
     void processBUMessage(BindingUpdate * bu, IPv6ControlInfo * ctrlInfo);
+
+    void processNBUMessage(NemoBindingUpdate * nbu, IPv6ControlInfo * ctrlInfo);
 
     /**
      * Validate a BU - only applicable to HAs and CNs
@@ -279,6 +289,8 @@ class INET_API xMIPv6 : public cSimpleModule
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
      */
     void processBAMessage(BindingAcknowledgement * ba, IPv6ControlInfo * ctrlInfo);
+
+    void processNBAMessage(NemoBindingAcknowledgement * nba, IPv6ControlInfo * ctrlInfo);
 
     /**
      * Validates a Binding Acknowledgement for a mobile node.

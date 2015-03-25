@@ -76,6 +76,7 @@ packet NemoBindingUpdate extends BindingUpdate
         //fayruz 27.01.2015	- RFC 3963 section 4.1
     bool mobilityOptions; // M-Flag.........?
     bool mobileRouter; // R-Flag
+    IPv6Address prefixAddress;
 }
 
 
@@ -124,6 +125,7 @@ packet NemoBindingAcknowledgement extends BindingAcknowledgement
 {
         //fayruz 27.01.2015	- RFC 3963 section 4.2
     bool mobileRouter; // R-Flag
+    IPv6Address prefixAddress;
 }
 
 //==================Defining Binding Error Status====================
