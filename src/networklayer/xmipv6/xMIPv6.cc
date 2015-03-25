@@ -32,6 +32,9 @@
 #include "IPv6InterfaceData.h"
 #include "IPv6NeighbourDiscoveryAccess.h"
 #include "IPv6TunnelingAccess.h"
+#include "NemoBindingCacheAccess.h"
+#include "NemoBindingUpdateList.h"
+#include "NemoBindingUpdateListAccess.h"
 #include "RoutingTable6Access.h"
 
 
@@ -128,6 +131,7 @@ void xMIPv6::initialize(int stage)
         // 26.10.07 - CB
         rt6->setIsHomeAgent(par("isHomeAgent").boolValue());
         rt6->setIsMobileNode(par("isMobileNode").boolValue());
+        rt6->setIsMobileRouter(par("isMobileRouter").boolValue());
     }
     else if (stage == 3)
     {

@@ -124,6 +124,9 @@ void RoutingTable6::initialize(int stage)
         ismobile_node = false;
         WATCH(ismobile_node);
 
+        ismobile_router = false;
+        WATCH(ismobile_router);
+
         mipv6Support = false; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
