@@ -31,6 +31,12 @@
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
 
+#ifdef __linux__
+#define UI_REFRESH_TIME 100000 /* refresh time of the UI in us */
+#else
+#define UI_REFRESH_TIME 500
+#endif
+
 #ifdef HAVE_PCAP
 std::vector<cModule *>cSocketRTScheduler::modules;
 std::vector<pcap_t *>cSocketRTScheduler::pds;
@@ -139,7 +145,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((datalink = pcap_datalink(pd)) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
-#ifndef LINUX
+#ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
@@ -218,7 +224,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
     struct timeval timeout;
 #ifdef HAVE_PCAP
     int32 n;
-#ifdef LINUX
+#ifdef __linux__
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif
@@ -228,7 +234,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
 #ifdef HAVE_PCAP
-#ifdef LINUX
+#ifdef __linux__
     FD_ZERO(&rdfds);
     maxfd = -1;
     for (uint16 i = 0; i < pds.size(); i++)
@@ -245,7 +251,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
 #endif
     for (uint16 i = 0; i < pds.size(); i++)
     {
-#ifdef LINUX
+#ifdef __linux__
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
 #endif
@@ -254,7 +260,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
         if (n > 0)
             found = true;
     }
-#ifndef LINUX
+#ifndef __linux__
     if (!found)
         select(0, NULL, NULL, NULL, &timeout);
 #endif
@@ -266,21 +272,21 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
 
 int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
-    // if there's more than 200ms to wait, wait in 100ms chunks
+    // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
     while (targetTime.tv_sec-curTime.tv_sec >=2 ||
-           timeval_diff_usec(targetTime, curTime) >= 200000)
+           timeval_diff_usec(targetTime, curTime) >= 2*UI_REFRESH_TIME)
     {
-        if (receiveWithTimeout(100000)) // 100ms
+        if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (ev.idle())
             return -1;
         gettimeofday(&curTime, NULL);
     }
 
-    // difference is now at most 100ms, do it at once
+    // difference is now at most UI_REFRESH_TIME, do it at once
     long usec = timeval_diff_usec(targetTime, curTime);
     if (usec>0)
         if (receiveWithTimeout(usec))
