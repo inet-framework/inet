@@ -30,7 +30,6 @@
 #endif
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
-#define PCAP_TIMEOUT 100    /* Timeout in us */
 
 #ifdef HAVE_PCAP
 std::vector<cModule *>cSocketRTScheduler::modules;
@@ -213,7 +212,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 }
 #endif
 
-bool cSocketRTScheduler::receiveWithTimeout()
+bool cSocketRTScheduler::receiveWithTimeout(long usec)
 {
     bool found;
     struct timeval timeout;
@@ -227,7 +226,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
 
     found = false;
     timeout.tv_sec = 0;
-    timeout.tv_usec = PCAP_TIMEOUT;
+    timeout.tv_usec = usec;
 #ifdef HAVE_PCAP
 #ifdef LINUX
     FD_ZERO(&rdfds);
@@ -265,20 +264,27 @@ bool cSocketRTScheduler::receiveWithTimeout()
     return found;
 }
 
-int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
+int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
-    // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
+    // if there's more than 200ms to wait, wait in 100ms chunks
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
-    while (timeval_greater(targetTime, curTime))
+    while (targetTime.tv_sec-curTime.tv_sec >=2 ||
+           timeval_diff_usec(targetTime, curTime) >= 200000)
     {
-        if (receiveWithTimeout())
+        if (receiveWithTimeout(100000)) // 100ms
             return 1;
         if (ev.idle())
             return -1;
         gettimeofday(&curTime, NULL);
     }
+
+    // difference is now at most 100ms, do it at once
+    long usec = timeval_diff_usec(targetTime, curTime);
+    if (usec>0)
+        if (receiveWithTimeout(usec))
+            return 1;
     return 0;
 }
 
@@ -293,7 +299,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
 #define cEvent cMessage
 #endif
 {
-    timeval targetTime, curTime, diffTime;
+    timeval targetTime;
 
     // calculate target time
     cEvent *event = sim->msgQueue.peekFirst();
@@ -304,14 +310,17 @@ cMessage *cSocketRTScheduler::getNextEvent()
     }
     else
     {
+        // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
+    // if needed, wait until that time arrives
+    timeval curTime;
     gettimeofday(&curTime, NULL);
     if (timeval_greater(targetTime, curTime))
     {
-        int32 status = receiveUntil(targetTime);
+        int status = receiveUntil(targetTime);
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
@@ -321,7 +330,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
     {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
-        diffTime = timeval_substract(curTime, targetTime);
+        timeval diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
     cEvent *tmp = sim->msgQueue.removeFirst();
