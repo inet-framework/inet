@@ -31,6 +31,7 @@ void TrailFigure::addFigure(cFigure *figure)
     cGroupFigure::addFigure(figure);
     if (getNumFigures() > maxCount)
         delete removeFigure(0);
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     if (fadeOut) {
         int count = getNumFigures();
         for (int i = 0; i < count; i++) {
@@ -40,6 +41,7 @@ void TrailFigure::addFigure(cFigure *figure)
                 lineFigure->setLineOpacity((double)i / count);
         }
     }
+#endif
 }
 
 } // namespace inet

@@ -44,7 +44,7 @@ class INET_API IPhysicalEnvironment
     static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation, const cFigure::Point& translation)
     {
         Coord rotatedPoint = rotation.rotateVectorClockwise(point);
-        return cFigure::Point(rotatedPoint.x, rotatedPoint.y) + translation;
+        return cFigure::Point(rotatedPoint.x + translation.x, rotatedPoint.y + translation.y);
     }
 
     static cFigure::Point computeCanvasPoint(Coord point)
