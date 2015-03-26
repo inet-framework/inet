@@ -272,11 +272,13 @@ class INET_API xMIPv6 : public cSimpleModule
      * Validate a BU - only applicable to HAs and CNs
      */
     bool validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo);
+    bool validateNBUMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo);
 
     /**
      * Similiar to validateBUMessage(). However, this one is used only by HA to verify deregistration BU.
      */
     bool validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo); // 4.9.07 - CB
+    bool validateNBUderegisterMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo);
 
     /**
      * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
@@ -284,6 +286,8 @@ class INET_API xMIPv6 : public cSimpleModule
     void createAndSendBAMessage(const IPv6Address& src,
             const IPv6Address& dest, IPv6ControlInfo* ctrlInfo, const BAStatus& baStatus, const uint baSeq,
             const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0); // 14.9.07 - CB
+
+    void createAndSendNBAMessage(const IPv6Address& src, const IPv6Address& dest, IPv6ControlInfo* ctrlInfo, const BAStatus& baStatus, const uint baSeq, const uint lifeTime, const bool mR, simtime_t sendTime = 0);
 
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.

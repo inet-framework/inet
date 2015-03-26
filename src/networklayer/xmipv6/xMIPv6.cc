@@ -1176,7 +1176,7 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
             return;
         }
 
-        NemoBAStatus status;
+        BAStatus status;
         bool validBUMessage;
         validBUMessage = validateNBUMessage(nbu, ctrlInfo);
 
@@ -1189,47 +1189,20 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
             uint buLifetime = nbu->getLifetime() * 4; /* 6.1.7 One time unit is 4 seconds. */
             uint buSequence = nbu->getSequence();
             bool homeRegistration = nbu->getHomeRegistrationFlag();
+            bool mR = nbu->getMobileRouter();
 
-            if ((buLifetime == 0) || (CoA == HoA))
+            if ((buLifetime == 0) || (CoA == HoA))  // received BU is a DEREGISTRATION BU
             {
-                if (rt6->isHomeAgent() && ! validateNBUderegisterMessage(nbu, ctrlInfo)) // HAs have to validate the BU
+                if ( ! validateNBUderegisterMessage(nbu, ctrlInfo)) // HAs have to validate the BU
                 {
                     status = NOT_HA_FOR_THIS_MN; //enum defined in MobilityHeader.msg file
                     uint baSeqNumber = nbu->getSequence(); //the sequence number from Rxed BU is copied into BA.
-                    createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status,
-                            nbu->getBindingAuthorizationData(), baSeqNumber, buLifetime); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
+                    createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status, baSeqNumber, buLifetime, mR); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
                     EV << "Error: Not HA for this MN. Responding with appropriate BA...\n";
                     delete nbu;
                     delete ctrlInfo;
                     return;
                 }
-
-                //fayruz 06.03.2015
-                // RFC 3963 sec. 6.2. This section describes the processing of the Binding Update if the Mobile Router (R) Flag is set.
-                if(nbu->getMobileRouter())
-                {
-                    /* The Home Registration (H) Flag MUST be set. If it is not, the
-                        Home Agent MUST reject the Binding Update and send a Binding
-                        Acknowledgement with status set to 140*/
-                    if (rt6->isHomeAgent() && ! nbu->getHomeRegistrationFlag())
-                    {
-                         status = MOBILE_ROUTER_OPERATION_NOT_PERMITTED;
-                         uint baSeqNumber = nbu->getSequence(); //the sequence number from Rxed BU is copied into BA.
-                         createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status,
-                              nbu->getBindingAuthorizationData(), baSeqNumber, buLifetime); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
-                         EV << "Error: Mobile Router Flag is set, but Home Registration Flag is not set. Mobile Router operation is not permitted. Responding with appropriate BA...\n";
-
-                         // ini bener nggak ya?
-                         delete nbu;
-                         delete ctrlInfo;
-                         return;
-                     }
-
-                    /*
-                     *
-                     */
-                }
-
 
                 nbc->deleteEntry(HoA);
 
@@ -1238,50 +1211,69 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
                 // kill BC expiry timer
                 cancelTimerIfEntry(HoA, ctrlInfo->getInterfaceId(), KEY_BC_EXP);
 
-                if (rt6->isHomeAgent() || nbu->getAckFlag())
+                if (nbu->getAckFlag())
                 {
-
                     status = BINDING_UPDATE_ACCEPTED; //enum defined in MobilityHeader.msg file
 
                     uint baSeqNumber = nbu->getSequence();
-
                     uint lifeTime = 0;
 
                     createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status, baSeqNumber,
-                            nbu->getBindingAuthorizationData(), lifeTime); // swapped src and dest, 4.9.07 - CB
-                }
-
-
-
-                // err ini kayaknya ga perlu deh kalau buat nemo. cuman belum kuhapus. fayruz 03.03.2015
-                if (! rt6->isHomeAgent()) // this is a CN, 18.9.07 - CB
-                {
-                    // cancel existing Binding Refresh Request timer (if there exists one)
-                    int interfaceID = ctrlInfo->getInterfaceId();
-                    cancelTimerIfEntry(HoA, interfaceID, KEY_BR);
+                            lifeTime, mR); // swapped src and dest, 4.9.07 - CB
                 }
 
                 EV << "Deregistered binding\n";
                 bubble("Deregistered binding!");
             }
-            else
+
+            else    // not a deregistration BU
             {
-                if (homeRegistration)
+                //fayruz 06.03.2015
+                // RFC 3963 sec. 6.2. This section describes the processing of the Binding Update if the Mobile Router (R) Flag is set.
+                if(mR)
                 {
-                    if (! rt6->isHomeAgent())
+                    /* The Home Registration (H) Flag MUST be set. If it is not, the
+                    Home Agent MUST reject the Binding Update and send a Binding
+                    Acknowledgement with status set to 140*/
+                    if ( ! homeRegistration)
                     {
-                        status = HOME_REGISTRATION_NOT_SUPPORTED; //enum defined in MobilityHeader.msg file
-                        uint baSeqNumber = nbu->getSequence();
-                        uint lifeTime = 0;
-                        createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status, baSeqNumber,
-                                nbu->getBindingAuthorizationData(), lifeTime);
+                        status = MOBILE_ROUTER_OPERATION_NOT_PERMITTED;
+                        uint baSeqNumber = nbu->getSequence(); //the sequence number from Rxed BU is copied into BA.
+                        createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status,
+                        baSeqNumber, buLifetime, mR); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
+                        EV << "Error: Mobile Router Flag is set, but Home Registration Flag is not set. Mobile Router operation is not permitted. Responding with appropriate BA...\n";
 
                         delete nbu;
                         delete ctrlInfo;
                         return;
                     }
 
+                    /* fayruz 26.03.2015 .  RFC 3963 sec 6.2
+                     * If the Home Agent has a valid binding cache entry for the Mobile
+                     * Router, and if the Binding Update has the Mobile Router Flag (R) set
+                     * to a value different from that in the existing binding cache entry,
+                     * then the Home Agent MUST reject the Binding Update and send a Binding
+                     * Acknowledgement with status set to 139 (Registration type change disallowed).
+                     */
+                    if( nbc->isInBindingCache(HoA) && (mR!=nbc->getMobileRouter(HoA)))
+                    {
+                        status = REGISTRATION_TYPE_CHANGE_DISALLOWED;
+
+                        uint baSeqNumber = nbu->getSequence(); //the sequence number from Rxed BU is copied into BA.
+                        createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status,
+                        baSeqNumber, buLifetime, mR); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
+                        EV << "Error: Mobile Router Flag is different with MR flag in Binding Cache. Registration type change disallowed. Responding with appropriate BA...\n";
+
+                        delete nbu;
+                        delete ctrlInfo;
+                        return;
+                    }
+                }
+
+                if (homeRegistration && (! rt6->isOnLinkAddress(HoA)) )
+                {
                     // TODO: di Nemo, ini boleh kalau ga onlink, asalkan masih termasuk prefix yang terdaftar di HA
+                    //  tapi di sini semua HoA diambil dari prefix on link sih. jadi kode di bawah ini belum diedit
                     /* RFC 3963 sec. 6.2.
                      * Mobile IPv6 specification [1] requires that the Home Address in
                         the Binding Update be configured from a prefix advertised on the
@@ -1291,18 +1283,16 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
                         Address does not belong to the prefix that the Home Agent is
                         configured to serve.
                      */
-                    else if (! rt6->isOnLinkAddress(HoA)) // update 11.9.07 - CB. how to compare HoA with listed prefix?
-                    {
+
                         status = NOT_HOME_SUBNET; //enum defined in MobilityHeader.msg file
                         uint baSeqNumber = nbu->getSequence();
                         uint lifeTime = 0;
                         createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status, baSeqNumber,
-                                nbu->getBindingAuthorizationData(), lifeTime);
+                                lifeTime, mR);
 
                         delete nbu;
                         delete ctrlInfo;
                         return;
-                    }
                 }
 
                 bool existingBinding = bc->isInBindingCache(HoA);
@@ -1316,7 +1306,7 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
 
                     uint baSeqNumber = nbu->getSequence();
 
-                    uint lifeTime = bc->getLifetime(HoA);
+                    uint lifeTime = nbc->getLifetime(HoA);
 
                     simtime_t sendTime;
                     if (rt6->isHomeAgent())
@@ -1326,7 +1316,7 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
                         sendTime = 0;
 
                     createAndSendNBAMessage(destAddress, CoA, ctrlInfo, status, baSeqNumber,
-                            nbu->getBindingAuthorizationData(), lifeTime, sendTime); // swapped src and dest, 4.9.07 - CB // corrected lifetime value 18.06.08 - CB
+                            lifeTime, mR, sendTime); // swapped src and dest, 4.9.07 - CB // corrected lifetime value 18.06.08 - CB
 
                     /*If this Duplicate Address Detection fails for the given
                       home address or an associated link local address, then the home agent
@@ -1334,31 +1324,17 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
                       Acknowledgement to the mobile node, in which the Status field is set
                       to 134 (Duplicate Address Detection failed).*/
                     // TODO
-                }
-                else // condition: ! bu->getAckFlag()
-                {
-                    EV << "BU Validated as OK: ACK FLAG NOT SET" << endl;
-                    bubble("!!!BU VALID --- ACK FLAG = False !!!");
-                }
 
-                if (rt6->isHomeAgent()) // establish tunnel to MN - CB
-                {
                     IPv6Address& HA = destAddress;
 
                     tunneling->destroyTunnelForEntryAndTrigger(HA, HoA);
 
                     tunneling->createTunnel(IPv6Tunneling::NORMAL, HA, CoA, HoA);
                 }
-                else // CN, update 18.9.07 - CB
+                else // condition: ! bu->getAckFlag()
                 {
-                    IPv6Address& CNAddress = destAddress;
-                    tunneling->destroyTunnelForEntryAndTrigger(CNAddress, HoA);
-
-                    // establish RH2 pseudo-tunnel at correspondent node - CB
-                    tunneling->createTunnel(IPv6Tunneling::T2RH, CNAddress, CoA, HoA); // update 10.06.08 - CB
-
-                    int interfaceID = ctrlInfo->getInterfaceId();
-                    cancelTimerIfEntry(HoA, interfaceID, KEY_BR);
+                    EV << "BU Validated as OK: ACK FLAG NOT SET" << endl;
+                    bubble("!!!BU VALID --- ACK FLAG = False !!!");
                 }
             }
         }
@@ -1485,6 +1461,12 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     return true; //result;
 }
 
+bool xMIPv6::validateNBUMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo)
+{
+    // TODO nananana
+    return true;
+}
+
 bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
 {
     /*To begin processing the Binding Update, the home agent MUST perform
@@ -1497,6 +1479,12 @@ bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctr
       set to 133 (not home agent for this mobile node).*/
     return bc->isInBindingCache(bu->getHomeAddressMN())
             && bc->getHomeRegistration(bu->getHomeAddressMN());
+}
+
+bool xMIPv6::validateNBUderegisterMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo)
+{
+    //TODO nanananana
+    return true;
 }
 
 void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& dest,
@@ -1564,6 +1552,13 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
         statVectorBAtoMN.record(1);
     else
         statVectorBAtoMN.record(2);*/
+}
+
+void xMIPv6::createAndSendNBAMessage(const IPv6Address& src, const IPv6Address& dest,
+        IPv6ControlInfo* ctrlInfo, const BAStatus& baStatus, const uint baSeq, const uint lifeTime, const bool mR, const simtime_t sendTime)
+{
+    // TODO nanana
+    return;
 }
 
 void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlInfo)
