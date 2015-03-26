@@ -31,7 +31,12 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #define PCAP_SNAPLEN    65536 /* capture all data packets with up to pcap_snaplen bytes */
-#define PCAP_TIMEOUT    10    /* Timeout in ms */
+
+#ifdef __linux__
+#define UI_REFRESH_TIME 100000 /* refresh time of the UI in us */
+#else
+#define UI_REFRESH_TIME 500
+#endif
 
 namespace inet {
 
@@ -48,6 +53,7 @@ inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 {
     return out << (uint32)tv.tv_sec << "s" << tv.tv_usec << "us";
 }
+
 
 cSocketRTScheduler::cSocketRTScheduler() : cScheduler()
 {
@@ -111,10 +117,17 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
-    if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == nullptr)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot open pcap device, error = %s", errbuf);
+    if ((pd = pcap_create(dev, errbuf)) == nullptr)
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
         EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+
+    /* apply the immediate mode to pcap */
+    if (pcap_set_immediate_mode(pd, 1) != 0)
+            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+
+    if (pcap_activate(pd) != 0)
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
@@ -127,10 +140,10 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((datalink = pcap_datalink(pd)) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
-#ifndef LINUX
+#ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
-#endif // ifndef LINUX
+#endif
 
     switch (datalink) {
         case DLT_NULL:
@@ -198,20 +211,20 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     simulation.msgQueue.insert(notificationMsg);
 }
 
-bool cSocketRTScheduler::receiveWithTimeout()
+bool cSocketRTScheduler::receiveWithTimeout(long usec)
 {
     bool found;
     struct timeval timeout;
     int32 n;
-#ifdef LINUX
+#ifdef __linux__
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
-#endif // ifdef LINUX
+#endif
 
     found = false;
     timeout.tv_sec = 0;
-    timeout.tv_usec = PCAP_TIMEOUT * 1000;
-#ifdef LINUX
+    timeout.tv_usec = usec;
+#ifdef __linux__
     FD_ZERO(&rdfds);
     maxfd = -1;
     for (uint16 i = 0; i < pds.size(); i++) {
@@ -223,37 +236,45 @@ bool cSocketRTScheduler::receiveWithTimeout()
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0) {
         return found;
     }
-#endif // ifdef LINUX
+#endif
     for (uint16 i = 0; i < pds.size(); i++) {
-#ifdef LINUX
+#ifdef __linux__
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
-#endif // ifdef LINUX
+#endif // ifdef __linux__
         if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
             throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
         if (n > 0)
             found = true;
     }
-#ifndef LINUX
+#ifndef __linux__
     if (!found)
         select(0, nullptr, nullptr, nullptr, &timeout);
-#endif // ifndef LINUX
+#endif
     return found;
 }
 
-int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
+int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
-    // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
+    // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
     gettimeofday(&curTime, nullptr);
-    while (timeval_greater(targetTime, curTime)) {
-        if (receiveWithTimeout())
+    while (targetTime.tv_sec-curTime.tv_sec >=2 ||
+           timeval_diff_usec(targetTime, curTime) >= 2*UI_REFRESH_TIME)
+    {
+        if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (ev.idle())
             return -1;
         gettimeofday(&curTime, nullptr);
     }
+
+    // difference is now at most UI_REFRESH_TIME, do it at once
+    long usec = timeval_diff_usec(targetTime, curTime);
+    if (usec>0)
+        if (receiveWithTimeout(usec))
+            return 1;
     return 0;
 }
 
@@ -269,7 +290,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
 #define cEvent    cMessage
 #endif // if OMNETPP_VERSION >= 0x0500
 {
-    timeval targetTime, curTime, diffTime;
+    timeval targetTime;
 
     // calculate target time
     cEvent *event = sim->msgQueue.peekFirst();
@@ -278,13 +299,17 @@ cMessage * cSocketRTScheduler::getNextEvent()
         targetTime.tv_usec = 0;
     }
     else {
+        // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
-    gettimeofday(&curTime, nullptr);
-    if (timeval_greater(targetTime, curTime)) {
-        int32 status = receiveUntil(targetTime);
+    // if needed, wait until that time arrives
+    timeval curTime;
+    gettimeofday(&curTime, NULL);
+    if (timeval_greater(targetTime, curTime))
+    {
+        int status = receiveUntil(targetTime);
         if (status == -1)
             return nullptr; // interrupted by user
         if (status == 1)
@@ -293,7 +318,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
     else {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
-        diffTime = timeval_substract(curTime, targetTime);
+        timeval diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
 #if OMNETPP_VERSION >= 0x0500

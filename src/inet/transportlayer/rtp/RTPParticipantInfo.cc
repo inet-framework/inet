@@ -30,7 +30,7 @@ RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) :
     RTPParticipantInfo_Base(),
     _sdesChunk("SDESChunk", ssrc)
 {
-    setName(ssrcToName(ssrc));
+    setName(ssrcToName(ssrc).c_str());
     // because there haven't been sent any RTP packets
     // by this endsystem at all, the number of silent
     // intervals would be undefined; to calculate with
@@ -145,11 +145,11 @@ void RTPParticipantInfo::addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *
     _sdesChunk.addSDESItem(new SDESItem(type, content));
 }
 
-char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
+std::string RTPParticipantInfo::ssrcToName(uint32 ssrc)
 {
     char name[9];
     sprintf(name, "%08x", ssrc);
-    return opp_strdup(name);
+    return name;
 }
 
 } // namespace rtp
