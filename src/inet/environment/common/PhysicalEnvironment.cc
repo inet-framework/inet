@@ -506,9 +506,8 @@ void PhysicalEnvironment::updateCanvas()
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure();
             figure->setFilled(true);
-            cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), viewRotation, viewTranslation);
-            cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), viewRotation, viewTranslation);
-            figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
+            cFigure::Point center = computeCanvasPoint(position, viewRotation, viewTranslation);
+            figure->setBounds(cFigure::Rectangle(center.x - radius, center.y - radius, radius * 2, radius * 2));
             figure->setLineWidth(object->getLineWidth());
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
