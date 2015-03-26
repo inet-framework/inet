@@ -150,12 +150,9 @@ void MobilityBase::updateVisualRepresentation()
     if (ev.isGUI() && visualRepresentation) {
         cFigure::Point point = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
         char buf[32];
-
-        /* The display string can handle floating point numbers for positions. */
         snprintf(buf, sizeof(buf), "%lf", point.x);
         buf[sizeof(buf) - 1] = 0;
         visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
-
         snprintf(buf, sizeof(buf), "%lf", point.y);
         buf[sizeof(buf) - 1] = 0;
         visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
