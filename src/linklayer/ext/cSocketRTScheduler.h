@@ -41,7 +41,7 @@ class cSocketRTScheduler : public cScheduler
     protected:
         int fd;
 
-        virtual bool receiveWithTimeout();
+        virtual bool receiveWithTimeout(long usec);
         virtual int receiveUntil(const timeval& targetTime);
     public:
         /**

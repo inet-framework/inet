@@ -30,7 +30,12 @@
 #endif
 
 #define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
-#define PCAP_TIMEOUT 100    /* Timeout in us */
+
+#ifdef __linux__
+#define UI_REFRESH_TIME 100000 /* refresh time of the UI in us */
+#else
+#define UI_REFRESH_TIME 500
+#endif
 
 #ifdef HAVE_PCAP
 std::vector<cModule *>cSocketRTScheduler::modules;
@@ -140,7 +145,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((datalink = pcap_datalink(pd)) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
-#ifndef LINUX
+#ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
@@ -213,13 +218,13 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 }
 #endif
 
-bool cSocketRTScheduler::receiveWithTimeout()
+bool cSocketRTScheduler::receiveWithTimeout(long usec)
 {
     bool found;
     struct timeval timeout;
 #ifdef HAVE_PCAP
     int32 n;
-#ifdef LINUX
+#ifdef __linux__
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif
@@ -227,9 +232,9 @@ bool cSocketRTScheduler::receiveWithTimeout()
 
     found = false;
     timeout.tv_sec = 0;
-    timeout.tv_usec = PCAP_TIMEOUT;
+    timeout.tv_usec = usec;
 #ifdef HAVE_PCAP
-#ifdef LINUX
+#ifdef __linux__
     FD_ZERO(&rdfds);
     maxfd = -1;
     for (uint16 i = 0; i < pds.size(); i++)
@@ -246,7 +251,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
 #endif
     for (uint16 i = 0; i < pds.size(); i++)
     {
-#ifdef LINUX
+#ifdef __linux__
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
 #endif
@@ -255,7 +260,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
         if (n > 0)
             found = true;
     }
-#ifndef LINUX
+#ifndef __linux__
     if (!found)
         select(0, NULL, NULL, NULL, &timeout);
 #endif
@@ -265,20 +270,27 @@ bool cSocketRTScheduler::receiveWithTimeout()
     return found;
 }
 
-int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
+int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
-    // wait until targetTime or a bit longer, wait in PCAP_TIMEOUT chunks
+    // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
-    while (timeval_greater(targetTime, curTime))
+    while (targetTime.tv_sec-curTime.tv_sec >=2 ||
+           timeval_diff_usec(targetTime, curTime) >= 2*UI_REFRESH_TIME)
     {
-        if (receiveWithTimeout())
+        if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (ev.idle())
             return -1;
         gettimeofday(&curTime, NULL);
     }
+
+    // difference is now at most UI_REFRESH_TIME, do it at once
+    long usec = timeval_diff_usec(targetTime, curTime);
+    if (usec>0)
+        if (receiveWithTimeout(usec))
+            return 1;
     return 0;
 }
 
@@ -293,7 +305,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
 #define cEvent cMessage
 #endif
 {
-    timeval targetTime, curTime, diffTime;
+    timeval targetTime;
 
     // calculate target time
     cEvent *event = sim->msgQueue.peekFirst();
@@ -304,14 +316,17 @@ cMessage *cSocketRTScheduler::getNextEvent()
     }
     else
     {
+        // use time of next event
         simtime_t eventSimtime = event->getArrivalTime();
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
+    // if needed, wait until that time arrives
+    timeval curTime;
     gettimeofday(&curTime, NULL);
     if (timeval_greater(targetTime, curTime))
     {
-        int32 status = receiveUntil(targetTime);
+        int status = receiveUntil(targetTime);
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
@@ -321,7 +336,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
     {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
-        diffTime = timeval_substract(curTime, targetTime);
+        timeval diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
     cEvent *tmp = sim->msgQueue.removeFirst();
