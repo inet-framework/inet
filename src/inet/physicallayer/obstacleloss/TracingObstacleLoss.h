@@ -67,6 +67,10 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
      * Leaves graphical trail of obstacle intersections.
      */
     bool leaveIntersectionTrail;
+    /**
+     * Leaves graphical trail of intersection face normal vectors.
+     */
+    bool leaveFaceNormalVectorTrail;
     //@}
 
     /** @name Graphics */
