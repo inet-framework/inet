@@ -90,7 +90,7 @@ void MovingMobilityBase::updateVisualRepresentation()
         cFigure::Point endPosition = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
         double dx = startPosition.x - endPosition.x;
         double dy = startPosition.y - endPosition.y;
-        if (movementTrail->getNumFigures() == 0 || (dx * dx + dy * dy) > 100) {
+        if (movementTrail->getNumFigures() == 0 || dx * dx + dy * dy > (lastSpeed * updateInterval.dbl()).squareLength()) {
             cLineFigure *movementLine = new cLineFigure();
             movementLine->setTags("movement_trail recent_history");
             movementLine->setStart(startPosition);
