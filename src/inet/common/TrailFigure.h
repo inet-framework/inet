@@ -26,6 +26,7 @@ class INET_API TrailFigure : public cGroupFigure
 {
   protected:
     int maxCount;
+    int fadeCounter;
     bool fadeOut;
 
   public:

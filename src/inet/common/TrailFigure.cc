@@ -22,7 +22,8 @@ namespace inet {
 TrailFigure::TrailFigure(int maxCount, bool fadeOut, const char *name) :
     cGroupFigure(name),
     maxCount(maxCount),
-    fadeOut(false)
+    fadeCounter(0),
+    fadeOut(fadeOut)
 {
 }
 
@@ -33,12 +34,17 @@ void TrailFigure::addFigure(cFigure *figure)
         delete removeFigure(0);
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
     if (fadeOut) {
-        int count = getNumFigures();
-        for (int i = 0; i < count; i++) {
-            cFigure *figure = getFigure(i);
-            cAbstractLineFigure *lineFigure = dynamic_cast<cAbstractLineFigure *>(figure);
-            if (lineFigure)
-                lineFigure->setLineOpacity((double)i / count);
+        if (fadeCounter > 0)
+            fadeCounter--;
+        else {
+            int count = getNumFigures();
+            fadeCounter = count / 10;
+            for (int i = 0; i < count; i++) {
+                cFigure *figure = getFigure(i);
+                cAbstractLineFigure *lineFigure = dynamic_cast<cAbstractLineFigure *>(figure);
+                if (lineFigure)
+                    lineFigure->setLineOpacity((double)i / count);
+            }
         }
     }
 #endif
