@@ -62,7 +62,7 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     K temperature;
     Coord spaceMin;
     Coord spaceMax;
-    bool displayAxes;
+    double axisLength;
     //@}
 
     /** @name Internal state */
