@@ -157,7 +157,7 @@ const simtime_t Ieee80211OFDMDataMode::getDuration(int dataBitLength) const
 }
 
 Ieee80211OFDMModeBase::Ieee80211OFDMModeBase(Hz channelSpacing, Hz bandwidth) :
-    channelSpacing(bandwidth),
+    channelSpacing(channelSpacing),
     bandwidth(bandwidth)
 {
 }
