@@ -64,7 +64,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16(pkt->getDestinationPort());
     b.writeUint16(packetLength);
     unsigned int chksumPos = b.getPos();
-    b.accessNBytes(2);  // place for checksum
+    b.writeUint16(0);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
         SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 0);
