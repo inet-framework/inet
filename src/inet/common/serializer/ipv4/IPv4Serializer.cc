@@ -145,10 +145,14 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;
 
-    if (TCPIPchecksum::checksum(ip, IP_HEADER_BYTES) != 0)
+    if (headerLength < IP_HEADER_BYTES) {
+        dest->setBitError(true);
+        headerLength = IP_HEADER_BYTES;
+    }
+    if (headerLength > b._getBufSize() || TCPIPchecksum::checksum(ip, headerLength) != 0)
         dest->setBitError(true);
 
-    if (headerLength > sizeof(struct ip)) {
+    if (headerLength > IP_HEADER_BYTES) {
         EV_ERROR << "Handling a captured IPv4 packet with options. Dropping the options.\n";
     }
     b.seek(headerLength);
@@ -156,7 +160,7 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     if (totalLength > bufsize)
         EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
-    dest->setByteLength(IP_HEADER_BYTES);
+    dest->setByteLength(headerLength);
 
     cPacket *encapPacket = nullptr;
     if (dest->getMoreFragments() || dest->getFragmentOffset() != 0) {  // IP fragment
