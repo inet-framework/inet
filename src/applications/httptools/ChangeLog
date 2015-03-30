@@ -1,3 +1,5 @@
+====== inet-2.x ======
+
 2015-03-17  Tey
 
 	Fix: In random browsing mode the resource size is now properly set.

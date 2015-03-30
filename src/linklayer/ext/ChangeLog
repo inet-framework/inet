@@ -1,3 +1,5 @@
+====== inet-2.x ======
+
 2015-03-22  Artur Scussel
 
 	cSocketScheduler is now using immediate mode and calling the UI every 100ms (on Linux) 
