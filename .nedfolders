@@ -1,6 +1,8 @@
 examples
 src
+-inet.examples.emulation
 -inet.transportlayer.tcp_lwip
--inet.transportlayer.tcp_nsc
 -inet.applications.voipstream
+-inet.linklayer.ext
+-inet.transportlayer.tcp_nsc
 -inet.examples.voipstream

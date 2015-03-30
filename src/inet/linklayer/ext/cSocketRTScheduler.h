@@ -32,13 +32,6 @@
 #define HAVE_U_INT32_T
 #define HAVE_U_INT64_T
 
-#ifndef HAVE_PCAP
-#error "No PCAP! If you want to use external interfaces with INET, \
-install winpcap (on windows) or libpcap-dev (on linux) \
-and re-run ./configure in the omnetpp root directory \
-- otherwise you should disable the 'Network emulation support' feature in INET"
-#endif // ifndef HAVE_PCAP
-
 #include <pcap.h>
 #include "inet/linklayer/ext/ExtFrame_m.h"
 

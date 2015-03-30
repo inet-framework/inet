@@ -10,7 +10,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep --make-so -o INET -O out -pINET --no-deep-includes -I. -Xinet/applications/voipstream -Xinet/transportlayer/tcp_lwip -Xinet/transportlayer/tcp_nsc -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_GENERIC -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_NETPERFMETER -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_RIP -DWITH_TRACI -DWITH_RADIO -DWITH_POWER -DWITH_AODV -DWITH_MANET -DWITH_IEEE80211 -DWITH_IDEALWIRELESS
+	cd src && opp_makemake -f --deep --make-so -o INET -O out -pINET --no-deep-includes -Xinet/applications/voipstream -Xinet/linklayer/ext -Xinet/transportlayer/tcp_lwip -Xinet/transportlayer/tcp_nsc -I../src -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_MANET -DWITH_TRACI -DWITH_AODV -DWITH_RIP -DWITH_RADIO -DWITH_POWER -DWITH_IEEE80211 -DWITH_GENERIC -DWITH_IDEALWIRELESS -DWITH_FLOOD -DWITH_PIM -DWITH_IEEE802154 -DWITH_APSKRADIO -DWITH_TUN -DWITH_BMAC -DWITH_LMAC -DWITH_CSMA
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
