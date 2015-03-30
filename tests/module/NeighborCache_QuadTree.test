@@ -104,7 +104,7 @@ ned-path = .;../../../../src;../../lib
 **.neighborCache.refillPeriod = 1s
 
 # radio medium
-**.radioMedium.maxCommunicationRange = 250m
+**.radioMedium.mediumLimitCache.maxCommunicationRange = 250m
 **.radioMedium.rangeFilter = "communicationRange"
 
 **.radioMedium.neighborCacheType = "QuadTreeNeighborCache"

@@ -20,6 +20,7 @@
 
 #include "inet/environment/contract/IMaterial.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
@@ -47,24 +48,6 @@ using namespace inet::physicalenvironment;
 class INET_API IRadioMedium : public IPrintableObject
 {
   public:
-    /**
-     * Returns the minimum interference power among the radio receivers is
-     * in the range [0, +infinity) or NaN if unspecified.
-     */
-    virtual W getMinInterferencePower() const = 0;
-
-    /**
-     * Returns the minimum reception power among the radio receivers is in
-     * the range [0, +infinity) or NaN if unspecified.
-     */
-    virtual W getMinReceptionPower() const = 0;
-
-    /**
-     * Returns the maximum antenna gain among the radio antennas. The value
-     * is in the range [1, +infinity) or NaN if unspecified.
-     */
-    virtual double getMaxAntennaGain() const = 0;
-
     /**
      * Returns the material of the radio medium. This function never returns nullptr.
      */

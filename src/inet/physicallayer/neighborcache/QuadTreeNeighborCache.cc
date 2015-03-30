@@ -45,10 +45,10 @@ void QuadTreeNeighborCache::initialize(int stage)
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
-        constraintAreaMax = radioMedium->getConstraintAreaMax();
-        constraintAreaMin = radioMedium->getConstraintAreaMin();
+        constraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
+        constraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, nullptr);
-        maxSpeed = radioMedium->getMaxSpeed().get();
+        maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         rebuildQuadTree();
         scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
     }
@@ -74,11 +74,11 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
-    maxSpeed = radioMedium->getMaxSpeed().get();
+    maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
     if (maxSpeed != 0 && !rebuildQuadTreeTimer->isScheduled() && initialized())
         scheduleAt(simTime() + refillPeriod, rebuildQuadTreeTimer);
-    Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
-    Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+    Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
+    Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
     // If the constraintArea changed we must rebuild the QuadTree
     if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
     {
@@ -96,8 +96,8 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
     auto it = find(radios.begin(), radios.end(), radio);
     if (it != radios.end()) {
         radios.erase(it);
-        Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
-        Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+        Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
+        Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
         if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
         {
             constraintAreaMin = newConstraintAreaMin;
@@ -107,7 +107,7 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
         }
         else if (initialized())
             quadTree->remove(check_and_cast<const cObject *>(radio));
-        maxSpeed = radioMedium->getMaxSpeed().get();
+        maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         if (maxSpeed == 0 && initialized())
             cancelEvent(rebuildQuadTreeTimer);
     }

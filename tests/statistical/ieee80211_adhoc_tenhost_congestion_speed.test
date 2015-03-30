@@ -144,8 +144,8 @@ sim-time-limit = 50s
 **.mobility.updateInterval = 100ms
 
 # channel physical parameters
-*.radioMedium.carrierFrequency = 2.4GHz
-*.radioMedium.maxTransmissionPower = 20mW
+*.radioMedium.mediumLimitCache.carrierFrequency = 2.4GHz
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 20mW
 
 # access point
 

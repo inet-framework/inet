@@ -15,16 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee802154.bitlevel;
+package inet.physicallayer.contract.packetlevel;
 
-import inet.physicallayer.apskradio.packetlevel.APSKDimensionalRadioMedium;
-
-module Ieee802154UWBIRRadioMedium extends APSKDimensionalRadioMedium
+moduleinterface IMediumLimitCache
 {
     parameters:
-        backgroundNoise.power = default(-110dBm);
-        backgroundNoise.dimensions = default("time");
-        mediumLimitCache.carrierFrequency = default(2.4GHz);
-        mediumLimitCache.minReceptionPower = default(-85dBm);
-        mediumLimitCache.minInterferencePower = default(-110dBm);
+        @display("i=block/table2");
 }

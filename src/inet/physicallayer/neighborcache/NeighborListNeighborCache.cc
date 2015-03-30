@@ -42,7 +42,7 @@ void NeighborListNeighborCache::initialize(int stage)
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
-        maxSpeed = radioMedium->getMaxSpeed().get();
+        maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         updateNeighborLists();
         scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
     }
@@ -105,7 +105,7 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
     radios.push_back(newEntry);
     radioToEntry[radio] = newEntry;
     updateNeighborLists();
-    maxSpeed = radioMedium->getMaxSpeed().get();
+    maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
     if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled() && initialized())
         scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);
 }
@@ -116,7 +116,7 @@ void NeighborListNeighborCache::removeRadio(const IRadio *radio)
     if (it != radios.end()) {
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
-        maxSpeed = radioMedium->getMaxSpeed().get();
+        maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         if (maxSpeed == 0 && initialized())
             cancelEvent(updateNeighborListsTimer);
     }

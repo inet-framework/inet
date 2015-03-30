@@ -19,16 +19,13 @@ package inet.physicallayer.common.packetlevel;
 
 import inet.physicallayer.contract.packetlevel.IAnalogModel;
 import inet.physicallayer.contract.packetlevel.ICommunicationCache;
+import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
 import inet.physicallayer.contract.packetlevel.INeighborCache;
 import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 import inet.physicallayer.contract.packetlevel.IPathLoss;
 import inet.physicallayer.contract.packetlevel.IPropagation;
 import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
-
-module Dummy
-{
-}
 
 //
 // The medium model describes the shared physical medium where communication
@@ -46,20 +43,9 @@ module RadioMedium like IRadioMedium
         string obstacleLossType = default("");    // NED type of the obstacle loss model
         string analogModelType;                   // NED type of the analog model
         string backgroundNoiseType = default(""); // NED type of the background noise model
-        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
+        string mediumLimitCacheType = default("MediumLimitCache"); // NED type of the medium limit cache model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
-
-        // channel limit parameters
-        double carrierFrequency @unit(Hz) = default(0Hz/0);       // TODO: rename to maxRangeCarrierFrequency
-        double maxSpeed @unit(mps) = default(0mps/0);             // maxium speed on the medium, NaN means medium computes using mobility models
-        double maxTransmissionPower @unit(W) = default(0W/0);
-        double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
-        double minReceptionPower @unit(dBm) = default(0dBm/0);    // TODO: @unit(W) + dBm/dBW <--> W
-        double maxAntennaGain @unit(dB) = default(0dB);           // maximum antenna gain on the medium, NaN means medium computes using antenna models
-        double minInterferenceTime @unit(s) = default(1ps);       // minimum time interval to consider two overlapping signals interfering
-        double maxTransmissionDuration @unit(s) = default(10ms);  // maximum duration of a transmission on the medium
-        double maxCommunicationRange @unit(m) = default(0m/0);    // maximum communication range on the medium, NaN means medium computes using transmitter and receiver models
-        double maxInterferenceRange @unit(m) = default(0m/0);     // maximum interference range on the medium, NaN means medium computes using transmitter and receiver models
+        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
 
         // filter parameters that control when radio frames are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
@@ -100,10 +86,13 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=300,150");
         }
-        dummy: Dummy;
-        communicationCache: <communicationCacheType> like ICommunicationCache {
+        mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache {
             parameters:
                 @display("p=500,50");
+        }
+        communicationCache: <communicationCacheType> like ICommunicationCache {
+            parameters:
+                @display("p=500,250");
         }
         neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
             parameters:
