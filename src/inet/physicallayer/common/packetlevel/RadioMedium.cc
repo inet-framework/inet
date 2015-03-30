@@ -761,7 +761,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         communicationFigure->setStart(start);
         communicationFigure->setEnd(end);
         communicationFigure->setLineColor(cFigure::BLUE);
-        communicationFigure->setEndArrowHead(cFigure::ARROW_SIMPLE);
+        communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
         communicationFigure->setLineWidth(1);
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
         communicationFigure->setScaleLineWidth(false);
