@@ -69,6 +69,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     tcp->th_seq = htonl(tcpseg->getSequenceNo());
     tcp->th_ack = htonl(tcpseg->getAckNo());
     tcp->th_offs = TCP_HEADER_OCTETS / 4;
+    tcp->th_x2 = 0;     // unused
 
     // set flags
     unsigned char flags = 0;
