@@ -24,6 +24,10 @@
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
+2015-03-17  Tey
+
+		Initial mobility positions are now floating points (instead of integer)
+
 2015-03-04  ------ inet-2.6 released ------
 
 2014-11-07  ------ inet-2.5.1 released ------

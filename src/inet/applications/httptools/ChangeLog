@@ -44,6 +44,10 @@
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
+2015-03-17  Tey
+
+		Fix: In random browsing mode the resource size is now properly set.
+
 2015-03-04  ------ inet-2.6 released ------
 
 2014-11-07  ------ inet-2.5.1 released ------

@@ -32,6 +32,15 @@
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
+2015-03-17  Tey
+
+	Now both space and tabs are processed correctly in gdf files.
+
+	Fixed a memory leak.
+
+	Now it's possible to disable the RTP logging file by specifying
+	empty for the logfile name.
+
 2015-03-04  ------ inet-2.6 released ------
 
 2014-11-07  ------ inet-2.5.1 released ------
