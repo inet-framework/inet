@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-03-02  Levente Mészáros & Zoltan Bojthe
 
 	Fixed memory leaks detected by valgrind memcheck.
@@ -32,7 +34,7 @@
 
 	Rest of the ChangeLog describes world/obstacles/.
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======
 
 2015-03-04  ------ inet-2.6 released ------
 

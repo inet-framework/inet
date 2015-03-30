@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-03-02  Levente Mészáros
 
 	Fixed memory managements bugs found by valgrind memcheck.
@@ -66,4 +68,4 @@
 	ListeningDecision, Modulation, ModulationType, Radio, RadioFrame,
 	RadioMedium, ReceptionDecision
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======

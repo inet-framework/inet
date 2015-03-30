@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-02-25  Levente Meszaros
 
 	Added new interfaces for analog domain representation of radio signals:
@@ -25,4 +27,4 @@
 	IPrintableObject, IPropagation, IRadio, IRadioFrame, IRadioMedium,
 	IReceiver, IReception IReceptionDecision, ISNIR, ITransmission, ITransmitter
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======

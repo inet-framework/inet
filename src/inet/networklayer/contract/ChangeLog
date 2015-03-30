@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-01-21  Zoltan Bojthe
 
 	Applied C++ source code modernizer.
@@ -30,7 +32,7 @@
 	Namespace (Zoltan Bojthe, Zsolt Prontvai)
 	- code has been moved into the inet namespace
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======
 
 2015-03-04  ------ inet-2.6 released ------
 
