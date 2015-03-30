@@ -20,11 +20,13 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "inet/mobility/base/MobilityBase.h"
 #include "inet/common/INETMath.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
+
+using namespace inet::physicalenvironment;
 
 Register_Abstract_Class(MobilityBase);
 
@@ -33,13 +35,12 @@ static bool parseIntTo(const char *s, double& destValue)
     if (!s || !*s)
         return false;
 
-    char *endptr;
-    int value = strtol(s, &endptr, 10);
-
-    if (*endptr)
+    /* This method is only used to convert positions from the display strings,
+     * which can contain floating point values.
+     */
+    if(sscanf(s, "%lf", &destValue) != 1)
         return false;
 
-    destValue = value;
     return true;
 }
 
@@ -147,9 +148,14 @@ void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
     if (ev.isGUI() && visualRepresentation) {
-        cFigure::Point point = PhysicalEnvironment::computeCanvasPoint(lastPosition);
-        visualRepresentation->getDisplayString().setTagArg("p", 0, (long)point.x);
-        visualRepresentation->getDisplayString().setTagArg("p", 1, (long)point.y);
+        cFigure::Point point = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%lf", point.x);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
+        snprintf(buf, sizeof(buf), "%lf", point.y);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
     }
 }
 

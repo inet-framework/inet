@@ -20,7 +20,7 @@
 
 #include "inet/transportlayer/tcp/queues/TCPByteStreamRcvQueue.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
@@ -68,7 +68,7 @@ TCPByteStreamRcvQueue::Region *TCPByteStreamRcvQueue::Region::split(uint32 seq)
 
     Region *reg = new Region(begin, seq);
     reg->data.setDataFromByteArray(data, 0, seq - begin);
-    data.truncateData(seq - begin);
+    data.truncateData(seq - begin, 0);
     begin = seq;
     return reg;
 }
@@ -77,7 +77,7 @@ void TCPByteStreamRcvQueue::Region::copyTo(cPacket *msg_) const
 {
     ASSERT(getLength() == data.getDataArraySize());
 
-    ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msg_);
+    RawPacket *msg = check_and_cast<RawPacket *>(msg_);
     TCPVirtualDataRcvQueue::Region::copyTo(msg);
     msg->setByteArray(data);
 }
@@ -108,7 +108,7 @@ cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
     cPacket *msg = nullptr;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
     if (reg) {
-        msg = new ByteArrayMessage("data");
+        msg = new RawPacket("data");
         reg->copyTo(msg);
         delete reg;
     }

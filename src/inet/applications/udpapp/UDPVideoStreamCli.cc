@@ -78,6 +78,7 @@ void UDPVideoStreamCli::requestStream()
     socket.bind(localPort);
 
     cPacket *pk = new cPacket("VideoStrmReq");
+    pk->setByteLength(1);   //FIXME set packet length
     socket.sendTo(pk, svrAddr, svrPort);
 }
 

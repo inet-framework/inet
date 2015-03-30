@@ -18,16 +18,16 @@
 
 package inet.examples.wireless.obstacle;
 
-import inet.environment.PhysicalEnvironment;
+import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.ieee80211.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 network ObstacleTest
 {
     parameters:
         int numHosts;
-        @display("bgb=1000,500");
+        @display("bgb=0,0");
     submodules:
         environment: PhysicalEnvironment {
             parameters:

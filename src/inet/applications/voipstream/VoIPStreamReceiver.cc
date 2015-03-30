@@ -243,9 +243,9 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
     emit(delaySignal, curConn.lastPacketFinish - vp->getCreationTime());
     curConn.seqNo = newSeqNo;
 
-    int len = vp->getByteArray().getDataArraySize();
+    int len = vp->getBytes().getDataArraySize();
     uint8_t buff[len];
-    vp->copyDataToBuffer(buff, len);
+    vp->getBytes().copyDataToBuffer(buff, len);
     curConn.writeAudioFrame(buff, len);
     if (hasher)
         hasher->add((const char *)buff, len);

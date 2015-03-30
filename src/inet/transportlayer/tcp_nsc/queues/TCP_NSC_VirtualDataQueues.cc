@@ -79,9 +79,7 @@ TCPSegment *TCP_NSC_VirtualDataSendQueue::createSegmentWithBytes(const void *tcp
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = new TCPSegment("tcp-segment");
-
-    TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg, false);
+    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
 
     return tcpseg;
 }

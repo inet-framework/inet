@@ -21,7 +21,7 @@ namespace inet;
 
 //
 // Class that carries raw bytes.
-// For example, used by ~ByteArrayMessage and some TCP queues.
+// For example, used by ~RawPacket and some TCP queues.
 //
 class ByteArray
 {

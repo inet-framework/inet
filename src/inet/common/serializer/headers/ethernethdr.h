@@ -13,6 +13,13 @@ namespace inet {
 
 namespace serializer {
 
+#ifdef _MSC_VER
+#define __PACKED__
+#else
+#define __PACKED__  __attribute__((packed))
+#endif
+
+
 /*
  * The number of bytes in an ethernet (MAC) address.
  */
@@ -68,9 +75,9 @@ namespace serializer {
  */
 struct  ether_header
 {
-    u_char ether_dhost[ETHER_ADDR_LEN];
-    u_char ether_shost[ETHER_ADDR_LEN];
-    u_short ether_type;
+    uint8_t ether_dhost[ETHER_ADDR_LEN];
+    uint8_t ether_shost[ETHER_ADDR_LEN];
+    uint16_t ether_type;
 };
 
 /*
@@ -78,8 +85,20 @@ struct  ether_header
  */
 struct  ether_addr
 {
-    u_char octet[ETHER_ADDR_LEN];
+    uint8_t octet[ETHER_ADDR_LEN];
 };
+
+/*
+ * Structure of SNAP header
+ */
+struct snap_header
+{
+    uint8_t dsap;
+    uint8_t ssap;
+    uint8_t ctrl;
+    uint8_t oui[3];    // organizational universal id
+    uint16_t ethertype;    // packet type ID field
+} __PACKED__;
 
 extern const uint8_t etherbroadcastaddr[ETHER_ADDR_LEN];
 
@@ -90,6 +109,8 @@ extern const uint8_t etherbroadcastaddr[ETHER_ADDR_LEN];
  *  However, there are some conflicts.
  */
 
+// disabled ETHERTYPE constants
+#if 0
 #define ETHERTYPE_8023              0x0004  /* IEEE 802.3 packet */
 /* 0x0101 .. 0x1FF      Experimental */
 #define ETHERTYPE_PUP               0x0200  /* Xerox PUP protocol - see 0A00 */
@@ -344,6 +365,8 @@ extern const uint8_t etherbroadcastaddr[ETHER_ADDR_LEN];
 /* 0xFF00 - 0xFFOF     ISC Bunker Ramo */
 
 #define ETHERTYPE_MAX            0xFFFF  /* Maximum valid ethernet type, reserved */
+
+#endif
 
 /*
  * The ETHERTYPE_NTRAILER packet types starting at ETHERTYPE_TRAIL have

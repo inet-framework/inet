@@ -21,6 +21,7 @@
 
 #include <list>
 #include "inet/common/INETDefs.h"
+#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/sctp/SCTPMessage_m.h"
 
 namespace inet {
@@ -31,7 +32,7 @@ namespace sctp {
  * Represents a SCTP Message. More info in the SCTPMessage.msg file
  * (and the documentation generated from it).
  */
-class INET_API SCTPMessage : public SCTPMessage_Base
+class INET_API SCTPMessage : public SCTPMessage_Base, public ITransportPacket
 {
   protected:
     std::vector<cPacket *> chunkList;
@@ -72,6 +73,11 @@ class INET_API SCTPMessage : public SCTPMessage_Base
     virtual cPacket *peekFirstChunk();
     virtual cPacket *peekLastChunk();
     virtual void replaceChunk(cPacket *msg, uint32 k);
+
+    virtual unsigned int getSourcePort() const override { return SCTPMessage_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { SCTPMessage_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return SCTPMessage_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { SCTPMessage_Base::setDestPort(port); }
 };
 
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base

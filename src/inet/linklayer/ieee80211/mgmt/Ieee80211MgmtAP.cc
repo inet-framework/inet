@@ -24,7 +24,7 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #endif // ifdef WITH_ETHERNET
 
-#include "inet/physicallayer/ieee80211/Ieee80211Radio.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 

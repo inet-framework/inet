@@ -24,7 +24,7 @@
 #include "inet/common/packet/PacketDump.h"
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
@@ -486,6 +486,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
 {
     std::ostream& out = *outp;
     char buf[30];
+    std::string classes;
 
 #ifdef WITH_IPv4
     cPacket *encapmsg = dgram->getEncapsulatedPacket();
@@ -519,9 +520,15 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
         // seq and time (not part of the tcpdump format)
         sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
         out << buf;
+        out << "[IPv4] " << dgram->getSrcAddress() << " > " << dgram->getDestAddress();
 
-        // packet class and name
-        out << "? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"";
+        if (dgram->getMoreFragments() || dgram->getFragmentOffset())
+            out << ((dgram->getMoreFragments()) ? " inner" : " last") << " fragment from offset " << dgram->getFragmentOffset();
+
+        if (encapmsg) {
+            // packet class and name
+            out << " ? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"";
+        }
 
         // comment
         if (comment)

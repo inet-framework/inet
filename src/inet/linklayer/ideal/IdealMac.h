@@ -21,7 +21,7 @@
 #define __INET_IDEALMAC_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
 

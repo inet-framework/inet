@@ -18,7 +18,7 @@
 
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
@@ -50,7 +50,7 @@ void TcpLwipByteStreamSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
 
-    ByteArrayMessage *msg = check_and_cast<ByteArrayMessage *>(msgP);
+    RawPacket *msg = check_and_cast<RawPacket *>(msgP);
     int64 bytes = msg->getByteLength();
 
     ASSERT(bytes == msg->getByteArray().getDataArraySize());
@@ -80,9 +80,7 @@ TCPSegment *TcpLwipByteStreamSendQueue::createSegmentWithBytes(const void *tcpDa
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = new TCPSegment();
-
-    TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg, true);
+    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, true);
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
@@ -141,11 +139,11 @@ cPacket *TcpLwipByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
-    ByteArrayMessage *dataMsg = nullptr;
+    RawPacket *dataMsg = nullptr;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
     if (bytesInQueue) {
-        dataMsg = new ByteArrayMessage("DATA");
+        dataMsg = new RawPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);
         unsigned int extractBytes = bytesInQueue;
         char *data = new char[extractBytes];

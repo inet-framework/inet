@@ -69,8 +69,8 @@ class RIPPacket;
 #endif // ifdef WITH_RIP
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/common/RadioFrame.h"
-#include "inet/physicallayer/analogmodel/ScalarTransmission.h"
+#include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #else // ifdef WITH_RADIO
 namespace inet { namespace physicallayer { class RadioFrame; } }
 #endif // ifdef WITH_RADIO
@@ -320,6 +320,7 @@ std::string InetPacketPrinter2::formatIeee80211Frame(ieee80211::Ieee80211Frame *
             break;
 
         case ST_DATA:
+        case ST_DATA_WITH_QOS:
             os << " data";    //TODO
             break;
 

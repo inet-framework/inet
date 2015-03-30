@@ -271,6 +271,7 @@ void ICMP::sendEchoRequest(PingPayload *msg)
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
     ctrl->setProtocol(IP_PROT_ICMP);
     ICMPMessage *request = new ICMPMessage(msg->getName());
+    request->setByteLength(4);
     request->setType(ICMP_ECHO_REQUEST);
     request->encapsulate(msg);
     request->setControlInfo(ctrl);

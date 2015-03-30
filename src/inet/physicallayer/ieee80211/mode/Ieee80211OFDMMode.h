@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211OFDMMODE_H
 #define __INET_IEEE80211OFDMMODE_H
 
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/ieee80211/Ieee80211OFDMCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 
 namespace inet {

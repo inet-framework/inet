@@ -22,7 +22,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AODVRouter;
-import inet.physicallayer.ideal.IdealRadioMedium;
+import inet.physicallayer.idealradio.IdealRadioMedium;
 
 
 network SimpleRREQ

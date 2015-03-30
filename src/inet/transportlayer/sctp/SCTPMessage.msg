@@ -66,6 +66,8 @@ message SCTPInitChunk extends SCTPChunk
     // Initial TSN
     uint32 initTSN;
     bool forwardTsn;
+    bool ipv4Supported;
+    bool ipv6Supported;
     L3Address addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
     uint32 msg_rwnd;
@@ -88,6 +90,8 @@ message SCTPInitAckChunk extends SCTPChunk
     // Initial TSN
     uint32 initTSN;
     bool forwardTsn;
+    bool ipv4Supported;
+    bool ipv6Supported;
     L3Address addresses[];
     char cookie[];
     uint8 unrecognizedParameters[];

@@ -28,11 +28,31 @@ void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
         memcpy(data_var, ptr, length);
 }
 
+void ByteArray::copyDataFromBuffer(unsigned int destOffset, const void *ptr, unsigned int length)
+{
+    unsigned int nlength = destOffset + length;
+    if (data_arraysize < nlength) {
+        char *ndata_var = new char[nlength];
+        if (data_arraysize)
+            memcpy(ndata_var, data_var, data_arraysize);
+        delete[] data_var;
+        data_var = ndata_var;
+    }
+    memcpy(data_var + destOffset, ptr, length);
+}
+
 void ByteArray::setDataFromByteArray(const ByteArray& other, unsigned int srcOffs, unsigned int length)
 {
     ASSERT(srcOffs + length <= other.data_arraysize);
     setDataFromBuffer(other.data_var + srcOffs, length);
 }
+
+void ByteArray::copyDataFromByteArray(unsigned int destOffset, const ByteArray& other, unsigned int srcOffset, unsigned int length)
+{
+    ASSERT(srcOffset + length <= other.data_arraysize);
+    copyDataFromBuffer(destOffset, other.data_var + srcOffset, length);
+}
+
 
 void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
 {
@@ -78,6 +98,20 @@ void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
             ndata_var = new char[nlength];
             memcpy(ndata_var, data_var + truncleft, nlength);
         }
+        delete[] data_var;
+        data_var = ndata_var;
+        data_arraysize = nlength;
+    }
+}
+
+void ByteArray::expandData(unsigned int addleft, unsigned int addright)
+{
+    ASSERT(data_arraysize <= (data_arraysize + addleft + addright));
+
+    if ((addleft || addright)) {
+        unsigned int nlength = data_arraysize + (addleft + addright);
+        char *ndata_var = new char[nlength];
+        memmove(ndata_var + addleft, data_var, data_arraysize);
         delete[] data_var;
         data_var = ndata_var;
         data_arraysize = nlength;

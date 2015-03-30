@@ -20,6 +20,7 @@ package inet.node.inet;
 import inet.applications.contract.IUDPApp;
 import inet.routing.contract.IBGPRouting;
 import inet.routing.contract.IIPRouting;
+import inet.routing.contract.IPIMRouting;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 
@@ -54,6 +55,7 @@ module Router extends NodeBase
         bool hasOSPF = default(false);
         bool hasRIP = default(false);
         bool hasBGP = default(false);
+        bool hasPIM = default(false);
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default("UDP");
 
@@ -78,6 +80,9 @@ module Router extends NodeBase
         udp: <udpType> like IUDP if hasRIP {
             @display("p=404,180");
         }
+        pim: <"PIMRouting"> like IPIMRouting if hasPIM {
+            @display("p=175,287");
+        }
 
     connections allowunconnected:
         if hasOSPF {
@@ -99,5 +104,10 @@ module Router extends NodeBase
 
             udp.ipOut --> networkLayer.transportIn++;
             udp.ipIn <-- networkLayer.transportOut++;
+        }
+
+        if hasPIM {
+            pim.networkLayerOut --> networkLayer.transportIn++;
+            pim.networkLayerIn <-- networkLayer.transportOut++;
         }
 }

@@ -35,6 +35,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.paths.1304941279" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
@@ -50,6 +57,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.552444216" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1458844290" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -80,6 +94,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.986287674" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -92,6 +113,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2067298919" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -103,7 +131,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/physicallayer/idealradio|inet/physicallayer/communicationcache|inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -139,6 +167,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.paths.1086707691" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
@@ -154,6 +189,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.paths.951413942" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.406690453" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -184,6 +226,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1307550561" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -196,6 +245,13 @@
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
+									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
+									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_BMAC"/>
+									<listOptionValue builtIn="false" value="WITH_LMAC"/>
+									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.18906227" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -207,7 +263,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/physicallayer/idealradio|inet/physicallayer/communicationcache|inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

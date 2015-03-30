@@ -30,7 +30,7 @@
 #include "inet/networklayer/contract/ipv6/IPv6AddressType.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/IARP.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/routing/extras/base/ControlInfoBreakLink_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -412,7 +412,6 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const L3Addres
     }
 
     UDPPacket *udpPacket = new UDPPacket(msg->getName());
-    udpPacket->setByteLength(UDP_HDR_LEN);
     udpPacket->encapsulate(msg);
     //Address srcAddr = interfaceWlanptr->ipv4Data()->getIPAddress();
 

@@ -42,6 +42,7 @@ src
 -inet.routing.rip
 -inet.physicallayer.energyconsumer
 -inet.transportlayer.tcp_nsc
+-inet.physicallayer.communicationcache
 -inet.networklayer.mpls
 -inet.examples.httptools.direct
 -inet.mobility.group
@@ -75,6 +76,7 @@ src
 -inet.power.consumer
 -inet.examples.objectcache
 -inet.physicallayer.base
+-inet.physicallayer.idealradio
 -inet.mobility.base
 -inet.physicallayer.apsk
 -inet.node.mpls
@@ -96,6 +98,7 @@ src
 -inet.applications.traci
 -inet.examples.traci
 -inet.physicallayer.neighborcache
+-inet.environment.common
 -inet.networklayer.diffserv
 -inet.transportlayer.tcp_lwip
 -inet.applications.voipstream

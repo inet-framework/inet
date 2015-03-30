@@ -18,7 +18,7 @@
 #ifndef __INET_UWBIRSTOCHASTICPATHLOSS_H
 #define __INET_UWBIRSTOCHASTICPATHLOSS_H
 
-#include "inet/physicallayer/contract/IPathLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 
 namespace inet {
 

@@ -9,7 +9,7 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.apsk.APSKScalarRadioMedium;
+import inet.physicallayer.apskradio.packetlevel.APSKScalarRadioMedium;
 
 network Test
 {
@@ -25,7 +25,7 @@ network Test
 
 [General]
 network = Test
-sim-time-limit = 400us
+sim-time-limit = 500us
 record-eventlog = true
 ned-path = .;../../../../src
 

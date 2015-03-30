@@ -17,7 +17,7 @@
 
 #include "inet/transportlayer/tcp/queues/TCPByteStreamSendQueue.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
@@ -52,7 +52,7 @@ std::string TCPByteStreamSendQueue::info() const
 void TCPByteStreamSendQueue::enqueueAppData(cPacket *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
-    ByteArrayMessage *bamsg = check_and_cast<ByteArrayMessage *>(msg);
+    RawPacket *bamsg = check_and_cast<RawPacket *>(msg);
     int64 bytes = bamsg->getByteLength();
     ASSERT(bytes == bamsg->getByteArray().getDataArraySize());
     dataBuffer.push(bamsg->getByteArray());

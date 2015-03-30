@@ -15,5 +15,33 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_UDPPACKET_H
+#define __INET_UDPPACKET_H
+
+#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
+
+namespace inet {
+
+class INET_API UDPPacket : public UDPPacket_Base, public ITransportPacket
+{
+  private:
+    void copy(const UDPPacket& other) {}
+
+  public:
+    UDPPacket(const char *name=NULL, int kind=0) : UDPPacket_Base(name,kind) {}
+    UDPPacket(const UDPPacket& other) : UDPPacket_Base(other) {copy(other);}
+    UDPPacket& operator=(const UDPPacket& other) {if (this==&other) return *this; UDPPacket_Base::operator=(other); copy(other); return *this;}
+
+    virtual UDPPacket *dup() const {return new UDPPacket(*this);}
+
+    virtual unsigned int getSourcePort() const override { return UDPPacket_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { UDPPacket_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return UDPPacket_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { UDPPacket_Base::setDestPort(port); }
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_TCPSEGMENT_H
 

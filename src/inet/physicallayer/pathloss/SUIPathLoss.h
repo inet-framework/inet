@@ -18,7 +18,7 @@
 #define __INET_SUIPATHLOSS_H
 
 #include <string>
-#include "inet/physicallayer/contract/IPathLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 
 namespace inet {
 

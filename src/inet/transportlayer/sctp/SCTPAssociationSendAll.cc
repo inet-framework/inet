@@ -52,21 +52,28 @@ void SCTPAssociation::storePacket(SCTPPathVariables *pathVar,
 {
     uint32 packetBytes = 0;
     for (uint16 i = 0; i < sctpMsg->getChunksArraySize(); i++) {
-        SCTPDataVariables *chunk = retransmissionQ->payloadQueue.find(((SCTPDataChunk *)sctpMsg->getChunks(i))->getTsn())->second;
-        decreaseOutstandingBytes(chunk);
-        chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-        chunk->queuedOnPath = nullptr;
-        packetBytes += chunk->booksize;
+        cPacketPtr& chunkPtr = sctpMsg->getChunks(i);
+        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        if(dataChunk != NULL) {
+            const uint32_t tsn = dataChunk->getTsn();
+            SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+            assert(chunk != NULL);
+            decreaseOutstandingBytes(chunk);
+            chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+            chunk->queuedOnPath = NULL;
+            packetBytes += chunk->booksize;
+        }
     }
+
     state->sctpMsg = sctpMsg;
     state->chunksAdded = chunksAdded;
     state->dataChunksAdded = dataChunksAdded;
     state->packetBytes = packetBytes;
     state->authAdded = authAdded;
     EV_INFO << "storePacket: path=" << pathVar->remoteAddress
-            << " state->packetBytes=" << state->packetBytes
-            << " osb=" << pathVar->outstandingBytes << " -> "
-            << pathVar->outstandingBytes - state->packetBytes << endl;
+              << " state->packetBytes=" << state->packetBytes
+              << " osb=" << pathVar->outstandingBytes << " -> "
+              << pathVar->outstandingBytes - state->packetBytes << endl;
     if (state->osbWithHeader)
         qCounter.roomSumSendStreams += state->packetBytes;
     else
@@ -95,12 +102,18 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
     qCounter.bookedSumSendStreams -= state->packetBytes;
 
     for (uint16 i = 0; i < (*sctpMsg)->getChunksArraySize(); i++) {
-        SCTPDataVariables *chunk = retransmissionQ->payloadQueue.find(((SCTPDataChunk *)(*sctpMsg)->getChunks(i))->getTsn())->second;
-        chunk->queuedOnPath = pathVar;
-        chunk->queuedOnPath->queuedBytes += chunk->booksize;
-        chunk->setLastDestination(pathVar);
-        increaseOutstandingBytes(chunk, pathVar);
-        chunk->countsAsOutstanding = true;
+        cPacketPtr& chunkPtr = (*sctpMsg)->getChunks(i);
+        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        if(dataChunk != NULL) {
+            const uint32_t tsn = dataChunk->getTsn();
+            SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+            assert(chunk != NULL);
+            chunk->queuedOnPath = pathVar;
+            chunk->queuedOnPath->queuedBytes += chunk->booksize;
+            chunk->setLastDestination(pathVar);
+            increaseOutstandingBytes(chunk, pathVar);
+            chunk->countsAsOutstanding = true;
+        }
     }
 }
 
@@ -689,7 +702,13 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
         EV_INFO << pathId->remoteAddress;
     }
     EV_INFO << ") at t=" << simTime() << " #####" << endl;
+    
+    unsigned int safetyCounter = 0;
     while (sendingAllowed) {
+        if (safetyCounter++ >= 1000) {
+            throw cRuntimeError("Endless loop in SCTPAssociation::sendOnPath()?! This should not happen ...");
+        }
+
         headerCreated = false;
         if (state->bytesToRetransmit > 0) {
             // There are bytes in the transmissionQ. They have to be sent first.
@@ -810,6 +829,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                 sctpAlgorithm->sackSent();
                 state->sackAllowed = false;
                 sendSACKviaSelectedPath(sctpMsg);
+                sctpMsg = nullptr;
                 return;
             }
         }
@@ -964,13 +984,14 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                 state->sackAllowed = false;
                                 EV_DETAIL << "RTX: send only SACK\n";
                                 sendSACKviaSelectedPath(sctpMsg);
-                                if (datVar != nullptr) {
-                                    sctpMsg = new SCTPMessage("send");
-                                    sctpMsg->setByteLength(SCTP_COMMON_HEADER);
-                                    headerCreated = true;
-                                    sackAdded = false;
-                                    chunksAdded = 0;
-                                }
+                                sctpMsg = nullptr;
+
+                                // TD 17.02.2015: There is data to send (on current path) -> create new message structure!
+                                sctpMsg = new SCTPMessage("send");
+                                sctpMsg->setByteLength(SCTP_COMMON_HEADER);
+                                headerCreated = true;
+                                sackAdded = false;
+                                chunksAdded = 0;
                             }
                         }
                     }
@@ -1096,6 +1117,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                     state->sackAllowed = false;
                                     EV_DETAIL << assocId << ": send SACK and make new header for datMsg (" << &datMsg << "). scount=" << scount << "\n";
                                     sendSACKviaSelectedPath(sctpMsg);
+                                    sctpMsg = nullptr;
                                     if (datMsg != nullptr) {
                                         sctpMsg = new SCTPMessage("send");
                                         sctpMsg->setByteLength(SCTP_COMMON_HEADER);
@@ -1165,6 +1187,12 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                     }
                     else if ((chunksAdded == 1 && sackAdded && sackOnly) || headerCreated) {
                         packetFull = true;
+                        /* TD 19.02.2015:
+                           If we are not on the primary path, and
+                           there is a small chunk to send (bytesToSend > 0),
+                           and Nagle turned on:
+                           leave inner loop. Otherwise, there will be an infinite loop! */
+                        bytesToSend = 0;
                     }
                 }
                 else if (chunksAdded == 1 && sackAdded && !sackOnly) {
@@ -1332,6 +1360,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                 if (packetFull) {
                     if (chunksAdded == 0) {    // Nothing to send
                         delete sctpMsg;
+                        sctpMsg = nullptr;
                         sendingAllowed = false;    // sendingAllowed==false => leave outer while loop
                     }
                     else {
@@ -1352,6 +1381,10 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                                 EV_DETAIL << "sendAll: RTX Timer already scheduled -> no need to schedule it\n";
                             }
                         }
+                        else {
+                            bytes.packet = false;   // TD 23.02.2015: no DATA chunks => done.
+                        }
+
                         if (sendOneMorePacket) {
                             sendOneMorePacket = false;
                             bytesToSend = 0;
@@ -1374,6 +1407,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         }
                         EV_DETAIL << assocId << ":sendToIP: packet size=" << sctpMsg->getByteLength() << " numChunks=" << sctpMsg->getChunksArraySize() << "\n";
                         sendToIP(sctpMsg, path->remoteAddress);
+                        sctpMsg = nullptr;
                         pmDataIsSentOn(path);
                         totalPacketsSent++;
                         path->lastTransmission = simTime();
@@ -1400,6 +1434,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
             else {
                 packetFull = true;    // Leave inner while loop
                 delete sctpMsg;    // T.D. 19.01.2010: Free unsent message
+                sctpMsg = nullptr;
             }
 
             EV_INFO << "packetFull=" << packetFull << endl;

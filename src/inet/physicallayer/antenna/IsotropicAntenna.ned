@@ -17,7 +17,7 @@
 
 package inet.physicallayer.antenna;
 
-import inet.physicallayer.base.AntennaBase;
+import inet.physicallayer.base.packetlevel.AntennaBase;
 
 //
 // This antenna model describes the theoretical point source which radiates the

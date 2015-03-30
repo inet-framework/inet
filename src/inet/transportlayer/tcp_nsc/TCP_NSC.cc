@@ -380,20 +380,21 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     if (!conn)
         conn = findConnByInetSockPair(inetSockPairAny);
 
-    totalTcpLen = TCPSerializer().serialize(tcpsegP, (unsigned char *)tcph, totalTcpLen);
+    Buffer b(tcph, totalTcpLen);
+    Context c;
+    c.l3AddressesPtr = &ih->saddr;
+    c.l3AddressesLength = 8;
+    TCPSerializer().serializePacket(tcpsegP, b, c);
+    totalTcpLen = b.getPos();
 
     if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(tcpsegP);
     }
 
-    // calculate TCP checksum
-    tcph->th_sum = 0;
-    tcph->th_sum = TCPSerializer().checksum(tcph, totalTcpLen, nscSockPair.remoteM.ipAddrM, nscSockPair.localM.ipAddrM);
-
     size_t totalIpLen = ipHdrLen + totalTcpLen;
     ih->tot_len = htons(totalIpLen);
     ih->check = 0;
-    ih->check = TCPIPchecksum::checksum(ih, ipHdrLen);
+    ih->check = htons(TCPIPchecksum::checksum(ih, ipHdrLen));
 
     // receive msg from network
 
@@ -862,9 +863,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
     else {
-        tcpseg = new TCPSegment("tcp-segment");
-
-        TCPSerializer().parse((const unsigned char *)tcph, totalLen - ipHdrLen, tcpseg, true);
+        tcpseg = TCPSerializer().deserialize((const unsigned char *)tcph, totalLen - ipHdrLen, true);
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 

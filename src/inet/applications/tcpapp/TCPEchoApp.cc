@@ -17,7 +17,7 @@
 
 #include "inet/applications/tcpapp/TCPEchoApp.h"
 
-#include "inet/common/ByteArrayMessage.h"
+#include "inet/common/RawPacket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -122,7 +122,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 
             pkt->setByteLength(byteLen);
 
-            ByteArrayMessage *baMsg = dynamic_cast<ByteArrayMessage *>(pkt);
+            RawPacket *baMsg = dynamic_cast<RawPacket *>(pkt);
 
             // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
             if (baMsg) {

@@ -20,7 +20,7 @@ package inet.examples.wireless.scaling;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.contract.IRadioMedium;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 
 network TestRadioScaling

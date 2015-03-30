@@ -16,21 +16,17 @@
 //
 
 #include <algorithm>    // std::min
-#include <platdep/sockets.h>
 
 #include "inet/common/serializer/ipv6/IPv6Serializer.h"
 
 #include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/common/serializer/ipv6/headers/ip6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
-#ifdef WITH_UDP
-#include "inet/common/serializer/udp/UDPSerializer.h"
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-#include "inet/common/serializer/sctp/SCTPSerializer.h"
-#endif // ifdef WITH_SCTP
 
 #include "inet/common/serializer/TCPIPchecksum.h"
 
@@ -54,19 +50,18 @@ namespace inet {
 
 namespace serializer {
 
-using namespace tcp;
-#ifdef WITH_SCTP
-using namespace sctp;
-#endif // ifdef WITH_SCTP
+Register_Serializer(IPv6Datagram, ETHERTYPE, ETHERTYPE_IPv6, IPv6Serializer);
 
-int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
+void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
-    int packetLength, i;
+    const IPv6Datagram *dgram = check_and_cast<const IPv6Datagram *>(pkt);
+    int i;
     uint32_t flowinfo;
 
     EV << "Serialize IPv6 packet\n";
 
-    struct ip6_hdr *ip6h = (struct ip6_hdr *)buf;
+    unsigned int nextHdrCodePos = b.getPos() + 6;
+    struct ip6_hdr *ip6h = (struct ip6_hdr *)b.accessNBytes(sizeof(struct ip6_hdr));
 
     flowinfo = 0x06;
     flowinfo <<= 8;
@@ -84,51 +79,76 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
     for (i = 0; i < 4; i++) {
         ip6h->ip6_dst.__u6_addr.__u6_addr32[i] = htonl(dgram->getDestAddress().words()[i]);
     }
+    c.l3AddressesPtr = &ip6h->ip6_src.__u6_addr.__u6_addr32[0];
+    c.l3AddressesLength = 32;
 
-    cMessage *encapPacket = dgram->getEncapsulatedPacket();
-
-    switch (dgram->getTransportProtocol())
-    {
-      case IP_PROT_IPv6_ICMP:
-        EV_DEBUG<<"ICMP Frame TODO TODO"<<endl; //TODO
-        /*packetLength += ICMPv6Serializer().serialize(check_and_cast<ICMPv6Message *>(encapPacket),
-                                                   buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES);
-        */
-        // TODO: implement ICMPv6Serializer
-        break;
-#ifdef WITH_UDP
-        case IP_PROT_UDP:
-            packetLength = UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
-                        buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES);
-            break;
-#endif // ifdef WITH_UDP
-
-#ifdef WITH_SCTP
-        case IP_PROT_SCTP:
-            packetLength = sctp::SCTPSerializer().serialize(check_and_cast<sctp::SCTPMessage *>(encapPacket),
-                        buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES);
-            break;
-#endif // ifdef WITH_SCTP
-
-#ifdef WITH_TCP_COMMON
-      case IP_PROT_TCP:
-        packetLength = TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
-                                                   buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES,
-                                                   dgram->getSrcAddress(), dgram->getDestAddress());
-        break;
-#endif
-
-      default:
-          throw cRuntimeError(dgram, "IPv6Serializer: cannot serialize protocol %d", dgram->getTransportProtocol());
+    //FIXME serialize extension headers
+    for (i = 0; i < dgram->getExtensionHeaderArraySize(); i++) {
+        const IPv6ExtensionHeader *extHdr = dgram->getExtensionHeader(i);
+        b.writeByteTo(nextHdrCodePos, extHdr->getExtensionType());
+        nextHdrCodePos = b.getPos();
+        b.writeByte(dgram->getTransportProtocol());
+        ASSERT((extHdr->getByteLength() & 7) == 0);
+        b.writeByte((extHdr->getByteLength() - 8) / 8);
+        switch (extHdr->getExtensionType()) {
+            case IP_PROT_IPv6EXT_HOP: {
+                const IPv6HopByHopOptionsHeader *hdr = check_and_cast<const IPv6HopByHopOptionsHeader *>(extHdr);
+                b.fillNBytes(hdr->getByteLength() - 2, '\0');    //TODO
+                break;
+            }
+            case IP_PROT_IPv6EXT_DEST: {
+                const IPv6DestinationOptionsHeader *hdr = check_and_cast<const IPv6DestinationOptionsHeader *>(extHdr);
+                b.fillNBytes(hdr->getByteLength() - 2, '\0');    //TODO
+                break;
+            }
+            case IP_PROT_IPv6EXT_ROUTING: {
+                const IPv6RoutingHeader *hdr = check_and_cast<const IPv6RoutingHeader *>(extHdr);
+                b.writeByte(hdr->getRoutingType());
+                b.writeByte(hdr->getSegmentsLeft());
+                for (int j = 0; j < hdr->getAddressArraySize(); j++) {
+                    b.writeIPv6Address(hdr->getAddress(j));
+                }
+                b.fillNBytes(4, '\0');
+                break;
+            }
+            case IP_PROT_IPv6EXT_FRAGMENT: {
+                const IPv6FragmentHeader *hdr = check_and_cast<const IPv6FragmentHeader *>(extHdr);
+                ASSERT((hdr->getFragmentOffset() & 7) == 0);
+                b.writeUint16(hdr->getFragmentOffset() | (hdr->getMoreFragments() ? 1 : 0));
+                b.writeUint32(hdr->getIdentification());
+                break;
+            }
+            case IP_PROT_IPv6EXT_AUTH: {
+                const IPv6AuthenticationHeader *hdr = check_and_cast<const IPv6AuthenticationHeader *>(extHdr);
+                b.fillNBytes(hdr->getByteLength() - 2, '\0');    //TODO
+                break;
+            }
+            case IP_PROT_IPv6EXT_ESP: {
+                const IPv6EncapsulatingSecurityPayloadHeader *hdr = check_and_cast<const IPv6EncapsulatingSecurityPayloadHeader *>(extHdr);
+                b.fillNBytes(hdr->getByteLength() - 2, '\0');    //TODO
+                break;
+            }
+            default: {
+                throw cRuntimeError("Unknown IPv6 extension header %d (%s)%s", extHdr->getExtensionType(), extHdr->getClassName(), extHdr->getFullName());
+                break;
+            }
+        }
+        ASSERT(nextHdrCodePos + extHdr->getByteLength() == b.getPos());
     }
 
-    ip6h->ip6_plen = htons(packetLength);
+    const cPacket *encapPacket = dgram->getEncapsulatedPacket();
+    unsigned int encapStart = b.getPos();
+    SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+    unsigned int encapEnd = b.getPos();
 
-    return packetLength + IPv6_HEADER_BYTES;
+    ip6h->ip6_plen = htons(encapEnd - encapStart);
 }
-void IPv6Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest)
+
+cPacket* IPv6Serializer::deserialize(Buffer &b, Context& c)
 {
-    const struct ip6_hdr *ip6h = (struct ip6_hdr *) buf;
+    ASSERT(b.getPos() == 0);
+    IPv6Datagram *dest = new IPv6Datagram("parsed-ipv6");
+    const struct ip6_hdr *ip6h = (struct ip6_hdr *) b.accessNBytes(IPv6_HEADER_BYTES);
     uint32_t flowinfo = ntohl(ip6h->ip6_flow);
     dest->setFlowLabel(flowinfo & 0xFFFFF);
     flowinfo >>= 20;
@@ -152,48 +172,23 @@ void IPv6Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv6D
              ntohl(ip6h->ip6_dst.__u6_addr.__u6_addr32[3]));
     dest->setDestAddress(temp);
 
-    if (packetLength + IPv6_HEADER_BYTES > bufsize)
-        EV << "Can not handle IPv6 packet of total length " << packetLength + IPv6_HEADER_BYTES << "(captured only " << bufsize << " bytes).\n";
+    c.l3AddressesPtr = &ip6h->ip6_src.__u6_addr.__u6_addr32[0];
+    c.l3AddressesLength = 32;
+
+    if (packetLength + IPv6_HEADER_BYTES > b._getBufSize()) {
+        EV_ERROR << "Can not handle IPv6 packet of total length " << packetLength + IPv6_HEADER_BYTES << "(captured only " << b._getBufSize() << " bytes).\n";
+        b.setError();
+    }
+    dest->setByteLength(b.getPos());    // set header size
 
     cPacket *encapPacket = NULL;
-    unsigned int encapLength = std::min(packetLength, bufsize - IPv6_HEADER_BYTES);
+    unsigned int encapLength = std::min(packetLength, b.getRemainder());
 
-    switch (dest->getTransportProtocol())
-    {
-      case IP_PROT_IPv6_ICMP:
-        encapPacket = new ICMPv6Message("icmp-from-wire");
-        //ICMPv6Serializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (ICMPv6Message *)encapPacket);
-        // TODO: implement ICMPv6Serializer
-        break;
-
-#ifdef WITH_UDP
-      case IP_PROT_UDP:
-        encapPacket = new UDPPacket("udp-from-wire");
-        UDPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (UDPPacket *)encapPacket);
-        break;
-#endif
-
-#ifdef WITH_SCTP
-      case IP_PROT_SCTP:
-        encapPacket = new SCTPMessage("sctp-from-wire");
-        SCTPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (SCTPMessage *)encapPacket);
-        break;
-#endif
-
-#ifdef WITH_TCP_COMMON
-      case IP_PROT_TCP:
-        encapPacket = new TCPSegment("tcp-from-wire");
-        TCPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (TCPSegment *)encapPacket, true);
-        break;
-#endif
-
-      default:
-        throw cRuntimeError("IPv6Serializer: cannot parse protocol %d", dest->getTransportProtocol());
-    }
-
+    encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), b.getRemainder() - encapLength);
     ASSERT(encapPacket);
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
+    return dest;
 }
 
 } // namespace serializer

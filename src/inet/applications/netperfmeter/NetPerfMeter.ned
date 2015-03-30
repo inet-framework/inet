@@ -26,8 +26,25 @@
 // *   Contact: dreibh@iem.uni-due.de
 
 package inet.applications.netperfmeter;
-import inet.applications.INetPerfMeterApp;
+import inet.applications.contract.INetPerfMeterApp;
 
+//
+// Application model for comparing the performance of various transport
+// protocols.
+//
+// The NetPerfMeter model simultaneously transmits bidirectional flows to an
+// endpoint, and measures the resulting flow bandwidths and QoS. Since the
+// application behaviour is the same for all underlying transport layer
+// protocols, it allows for comparing the performance of various transport
+// protocols, e.g. TCP vs. SCTP.
+//
+// The model closely mimics the operation of the real-world NetPerfMeter
+// application (https://www.uni-due.de/~be0001/netperfmeter/), a tool for
+// measuring UDP, TCP, MPTCP, SCTP and DCCP performance over IPv4 and IPv6.
+// Since the parametrisation and features are similar to the real-world
+// application, the model also makes comparisons of simulation results and
+// real-world measurements easy.
+//
 simple NetPerfMeter like INetPerfMeterApp
 {
     parameters:
@@ -45,7 +62,7 @@ simple NetPerfMeter like INetPerfMeterApp
 
         double          onTime          @unit(s) = default(-1s);       // Online time; disconnect when timer expires
         double          offTime         @unit(s) = default(-1s);       // Offline time; reconnect when timer expires
-        int             maxReconnects            = default(0);         // Maximum number of reconnects
+        int             maxOnOffCycles           = default(0);         // Maximum number of on-off cycles (-1 for unlimited)
 
         int             outboundStreams          = default(1);         // Number of outbound streams (SCTP only)
         int             maxInboundStreams        = default(16);        // Maximum number of inbound streams (SCTP only)

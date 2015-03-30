@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211FHSSMODE_H
 #define __INET_IEEE80211FHSSMODE_H
 
-#include "inet/physicallayer/base/GFSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/GFSKModulationBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 
 namespace inet {

@@ -57,6 +57,7 @@ simple GPSR like IGPSR
         double beaconInterval @unit("s") = default(10s);
         double maxJitter @unit("s") = default(1s);
         double neighborValidityInterval @unit("s") = default(30s);
+        int positionByteLength @unit(B) = default(2 * 4B);
 
     gates:
         input ipIn;

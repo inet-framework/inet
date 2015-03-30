@@ -73,6 +73,7 @@
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.arp.ipv4
                        inet.common.serializer.ipv4
+                       inet.common.serializer.headerserializers.arp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -199,6 +200,21 @@
         linkerFlags = ""
         />
     <feature
+        id="Flood"
+        name="Flood"
+        description = "Provides network layer support for deterministic and probabilistic flooding"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.flood
+                       inet.networklayer.probabilistic
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_FLOOD"
+        linkerFlags = ""
+        />
+    <feature
         id="UDP"
         name="UDP protocol"
         description = "UDP protocol"
@@ -252,6 +268,7 @@
         requires = "IPv4 IPv6"
         labels = ""
         nedPackages = "
+                       inet.applications.sctpapp
                        inet.applications.sctpapp
                        inet.transportlayer.sctp
                        inet.common.serializer.sctp
@@ -316,6 +333,7 @@
                        inet.applications.ethernet
                        inet.linklayer.ethernet
                        inet.node.ethernet
+                       inet.common.serializer.headerserializers.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
@@ -461,6 +479,34 @@
         labels = "routing examples"
         nedPackages = "
                        inet.examples.bgpv4
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="PIM"
+        name="PIM"
+        description = "PIM support"
+        initiallyEnabled = "true"
+        requires = "IPv4"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.pim
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PIM"
+        linkerFlags = ""
+        />
+    <feature
+        id="PIM_examples"
+        name="PIM examples"
+        description = "Examples for PIM"
+        initiallyEnabled = "true"
+        requires = "PIM PPP Ethernet"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.pim
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -649,7 +695,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.environment
+                       inet.environment.common
                        inet.environment.objectcache
                       "
         extraSourceFolders = ""
@@ -671,36 +717,9 @@
         linkerFlags = ""
         />
     <feature
-        id="radio"
-        name="Radio"
-        description = "Radio support for wireless simulations"
-        requires = ""
-        labels = ""
-        nedPackages = "
-                       inet.physicallayer.apsk
-                       inet.physicallayer.base
-                       inet.physicallayer.backgroundnoise
-                       inet.physicallayer.antenna
-                       inet.physicallayer.common
-                       inet.physicallayer.errormodel
-                       inet.physicallayer.ideal
-                       inet.physicallayer.mapping
-                       inet.physicallayer.modulation
-                       inet.physicallayer.neighborcache
-                       inet.physicallayer.obstacleloss
-                       inet.physicallayer.pathloss
-                       inet.physicallayer.energyconsumer
-                       inet.physicallayer.propagation
-                       inet.physicallayer.analogmodel
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_RADIO"
-        linkerFlags = ""
-        />
-    <feature
         id="power"
         name="Power"
-        description = "Power supply / Battery / Etc."
+        description = "Provides energy generator, consumer and storage models such as batteries"
         requires = ""
         labels = ""
         nedPackages = "
@@ -714,9 +733,34 @@
         linkerFlags = ""
         />
     <feature
+        id="radio"
+        name="Radio"
+        description = "Radio support for wireless simulations"
+        requires = "power"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.analogmodel
+                       inet.physicallayer.antenna
+                       inet.physicallayer.backgroundnoise
+                       inet.physicallayer.base
+                       inet.physicallayer.common
+                       inet.physicallayer.communicationcache
+                       inet.physicallayer.energyconsumer
+                       inet.physicallayer.errormodel
+                       inet.physicallayer.modulation
+                       inet.physicallayer.neighborcache
+                       inet.physicallayer.obstacleloss
+                       inet.physicallayer.pathloss
+                       inet.physicallayer.propagation
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_RADIO"
+        linkerFlags = ""
+        />
+    <feature
         id="Ieee80211"
-        name="802.11a/b/g/e (ad-hoc and infrastructure mode)"
-        description = "IEEE 802.11a/b/g/e ad-hoc and infrastucture mode NIC"
+        name="IEEE 802.11"
+        description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
@@ -732,8 +776,8 @@
         />
     <feature
         id="Ieee802154"
-        name="802.15.4a UWBIR"
-        description = "IEEE 802.15.4a UWBIR"
+        name="IEEE 802.15.4"
+        description = "Provides IEEE 802.15.4 Narrowband and Ultra-Wideband NICs"
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
@@ -742,22 +786,36 @@
                        inet.physicallayer.ieee802154
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_IEEE80211"
+        compileFlags = "-DWITH_IEEE802154"
+        linkerFlags = ""
+        />
+    <feature
+        id="apskradio"
+        name="APSK radio"
+        description = "Provides a hypothetical generic radio for APSK modulations"
+        requires = "mobility radio"
+        labels = ""
+        nedPackages = "
+                       inet.physicallayer.apskradio
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_APSKRADIO"
         linkerFlags = ""
         />
     <feature
         id="idealwireless"
-        name="Ideal Wireless Communication"
-        description = "Provides a simple (dummy) wireless interface that consists
+        name="Ideal Wireless"
+        description = "Provides a simple wireless interface that consists
         	of a unit disk radio and no real MAC protocol. It offers simplicity
         	for scenarios where Layer 1 and 2 effects can be completely ignored.
         	Parts: IdealWirelessNic (IdealWirelessMac plus IdealRadio), and
-        	IdealChannelModel."
+            IdealRadioMedium."
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ideal
+                       inet.physicallayer.idealradio
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IDEALWIRELESS"
@@ -766,9 +824,9 @@
     <feature
         id="wireless_examples"
         name="wireless examples"
-        description = "wireless examples"
+        description = "Provides various wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 idealwireless"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio idealwireless physicalenvironment AODV"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
@@ -964,6 +1022,63 @@
                       "
         extraSourceFolders = ""
         compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="TUN"
+        name="TUN"
+        description = "Provides TUN/TAP virtual network interfaces"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.applications.tunapp
+                       inet.linklayer.tun
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_TUN"
+        linkerFlags = ""
+        />
+    <feature
+        id="BMAC"
+        name="BMAC"
+        description = "Provides the B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.bmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_BMAC"
+        linkerFlags = ""
+        />
+    <feature
+        id="LMAC"
+        name="LMAC"
+        description = "Provides the L-MAC, a Lightweight Medium Access Protocol for Wireless Sensor Networks"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.lmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_LMAC"
+        linkerFlags = ""
+        />
+    <feature
+        id="CSMA"
+        name="CSMA"
+        description = "Provides link layer support for Carrier Sense Multiple Access protocols"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.csma
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CSMA"
         linkerFlags = ""
         />
 </features>

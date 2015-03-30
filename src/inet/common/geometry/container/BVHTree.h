@@ -21,9 +21,11 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IVisitor.h"
 #include "inet/common/geometry/object/LineSegment.h"
-#include "inet/environment/PhysicalObject.h"
+#include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
+
+using namespace inet::physicalenvironment;
 
 /*
  * A bounding volume hierarchy (BVH) is a tree structure on a set of geometric objects.
@@ -63,7 +65,7 @@ class INET_API BVHTree
         {
             char axis;
             AxisComparator(char axis) : axis(axis) {}
-            bool operator()(const PhysicalObject *left, const PhysicalObject *right) const
+            bool operator()(const IPhysicalObject *left, const IPhysicalObject *right) const
             {
                 Coord leftPos = left->getPosition() + left->getShape()->computeBoundingBoxSize() / 2;
                 Coord rightPos = right->getPosition() + right->getShape()->computeBoundingBoxSize() / 2;
@@ -84,16 +86,16 @@ class INET_API BVHTree
         Coord center;
         BVHTree *left;
         BVHTree *right;
-        std::vector<const PhysicalObject *> objects;
+        std::vector<const IPhysicalObject *> objects;
 
     protected:
         bool isLeaf() const;
-        void buildHierarchy(std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis);
-        void computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end) const;
+        void buildHierarchy(std::vector<const IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis);
+        void computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const IPhysicalObject *>& objects, unsigned int start, unsigned int end) const;
         bool intersectWithLineSegment(const LineSegment& lineSegment) const;
 
     public:
-        BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
+        BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
         virtual ~BVHTree();
         void lineSegmentQuery(const LineSegment& lineSegment,  const IVisitor *visitor) const;
 };

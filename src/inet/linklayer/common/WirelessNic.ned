@@ -19,7 +19,7 @@ package inet.linklayer.common;
 
 import inet.linklayer.contract.IMACProtocol;
 import inet.linklayer.contract.IWirelessNic;
-import inet.physicallayer.contract.IRadio;
+import inet.physicallayer.contract.packetlevel.IRadio;
 
 module WirelessNic like IWirelessNic
 {

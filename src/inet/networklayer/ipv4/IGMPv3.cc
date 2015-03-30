@@ -694,6 +694,7 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
 
     //HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     IGMPv3Report *report = new IGMPv3Report("IGMPv3 report");
+    unsigned int byteLength = 8;   // IGMPv3Report header size
     report->setType(IGMPV3_MEMBERSHIP_REPORT);
     int counter = 0;
     report->setGroupRecordArraySize(interfaceData->groups.size());
@@ -715,14 +716,19 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
         gr.groupAddress = elem.second->groupAddr;
         gr.sourceList = elem.second->sourceAddressList;
         report->setGroupRecord(counter++, gr);
+        byteLength += 8 + gr.sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
     }
+    report->setByteLength(byteLength);
+
     if (counter != 0) {    //if no record created, dont need to send report
         EV_INFO << "Sending response to a General Query on interface '" << ie->getName() << "'.\n";
         sendReportToIP(report, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
     }
-    else
+    else {
         EV_INFO << "There are no multicast listeners, no response is sent to a General Query on interface '" << ie->getName() << "'.\n";
+        delete report;
+    }
 }
 
 // RFC 3376 5.2  report generation, point 2. and 3.
@@ -971,13 +977,16 @@ void IGMPv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
 {
     EV << "IGMPv3: sending Membership Report on iface=" << ie->getName() << "\n";
     IGMPv3Report *msg = new IGMPv3Report("IGMPv3 report");
+    unsigned int byteLength = 8;   // IGMPv3Report header size
     msg->setType(IGMPV3_MEMBERSHIP_REPORT);
     msg->setGroupRecordArraySize(records.size());
     for (int i = 0; i < (int)records.size(); ++i) {
         IPv4Address group = records[i].groupAddress;
         ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
         msg->setGroupRecord(i, records[i]);
+        byteLength += 8 + records[i].sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
     }
+    msg->setByteLength(byteLength);
 
     sendReportToIP(msg, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     numReportsSent++;

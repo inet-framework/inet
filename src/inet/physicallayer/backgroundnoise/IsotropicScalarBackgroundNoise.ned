@@ -17,7 +17,7 @@
 
 package inet.physicallayer.backgroundnoise;
 
-import inet.physicallayer.contract.IRadioBackgroundNoise;
+import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
 
 //
 // This background noise model describes noise that does not change over space,

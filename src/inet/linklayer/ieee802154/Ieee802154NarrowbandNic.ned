@@ -19,8 +19,7 @@
 package inet.linklayer.ieee802154;
 
 import inet.linklayer.contract.IWirelessNic;
-import inet.linklayer.csma.CSMA;
-import inet.physicallayer.contract.IRadio;
+import inet.physicallayer.contract.packetlevel.IRadio;
 
 module Ieee802154NarrowbandNic like IWirelessNic
 {

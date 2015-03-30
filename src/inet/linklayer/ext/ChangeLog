@@ -36,6 +36,12 @@
 
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
+2015-03-22  Artur Scussel
+
+	and 500us on othe platforms. This allows getting much smaller response times when a 
+	component receives a packet from the outside world while maintaining relatively low CPU 
+	usage for polling.
+
 2015-03-04  ------ inet-2.6 released ------
 
 2014-11-07  ------ inet-2.5.1 released ------

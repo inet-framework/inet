@@ -18,10 +18,11 @@
 #ifndef __INET_TRACINGOBSTACLELOSS_H
 #define __INET_TRACINGOBSTACLELOSS_H
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
-#include "inet/physicallayer/contract/IObstacleLoss.h"
+#include "inet/common/IVisitor.h"
 #include "inet/common/TrailFigure.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 
 namespace inet {
 
@@ -61,11 +62,15 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     /**
      * The physical environment that provides to obstacles.
      */
-    PhysicalEnvironment *environment;
+    IPhysicalEnvironment *environment;
     /**
      * Leaves graphical trail of obstacle intersections.
      */
     bool leaveIntersectionTrail;
+    /**
+     * Leaves graphical trail of intersection face normal vectors.
+     */
+    bool leaveFaceNormalVectorTrail;
     //@}
 
     /** @name Graphics */
@@ -92,9 +97,9 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     virtual void initialize(int stage) override;
     virtual void finish() override;
 
-    virtual double computeDielectricLoss(const Material *material, Hz frequency, m distance) const;
-    virtual double computeReflectionLoss(const Material *incidentMaterial, const Material *refractiveMaterial, double angle) const;
-    virtual double computeObjectLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
+    virtual double computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const;
+    virtual double computeReflectionLoss(const IMaterial *incidentMaterial, const IMaterial *refractiveMaterial, double angle) const;
+    virtual double computeObjectLoss(const IPhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
 
   public:
     TracingObstacleLoss();

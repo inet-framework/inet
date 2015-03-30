@@ -62,6 +62,7 @@ enum Ieee80211FrameType
 
     // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
+    ST_DATA_WITH_QOS = 0x28;
     //Feedback frame for multicast tramsmission
     ST_LBMS_REQUEST = 0x30;
     ST_LBMS_REPORT = 0x31;
@@ -151,12 +152,14 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
 //  field is set to 1 (8.3.2.1 Data frame format)
-//  FIXME: byteLength is not a constant value (LENGTH_DATAHDR / 8 = 34).
-//  For example, with Address 4 and without QoS the correct length is 38 bytes.
-//  Without Address 4 and QoS the correct value is indeed 34.
-    byteLength = LENGTH_DATAHDR / 8;
-    type = ST_DATA;
-    MACAddress address4;
+//  FIXME: byteLength is not a constant value (DATAFRAME_HEADER_MINLENGTH / 8 = 28).
+//  For example, with Address 4 and without QoS the correct length is 34 bytes.
+//  Without Address 4 and QoS the correct value is indeed 28.
+//  With Address 4 and QoS the correct value is indeed 36.
+    byteLength = DATAFRAME_HEADER_MINLENGTH / 8;
+    type = ST_DATA;         // or ST_DATA_WITH_QOS
+    MACAddress address4;    // optional field, exists when toDS and fromDS are true
+    uint16 qos;             // optional field, exists when type = ST_DATA_WITH_QOS
 }
 
 //
@@ -164,7 +167,7 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {
-    byteLength = LENGTH_DATAHDR / 8 + SNAP_HEADER_BYTES;
+    byteLength = DATAFRAME_HEADER_MINLENGTH / 8 + SNAP_HEADER_BYTES;
     int etherType @enum(EtherType);
 }
 

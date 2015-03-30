@@ -22,8 +22,7 @@ package inet.linklayer.ideal;
 
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IWirelessNic;
-import inet.physicallayer.contract.IRadio;
-
+import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
 // Highly abstracted wireless NIC that consists of a unit disk radio and a trivial

@@ -27,7 +27,7 @@
 
 package inet.applications.netperfmeter;
 
-import inet.applications.INetPerfMeterApp;
+import inet.applications.contract.INetPerfMeterApp;
 import inet.node.inet.NodeBase;
 import inet.transportlayer.contract.ISCTP;
 import inet.transportlayer.contract.ITCP;

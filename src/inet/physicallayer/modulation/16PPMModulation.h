@@ -18,7 +18,7 @@
 #ifndef __INET_16PPMMODULATION_H
 #define __INET_16PPMMODULATION_H
 
-#include "inet/physicallayer/base/PPMModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/PPMModulationBase.h"
 
 namespace inet {
 

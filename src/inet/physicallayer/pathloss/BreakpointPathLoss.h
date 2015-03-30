@@ -1,7 +1,7 @@
 #ifndef __INET_BREAKPOINTPATHLOSS_H
 #define __INET_BREAKPOINTPATHLOSS_H
 
-#include "inet/physicallayer/contract/IPathLoss.h"
+#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 
 namespace inet {
 

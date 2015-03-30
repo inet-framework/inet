@@ -25,6 +25,8 @@
 
 namespace inet {
 
+//TODO need solution for fragments with encapsulated RawPacket contains bytes of fragment or bytes of total packet
+
 IPv4FragBuf::IPv4FragBuf()
 {
     icmpModule = nullptr;

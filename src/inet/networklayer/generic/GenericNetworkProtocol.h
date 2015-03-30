@@ -22,7 +22,7 @@
 #include <list>
 #include <map>
 
-#include "inet/networklayer/arp/IARP.h"
+#include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

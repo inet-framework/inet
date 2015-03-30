@@ -17,13 +17,13 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
 
-#include "inet/physicallayer/contract/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/common/NotifierConsts.h"
-#include "inet/physicallayer/contract/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/Ieee80211aControlInfo_m.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {
@@ -369,7 +369,7 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, c
             return;
         if (frame->getType() != ST_BEACON)
             return;
-        Radio80211aControlInfo *ctl = dynamic_cast<Radio80211aControlInfo *>(frame->getControlInfo());
+        Ieee80211ReceptionIndication *ctl = dynamic_cast<Ieee80211ReceptionIndication *>(frame->getControlInfo());
         if (ctl == nullptr)
             return;
         Ieee80211BeaconFrame *beacon = (check_and_cast<Ieee80211BeaconFrame *>(frame));

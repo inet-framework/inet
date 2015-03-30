@@ -18,8 +18,8 @@
 #ifndef __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 #define __INET_ISOTROPICDIMENSIONALBACKGROUNDNOISE_H
 
-#include "inet/physicallayer/contract/IBackgroundNoise.h"
-#include "inet/physicallayer/mapping/MappingBase.h"
+#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/common/mapping/MappingBase.h"
 
 namespace inet {
 

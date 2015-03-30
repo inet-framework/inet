@@ -9,7 +9,7 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.ideal.IdealRadioMedium;
+import inet.physicallayer.idealradio.IdealRadioMedium;
 
 network Test
 {
@@ -25,7 +25,7 @@ network Test
 
 [General]
 network = Test
-sim-time-limit = 400us
+sim-time-limit = 500us
 record-eventlog = true
 ned-path = .;../../../../src
 
@@ -52,6 +52,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].mac.fullDuplex = false
 *.host*.wlan[*].radioType = "IdealRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
 *.hostSender1.wlan[*].radio.transmitter.maxCommunicationRange = 150m
 *.hostSender1.wlan[*].radio.transmitter.maxInterferenceRange = 300m

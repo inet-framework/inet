@@ -7,7 +7,7 @@ The received signal is strong enough to sense but too weak to receive.
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.ideal.IdealRadioMedium;
+import inet.physicallayer.idealradio.IdealRadioMedium;
 
 network Test
 {
@@ -22,7 +22,7 @@ network Test
 
 [General]
 network = Test
-sim-time-limit = 400us
+sim-time-limit = 80us
 record-eventlog = true
 ned-path = .;../../../../src
 
@@ -48,6 +48,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].mac.fullDuplex = false
 *.host*.wlan[*].radioType = "IdealRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 200m
 *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 400m
 *.host*.wlan[*].radio.transmitter.maxDetectionRange = 600m

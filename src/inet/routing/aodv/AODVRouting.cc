@@ -409,7 +409,7 @@ AODVRREQ *AODVRouting::createRREQ(const L3Address& destAddr)
 
     RREQIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
-
+    rreqPacket->setByteLength(24);
     return rreqPacket;
 }
 
@@ -488,6 +488,8 @@ AODVRREP *AODVRouting::createRREP(AODVRREQ *rreq, IRoute *destRoute, IRoute *ori
 
         rrep->setLifeTime(destRouteData->getLifeTime() - simTime());
     }
+
+    rrep->setByteLength(20);
     return rrep;
 }
 
@@ -521,6 +523,7 @@ AODVRREP *AODVRouting::createGratuitousRREP(AODVRREQ *rreq, IRoute *originatorRo
     grrep->setOriginatorAddr(rreq->getDestAddr());
     grrep->setLifeTime(routeData->getLifeTime());
 
+    grrep->setByteLength(20);
     return grrep;
 }
 
@@ -663,10 +666,10 @@ void AODVRouting::handleRREP(AODVRREP *rrep, const L3Address& sourceAddr)
                 // source (originator).
 
                 IRoute *nextHopToDestRoute = routingTable->findBestMatchingRoute(destRoute->getNextHopAsGeneric());
-                ASSERT(nextHopToDestRoute);
-                AODVRouteData *nextHopToDestRouteData = check_and_cast<AODVRouteData *>(nextHopToDestRoute->getProtocolData());
-                nextHopToDestRouteData->addPrecursor(originatorRoute->getNextHopAsGeneric());
-
+                if (nextHopToDestRoute && nextHopToDestRoute->getSource() == this) {
+                    AODVRouteData *nextHopToDestRouteData = check_and_cast<AODVRouteData *>(nextHopToDestRoute->getProtocolData());
+                    nextHopToDestRouteData->addPrecursor(originatorRoute->getNextHopAsGeneric());
+                }
                 AODVRREP *outgoingRREP = rrep->dup();
                 forwardRREP(outgoingRREP, originatorRoute->getNextHopAsGeneric(), 100);
             }
@@ -1115,6 +1118,8 @@ AODVRERR *AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachabl
         node.seqNum = unreachableNodes[i].seqNum;
         rerr->setUnreachableNodes(i, node);
     }
+
+    rerr->setByteLength(4 + 4 * 2 * destCount);
     return rerr;
 }
 

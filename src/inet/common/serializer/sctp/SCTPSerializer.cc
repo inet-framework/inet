@@ -24,13 +24,17 @@
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/common/serializer/headers/in.h"
 #include "inet/common/serializer/ipv4/headers/ip.h"
+#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/serializer/sctp/headers/sctphdr.h"
 
 #include "inet/common/serializer/sctp/SCTPSerializer.h"
 
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/common/serializer/ipv4/IPv4Serializer.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
+
+#include "inet/networklayer/common/IPProtocolId_m.h"
+
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...
@@ -42,15 +46,32 @@
 
 namespace inet {
 
-using namespace serializer;
+using namespace sctp;
 
-namespace sctp {
+namespace serializer {
+
+Register_Serializer(sctp::SCTPMessage, IP_PROT, IP_PROT_SCTP, SCTPSerializer);
 
 unsigned char SCTPSerializer::keyVector[512];
 unsigned int SCTPSerializer::sizeKeyVector = 0;
 unsigned char SCTPSerializer::peerKeyVector[512];
 unsigned int SCTPSerializer::sizePeerKeyVector = 0;
 unsigned char SCTPSerializer::sharedKey[512];
+
+void SCTPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
+{
+    int32 len = serialize(check_and_cast<const SCTPMessage *>(pkt), static_cast<unsigned char *>(b.accessNBytes(0)), b.getRemainder());
+    b.accessNBytes(len);
+}
+
+cPacket* SCTPSerializer::deserialize(Buffer &b, Context& context)
+{
+    SCTPMessage *dest = new SCTPMessage("parsed-sctp");
+    parse(static_cast<uint8 *>(b.accessNBytes(0)), b.getRemainder(), dest);
+    b.accessNBytes(b.getRemainder());
+    return dest;
+}
+
 
 int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint32 bufsize)
 {
@@ -129,12 +150,22 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 ic->initial_tsn = htonl(initChunk->getInitTSN());
                 int32 parPtr = 0;
                 // Var.-Len. Parameters
-                struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
-                sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
-                sup_addr->length = htons(8);
-                sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
-                sup_addr->address_type_2 = htons(INIT_PARAM_IPV6);
-                parPtr += 8;
+                if (initChunk->getIpv4Supported() || initChunk->getIpv6Supported()) {
+                    struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
+                    sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
+                    sup_addr->length = htons(8);
+                    if (initChunk->getIpv4Supported() && initChunk->getIpv6Supported()) {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
+                        sup_addr->address_type_2 = htons(INIT_PARAM_IPV6);
+                    } else if (initChunk->getIpv4Supported()) {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
+                        sup_addr->address_type_2 = 0;
+                    } else {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV6);
+                        sup_addr->address_type_2 = 0;
+                    }
+                    parPtr += 8;
+                }
                 if (initChunk->getForwardTsn() == true) {
                     struct forward_tsn_supported_parameter *forward = (struct forward_tsn_supported_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                     forward->type = htons(FORWARD_TSN_SUPPORTED_PARAMETER);
@@ -245,13 +276,22 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 iac->initial_tsn = htonl(initAckChunk->getInitTSN());
                 // Var.-Len. Parameters
                 int32 parPtr = 0;
-
-                struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
-                sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
-                sup_addr->length = htons(6);
-                sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
-                parPtr += 8;
-
+                if (initAckChunk->getIpv4Supported() || initAckChunk->getIpv6Supported()) {
+                    struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
+                    sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
+                    sup_addr->length = htons(8);
+                    if (initAckChunk->getIpv4Supported() && initAckChunk->getIpv6Supported()) {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
+                        sup_addr->address_type_2 = htons(INIT_PARAM_IPV6);
+                    } else if (initAckChunk->getIpv4Supported()) {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV4);
+                        sup_addr->address_type_2 = 0;
+                    } else {
+                        sup_addr->address_type_1 = htons(INIT_PARAM_IPV6);
+                        sup_addr->address_type_2 = 0;
+                    }
+                    parPtr += 8;
+                }
                 if (initAckChunk->getForwardTsn() == true) {
                     struct forward_tsn_supported_parameter *forward = (struct forward_tsn_supported_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     forward->type = htons(FORWARD_TSN_SUPPORTED_PARAMETER);
@@ -356,7 +396,6 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         hp->ident[i] = htons(initAckChunk->getHmacTypes(i));
                     }
                     parPtr += ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize());
-
                     for (unsigned int k = 0; k < min(sizeVector, 64); k++) {
                         if (sizeKeyVector != 0)
                             peerKeyVector[k] = vector[k];
@@ -386,8 +425,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
                     }
                     parPtr += (SCTP_COOKIE_LENGTH + 4);
-                }
-                else {
+                } else {
                     struct tlv *cookie = (struct tlv *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(cookielen + 4);
@@ -913,8 +951,9 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             struct error_cause *errorc = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk));
                             errorc->cause_code = htons(ecp->getParameterType());
                             if (check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()) != nullptr) {
-                                IPv4Serializer().serialize(check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()),
-                                        ((unsigned char *)error) + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
+                                Buffer b((unsigned char *)error + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
+                                Context c;
+                                IPv4Serializer().serializePacket(ecp->getEncapsulatedPacket(), b, c);
                             }
                             errorc->length = htons(ecp->getByteLength());
                         }
@@ -1043,8 +1082,14 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             auth->hmac[k] = result[k];
     }
     // finally, set the CRC32 checksum field in the SCTP common header
-
     ch->checksum = checksum((unsigned char *)ch, writtenbytes);
+
+    // check the serialized packet length
+    if (writtenbytes != msg->getByteLength()) {
+        throw cRuntimeError("SCTP Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
+                writtenbytes, (unsigned long)msg->getByteLength(), msg->getClassName(), msg->getFullName());
+    }
+
     return writtenbytes;
 }
 
@@ -1186,6 +1231,18 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         EV_INFO << "search for param " << paramType << "\n";
                         switch (paramType) {
                             case SUPPORTED_ADDRESS_TYPES: {
+                                const struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
+                                if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV4) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV4)) {
+                                    chunk->setIpv4Supported(true);
+                                } else {
+                                    chunk->setIpv4Supported(false);
+                                }
+                                if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV6) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV6)) {
+                                    chunk->setIpv6Supported(true);
+                                } else {
+                                    chunk->setIpv6Supported(false);
+                                }
+                                chunklen += 8;
                                 break;
                             }
 
@@ -1375,6 +1432,18 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         //sctpEV3<<"ParamType = "<<paramType<<" parameterLength="<<ntohs(parameter->length)<<"\n";
                         switch (paramType) {
                             case SUPPORTED_ADDRESS_TYPES: {
+                                const struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
+                                if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV4) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV4)) {
+                                    chunk->setIpv4Supported(true);
+                                } else {
+                                    chunk->setIpv4Supported(false);
+                                }
+                                if (sup_addr->address_type_1 == ntohs(INIT_PARAM_IPV6) || sup_addr->address_type_2 == ntohs(INIT_PARAM_IPV6)) {
+                                    chunk->setIpv6Supported(true);
+                                } else {
+                                    chunk->setIpv6Supported(false);
+                                }
+                                chunklen += 8;
                                 break;
                             }
 

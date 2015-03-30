@@ -1,6 +1,2 @@
 #!/bin/sh
-./smoketest -c -m wireless
-./smoketest -c -m adhoc
-./smoketest -c -m manet 
-./smoketest -c -m mobileipv6
-./smoketest -c -m WirelessDHCP
+./smoketest -c -m wireless -m adhoc -m manet -m mobileipv6 -m WirelessDHCP

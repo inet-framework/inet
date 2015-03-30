@@ -17,25 +17,9 @@
 
 package inet.node.inet;
 
-import inet.networklayer.pim.PIMRouting;
-
-//
-// TODO
-//
 module MulticastRouter extends Router
 {
     parameters:
-        @display("i=abstract/router");
-        bool hasPIM = default(true);
+        hasPIM = default(true);
         multicastForwarding = true;
-    submodules:
-        pim: PIMRouting if hasPIM {
-            @display("p=175,287");
-        }
-    connections allowunconnected:
-
-        if hasPIM {
-            pim.networkLayerOut --> networkLayer.transportIn++;
-            pim.networkLayerIn <-- networkLayer.transportOut++;
-        }
 }

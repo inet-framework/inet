@@ -71,6 +71,9 @@ void GPSR::initialize(int stage)
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
+
+        // packet size
+        positionByteLength = par("positionByteLength");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         IPSocket socket(gate("ipOut"));
@@ -203,6 +206,7 @@ GPSRBeacon *GPSR::createBeacon()
     GPSRBeacon *beacon = new GPSRBeacon();
     beacon->setAddress(getSelfAddress());
     beacon->setPosition(mobility->getCurrentPosition());
+    beacon->setByteLength(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength);
     return beacon;
 }
 
@@ -247,13 +251,13 @@ GPSRPacket *GPSR::createPacket(L3Address destination, cPacket *content)
 int GPSR::computePacketBitLength(GPSRPacket *packet)
 {
     // routingMode
-    int routingMode = 1;
+    int routingModeBits = 1;
     // destinationPosition, perimeterRoutingStartPosition, perimeterRoutingForwardPosition
-    int positions = 8 * 3 * 2 * 4;
+    int positionsBits = 3 * 8 * positionByteLength;
     // currentFaceFirstSenderAddress, currentFaceFirstReceiverAddress, senderAddress
-    int addresses = 8 * 3 * 4;
+    int addressesBits = 3 * 8 * getSelfAddress().getAddressType()->getAddressByteLength();
     // TODO: address size
-    return routingMode + positions + addresses;
+    return routingModeBits + positionsBits + addressesBits;
 }
 
 //

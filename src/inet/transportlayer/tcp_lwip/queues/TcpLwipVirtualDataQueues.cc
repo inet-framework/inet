@@ -79,9 +79,7 @@ TCPSegment *TcpLwipVirtualDataSendQueue::createSegmentWithBytes(const void *tcpD
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = new TCPSegment("");
-
-    TCPSerializer().parse((const unsigned char *)tcpDataP, tcpLengthP, tcpseg, false);
+    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];

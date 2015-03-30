@@ -15,6 +15,8 @@
 
 package inet.environment.objectcache;
 
+import inet.environment.contract.IObjectCache;
+
 //
 // This object cache model stores physical objects in a spatial grid. Each cell
 // maintains a list of intersecting physical objects. The grid is aligned with
@@ -31,6 +33,6 @@ module GridObjectCache like IObjectCache
         int cellCountX = default(10); // divide space to so many cells
         int cellCountY = default(10); // divide space to so many cells
         int cellCountZ = default(10); // divide space to so many cells
-        @display("i=block/cogwheel");
+        @display("i=block/table2");
         @class(GridObjectCache);
 }

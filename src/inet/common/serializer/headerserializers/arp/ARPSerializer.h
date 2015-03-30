@@ -17,29 +17,50 @@
 #define __INET_ARPSERIALIZER_H
 
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/serializer/SerializerBase.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 
 namespace serializer {
+
 /**
  * Converts between ARPPacket and binary (network byte order)  ARP header.
  */
-
-class ARPSerializer
+class ARPSerializer : public SerializerBase
 {
-    public:
+  protected:
+    /**
+     * Serializes an ARPPacket for transmission on the wire.
+     * Returns the length of data written into buffer.
+     */
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
 
+    /**
+     * Puts a packet sniffed from the wire into an ARPPacket.
+     */
+    virtual cPacket *deserialize(Buffer &b, Context& context) override;
+
+    MACAddress readMACAddress(Buffer& b, unsigned int size);
+    IPv4Address readIPv4Address(Buffer& b, unsigned int size);
+
+  public:
+    ARPSerializer(const char *name = nullptr) : SerializerBase(name) {}
+
+    //TODO remove next 2 functions
         /**
          * Serializes an ARPPacket for transmission on the wire.
          * Returns the length of data written into buffer.
          */
-        int serialize(const ARPPacket *pkt, unsigned char *buf, unsigned int bufsize);
+        int serialize(const ARPPacket *pkt, unsigned char *buf, unsigned int bufsize)
+        { Buffer b(buf, bufsize); Context c; serialize(pkt, b, c); return b.getPos(); }
 
         /**
          * Puts a packet sniffed from the wire into an ARPPacket.
          */
-        void parse(const unsigned char *buf, unsigned int bufsize, ARPPacket *pkt);
+        ARPPacket *parse(const unsigned char *buf, unsigned int bufsize)
+        { Buffer b(const_cast<unsigned char *>(buf), bufsize); Context c; return check_and_cast<ARPPacket *>(deserialize(b, c)); }
 };
 
 } // namespace serializer

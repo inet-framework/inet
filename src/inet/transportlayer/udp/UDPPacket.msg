@@ -23,12 +23,18 @@ cplusplus {{
 
 namespace inet;
 
+enum UdpConstants{
+    UDP_HDR_LEN = 8;
+};
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
 packet UDPPacket
 {
-    unsigned short sourcePort;
-    unsigned short destinationPort;
+    @customize(true);
+
+    unsigned short srcPort;
+    unsigned short destPort;
+    byteLength = UDP_HDR_LEN;
 }
 

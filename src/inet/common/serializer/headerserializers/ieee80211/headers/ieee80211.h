@@ -75,6 +75,17 @@ struct ieee80211_frame {
     /* possibly followed by addr4[IEEE80211_ADDR_LEN]; */
     /* see below */
 } __PACKED__;
+enum {
+    ieee80211_frame_i_fc_0 = 0,
+    ieee80211_frame_i_fc_1 = 1,
+    ieee80211_frame_i_dur = 2,
+    ieee80211_frame_i_addr1 = 4,
+    ieee80211_frame_i_addr2 = ieee80211_frame_i_addr1 + IEEE80211_ADDR_LEN,
+    ieee80211_frame_i_addr3 = ieee80211_frame_i_addr2 + IEEE80211_ADDR_LEN,
+    ieee80211_frame_i_seq = ieee80211_frame_i_addr3 + IEEE80211_ADDR_LEN,
+    ieee80211_frame_i_END = ieee80211_frame_i_seq + 2
+};
+
 
 struct ieee80211_qosframe {
     uint8_t     i_fc[2];
@@ -456,6 +467,14 @@ struct ieee80211_frame_rts {
     uint8_t     i_ta[IEEE80211_ADDR_LEN];
     /* FCS */
 } __PACKED__;
+enum {
+    ieee80211_frame_rts_i_fc_0 = 0,
+    ieee80211_frame_rts_i_fc_1 = 1,
+    ieee80211_frame_rts_i_dur = 2,
+    ieee80211_frame_rts_i_ra = 4,
+    ieee80211_frame_rts_i_ta = ieee80211_frame_rts_i_ra + IEEE80211_ADDR_LEN,
+    ieee80211_frame_rts_i_END = ieee80211_frame_rts_i_ta + IEEE80211_ADDR_LEN
+};
 
 struct ieee80211_frame_cts {
     uint8_t     i_fc[2];
@@ -463,6 +482,13 @@ struct ieee80211_frame_cts {
     uint8_t     i_ra[IEEE80211_ADDR_LEN];
     /* FCS */
 } __PACKED__;
+enum {
+    ieee80211_frame_cts_i_fc_0 = 0,
+    ieee80211_frame_cts_i_fc_1 = 1,
+    ieee80211_frame_cts_i_dur = 2,
+    ieee80211_frame_cts_i_ra = 4,
+    ieee80211_frame_cts_i_END = 4 + IEEE80211_ADDR_LEN
+};
 
 struct ieee80211_frame_ack {
     uint8_t     i_fc[2];

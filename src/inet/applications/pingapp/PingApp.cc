@@ -191,7 +191,7 @@ void PingApp::sendPingRequest()
     PingPayload *msg = new PingPayload(name);
     msg->setOriginatorId(pid);
     msg->setSeqNo(sendSeqNo);
-    msg->setByteLength(packetSize);
+    msg->setByteLength(packetSize + 4);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();

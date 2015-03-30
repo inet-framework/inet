@@ -21,9 +21,11 @@
  **************************************************************************/
 
 #include "inet/mobility/base/MovingMobilityBase.h"
-#include "inet/environment/PhysicalEnvironment.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 
 namespace inet {
+
+using namespace inet::physicalenvironment;
 
 MovingMobilityBase::MovingMobilityBase() :
     moveTimer(nullptr),
@@ -51,9 +53,9 @@ void MovingMobilityBase::initialize(int stage)
         updateInterval = par("updateInterval");
         leaveMovementTrail = par("leaveMovementTrail");
         if (leaveMovementTrail) {
-            movementTrail = new TrailFigure(100, "movement trail");
+            movementTrail = new TrailFigure(100, true, "movement trail");
             cCanvas *canvas = visualRepresentation->getParentModule()->getCanvas();
-            canvas->addFigure(movementTrail, canvas->findFigure("submodules"));
+            canvas->addFigureBelow(movementTrail, canvas->getSubmodulesLayer());
         }
     }
 }
@@ -82,18 +84,25 @@ void MovingMobilityBase::updateVisualRepresentation()
     if (leaveMovementTrail && visualRepresentation && ev.isGUI()) {
         cFigure::Point startPosition;
         if (movementTrail->getNumFigures() == 0)
-            startPosition = PhysicalEnvironment::computeCanvasPoint(lastPosition);
+            startPosition = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
         else
             startPosition = static_cast<cLineFigure *>(movementTrail->getFigure(movementTrail->getNumFigures() - 1))->getEnd();
-        cFigure::Point endPosition = PhysicalEnvironment::computeCanvasPoint(lastPosition);
+        cFigure::Point endPosition = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
         double dx = startPosition.x - endPosition.x;
         double dy = startPosition.y - endPosition.y;
-        if (movementTrail->getNumFigures() == 0 || (dx * dx + dy * dy) > 100) {
+        if (movementTrail->getNumFigures() == 0 || dx * dx + dy * dy > (lastSpeed * updateInterval.dbl()).squareLength()) {
             cLineFigure *movementLine = new cLineFigure();
             movementLine->setTags("movement_trail recent_history");
             movementLine->setStart(startPosition);
             movementLine->setEnd(endPosition);
+            movementLine->setLineWidth(1);
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+            cFigure::Color color = cFigure::GOOD_DARK_COLORS[getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+            movementLine->setLineColor(color);
+            movementLine->setScaleLineWidth(false);
+#else
             movementLine->setLineColor(cFigure::BLACK);
+#endif
             movementTrail->addFigure(movementLine);
         }
     }

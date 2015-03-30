@@ -12,7 +12,7 @@
 #ifndef __INET_LMACLAYER_H
 #define __INET_LMACLAYER_H
 
-#include "inet/physicallayer/contract/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMACProtocol.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/base/MACProtocolBase.h"

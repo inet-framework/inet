@@ -38,6 +38,8 @@ class TCPIPchecksum
      * segment contains an odd number of header and text octets to be
      * checksummed, the last octet is padded on the right with zeros to
      * form a 16 bit word for checksum purposes
+     *
+     * calculated checksum in host byte order
      */
     static uint16_t checksum(const void *addr, unsigned int count)
     {
@@ -45,6 +47,9 @@ class TCPIPchecksum
     }
 
     static uint16_t _checksum(const void *addr, unsigned int count);
+
+    static uint16_t checksum(unsigned int protocolId, const void *packet, unsigned int packetLength,
+            const void *addr, unsigned int addrLength);
 };
 
 } // namespace serializer

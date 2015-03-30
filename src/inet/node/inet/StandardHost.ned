@@ -25,6 +25,7 @@ import inet.applications.contract.IUDPApp;
 import inet.transportlayer.contract.ISCTP;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
+import inet.applications.contract.ITunApp;
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and applications.
@@ -51,15 +52,20 @@ module StandardHost extends NodeBase
         int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
         int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
         int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
-        bool hasTcp = default(numTcpApps>0);
-        bool hasUdp = default(numUdpApps>0);
-        bool hasSctp = default(numSctpApps>0);
+        bool hasTcp = default(numTcpApps > 0);
+        bool hasUdp = default(numUdpApps > 0);
+        bool hasSctp = default(numSctpApps > 0);
+        bool hasTun = default(numTunInterfaces > 0);
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
         forwarding = default(false);  // disable routing by default
         networkLayer.proxyARP = default(false);
     submodules:
+        tunApp[numTunInterfaces]: <> like ITunApp {
+            parameters:
+                @display("p=280,40");
+        }
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
                 @display("p=147,54,row,60");
@@ -114,5 +120,10 @@ module StandardHost extends NodeBase
         for i=0..numPingApps-1 {
             networkLayer.pingOut++ --> pingApp[i].pingIn;
             networkLayer.pingIn++ <-- pingApp[i].pingOut;
+        }
+
+        for i=0..numTunInterfaces-1 {
+            tunApp[i].tunOut --> tun[i].appIn if hasTun;
+            tunApp[i].tunIn <-- tun[i].appOut if hasTun;
         }
 }

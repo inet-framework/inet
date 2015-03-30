@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace physicalenvironment {
+
 Define_Module(BVHObjectCache);
 
 BVHObjectCache::BVHObjectCache() :
@@ -45,7 +47,7 @@ void BVHObjectCache::initialize(int stage)
     }
 }
 
-bool BVHObjectCache::insertObject(const PhysicalObject *object)
+bool BVHObjectCache::insertObject(const IPhysicalObject *object)
 {
     if (bvhTree) {
         delete bvhTree;
@@ -61,6 +63,8 @@ void BVHObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& li
         bvhTree = new BVHTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, BVHTree::Axis(axisOrder), leafCapacity);
     bvhTree->lineSegmentQuery(lineSegment, visitor);
 }
+
+} // namespace physicalenvironment
 
 } // namespace inet
 

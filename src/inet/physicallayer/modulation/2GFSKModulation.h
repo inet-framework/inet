@@ -18,7 +18,7 @@
 #ifndef __INET_2GFSKMODULATION_H
 #define __INET_2GFSKMODULATION_H
 
-#include "inet/physicallayer/base/GFSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/GFSKModulationBase.h"
 
 namespace inet {
 

@@ -27,7 +27,7 @@ const unsigned int LENGTH_RTS = 160;    //bits
 const unsigned int LENGTH_CTS = 112;    //bits
 const unsigned int LENGTH_ACK = 112;    //bits
 const unsigned int LENGTH_MGMT = 28 * 8;    //bits
-const unsigned int LENGTH_DATAHDR = 34 * 8;    //bits
+const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4, without SNAP: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
 
 const unsigned int SNAP_HEADER_BYTES = 8;
 

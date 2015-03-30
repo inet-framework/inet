@@ -5,7 +5,7 @@ with the IEEE802.11 standard puncture matrix defined in the INI file.
 %file: test.ned
 
 import ieee80211.Ieee80211BitDomainTest;
-import inet.physicallayer.common.layered.ConvolutionalCoder;
+import inet.physicallayer.common.bitlevel.ConvolutionalCoder;
 
 network ConvCoder
 {
