@@ -161,13 +161,16 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
         EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
     dest->setByteLength(headerLength);
-
+    unsigned int payloadLength = totalLength - headerLength;
+    unsigned int trailerLength = payloadLength < b.getRemainder() ? b.getRemainder() - payloadLength : 0;
     cPacket *encapPacket = nullptr;
     if (dest->getMoreFragments() || dest->getFragmentOffset() != 0) {  // IP fragment
-        encapPacket = serializers.byteArraySerializer.deserialize(b, c);
+        Buffer subBuffer(b, trailerLength);
+        encapPacket = serializers.byteArraySerializer.deserialize(subBuffer, c);
+        b.accessNBytes(subBuffer.getPos());
     }
     else
-        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), 0);
+        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), trailerLength);
 
     if (encapPacket) {
         dest->encapsulate(encapPacket);
