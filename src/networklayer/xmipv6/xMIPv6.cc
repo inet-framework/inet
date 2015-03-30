@@ -36,6 +36,7 @@
 #include "NemoBindingUpdateList.h"
 #include "NemoBindingUpdateListAccess.h"
 #include "RoutingTable6Access.h"
+#include "PrefixTable.h"
 
 
 #define MK_SEND_PERIODIC_BU            1
@@ -1295,8 +1296,9 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
                         return;
                 }
 
-                bool existingBinding = bc->isInBindingCache(HoA);
-                bc->addOrUpdateBC(HoA, CoA, buLifetime, buSequence, homeRegistration); // moved to there, 11.9.07 - CB
+                bool existingBinding = nbc->isInBindingCache(HoA);
+                nbc->addOrUpdateBC(HoA, CoA, buLifetime, buSequence, homeRegistration); // moved to there, 11.9.07 - CB
+                pt->addOrUpdatePT(HoA,prefiks);
                 // for both HA and CN we create a BCE expiry timer
                 createBCEntryExpiryTimer(HoA, ift->getInterfaceById(ctrlInfo->getInterfaceId()), simTime() + buLifetime);
 
@@ -1331,7 +1333,7 @@ void xMIPv6::processNBUMessage(NemoBindingUpdate* nbu, IPv6ControlInfo* ctrlInfo
 
                     tunneling->createTunnel(IPv6Tunneling::NORMAL, HA, CoA, HoA);
                 }
-                else // condition: ! bu->getAckFlag()
+                else // condition: ! nbu->getAckFlag()
                 {
                     EV << "BU Validated as OK: ACK FLAG NOT SET" << endl;
                     bubble("!!!BU VALID --- ACK FLAG = False !!!");
@@ -1463,8 +1465,57 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
 
 bool xMIPv6::validateNBUMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo)
 {
-    // TODO nananana
-    return true;
+    //TODO copas fungsi di bawah, edit edit sesuai rule nemo
+       // TODO untuk pesan error 140-143, siapa tau kudu dicek di sini, bukan di processNBUmsg
+       // Performs BU Validation according to RFC3775 Sec 9.5.1
+       // AND RFC 3963
+
+           EV << "\n<<<<<<<<<ROUTINE WHERE NEMO BU GETS VALIDATED>>>>>>>>>>>>>>><<\n";
+
+           IPv6Address& src = ctrlInfo->getSrcAddr();
+           IPv6Address homeAddress = nbu->getHomeAddressMN(); //confirm whether it is getHomeAddressMN() or simply homeAddress()
+           uint seqNumber = nbu->getSequence(); //The seq Number of the recieved BU
+           uint bcSeqNumber = nbc->readBCSequenceNumber(homeAddress); //The seq Number of the last recieved BU in the Binding cache
+           bool mR = nbu->getMobileRouter();
+
+           // restructured the following and removed "delete bu" - CB
+           if (!(src.isGlobal() && src.isUnicast()))
+           {
+               EV << "BU Validation Failed: SrcAdress is not unicast Global !" << endl;
+               EV << "Dropping unvalidated BU message" << endl;
+               bubble("!! BU Validation Failed !!");
+               return false; //result = false;
+           }
+           if (! (homeAddress.isGlobal() && homeAddress.isUnicast()))
+           {
+               EV << "BU Validation Failed: Home Adress of MN is not unicast Global !" << endl;
+               bubble("!! BU Validation Failed !!");
+               EV << "Dropping unvalidated BU message" << endl;
+               return false; //result = false;
+           }
+
+           else if (((bcSeqNumber % 65536) > seqNumber) || ((32768 + bcSeqNumber) % 65536 < seqNumber)) // update 10.9.07 - CB
+           {
+               EV << "BU Validation Failed: Received Seq#: " << seqNumber << " is LESS THAN in BC: "
+                  << bcSeqNumber << endl;
+               bubble("!! BU Validation Failed !!");
+               EV << "Dropping unvalidated BU message" << endl;
+
+               IPv6Address& destAddress = ctrlInfo->getDestAddr();
+
+               createAndSendNBAMessage(destAddress, homeAddress, ctrlInfo, SEQUENCE_NUMBER_OUT_OF_WINDOW,
+                               bcSeqNumber, 0, mR); // lifetime = 0 --> deregistration???
+
+               return false;
+           }
+
+           // If all the above tests are passed the Received BU is valid
+           EV << "BU validation passed" << endl;
+
+           if (ev.isGUI())
+               bubble("BU Validated");
+
+           return true; //result;
 }
 
 bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
@@ -1483,8 +1534,8 @@ bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctr
 
 bool xMIPv6::validateNBUderegisterMessage(NemoBindingUpdate *nbu, IPv6ControlInfo *ctrlInfo)
 {
-    //TODO nanananana
-    return true;
+    return nbc->isInBindingCache(nbu->getHomeAddressMN())
+                && nbc->getHomeRegistration(nbu->getHomeAddressMN());
 }
 
 void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& dest,
@@ -1557,8 +1608,22 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
 void xMIPv6::createAndSendNBAMessage(const IPv6Address& src, const IPv6Address& dest,
         IPv6ControlInfo* ctrlInfo, const BAStatus& baStatus, const uint baSeq, const uint lifeTime, const bool mR, const simtime_t sendTime)
 {
-    // TODO nanana
-    return;
+    EV << "Entered createAndSendBAMessage() method" << endl;
+
+        InterfaceEntry *ie = ift -> getInterfaceById(ctrlInfo -> getInterfaceId()); // To find the interface on which the BU was received
+
+        NemoBindingAcknowledgement *nba = new NemoBindingAcknowledgement("NEMO Binding Acknowledgement");
+        nba -> setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
+        nba -> setStatus(baStatus);
+        nba -> setSequenceNumber(baSeq); //this sequence number will correspond to the ACKed BU
+        nba -> setMobileRouter(mR);
+
+        // we are providing lifetime as a parameter, 14.9.07 - CB
+        nba -> setLifetime(lifeTime / 4); /* 6.1.8 ...in time units of 4 seconds... */
+
+        nba->setByteLength(SIZE_MOBILITY_HEADER + SIZE_BACK);
+
+        sendMobilityMessageToIPv6Module(nba, dest, src, ie->getInterfaceId(), sendTime);
 }
 
 void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlInfo)
@@ -1765,8 +1830,93 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
 
 void xMIPv6::processNBAMessage(NemoBindingAcknowledgement* nba, IPv6ControlInfo* ctrlInfo)
 {
-    // TODO nanananana
-    return;
+    EV << "\n<<<<<<<<<This is where NEMO BA gets processed>>>>>>>>>\n";
+
+        IPv6Address& baSource = ctrlInfo->getSrcAddr();
+        InterfaceEntry *ie = ift->getInterfaceById(ctrlInfo->getInterfaceId()); //the interface on which the BAck was received
+
+        if (rt6->isMobileRouter())
+        {
+            if (!validateNBAck(*nba, ctrlInfo))
+            {
+                EV << "Discarding invalid BAck...\n";
+                delete ctrlInfo;
+                delete nba;
+                return;
+            }
+
+            if (nba->getStatus() < 128)
+            {
+                EV << "Binding was accepted." << endl;
+
+                cancelTimerIfEntry(baSource, ie->getInterfaceId(), KEY_BU); // 11.06.08 - CB
+
+                if (nba->getLifetime() == 0) // BAck to deregistration BU
+                {
+                    if (baSource == ie->ipv6Data()->getHomeAgentAddress())
+                    {
+                        ipv6nd->sendUnsolicitedNA(ie);
+                    }
+                    nbul->removeBinding(baSource);
+                    // remove all timers related to this BA address
+                    removeTimerEntries(baSource, ctrlInfo->getInterfaceId()); // update 10.10.08 - CB
+                }
+                else
+                {
+                    NemoBindingUpdateList::NemoBindingUpdateListEntry* entry = nbul->lookup(ctrlInfo->getSrcAddr());
+                    ASSERT(entry != NULL);
+
+                    // establish tunnel, but only if we have not already acked the BU before
+                    if (entry->BAck == false && entry->destAddress == ie->ipv6Data()->getHomeAgentAddress()) // BA from HA
+                    {
+                        removeCoAEntries(); // TODO would be better if this is done somewhere else or in a completely different way
+                        interfaceCoAList[ie->getInterfaceId()] = entry->careOfAddress;
+
+                        tunneling->createTunnel(IPv6Tunneling::NORMAL, entry->careOfAddress, entry->destAddress); // update 10.06.08 - CB
+                    }
+                    else if (entry->BAck == false) // BA from CN
+                    {
+                        tunneling->destroyTunnelForExitAndTrigger(entry->homeAddress, baSource);
+                        tunneling->createTunnel(IPv6Tunneling::HA_OPT, entry->careOfAddress, entry->homeAddress, baSource); // update 10.06.08 - CB
+
+                        // fire event to MIH subscribers
+                        nb->fireChangeNotification(NF_MIPv6_RO_COMPLETED, NULL);
+                    }
+
+                    // set BAck flag in BUL
+                    entry->BAck = true;
+
+                    // set mobility state in BUL
+                    entry->state = NemoBindingUpdateList::REGISTERED;
+
+                    int l_ack = nba->getLifetime() * 4; /* 6.1.7 One time unit is 4 seconds. */
+                    int l_update = entry->bindingLifetime;
+                    int l_remain = entry->bindingLifetime - (SIMTIME_DBL(simTime() - entry->sentTime));
+                    int x = l_remain - (l_update - l_ack);
+                    entry->bindingLifetime = x > 0 ? x : 0;
+                    entry->bindingExpiry = simTime() + entry->bindingLifetime;
+
+                    // TODO currently we schedule the expiry message some seconds (PRE_BINDING_EXPIRY)
+                    //         before the actual expiration. Can be improved.
+                    simtime_t scheduledTime = entry->bindingExpiry - PRE_BINDING_EXPIRY;
+                    scheduledTime = scheduledTime > 0 ? scheduledTime : 0;
+
+                    EV << "Scheduling BULEntryExpiryTimer for " << scheduledTime << endl;
+                    createBULEntryExpiryTimer(entry, ie, scheduledTime);
+                }
+            }
+
+            else    // nba status > 128
+            {
+                EV << "Binding was rejected.\n";
+
+                // retransmission is performed anyway as timers are not deleted
+                // TODO store DO_NOT_SEND_BU in BUL
+            }
+        }
+
+        delete ctrlInfo;
+        delete nba;
 }
 
 bool xMIPv6::validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInfo* ctrlInfo)
@@ -1804,6 +1954,20 @@ bool xMIPv6::validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInf
     }
 
     return true;
+}
+
+bool xMIPv6::validateNBAck(const NemoBindingAcknowledgement& nba, const IPv6ControlInfo* ctrlInfo)
+{
+    IPv6Address cnAddress = ctrlInfo->getSrcAddr();
+
+    // 24.9.07 - CB
+        if (nbul->getSequenceNumber(cnAddress) != nba.getSequenceNumber())
+        {
+            EV << "BA Validation Failed: Sequence number from BA does not match the one from the BUL!!\n";
+            return false;
+        }
+
+        return true;
 }
 
 /**
@@ -3029,6 +3193,34 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
     scheduleAt(scheduledTime, bulExpiryMsg);
     EV << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
     // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
+}
+
+void xMIPv6::createBULEntryExpiryTimer(NemoBindingUpdateList::NemoBindingUpdateListEntry* entry, InterfaceEntry* ie, simtime_t scheduledTime)
+{
+    cMessage* bulExpiryMsg = new cMessage("BULEntryExpiry", MK_BUL_EXPIRY);
+
+        // we are able to associate the BUL entry later on based on HoA, CoA and destination (=HA address)
+        IPv6Address& HoA = entry->homeAddress;
+        IPv6Address& CoA = entry->careOfAddress;
+        IPv6Address& HA = entry->destAddress;
+
+        Key key(HA, ie->getInterfaceId(), KEY_BUL_EXP);
+        // fetch a valid TimerIfEntry obect
+        BULExpiryIfEntry* bulExpIfEntry = (BULExpiryIfEntry*) getTimerIfEntry(key, EXPIRY_TYPE_BUL);
+
+        bulExpIfEntry->dest = HA;
+        bulExpIfEntry->HoA = HoA;
+        bulExpIfEntry->CoA = CoA;
+        bulExpIfEntry->ifEntry = ie;
+        bulExpIfEntry->timer = bulExpiryMsg;
+
+        bulExpiryMsg->setContextPointer(bulExpIfEntry); // information in the bulExpIfEntry is required for handler when message fires
+
+        /*BULExpiryIfEntry* bulExpIfEntry = createBULEntryExpiryTimer(key, HA, HoA, CoA, ie);*/
+
+        scheduleAt(scheduledTime, bulExpiryMsg);
+        EV << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
+        // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
 }
 
 /*BULExpiryIfEntry* xMIPv6::createBULEntryExpiryTimer(Key& key, IPv6Adress& dest, IPv6Adress& HoA, IPv6Adress& CoA, InterfaceEntry* ie, cMessage* bulExpiryMsg)

@@ -46,6 +46,7 @@ class NemoBindingCache;
 class NemoBindingUpdate;
 class RoutingTable6;
 class NotificationBoard;
+class PrefixTable;
 
 // 13.9.07
 // Keys for timer list (=message type)
@@ -85,6 +86,7 @@ class INET_API xMIPv6 : public cSimpleModule
     IPv6NeighbourDiscovery* ipv6nd;
     NemoBindingUpdateList* nbul;
     NemoBindingCache* nbc;
+    PrefixTable* pt;
 
     // statistic collection
     cOutVector statVectorBUtoHA, statVectorBUtoCN, statVectorBUtoMN;
@@ -300,6 +302,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Validates a Binding Acknowledgement for a mobile node.
      */
     bool validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInfo* ctrlInfo); // update 12.9.07
+    bool validateNBAck(const NemoBindingAcknowledgement& nba, const IPv6ControlInfo* ctrlInfo);
 
     /**
      * Creates and sends Binding Error message.
@@ -530,6 +533,8 @@ class INET_API xMIPv6 : public cSimpleModule
      * Creates or overwrites a timer for BUL expiry that fires at provided scheduledTime.
      */
     void createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry* entry,
+            InterfaceEntry* ie, simtime_t scheduledTime);
+    void createBULEntryExpiryTimer(NemoBindingUpdateList::NemoBindingUpdateListEntry* entry,
             InterfaceEntry* ie, simtime_t scheduledTime);
 
     /**
