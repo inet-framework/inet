@@ -417,9 +417,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,             90e1-61fa
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,             ce75-918f
 
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            e361-8f0b
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            31a1-9bf9
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            21ea-c2b0
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            da56-812f
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            1ec0-b8b4
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            976a-7853
 
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,         f1f0-b32f
 
