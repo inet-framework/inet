@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2015-03-31  Rudolf Hornig
+
+	New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB.
+	where AA is the major while BB is the minor version in hex) and.
+	INET_PATCH_LEVEL (format: 0xCC is the patch level in hex).
+
 2015-03-12  Zoltan Bojthe
 
 	Renamed ByteArrayMessage to RawPacket.
