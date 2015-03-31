@@ -59,7 +59,7 @@ module xMIPv6Support like IxMIPv6Support
         nemoBUList: NemoBindingUpdateList {
             @display("p=209,35;i=old/harddisk");
         }
-        prefixTable: NemoPrefixTable {
+        prefixTable: PrefixTable {
             @display("p=124,161;i=old/harddisk");
         }
     connections:

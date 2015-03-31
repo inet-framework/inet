@@ -18,6 +18,6 @@ package inet.networklayer.xmipv6;
 //
 // Data Structure for Home Agent which supports NEMO
 //
-simple NemoPrefixTable
+simple PrefixTable
 {
 }
