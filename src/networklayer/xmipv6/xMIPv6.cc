@@ -794,7 +794,7 @@ void xMIPv6::updateNBUL(NemoBindingUpdate* nbu, const IPv6Address& dest, const I
         return;
      }
 
-     nbul->addOrUpdateBUL(dest, HoA, CoA, buLife, buSeq, sendTime, true, prefiks);
+     nbul->addOrUpdateBUL(dest, HoA, CoA, buLife, buSeq, sendTime, true, prefiks, ie->getInterfaceId());
 }
 
 xMIPv6::BUTransmitIfEntry* xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, const IPv6Address& dest)

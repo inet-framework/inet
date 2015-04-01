@@ -87,7 +87,7 @@ void NemoBindingUpdateList::handleMessage(cMessage *msg)
     opp_error("This module doesn't process messages");
 }
 
-void NemoBindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime, const bool mR, const IPv6Address& prefix)//,const simtime_t& nextBUSentTime)
+void NemoBindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime, const bool mR, const IPv6Address& prefix, int intID)//,const simtime_t& nextBUSentTime)
 {
     // modified structure - CB
 
@@ -116,6 +116,8 @@ void NemoBindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Ad
     //fayruz 27.02.2015
     entry->mobileRouter = mR; // Mobile Router Flag
     entry->prefixInfo = prefix; // Prefix Information
+
+    entry->interfaceID = intID; // for forwarding purpose - fayruz
 }
 
 NemoBindingUpdateList::NemoBindingUpdateListEntry* NemoBindingUpdateList::createBULEntry(const IPv6Address& dest)
@@ -145,6 +147,8 @@ void NemoBindingUpdateList::initializeBUValues(NemoBindingUpdateListEntry& entry
     // fayruz 04.02.2015 new data structure RFC 3963 point 5.1
     //entry.prefixInfo = NULL;
     entry.mobileRouter = 0;
+
+    entry.interfaceID = 0;
 }
 
 NemoBindingUpdateList::NemoBindingUpdateListEntry* NemoBindingUpdateList::lookup(const IPv6Address& dest)
@@ -289,6 +293,7 @@ void NemoBindingUpdateList::resetBindingCacheEntry(NemoBindingUpdateListEntry& e
     //entry.nextBUTx = 0;
     entry.BAck = false;
     entry.state = NONE;
+    entry.interfaceID = 0;
 }
 
 

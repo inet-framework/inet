@@ -325,6 +325,17 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
         return;
     }
 
+    if(rt->isMobileRouter()) // MR langsung forward ke parent aja (harusnya). di sini baru ke HA doang. kalo ke MR parent-> cek RA packet?
+    {
+        InterfaceEntry *ientry = ift->getInterfaceByName("wlan0");
+        IPv6Address HAaddr;
+        if (datagram->getSrcAddress() == HAaddr) // paket diforward ke HA jika di home network aja
+        {
+            interfaceId = ientry->getInterfaceId();
+            nextHop = HAaddr;
+        }
+    }
+
     if (interfaceId == -1)
         if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram, fromHL) )
             // no interface found; sent to ND or to ICMP for error processing
@@ -809,32 +820,50 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
     //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
     nextHop = rt->lookupDestCache(destAddress, interfaceId);
 
-    if (interfaceId == -1)
+    if (interfaceId == -1) // address not in destination cache: do longest prefix match in routing table
     {
-        // address not in destination cache: do longest prefix match in routing table
         EV << "do longest prefix match in routing table" << endl;
         const IPv6Route *route = rt->doLongestPrefixMatch(destAddress);
         EV << "finished longest prefix match in routing table" << endl;
+
         if (!route)
         {
-            if (rt->isRouter())
-            {
-                EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
-                numUnroutable++;
-                icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
+//            if(rt->isMobileRouter()) // terjadi kebodohan di sini
+//                // TODO harusnya pakai interface entry, bukan bul!
+//            {
+//                // forward packet to its Home Agent - really? fayruz
+//                NemoBindingUpdateList::NemoBindingUpdateListEntry* nbulEntry = nbul->fetch(destAddress);
+//                ASSERT(nbulEntry != NULL);
+//                nextHop = nbulEntry->homeAddress;
+//                interfaceId = nbulEntry->interfaceID;
+//
+//                InterfaceEntry ientry = ift->getInterfaceByName("wlan0");
+//                nextHop = ientry->
+//
+//                // ya pasti gagal lah! kan belum punya apdet apa apa, binding update list masih kosong!
+//            }
+//
+//            else
+//            {
+                if (rt->isRouter())
+                {
+                    EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
+                    numUnroutable++;
+                    icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
+                 }
+                 else // host
+                 {
+                     EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+                     datagram->addPar("IPv6-fromHL") = fromHL;
+                     send(datagram, "ndOut");
+                  }
+                  return false;
             }
-            else // host
-            {
-                EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                datagram->addPar("IPv6-fromHL") = fromHL;
-                send(datagram, "ndOut");
-            }
-            return false;
-        }
-        interfaceId = route->getInterfaceId();
-        nextHop = route->getNextHop();
-        if (nextHop.isUnspecified())
-            nextHop = destAddress;  // next hop is the host itself
+
+            interfaceId = route->getInterfaceId();
+            nextHop = route->getNextHop();
+            if (nextHop.isUnspecified())
+                nextHop = destAddress;  // next hop is the host itself
 
         // add result into destination cache
         rt->updateDestCache(destAddress, nextHop, interfaceId, route->getExpiryTime());
