@@ -92,8 +92,9 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
         b.accessNBytes(payloadLength);
         pkt->encapsulate(encapPacket);
     }
-    if (chksum != 0)
+    if (chksum != 0 && c.l3AddressesPtr && c.l3AddressesLength)
         chksum = TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), b.getPos(), c.l3AddressesPtr, c.l3AddressesLength);
+    else chksum = 0;
     if (length < UDP_HDR_LEN || chksum != 0 || pkt->getByteLength() != length)
         pkt->setBitError(true);
     return pkt;
