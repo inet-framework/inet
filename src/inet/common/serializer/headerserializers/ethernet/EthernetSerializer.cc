@@ -68,6 +68,10 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
                 SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
             }
         }
+        else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
+            cPacket *encapPkt = frame->getEncapsulatedPacket();
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 4);
+        }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
         }
