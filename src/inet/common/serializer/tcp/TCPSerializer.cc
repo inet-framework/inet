@@ -130,21 +130,18 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     const TCPSegment *tcpseg = check_and_cast<const TCPSegment *>(pkt);
-    ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);
-    struct tcphdr *tcp = (struct tcphdr *)(b.accessNBytes(sizeof(struct tcphdr)));
-    if (!tcp)
-        return;
+    struct tcphdr tcp;  // = (struct tcphdr *)(b.accessNBytes(sizeof(struct tcphdr)))
 
     int writtenbytes = tcpseg->getByteLength();
 
     // fill TCP header structure
-    tcp->th_sum = 0;
-    tcp->th_sport = htons(tcpseg->getSrcPort());
-    tcp->th_dport = htons(tcpseg->getDestPort());
-    tcp->th_seq = htonl(tcpseg->getSequenceNo());
-    tcp->th_ack = htonl(tcpseg->getAckNo());
-    tcp->th_offs = TCP_HEADER_OCTETS / 4;
-    tcp->th_x2 = 0;     // unused
+    tcp.th_sum = 0;
+    tcp.th_sport = htons(tcpseg->getSrcPort());
+    tcp.th_dport = htons(tcpseg->getDestPort());
+    tcp.th_seq = htonl(tcpseg->getSequenceNo());
+    tcp.th_ack = htonl(tcpseg->getAckNo());
+    tcp.th_offs = TCP_HEADER_OCTETS / 4;
+    tcp.th_x2 = 0;     // unused
 
     // set flags
     unsigned char flags = 0;
@@ -160,13 +157,15 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         flags |= TH_ACK;
     if (tcpseg->getUrgBit())
         flags |= TH_URG;
-    tcp->th_flags = (TH_FLAGS & flags);
-    tcp->th_win = htons(tcpseg->getWindow());
-    tcp->th_urp = htons(tcpseg->getUrgentPointer());
+    tcp.th_flags = (TH_FLAGS & flags);
+    tcp.th_win = htons(tcpseg->getWindow());
+    tcp.th_urp = htons(tcpseg->getUrgentPointer());
 
+    b.seek(TCP_HEADER_OCTETS);
     unsigned short numOptions = tcpseg->getHeaderOptionArraySize();
-    unsigned char *options = (unsigned char *)tcp->th_options;
-    unsigned int optionsLength = tcpseg->getHeaderLength() - TCP_HEADER_OCTETS;
+    if (tcpseg->getHeaderLength() % 4 != 0)
+        throw cRuntimeError("invalid TCP header length=%u: must be dividable by 4", tcpseg->getHeaderLength());
+    unsigned int optionsLength = tcpseg->getHeaderLength() > TCP_HEADER_OCTETS ? tcpseg->getHeaderLength() - TCP_HEADER_OCTETS : 0;
     if (numOptions > 0) {    // options present?
         Buffer sb(b, 0, optionsLength);
 
@@ -179,23 +178,26 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         if (sb.hasError())
             b.setError();
 
-        tcp->th_offs = (TCP_HEADER_OCTETS + sb.getPos() + 3) / 4;    // TCP_HEADER_OCTETS = 20
+        tcp.th_offs = tcpseg->getHeaderLength() / 4;
     }    // if options present
-    b.seek(tcpseg->getHeaderLength());
+    b.seek(TCP_HEADER_OCTETS + optionsLength);
 
     // write data
     if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
         unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
-        char *tcpData = (char *)options + optionsLength;
 
         if (tcpseg->getByteArray().getDataArraySize() > 0) {
             ASSERT(tcpseg->getByteArray().getDataArraySize() == dataLength);
-            tcpseg->getByteArray().copyDataToBuffer(tcpData, dataLength);
+            tcpseg->getByteArray().copyDataToBuffer(b.accessNBytes(0), b.getRemainder());
+            b.accessNBytes(dataLength);
         }
         else
             b.fillNBytes(dataLength, 't'); // fill data part with 't'
     }
-    tcp->th_sum = htons(TCPIPchecksum::checksum(IP_PROT_TCP, tcp, writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
+    writtenbytes = b.getPos();
+    b.seek(0);
+    b.writeNBytes(TCP_HEADER_OCTETS, &tcp);
+    b.writeUint16To(16, TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
     b.seek(writtenbytes);
 }
 
@@ -292,23 +294,23 @@ TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bu
 
 cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
 {
-    struct tcphdr const *const tcp = static_cast<struct tcphdr const *>(b.accessNBytes(TCP_HEADER_OCTETS));
-    if (!tcp) {
-        return nullptr;
-    }
+    struct tcphdr tcp;
+    memset(&tcp, 0, sizeof(tcp));
+    ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
+    b.readNBytes(TCP_HEADER_OCTETS, &tcp);
 
     TCPSegment *tcpseg = new TCPSegment("parsed-tcp");
 
     // fill TCP header structure
-    tcpseg->setSrcPort(ntohs(tcp->th_sport));
-    tcpseg->setDestPort(ntohs(tcp->th_dport));
-    tcpseg->setSequenceNo(ntohl(tcp->th_seq));
-    tcpseg->setAckNo(ntohl(tcp->th_ack));
-    unsigned short hdrLength = tcp->th_offs * 4;
+    tcpseg->setSrcPort(ntohs(tcp.th_sport));
+    tcpseg->setDestPort(ntohs(tcp.th_dport));
+    tcpseg->setSequenceNo(ntohl(tcp.th_seq));
+    tcpseg->setAckNo(ntohl(tcp.th_ack));
+    unsigned short hdrLength = tcp.th_offs * 4;
     tcpseg->setHeaderLength(hdrLength);
 
     // set flags
-    unsigned char flags = tcp->th_flags;
+    unsigned char flags = tcp.th_flags;
     tcpseg->setFinBit((flags & TH_FIN) == TH_FIN);
     tcpseg->setSynBit((flags & TH_SYN) == TH_SYN);
     tcpseg->setRstBit((flags & TH_RST) == TH_RST);
@@ -316,9 +318,9 @@ cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
     tcpseg->setAckBit((flags & TH_ACK) == TH_ACK);
     tcpseg->setUrgBit((flags & TH_URG) == TH_URG);
 
-    tcpseg->setWindow(ntohs(tcp->th_win));
+    tcpseg->setWindow(ntohs(tcp.th_win));
 
-    tcpseg->setUrgentPointer(ntohs(tcp->th_urp));
+    tcpseg->setUrgentPointer(ntohs(tcp.th_urp));
 
     if (hdrLength > TCP_HEADER_OCTETS) {    // options present?
         unsigned short optionBytes = hdrLength - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
@@ -340,7 +342,7 @@ cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
     if (b.hasError())
         tcpseg->setBitError(true);
     // Checksum: modeled by cPacket::hasBitError()
-    if (tcp->th_sum != 0 && c.l3AddressesPtr && c.l3AddressesLength && TCPIPchecksum::checksum(IP_PROT_TCP, tcp, b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
+    if (tcp.th_sum != 0 && c.l3AddressesPtr && c.l3AddressesLength && TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
         tcpseg->setBitError(true);
     return tcpseg;
 }
