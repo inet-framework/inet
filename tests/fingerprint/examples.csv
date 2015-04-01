@@ -26,7 +26,7 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           708f-4e08
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           e88f-fee0
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            ff0a-3837
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            249c-2248
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            328c-e439
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             c87e-4fd8
@@ -271,7 +271,7 @@
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             5bc8-e25f
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             5ce4-b03b
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
@@ -385,7 +385,7 @@
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         56f5-ba64
 
-/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           8139-4038
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           fef1-24db
 
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7488-3db5
 
@@ -434,4 +434,4 @@
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             7cd1-3a38
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             6e83-812f
 
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            b4cd-7a87
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            a792-5e28
