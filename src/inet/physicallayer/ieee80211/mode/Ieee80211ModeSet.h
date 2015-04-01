@@ -19,6 +19,7 @@
 #define __INET_IEEE80211MODESET_H
 
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/common/DelayedInitializer.h"
 
 namespace inet {
 
@@ -34,12 +35,16 @@ class INET_API Ieee80211ModeSet
         const IIeee80211Mode *mode;
     };
 
+    struct EntryNetBitrateComparator {
+        bool operator() (const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
+    };
+
   protected:
     const char name;
     const std::vector<Entry> entries;
 
   public:
-    static const std::vector<Ieee80211ModeSet> modeSets;
+    static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
 
   protected:
     int findModeIndex(const IIeee80211Mode *mode) const;
