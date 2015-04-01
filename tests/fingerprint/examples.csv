@@ -58,16 +58,16 @@
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           a95e-39d0
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            b677-031c
 
-/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,         3114-0f7a
+/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,         47b3-471c
 
-/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         25e4-59d6
-/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         b6c9-6992
+/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         d9b2-1cf9
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         c2a3-6895
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,         8720-fe74
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         6b22-a445
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         0ef1-219f
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,         f6db-0a91
-/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         c27c-876c
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          5c31-5023
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          b473-2a47
+/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         7ea1-1200
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          d47b-8740
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          6eb8-8eb9
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,         0000-0000   # LargeNet extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,         0000-0000   # RSTP extended
@@ -323,9 +323,9 @@
 /examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,            deb5-ca0b
 /examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,            7fa5-6194
 
-/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,         04ac-d5ad
-/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,         04ac-d5ad
-/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,         04ac-d5ad
+/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,         ac7d-2da8
+/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,         ac7d-2da8
+/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,         ac7d-2da8
 
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            1882-d6ea
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            396c-70d5
