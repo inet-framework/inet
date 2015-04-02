@@ -1273,8 +1273,8 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 #ifndef WITH_xMIPv6
             prefixInfo.setPrefix(advPrefix.prefix);
 #else /* WITH_xMIPv6 */
-            EV<<"\n+=+=+=+= Appendign Prefix Info Option to RA +=+=+=+=\n";
-            EV<<"Prefix Vaue: " <<advPrefix.prefix <<endl;
+            EV<<"\n+=+=+=+= Appending Prefix Info Option to RA +=+=+=+=\n";
+            EV<<"Prefix Value: " <<advPrefix.prefix <<endl;
             EV<<"Prefix Length: " <<advPrefix.prefixLength <<endl;
             EV<<"L-Flag: " <<advPrefix.advOnLinkFlag <<endl;
             EV<<"A-Flag: " <<advPrefix.advAutonomousFlag <<endl;
@@ -1323,7 +1323,8 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 {
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
 
-    if (ie->ipv6Data()->getAdvSendAdvertisements())
+
+    if ((ie->ipv6Data()->getAdvSendAdvertisements()) && !rt6->isMobileRouter())
     {
         EV << "Interface is an advertising interface, dropping RA message.\n";
         delete ra;
@@ -1349,7 +1350,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 #endif /* WITH_xMIPv6 */
 
         cancelRouterDiscovery(ie); //Cancel router discovery if it is in progress.
-        EV << "Interface is a host, processing RA.\n";
+        EV << "Interface is a host or MR, processing RA.\n";
 
         processRAForRouterUpdates(ra, raCtrlInfo); //See RFC2461: Section 6.3.4
 

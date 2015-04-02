@@ -105,6 +105,8 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
                 continue;
             if (ie->ipv6Data()->getNumAdvPrefixes()>0)
                 continue;  // already has one
+            if (rt->isMobileRouter()) // MR does NOT configure its own prefix. Its prefix is derived from its parent's
+                continue;
 
             // add a prefix
             IPv6Address prefix(0xaaaa0000+nodeIndex, ie->getNetworkLayerGateIndex()<<16, 0, 0);
@@ -129,6 +131,8 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
             // add a link-local address (tentative) if it doesn't have one
             if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
                 ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+
+            EV<<"\nNode " << topo.getNode(i) << " -interface " << ie->getFullName() <<" got prefix " << p.prefix <<"\n";
         }
     }
 }
@@ -153,6 +157,10 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
+            continue;
+
+        // skip Mobile Router
+        if (rt->isMobileRouter())
             continue;
 
         // add globally routable prefixes to routing table
