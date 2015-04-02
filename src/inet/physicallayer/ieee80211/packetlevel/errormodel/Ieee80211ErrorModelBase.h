@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 {
   protected:
-    virtual double GetChunkSuccessRate(const IIeee80211ChunkMode *chunkMode, double snr, uint32_t nbits) const = 0;
+    virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const = 0;
 
   public:
     Ieee80211ErrorModelBase();

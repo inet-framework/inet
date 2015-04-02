@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211INTERLEAVERMODULE_H
-#define __INET_IEEE80211INTERLEAVERMODULE_H
+#ifndef __INET_IEEE80211OFDMINTERLEAVERMODULE_H
+#define __INET_IEEE80211OFDMINTERLEAVERMODULE_H
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211InterleaverModule : public cSimpleModule, public IInterleaver
+class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IInterleaver
 {
   protected:
-    const Ieee80211Interleaver *interleaver;
+    const Ieee80211OFDMInterleaver *interleaver;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -35,15 +35,15 @@ class INET_API Ieee80211InterleaverModule : public cSimpleModule, public IInterl
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages."); }
 
   public:
-    virtual ~Ieee80211InterleaverModule();
+    virtual ~Ieee80211OFDMInterleaverModule();
 
     virtual void printToStream(std::ostream& stream) const;
     virtual BitVector interleave(const BitVector& bits) const { return interleaver->interleave(bits); }
     virtual BitVector deinterleave(const BitVector& bits) const { return interleaver->deinterleave(bits); }
-    virtual const Ieee80211Interleaving *getInterleaving() const { return interleaver->getInterleaving(); }
+    virtual const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaver->getInterleaving(); }
 };
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211INTERLEAVERMODULE_H
+#endif // ifndef __INET_IEEE80211OFDMINTERLEAVERMODULE_H
 

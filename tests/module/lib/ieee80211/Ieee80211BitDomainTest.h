@@ -19,7 +19,7 @@
 #define __INET_IEEE80211BITDOMAINTEST_H_
 
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211InterleaverModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaverModule.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScramblerModule.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
@@ -32,7 +32,7 @@ class INET_API Ieee80211BitDomainTest : public cSimpleModule
 {
     protected:
         AdditiveScramblerModule *scrambler;
-        Ieee80211InterleaverModule *interleaver;
+        Ieee80211OFDMInterleaverModule *interleaver;
         ConvolutionalCoderModule *convCoder;
         std::ifstream *fileStream;
         const char *testType;

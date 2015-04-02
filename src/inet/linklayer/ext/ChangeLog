@@ -1,3 +1,21 @@
+====== inet-3.x ======
+
+2015-03-30  Rudolf Hornig
+
+	The HAVE_PCAP macro is no longer used. To use the emulation feature
+	you have to install the libpcap-dev package, turn on the feature and
+	rebuild INET. Running ./configure in the omnetpp root and make changes to
+	inet/src/makefrag is no longer required. 
+
+2015-03-23  Artur Scussel
+
+	On Linux pcap is now configured to use immediate mode. This results in
+	much better response times (sub ms ping responses over a local network)
+	and reduces the CPU time required for the packet capturing. On Windows
+	and MAC this API is not available so the interface still polls the 
+	card every 500us. This still gives sub ms accuracy, but requires a bit more
+	CPU usage. 
+
 2015-02-05  Zoltan Bojthe
 
 	Replaced getParentModule calls with module parameters.
@@ -34,7 +52,7 @@
 	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
 	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======
 
 2015-03-22  Artur Scussel
 

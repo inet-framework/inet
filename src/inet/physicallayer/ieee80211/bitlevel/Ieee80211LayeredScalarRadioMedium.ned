@@ -26,8 +26,8 @@ module Ieee80211LayeredScalarRadioMedium extends RadioMedium
         pathLossType = default("FreeSpacePathLoss");
         analogModelType = default("LayeredScalarAnalogModel");
         backgroundNoiseType = default("IsotropicScalarBackgroundNoise");
-        carrierFrequency = default(2.4GHz);
-        minReceptionPower = default(-85dBm);
-        minInterferencePower = default(-110dBm);
         backgroundNoise.power = default(-110dBm);
+        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.minReceptionPower = default(-85dBm);
+        mediumLimitCache.minInterferencePower = default(-110dBm);
 }

@@ -81,7 +81,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     const ITransmissionAnalogModel *createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
 
     BitVector *serialize(const cPacket *packet) const;
-    void appendPadding(BitVector *serializedPacket, unsigned int dataBitsLength, uint8_t rate) const;
+    void appendPadding(BitVector *serializedPacket, unsigned int length) const;
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
 
   public:
@@ -93,7 +93,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     virtual const IPulseShaper *getPulseShaper() const { return pulseShaper; }
     virtual const IDigitalAnalogConverter *getDigitalAnalogConverter() const { return digitalAnalogConverter; }
     virtual W getMaxPower() const { return power; }
-    const Hz getBandwidth() const { return mode->getBandwidth(); }
+    const Hz getBandwidth() const { return mode->getDataMode()->getBandwidth(); }
     const Hz getCarrierFrequency() const { return carrierFrequency; }
     const Hz getCarrierSpacing() const { return mode->getChannelSpacing(); }
     virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Transmitter"; }

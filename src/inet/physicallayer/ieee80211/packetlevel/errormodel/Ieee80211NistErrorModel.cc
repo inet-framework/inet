@@ -1,22 +1,22 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
- * Copyright (c) 2010 The Boeing Company
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Author: Gary Pei <guangyu.pei@boeing.com>
- */
+//
+// Copyright (c) 2010 The Boeing Company
+// Copyright (C) 2015 OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Author: Gary Pei <guangyu.pei@boeing.com>
+//
 
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
@@ -33,15 +33,11 @@ namespace physicallayer {
 
 Define_Module(Ieee80211NistErrorModel);
 
-Ieee80211NistErrorModel::Ieee80211NistErrorModel()
-{
-}
-
 Ieee80211NistErrorModel::~Ieee80211NistErrorModel()
 {
 }
 
-double Ieee80211NistErrorModel::GetBpskBer(double snr) const
+double Ieee80211NistErrorModel::getBpskBer(double snr) const
 {
     double z = sqrt(snr);
     double ber = 0.5 * erfc(z);
@@ -49,7 +45,7 @@ double Ieee80211NistErrorModel::GetBpskBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::GetQpskBer(double snr) const
+double Ieee80211NistErrorModel::getQpskBer(double snr) const
 {
     double z = sqrt(snr / 2.0);
     double ber = 0.5 * erfc(z);
@@ -57,7 +53,7 @@ double Ieee80211NistErrorModel::GetQpskBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::Get16QamBer(double snr) const
+double Ieee80211NistErrorModel::get16QamBer(double snr) const
 {
     double z = sqrt(snr / (5.0 * 2.0));
     double ber = 0.75 * 0.5 * erfc(z);
@@ -65,7 +61,7 @@ double Ieee80211NistErrorModel::Get16QamBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::Get64QamBer(double snr) const
+double Ieee80211NistErrorModel::get64QamBer(double snr) const
 {
     double z = sqrt(snr / (21.0 * 2.0));
     double ber = 7.0 / 12.0 * 0.5 * erfc(z);
@@ -73,31 +69,31 @@ double Ieee80211NistErrorModel::Get64QamBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::GetFecBpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFecBpskBer(double snr, double nbits, uint32_t bValue) const
 {
-    double ber = GetBpskBer(snr);
+    double ber = getBpskBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetFecQpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFecQpskBer(double snr, double nbits, uint32_t bValue) const
 {
-    double ber = GetQpskBer(snr);
+    double ber = getQpskBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::CalculatePe(double p, uint32_t bValue) const
+double Ieee80211NistErrorModel::calculatePe(double p, uint32_t bValue) const
 {
     double D = sqrt(4.0 * p * (1.0 - p));
     double pe = 1.0;
@@ -128,86 +124,107 @@ double Ieee80211NistErrorModel::CalculatePe(double p, uint32_t bValue) const
     return pe;
 }
 
-double Ieee80211NistErrorModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
-    double ber = Get16QamBer(snr);
+    double ber = get16QamBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
-    double ber = Get64QamBer(snr);
+    double ber = get64QamBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetChunkSuccessRate(const IIeee80211ChunkMode *chunkMode, double snr, uint32_t nbits) const
+double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
 {
-    if (dynamic_cast<const Ieee80211OFDMChunkMode *>(chunkMode) /* TODO: || dynamic_cast<const Ieee80211ERPOFDMChunkMode *>(mode)*/) {
-        const Ieee80211OFDMChunkMode *ofdmChunkMode = dynamic_cast<const Ieee80211OFDMChunkMode *>(chunkMode);
-        const ConvolutionalCode *convolutionalCode = ofdmChunkMode->getCode()->getConvolutionalCode();
-        if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &BPSKModulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFecBpskBer(snr, nbits, 1);
-            }
-            else {
-                return GetFecBpskBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QPSKModulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFecQpskBer(snr, nbits, 1);
-            }
-            else {
-                return GetFecQpskBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QAM16Modulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFec16QamBer(snr, nbits, 1);
-            }
-            else {
-                return GetFec16QamBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QAM64Modulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3) {
-                return GetFec64QamBer(snr, nbits, 2);
-            }
-            else {
-                return GetFec64QamBer(snr, nbits, 3);
-            }
-        }
-        else
-            throw cRuntimeError("Unknown modulation");
+    if (subcarrierModulation == &BPSKModulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFecBpskBer(snr, bitLength, 1);
+        return getFecBpskBer(snr, bitLength, 3);
     }
-    else if (dynamic_cast<const Ieee80211DsssChunkMode *>(chunkMode) || dynamic_cast<const Ieee80211HrDsssChunkMode *>(chunkMode)) {
-        switch ((int)chunkMode->getNetBitrate().get()) {
-            case 1000000:
-                return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, nbits);
-
-            case 2000000:
-                return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, nbits);
-
-            case 5500000:
-                return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, nbits);
-
-            case 11000000:
-                return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, nbits);
-        }
+    else if (subcarrierModulation == &QPSKModulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFecQpskBer(snr, bitLength, 1);
+        return getFecQpskBer(snr, bitLength, 3);
     }
-    return 0;
+    else if (subcarrierModulation == &QAM16Modulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFec16QamBer(snr, bitLength, 1);
+        return getFec16QamBer(snr, bitLength, 3);
+    }
+    else if (subcarrierModulation == &QAM64Modulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3)
+            return getFec64QamBer(snr, bitLength, 2);
+        return getFec64QamBer(snr, bitLength, 3);
+    }
+    else
+        throw cRuntimeError("Unknown modulation");
+}
+
+double Ieee80211NistErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const
+{
+    switch ((int)bitrate.get()) {
+        case 1000000:
+            return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, bitLength);
+        case 2000000:
+            return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, bitLength);
+        case 5500000:
+            return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, bitLength);
+        case 11000000:
+            return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, bitLength);
+    }
+    throw cRuntimeError("Unsupported bitrate");
+}
+
+double Ieee80211NistErrorModel::getSuccessRate(const IIeee80211Mode* mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const
+{
+    double headerSuccessRate = 0;
+    double payloadSuccessRate = 0;
+    if (dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    {
+        const Ieee80211OFDMMode *ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode);
+        headerSuccessRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
+                                                              ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
+                                                              headerBitLength,
+                                                              snr);
+        payloadSuccessRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
+                                                              ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
+                                                              payloadBitLength,
+                                                              snr);
+    }
+    else if (dynamic_cast<const Ieee80211DsssMode *>(mode))
+    {
+        const Ieee80211DsssMode *dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode);
+        headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
+        payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
+    }
+    else if (dynamic_cast<const Ieee80211HrDsssMode *>(mode))
+    {
+        const Ieee80211HrDsssMode *hrDsssMode = dynamic_cast<const Ieee80211HrDsssMode *>(mode);
+        headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
+        payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
+    }
+    else
+        throw cRuntimeError("Unsupported 802.11 mode");
+    EV_DEBUG << "Min SNIR = " << snr << ", bit length = " << payloadBitLength << ", header error rate = " << 1 - headerSuccessRate << ", payload error rate = " << 1 - payloadSuccessRate << endl;
+    if (headerSuccessRate >= 1)
+        headerSuccessRate = 1;
+    if (payloadSuccessRate >= 1)
+        payloadSuccessRate = 1;
+    return headerSuccessRate * payloadSuccessRate;
 }
 
 } // namespace physicallayer

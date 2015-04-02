@@ -19,7 +19,7 @@ package inet.physicallayer.ieee80211.bitlevel;
 
 import inet.physicallayer.contract.bitlevel.IInterleaver;
 
-// The Ieee80211Interleaver is defined by a two-step permutation.
+// The Ieee80211OFDMInterleaver is defined by a two-step permutation.
 // The first permutation ensures that adjacent coded bits are mapped
 // onto nonadjacent subcarriers. The second ensures that adjacent coded
 // bits are mapped alternately onto less and more significant bits of the
@@ -32,11 +32,11 @@ import inet.physicallayer.contract.bitlevel.IInterleaver;
 //
 // The latter is simply N_{BPSC} * number of subcarriers in a symbol.
 //
-module Ieee80211Interleaver like IInterleaver
+module Ieee80211OFDMInterleaver like IInterleaver
 {
     parameters:
         int numberOfCodedBitsPerSymbol;
         int numberOfCodedBitsPerSubcarrier;
-        @class("Ieee80211InterleaverModule");
+        @class("Ieee80211OFDMInterleaverModule");
         @display("i=block/switch");
 }

@@ -34,9 +34,8 @@ module Ieee80211RadioMedium extends RadioMedium
     parameters:
         propagationType = default("ConstantSpeedPropagation");
         pathLossType = default("FreeSpacePathLoss");
-        // TODO: move to addRadio, query radios for these parameters
-        carrierFrequency = default(2.4GHz);
-        minReceptionPower = default(-85dBm);
-        minInterferencePower = default(-110dBm);
         backgroundNoise.power = default(-110dBm);
+        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.minReceptionPower = default(-85dBm);
+        mediumLimitCache.minInterferencePower = default(-110dBm);
 }

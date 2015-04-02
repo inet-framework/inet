@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/modulation/QBPSKModulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
@@ -30,6 +31,7 @@ Ieee80211OFDMModulation::Ieee80211OFDMModulation(const APSKModulationBase* modul
 }
 
 // Modulations
+const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qbpskModulation(&QBPSKModulation::singleton);
 const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::bpskModulation(&BPSKModulation::singleton);
 const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qpskModulation(&QPSKModulation::singleton);
 const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qam16Modulation(&QAM16Modulation::singleton);

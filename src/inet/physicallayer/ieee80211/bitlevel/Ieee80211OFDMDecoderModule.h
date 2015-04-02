@@ -21,9 +21,9 @@
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {

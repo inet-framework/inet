@@ -15,44 +15,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211INTERLEAVER_H
-#define __INET_IEEE80211INTERLEAVER_H
+#ifndef __INET_IEEE80211OFDMINTERLEAVING_H
+#define __INET_IEEE80211OFDMINTERLEAVING_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/BitVector.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-/*
- * It is a IEEE 802.11 block interleaver/deinterleaver implementation.
- * The permutation equations and all the details can be found in:
- * Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
- * 18.3.5.7 Data interleaving
- */
-class INET_API Ieee80211Interleaver : public IInterleaver
+class INET_API Ieee80211OFDMInterleaving : public IInterleaving
 {
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
-    int s;
-    const Ieee80211Interleaving *interleaving;
 
   public:
-    Ieee80211Interleaver(const Ieee80211Interleaving *interleaving);
+    Ieee80211OFDMInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier) :
+        numberOfCodedBitsPerSymbol(numberOfCodedBitsPerSymbol),
+        numberOfCodedBitsPerSubcarrier(numberOfCodedBitsPerSubcarrier) {}
 
-    virtual void printToStream(std::ostream& stream) const;
-    BitVector interleave(const BitVector& bits) const;
-    BitVector deinterleave(const BitVector& bits) const;
-    int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
+    void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 Interleaver"; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-    const Ieee80211Interleaving *getInterleaving() const { return interleaving; }
+    int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
 };
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211INTERLEAVER_H
+#endif // ifndef __INET_IEEE80211OFDMINTERLEAVING_H
 

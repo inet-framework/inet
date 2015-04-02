@@ -22,10 +22,9 @@ import inet.physicallayer.apskradio.packetlevel.APSKDimensionalRadioMedium;
 module Ieee802154UWBIRRadioMedium extends APSKDimensionalRadioMedium
 {
     parameters:
-        // TODO: move to addRadio, query radios for these parameters
-        carrierFrequency = default(2.4GHz);
-        minReceptionPower = default(-85dBm);
-        minInterferencePower = default(-110dBm);
         backgroundNoise.power = default(-110dBm);
         backgroundNoise.dimensions = default("time");
+        mediumLimitCache.carrierFrequency = default(2.4GHz);
+        mediumLimitCache.minReceptionPower = default(-85dBm);
+        mediumLimitCache.minInterferencePower = default(-110dBm);
 }

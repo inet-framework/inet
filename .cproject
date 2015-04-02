@@ -20,7 +20,7 @@
 					<folderInfo id="org.omnetpp.cdt.gnu.config.debug.229043752." name="/" resourcePath="">
 						<toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.268477749" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.946608572" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<builder id="org.omnetpp.cdt.gnu.builder.debug.859740860" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.omnetpp.cdt.gnu.builder.debug">
+							<builder id="org.omnetpp.cdt.gnu.builder.debug.859740860" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNEST Make Builder (opp_makemake)" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.omnetpp.cdt.gnu.builder.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 								</outputEntries>
@@ -31,12 +31,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -53,12 +71,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -90,12 +126,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -109,12 +163,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -131,7 +203,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/physicallayer/idealradio|inet/physicallayer/communicationcache|inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -156,19 +228,37 @@
 					<folderInfo id="org.omnetpp.cdt.gnu.config.release.1746235823." name="/" resourcePath="">
 						<toolChain id="org.omnetpp.cdt.gnu.toolchain.release.1498166216" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.release">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform.1049800537" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<builder id="org.omnetpp.cdt.gnu.builder.release.1176677325" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
+							<builder id="org.omnetpp.cdt.gnu.builder.release.1176677325" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNEST Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1643927787" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1039888888" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.preprocessor.def.655304152" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -185,12 +275,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -222,12 +330,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -241,12 +367,30 @@
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
 									<listOptionValue builtIn="false" value="WITH_IPv6"/>
+									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
+									<listOptionValue builtIn="false" value="WITH_UDP"/>
+									<listOptionValue builtIn="false" value="WITH_RTP"/>
+									<listOptionValue builtIn="false" value="WITH_SCTP"/>
+									<listOptionValue builtIn="false" value="WITH_DHCP"/>
+									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
+									<listOptionValue builtIn="false" value="WITH_PPP"/>
+									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
+									<listOptionValue builtIn="false" value="WITH_MPLS"/>
+									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
+									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
+									<listOptionValue builtIn="false" value="WITH_MANET"/>
+									<listOptionValue builtIn="false" value="WITH_TRACI"/>
+									<listOptionValue builtIn="false" value="WITH_AODV"/>
+									<listOptionValue builtIn="false" value="WITH_RIP"/>
+									<listOptionValue builtIn="false" value="WITH_RADIO"/>
+									<listOptionValue builtIn="false" value="WITH_POWER"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
+									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
+									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
 									<listOptionValue builtIn="false" value="WITH_PIM"/>
+									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
@@ -263,7 +407,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/physicallayer/idealradio|inet/physicallayer/communicationcache|inet/common/serializer/headerserializers/ieee80211|inet/physicallayer/modulation|inet/transportlayer/tcp_lwip|inet/node/internetcloud|inet/networklayer/internetcloud|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/linklayer/ideal|inet/physicallayer/ieee802154|inet/linklayer/ieee802154|inet/node/wireless|inet/physicallayer/ieee80211|inet/linklayer/ieee80211|inet/power/storage|inet/power/generator|inet/power/consumer|inet/power/base|inet/physicallayer/analogmodel|inet/physicallayer/propagation|inet/physicallayer/energyconsumer|inet/physicallayer/pathloss|inet/physicallayer/obstacleloss|inet/physicallayer/neighborcache|inet/physicallayer/mapping|inet/physicallayer/ideal|inet/physicallayer/errormodel|inet/physicallayer/common|inet/physicallayer/antenna|inet/physicallayer/backgroundnoise|inet/physicallayer/base|inet/physicallayer/apsk|inet/environment|inet/applications/traci|inet/mobility/static|inet/mobility/single|inet/mobility/group|inet/mobility/base|inet/routing/extras|inet/node/rip|inet/routing/rip|inet/node/gpsr|inet/routing/gpsr|inet/node/dymo|inet/routing/dymo|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/linklayer/ppp|inet/applications/dhcp|inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/networklayer/wiseroute|inet/networklayer/multi|inet/networklayer/arp/generic|inet/networklayer/configurator/generic|inet/networklayer/generic|inet/node/xmipv6|inet/networklayer/xmipv6|inet/node/aodv|inet/routing/aodv|inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -271,7 +415,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="inet.org.omnetpp.cdt.omnetppProjectType.75640564" name="OMNeT++ Simulation" projectType="org.omnetpp.cdt.omnetppProjectType"/>
+		<project id="inet.org.omnetpp.cdt.omnetppProjectType.1299021111" name="OMNeT++ Simulation" projectType="org.omnetpp.cdt.omnetppProjectType"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>

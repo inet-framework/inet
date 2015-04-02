@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-01-06  Zoltan Bojthe
 
 	Removed getParentModule calls.
@@ -42,7 +44,11 @@
 	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
 	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======
+
+2015-03-17  Tey
+
+		Fix: In random browsing mode the resource size is now properly set.
 
 2015-03-04  ------ inet-2.6 released ------
 

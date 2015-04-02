@@ -31,11 +31,7 @@ enum Ieee80211HrDsssPreambleType {
     IEEE80211_HRDSSS_PREAMBLE_TYPE_LONG,
 };
 
-class INET_API Ieee80211HrDsssChunkMode
-{
-};
-
-class INET_API Ieee80211HrDsssPreambleMode : public Ieee80211HrDsssChunkMode, public IIeee80211PreambleMode
+class INET_API Ieee80211HrDsssPreambleMode : public IIeee80211PreambleMode
 {
   protected:
     const Ieee80211HrDsssPreambleType preambleType;
@@ -49,13 +45,13 @@ class INET_API Ieee80211HrDsssPreambleMode : public Ieee80211HrDsssChunkMode, pu
     inline int getSFDBitLength() const { return 16; }
     inline int getBitLength() const { return getSyncBitLength() + getSFDBitLength(); }
 
-    virtual inline bps getNetBitrate() const override { return Mbps(1); }
-    virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
+    virtual inline bps getNetBitrate() const { return Mbps(1); }
+    virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
-    virtual const DBPSKModulation *getModulation() const override { return &DBPSKModulation::singleton; }
+    virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
 };
 
-class INET_API Ieee80211HrDsssHeaderMode : public Ieee80211HrDsssChunkMode, public IIeee80211HeaderMode
+class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
 {
   protected:
     const Ieee80211HrDsssPreambleType preambleType;
@@ -75,7 +71,7 @@ class INET_API Ieee80211HrDsssHeaderMode : public Ieee80211HrDsssChunkMode, publ
     virtual const DPSKModulationBase *getModulation() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? static_cast<const DPSKModulationBase *>(&DQPSKModulation::singleton) : static_cast<const DPSKModulationBase *>(&DBPSKModulation::singleton); }
 };
 
-class INET_API Ieee80211HrDsssDataMode : public Ieee80211HrDsssChunkMode, public IIeee80211DataMode
+class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
 {
   protected:
     const bps bitrate;

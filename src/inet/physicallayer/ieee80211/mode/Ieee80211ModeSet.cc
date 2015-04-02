@@ -21,58 +21,137 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ERPOFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HTMode.h"
+#include <algorithm>
 
 namespace inet {
 
 namespace physicallayer {
 
-const std::vector<Ieee80211ModeSet> Ieee80211ModeSet::modeSets = {
+const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
     Ieee80211ModeSet('a', {
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS20MHz },
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS20MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS20MHz },
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS20MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode36Mbps },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
-            }),
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS20MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS20MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode36Mbps },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
+    }),
+    Ieee80211ModeSet('a', {
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS20MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS20MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS20MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode36Mbps },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
+    }),
     Ieee80211ModeSet('b', {
-                { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
-                { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
-                { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
-                { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
-            }),
+        { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
+        { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
+    }),
     Ieee80211ModeSet('g', {
-                { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
-                { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
-                { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
-                { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
-                { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
-                { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
-                { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
-                { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
-                { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
-                { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
-                { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
-                { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO: ERP-CCK, ERP-PBCC, DSSS-OFDM
-            }),
+        { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
+        { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO: ERP-CCK, ERP-PBCC, DSSS-OFDM
+    }),
     Ieee80211ModeSet('p', {
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode3MbpsCS10MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode4_5MbpsCS10MHz },
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS10MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS10MHz },
-                { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS10MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS10MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS10MHz },
-                { false, &Ieee80211OFDMCompliantModes::ofdmMode27Mbps },
-            }),
-};
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode3MbpsCS10MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode4_5MbpsCS10MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS10MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS10MHz },
+        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS10MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS10MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS10MHz },
+        { false, &Ieee80211OFDMCompliantModes::ofdmMode27Mbps },
+        }),
+    Ieee80211ModeSet('n', {
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs0BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs1BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs2BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs3BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs4BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs5BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs6BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs7BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs8BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs9BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs10BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs11BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs12BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs13BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs14BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs15BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs16BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs17BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs18BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs19BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs20BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs21BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs22BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs23BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs24BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs25BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs26BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs27BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs28BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs29BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs30BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs31BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs0BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs1BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs2BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs3BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs4BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs5BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs6BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs7BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs8BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs9BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs10BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs11BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs12BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs13BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs14BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs15BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs16BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs17BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs18BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs19BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs20BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs21BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs22BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs23BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs24BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs25BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs26BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs27BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs28BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs29BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs30BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) },
+        { false, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs31BW40MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_SHORT) }
+}),}; });
 
 Ieee80211ModeSet::Ieee80211ModeSet(char name, const std::vector<Entry> entries) :
     name(name),
     entries(entries)
 {
+    std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
+    std::sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
 }
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
@@ -138,8 +217,8 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(char mode)
 {
-    for (int index = 0; index < (int)Ieee80211ModeSet::modeSets.size(); index++) {
-        const Ieee80211ModeSet *modeSet = &Ieee80211ModeSet::modeSets[index];
+    for (int index = 0; index < (int)(&modeSets)->size(); index++) {
+        const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
         if (modeSet->getName() == mode)
             return modeSet;
     }

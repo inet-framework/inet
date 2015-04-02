@@ -32,6 +32,7 @@
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
 #include "inet/linklayer/common/MACAddress.h"
 
@@ -83,63 +84,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The physical material of the medium.
      */
     const IMaterial *material;
-    /**
-     * The maximum speed among the radios is in the range [0, +infinity) or
-     * NaN if unspecified.
-     */
-    mps maxSpeed;
-    /**
-     * The constraint area minimum among the radios is in the range [-infinity,
-     * +infinity] or NaN if unspecified.
-     */
-    Coord constraintAreaMin;
-    /**
-     * The constraint area maximum among the radios is in the range [-infinity,
-     * +infinity] or NaN if unspecified.
-     */
-    Coord constraintAreaMax;
-    /**
-     * The maximum transmission power among the radio transmitters is in the
-     * range [0, +infinity) or NaN if unspecified.
-     */
-    W maxTransmissionPower;
-    /**
-     * The minimum interference power among the radio receivers is in the
-     * range [0, +infinity) or NaN if unspecified.
-     */
-    W minInterferencePower;
-    /**
-     * The minimum reception power among the radio receivers is in the range
-     * [0, +infinity) or NaN if unspecified.
-     */
-    W minReceptionPower;
-    /**
-     * The maximum gain among the radio antennas is in the range [1, +infinity).
-     */
-    double maxAntennaGain;
-    /**
-     * The minimum overlapping in time needed to consider two transmissions
-     * interfering.
-     */
-    // TODO: maybe compute from longest frame duration, maximum mobility speed and signal propagation time
-    simtime_t minInterferenceTime;
-    /**
-     * The maximum transmission duration of a radio signal.
-     */
-    // TODO: maybe compute from maximum bit length and minimum bitrate
-    simtime_t maxTransmissionDuration;
-    /**
-     * The maximum communication range where a transmission can still be
-     * potentially successfully received is in the range [0, +infinity) or
-     * NaN if unspecified.
-     */
-    m maxCommunicationRange;
-    /**
-     * The maximum interference range where a transmission is still considered
-     * to some effect on other transmissions is in the range [0, +infinity)
-     * or NaN if unspecified.
-     */
-    m maxInterferenceRange;
     /**
      * The radio medium doesn't send radio frames to a radio if it's outside
      * the provided range.
@@ -216,13 +160,17 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Cache */
     //@{
     /**
-     * Caches communication for all radios.
+     * Caches medium limits among all radios.
      */
-    mutable ICommunicationCache *communicationCache;
+    mutable IMediumLimitCache *mediumLimitCache;
     /**
      * Caches neighbors for all radios or nullptr if turned off.
      */
     mutable INeighborCache *neighborCache;
+    /**
+     * Caches communication for all radios.
+     */
+    mutable ICommunicationCache *communicationCache;
     //@}
 
     /** @name Logging */
@@ -322,26 +270,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void handleMessage(cMessage *message) override;
     //@}
 
-    /** @name Limits */
-    //@{
-    virtual mps computeMaxSpeed() const;
-
-    virtual W computeMaxTransmissionPower() const;
-    virtual W computeMinInterferencePower() const;
-    virtual W computeMinReceptionPower() const;
-    virtual double computeMaxAntennaGain() const;
-
-    virtual const simtime_t computeMinInterferenceTime() const;
-    virtual const simtime_t computeMaxTransmissionDuration() const;
-
-    virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
-    virtual m computeMaxCommunicationRange() const;
-    virtual m computeMaxInterferenceRange() const;
-    virtual Coord computeConstraintAreaMin() const;
-    virtual Coord computeConstreaintAreaMax() const;
-    virtual void updateLimits();
-    //@}
-
     /** @name Transmission */
     //@{
     /**
@@ -417,21 +345,16 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual void printToStream(std::ostream &stream) const override;
 
-    virtual W getMinInterferencePower() const override { return minInterferencePower; }
-    virtual W getMinReceptionPower() const override { return minReceptionPower; }
-    virtual double getMaxAntennaGain() const override { return maxAntennaGain; }
-    virtual mps getMaxSpeed() const { return maxSpeed; }
-    virtual m getMaxInterferenceRange(const IRadio *radio) const;
-    virtual m getMaxCommunicationRange(const IRadio *radio) const;
-    virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
-    virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
-
     virtual const IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }
     virtual const IPathLoss *getPathLoss() const override { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }
     virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
+
+    virtual const IMediumLimitCache *getMediumLimitCache() const { return mediumLimitCache; }
+    virtual const INeighborCache *getNeighborCache() const { return neighborCache; }
+    virtual const ICommunicationCache *getCommunicationCache() const { return communicationCache; }
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;

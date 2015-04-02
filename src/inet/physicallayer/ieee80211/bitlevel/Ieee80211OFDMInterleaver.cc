@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-void Ieee80211Interleaver::printToStream(std::ostream& stream) const
+void Ieee80211OFDMInterleaver::printToStream(std::ostream& stream) const
 {
-    stream << "Ieee80211Interleaver, "
+    stream << "Ieee80211OFDMInterleaver, "
            << "interleaving = " << interleaving;
 }
 
-BitVector Ieee80211Interleaver::interleave(const BitVector& deinterleavedBits) const
+BitVector Ieee80211OFDMInterleaver::interleave(const BitVector& deinterleavedBits) const
 {
     if (deinterleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("deinterleavedBits length = %d must be a multiple of numberOfCodedBitsPerSymbol = %d", deinterleavedBits.getSize(), numberOfCodedBitsPerSymbol);
@@ -50,7 +50,7 @@ BitVector Ieee80211Interleaver::interleave(const BitVector& deinterleavedBits) c
     return interleavedBits;
 }
 
-BitVector Ieee80211Interleaver::deinterleave(const BitVector& interleavedBits) const
+BitVector Ieee80211OFDMInterleaver::deinterleave(const BitVector& interleavedBits) const
 {
     if (interleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("interleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
@@ -72,7 +72,7 @@ BitVector Ieee80211Interleaver::deinterleave(const BitVector& interleavedBits) c
     return deinterleavedBits;
 }
 
-Ieee80211Interleaver::Ieee80211Interleaver(const Ieee80211Interleaving *interleaving) : interleaving(interleaving)
+Ieee80211OFDMInterleaver::Ieee80211OFDMInterleaver(const Ieee80211OFDMInterleaving *interleaving) : interleaving(interleaving)
 {
     numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
     numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();

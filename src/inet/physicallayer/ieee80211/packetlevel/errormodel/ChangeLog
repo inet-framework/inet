@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-02-24  Levente Mészáros
 
 	Removed header success rate calculation from Ieee80211BerTableErrorModel.
@@ -16,7 +18,7 @@
 
 2014-11-07  ------ inet-2.99.0 released ------
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======
 
 2015-03-04  ------ inet-2.6 released ------
 

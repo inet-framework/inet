@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-01-05  Zoltan Bojthe
 
 	Replaced getParentModule calls with arpModule parameter.
@@ -16,4 +18,4 @@
 
 	Ported the network protocol from MiXiM and adapted to the network protocol contract.
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======

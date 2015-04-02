@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2015-02-05  Zoltan Bojthe
 
 	Replaced getParentModule calls with module parameters.
@@ -16,4 +18,4 @@
 
 	Ported the MAC protocol from MiXiM and adapted to the MAC protocol contract.
 
-2013-07-25  ====== inet-3.x development started (integration branch) ======
+====== inet-2.x ======

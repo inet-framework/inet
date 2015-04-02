@@ -97,20 +97,20 @@ void Radio::initialize(int stage)
 m Radio::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     // TODO: retrieve carrier frequency from the transmitter?
-    Hz carrierFrequency = Hz(check_and_cast<cModule *>(medium)->par("carrierFrequency"));
-    double maxAntennaGain = medium->getMaxAntennaGain();
+    Hz carrierFrequency = Hz(check_and_cast<const cModule *>(check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache())->par("carrierFrequency"));
+    double maxAntennaGain = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxAntennaGain();
     double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
     return medium->getPathLoss()->computeRange(medium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
 }
 
 m Radio::computeMaxCommunicationRange() const
 {
-    return computeMaxRange(transmitter->getMaxPower(), medium->getMinReceptionPower());
+    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinReceptionPower());
 }
 
 m Radio::computeMaxInterferenceRange() const
 {
-    return computeMaxRange(transmitter->getMaxPower(), medium->getMinInterferencePower());
+    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinInterferencePower());
 }
 
 void Radio::printToStream(std::ostream& stream) const

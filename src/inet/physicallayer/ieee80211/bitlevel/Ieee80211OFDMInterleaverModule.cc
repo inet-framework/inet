@@ -15,30 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211InterleaverModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaverModule.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211InterleaverModule);
+Define_Module(Ieee80211OFDMInterleaverModule);
 
-void Ieee80211InterleaverModule::initialize(int stage)
+void Ieee80211OFDMInterleaverModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         int numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
         int numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
-        const Ieee80211Interleaving *interleaving = new Ieee80211Interleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
-        interleaver = new Ieee80211Interleaver(interleaving);
+        const Ieee80211OFDMInterleaving *interleaving = new Ieee80211OFDMInterleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
+        interleaver = new Ieee80211OFDMInterleaver(interleaving);
     }
 }
 
-void Ieee80211InterleaverModule::printToStream(std::ostream& stream) const
+void Ieee80211OFDMInterleaverModule::printToStream(std::ostream& stream) const
 {
     stream << interleaver;
 }
 
-Ieee80211InterleaverModule::~Ieee80211InterleaverModule()
+Ieee80211OFDMInterleaverModule::~Ieee80211OFDMInterleaverModule()
 {
     delete interleaver;
 }

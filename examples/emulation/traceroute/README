@@ -8,8 +8,12 @@ to a real host.
 This network can be used to apply traceroute, a tool to trace the
 path through the network to a specified host.
 
-To run this examples, some parameters have to be adjusted in the omnetpp.ini.
+To run this example, some parameters have to be adjusted in the omnetpp.ini.
 
+- Make sure that you have libpcap-dev (v1.5.3 or later) installed on your machine. 
+- Turn on the "Network Emulation" feature (In IDE / INET Project Properties / Project Features.
+  (if you forget this you will receive a 'Class "inet::cSocketRTScheduler" not found' error)
+- Rebuild INET
 - Set **.ext[0].device to the device name of the interface of the computer
   running the simulation.
 - On your server, add a route to the nets 10.2. and 10.3., and set
@@ -20,9 +24,3 @@ Start the simulation with root privileges. To get realistic round trip times
 you should choose the express mode.
 
 Type traceroute 10.2.1.1 at the command prompt of the external machine.
-
-
-
-
-
-

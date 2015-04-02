@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2014 OpenSim Ltd.
+// Copyright (C) 2015 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,32 +15,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211INTERLEAVING_H
-#define __INET_IEEE80211INTERLEAVING_H
+#ifndef __INET_IEEE80211HTINTERLEAVING_H
+#define __INET_IEEE80211HTINTERLEAVING_H
 
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-class INET_API Ieee80211Interleaving : public IInterleaving
+class INET_API Ieee80211HTInterleaving : public IInterleaving
 {
-  protected:
-    int numberOfCodedBitsPerSymbol;
-    int numberOfCodedBitsPerSubcarrier;
+    protected:
+        // Let numberOfCodedBitsPerSpatialStreams.at(i) denote the number of coded bits for the ith spatial
+        // stream and numberOfCodedBitsPerSpatialStreams.size() must be equal to N_SS (the number of spatial
+        // streams).
+        const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams;
+        const Hz bandwidth;
 
-  public:
-    Ieee80211Interleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier) :
-        numberOfCodedBitsPerSymbol(numberOfCodedBitsPerSymbol),
-        numberOfCodedBitsPerSubcarrier(numberOfCodedBitsPerSubcarrier) {}
-
-    void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 Interleaver"; }
-    int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-    int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
+    public:
+        virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211HTInterleaving"; }
+        Ieee80211HTInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 
-#endif // ifndef __INET_IEEE80211INTERLEAVING_H
-
+#endif // ifndef __INET_IEEE80211HTINTERLEAVING_H

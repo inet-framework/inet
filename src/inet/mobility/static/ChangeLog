@@ -1,3 +1,5 @@
+====== inet-3.x ======
+
 2014-12-04  Florian Meier
 
 	Added StaticConcentricMobility similar to StaticGridMobility, but it places

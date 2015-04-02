@@ -1,18 +1,18 @@
 #!/bin/sh
 
-if [ ! -f Version ]; then
-    echo 'Must be called in top-level omnetpp dir!'
-    exit
-fi
+cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+INET_ROOT=`pwd`
 
-# cvstag and release names...
-relname=`cat Version`
-escaped_relname=`cat Version | sed 's/\./\\\\./g'`
+# tag and release names...
+relname=`$INET_ROOT/_scripts/get_version`
+escaped_relname=`$INET_ROOT/_scripts/get_version | sed 's/\./\\\\./g'`
 
 # check tag format
 echo "About to add --- $relname released --- line to ChangeLogs"
 echo "Enter to continue..."
 read tmp
+
+head="====== inet-3.x ======"
 
 # update ChangeLog files. (remove earlier marker line if exists, plus blank line below it)
 today=`date '+20%y-%m-%d'`
@@ -22,9 +22,11 @@ echo "Finding ChangeLogs..."
 changelogs=`find . -name ChangeLog`
 echo "Updating ChangeLogs..."
 for i in $changelogs; do
-    echo "$line" > $i.b
+    echo "$head" > $i.b
     echo "" >> $i.b
-    sed "/$pattern/{N;d;}" $i >> $i.b || exit 1
+    echo "$line" >> $i.b
+    echo "" >> $i.b
+    sed "/$head/{N;d;}" $i | sed "/$pattern/{N;d;}" >> $i.b || exit 1
     mv $i.b $i || exit 1
 done
 echo "Done"

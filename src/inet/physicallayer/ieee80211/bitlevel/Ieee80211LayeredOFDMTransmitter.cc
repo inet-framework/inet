@@ -83,9 +83,7 @@ BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) con
     const Ieee80211OFDMPLCPFrame *phyFrame = check_and_cast<const Ieee80211OFDMPLCPFrame *>(packet);
     phySerializer.serialize(phyFrame, serializedPacket);
     unsigned int byteLength = phyFrame->getLength();
-    unsigned int rate = phyFrame->getRate();
-    int dataBitsLength = 6 + byteLength * 8 + 16;
-    appendPadding(serializedPacket, dataBitsLength, rate);
+    appendPadding(serializedPacket, byteLength);
     return serializedPacket;
 }
 
@@ -139,7 +137,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAna
     unsigned int numberOfDataOFDMSymbols = numberOfDataAPSKSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
     simtime_t duration = preambleDuration + headerDuration + dataDuration;
-    return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getBandwidth(), power);
+    return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getDataMode()->getBandwidth(), power);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
@@ -174,11 +172,7 @@ void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacke
             if (encoder) // non-compliant mode
                 fieldBitModel = encoder->encode(fieldPacketModel);
             else { // compliant mode
-                const Ieee80211OFDMCode *code = nullptr;
-                if (isSignalField)
-                    code = mode->getSignalMode()->getCode();
-                else // data
-                    code = mode->getDataMode()->getCode();
+                const Ieee80211OFDMCode *code = isSignalField ? mode->getSignalMode()->getCode() : mode->getDataMode()->getCode();
                 const Ieee80211OFDMEncoder encoder(code);
                 fieldBitModel = encoder.encode(fieldPacketModel);
             }
@@ -191,12 +185,8 @@ void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacke
             if (modulator) // non-compliant mode
                 fieldSymbolModel = modulator->modulate(fieldBitModel);
             else { // compliant mode
-                const Ieee80211OFDMModulation *ofdmModulation;
-                if (isSignalField)
-                    ofdmModulation = mode->getSignalMode()->getModulation();
-                else
-                    ofdmModulation = mode->getDataMode()->getModulation();
-                Ieee80211OFDMModulator modulator(ofdmModulation);
+                const Ieee80211OFDMModulation *ofdmModulation = isSignalField ? mode->getSignalMode()->getModulation() : mode->getDataMode()->getModulation();
+                Ieee80211OFDMModulator modulator(ofdmModulation, isSignalField ? 0 : 1);
                 fieldSymbolModel = modulator.modulate(fieldBitModel);
             }
         }
@@ -247,18 +237,22 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
     return new TransmissionBitModel(-1, mode->getSignalMode()->getGrossBitrate(), -1, mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
-void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int dataBitsLength, uint8_t rate) const
+void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int length) const
 {
+    // 18.3.5.4 Pad bits (PAD), 1597p.
     // TODO: in non-compliant mode: header padding.
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OFDMCode *code = mode->getDataMode()->getCode();
-    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol;
-    if (code && code->getConvolutionalCode()) {
+    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
+    if (code->getConvolutionalCode()) {
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int appendedBitsLength = dataBitsPerOFDMSymbol - dataBitsLength % dataBitsPerOFDMSymbol;
-    serializedPacket->appendBit(0, appendedBitsLength);
+    unsigned int dataBitsLength = 6 + length * 8 + 16;
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
+    unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
+    serializedPacket->appendBit(0, numberOfPadBits);
 }
 
 const ITransmissionSampleModel *Ieee80211LayeredOFDMTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
@@ -302,7 +296,7 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
     const Ieee80211OFDMModulatorModule *ofdmDataModulatorModule = check_and_cast<const Ieee80211OFDMModulatorModule *>(dataModulator);
     const Ieee80211OFDMSignalMode *signalMode = new Ieee80211OFDMSignalMode(ofdmSignalEncoderModule->getCode(), ofdmSignalModulatorModule->getModulation(), channelSpacing, bandwidth, 0);
     const Ieee80211OFDMDataMode *dataMode = new Ieee80211OFDMDataMode(ofdmDataEncoderModule->getCode(), ofdmDataModulatorModule->getModulation(), channelSpacing, bandwidth);
-    return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing, bandwidth), signalMode, dataMode, channelSpacing, bandwidth);
+    return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

@@ -25,7 +25,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 
 namespace inet {
 

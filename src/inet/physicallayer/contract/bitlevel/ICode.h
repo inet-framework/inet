@@ -18,6 +18,8 @@
 #ifndef __INET_ICODE_H
 #define __INET_ICODE_H
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 namespace physicallayer {
 

@@ -19,11 +19,13 @@
 
 #include "inet/common/serializer/ipv4/ICMPSerializer.h"
 
-#include "inet/applications/pingapp/PingPayload_m.h"
+#include "inet/common/serializer/headers/bsdint.h"
+#include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/common/serializer/ipv4/headers/ip.h"
 #include "inet/common/serializer/ipv4/headers/ip_icmp.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/applications/pingapp/PingPayload_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
