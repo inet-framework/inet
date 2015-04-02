@@ -23,6 +23,8 @@
 
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/dsss-error-rate-model.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 
 namespace inet {
 
@@ -47,12 +49,14 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
     double getFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
     double getFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
 
+    virtual double getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const;
+    virtual double getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const;
 
   public:
     virtual ~Ieee80211NistErrorModel();
 
     virtual void printToStream(std::ostream& stream) const override { stream << "Ieee80211NistErrorModel"; }
-    virtual double GetChunkSuccessRate(const IIeee80211ChunkMode *chunkMode, double snr, uint32_t nbits) const override;
+    virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const override;
 
 };
 

@@ -36,19 +36,9 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
     const IIeee80211Mode *mode = ieee80211Transmission->getMode();
-    // probability of no bit error in the header
-    double minSNIR = snir->getMin();
-    int headerBitLength = flatTransmission->getHeaderBitLength();
-    double headerSuccessRate = GetChunkSuccessRate(mode->getHeaderMode(), minSNIR, headerBitLength);
-    // probability of no bit error in the MPDU
-    int payloadBitLength = flatTransmission->getPayloadBitLength();
-    double payloadSuccessRate = GetChunkSuccessRate(mode->getDataMode(), minSNIR, payloadBitLength);
-    EV_DEBUG << "min SNIR = " << minSNIR << ", bit length = " << payloadBitLength << ", header error rate = " << 1 - headerSuccessRate << ", payload error rate = " << 1 - payloadSuccessRate << endl;
-    if (headerSuccessRate >= 1)
-        headerSuccessRate = 1;
-    if (payloadSuccessRate >= 1)
-        payloadSuccessRate = 1;
-    return 1 - headerSuccessRate * payloadSuccessRate;
+    // Probability of no bit error in the payload and the header
+    double succesRate = getSuccessRate(mode, flatTransmission->getHeaderBitLength(), flatTransmission->getPayloadBitLength(), snir->getMin());
+    return 1 - succesRate;
 }
 
 double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir) const

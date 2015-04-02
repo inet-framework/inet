@@ -148,62 +148,83 @@ double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint3
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetChunkSuccessRate(const IIeee80211ChunkMode *chunkMode, double snr, uint32_t nbits) const
+double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
 {
-    if (dynamic_cast<const Ieee80211OFDMChunkMode *>(chunkMode) /* TODO: || dynamic_cast<const Ieee80211ERPOFDMChunkMode *>(mode)*/) {
-        const Ieee80211OFDMChunkMode *ofdmChunkMode = dynamic_cast<const Ieee80211OFDMChunkMode *>(chunkMode);
-        const ConvolutionalCode *convolutionalCode = ofdmChunkMode->getCode()->getConvolutionalCode();
-        if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &BPSKModulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFecBpskBer(snr, nbits, 1);
-            }
-            else {
-                return GetFecBpskBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QPSKModulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFecQpskBer(snr, nbits, 1);
-            }
-            else {
-                return GetFecQpskBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QAM16Modulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2) {
-                return GetFec16QamBer(snr, nbits, 1);
-            }
-            else {
-                return GetFec16QamBer(snr, nbits, 3);
-            }
-        }
-        else if (ofdmChunkMode->getModulation()->getSubcarrierModulation() == &QAM64Modulation::singleton) {
-            if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3) {
-                return GetFec64QamBer(snr, nbits, 2);
-            }
-            else {
-                return GetFec64QamBer(snr, nbits, 3);
-            }
-        }
-        else
-            throw cRuntimeError("Unknown modulation");
+    if (subcarrierModulation == &BPSKModulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFecBpskBer(snr, bitLength, 1);
+        return getFecBpskBer(snr, bitLength, 3);
     }
-    else if (dynamic_cast<const Ieee80211DsssChunkMode *>(chunkMode) || dynamic_cast<const Ieee80211HrDsssChunkMode *>(chunkMode)) {
-        switch ((int)chunkMode->getNetBitrate().get()) {
-            case 1000000:
-                return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, nbits);
-
-            case 2000000:
-                return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, nbits);
-
-            case 5500000:
-                return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, nbits);
-
-            case 11000000:
-                return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, nbits);
-        }
+    else if (subcarrierModulation == &QPSKModulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFecQpskBer(snr, bitLength, 1);
+        return getFecQpskBer(snr, bitLength, 3);
     }
-    return 0;
+    else if (subcarrierModulation == &QAM16Modulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
+            return getFec16QamBer(snr, bitLength, 1);
+        return getFec16QamBer(snr, bitLength, 3);
+    }
+    else if (subcarrierModulation == &QAM64Modulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3)
+            return getFec64QamBer(snr, bitLength, 2);
+        return getFec64QamBer(snr, bitLength, 3);
+    }
+    else
+        throw cRuntimeError("Unknown modulation");
+}
+
+double Ieee80211NistErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const
+{
+    switch ((int)bitrate.get()) {
+        case 1000000:
+            return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, bitLength);
+        case 2000000:
+            return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, bitLength);
+        case 5500000:
+            return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, bitLength);
+        case 11000000:
+            return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, bitLength);
+    }
+    throw cRuntimeError("Unsupported bitrate");
+}
+
+double Ieee80211NistErrorModel::getSuccessRate(const IIeee80211Mode* mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const
+{
+    double headerSuccessRate = 0;
+    double payloadSuccessRate = 0;
+    if (dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    {
+        const Ieee80211OFDMMode *ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode);
+        headerSuccessRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
+                                                              ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
+                                                              headerBitLength,
+                                                              snr);
+        payloadSuccessRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
+                                                              ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
+                                                              payloadBitLength,
+                                                              snr);
+    }
+    else if (dynamic_cast<const Ieee80211DsssMode *>(mode))
+    {
+        const Ieee80211DsssMode *dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode);
+        headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
+        payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
+    }
+    else if (dynamic_cast<const Ieee80211HrDsssMode *>(mode))
+    {
+        const Ieee80211HrDsssMode *hrDsssMode = dynamic_cast<const Ieee80211HrDsssMode *>(mode);
+        headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
+        payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
+    }
+    else
+        throw cRuntimeError("Unsupported 802.11 mode");
+    EV_DEBUG << "Min SNIR = " << snr << ", bit length = " << payloadBitLength << ", header error rate = " << 1 - headerSuccessRate << ", payload error rate = " << 1 - payloadSuccessRate << endl;
+    if (headerSuccessRate >= 1)
+        headerSuccessRate = 1;
+    if (payloadSuccessRate >= 1)
+        payloadSuccessRate = 1;
+    return headerSuccessRate * payloadSuccessRate;
 }
 
 } // namespace physicallayer
