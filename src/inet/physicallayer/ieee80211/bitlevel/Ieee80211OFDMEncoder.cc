@@ -21,10 +21,9 @@
 #include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaver.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 
@@ -66,7 +65,7 @@ Ieee80211OFDMEncoder::Ieee80211OFDMEncoder(const Ieee80211OFDMCode *code) :
     if (code->getScrambling())
         scrambler = new AdditiveScrambler(code->getScrambling());
     if (code->getInterleaving())
-        interleaver = new Ieee80211Interleaver(code->getInterleaving());
+        interleaver = new Ieee80211OFDMInterleaver(code->getInterleaving());
     if (code->getConvolutionalCode())
         convolutionalCoder = new ConvolutionalCoder(code->getConvolutionalCode());
 }

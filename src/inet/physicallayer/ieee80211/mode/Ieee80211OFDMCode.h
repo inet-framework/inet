@@ -19,7 +19,7 @@
 #define __INET_IEEE80211OFDMCODE_H
 
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211Interleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/contract/bitlevel/ICode.h"
 
@@ -30,14 +30,14 @@ class INET_API Ieee80211OFDMCode : public ICode
 {
     protected:
         const ConvolutionalCode *convolutionalCode;
-        const Ieee80211Interleaving *interleaving;
+        const Ieee80211OFDMInterleaving *interleaving;
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211OFDMCode(const ConvolutionalCode *convolutionalCode, const Ieee80211Interleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211OFDMCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OFDMInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
         const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
-        const Ieee80211Interleaving *getInterleaving() const { return interleaving; }
+        const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaving; }
         const AdditiveScrambling *getScrambling() const { return scrambling; }
 };
 
@@ -50,10 +50,10 @@ class INET_API Ieee80211OFDMCompliantCodes
     static const Ieee80211ConvolutionalCode ofdmConvolutionalCode3_4;
 
     // Interleavings supported by the OFDM PHY: 18.3.5.7 Data interleaving
-    static const Ieee80211Interleaving ofdmBPSKInterleaving;
-    static const Ieee80211Interleaving ofdmQPSKInterleaving;
-    static const Ieee80211Interleaving ofdmQAM16Interleaving;
-    static const Ieee80211Interleaving ofdmQAM64Interleaving;
+    static const Ieee80211OFDMInterleaving ofdmBPSKInterleaving;
+    static const Ieee80211OFDMInterleaving ofdmQPSKInterleaving;
+    static const Ieee80211OFDMInterleaving ofdmQAM16Interleaving;
+    static const Ieee80211OFDMInterleaving ofdmQAM64Interleaving;
 
     // Scrambling supported by the OFDM PHY: 18.3.5.5 PLCP DATA scrambler and descrambler
     static const AdditiveScrambling ofdmScrambling;
