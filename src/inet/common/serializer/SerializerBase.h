@@ -70,8 +70,9 @@ class INET_API Buffer
     // read
     unsigned char readByte() const;  // returns 0 when not enough space
     void readNBytes(unsigned int length, void *dest) const;    // padding with 0 when not enough space
-    uint16_t readUint16() const;    // ntoh, returns 0 when not enough space
-    uint32_t readUint32() const;    // ntoh, returns 0 when not enough space
+    uint16_t readUint16() const;    // ntoh, padding with 0 when not enough bytes
+    uint32_t readUint32() const;    // ntoh, padding with 0 when not enough bytes
+    uint64_t readUint64() const;    // ntoh, padding with 0 when not enough bytes
     MACAddress readMACAddress() const;
     IPv4Address readIPv4Address() const  { return IPv4Address(readUint32()); }
     IPv6Address readIPv6Address() const;
@@ -86,6 +87,7 @@ class INET_API Buffer
     void writeUint16(uint16_t data);    // hton
     void writeUint16To(unsigned int position, uint16_t data);    // hton
     void writeUint32(uint32_t data);    // hton
+    void writeUint64(uint64_t data);    // hton
     void writeMACAddress(const MACAddress& addr);
     void writeIPv4Address(IPv4Address addr)  { writeUint32(addr.getInt()); }
     void writeIPv6Address(const IPv6Address &addr)  { for (int i = 0; i < 4; i++) { writeUint32(addr.words()[i]); } }

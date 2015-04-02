@@ -68,23 +68,36 @@ void Buffer::readNBytes(unsigned int length, void *_dest) const
 
 uint16_t Buffer::readUint16() const
 {
-    if (pos + 2 > bufsize) {
-        errorFound = true;
-        return 0;
-    }
-    uint16_t ret = ((uint16_t)(buf[pos]) << 8) + buf[pos+1];
-    pos += 2;
+    uint16_t ret = 0;
+    if (pos < bufsize) ret += ((uint16_t)(buf[pos++]) << 8);
+    if (pos < bufsize) ret += ((uint16_t)(buf[pos++]));
+    else errorFound = true;
     return ret;
 }
 
 uint32_t Buffer::readUint32() const
 {
-    if (pos + 4 > bufsize) {
-        errorFound = true;
-        return 0;
-    }
-    uint32_t ret = ((uint32_t)(buf[pos]) << 24) + ((uint32_t)(buf[pos+1]) << 16) + ((uint32_t)(buf[pos+2]) << 8) + buf[pos+3];
-    pos += 4;
+    uint32_t ret = 0;
+    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) << 24);
+    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) << 16);
+    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) <<  8);
+    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]));
+    else errorFound = true;
+    return ret;
+}
+
+uint64_t Buffer::readUint64() const
+{
+    uint64_t ret = 0;
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 56);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 48);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 40);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 32);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 24);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 16);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) <<  8);
+    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]));
+    else errorFound = true;
     return ret;
 }
 
@@ -171,6 +184,28 @@ void Buffer::writeUint32(uint32_t data)    // hton
         errorFound = true;
 }
 
+void Buffer::writeUint64(uint64_t data)    // hton
+{
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 56);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 48);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 40);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 32);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 24);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 16);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)(data >> 8);
+    if (pos < bufsize)
+        buf[pos++] = (uint8_t)data;
+    else
+        errorFound = true;
+}
+
 void *Buffer::accessNBytes(unsigned int length)
 {
     if (pos + length <= bufsize) {
@@ -206,10 +241,10 @@ IPv6Address Buffer::readIPv6Address() const
     return IPv6Address(d[0], d[1], d[2], d[3]);
 }
 
-void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& context)
+void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
 {
     unsigned int startPos = b.getPos();
-    serialize(pkt, b, context);
+    serialize(pkt, b, c);
     if (!b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
         throw cRuntimeError("%s serializer error: packet %s (%s) length is %d but serialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
