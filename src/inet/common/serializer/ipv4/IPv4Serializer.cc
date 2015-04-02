@@ -98,19 +98,24 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     }
 
     const cPacket *encapPacket = dgram->getEncapsulatedPacket();
+    unsigned int payloadLength = dgram->getByteLength() - b.getPos();
 
-    if (dgram->getMoreFragments() || dgram->getFragmentOffset() != 0) {  // IP fragment
-        unsigned int totalLength = encapPacket->getByteLength();
-        char *buf = new char[totalLength];
-        Buffer tmpBuffer(buf, totalLength);
-        SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
-        unsigned int segmentLength = dgram->getByteLength() - b.getPos();
-        tmpBuffer.seek(dgram->getFragmentOffset());
-        b.writeNBytes(tmpBuffer, segmentLength);
-        delete [] buf;
+    if (encapPacket) {
+        if (dgram->getMoreFragments() || dgram->getFragmentOffset() != 0) {  // IP fragment
+            unsigned int totalLength = encapPacket->getByteLength();
+            char *buf = new char[totalLength];
+            Buffer tmpBuffer(buf, totalLength);
+            SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
+            tmpBuffer.seek(dgram->getFragmentOffset());
+            b.writeNBytes(tmpBuffer, payloadLength);
+            delete [] buf;
+        }
+        else
+            SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
     }
-    else
-        SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+    else {
+        b.fillNBytes(payloadLength, '?');
+    }
 
     ip->ip_sum = htons(TCPIPchecksum::checksum(ip, IP_HEADER_BYTES));
 }
