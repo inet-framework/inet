@@ -145,7 +145,9 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
     body.setChannelNumber(channelNumber);
+    body.setBodyLength(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates));
 
+    frame->setByteLength(28 + body.getBodyLength());
     frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);
     frame->setFromDS(true);
 
