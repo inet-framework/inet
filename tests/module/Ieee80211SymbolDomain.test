@@ -60,17 +60,17 @@ network = SymbolDomainTest
 
 **.ieee80211OFDMDataEncoder.fecType = "ConvolutionalCoder"
 **.ieee80211OFDMDataEncoder.scramblerType = "AdditiveScrambler"
-**.ieee80211OFDMDataEncoder.interleaverType = "Ieee80211Interleaver"
+**.ieee80211OFDMDataEncoder.interleaverType = "Ieee80211OFDMInterleaver"
 **.ieee80211OFDMSignalEncoder.fecType = "ConvolutionalCoder"
 **.ieee80211OFDMSignalEncoder.scramblerType = ""
-**.ieee80211OFDMSignalEncoder.interleaverType = "Ieee80211Interleaver"
+**.ieee80211OFDMSignalEncoder.interleaverType = "Ieee80211OFDMInterleaver"
 
 **.ieee80211OFDMDataDecoder.fecType = "ConvolutionalCoder"
 **.ieee80211OFDMDataDecoder.descramblerType = "AdditiveScrambler"
-**.ieee80211OFDMDataDecoder.deinterleaverType = "Ieee80211Interleaver"
+**.ieee80211OFDMDataDecoder.deinterleaverType = "Ieee80211OFDMInterleaver"
 **.ieee80211OFDMSignalDecoder.fecType = "ConvolutionalCoder"
 **.ieee80211OFDMSignalDecoder.descramblerType = ""
-**.ieee80211OFDMSignalDecoder.deinterleaverType = "Ieee80211Interleaver"
+**.ieee80211OFDMSignalDecoder.deinterleaverType = "Ieee80211OFDMInterleaver"
 
 # Data deinterleaver
 **.ieee80211OFDMDataDecoder.deinterleaver.numberOfCodedBitsPerSubcarrier = 4

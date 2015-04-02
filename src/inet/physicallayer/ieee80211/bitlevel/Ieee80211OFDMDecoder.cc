@@ -40,7 +40,7 @@ Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OFDMCode *code) :
     if (code->getConvolutionalCode())
         fecDecoder = new ConvolutionalCoder(code->getConvolutionalCode());
     if (code->getInterleaving())
-        deinterleaver = new Ieee80211Interleaver(code->getInterleaving());
+        deinterleaver = new Ieee80211OFDMInterleaver(code->getInterleaving());
 }
 
 const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitModel *bitModel) const

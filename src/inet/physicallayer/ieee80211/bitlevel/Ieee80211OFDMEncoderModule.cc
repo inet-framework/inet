@@ -34,9 +34,9 @@ void Ieee80211OFDMEncoderModule::initialize(int stage)
         const ConvolutionalCode *convolutionalCode = nullptr;
         if (convolutionalCoder)
             convolutionalCode = check_and_cast<const ConvolutionalCode *>(convolutionalCoder->getForwardErrorCorrection());
-        const Ieee80211Interleaving *interleaving = nullptr;
+        const Ieee80211OFDMInterleaving *interleaving = nullptr;
         if (interleaver)
-            interleaving = check_and_cast<const Ieee80211Interleaving *>(interleaver->getInterleaving());
+            interleaving = check_and_cast<const Ieee80211OFDMInterleaving *>(interleaver->getInterleaving());
         const AdditiveScrambling *scrambling = nullptr;
         if (scrambler)
             scrambling = check_and_cast<const AdditiveScrambling *>(scrambler->getScrambling());

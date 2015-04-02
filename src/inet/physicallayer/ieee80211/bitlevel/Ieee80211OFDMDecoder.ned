@@ -30,7 +30,7 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 //
 //       - Convolutional decoder (18.3.5.6 Convolutional encoder) @see ~ConvolutionalCoder
 //       - Additive descrambler (18.3.5.5 PLCP DATA scrambler and descrambler) @see ~AdditiveScrambler
-//       - Block deinterleaver (18.3.5.7 Data interleaving) @see ~Ieee80211Interleaver
+//       - Block deinterleaver (18.3.5.7 Data interleaving) @see ~Ieee80211OFDMInterleaver
 //
 //
 module Ieee80211OFDMDecoder like IDecoder
