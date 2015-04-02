@@ -1,22 +1,22 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
- * Copyright (c) 2010 The Boeing Company
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Author: Gary Pei <guangyu.pei@boeing.com>
- */
+//
+// Copyright (c) 2010 The Boeing Company
+// Copyright (C) 2015 OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Author: Gary Pei <guangyu.pei@boeing.com>
+//
 
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
@@ -33,15 +33,11 @@ namespace physicallayer {
 
 Define_Module(Ieee80211NistErrorModel);
 
-Ieee80211NistErrorModel::Ieee80211NistErrorModel()
-{
-}
-
 Ieee80211NistErrorModel::~Ieee80211NistErrorModel()
 {
 }
 
-double Ieee80211NistErrorModel::GetBpskBer(double snr) const
+double Ieee80211NistErrorModel::getBpskBer(double snr) const
 {
     double z = sqrt(snr);
     double ber = 0.5 * erfc(z);
@@ -49,7 +45,7 @@ double Ieee80211NistErrorModel::GetBpskBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::GetQpskBer(double snr) const
+double Ieee80211NistErrorModel::getQpskBer(double snr) const
 {
     double z = sqrt(snr / 2.0);
     double ber = 0.5 * erfc(z);
@@ -57,7 +53,7 @@ double Ieee80211NistErrorModel::GetQpskBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::Get16QamBer(double snr) const
+double Ieee80211NistErrorModel::get16QamBer(double snr) const
 {
     double z = sqrt(snr / (5.0 * 2.0));
     double ber = 0.75 * 0.5 * erfc(z);
@@ -65,7 +61,7 @@ double Ieee80211NistErrorModel::Get16QamBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::Get64QamBer(double snr) const
+double Ieee80211NistErrorModel::get64QamBer(double snr) const
 {
     double z = sqrt(snr / (21.0 * 2.0));
     double ber = 7.0 / 12.0 * 0.5 * erfc(z);
@@ -73,31 +69,31 @@ double Ieee80211NistErrorModel::Get64QamBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::GetFecBpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFecBpskBer(double snr, double nbits, uint32_t bValue) const
 {
-    double ber = GetBpskBer(snr);
+    double ber = getBpskBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetFecQpskBer(double snr, double nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFecQpskBer(double snr, double nbits, uint32_t bValue) const
 {
-    double ber = GetQpskBer(snr);
+    double ber = getQpskBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::CalculatePe(double p, uint32_t bValue) const
+double Ieee80211NistErrorModel::calculatePe(double p, uint32_t bValue) const
 {
     double D = sqrt(4.0 * p * (1.0 - p));
     double pe = 1.0;
@@ -128,25 +124,25 @@ double Ieee80211NistErrorModel::CalculatePe(double p, uint32_t bValue) const
     return pe;
 }
 
-double Ieee80211NistErrorModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
-    double ber = Get16QamBer(snr);
+    double ber = get16QamBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
 
-double Ieee80211NistErrorModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
 {
-    double ber = Get64QamBer(snr);
+    double ber = get64QamBer(snr);
     if (ber == 0.0) {
         return 1.0;
     }
-    double pe = CalculatePe(ber, bValue);
+    double pe = calculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
     double pms = pow(1 - pe, (double)nbits);
     return pms;
