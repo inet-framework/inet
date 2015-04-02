@@ -111,6 +111,7 @@ Physical layer:
    supports both the flat and the layered physical layer models and provide PHY
    characteristics. The implemented 802.11 modes are: DSSS, HR-DSSS, FHSS, IR,
    OFDM, ERP-OFDM.
+ - Also implemented 802.11 High Throughput mode that makes available Wifi n modes.
  - Added a simple hypothetical APSK physical layer implementation that supports
    packet-level, bit-level, and symbol-level simulations with widely configurable
    bit-domain and symbol-domain parameters.
