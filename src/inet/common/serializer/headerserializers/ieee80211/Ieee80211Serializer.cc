@@ -284,7 +284,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             //type = ST_BEACON;
             const Ieee80211BeaconFrame *Frame = static_cast<const Ieee80211BeaconFrame *>(pkt);
             // 1    Timestamp
-            b.accessNBytes(8);    //FIXME set timestamp value
+            b.writeUint64(Frame->getTimestamp().raw());   //FIXME
             // 2    Beacon interval
             b.writeUint16((uint16_t)(Frame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3    Capability
@@ -330,7 +330,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             //type = ST_PROBERESPONSE;
             const Ieee80211ProbeResponseFrame *Frame = static_cast<const Ieee80211ProbeResponseFrame *>(pkt);
             // 1      Timestamp
-            b.accessNBytes(8);    //FIXME
+            b.writeUint64(Frame->getTimestamp().raw());   //FIXME
             // 2      Beacon interval
             b.writeUint16((uint16_t)(Frame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3      Capability
@@ -646,7 +646,8 @@ cPacket* Ieee80211Serializer::deserialize(Buffer &b, Context& c)
             Ieee80211BeaconFrame *pkt = new Ieee80211BeaconFrame();
             parseDataOrMgmtFrame(b, pkt, ST_BEACON);
             Ieee80211BeaconFrameBody body;
-            b.accessNBytes(8);
+
+            simtime_t t; t.setRaw(b.readUint64()); pkt->setTimestamp(t);  //timestamp   //FIXME
 
             body.setBeaconInterval(SimTime((int64_t)b.readUint16()*1024, SIMTIME_US));
             b.readUint16();     // Capability
@@ -675,7 +676,8 @@ cPacket* Ieee80211Serializer::deserialize(Buffer &b, Context& c)
             Ieee80211ProbeResponseFrame *pkt = new Ieee80211ProbeResponseFrame();
             parseDataOrMgmtFrame(b, pkt, ST_PROBERESPONSE);
             Ieee80211ProbeResponseFrameBody body;
-            b.accessNBytes(8);
+
+            simtime_t t; t.setRaw(b.readUint64()); pkt->setTimestamp(t);  //timestamp   //FIXME
 
             body.setBeaconInterval(SimTime((int64_t)b.readUint16() * 1024, SIMTIME_US));
             b.readUint16();
