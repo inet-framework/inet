@@ -354,6 +354,7 @@ const IReceptionDecision *Ieee80211LayeredOFDMReceiver::computeReceptionDecision
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
         uint8_t rate = getRate(signalFieldPacketModel->getSerializedPacket());
+        // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
     }
     else if (!mode)
