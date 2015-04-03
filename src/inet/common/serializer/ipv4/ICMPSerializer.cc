@@ -142,6 +142,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             pkt->setByteLength(4);
             pp->setOriginatorId(b.readUint16());
             uint16_t seqno = b.readUint16();
+            pp->setSeqNo(seqno);
 
             char name[32];
             sprintf(name, "parsed-ping%d-reply", seqno);
