@@ -177,7 +177,7 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
     return entries[getModeIndex(mode)].isMandatory;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate) const
 {
     for (int index = 0; index < (int)entries.size(); index++) {
         const IIeee80211Mode *mode = entries[index].mode;
@@ -185,6 +185,15 @@ const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate) const
             return entries[index].mode;
     }
     return nullptr;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate) const
+{
+    const IIeee80211Mode *mode = findMode(bitrate);
+    if (mode == nullptr)
+        throw cRuntimeError("Unknown bitrate: %g in operation mode: '%c'", bitrate.get(), name);
+    else
+        return mode;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getSlowestMode() const
@@ -229,7 +238,7 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(char mode)
 {
     const Ieee80211ModeSet *modeSet = findModeSet(mode);
     if (modeSet == nullptr)
-        throw cRuntimeError("Unknown op mode");
+        throw cRuntimeError("Unknown 802.11 operational mode: '%c'", mode);
     else
         return modeSet;
 }
