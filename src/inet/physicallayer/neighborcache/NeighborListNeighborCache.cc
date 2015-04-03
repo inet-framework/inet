@@ -48,7 +48,7 @@ void NeighborListNeighborCache::initialize(int stage)
     }
 }
 
-void NeighborListNeighborCache::printToStream(std::ostream& stream) const
+void NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "NeighborListNeighborCache, "
            << "refillPeriod = " << refillPeriod << ", "

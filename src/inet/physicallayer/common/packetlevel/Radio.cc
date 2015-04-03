@@ -113,7 +113,7 @@ m Radio::computeMaxInterferenceRange() const
     return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinInterferencePower());
 }
 
-void Radio::printToStream(std::ostream& stream) const
+void Radio::printToStream(std::ostream& stream, int level) const
 {
     stream << (cSimpleModule *)this;
 }

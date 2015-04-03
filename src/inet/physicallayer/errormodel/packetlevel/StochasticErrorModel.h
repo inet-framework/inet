@@ -40,7 +40,7 @@ class INET_API StochasticErrorModel : public ErrorModelBase
   public:
     StochasticErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
 
     virtual double computePacketErrorRate(const ISNIR *snir) const override;
     virtual double computeBitErrorRate(const ISNIR *snir) const override;

@@ -26,7 +26,7 @@ void BreakpointPathLoss::initialize(int stage)
     }
 }
 
-void BreakpointPathLoss::printToStream(std::ostream& stream) const
+void BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "BreakpointPathLoss, "
            << "L01 = " << l01 << ", "

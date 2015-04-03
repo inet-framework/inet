@@ -32,7 +32,7 @@ RadioFrame::RadioFrame(const RadioFrame& other) :
 {
 }
 
-void RadioFrame::printToStream(std::ostream& stream) const
+void RadioFrame::printToStream(std::ostream& stream, int level) const
 {
     stream << (cPacket *)this;
 }

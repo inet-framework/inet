@@ -26,7 +26,7 @@ MFSKModulation::MFSKModulation(unsigned int codeWordSize) :
 {
 }
 
-void MFSKModulation::printToStream(std::ostream& stream) const
+void MFSKModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "MFSKModulaiton";
 }

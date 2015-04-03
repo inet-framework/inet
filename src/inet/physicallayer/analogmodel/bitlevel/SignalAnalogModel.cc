@@ -26,7 +26,7 @@ SignalAnalogModel::SignalAnalogModel(const simtime_t duration) :
 {
 }
 
-void SignalAnalogModel::printToStream(std::ostream& stream) const
+void SignalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "duration = " << duration;
 }

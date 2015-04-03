@@ -33,7 +33,7 @@ SignalSampleModel::~SignalSampleModel()
     delete samples;
 }
 
-void SignalSampleModel::printToStream(std::ostream& stream) const
+void SignalSampleModel::printToStream(std::ostream& stream, int level) const
 {
 }
 

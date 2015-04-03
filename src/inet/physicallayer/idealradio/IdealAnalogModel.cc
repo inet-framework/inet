@@ -27,7 +27,7 @@ namespace physicallayer {
 
 Define_Module(IdealAnalogModel);
 
-void IdealAnalogModel::printToStream(std::ostream& stream) const
+void IdealAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealAnalogModel";
 }

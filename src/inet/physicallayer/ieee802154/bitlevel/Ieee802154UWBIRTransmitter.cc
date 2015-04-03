@@ -42,7 +42,7 @@ void Ieee802154UWBIRTransmitter::initialize(int stage)
     }
 }
 
-void Ieee802154UWBIRTransmitter::printToStream(std::ostream& stream) const
+void Ieee802154UWBIRTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee802154UWBIRTransmitter";
 }

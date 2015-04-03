@@ -42,7 +42,7 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
     return 1.5 * q * q;
 }
 
-void DipoleAntenna::printToStream(std::ostream& stream) const
+void DipoleAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "DipoleAntenna, length = " << length;
 }

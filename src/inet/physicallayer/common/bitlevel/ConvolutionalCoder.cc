@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-void ConvolutionalCoder::printToStream(std::ostream& stream) const
+void ConvolutionalCoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConvolutionalCoder, "
            << "convolutionalCode = " << convolutionalCode;

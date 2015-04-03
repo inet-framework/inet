@@ -30,10 +30,10 @@ APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
 {
 }
 
-void APSKDimensionalTransmitter::printToStream(std::ostream& stream) const
+void APSKDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKDimensionalTransmitter, ";
-    DimensionalTransmitterBase::printToStream(stream);
+    DimensionalTransmitterBase::printToStream(stream, level);
 }
 
 const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

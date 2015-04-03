@@ -37,7 +37,7 @@ class INET_API StochasticLayeredErrorModel : public LayeredErrorModelBase
   public:
     StochasticLayeredErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
 
     virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
     virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const;

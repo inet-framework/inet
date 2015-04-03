@@ -39,7 +39,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
   public:
     ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
 
     virtual const IReception *getReception() const { return reception; }
     virtual const ReceptionIndication *getIndication() const { return indication; }

@@ -93,7 +93,7 @@ void MediumLimitCache::initialize(int stage)
     }
 }
 
-void MediumLimitCache::printToStream(std::ostream &stream) const
+void MediumLimitCache::printToStream(std::ostream &stream, int level) const
 {
     stream << "RadioMediumLimits, "
            << "minConstraintArea = " << minConstraintArea << ", "

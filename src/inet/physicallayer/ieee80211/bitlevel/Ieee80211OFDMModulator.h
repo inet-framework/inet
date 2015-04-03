@@ -49,7 +49,7 @@ class INET_API Ieee80211OFDMModulator : public IModulator
 
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
     const Ieee80211OFDMModulation *getModulation() const { return subcarrierModulation; }
-    void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Modulator"; }
+    void printToStream(std::ostream& stream, int level) const { stream << "IEEE 802.11 OFDM Modulator"; }
 };
 
 } // namespace physicallayer

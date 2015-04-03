@@ -96,7 +96,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     const Hz getBandwidth() const { return mode->getDataMode()->getBandwidth(); }
     const Hz getCarrierFrequency() const { return carrierFrequency; }
     const Hz getCarrierSpacing() const { return mode->getChannelSpacing(); }
-    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Transmitter"; }
+    virtual void printToStream(std::ostream& stream, int level) const { stream << "IEEE 802.11 OFDM Transmitter"; }
 };
 
 } // namespace physicallayer

@@ -27,11 +27,11 @@ DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz ca
 {
 }
 
-void DimensionalNoise::printToStream(std::ostream& stream) const
+void DimensionalNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalNoise, "
            << "power = { " << power << " }";
-    NarrowbandNoiseBase::printToStream(stream);
+    NarrowbandNoiseBase::printToStream(stream, level);
 }
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

@@ -38,7 +38,7 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 
   public:
     TwoRayGroundReflection();
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 

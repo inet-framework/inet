@@ -27,7 +27,7 @@ SNIRBase::SNIRBase(const IReception *reception, const INoise *noise) :
 {
 }
 
-void SNIRBase::printToStream(std::ostream& stream) const
+void SNIRBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "reception = { " << reception << " }, "
            << "noise = { " << noise << " }";

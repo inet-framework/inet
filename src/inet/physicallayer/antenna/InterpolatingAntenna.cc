@@ -40,7 +40,7 @@ void InterpolatingAntenna::initialize(int stage)
     }
 }
 
-void InterpolatingAntenna::printToStream(std::ostream& stream) const
+void InterpolatingAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "InterpolatingAntenna, maxGain = " << maxGain;
 }

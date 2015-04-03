@@ -35,7 +35,7 @@ ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const c
         memory = std::max(memory, atoi(tokenizer.nextToken()) - 1);
 }
 
-void ConvolutionalCode::printToStream(std::ostream& stream) const
+void ConvolutionalCode::printToStream(std::ostream& stream, int level) const
 {
     stream << codeRatePuncturingK << "/" << codeRatePuncturingN << " convolutional encoder/decoder";
 }

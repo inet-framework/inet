@@ -153,7 +153,7 @@ class INET_API ConvolutionalCoder : public IFECCoder
     const int **getOutputTable() const { return (const int **)inputSymbols; }
 
     /* IPrintable object */
-    void printToStream(std::ostream& stream) const;
+    void printToStream(std::ostream& stream, int level) const;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

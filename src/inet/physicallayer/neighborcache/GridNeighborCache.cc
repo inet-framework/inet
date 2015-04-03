@@ -71,7 +71,7 @@ void GridNeighborCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + refillPeriod, msg);
 }
 
-void GridNeighborCache::printToStream(std::ostream& stream) const
+void GridNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "GridNeighborCache, "
            << "cellSize = " << cellSize << ", "

@@ -36,7 +36,7 @@ class INET_API MQAMModulation : public MQAMModulationBase
     MQAMModulation(unsigned int codeWordSize);
     virtual ~MQAMModulation();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
 };
 
 } // namespace physicallayer

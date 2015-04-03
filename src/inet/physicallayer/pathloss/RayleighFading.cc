@@ -23,7 +23,7 @@ namespace physicallayer {
 
 Define_Module(RayleighFading);
 
-void RayleighFading::printToStream(std::ostream& stream) const
+void RayleighFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "RayleighFading, "
            << "alpha = " << alpha << ", "

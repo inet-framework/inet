@@ -41,7 +41,7 @@ class INET_API QAM256Modulation : public MQAMModulationBase
   public:
     QAM256Modulation();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "QAM256Modulation"; }
+    virtual void printToStream(std::ostream& stream, int level) const { stream << "QAM256Modulation"; }
 };
 
 } // namespace physicallayer

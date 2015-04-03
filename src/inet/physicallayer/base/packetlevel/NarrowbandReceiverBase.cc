@@ -47,12 +47,12 @@ void NarrowbandReceiverBase::initialize(int stage)
     }
 }
 
-void NarrowbandReceiverBase::printToStream(std::ostream& stream) const
+void NarrowbandReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "modulation = { " << modulation << " }, "
            << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth << ", ";
-    SNIRReceiverBase::printToStream(stream);
+    SNIRReceiverBase::printToStream(stream, level);
 }
 
 const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

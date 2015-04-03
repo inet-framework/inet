@@ -32,7 +32,7 @@ class INET_API DBPSKModulation : public DPSKModulationBase
   public:
     DBPSKModulation();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "DBPSKModulation"; }
+    virtual void printToStream(std::ostream& stream, int level) const { stream << "DBPSKModulation"; }
 };
 
 } // namespace physicallayer

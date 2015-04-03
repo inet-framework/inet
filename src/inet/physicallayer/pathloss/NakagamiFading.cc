@@ -36,7 +36,7 @@ void NakagamiFading::initialize(int stage)
     }
 }
 
-void NakagamiFading::printToStream(std::ostream& stream) const
+void NakagamiFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "NakagamiFading, "
            << "alpha = " << alpha << ", "

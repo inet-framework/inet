@@ -64,7 +64,7 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
     VectorCommunicationCache();
     virtual ~VectorCommunicationCache();
 
-    virtual void printToStream(std::ostream &stream) const { stream << "VectorCommunicationCache"; }
+    virtual void printToStream(std::ostream &stream, int level) const { stream << "VectorCommunicationCache"; }
 
     /** @name Medium state change notifications */
     //@{

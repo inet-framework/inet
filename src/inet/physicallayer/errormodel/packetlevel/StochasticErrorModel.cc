@@ -40,7 +40,7 @@ void StochasticErrorModel::initialize(int stage)
     }
 }
 
-void StochasticErrorModel::printToStream(std::ostream& stream) const
+void StochasticErrorModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "StochasticErrorModel, "
            << "packetErrorRate = " << packetErrorRate << ", "

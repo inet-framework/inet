@@ -27,7 +27,7 @@ ListeningDecision::ListeningDecision(const IListening *listening, bool isListeni
 {
 }
 
-void ListeningDecision::printToStream(std::ostream& stream) const
+void ListeningDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ListeningDecision, "
            << "listening = { " << listening << " }, "

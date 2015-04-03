@@ -39,7 +39,7 @@ class INET_API Arrival : public virtual IArrival
   public:
     Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
 
     virtual const simtime_t getStartPropagationTime() const override { return startPropagationTime; }
     virtual const simtime_t getEndPropagationTime() const override { return endPropagationTime; }

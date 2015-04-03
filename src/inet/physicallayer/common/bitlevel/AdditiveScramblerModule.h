@@ -38,7 +38,7 @@ class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
   public:
     virtual ~AdditiveScramblerModule();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
     virtual BitVector scramble(const BitVector& bits) const { return scrambler->scramble(bits); }
     virtual BitVector descramble(const BitVector& bits) const { return scrambler->descramble(bits); }
     virtual const AdditiveScrambling *getScrambling() const { return scrambler->getScrambling(); }

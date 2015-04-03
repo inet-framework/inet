@@ -44,7 +44,7 @@ class INET_API ConvolutionalCode : public IForwardErrorCorrection
     const char *getMode() const { return mode; }
     const char *getPuncturingMatrix() const { return puncturingMatrix; }
     const char *getTransferFunctionMatrix() const { return transferFunctionMatrix; }
-    void printToStream(std::ostream& stream) const;
+    void printToStream(std::ostream& stream, int level) const;
     virtual double getCodeRate() const;
     virtual int getEncodedLength(int decodedLength) const;
     virtual int getDecodedLength(int encodedLength) const;

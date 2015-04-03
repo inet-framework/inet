@@ -34,7 +34,7 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const cPacket *mac
 {
 }
 
-void TransmissionBase::printToStream(std::ostream& stream) const
+void TransmissionBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "id = " << id << ", "
            << "transmitter id = " << transmitter->getId() << ", "

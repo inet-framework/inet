@@ -37,7 +37,7 @@ void FreeSpacePathLoss::initialize(int stage)
     }
 }
 
-void FreeSpacePathLoss::printToStream(std::ostream& stream) const
+void FreeSpacePathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "FreeSpacePathLoss, "
            << "alpha = " << alpha << ", "

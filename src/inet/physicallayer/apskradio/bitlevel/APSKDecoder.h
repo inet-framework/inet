@@ -41,7 +41,7 @@ class INET_API APSKDecoder : public cSimpleModule, public IDecoder
     APSKDecoder();
     virtual ~APSKDecoder();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "APSKDecoder"; }
+    virtual void printToStream(std::ostream& stream, int level) const { stream << "APSKDecoder"; }
     virtual const APSKCode *getCode() const { return code; }
     virtual const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const;
 };

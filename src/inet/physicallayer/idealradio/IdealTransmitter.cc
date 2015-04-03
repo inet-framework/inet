@@ -45,7 +45,7 @@ void IdealTransmitter::initialize(int stage)
     }
 }
 
-void IdealTransmitter::printToStream(std::ostream& stream) const
+void IdealTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealTransmitter, "
            << "headerBitLength = " << headerBitLength << ", "

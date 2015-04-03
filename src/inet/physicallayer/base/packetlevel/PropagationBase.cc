@@ -33,7 +33,7 @@ void PropagationBase::initialize(int stage)
         propagationSpeed = mps(par("propagationSpeed"));
 }
 
-void PropagationBase::printToStream(std::ostream& stream) const
+void PropagationBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "propagationSpeed = " << propagationSpeed;
 }

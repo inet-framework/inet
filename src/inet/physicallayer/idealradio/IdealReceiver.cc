@@ -39,7 +39,7 @@ void IdealReceiver::initialize(int stage)
     }
 }
 
-void IdealReceiver::printToStream(std::ostream& stream) const
+void IdealReceiver::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealReceiver, "
            << (ignoreInterference ? "ignoring interference" : "considering interference");

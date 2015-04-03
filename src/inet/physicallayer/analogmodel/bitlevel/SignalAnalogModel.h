@@ -33,7 +33,7 @@ class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
   public:
     SignalAnalogModel(const simtime_t duration);
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
 
     virtual const simtime_t getDuration() const { return duration; }
 };

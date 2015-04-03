@@ -39,12 +39,12 @@ void FlatTransmitterBase::initialize(int stage)
     }
 }
 
-void FlatTransmitterBase::printToStream(std::ostream& stream) const
+void FlatTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "headerBitLength = " << headerBitLength << ", "
            << "bitrate = " << bitrate << ", "
            << "power = " << power;
-    NarrowbandTransmitterBase::printToStream(stream);
+    NarrowbandTransmitterBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

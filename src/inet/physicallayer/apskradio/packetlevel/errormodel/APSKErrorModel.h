@@ -30,7 +30,7 @@ namespace physicallayer {
 class INET_API APSKErrorModel : public ErrorModelBase
 {
   public:
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
 
     virtual double computePacketErrorRate(const ISNIR *snir) const override;
 

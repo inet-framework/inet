@@ -25,7 +25,7 @@ class INET_API BreakpointPathLoss : public cModule, public IPathLoss
 
   public:
 	BreakpointPathLoss();
-	virtual void printToStream(std::ostream& stream) const override;
+	virtual void printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const override;
 };

@@ -55,7 +55,7 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
   public:
     virtual ~Ieee80211NistErrorModel();
 
-    virtual void printToStream(std::ostream& stream) const override { stream << "Ieee80211NistErrorModel"; }
+    virtual void printToStream(std::ostream& stream, int level) const override { stream << "Ieee80211NistErrorModel"; }
     virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const override;
 
 };

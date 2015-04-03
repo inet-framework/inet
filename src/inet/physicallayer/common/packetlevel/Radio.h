@@ -200,7 +200,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual int getId() const override { return id; }
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
 
     virtual const IAntenna *getAntenna() const override { return antenna; }
     virtual const ITransmitter *getTransmitter() const override { return transmitter; }

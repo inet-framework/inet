@@ -41,7 +41,7 @@ void DimensionalAnalogModelBase::initialize(int stage)
     }
 }
 
-void DimensionalAnalogModelBase::printToStream(std::ostream& stream) const
+void DimensionalAnalogModelBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "attenuateWithCarrierFrequency = " << attenuateWithCarrierFrequency << ", "
            << "interpolationMode = " << interpolationMode;

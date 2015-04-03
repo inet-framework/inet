@@ -33,7 +33,7 @@ ReceptionBase::ReceptionBase(const IRadio *receiver, const ITransmission *transm
 {
 }
 
-void ReceptionBase::printToStream(std::ostream& stream) const
+void ReceptionBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "receiver id = " << receiver->getId() << ", "
            << "transmission id = " << transmission->getId() << ", "

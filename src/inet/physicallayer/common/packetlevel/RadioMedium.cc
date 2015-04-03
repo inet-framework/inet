@@ -134,7 +134,7 @@ void RadioMedium::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         EV_DEBUG << "Initialized ";
-        printToStream(EVSTREAM);
+        printToStream(EVSTREAM, 0);
         EV_DEBUG << endl;
     }
 }
@@ -170,7 +170,7 @@ void RadioMedium::finish()
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
-void RadioMedium::printToStream(std::ostream &stream) const
+void RadioMedium::printToStream(std::ostream &stream, int level) const
 {
     stream << "RadioMedium, "
            << "propagation = { " << propagation << " }, "
@@ -189,8 +189,6 @@ void RadioMedium::printToStream(std::ostream &stream) const
         stream << "neighborCache = { " << neighborCache << " }, ";
     else
         stream << "neighborCache = nullptr, ";
-
-
     stream << "communicationCache = { " << communicationCache << " }";
 }
 

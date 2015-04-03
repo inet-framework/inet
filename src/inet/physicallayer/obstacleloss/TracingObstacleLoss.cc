@@ -60,7 +60,7 @@ void TracingObstacleLoss::finish()
     recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
-void TracingObstacleLoss::printToStream(std::ostream& stream) const
+void TracingObstacleLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "TracingObstacleLoss";
 }

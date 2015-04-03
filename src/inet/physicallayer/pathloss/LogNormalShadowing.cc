@@ -36,7 +36,7 @@ void LogNormalShadowing::initialize(int stage)
     }
 }
 
-void LogNormalShadowing::printToStream(std::ostream& stream) const
+void LogNormalShadowing::printToStream(std::ostream& stream, int level) const
 {
     stream << "LogNormalShadowing, "
            << "alpha = " << alpha << ", "

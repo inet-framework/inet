@@ -38,7 +38,7 @@ void TwoRayGroundReflection::initialize(int stage)
     }
 }
 
-void TwoRayGroundReflection::printToStream(std::ostream& stream) const
+void TwoRayGroundReflection::printToStream(std::ostream& stream, int level) const
 {
     stream << "TwoRayGroundReflection, "
            << "alpha = " << alpha << ", "

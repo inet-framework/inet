@@ -59,7 +59,7 @@ void UWBIRStochasticPathLoss::initialize(int stage)
     }
 }
 
-void UWBIRStochasticPathLoss::printToStream(std::ostream& stream) const
+void UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "UWBIRStochasticPathLoss, "
            << "PL0 = " << PL0 << ", "

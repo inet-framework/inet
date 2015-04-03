@@ -35,7 +35,7 @@ SignalBitModel::~SignalBitModel()
     delete bits;
 }
 
-void SignalBitModel::printToStream(std::ostream& stream) const
+void SignalBitModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "headerBitLength = " << headerBitLength << ", "
            << "headerBitRate = " << headerBitRate << ", "

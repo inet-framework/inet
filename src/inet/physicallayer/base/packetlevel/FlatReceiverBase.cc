@@ -46,12 +46,12 @@ void FlatReceiverBase::initialize(int stage)
     }
 }
 
-void FlatReceiverBase::printToStream(std::ostream& stream) const
+void FlatReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "errorModel = { " << errorModel << " }, "
            << "energyDetection = " << energyDetection << ", "
            << "sensitivity = " << sensitivity << ", ";
-    NarrowbandReceiverBase::printToStream(stream);
+    NarrowbandReceiverBase::printToStream(stream, level);
 }
 
 // TODO: this is not purely functional, see interface comment

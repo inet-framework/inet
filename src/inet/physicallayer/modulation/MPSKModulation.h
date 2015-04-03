@@ -36,7 +36,7 @@ class INET_API MPSKModulation : public APSKModulationBase
     MPSKModulation(unsigned int codeWordSize);
     virtual ~MPSKModulation();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
 
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const;

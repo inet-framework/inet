@@ -22,7 +22,7 @@ namespace inet {
 
 namespace physicallayer {
 
-void AdditiveScrambler::printToStream(std::ostream& stream) const
+void AdditiveScrambler::printToStream(std::ostream& stream, int level) const
 {
     stream << "Additive scrambling, "
            << "scrambling = " << scrambling;

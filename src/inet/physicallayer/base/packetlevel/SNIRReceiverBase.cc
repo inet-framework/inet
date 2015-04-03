@@ -36,7 +36,7 @@ void SNIRReceiverBase::initialize(int stage)
         snirThreshold = math::dB2fraction(par("snirThreshold"));
 }
 
-void SNIRReceiverBase::printToStream(std::ostream& stream) const
+void SNIRReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "snirThreshold = " << snirThreshold;
 }

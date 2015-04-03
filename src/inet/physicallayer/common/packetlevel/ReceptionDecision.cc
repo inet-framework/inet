@@ -33,7 +33,7 @@ ReceptionDecision::ReceptionDecision(const IReception *reception, const Receptio
 {
 }
 
-void ReceptionDecision::printToStream(std::ostream& stream) const
+void ReceptionDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionDecision, "
            << (isReceptionPossible_ ? "possible" : "impossible") << ", "

@@ -36,7 +36,7 @@ void ConstantGainAntenna::initialize(int stage)
         gain = math::dB2fraction(par("gain"));
 }
 
-void ConstantGainAntenna::printToStream(std::ostream& stream) const
+void ConstantGainAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConstantGainAntenna, gain = " << gain;
 }

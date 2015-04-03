@@ -33,7 +33,7 @@ SignalPacketModel::~SignalPacketModel()
     delete serializedPacket;
 }
 
-void SignalPacketModel::printToStream(std::ostream& stream) const
+void SignalPacketModel::printToStream(std::ostream& stream, int level) const
 {
     stream << packet;
 }

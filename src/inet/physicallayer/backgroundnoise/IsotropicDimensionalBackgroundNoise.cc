@@ -58,7 +58,7 @@ void IsotropicDimensionalBackgroundNoise::initialize(int stage)
     }
 }
 
-void IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream) const
+void IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "IsotropicDimensionalBackgroundNoise, "
            // TODO: << "dimensions = { " << dimensions << " }, "

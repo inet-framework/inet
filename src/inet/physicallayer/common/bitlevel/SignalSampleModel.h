@@ -35,7 +35,7 @@ class INET_API SignalSampleModel : public virtual ISignalSampleModel
     SignalSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples);
     virtual ~SignalSampleModel();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
     virtual int getSampleLength() const { return sampleLength; }
     virtual double getSampleRate() const { return sampleRate; }
     virtual const std::vector<W> *getSamples() const { return samples; }

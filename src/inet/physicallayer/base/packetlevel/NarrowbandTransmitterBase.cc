@@ -39,7 +39,7 @@ void NarrowbandTransmitterBase::initialize(int stage)
     }
 }
 
-void NarrowbandTransmitterBase::printToStream(std::ostream& stream) const
+void NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "modulation = { " << modulation << " }, "
            << "carrierFrequency = " << carrierFrequency << ", "

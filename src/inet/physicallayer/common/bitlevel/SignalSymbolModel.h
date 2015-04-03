@@ -38,7 +38,7 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
     SignalSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
     virtual ~SignalSymbolModel();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
     virtual int getPayloadSymbolLength() const { return payloadSymbolLength; }
     virtual double getPayloadSymbolRate() const { return payloadSymbolRate; }
     virtual int getHeaderSymbolLength() const { return headerSymbolLength; }

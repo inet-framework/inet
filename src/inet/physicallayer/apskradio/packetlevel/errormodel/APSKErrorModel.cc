@@ -25,7 +25,7 @@ namespace physicallayer {
 
 Define_Module(APSKErrorModel);
 
-void APSKErrorModel::printToStream(std::ostream& stream) const
+void APSKErrorModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKErrorModel";
 }

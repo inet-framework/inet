@@ -62,7 +62,7 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + refillPeriod, msg);
 }
 
-void QuadTreeNeighborCache::printToStream(std::ostream& stream) const
+void QuadTreeNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "QuadTreeNeighborCache, "
            << "maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant << ", "

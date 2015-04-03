@@ -46,7 +46,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
   public:
     SNIRReceiverBase();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual void printToStream(std::ostream& stream, int level) const override;
 
     virtual double getSNIRThreshold() const { return snirThreshold; }
 

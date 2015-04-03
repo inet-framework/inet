@@ -39,7 +39,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     SignalBitModel(int headerBitLength, bps headerBitRate, int payloadBitLength, bps payloadBitRate, const BitVector *bits);
     virtual ~SignalBitModel();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual void printToStream(std::ostream& stream, int level) const;
     virtual int getHeaderBitLength() const { return headerBitLength; }
     virtual bps getHeaderBitRate() const { return headerBitRate; }
     virtual int getPayloadBitLength() const { return payloadBitLength; }

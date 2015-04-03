@@ -29,12 +29,12 @@ FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPac
 {
 }
 
-void FlatTransmissionBase::printToStream(std::ostream& stream) const
+void FlatTransmissionBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "headerBitLength = " << headerBitLength << ", "
            << "payloadBitLength = " << payloadBitLength << ", "
            << "bitrate = " << bitrate << ", ";
-    NarrowbandTransmissionBase::printToStream(stream);
+    NarrowbandTransmissionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

@@ -70,7 +70,7 @@ void SUIPathLoss::initialize(int stage)
     }
 }
 
-void SUIPathLoss::printToStream(std::ostream& stream) const
+void SUIPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "SUIPathLoss, "
            << "ht = " << ht << ", "

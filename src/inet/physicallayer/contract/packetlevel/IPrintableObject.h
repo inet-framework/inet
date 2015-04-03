@@ -38,30 +38,30 @@ class INET_API IPrintableObject
      * Function calls to operator<< with pointers or references either const
      * or not are all forwarded to this function.
      */
-    virtual void printToStream(std::ostream& stream) const = 0;
+    virtual void printToStream(std::ostream& stream, int level) const = 0;
 };
 
 inline std::ostream& operator<<(std::ostream& stream, IPrintableObject *object)
 {
-    object->printToStream(stream);
+    object->printToStream(stream, 0);
     return stream;
 };
 
 inline std::ostream& operator<<(std::ostream& stream, IPrintableObject& object)
 {
-    object.printToStream(stream);
+    object.printToStream(stream, 0);
     return stream;
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
-    object->printToStream(stream);
+    object->printToStream(stream, 0);
     return stream;
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
-    object.printToStream(stream);
+    object.printToStream(stream, 0);
     return stream;
 };
 

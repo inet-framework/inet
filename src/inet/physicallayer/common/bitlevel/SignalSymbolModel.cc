@@ -35,7 +35,7 @@ SignalSymbolModel::~SignalSymbolModel()
     delete symbols;
 }
 
-void SignalSymbolModel::printToStream(std::ostream& stream) const
+void SignalSymbolModel::printToStream(std::ostream& stream, int level) const
 {
 //    stream << modulation;
 }

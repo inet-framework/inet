@@ -28,11 +28,11 @@ NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime,
 {
 }
 
-void NarrowbandNoiseBase::printToStream(std::ostream& stream) const
+void NarrowbandNoiseBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth << ", ";
-    NoiseBase::printToStream(stream);
+    NoiseBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

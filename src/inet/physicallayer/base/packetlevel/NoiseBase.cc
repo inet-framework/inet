@@ -27,7 +27,7 @@ NoiseBase::NoiseBase(simtime_t startTime, simtime_t endTime) :
 {
 }
 
-void NoiseBase::printToStream(std::ostream& stream) const
+void NoiseBase::printToStream(std::ostream& stream, int level) const
 {
     stream << "startTime = " << startTime << ", "
            << "endTime = " << endTime;

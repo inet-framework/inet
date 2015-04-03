@@ -33,7 +33,7 @@ Interference::~Interference()
     delete interferingReceptions;
 }
 
-void Interference::printToStream(std::ostream& stream) const
+void Interference::printToStream(std::ostream& stream, int level) const
 {
     stream << "Interference, "
            << "backgroundNoise = { " << backgroundNoise << " }, "

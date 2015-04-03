@@ -35,7 +35,7 @@ class INET_API Ieee80211OFDMModulation : public IModulation
         virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
         virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
 
-        virtual void printToStream(std::ostream& stream) const { std::cout << "Ieee80211OFDMModulation"; }
+        virtual void printToStream(std::ostream& stream, int level) const { std::cout << "Ieee80211OFDMModulation"; }
 };
 
 class INET_API Ieee80211OFDMCompliantModulations
