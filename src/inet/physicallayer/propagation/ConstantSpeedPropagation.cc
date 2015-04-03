@@ -46,12 +46,13 @@ const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t tim
     throw cRuntimeError("Movement approximation is not implemented");
 }
 
-void ConstantSpeedPropagation::printToStream(std::ostream& stream, int level) const
+std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ConstantSpeedPropagation, "
-           << "ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation << ", "
-           << "ignoreMovementDuringReception = " << ignoreMovementDuringReception << ", ";
-    PropagationBase::printToStream(stream, level);
+    stream << "ConstantSpeedPropagation";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation
+               << ", ignoreMovementDuringReception = " << ignoreMovementDuringReception;
+    return PropagationBase::printToStream(stream, level);
 }
 
 const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const

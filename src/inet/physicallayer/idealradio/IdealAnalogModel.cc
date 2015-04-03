@@ -27,9 +27,9 @@ namespace physicallayer {
 
 Define_Module(IdealAnalogModel);
 
-void IdealAnalogModel::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealAnalogModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealAnalogModel";
+    return stream << "IdealAnalogModel";
 }
 
 const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const

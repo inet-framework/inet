@@ -33,16 +33,19 @@ Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropag
 {
 }
 
-void Arrival::printToStream(std::ostream& stream, int level) const
+std::ostream& Arrival::printToStream(std::ostream& stream, int level) const
 {
-    stream << "startPropagationTime = " << startPropagationTime << ", "
-           << "endPropagationTime = " << endPropagationTime << ", "
-           << "startTime = " << startTime << ", "
-           << "endTime = " << endTime << ", "
-           << "startPosition = " << startPosition << ", "
-           << "endPosition = " << endPosition << ", "
-           << "startOrientation = " << startOrientation << ", "
-           << "endOrientation = " << endOrientation;
+    stream << "Arrival";
+    if (level >= PRINT_LEVEL_TRACE)
+       stream << ", startPropagationTime = " << startPropagationTime
+              << ", endPropagationTime = " << endPropagationTime
+              << ", startTime = " << startTime
+              << ", endTime = " << endTime
+              << ", startPosition = " << startPosition
+              << ", endPosition = " << endPosition
+              << ", startOrientation = " << startOrientation
+              << ", endOrientation = " << endOrientation;
+    return stream;
 }
 
 } // namespace physicallayer

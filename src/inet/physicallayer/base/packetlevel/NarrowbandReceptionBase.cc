@@ -28,11 +28,12 @@ NarrowbandReceptionBase::NarrowbandReceptionBase(const IRadio *receiver, const I
 {
 }
 
-void NarrowbandReceptionBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandReceptionBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
-    ReceptionBase::printToStream(stream, level);
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", carrierFrequency = " << carrierFrequency
+               << ", bandwidth = " << bandwidth;
+    return ReceptionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

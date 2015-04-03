@@ -42,11 +42,11 @@ class INET_API Ieee80211OFDMDemodulator : public IDemodulator
     bool isPilotOrDcSubcarrier(int i) const;
 
   public:
-    Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *ofdmModulation);
+    Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *subcarrierModulation);
 
     const Ieee80211OFDMModulation *getModulation() const { return subcarrierModulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
-    void printToStream(std::ostream& stream, int level) const { stream << "IEEE 802.11 OFDM Demodulator"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

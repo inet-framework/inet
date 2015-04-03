@@ -47,7 +47,7 @@ class INET_API APSKEncoder : public IEncoder, public cSimpleModule
     APSKEncoder();
     virtual ~APSKEncoder();
 
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "APSKEncoder"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const APSKCode *getCode() const { return code; }
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
 };

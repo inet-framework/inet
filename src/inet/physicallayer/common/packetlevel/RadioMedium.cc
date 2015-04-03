@@ -56,7 +56,7 @@ RadioMedium::RadioMedium() :
     communicationLayer(nullptr),
     communicationTrail(nullptr),
     transmissionCount(0),
-    sendCount(0),
+    radioFrameSendCount(0),
     receptionComputationCount(0),
     interferenceComputationCount(0),
     receptionDecisionComputationCount(0),
@@ -132,11 +132,8 @@ void RadioMedium::initialize(int stage)
         }
         updateCanvasInterval = par("updateCanvasInterval");
     }
-    else if (stage == INITSTAGE_LAST) {
-        EV_DEBUG << "Initialized ";
-        printToStream(EVSTREAM, 0);
-        EV_DEBUG << endl;
-    }
+    else if (stage == INITSTAGE_LAST)
+        EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
 }
 
 void RadioMedium::finish()
@@ -147,7 +144,7 @@ void RadioMedium::finish()
     double snirCacheHitPercentage = 100 * (double)cacheSNIRHitCount / (double)cacheSNIRGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
     EV_INFO << "Transmission count = " << transmissionCount << endl;
-    EV_INFO << "Radio frame send count = " << sendCount << endl;
+    EV_INFO << "Radio frame send count = " << radioFrameSendCount << endl;
     EV_INFO << "Reception computation count = " << receptionComputationCount << endl;
     EV_INFO << "Interference computation count = " << interferenceComputationCount << endl;
     EV_INFO << "Reception decision computation count = " << receptionDecisionComputationCount << endl;
@@ -158,7 +155,7 @@ void RadioMedium::finish()
     EV_INFO << "SNIR cache hit = " << snirCacheHitPercentage << " %" << endl;
     EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
     recordScalar("transmission count", transmissionCount);
-    recordScalar("radio frame send count", sendCount);
+    recordScalar("radio frame send count", radioFrameSendCount);
     recordScalar("reception computation count", receptionComputationCount);
     recordScalar("interference computation count", interferenceComputationCount);
     recordScalar("reception decision computation count", receptionDecisionComputationCount);
@@ -170,26 +167,20 @@ void RadioMedium::finish()
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
-void RadioMedium::printToStream(std::ostream &stream, int level) const
+std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
 {
-    stream << "RadioMedium, "
-           << "propagation = { " << propagation << " }, "
-           << "pathLoss = { " << pathLoss << " }, "
-           << "analogModel = { " << analogModel << " }, ";
-    if (obstacleLoss != nullptr)
-        stream << "obstacleLoss = { " << obstacleLoss << " }, ";
-    else
-        stream << "obstacleLoss = nullptr, ";
-    if (backgroundNoise != nullptr)
-        stream << "backgroundNoise = { " << backgroundNoise << " }, ";
-    else
-        stream << "backgroundNoise = nullptr, ";
-    stream << "mediumLimitCache = { " << mediumLimitCache << " }, ";
-    if (neighborCache != nullptr)
-        stream << "neighborCache = { " << neighborCache << " }, ";
-    else
-        stream << "neighborCache = nullptr, ";
-    stream << "communicationCache = { " << communicationCache << " }";
+    stream << static_cast<const cSimpleModule *>(this);
+    if (level >= PRINT_LEVEL_TRACE) {
+        stream << ", propagation = " << printObjectToString(propagation, level - 1)
+               << ", pathLoss = " << printObjectToString(pathLoss, level - 1)
+               << ", analogModel = " << printObjectToString(analogModel, level - 1)
+               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level - 1)
+               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level - 1)
+               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level - 1)
+               << ", neighborCache = " << printObjectToString(neighborCache, level - 1)
+               << ", communicationCache = " << printObjectToString(communicationCache, level - 1) ;
+    }
+    return stream;
 }
 
 void RadioMedium::handleMessage(cMessage *message)
@@ -550,7 +541,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
         cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
         communicationCache->setCachedFrame(receiverRadio, transmission, frameCopy);
-        sendCount++;
+        radioFrameSendCount++;
     }
 }
 
@@ -718,7 +709,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, delay > 0 ? delay : 0, duration, gate);
                     communicationCache->setCachedFrame(receiverRadio, transmission, frameCopy);
-                    sendCount++;
+                    radioFrameSendCount++;
                 }
             }
         }

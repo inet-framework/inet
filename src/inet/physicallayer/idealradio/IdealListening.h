@@ -32,7 +32,7 @@ class INET_API IdealListening : public ListeningBase
   public:
     IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
 
-    virtual void printToStream(std::ostream& stream, int level) const override { stream << "IdealListening"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

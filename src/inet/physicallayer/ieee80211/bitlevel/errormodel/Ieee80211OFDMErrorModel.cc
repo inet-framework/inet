@@ -42,6 +42,17 @@ void Ieee80211OFDMErrorModel::initialize(int stage)
     }
 }
 
+std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMErrorModel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", signalSymbolErrorRate = " << signalSymbolErrorRate
+               << ", dataSymbolErrorRate = " << dataSymbolErrorRate
+               << ", signalBitErrorRate = " << signalBitErrorRate
+               << ", dataBitErrorRate = " << dataBitErrorRate;
+    return stream;
+}
+
 const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();

@@ -34,7 +34,7 @@ class INET_API Interference : public virtual IInterference
     Interference(const INoise *noise, const std::vector<const IReception *> *receptions);
     virtual ~Interference();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const INoise *getBackgroundNoise() const override { return backgroundNoise; }
     virtual const std::vector<const IReception *> *getInterferingReceptions() const override { return interferingReceptions; }
 };

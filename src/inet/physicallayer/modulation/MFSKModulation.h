@@ -37,7 +37,7 @@ class INET_API MFSKModulation : public IModulation
   public:
     MFSKModulation(unsigned int codeWordSize);
 
-    virtual void printToStream(std::ostream& stream, int level) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const;

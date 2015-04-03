@@ -29,7 +29,7 @@ class INET_API APSKDimensionalTransmitter : public DimensionalTransmitterBase
   public:
     APSKDimensionalTransmitter();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };

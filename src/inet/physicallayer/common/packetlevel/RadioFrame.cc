@@ -32,9 +32,9 @@ RadioFrame::RadioFrame(const RadioFrame& other) :
 {
 }
 
-void RadioFrame::printToStream(std::ostream& stream, int level) const
+std::ostream& RadioFrame::printToStream(std::ostream& stream, int level) const
 {
-    stream << (cPacket *)this;
+    return stream << (cPacket *)this;
 }
 
 } // namespace physicallayer

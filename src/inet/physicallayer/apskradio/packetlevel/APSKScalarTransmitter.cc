@@ -31,10 +31,10 @@ APSKScalarTransmitter::APSKScalarTransmitter() :
 {
 }
 
-void APSKScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKScalarTransmitter, ";
-    FlatTransmitterBase::printToStream(stream, level);
+    stream << "APSKScalarTransmitter";
+    return FlatTransmitterBase::printToStream(stream, level);
 }
 
 const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

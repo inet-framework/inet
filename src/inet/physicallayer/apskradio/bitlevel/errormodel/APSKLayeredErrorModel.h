@@ -29,7 +29,7 @@ class INET_API APSKLayeredErrorModel : public LayeredErrorModelBase
   public:
     APSKLayeredErrorModel();
 
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "LayeredAPSKErrorModel"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
     virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const;

@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IPulseFilter
+class INET_API IPulseFilter : public IPrintableObject
 {
   public:
     virtual const IReceptionSymbolModel *filter(const IReceptionSampleModel *sampleModel) const = 0;

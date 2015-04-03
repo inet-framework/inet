@@ -39,7 +39,7 @@ class INET_API APSKModulationBase : public IAPSKModulation
   public:
     APSKModulationBase(const std::vector<APSKSymbol> *constellation);
 
-    virtual void printToStream(std::ostream& stream, int level) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const static APSKModulationBase *findModulation(const char *name);
 
     virtual const std::vector<APSKSymbol> *getConstellation() const { return constellation; }

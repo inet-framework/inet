@@ -27,11 +27,12 @@ ScalarNoise::ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequ
 {
 }
 
-void ScalarNoise::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarNoise, "
-           << "powerChanges = { " << powerChanges << " }, ";
-    NarrowbandNoiseBase::printToStream(stream, level);
+    stream << "ScalarNoise";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", powerChanges = " << powerChanges ;
+    return NarrowbandNoiseBase::printToStream(stream, level);
 }
 
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

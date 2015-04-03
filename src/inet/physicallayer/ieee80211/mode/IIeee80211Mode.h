@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IIeee80211PreambleMode
+class INET_API IIeee80211PreambleMode : public IPrintableObject
 {
   public:
     virtual const simtime_t getDuration() const = 0;
 };
 
-class INET_API IIeee80211HeaderMode
+class INET_API IIeee80211HeaderMode : public IPrintableObject
 {
   public:
     virtual bps getNetBitrate() const = 0;
@@ -40,7 +40,7 @@ class INET_API IIeee80211HeaderMode
     virtual const IModulation *getModulation() const = 0;
 };
 
-class INET_API IIeee80211DataMode
+class INET_API IIeee80211DataMode : public IPrintableObject
 {
   public:
     virtual bps getNetBitrate() const = 0;
@@ -50,7 +50,7 @@ class INET_API IIeee80211DataMode
     virtual const IModulation *getModulation() const = 0;
 };
 
-class INET_API IIeee80211Mode
+class INET_API IIeee80211Mode : public IPrintableObject
 {
   public:
     virtual const IIeee80211PreambleMode *getPreambleMode() const = 0;

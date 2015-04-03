@@ -35,6 +35,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
   public:
     AntennaBase();
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual IMobility *getMobility() const override { return mobility; }
 };
 

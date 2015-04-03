@@ -42,7 +42,7 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     ReferenceCommunicationCache();
     virtual ~ReferenceCommunicationCache();
 
-    virtual void printToStream(std::ostream &stream, int level) const { stream << "ReferenceCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level) const { return stream << "ReferenceCommunicationCache"; }
 
     /** @name Medium state change notifications */
     //@{

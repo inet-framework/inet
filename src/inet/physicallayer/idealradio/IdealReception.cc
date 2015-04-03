@@ -27,11 +27,12 @@ IdealReception::IdealReception(const IRadio *radio, const ITransmission *transmi
 {
 }
 
-void IdealReception::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealReception::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealReception, "
-           << "power = " << power << ", ";
-    ReceptionBase::printToStream(stream, level);
+    stream << "IdealReception";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", power = " << power;
+    return ReceptionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

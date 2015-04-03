@@ -74,6 +74,8 @@ class INET_API Ieee80211OFDMPreambleMode : public IIeee80211PreambleMode, public
     Ieee80211OFDMPreambleMode(Hz channelSpacing);
     virtual ~Ieee80211OFDMPreambleMode() {}
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
     const simtime_t getTrainingSymbolGIDuration() const { return getFFTTransformPeriod() / 2; }
     const simtime_t getShortTrainingSequenceDuration() const { return 10 * getFFTTransformPeriod() / 4; }
     const simtime_t getLongTrainingSequenceDuration() const { return getTrainingSymbolGIDuration() + 2 * getFFTTransformPeriod(); }
@@ -88,6 +90,8 @@ class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Iee
   public:
     Ieee80211OFDMSignalMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth, unsigned int rate);
     virtual ~Ieee80211OFDMSignalMode() {}
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     unsigned int getRate() const { return rate; }
     inline int getRateBitLength() const { return 4; }
@@ -112,6 +116,8 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
     Ieee80211OFDMDataMode(const Ieee80211OFDMCode *code, const Ieee80211OFDMModulation *modulation, Hz channelSpacing, Hz bandwidth);
     virtual ~Ieee80211OFDMDataMode() {}
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
     inline int getServiceBitLength() const { return 16; }
     inline int getTailBitLength() const { return 6; }
 
@@ -133,7 +139,8 @@ class INET_API Ieee80211OFDMMode : public IIeee80211Mode, public Ieee80211OFDMTi
 
   public:
     Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
-    virtual ~Ieee80211OFDMMode() {}
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const Ieee80211OFDMPreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const Ieee80211OFDMSignalMode *getHeaderMode() const override { return signalMode; }

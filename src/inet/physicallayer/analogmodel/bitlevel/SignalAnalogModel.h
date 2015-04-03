@@ -33,7 +33,7 @@ class INET_API SignalAnalogModel : public virtual ISignalAnalogModel
   public:
     SignalAnalogModel(const simtime_t duration);
 
-    virtual void printToStream(std::ostream& stream, int level) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const simtime_t getDuration() const { return duration; }
 };
@@ -46,6 +46,8 @@ class INET_API NarrowbandSignalAnalogModel : public SignalAnalogModel, public vi
 
   public:
     NarrowbandSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }

@@ -30,7 +30,7 @@ class INET_API APSKDimensionalReceiver : public FlatReceiverBase
   public:
     APSKDimensionalReceiver();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

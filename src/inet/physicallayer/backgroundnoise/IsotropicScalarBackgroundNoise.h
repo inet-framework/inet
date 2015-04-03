@@ -35,7 +35,7 @@ class INET_API IsotropicScalarBackgroundNoise : public cModule, public IBackgrou
   public:
     IsotropicScalarBackgroundNoise();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual W getPower() const { return power; }
     virtual const INoise *computeNoise(const IListening *listening) const override;
 };

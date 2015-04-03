@@ -36,6 +36,11 @@ APSKLayeredErrorModel::APSKLayeredErrorModel()
 {
 }
 
+std::ostream& APSKLayeredErrorModel::printToStream(std::ostream& stream, int level) const
+{
+    return stream << "LayeredAPSKErrorModel";
+}
+
 const IReceptionPacketModel *APSKLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     const ITransmissionBitModel* bitModel = transmission->getBitModel();

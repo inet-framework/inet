@@ -141,6 +141,35 @@ const simtime_t Ieee80211OFDMMode::getRxTxTurnaroundTime() const
     return 0;
 }
 
+std::ostream& Ieee80211OFDMPreambleMode::printToStream(std::ostream& stream, int level) const
+{
+    return stream << "Ieee80211OFDMPreambleMode";
+}
+
+std::ostream& Ieee80211OFDMSignalMode::printToStream(std::ostream& stream, int level) const
+{
+    return stream << "Ieee80211OFDMSignalMode";
+}
+
+std::ostream& Ieee80211OFDMDataMode::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMDataMode";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", netBitrate = " << netBitrate;
+    return stream;
+}
+
+std::ostream& Ieee80211OFDMMode::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMMode";
+    if (level >= PRINT_LEVEL_DEBUG)
+        stream << ", preambleMode = " << printObjectToString(preambleMode, level - 1)
+               << ", signalMode = " << printObjectToString(signalMode, level - 1);
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", dataMode = " << printObjectToString(dataMode, level - 1);
+    return stream;
+}
+
 int Ieee80211OFDMDataMode::getBitLength(int dataBitLength) const
 {
     return getServiceBitLength() + dataBitLength + getTailBitLength(); // TODO: padding?

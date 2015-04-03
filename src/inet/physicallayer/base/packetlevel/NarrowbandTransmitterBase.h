@@ -38,7 +38,7 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
   public:
     NarrowbandTransmitterBase();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IModulation *getModulation() const { return modulation; }
     virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }

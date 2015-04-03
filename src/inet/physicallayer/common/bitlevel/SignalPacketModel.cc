@@ -33,9 +33,12 @@ SignalPacketModel::~SignalPacketModel()
     delete serializedPacket;
 }
 
-void SignalPacketModel::printToStream(std::ostream& stream, int level) const
+std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << packet;
+    stream << "SignalPacketModel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", packet = " << packet;
+    return stream;
 }
 
 TransmissionPacketModel::TransmissionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate) :

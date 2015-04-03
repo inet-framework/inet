@@ -36,12 +36,14 @@ void NakagamiFading::initialize(int stage)
     }
 }
 
-void NakagamiFading::printToStream(std::ostream& stream, int level) const
+std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level) const
 {
-    stream << "NakagamiFading, "
-           << "alpha = " << alpha << ", "
-           << "systemLoss = " << systemLoss << ", "
-           << "shapeFactor = " << shapeFactor;
+    stream << "NakagamiFading";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << ", systemLoss = " << systemLoss
+               << ", shapeFactor = " << shapeFactor;
+    return stream;
 }
 
 double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

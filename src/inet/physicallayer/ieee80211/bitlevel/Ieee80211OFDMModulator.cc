@@ -41,11 +41,18 @@ const double Ieee80211OFDMModulator::pilotSubcarrierPolarityVector[] = {
     -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1
 };
 
-
-Ieee80211OFDMModulator::Ieee80211OFDMModulator(const Ieee80211OFDMModulation *ofdmModulation, unsigned int polarityVectorOffset) :
-    subcarrierModulation(ofdmModulation),
+Ieee80211OFDMModulator::Ieee80211OFDMModulator(const Ieee80211OFDMModulation *subcarrierModulation, unsigned int polarityVectorOffset) :
+    subcarrierModulation(subcarrierModulation),
     pilotSubcarrierPolarityVectorOffset(polarityVectorOffset)
 {
+}
+
+std::ostream& Ieee80211OFDMModulator::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMModulator";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level - 1);
+    return stream;
 }
 
 int Ieee80211OFDMModulator::getSubcarrierIndex(int ofdmSymbolIndex) const

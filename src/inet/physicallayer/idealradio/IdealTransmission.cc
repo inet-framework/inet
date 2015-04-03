@@ -29,13 +29,14 @@ IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *m
 {
 }
 
-void IdealTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealTransmission::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealTransmission, "
-           << "maxCommunicationRange = " << maxCommunicationRange << ", "
-           << "maxInterferenceRange = " << maxInterferenceRange << ", "
-           << "maxDetectionRange = " << maxDetectionRange << ", ";
-    TransmissionBase::printToStream(stream, level);
+    stream << "IdealTransmission";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", maxCommunicationRange = " << maxCommunicationRange
+               << ", maxInterferenceRange = " << maxInterferenceRange
+               << ", maxDetectionRange = " << maxDetectionRange;
+    return TransmissionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

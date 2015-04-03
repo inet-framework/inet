@@ -15,29 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_16PPMMODULATION_H
-#define __INET_16PPMMODULATION_H
-
-#include "inet/physicallayer/base/packetlevel/PPMModulationBase.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API _16PPMModulation : public PPMModulationBase
+Ieee80211OFDMInterleaving::Ieee80211OFDMInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier) :
+    numberOfCodedBitsPerSymbol(numberOfCodedBitsPerSymbol),
+    numberOfCodedBitsPerSubcarrier(numberOfCodedBitsPerSubcarrier)
 {
-  public:
-    static const _16PPMModulation singleton;
+}
 
-  public:
-    _16PPMModulation();
+std::ostream& Ieee80211OFDMInterleaving::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMInterleaving";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", numberOfCodedBitsPerSymbol = " << numberOfCodedBitsPerSymbol
+               << ", numberOfCodedBitsPerSubcarrier = " << numberOfCodedBitsPerSubcarrier;
+    return stream;
+}
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "16PPMModulation"; }
-};
+} /* namespace physicallayer */
 
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_16PPMMODULATION_H
+} /* namespace inet */
 

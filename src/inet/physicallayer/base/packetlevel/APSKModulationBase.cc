@@ -36,10 +36,12 @@ APSKModulationBase::APSKModulationBase(const std::vector<APSKSymbol> *constellat
 {
 }
 
-void APSKModulationBase::printToStream(std::ostream& stream, int level) const
+std::ostream& APSKModulationBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "constellationSize = " << constellationSize << ", "
-           << "codeWordSize = " << codeWordSize;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", constellationSize = " << constellationSize
+               << ", codeWordSize = " << codeWordSize;
+    return stream;
 }
 
 const APSKModulationBase *APSKModulationBase::findModulation(const char *modulation)

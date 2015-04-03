@@ -45,14 +45,16 @@ void IdealTransmitter::initialize(int stage)
     }
 }
 
-void IdealTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealTransmitter, "
-           << "headerBitLength = " << headerBitLength << ", "
-           << "bitrate = " << bitrate << ", "
-           << "maxCommunicationRange = " << maxCommunicationRange << ", "
-           << "maxInterferenceRange = " << maxInterferenceRange << ", "
-           << "maxDetectionRange = " << maxDetectionRange;
+    stream << "IdealTransmitter";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", headerBitLength = " << headerBitLength
+               << ", bitrate = " << bitrate
+               << ", maxCommunicationRange = " << maxCommunicationRange
+               << ", maxInterferenceRange = " << maxInterferenceRange
+               << ", maxDetectionRange = " << maxDetectionRange;
+    return stream;
 }
 
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

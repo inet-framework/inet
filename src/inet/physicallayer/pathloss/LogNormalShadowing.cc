@@ -36,12 +36,14 @@ void LogNormalShadowing::initialize(int stage)
     }
 }
 
-void LogNormalShadowing::printToStream(std::ostream& stream, int level) const
+std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level) const
 {
-    stream << "LogNormalShadowing, "
-           << "alpha = " << alpha << ", "
-           << "systemLoss = " << systemLoss << ", "
-           << "sigma = " << sigma;
+    stream << "LogNormalShadowing";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << ", systemLoss = " << systemLoss
+               << ", sigma = " << sigma;
+    return stream;
 }
 
 double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

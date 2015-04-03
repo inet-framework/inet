@@ -28,6 +28,12 @@ IsotropicAntenna::IsotropicAntenna() :
 {
 }
 
+std::ostream& IsotropicAntenna::printToStream(std::ostream& stream, int level) const
+{
+    stream << "IsotropicAntenna";
+    return AntennaBase::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

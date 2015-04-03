@@ -37,7 +37,7 @@ class INET_API DimensionalSNIR : public SNIRBase
   public:
     DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getMin() const override;
 };

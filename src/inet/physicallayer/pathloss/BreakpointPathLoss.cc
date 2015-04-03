@@ -26,14 +26,16 @@ void BreakpointPathLoss::initialize(int stage)
     }
 }
 
-void BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "BreakpointPathLoss, "
-           << "L01 = " << l01 << ", "
-           << "L02 = " << l02 << ", "
-           << "alpha1 = " << alpha1 << ", "
-           << "alpha2 = " << alpha2 << ", "
-           << "breakpointDistance = " << breakpointDistance;
+    stream << "BreakpointPathLoss";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", L01 = " << l01
+               << ", L02 = " << l02
+               << ", alpha1 = " << alpha1
+               << ", alpha2 = " << alpha2
+               << ", breakpointDistance = " << breakpointDistance;
+    return stream;
 }
 
 double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

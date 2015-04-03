@@ -25,9 +25,9 @@ namespace physicallayer {
 
 Define_Module(APSKErrorModel);
 
-void APSKErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& APSKErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKErrorModel";
+    return stream << "APSKErrorModel";
 }
 
 double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const

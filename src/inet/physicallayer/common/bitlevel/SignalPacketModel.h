@@ -35,7 +35,7 @@ class INET_API SignalPacketModel : public virtual ISignalPacketModel
     SignalPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate);
     virtual ~SignalPacketModel();
 
-    virtual void printToStream(std::ostream& stream, int level) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const cPacket *getPacket() const { return packet; }
     virtual const BitVector *getSerializedPacket() const { return serializedPacket; }
     virtual bps getBitrate() const { return bitrate; }

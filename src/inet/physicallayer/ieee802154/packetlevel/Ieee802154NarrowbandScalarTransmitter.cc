@@ -32,10 +32,10 @@ Ieee802154NarrowbandScalarTransmitter::Ieee802154NarrowbandScalarTransmitter() :
 {
 }
 
-void Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee802154NarrowbandScalarTransmitter, ";
-    FlatTransmitterBase::printToStream(stream, level);
+    stream << "Ieee802154NarrowbandScalarTransmitter";
+    return FlatTransmitterBase::printToStream(stream, level);
 }
 
 const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const

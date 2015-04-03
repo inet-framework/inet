@@ -41,10 +41,10 @@ MASKModulation::~MASKModulation()
     delete constellation;
 }
 
-void MASKModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MASKModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "MASKModulaiton, ";
-    APSKModulationBase::printToStream(stream, level);
+    stream << "MASKModulaiton";
+    return APSKModulationBase::printToStream(stream, level);
 }
 
 double MASKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const

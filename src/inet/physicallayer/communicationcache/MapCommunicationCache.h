@@ -51,7 +51,7 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
     MapCommunicationCache();
     virtual ~MapCommunicationCache();
 
-    virtual void printToStream(std::ostream &stream, int level) const { stream << "MapCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level) const { return stream << "MapCommunicationCache"; }
 
     /** @name Medium state change notifications */
     //@{

@@ -93,20 +93,22 @@ void MediumLimitCache::initialize(int stage)
     }
 }
 
-void MediumLimitCache::printToStream(std::ostream &stream, int level) const
+std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level) const
 {
-    stream << "RadioMediumLimits, "
-           << "minConstraintArea = " << minConstraintArea << ", "
-           << "maxConstraintArea = " << maxConstraintArea << ", "
-           << "maxSpeed = " << maxSpeed << ", "
-           << "maxTransmissionPower = " << maxTransmissionPower << ", "
-           << "minInterferencePower = " << minInterferencePower << ", "
-           << "minReceptionPower = " << minReceptionPower << ", "
-           << "maxAntennaGain = " << maxAntennaGain << ", "
-           << "minInterferenceTime = " << minInterferenceTime << ", "
-           << "maxTransmissionDuration = " << maxTransmissionDuration << ", "
-           << "maxCommunicationRange = " << maxCommunicationRange << ", "
-           << "maxInterferenceRange = " << maxInterferenceRange;
+    stream << "RadioMediumLimits";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", minConstraintArea = " << minConstraintArea
+               << ", maxConstraintArea = " << maxConstraintArea
+               << ", maxSpeed = " << maxSpeed
+               << ", maxTransmissionPower = " << maxTransmissionPower
+               << ", minInterferencePower = " << minInterferencePower
+               << ", minReceptionPower = " << minReceptionPower
+               << ", maxAntennaGain = " << maxAntennaGain
+               << ", minInterferenceTime = " << minInterferenceTime
+               << ", maxTransmissionDuration = " << maxTransmissionDuration
+               << ", maxCommunicationRange = " << maxCommunicationRange
+               << ", maxInterferenceRange = " << maxInterferenceRange;
+    return stream;
 }
 
 void MediumLimitCache::updateLimits()

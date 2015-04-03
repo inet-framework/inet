@@ -45,12 +45,14 @@ void StochasticLayeredErrorModel::initialize(int stage)
     }
 }
 
-void StochasticLayeredErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& StochasticLayeredErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "LayeredStochasticErrorModel, "
-           << "packetErrorRate = " << packetErrorRate << ", "
-           << "bitErrorRate = " << bitErrorRate << ", "
-           << "symbolErrorRate = " << symbolErrorRate;
+    stream << "StochasticLayeredErrorModel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << "packetErrorRate = " << packetErrorRate
+               << "bitErrorRate = " << bitErrorRate
+               << "symbolErrorRate = " << symbolErrorRate;
+    return stream;
 }
 
 const IReceptionPacketModel *StochasticLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const

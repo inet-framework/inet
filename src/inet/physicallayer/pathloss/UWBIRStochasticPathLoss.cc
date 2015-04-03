@@ -59,15 +59,17 @@ void UWBIRStochasticPathLoss::initialize(int stage)
     }
 }
 
-void UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "UWBIRStochasticPathLoss, "
-           << "PL0 = " << PL0 << ", "
-           << "muGamma = " << muGamma << ", "
-           << "muSigma = " << muSigma << ", "
-           << "sigmaGamma = " << sigmaGamma << ", "
-           << "sigmaSigma = " << sigmaSigma << ", "
-           << "shadowing = " << shadowing;
+    stream << "UWBIRStochasticPathLoss";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", PL0 = " << PL0
+               << ", muGamma = " << muGamma
+               << ", muSigma = " << muSigma
+               << ", sigmaGamma = " << sigmaGamma
+               << ", sigmaSigma = " << sigmaSigma
+               << ", shadowing = " << shadowing;
+    return stream;
 }
 
 double UWBIRStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const {

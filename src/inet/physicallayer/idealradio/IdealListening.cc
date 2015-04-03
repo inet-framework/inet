@@ -26,6 +26,12 @@ IdealListening::IdealListening(const IRadio *radio, simtime_t startTime, simtime
 {
 }
 
+std::ostream& IdealListening::printToStream(std::ostream& stream, int level) const
+{
+    stream << "IdealListening";
+    return ListeningBase::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

@@ -37,7 +37,7 @@ class INET_API PropagationBase : public cModule, public IPropagation
   public:
     PropagationBase();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual mps getPropagationSpeed() const override { return propagationSpeed; }
 };
 

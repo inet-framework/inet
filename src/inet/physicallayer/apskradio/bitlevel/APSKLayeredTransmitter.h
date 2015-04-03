@@ -66,7 +66,7 @@ class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModul
   public:
     APSKLayeredTransmitter();
 
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "APSKLayeredTransmitter"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IEncoder *getEncoder() const { return encoder; }
     virtual const IModulator *getModulator() const { return modulator; }
     virtual const IPulseShaper *getPulseShaper() const { return pulseShaper; }

@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API DimensionalAnalogModel : public DimensionalAnalogModelBase
 {
   public:
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
 };

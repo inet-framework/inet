@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,33 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKERRORMODEL_H
-#define __INET_APSKERRORMODEL_H
-
-#include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-/**
- * Implements the APSKErrorModel model, see the NED file for details.
- */
-class INET_API APSKErrorModel : public ErrorModelBase
+AdditiveScrambling::AdditiveScrambling(const ShortBitVector& seed, const ShortBitVector& generatorPolynomial) :
+    seed(seed),
+    generatorPolynomial(generatorPolynomial)
 {
-  public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+}
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const override;
+std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level) const
+{
+    stream << "AdditiveScrambling";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", seed = " << seed
+               << ", generatorPolynomial = " << generatorPolynomial;
+    return stream;
+}
 
-    virtual double computeBitErrorRate(const ISNIR *snir) const override;
+} /* namespace physicallayer */
 
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_APSKERRORMODEL_H
+} /* namespace inet */
 

@@ -33,7 +33,7 @@ namespace physicallayer {
 class INET_API RayleighFading : public FreeSpacePathLoss
 {
   public:
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 

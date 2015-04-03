@@ -48,12 +48,14 @@ void NeighborListNeighborCache::initialize(int stage)
     }
 }
 
-void NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
 {
-    stream << "NeighborListNeighborCache, "
-           << "refillPeriod = " << refillPeriod << ", "
-           << "range = " << range << ", "
-           << "maxSpeed = " << maxSpeed;
+    stream << "NeighborListNeighborCache";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", refillPeriod = " << refillPeriod
+               << ", range = " << range
+               << ", maxSpeed = " << maxSpeed;
+    return stream;
 }
 
 void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const

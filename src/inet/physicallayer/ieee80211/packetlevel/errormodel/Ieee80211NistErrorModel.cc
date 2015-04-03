@@ -33,10 +33,6 @@ namespace physicallayer {
 
 Define_Module(Ieee80211NistErrorModel);
 
-Ieee80211NistErrorModel::~Ieee80211NistErrorModel()
-{
-}
-
 double Ieee80211NistErrorModel::getBpskBer(double snr) const
 {
     double z = sqrt(snr);

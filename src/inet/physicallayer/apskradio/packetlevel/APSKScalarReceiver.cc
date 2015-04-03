@@ -32,10 +32,10 @@ APSKScalarReceiver::APSKScalarReceiver() :
 {
 }
 
-void APSKScalarReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& APSKScalarReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKScalarReceiver, ";
-    FlatReceiverBase::printToStream(stream, level);
+    stream << "APSKScalarReceiver";
+    return FlatReceiverBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

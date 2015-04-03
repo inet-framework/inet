@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API ScalarAnalogModel : public ScalarAnalogModelBase
 {
   public:
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "ScalarAnalogModel"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
 };

@@ -37,7 +37,7 @@ class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IIn
   public:
     virtual ~Ieee80211OFDMInterleaverModule();
 
-    virtual void printToStream(std::ostream& stream, int level) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual BitVector interleave(const BitVector& bits) const { return interleaver->interleave(bits); }
     virtual BitVector deinterleave(const BitVector& bits) const { return interleaver->deinterleave(bits); }
     virtual const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaver->getInterleaving(); }

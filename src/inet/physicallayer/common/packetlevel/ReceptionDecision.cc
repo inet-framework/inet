@@ -33,13 +33,15 @@ ReceptionDecision::ReceptionDecision(const IReception *reception, const Receptio
 {
 }
 
-void ReceptionDecision::printToStream(std::ostream& stream, int level) const
+std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ReceptionDecision, "
-           << (isReceptionPossible_ ? "possible" : "impossible") << ", "
-           << (isReceptionAttempted_ ? "attempted" : "ignored") << ", "
-           << (isReceptionSuccessful_ ? "successful" : "unsuccessful") << ", "
-           << "indication = { " << indication << " }";
+    stream << "ReceptionDecision";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << (isReceptionPossible_ ? ", possible" : "impossible")
+               << (isReceptionAttempted_ ? ", attempted" : "ignored")
+               << (isReceptionSuccessful_ ? ", successful" : "unsuccessful")
+               << ", indication = " << indication ;
+    return stream;
 }
 
 const cPacket* inet::physicallayer::ReceptionDecision::getPhyFrame() const

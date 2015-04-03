@@ -90,8 +90,18 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         updateDisplayString();
-        EV_DEBUG << "Radio initialized with " << antenna << ", " << transmitter << ", " << receiver << endl;
+        EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
+}
+
+std::ostream& Radio::printToStream(std::ostream& stream, int level) const
+{
+    stream << static_cast<const cSimpleModule *>(this);
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", antenna = " << printObjectToString(antenna, level - 1)
+               << ", transmitter = " << printObjectToString(transmitter, level - 1)
+               << ", receiver = " << printObjectToString(receiver, level - 1);
+    return stream;
 }
 
 m Radio::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
@@ -111,11 +121,6 @@ m Radio::computeMaxCommunicationRange() const
 m Radio::computeMaxInterferenceRange() const
 {
     return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinInterferencePower());
-}
-
-void Radio::printToStream(std::ostream& stream, int level) const
-{
-    stream << (cSimpleModule *)this;
 }
 
 void Radio::setRadioMode(RadioMode newRadioMode)

@@ -18,12 +18,12 @@
 #ifndef __INET_ICODE_H
 #define __INET_ICODE_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API ICode
+class INET_API ICode : public IPrintableObject
 {
 };
 

@@ -37,11 +37,13 @@ void FreeSpacePathLoss::initialize(int stage)
     }
 }
 
-void FreeSpacePathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& FreeSpacePathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "FreeSpacePathLoss, "
-           << "alpha = " << alpha << ", "
-           << "systemLoss = " << systemLoss;
+    stream << "FreeSpacePathLoss";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << ", systemLoss = " << systemLoss;
+    return stream;
 }
 
 double FreeSpacePathLoss::computeFreeSpacePathLoss(m waveLength, m distance, double alpha, double systemLoss) const

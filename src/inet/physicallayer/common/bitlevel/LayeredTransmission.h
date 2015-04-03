@@ -42,6 +42,8 @@ class INET_API LayeredTransmission : public TransmissionBase
     LayeredTransmission(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel, const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
     virtual ~LayeredTransmission();
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
     virtual const ITransmissionPacketModel *getPacketModel() const { return packetModel; }
     virtual const ITransmissionBitModel *getBitModel()    const { return bitModel; }
     virtual const ITransmissionSymbolModel *getSymbolModel() const { return symbolModel; }

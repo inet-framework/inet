@@ -92,6 +92,8 @@ class INET_API Ieee80211IrMode : public IIeee80211Mode
   public:
     Ieee80211IrMode(const Ieee80211IrPreambleMode *preambleMode, const Ieee80211IrHeaderMode *headerMode, const Ieee80211IrDataMode *dataMode);
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211IrMode"; }
+
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }

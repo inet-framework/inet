@@ -71,12 +71,14 @@ void GridNeighborCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + refillPeriod, msg);
 }
 
-void GridNeighborCache::printToStream(std::ostream& stream, int level) const
+std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level) const
 {
-    stream << "GridNeighborCache, "
-           << "cellSize = " << cellSize << ", "
-           << "refillPeriod = " << refillPeriod << ", "
-           << "maxSpeed = " << maxSpeed;
+    stream << "GridNeighborCache";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", cellSize = " << cellSize
+               << ", refillPeriod = " << refillPeriod
+               << ", maxSpeed = " << maxSpeed;
+    return stream;
 }
 
 void GridNeighborCache::fillCubeVector()

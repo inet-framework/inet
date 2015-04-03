@@ -41,7 +41,7 @@ class INET_API APSKDemodulator : public IDemodulator, public cSimpleModule
   public:
     APSKDemodulator();
 
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "APSKDemodulator"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const APSKModulationBase *getModulation() const { return modulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
 };

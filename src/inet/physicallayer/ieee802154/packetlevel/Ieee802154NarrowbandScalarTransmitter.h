@@ -30,7 +30,7 @@ class INET_API Ieee802154NarrowbandScalarTransmitter : public FlatTransmitterBas
   public:
     Ieee802154NarrowbandScalarTransmitter();
 
-    virtual void printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 

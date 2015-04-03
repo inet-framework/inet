@@ -40,6 +40,18 @@ LayeredTransmission::~LayeredTransmission()
     delete analogModel;
 }
 
+std::ostream& LayeredTransmission::printToStream(std::ostream& stream, int level) const
+{
+    stream << "LayeredTransmission";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", packetModel = " << printObjectToString(packetModel, level - 1)
+               << ", bitModel = " << printObjectToString(bitModel, level - 1)
+               << ", symbolModel = " << printObjectToString(symbolModel, level - 1)
+               << ", sampleModel = " << printObjectToString(sampleModel, level - 1)
+               << ", analogModel = " << printObjectToString(analogModel, level - 1);
+    return TransmissionBase::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

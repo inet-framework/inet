@@ -33,6 +33,11 @@ void AntennaBase::initialize(int stage)
         mobility = getModuleFromPar<IMobility>(par("mobilityModule"), getContainingNode(this));
 }
 
+std::ostream& AntennaBase::printToStream(std::ostream& stream, int level) const
+{
+    return stream;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

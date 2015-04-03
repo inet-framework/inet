@@ -51,10 +51,10 @@ MQAMModulation::~MQAMModulation()
     delete constellation;
 }
 
-void MQAMModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MQAMModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "MQAMModulation, ";
-    APSKModulationBase::printToStream(stream, level);
+    stream << "MQAMModulation";
+    return APSKModulationBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

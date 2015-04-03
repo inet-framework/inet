@@ -39,11 +39,13 @@ void NarrowbandTransmitterBase::initialize(int stage)
     }
 }
 
-void NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level) const
+std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "modulation = { " << modulation << " }, "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", modulation = " << printObjectToString(modulation, level - 1) 
+               << ", carrierFrequency = " << carrierFrequency
+               << ", bandwidth = " << bandwidth;
+    return stream;
 }
 
 } // namespace physicallayer

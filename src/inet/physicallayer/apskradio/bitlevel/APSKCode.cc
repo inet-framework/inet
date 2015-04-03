@@ -36,6 +36,18 @@ APSKCode::~APSKCode()
     delete interleaving;
     delete scrambling;
 }
+
+std::ostream& APSKCode::printToStream(std::ostream& stream, int level) const
+{
+    stream << "APSKCode";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level - 1)
+               << ", interleaving = " << printObjectToString(interleaving, level - 1)
+               << ", scrambling = " << printObjectToString(scrambling, level - 1);
+    return stream;
+}
+
 } /* namespace physicallayer */
+
 } /* namespace inet */
 

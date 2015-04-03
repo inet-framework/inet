@@ -22,10 +22,12 @@ namespace inet {
 
 namespace physicallayer {
 
-void AdditiveScrambler::printToStream(std::ostream& stream, int level) const
+std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Additive scrambling, "
-           << "scrambling = " << scrambling;
+    stream << "AdditiveScrambler";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream<< ", scrambling = " << printObjectToString(scrambling, level - 1);
+    return stream;
 }
 
 BitVector AdditiveScrambler::scramble(const BitVector& bits) const

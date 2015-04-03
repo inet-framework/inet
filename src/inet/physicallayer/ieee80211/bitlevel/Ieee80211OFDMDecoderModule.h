@@ -47,7 +47,7 @@ class INET_API Ieee80211OFDMDecoderModule : public cSimpleModule, public IDecode
   public:
     virtual ~Ieee80211OFDMDecoderModule();
 
-    virtual void printToStream(std::ostream& stream, int level) const { stream << "IEEE 802.11 OFDM Decoder"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const Ieee80211OFDMCode *getCode() const { return code; }
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const;
 };

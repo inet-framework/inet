@@ -60,9 +60,9 @@ void TracingObstacleLoss::finish()
     recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
-void TracingObstacleLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& TracingObstacleLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "TracingObstacleLoss";
+    return stream << "TracingObstacleLoss";
 }
 
 double TracingObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const
