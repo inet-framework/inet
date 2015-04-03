@@ -84,6 +84,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual const simtime_t getDuration(int bitLength) const override;
     virtual IModulation *getModulation() const override { return nullptr; } // TODO:
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**

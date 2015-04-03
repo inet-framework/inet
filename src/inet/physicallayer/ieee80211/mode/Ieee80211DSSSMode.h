@@ -75,6 +75,7 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual const simtime_t getDuration(int bitLength) const override;
     virtual const DPSKModulationBase *getModulation() const override { return modulation; }
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**

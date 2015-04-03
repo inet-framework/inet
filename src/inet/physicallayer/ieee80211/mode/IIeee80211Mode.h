@@ -48,6 +48,7 @@ class INET_API IIeee80211DataMode : public IPrintableObject
     virtual int getBitLength(int dataBitLength) const = 0;
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
     virtual const IModulation *getModulation() const = 0;
+    virtual int getNumberOfSpatialStreams() const = 0;
 };
 
 class INET_API IIeee80211Mode : public IPrintableObject

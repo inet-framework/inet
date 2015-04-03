@@ -128,6 +128,7 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
     const Ieee80211OFDMModulation* getModulation() const override { return modulation; }
     virtual bps getGrossBitrate() const override { return Ieee80211OFDMModeBase::getGrossBitrate(); }
     virtual bps getNetBitrate() const override { return Ieee80211OFDMModeBase::getNetBitrate(); }
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 class INET_API Ieee80211OFDMMode : public IIeee80211Mode, public Ieee80211OFDMTimingRelatedParametersBase

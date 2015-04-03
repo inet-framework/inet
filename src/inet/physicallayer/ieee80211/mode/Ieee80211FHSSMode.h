@@ -68,6 +68,7 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual inline const simtime_t getDuration(int bitLength) const override { return bitLength / getNetBitrate().get(); }
     virtual const GFSKModulationBase *getModulation() const override { return modulation; }
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**
