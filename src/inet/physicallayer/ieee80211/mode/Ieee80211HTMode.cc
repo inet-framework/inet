@@ -207,9 +207,9 @@ bps Ieee80211HTDataMode::computeGrossBitrate() const
     unsigned int numberOfCodedBitsPerSubcarrierSum = computeNumberOfCodedBitsPerSubcarrierSum();
     unsigned int numberOfCodedBitsPerSymbol = numberOfCodedBitsPerSubcarrierSum * getNumberOfDataSubcarriers();
     if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
+        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval() * numberOfSpatialStreams);
     else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
+        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval() * numberOfSpatialStreams);
     else
         throw cRuntimeError("Unknown guard interval type");
 }
@@ -263,8 +263,8 @@ int Ieee80211HTDataMode::getBitLength(int dataBitLength) const
 
 unsigned int Ieee80211HTDataMode::computeNumberOfSpatialStreams(const Ieee80211OFDMModulation* stream1Modulation, const Ieee80211OFDMModulation* stream2Modulation, const Ieee80211OFDMModulation* stream3Modulation, const Ieee80211OFDMModulation* stream4Modulation) const
 {
-    return stream1Modulation ? 1 : 0 + stream2Modulation ? 1 : 0 +
-           stream3Modulation ? 1 : 0 + stream4Modulation ? 1 : 0;
+    return (stream1Modulation ? 1 : 0) + (stream2Modulation ? 1 : 0) +
+           (stream3Modulation ? 1 : 0) + (stream4Modulation ? 1 : 0);
 }
 
 unsigned int Ieee80211HTDataMode::computeNumberOfCodedBitsPerSubcarrierSum() const
