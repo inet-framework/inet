@@ -57,6 +57,8 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const IIeee80211Mode *transmissionMode = ieee80211TransmissionRequest != nullptr ? ieee80211TransmissionRequest->getMode() : transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
     if (!modeSet->containsMode(transmissionMode))
         throw cRuntimeError("Unsupported mode requested");
+    if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
+        throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
     const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
