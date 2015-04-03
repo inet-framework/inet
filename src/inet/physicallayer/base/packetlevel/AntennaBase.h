@@ -28,6 +28,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
 {
   protected:
     IMobility *mobility;
+    int numAntennas;
 
   protected:
     virtual void initialize(int stage) override;
@@ -37,6 +38,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual IMobility *getMobility() const override { return mobility; }
+    virtual int getNumAntennas() const override { return numAntennas; }
 };
 
 } // namespace physicallayer
