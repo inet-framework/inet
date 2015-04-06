@@ -1213,6 +1213,9 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
 IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         const IPv6Address& destAddr, InterfaceEntry *ie)
 {
+    if (rt6->isMobileRouter() && (ie->getFullName() == "wlan0"))
+        return NULL; // wlan 0 di mobile router khusus untuk receive RA dari parent, yg terus jadi prefiks utama
+
     EV << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
     IPv6Address sourceAddr = ie->ipv6Data()->getLinkLocalAddress();
@@ -1323,12 +1326,11 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 {
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
 
-
-    if ((ie->ipv6Data()->getAdvSendAdvertisements()) && !rt6->isMobileRouter())
-    {
-        EV << "Interface is an advertising interface, dropping RA message.\n";
-        delete ra;
-        return;
+    if (ie->ipv6Data()->getAdvSendAdvertisements() && (!(rt6->isMobileRouter() && (ie->getFullName()=="wlan0"))))
+    {   // interface wlan0 of Mobile Router can process RA message
+            EV << "Interface is an advertising interface, dropping RA message.\n";
+            delete ra;
+            return;
     }
     else
     {
@@ -2018,7 +2020,6 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolici
         IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
-    MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
 
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
