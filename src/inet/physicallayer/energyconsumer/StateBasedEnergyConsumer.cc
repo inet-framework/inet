@@ -25,15 +25,15 @@ namespace physicallayer {
 Define_Module(StateBasedEnergyConsumer);
 
 StateBasedEnergyConsumer::StateBasedEnergyConsumer() :
-    offPowerConsumption(W(sNaN)),
-    sleepPowerConsumption(W(sNaN)),
-    switchingPowerConsumption(W(sNaN)),
-    receiverIdlePowerConsumption(W(sNaN)),
-    receiverBusyPowerConsumption(W(sNaN)),
-    receiverSynchronizingPowerConsumption(W(sNaN)),
-    receiverReceivingPowerConsumption(W(sNaN)),
-    transmitterIdlePowerConsumption(W(sNaN)),
-    transmitterTransmittingPowerConsumption(W(sNaN)),
+    offPowerConsumption(W(NaN)),
+    sleepPowerConsumption(W(NaN)),
+    switchingPowerConsumption(W(NaN)),
+    receiverIdlePowerConsumption(W(NaN)),
+    receiverBusyPowerConsumption(W(NaN)),
+    receiverSynchronizingPowerConsumption(W(NaN)),
+    receiverReceivingPowerConsumption(W(NaN)),
+    transmitterIdlePowerConsumption(W(NaN)),
+    transmitterTransmittingPowerConsumption(W(NaN)),
     radio(nullptr),
     energySource(nullptr),
     energyConsumerId(-1)

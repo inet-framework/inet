@@ -25,7 +25,7 @@ namespace physicallayer {
 
 SNIRReceiverBase::SNIRReceiverBase() :
     ReceiverBase(),
-    snirThreshold(sNaN)
+    snirThreshold(NaN)
 {
 }
 

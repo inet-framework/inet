@@ -27,10 +27,10 @@ Define_Module(IdealTransmitter);
 
 IdealTransmitter::IdealTransmitter() :
     headerBitLength(-1),
-    bitrate(sNaN),
-    maxCommunicationRange(sNaN),
-    maxInterferenceRange(sNaN),
-    maxDetectionRange(sNaN)
+    bitrate(NaN),
+    maxCommunicationRange(NaN),
+    maxInterferenceRange(NaN),
+    maxDetectionRange(NaN)
 {
 }
 

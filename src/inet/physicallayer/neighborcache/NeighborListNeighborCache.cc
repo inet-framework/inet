@@ -27,9 +27,9 @@ Define_Module(NeighborListNeighborCache);
 NeighborListNeighborCache::NeighborListNeighborCache() :
     radioMedium(nullptr),
     updateNeighborListsTimer(nullptr),
-    refillPeriod(sNaN),
-    range(sNaN),
-    maxSpeed(sNaN)
+    refillPeriod(NaN),
+    range(NaN),
+    maxSpeed(NaN)
 {
 }
 

@@ -7,11 +7,11 @@ namespace physicallayer {
 Define_Module(BreakpointPathLoss);
 
 BreakpointPathLoss::BreakpointPathLoss() :
-    l01(sNaN),
-    l02(sNaN),
-    alpha1(sNaN),
-    alpha2(sNaN),
-    breakpointDistance(m(sNaN))
+    l01(NaN),
+    l02(NaN),
+    alpha1(NaN),
+    alpha2(NaN),
+    breakpointDistance(m(NaN))
 {
 }
 

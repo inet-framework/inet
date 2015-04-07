@@ -27,7 +27,7 @@ Define_Module(IsotropicDimensionalBackgroundNoise);
 
 IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
     interpolationMode((Mapping::InterpolationMethod)-1),
-    power(W(sNaN))
+    power(W(NaN))
 {
 }
 

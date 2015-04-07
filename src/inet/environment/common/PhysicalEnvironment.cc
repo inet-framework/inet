@@ -31,9 +31,9 @@ namespace physicalenvironment {
 Define_Module(PhysicalEnvironment);
 
 PhysicalEnvironment::PhysicalEnvironment() :
-    temperature(sNaN),
-    spaceMin(Coord(sNaN, sNaN, sNaN)),
-    spaceMax(Coord(sNaN, sNaN, sNaN)),
+    temperature(NaN),
+    spaceMin(Coord(NaN, NaN, NaN)),
+    spaceMax(Coord(NaN, NaN, NaN)),
     axisLength(NaN),
     objectCache(nullptr),
     objectsLayer(nullptr)

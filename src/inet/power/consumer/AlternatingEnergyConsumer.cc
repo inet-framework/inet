@@ -27,7 +27,7 @@ AlternatingEnergyConsumer::AlternatingEnergyConsumer() :
     isSleeping(false),
     energyConsumerId(-1),
     energySource(nullptr),
-    powerConsumption(W(sNaN)),
+    powerConsumption(W(NaN)),
     timer(nullptr)
 {
 }

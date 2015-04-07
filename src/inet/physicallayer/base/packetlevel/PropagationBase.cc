@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 PropagationBase::PropagationBase() :
-    propagationSpeed(mps(sNaN)),
+    propagationSpeed(mps(NaN)),
     arrivalComputationCount(0)
 {
 }

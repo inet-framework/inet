@@ -26,7 +26,7 @@ namespace physicallayer {
 Define_Module(IsotropicScalarBackgroundNoise);
 
 IsotropicScalarBackgroundNoise::IsotropicScalarBackgroundNoise() :
-    power(W(sNaN))
+    power(W(NaN))
 {
 }
 

@@ -25,7 +25,7 @@ Define_Module(ConstantGainAntenna);
 
 ConstantGainAntenna::ConstantGainAntenna() :
     AntennaBase(),
-    gain(sNaN)
+    gain(NaN)
 {
 }
 

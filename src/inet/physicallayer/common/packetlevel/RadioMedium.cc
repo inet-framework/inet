@@ -47,7 +47,7 @@ RadioMedium::RadioMedium() :
     displayCommunication(false),
     drawCommunication2D(false),
     leaveCommunicationTrail(false),
-    updateCanvasInterval(sNaN),
+    updateCanvasInterval(NaN),
     updateCanvasTimer(nullptr),
     removeNonInterferingTransmissionsTimer(nullptr),
     mediumLimitCache(nullptr),
