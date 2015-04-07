@@ -969,7 +969,8 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     after recovery from a power failure.*/
     //TODO: Placing these operations here means fast router solicitation is
     //not adopted. Will relocate.
-    if (ie->ipv6Data()->getAdvSendAdvertisements() == false)
+    // Only host will send RS and MR via wlan0
+    if (ie->ipv6Data()->getAdvSendAdvertisements() == false || (rt6->isMobileRouter() && ie->getFullName()=="wlan0"))
     {
         EV << "creating router discovery message timer\n";
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);

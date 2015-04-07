@@ -43,11 +43,11 @@ void FlatNetworkConfigurator6::initialize(int stage)
     topo.extractByProperty("node");
     EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
-    if (stage==2)
+    if (stage==3) // edit from 2 to 3, since xmipv6 parameters are set in stage 2
     {
         configureAdvPrefixes(topo);
     }
-    else if (stage==3)
+    else if (stage==4)
     {
         addOwnAdvPrefixRoutes(topo);
         addStaticRoutes(topo);
