@@ -970,7 +970,7 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     //TODO: Placing these operations here means fast router solicitation is
     //not adopted. Will relocate.
     // Only host will send RS and MR via wlan0
-    if (ie->ipv6Data()->getAdvSendAdvertisements() == false || (rt6->isMobileRouter() && ie->getFullName()=="wlan0"))
+    if (ie->ipv6Data()->getAdvSendAdvertisements() == false || (rt6->isMobileRouter() && strcmp(ie->getFullName(),"wlan0")==0))
     {
         EV << "creating router discovery message timer\n";
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
@@ -1214,7 +1214,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
 IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
         const IPv6Address& destAddr, InterfaceEntry *ie)
 {
-    if (rt6->isMobileRouter() && (ie->getFullName() == "wlan0"))
+    if (rt6->isMobileRouter() && (strcmp(ie->getFullName(), "wlan0")==0))
         return NULL; // wlan 0 di mobile router khusus untuk receive RA dari parent, yg terus jadi prefiks utama
 
     EV << "Create and send RA invoked!\n";
@@ -1327,7 +1327,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
 {
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
 
-    if (ie->ipv6Data()->getAdvSendAdvertisements() && (!(rt6->isMobileRouter() && (ie->getFullName()=="wlan0"))))
+    if (ie->ipv6Data()->getAdvSendAdvertisements() && (!(rt6->isMobileRouter() && (strcmp(ie->getFullName(),"wlan0")==0))))
     {   // interface wlan0 of Mobile Router can process RA message
             EV << "Interface is an advertising interface, dropping RA message.\n";
             delete ra;
@@ -1358,8 +1358,8 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         processRAForRouterUpdates(ra, raCtrlInfo); //See RFC2461: Section 6.3.4
 
         //Possible options
-        MACAddress macAddress = ra->getSourceLinkLayerAddress();
-        uint mtu = ra->getMTU();
+//        MACAddress macAddress = ra->getSourceLinkLayerAddress();
+//        uint mtu = ra->getMTU();
         for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++)
         {
             IPv6NDPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
@@ -1991,7 +1991,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
 {
     //Control Information
     IPv6Address nsSrcAddr = nsCtrlInfo->getSrcAddr();
-    IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
+//    IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
     //solicitation is processed as described in RFC2462:section 5.4.3
@@ -2502,12 +2502,12 @@ IPv6Redirect *IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry
 void IPv6NeighbourDiscovery::processRedirectPacket(IPv6Redirect *redirect,
         IPv6ControlInfo *ctrlInfo)
 {
-    //First we need to extract information from the redirect message
-    IPv6Address targetAddr = redirect->getTargetAddress(); //Addressed to me
-    IPv6Address destAddr = redirect->getDestinationAddress(); //new dest addr
-
-    //Optional
-    MACAddress macAddr = redirect->getTargetLinkLayerAddress();
+//    //First we need to extract information from the redirect message
+//    IPv6Address targetAddr = redirect->getTargetAddress(); //Addressed to me
+//    IPv6Address destAddr = redirect->getDestinationAddress(); //new dest addr
+//
+//    //Optional
+//    MACAddress macAddr = redirect->getTargetLinkLayerAddress();
 }
 
 #ifdef WITH_xMIPv6
