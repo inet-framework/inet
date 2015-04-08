@@ -114,6 +114,7 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
     ethframe->setEtherType(frame->getEtherType());
+    ethframe->setByteLength(ETHER_MAC_FRAME_BYTES);
 
     // encapsulate the payload in there
     cPacket *payload = frame->decapsulate();

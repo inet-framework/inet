@@ -26,7 +26,7 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           708f-4e08
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           e88f-fee0
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            249c-2248
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            11c5-902b
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            328c-e439
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             c87e-4fd8
@@ -271,7 +271,7 @@
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             5ce4-b03b
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             d5ac-4a1e
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
@@ -397,7 +397,7 @@
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000   # [Config Ping2] # __interactive__
 
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            fcb4-e06e
-/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            91bf-a8c2
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            38fa-a1ad
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            f41e-c948
 
 /examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            1392-adbb
@@ -434,4 +434,4 @@
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             7cd1-3a38
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             6e83-812f
 
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            a792-5e28
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            b853-9d44
