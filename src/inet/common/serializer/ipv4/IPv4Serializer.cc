@@ -101,16 +101,17 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     unsigned int payloadLength = dgram->getByteLength() - b.getPos();
 
     if (encapPacket) {
-        if (dgram->getMoreFragments() || dgram->getFragmentOffset() != 0) {  // IP fragment
-            unsigned int totalLength = encapPacket->getByteLength();
+        unsigned int totalLength = encapPacket->getByteLength();
+        int fragmentOffset = dgram->getFragmentOffset();
+        if ((dgram->getMoreFragments() || fragmentOffset != 0) && (payloadLength < totalLength)) {  // IP fragment  //FIXME hack: encapsulated packet contains entire packet if payloadLength < totalLength
             char *buf = new char[totalLength];
             Buffer tmpBuffer(buf, totalLength);
             SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
-            tmpBuffer.seek(dgram->getFragmentOffset());
+            tmpBuffer.seek(fragmentOffset);
             b.writeNBytes(tmpBuffer, payloadLength);
             delete [] buf;
         }
-        else
+        else    // no fragmentation, or the encapsulated packet is represents only the fragment
             SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
     }
     else {
