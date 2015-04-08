@@ -30,6 +30,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
 #endif
 
 namespace inet {
@@ -340,29 +341,32 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
         cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
         IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
         IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-        const FlatReceiverBase *receiver = dynamic_cast<const FlatReceiverBase *>(receiverRadio->getReceiver());
-        if (receiver) {
-            cPacket *macFrame = new cPacket();
-            macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
-            const IRadioMedium *medium = receiverRadio->getMedium();
-            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
-            const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
-            const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-            const INoise *noise = medium->getBackgroundNoise()->computeNoise(listening);
-            const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
-            const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
-            double packetErrorRate = receiver->getErrorModel()->computePacketErrorRate(snir);
-            delete snir;
-            delete reception;
-            delete noise;
-            delete listening;
-            delete arrival;
-            delete transmission;
-            // we want to have a maximum PER product along the path,
-            // but still minimize the hop count if the PER is negligible
-            return minLinkWeight - log(1 - packetErrorRate);
-        }
-        return defaultLinkWeight;
+        cPacket *macFrame = new cPacket();
+        macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
+        const IReceiver *receiver = receiverRadio->getReceiver();
+        const IRadioMedium *medium = receiverRadio->getMedium();
+        const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+        const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+        const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+        const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
+        const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
+        const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
+        const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
+        const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
+        const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
+        double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 0;
+        delete receptionIndication;
+        delete receptionDecision;
+        delete snir;
+        delete interference;
+        delete reception;
+        delete listening;
+        delete arrival;
+        delete transmission;
+        delete macFrame;
+        // we want to have a maximum PER product along the path,
+        // but still minimize the hop count if the PER is negligible
+        return minLinkWeight - log(1 - packetErrorRate);
 #else
         throw cRuntimeError("Radio feature is disabled");
 #endif

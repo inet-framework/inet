@@ -103,6 +103,10 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
 {
     ReceptionIndication *indication = new ReceptionIndication();
     bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference);
+    double errorRate = isReceptionSuccessful ? 0 : 1;
+    indication->setSymbolErrorRate(errorRate);
+    indication->setBitErrorRate(errorRate);
+    indication->setPacketErrorRate(errorRate);
     return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }
 
