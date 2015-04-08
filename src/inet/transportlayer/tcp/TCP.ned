@@ -214,7 +214,6 @@ simple TCP like ITCP
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
-        int windowScalingFactor = default(1);
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);

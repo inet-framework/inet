@@ -155,6 +155,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     bool recordStatistics = false;    // output vectors on/off
     bool isOperational = false;    // lifecycle: node is up/down
 
+    bool useDataNotification = false;
+
   public:
     TCP() {}
     virtual ~TCP();

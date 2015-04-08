@@ -539,10 +539,10 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     // as many bytes as requested. rcv_wnd should be decreased
                     // accordingly!
                     //
-                    cPacket *msg = nullptr;
+                    cMessage *msg = nullptr;
 
-                    if (tcpMain->par("useDataNotification")) {
-                        msg = new cPacket("Data Notification");
+                    if (tcpMain->useDataNotification) {
+                        msg = new cMessage("Data Notification");
                         msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
                         TCPCommand *cmd = new TCPCommand();
                         cmd->setConnId(connId);

@@ -39,7 +39,7 @@ enum TcpCommandCode
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
     TCP_C_QUEUE_BYTES_LIMIT = 8; // set send queue limit (in bytes)
-    TCP_C_REQUEST = 9;       // send request to TCP to deliver data
+    TCP_C_READ = 9;       // send request to TCP to deliver data
 }
 
 

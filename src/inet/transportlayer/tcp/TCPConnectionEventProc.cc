@@ -158,7 +158,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
     delete sendCommand;    // msg itself has been taken by the sendQueue
 }
 
-void TCPConnection::process_RECEIVE_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     delete msg;
     cMessage *dataMsg;
