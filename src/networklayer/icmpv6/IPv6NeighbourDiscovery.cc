@@ -1373,7 +1373,9 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
             }
 
 #ifdef WITH_xMIPv6
-            // When in foreign network(s), the MN needs info about its HA address and its own Home Address (HoA), when sending BU to HA and CN(s). Therefore while in the home network I intialise struct HomeNetworkInfo{} with HoA and HA address, which will eventually be used by the MN while sending BUs from within visit networks. (Zarrar Yousaf 12.07.07)
+            // When in foreign network(s), the MN needs info about its HA address and its own Home Address (HoA),
+            // when sending BU to HA and CN(s). Therefore while in the home network I initialize struct HomeNetworkInfo{}
+            // with HoA and HA address, which will eventually be used by the MN while sending BUs from within visit networks. (Zarrar Yousaf 12.07.07)
             if (ra->getHomeAgentFlag() && (prefixInfo.getRouterAddressFlag() == true))//If R-Flag is set and RA is from HA
             {
                 // homeNetworkInfo now carries HoA, global unicast HA address and the home network prefix
@@ -1428,7 +1430,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
             routersUnreachabilityDetection(ie);
 #endif /* WITH_xMIPv6 */
 
-            //If a Neighbor Cache entry is created for the router its reachability
+            //If a Neighbor Cache entry is created for the router, its reachability
             //state MUST be set to STALE as specified in Section 7.3.3.
             neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
 #ifndef WITH_xMIPv6
@@ -1576,6 +1578,11 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                 timer to the Valid Lifetime value in the Prefix Information option.*/
                 rt6->addOrUpdateOnLinkPrefix(prefix, prefixLength, ie->getInterfaceId(),
                     simTime()+validLifetime);
+
+                if (rt6->isMobileRouter())
+                {
+                    rt6->createSubPrefix(prefixInfo, ie);
+                }
             }
             /*- If the Prefix Information option's Valid Lifetime field is zero,
             and the prefix is not present in the host's Prefix List,

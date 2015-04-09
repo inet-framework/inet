@@ -26,6 +26,9 @@
 #include "NotificationBoard.h"
 #include "ILifecycle.h"
 
+#include "IPv6NDMessage_m.h"
+
+
 class IInterfaceTable;
 class InterfaceEntry;
 class RoutingTable6;
@@ -456,6 +459,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
      * ILifecycle method
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    /*
+     * Creating subnet for MR
+     */
+    virtual void createSubPrefix(IPv6NDPrefixInformation *prefixInfo, InterfaceEntry *ie);
 };
 
 #endif

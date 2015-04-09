@@ -114,7 +114,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 
             IPv6InterfaceData::AdvPrefix p;
             p.prefix = prefix;
-            p.prefixLength = 64;
+            p.prefixLength = 48; //changed from 64 to 48. so that the prefix can be subnetted
             // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
             // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in
             // consecutive advertisements).

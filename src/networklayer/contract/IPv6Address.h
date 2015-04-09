@@ -170,6 +170,23 @@ class INET_API IPv6Address
             d[0] = d0; d[1] = d1; d[2] = d2; d[3] = d3;
         }
 
+        uint32 getSegment0()
+        {
+            return d[0];
+        }
+
+        uint32 getSegment1()
+                {
+                    return d[1];
+                }
+        uint32 getSegment2()
+                {
+                    return d[2];
+                }
+        uint32 getSegment3()
+                {
+                    return d[3];
+                }
         /**
          * Returns a pointer to the internal binary representation of the address:
          * four 32-bit words, most significant word first.

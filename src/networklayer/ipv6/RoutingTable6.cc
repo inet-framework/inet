@@ -935,3 +935,18 @@ bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stag
     }
     return true;
 }
+
+void RoutingTable6::createSubPrefix(IPv6NDPrefixInformation *prefixInfo, InterfaceEntry *ie)
+{
+    // TODO~~~
+    // Ambil prefix dari prefixInfo
+    // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
+    IPv6Address superPrefix = prefixInfo->getPrefix();
+    int superPrefixLength = prefixInfo->getPrefixLength();
+    int prefixLength = superPrefixLength + 4;
+    uint32 segment0 = superPrefix.getSegment0();
+    uint32 segment1 = superPrefix.getSegment1();
+
+    //harusnya prefix di-assign ke tiap interface, selain wlan0
+    IPv6Address prefix(segment0, segment1+(this->getId()<<(64-prefixLength))); //= superPrefix + (this->getId() <<(128-prefixLength));
+}
