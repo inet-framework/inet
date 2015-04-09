@@ -23,17 +23,12 @@
 #include "inet/common/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/IInterference.h"
-#include "inet/physicallayer/contract/packetlevel/IPropagation.h"
-#include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
-#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
+#include "inet/physicallayer/common/packetlevel/MediumVisualizer.h"
 #include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
@@ -54,22 +49,22 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     };
 
   protected:
-    /** @name Parameters that control the behavior of the radio medium. */
+    /** @name Parameters and other models that control the behavior of the radio medium. */
     //@{
     /**
-     * The propagation model of the medium is never nullptr.
+     * The propagation model is never nullptr.
      */
     const IPropagation *propagation;
     /**
-     * The path loss model of the medium is never nullptr.
+     * The path loss model is never nullptr.
      */
     const IPathLoss *pathLoss;
     /**
-     * The obstacle loss model of the medium or nullptr if unused.
+     * The obstacle loss model or nullptr if unused.
      */
     const IObstacleLoss *obstacleLoss;
     /**
-     * The analog model of the medium is never nullptr.
+     * The analog model is never nullptr.
      */
     const IAnalogModel *analogModel;
     /**
@@ -79,14 +74,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The physical environment model or nullptr if unused.
      */
-    const IPhysicalEnvironment *environment;
+    const IPhysicalEnvironment *physicalEnvironment;
     /**
-     * The physical material of the medium.
+     * The physical material of the medium is never nullptr.
      */
     const IMaterial *material;
     /**
      * The radio medium doesn't send radio frames to a radio if it's outside
-     * the provided range.
+     * the range provided by the selected range filter.
      */
     RangeFilterKind rangeFilter;
     /**
@@ -97,45 +92,26 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * True means the radio medium doesn't send radio frames to a radio if
      * it listens on the medium in incompatible mode (e.g. different carrier
-     * frequency and bandwidth, different modulation, etc.)
+     * frequency and/or bandwidth, different modulation, etc.)
      */
     bool listeningFilter;
     /**
      * True means the radio medium doesn't send radio frames to a radio if
-     * it the destination mac address differs.
+     * the mac address of the destination is different.
      */
     bool macAddressFilter;
     /**
      * Records all transmissions and receptions into a separate trace file.
-     * The file is at ${resultdir}/${configname}-${runnumber}.tlog
+     * The communication log file can be found at:
+     * ${resultdir}/${configname}-${runnumber}.tlog
      */
     bool recordCommunicationLog;
-    /**
-     * Displays ongoing communications on the canvas.
-     */
-    bool displayCommunication;
-    /**
-     * Determines ongoing communication figure: 3D spheres or 2D circles on the X-Y plane.
-     */
-    bool drawCommunication2D;
-    /**
-     * Leaves graphical trail of successful communication between radios.
-     */
-    bool leaveCommunicationTrail;
-    /**
-     * Update canvas interval when ongoing communication exists.
-     */
-    simtime_t updateCanvasInterval;
     //@}
 
     /** @name Timer */
     //@{
     /**
-     * The message used to update the canvas when ongoing communication exists.
-     */
-    cMessage *updateCanvasTimer;
-    /**
-     * The message used to purge internal state and cache.
+     * The message that is used to purge the internal state of the medium.
      */
     cMessage *removeNonInterferingTransmissionsTimer;
     //@}
@@ -146,13 +122,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The list of radios that can transmit and receive radio signals on the
      * radio medium. The radios follow each other in the order of their unique
      * id. Radios are only removed from the beginning. This list may contain
-     * NULL pointers.
+     * nullptr values.
      */
     std::vector<const IRadio *> radios;
     /**
      * The list of ongoing transmissions on the radio medium. The transmissions
      * follow each other in the order of their unique id. Transmissions are only
-     * removed from the beginning. This list doesn't contain NULL pointers.
+     * removed from the beginning. This list doesn't contain nullptr values.
      */
     std::vector<const ITransmission *> transmissions;
     //@}
@@ -160,7 +136,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Cache */
     //@{
     /**
-     * Caches medium limits among all radios.
+     * Caches various medium limits among all radios.
      */
     mutable IMediumLimitCache *mediumLimitCache;
     /**
@@ -168,7 +144,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable INeighborCache *neighborCache;
     /**
-     * Caches communication for all radios.
+     * Caches intermediate results of the ongoing communication for all radios.
      */
     mutable ICommunicationCache *communicationCache;
     //@}
@@ -176,7 +152,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Logging */
     //@{
     /**
-     * The output communication log is written to.
+     * The communication log output recorder.
      */
     CommunicationLog communicationLog;
     //@}
@@ -184,13 +160,9 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Graphics */
     //@{
     /**
-     * The list figures representing ongoing communications.
+     * The visualizer for the communication on the medium.
      */
-    cGroupFigure *communicationLayer;
-    /**
-     * The list of trail figures representing successful communications.
-     */
-    TrailFigure *communicationTrail;
+    MediumVisualizer *mediumVisualizer;
     //@}
 
     /** @name Statistics */
@@ -333,12 +305,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
     //@}
 
-    /** @name Graphics */
-    //@{
-    virtual void updateCanvas();
-    virtual void scheduleUpdateCanvasTimer();
-    //@}
-
   public:
     RadioMedium();
     virtual ~RadioMedium();
@@ -351,6 +317,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }
     virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
+    virtual const IPhysicalEnvironment *getPhysicalEnvironment() const { return physicalEnvironment; }
 
     virtual const IMediumLimitCache *getMediumLimitCache() const { return mediumLimitCache; }
     virtual const INeighborCache *getNeighborCache() const { return neighborCache; }
