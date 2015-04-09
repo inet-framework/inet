@@ -29,8 +29,13 @@ MediumVisualizer::MediumVisualizer() :
     displayCommunication(false),
     drawCommunication2D(false),
     leaveCommunicationTrail(false),
+    leaveCommunicationHeat(false),
+    communicationHeatMapSize(100),
     updateCanvasInterval(NaN),
-    updateCanvasTimer(nullptr)
+    updateCanvasTimer(nullptr),
+    communicationLayer(nullptr),
+    communicationTrail(nullptr),
+    communicationHeat(nullptr)
 {
 }
 
@@ -55,10 +60,38 @@ void MediumVisualizer::initialize(int stage)
             communicationTrail = new TrailFigure(100, true, "communication trail");
             canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
         }
+        leaveCommunicationHeat = par("leaveCommunicationHeat");
+        if (leaveCommunicationHeat) {
+            communicationHeat = new HeatMapFigure(communicationHeatMapSize, "communication heat");
+            communicationHeat->setTags("successful_reception heat");
+            canvas->addFigure(communicationHeat, 0);
+        }
         updateCanvasInterval = par("updateCanvasInterval");
         updateCanvasTimer = new cMessage("updateCanvas");
     }
+    else if (stage == INITSTAGE_LAST) {
+        if (communicationHeat != nullptr) {
+            const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
+            const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
+            Coord min = mediumLimitCache->getMinConstraintArea();
+            Coord max = mediumLimitCache->getMaxConstraintArea();
+            cFigure::Point o = physicalEnvironment->computeCanvasPoint(Coord::ZERO);
+            cFigure::Point x = physicalEnvironment->computeCanvasPoint(Coord(1, 0, 0));
+            cFigure::Point y = physicalEnvironment->computeCanvasPoint(Coord(0, 1, 0));
+            double t1 = o.x;
+            double t2 = o.y;
+            double a = x.x - t1;
+            double b = x.y - t2;
+            double c = y.x - t1;
+            double d = y.y - t2;
+            communicationHeat->setTransform(cFigure::Transform(a, b, c, d, t1, t2));
+            communicationHeat->setPosition(cFigure::Point((min.x + max.x) / 2, (min.y + max.y) / 2));
+            communicationHeat->setWidth(max.x - min.x);
+            communicationHeat->setHeight(max.y - min.y);
+        }
+    }
 }
+
 
 void MediumVisualizer::handleMessage(cMessage *message)
 {
@@ -127,22 +160,36 @@ void MediumVisualizer::removeTransmission(const ITransmission *transmission)
 
 void MediumVisualizer::receivePacket(const IReceptionDecision *decision)
 {
-    if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
+    if (decision->isReceptionSuccessful()) {
         const ITransmission *transmission = decision->getReception()->getTransmission();
-        const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
-        cLineFigure *communicationFigure = new cLineFigure();
-        communicationFigure->setTags("successful_reception recent_history");
-        cFigure::Point start = physicalEnvironment->computeCanvasPoint(transmission->getStartPosition());
-        cFigure::Point end = physicalEnvironment->computeCanvasPoint(decision->getReception()->getStartPosition());
-        communicationFigure->setStart(start);
-        communicationFigure->setEnd(end);
-        communicationFigure->setLineColor(cFigure::BLUE);
-        communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
-        communicationFigure->setLineWidth(1);
+        const IReception *reception = decision->getReception();
+        if (leaveCommunicationTrail) {
+            const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
+            cLineFigure *communicationFigure = new cLineFigure();
+            communicationFigure->setTags("successful_reception recent_history");
+            cFigure::Point start = physicalEnvironment->computeCanvasPoint(transmission->getStartPosition());
+            cFigure::Point end = physicalEnvironment->computeCanvasPoint(reception->getStartPosition());
+            communicationFigure->setStart(start);
+            communicationFigure->setEnd(end);
+            communicationFigure->setLineColor(cFigure::BLUE);
+            communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
+            communicationFigure->setLineWidth(1);
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
-        communicationFigure->setScaleLineWidth(false);
+            communicationFigure->setScaleLineWidth(false);
 #endif
-        communicationTrail->addFigure(communicationFigure);
+            communicationTrail->addFigure(communicationFigure);
+        }
+        if (leaveCommunicationHeat) {
+            const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
+            Coord min = mediumLimitCache->getMinConstraintArea();
+            Coord max = mediumLimitCache->getMaxConstraintArea();
+            Coord delta = max - min;
+            int x1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().x - min.x) / delta.x));
+            int y1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().y - min.x) / delta.y));
+            int x2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().x - min.x) / delta.x));
+            int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
+            communicationHeat->heatLine(x1, y1, x2, y2);
+        }
     }
     if (displayCommunication)
         updateCanvas();
@@ -159,6 +206,8 @@ void MediumVisualizer::updateCanvas() const
     const IPropagation *propagation = radioMedium->getPropagation();
     const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
     ICommunicationCache *communicationCache = const_cast<ICommunicationCache *>(radioMedium->getCommunicationCache());
+    if (communicationHeat != nullptr)
+        communicationHeat->coolDown();
     for (const auto transmission : transmissions) {
         cFigure *groupFigure = communicationCache->getCachedFigure(transmission);
         if (groupFigure) {

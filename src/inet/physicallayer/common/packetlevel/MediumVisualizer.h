@@ -19,6 +19,7 @@
 #define __INET_MEDIUMVISUALIZER_H
 
 #include "inet/common/TrailFigure.h"
+#include "inet/common/HeatMapFigure.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
@@ -55,6 +56,14 @@ class INET_API MediumVisualizer : public cSimpleModule
      * Specifies whether successful communication between radios leave a trail or not.
      */
     bool leaveCommunicationTrail;
+    /**
+     * Specifies whether successful communication between radios leave a heat map or not.
+     */
+    bool leaveCommunicationHeat;
+    /**
+     * Specifies the size of the communication heat map.
+     */
+    int communicationHeatMapSize;
     //@}
 
     /** @name State */
@@ -87,6 +96,10 @@ class INET_API MediumVisualizer : public cSimpleModule
      * The trail figure that contains figures representing the recent successful communications.
      */
     TrailFigure *communicationTrail;
+    /**
+     * The heat map figure that shows the recent successful communications.
+     */
+    HeatMapFigure *communicationHeat;
     //@}
 
   protected:
