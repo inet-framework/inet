@@ -558,6 +558,9 @@ void PhysicalEnvironment::updateCanvas()
         cLineFigure *xAxis = new cLineFigure();
         cLineFigure *yAxis = new cLineFigure();
         cLineFigure *zAxis = new cLineFigure();
+        xAxis->setTags("axis");
+        yAxis->setTags("axis");
+        zAxis->setTags("axis");
         xAxis->setLineWidth(1);
         yAxis->setLineWidth(1);
         zAxis->setLineWidth(1);
@@ -587,6 +590,9 @@ void PhysicalEnvironment::updateCanvas()
         cTextFigure *yLabel = new cTextFigure();
         cTextFigure *zLabel = new cTextFigure();
 #endif
+        xLabel->setTags("axis label");
+        yLabel->setTags("axis label");
+        zLabel->setTags("axis label");
         xLabel->setText("X");
         yLabel->setText("Y");
         zLabel->setText("Z");
