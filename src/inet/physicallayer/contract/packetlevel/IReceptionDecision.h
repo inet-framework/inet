@@ -41,12 +41,13 @@ class INET_API IReceptionDecision : public IPrintableObject // TODO: revise name
     virtual const IReception *getReception() const = 0;
 
     /**
-     * Returns the physical properties of the reception.
+     * Returns the physical properties of the reception. This function never
+     * returns nullptr.
      */
     virtual const ReceptionIndication *getIndication() const = 0;
 
     /**
-     * Returns whether synchronization is possible according to the physical
+     * Returns whether synchronization was possible according to the physical
      * properties of the received radio signal.
      */
     virtual bool isSynchronizationPossible() const = 0;
@@ -63,7 +64,7 @@ class INET_API IReceptionDecision : public IPrintableObject // TODO: revise name
     virtual bool isSynchronizationSuccessful() const = 0;
 
     /**
-     * Returns whether reception is possible according to the physical
+     * Returns whether reception was possible according to the physical
      * properties of the received radio signal.
      */
     virtual bool isReceptionPossible() const = 0;
@@ -81,13 +82,13 @@ class INET_API IReceptionDecision : public IPrintableObject // TODO: revise name
 
     /**
      * Returns the PHY frame corresponding to the reception. This function
-     * may return NULL.
+     * may return nullptr.
      */
     virtual const cPacket *getPhyFrame() const = 0;
 
     /**
      * Returns the MAC frame corresponding to this reception. This function
-     * never returns NULL.
+     * never returns nullptr.
      */
     virtual const cPacket *getMacFrame() const = 0;
 };

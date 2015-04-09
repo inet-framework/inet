@@ -35,9 +35,11 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
     const bool isReceptionPossible_;
     const bool isReceptionAttempted_;
     const bool isReceptionSuccessful_;
+    const cPacket *macFrame;
 
   public:
     ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
+    ~ReceptionDecision();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

@@ -29,29 +29,37 @@ ReceptionDecision::ReceptionDecision(const IReception *reception, const Receptio
     isSynchronizationSuccessful_(false),
     isReceptionPossible_(isReceptionPossible),
     isReceptionAttempted_(isReceptionAttempted),
-    isReceptionSuccessful_(isReceptionSuccessful)
+    isReceptionSuccessful_(isReceptionSuccessful),
+    macFrame(nullptr)
 {
+    macFrame = reception->getTransmission()->getMacFrame()->dup();
+    const_cast<cPacket *>(macFrame)->setBitError(!isReceptionSuccessful);
+}
+
+ReceptionDecision::~ReceptionDecision()
+{
+    delete macFrame;
 }
 
 std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionDecision";
     if (level >= PRINT_LEVEL_TRACE)
-        stream << (isReceptionPossible_ ? ", possible" : "impossible")
-               << (isReceptionAttempted_ ? ", attempted" : "ignored")
-               << (isReceptionSuccessful_ ? ", successful" : "unsuccessful")
+        stream << (isReceptionPossible_ ? ", possible" : ", impossible")
+               << (isReceptionAttempted_ ? ", attempted" : ", ignored")
+               << (isReceptionSuccessful_ ? ", successful" : ", unsuccessful")
                << ", indication = " << indication ;
     return stream;
 }
 
 const cPacket* inet::physicallayer::ReceptionDecision::getPhyFrame() const
 {
-    return reception->getTransmission()->getPhyFrame();
+    return nullptr;
 }
 
 const cPacket* inet::physicallayer::ReceptionDecision::getMacFrame() const
 {
-    return reception->getTransmission()->getMacFrame();
+    return macFrame;
 }
 
 } // namespace physicallayer
