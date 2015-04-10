@@ -256,18 +256,17 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         stream->getStreamQ()->insert(datMsg);
 
         sendQueue->record(stream->getStreamQ()->getLength());
+    }
 
-        // ------ Send buffer full? -------------------------------------------
-        if ((state->appSendAllowed) &&
-            (state->sendQueueLimit > 0) &&
-            ((uint64)state->sendBuffer >= state->sendQueueLimit))
-        {
-            // If there are not enough messages that could be dropped,
-            // the buffer is really full and the app has to be notified.
-            if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
-                sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
-                state->appSendAllowed = false;
-            }
+    // ------ Send buffer full? -------------------------------------------
+    if ((state->appSendAllowed) &&
+        (state->sendQueueLimit > 0) &&
+        ((uint64)state->sendBuffer >= state->sendQueueLimit)) {
+        // If there are not enough messages that could be dropped,
+        // the buffer is really full and the app has to be notified.
+        if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
+            sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
+            state->appSendAllowed = false;
         }
     }
 
