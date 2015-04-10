@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,17 +40,17 @@ namespace inet {
  */
 class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
 {
-  protected:
+protected:
     /**
      * Represents a node in the network.
      */
     class Node : public NetworkConfiguratorBase::Node
     {
-      public:
+    public:
         std::vector<IPv4Route *> staticRoutes;
         std::vector<IPv4MulticastRoute *> staticMulticastRoutes;
 
-      public:
+    public:
         Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
         ~Node() {
             for (int i = 0; i < (int)staticRoutes.size(); i++) delete staticRoutes[i];
@@ -59,7 +60,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
 
     class Topology : public NetworkConfiguratorBase::Topology
     {
-      protected:
+    protected:
         virtual Node *createNode(cModule *module) override { return new IPv4NetworkConfigurator::Node(module); }
     };
 
@@ -68,14 +69,14 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      */
     class InterfaceInfo : public NetworkConfiguratorBase::InterfaceInfo
     {
-      public:
+    public:
         uint32 address;    // the bits
         uint32 addressSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
         uint32 netmask;    // the bits
         uint32 netmaskSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
         std::vector<IPv4Address> multicastGroups;
 
-      public:
+    public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
 
         IPv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return IPv4Address(address); }
@@ -89,14 +90,14 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      */
     class RouteInfo
     {
-      public:
+    public:
         int color;    // an index into an array representing the different route actions (gateway, interface, metric, etc.)
         bool enabled;    // allows turning of routes without removing them from the list
         uint32 destination;    // originally copied from the IPv4Route
         uint32 netmask;    // originally copied from the IPv4Route
         std::vector<RouteInfo *> originalRouteInfos;    // routes that are routed by this one from the unoptimized original routing table, we keep track of this to be able to skip merge candidates with less computation
 
-      public:
+    public:
         RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
         ~RouteInfo() {} // don't delete originalRouteInfos elements, they are not exclusively owned
     };
@@ -106,11 +107,11 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      */
     class RoutingTableInfo
     {
-      public:
+    public:
         std::vector<RouteInfo *> originalRouteInfos;    // keep track of the original routes
         std::vector<RouteInfo *> routeInfos;    // list of routes in the routing table
 
-      public:
+    public:
         RoutingTableInfo() {}
         ~RoutingTableInfo() { for (int i = 0; i < (int)originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
 
@@ -121,7 +122,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
         static bool routeInfoLessThan(const RouteInfo *a, const RouteInfo *b) { return a->netmask != b->netmask ? a->netmask > b->netmask : a->destination < b->destination; }
     };
 
-  protected:
+    protected:
     // parameters
     bool assignAddressesParameter;
     bool assignDisjunctSubnetAddressesParameter;
@@ -131,9 +132,9 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     bool optimizeRoutesParameter;
 
     // internal state
-    Topology topology;
+    Topology fullTopology;
 
-  public:
+    public:
     /**
      * Computes the IPv4 network configuration for all nodes in the network.
      * The result of the computation is only stored in the network configurator.
@@ -160,7 +161,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      */
     virtual void configureRoutingTable(IIPv4RoutingTable *routingTable);
 
-  protected:
+    protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
     virtual void initialize(int stage) override;
@@ -196,7 +197,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      * The algorithm uses Dijkstra's weighted shortest path algorithm.
      * May add default routes and subnet routes if possible and requested.
      */
-    virtual void addStaticRoutes(Topology& topology);
+    virtual void addStaticRoutes(Topology& topology, unsigned int networkID);
 
     /**
      * Destructively optimizes the given IPv4 routes by merging some of them.
@@ -221,6 +222,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
+    virtual void performConfigurations(Topology& topology, unsigned int networkID);
     virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);

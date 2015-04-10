@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,7 +40,7 @@ inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
 {
-  protected:
+protected:
     class LinkInfo;
     class InterfaceInfo;
 
@@ -48,13 +49,13 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      */
     class Node : public inet::Topology::Node
     {
-      public:
+    public:
         cModule *module = nullptr;
         IInterfaceTable *interfaceTable = nullptr;
         IRoutingTable *routingTable = nullptr;
         std::vector<InterfaceInfo *> interfaceInfos;
 
-      public:
+    public:
         Node(cModule *module) : inet::Topology::Node(module->getId()), module(module) { }
     };
 
@@ -63,11 +64,11 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      */
     class Link : public inet::Topology::Link
     {
-      public:
+    public:
         InterfaceInfo *sourceInterfaceInfo = nullptr;
         InterfaceInfo *destinationInterfaceInfo = nullptr;
 
-      public:
+    public:
         Link() { }
     };
 
@@ -76,7 +77,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      */
     class InterfaceInfo : public cObject
     {
-      public:
+    public:
         Node *node = nullptr;
         LinkInfo *linkInfo = nullptr;
         InterfaceEntry *interfaceEntry = nullptr;
@@ -87,7 +88,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         bool addDefaultRoute = false;    // add-default-route attribute
         bool addSubnetRoute = false;    // add-subnet-route attribute
 
-      public:
+    public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
 
         virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
@@ -99,11 +100,12 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      */
     class LinkInfo : public cObject
     {
-      public:
+    public:
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
         InterfaceInfo *gatewayInterfaceInfo = nullptr;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
+        unsigned int networkID;    // Identifier of the network
 
-      public:
+    public:
         LinkInfo() {  }
         ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
@@ -113,25 +115,26 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      */
     class Topology : public inet::Topology
     {
-      public:
+    public:
         std::vector<LinkInfo *> linkInfos;    // all links in the network
         std::map<InterfaceEntry *, InterfaceInfo *> interfaceInfos;    // all interfaces in the network
+        std::set<unsigned int> networkSet;    // independent networks set
 
-      public:
+    public:
         virtual ~Topology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
 
-      protected:
+    protected:
         virtual Node *createNode(cModule *module) override { return new NetworkConfiguratorBase::Node(module); }
         virtual Link *createLink() override { return new NetworkConfiguratorBase::Link(); }
     };
 
     class Matcher
     {
-      protected:
+    protected:
         bool matchesany = false;
         std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
-      public:
+    public:
         Matcher(const char *pattern);
         ~Matcher();
 
@@ -141,12 +144,12 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
 
     class InterfaceMatcher
     {
-      protected:
+    protected:
         bool matchesany = false;
         std::vector<inet::PatternMatcher *> nameMatchers;
         std::vector<inet::PatternMatcher *> towardsMatchers;
 
-      public:
+    public:
         InterfaceMatcher(const char *pattern);
         ~InterfaceMatcher();
 
@@ -154,14 +157,20 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         bool matchesAny() { return matchesany; }
     };
 
-  protected:
+    public:
+    static unsigned int getNetworkID(cModule*        module,
+            InterfaceEntry* interfaceEntry);
+    static unsigned int getNetworkID(cModule*           module,
+            Topology::LinkOut* link);
+
+    protected:
     // parameters
     const char *linkWeightMode = nullptr;
     double defaultLinkWeight = NaN;
     double minLinkWeight = NaN;
     cXMLElement *configuration = nullptr;
 
-  protected:
+    protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
@@ -171,7 +180,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      * Creates vertices from modules having @node property.
      * Creates edges from connections (wired and wireless) between network interfaces.
      */
-    virtual void extractTopology(Topology& topology);
+    virtual void extractTopology(Topology&          topology,
+            const unsigned int networkID = 0);
 
     // helper functions
     virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);

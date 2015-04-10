@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+DIR=`pwd`
+cd ../../..
+make -j12
+cd $DIR
+./run -u Cmdenv -f omnetpp.ini && \
+grep "Total Reception Bit R" scalars.sca | grep testNetwork.serverMain
