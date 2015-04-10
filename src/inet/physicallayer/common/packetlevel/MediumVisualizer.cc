@@ -71,6 +71,7 @@ void MediumVisualizer::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         if (communicationHeat != nullptr) {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
             const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
             Coord min = mediumLimitCache->getMinConstraintArea();
@@ -88,6 +89,7 @@ void MediumVisualizer::initialize(int stage)
             communicationHeat->setPosition(cFigure::Point((min.x + max.x) / 2, (min.y + max.y) / 2));
             communicationHeat->setWidth(max.x - min.x);
             communicationHeat->setHeight(max.y - min.y);
+#endif
         }
     }
 }
