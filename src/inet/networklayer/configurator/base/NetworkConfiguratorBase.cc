@@ -74,20 +74,20 @@ static bool nodeFilter(cModule* module, void* userData)
     // ====== Check whether node qualifies for specified networkID ===========
     const NodeFilterParameters* parameters   = (const NodeFilterParameters*)userData;
     cProperty*                  nodeProperty = module->getProperties()->get("node");
-    if(nodeProperty) {
+    if (nodeProperty) {
         // ====== Are nodes in arbitrary networks requested? ==================
-        if(parameters->NetworkID == 0) {
+        if (parameters->NetworkID == 0) {
             return(true);   // return all nodes
         }
 
         // ====== Is there an interface in the right network? =================
         IInterfaceTable* interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
-        if(interfaceTable) {
-            for(int k = 0;k < interfaceTable->getNumInterfaces(); k++) {
+        if (interfaceTable) {
+            for (int k = 0;k < interfaceTable->getNumInterfaces(); k++) {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
-                if(!interfaceEntry->isLoopback()) {
+                if (!interfaceEntry->isLoopback()) {
                     const unsigned int interfaceNetworkID = NetworkConfiguratorBase::getNetworkID(module, interfaceEntry);
-                    if( (interfaceNetworkID == 0) ||
+                    if ( (interfaceNetworkID == 0) ||
                             (interfaceNetworkID == parameters->NetworkID) ) {
                         // Node has an interface in the right network => add it.
                         return(true);
@@ -100,15 +100,14 @@ static bool nodeFilter(cModule* module, void* userData)
     return(false);
 }
 
-void NetworkConfiguratorBase::extractTopology(Topology&          topology,
-        const unsigned int networkID)
+void NetworkConfiguratorBase::extractTopology(Topology& topology, const unsigned int networkID)
 {
     // extract topology
     NodeFilterParameters parameters;
     parameters.NetworkID = networkID;
     topology.extractFromNetwork(&nodeFilter, &parameters);
 
-    if(networkID != 0) {
+    if (networkID != 0) {
         // The topology here is already pruned from nodes without connection in this network.
         // However, the links have not been pruned yet (between still-existing nodes)!
         for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -116,7 +115,7 @@ void NetworkConfiguratorBase::extractTopology(Topology&          topology,
             for (int j = 0; j < node->getNumOutLinks(); j++) {
                 Topology::LinkOut* link          = node->getLinkOut(j);
                 const unsigned int linkNetworkID = getNetworkID(node->getModule(), link);
-                if( (linkNetworkID != 0) && (linkNetworkID != networkID) ) {
+                if ( (linkNetworkID != 0) && (linkNetworkID != networkID) ) {
                     link->disable();   // Not possible to prune in topology => disable link.
                 }
             }
@@ -146,7 +145,7 @@ void NetworkConfiguratorBase::extractTopology(Topology&          topology,
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
                     // handle independent networks
                     const unsigned int linkNetworkID = getNetworkID(node->module, interfaceEntry);
-                    if( (linkNetworkID == networkID) ||
+                    if ( (linkNetworkID == networkID) ||
                             (linkNetworkID == 0) ||
                             (networkID == 0) ) {
                         topology.networkSet.insert(linkNetworkID);
@@ -636,16 +635,15 @@ void NetworkConfiguratorBase::dumpTopology(Topology& topology)
 }
 
 // ###### Get Network ID from InterfaceEntry ################################
-unsigned int NetworkConfiguratorBase::getNetworkID(cModule*        module,
-        InterfaceEntry* interfaceEntry)
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule* module, InterfaceEntry* interfaceEntry)
 {
     unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
     const int    outputGateID = interfaceEntry->getNodeOutputGateId();
-    if(outputGateID != -1) {
+    if (outputGateID != -1) {
         cGate*       outputGate   = module->gate(outputGateID);
         cChannel*    channel      = outputGate->getChannel();
-        if(channel) {
-            if(channel->hasPar("netID")) {
+        if (channel) {
+            if (channel->hasPar("netID")) {
                 networkID = channel->par("netID");
             }
         }
@@ -654,16 +652,15 @@ unsigned int NetworkConfiguratorBase::getNetworkID(cModule*        module,
 }
 
 // ###### Get Network ID from LinkOut #######################################
-unsigned int NetworkConfiguratorBase::getNetworkID(cModule*           module,
-        Topology::LinkOut* link)
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule* module, Topology::LinkOut* link)
 {
     unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
     const int    outputGateID = link->getLocalGateId();
-    if(outputGateID != -1) {
+    if (outputGateID != -1) {
         cGate*       outputGate   = module->gate(outputGateID);
         cChannel*    channel      = outputGate->getChannel();
-        if(channel) {
-            if(channel->hasPar("netID")) {
+        if (channel) {
+            if (channel->hasPar("netID")) {
                 networkID = channel->par("netID");
             }
         }
