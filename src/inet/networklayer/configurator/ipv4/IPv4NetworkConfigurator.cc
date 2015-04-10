@@ -1333,13 +1333,13 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, unsigned int n
                         nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
                     node = (Node *)node->getPath(0)->getRemoteNode();
                 }
-                const InterfaceInfo* ingressInterfaceInfo = dynamic_cast<InterfaceInfo*>(((Link*)destinationNode->getPath(0))->sourceInterfaceInfo);
-                ASSERT(ingressInterfaceInfo != NULL);
 
                 // determine source interface
                 if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
                     IRoutingTable*  destinationRoutingTable = L3AddressResolver().routingTableOf(destinationNode->getModule());
+                    const InterfaceInfo* ingressInterfaceInfo = dynamic_cast<InterfaceInfo*>(((Link*)destinationNode->getPath(0))->sourceInterfaceInfo);
+                    ASSERT(ingressInterfaceInfo != NULL);
 
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
