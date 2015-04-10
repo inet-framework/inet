@@ -1337,9 +1337,9 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, unsigned int n
                 // determine source interface
                 if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
-                    IRoutingTable*  destinationRoutingTable = L3AddressResolver().routingTableOf(destinationNode->getModule());
+
+                    IRoutingTable*  destinationRoutingTable = L3AddressResolver().findIPv4RoutingTableOf(destinationNode->getModule());
                     const InterfaceInfo* ingressInterfaceInfo = dynamic_cast<InterfaceInfo*>(((Link*)destinationNode->getPath(0))->sourceInterfaceInfo);
-                    ASSERT(ingressInterfaceInfo != NULL);
 
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
@@ -1347,8 +1347,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, unsigned int n
 
                         // std::cout << sourceInterfaceEntry->getFullPath() << " --> "
                         //           << destinationInterfaceInfo->interfaceEntry->getFullPath() << endl;
-                        if ( (!destinationRoutingTable->isForwardingEnabled()) &&
-                             (destinationInterfaceInfo != ingressInterfaceInfo) ) {
+                        if ( ((destinationRoutingTable) && (!destinationRoutingTable->isForwardingEnabled())) &&
+                             ((ingressInterfaceInfo) && (destinationInterfaceInfo != ingressInterfaceInfo)) ) {
                             continue;
                         }
 
