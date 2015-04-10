@@ -21,5 +21,17 @@ namespace inet {
 
 Register_Class(IPv4Datagram);
 
+int IPv4Datagram::getTotalLength() const
+{
+    return totalLength_var == -1 ? getByteLength() : totalLength_var;
+}
+
+void IPv4Datagram::setTotalLength(int totalLength)
+{
+    this->totalLength_var = totalLength;
+}
+
+
+
 } // namespace inet
 
