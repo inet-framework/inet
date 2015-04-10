@@ -936,17 +936,38 @@ bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stag
     return true;
 }
 
-void RoutingTable6::createSubPrefix(IPv6NDPrefixInformation *prefixInfo, InterfaceEntry *ie)
+void RoutingTable6::createSubPrefix(IPv6Address superPrefix, int superPrefixLength, simtime_t validLifetime, uint preferredLifetime)
 {
     // TODO~~~
     // Ambil prefix dari prefixInfo
     // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
-    IPv6Address superPrefix = prefixInfo->getPrefix();
-    int superPrefixLength = prefixInfo->getPrefixLength();
     int prefixLength = superPrefixLength + 4;
     uint32 segment0 = superPrefix.getSegment0();
     uint32 segment1 = superPrefix.getSegment1();
 
     //harusnya prefix di-assign ke tiap interface, selain wlan0
-    IPv6Address prefix(segment0, segment1+(this->getId()<<(64-prefixLength))); //= superPrefix + (this->getId() <<(128-prefixLength));
+    for (int k = 0; k < ift->getNumInterfaces(); k++)
+    {
+        InterfaceEntry *ie = ift->getInterface(k);
+        if (!ie->ipv6Data() || ie->isLoopback())
+            continue;
+        if (ie->ipv6Data()->getNumAdvPrefixes()>0)
+            continue;  // already has one
+        IPv6Address prefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0);
+
+        IPv6InterfaceData::AdvPrefix p;
+        p.prefix = prefix;
+        p.prefixLength = prefixLength; //changed from 64 to 48. so that the prefix can be subnetted
+        p.advValidLifetime = validLifetime;
+        p.advOnLinkFlag = true;
+        p.advPreferredLifetime = preferredLifetime;
+        p.advAutonomousFlag = true;
+        ie->ipv6Data()->addAdvPrefix(p);
+
+        if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
+            ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+
+        EV<<"\ninterface " << ie->getFullName() <<" got prefix " << p.prefix <<"\n";
+    }
+
 }

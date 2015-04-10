@@ -983,7 +983,9 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
 
 IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
 {
-    ASSERT(ie->ipv6Data()->getAdvSendAdvertisements() == false);
+    if (!rt6->isMobileRouter())
+        ASSERT(ie->ipv6Data()->getAdvSendAdvertisements() == false);
+
     //RFC 2461: Section 6.3.7 Sending Router Solicitations
     //A host sends Router Solicitations to the All-Routers multicast address. The
     //IP source address is set to either one of the interface's unicast addresses
@@ -1581,7 +1583,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 
                 if (rt6->isMobileRouter())
                 {
-                    rt6->createSubPrefix(prefixInfo, ie);
+                    rt6->createSubPrefix(prefix, prefixLength, validLifetime, preferredLifetime);
                 }
             }
             /*- If the Prefix Information option's Valid Lifetime field is zero,
@@ -2715,7 +2717,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
     if (connectedGate != NULL)
     {
         cModule* connectedNode = connectedGate->getOwnerModule();
-        ASSERT(isNetworkNode(connectedNode));
+//        ASSERT(isNetworkNode(connectedNode));
         if (isWirelessAccessPoint(connectedNode))
             return true;
     }

@@ -463,7 +463,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
     /*
      * Creating subnet for MR
      */
-    virtual void createSubPrefix(IPv6NDPrefixInformation *prefixInfo, InterfaceEntry *ie);
+    void createSubPrefix(IPv6Address prefix, int prefixLength, simtime_t validLifetime, uint preferredLifetime);
 };
 
 #endif
