@@ -259,12 +259,16 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
 
 cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
 {
+    if (b.getRemainder() == 0)
+        return nullptr;
+
     unsigned int startPos = b.getPos();
     cPacket *pkt = deserialize(b, context);
     if (pkt == nullptr) {
         b.seek(startPos);
         pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
+    ASSERT(pkt);
     if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
         const char *encclass = pkt->getEncapsulatedPacket() ? pkt->getEncapsulatedPacket()->getClassName() : "<nullptr>";
         throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
