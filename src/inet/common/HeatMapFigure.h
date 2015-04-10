@@ -22,7 +22,13 @@
 
 namespace inet {
 
-class INET_API HeatMapFigure : public cPixmapFigure
+
+class INET_API HeatMapFigure :
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+        public cPixmapFigure
+#else
+        public cTextFigure
+#endif
 {
   protected:
     double alpha = 0.5;

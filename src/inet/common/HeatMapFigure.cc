@@ -20,24 +20,38 @@
 namespace inet {
 
 HeatMapFigure::HeatMapFigure(int size, const char *name) :
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     cPixmapFigure(name)
+#else
+    cTextFigure(name)
+#endif
 {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     setPixmap(cFigure::Pixmap(size, size));
     fill(fromColor, 0);
+#else
+    setText("cPixmapFigure not implemented in current OmNET++");
+#endif
 }
 
 double HeatMapFigure::getHeat(int x, int y)
 {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     return getPixelOpacity(x, y);
+#else
+    return 0.0;
+#endif
 }
 
 void HeatMapFigure::setHeat(int x, int y, double value)
 {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     cFigure::Color color(
         (1 - value) * fromColor.red + value * toColor.red,
         (1 - value) * fromColor.green + value * toColor.green,
         (1 - value) * fromColor.blue + value * toColor.blue);
     setPixel(x, y, color, value);
+#endif
 }
 
 void HeatMapFigure::heatPoint(int x, int y)
@@ -78,6 +92,7 @@ void HeatMapFigure::heatLine(int x1, int y1, int x2, int y2)
 
 void HeatMapFigure::coolDown()
 {
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     double factor = exp(coolingSpeed * (lastCoolDown - simTime()).dbl());
     if (factor < 0.9) {
         lastCoolDown = simTime();
@@ -85,6 +100,7 @@ void HeatMapFigure::coolDown()
             for (int y = 0; y < getPixmapHeight(); y++)
                 setHeat(x, y, getHeat(x, y) * factor);
     }
+#endif
 }
 
 } // namespace inet
