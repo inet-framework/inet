@@ -42,5 +42,13 @@ module MobileRouter6 extends StandardHost6
     	networkLayer.mipv6support.isMobileNode = false; //is Mobile Node
     	networkLayer.mipv6support.isHomeAgent = false; //is Home Agent
     	networkLayer.mipv6support.isMobileRouter = true; //is Mobile Router
+    	
+    gates:
+    	input pagarIn;
+    	output pagarOut;
+    	  
+    connections allowunconnected:  
+    	pagarIn --> networkLayer.ifIn++;
+    	pagarOut <-- networkLayer.ifOut++;
 }
 

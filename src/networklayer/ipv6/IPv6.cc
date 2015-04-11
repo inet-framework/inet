@@ -391,7 +391,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
     numMulticast++;
 
     // if received from the network...
-    if (fromIE != NULL)
+    if (fromIE != NULL || rt->isMobileRouter())
     {
         // deliver locally
         if (rt->isLocalAddress(destAddr))
