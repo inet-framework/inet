@@ -30,7 +30,7 @@ class INET_API TransmitterBase : public cModule, public virtual ITransmitter
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
   public:
-    virtual W getMaxPower() const override { return W(qNaN); }
+    virtual W getMaxPower() const override { return W(NaN); }
 };
 
 } // namespace physicallayer

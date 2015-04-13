@@ -37,8 +37,8 @@ class INET_API ITransmitter : public IPrintableObject
      * if unspecified.
      */
     virtual W getMaxPower() const = 0;
-    virtual m getMaxCommunicationRange() const { return m(qNaN); }
-    virtual m getMaxInterferenceRange() const { return m(qNaN); }
+    virtual m getMaxCommunicationRange() const { return m(NaN); }
+    virtual m getMaxInterferenceRange() const { return m(NaN); }
 
     /**
      * Returns a transmission which describes the radio signal corresponding
