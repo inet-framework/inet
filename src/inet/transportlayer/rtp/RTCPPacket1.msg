@@ -13,6 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+cplusplus{{
+#include "inet/common/INETDefs.h"
+}}
+
 class cArray;
 
 namespace inet::rtp;

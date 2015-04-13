@@ -25,6 +25,8 @@
 #include <omnetpp.h>
 #include "inet/common/Compat.h"
 
+using namespace omnetpp;
+
 #if OMNETPP_VERSION < 0x0406
 #  error At least OMNeT++/OMNEST version 4.6 required
 #endif // if OMNETPP_VERSION < 0x0406
