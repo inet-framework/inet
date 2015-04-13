@@ -37,37 +37,40 @@ bool RouterLSA::update(const OSPFRouterLSA *lsa)
 
 bool RouterLSA::differsFrom(const OSPFRouterLSA *routerLSA) const
 {
+    const OSPFLSAHeader& thisHeader = getHeader();
     const OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
-    bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
-                            ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
-                            ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
-                            (header_var.getLsaLength() != lsaHeader.getLsaLength()));
+    bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
+                            ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
+                            ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
+                            (thisHeader.getLsaLength() != lsaHeader.getLsaLength()));
     bool differentBody = false;
 
     if (!differentHeader) {
-        differentBody = ((V_VirtualLinkEndpoint_var != routerLSA->getV_VirtualLinkEndpoint()) ||
-                         (E_ASBoundaryRouter_var != routerLSA->getE_ASBoundaryRouter()) ||
-                         (B_AreaBorderRouter_var != routerLSA->getB_AreaBorderRouter()) ||
-                         (numberOfLinks_var != routerLSA->getNumberOfLinks()) ||
-                         (links_arraysize != routerLSA->getLinksArraySize()));
+        differentBody = ((getV_VirtualLinkEndpoint() != routerLSA->getV_VirtualLinkEndpoint()) ||
+                         (getE_ASBoundaryRouter() != routerLSA->getE_ASBoundaryRouter()) ||
+                         (getB_AreaBorderRouter() != routerLSA->getB_AreaBorderRouter()) ||
+                         (getNumberOfLinks() != routerLSA->getNumberOfLinks()) ||
+                         (getLinksArraySize() != routerLSA->getLinksArraySize()));
 
         if (!differentBody) {
             unsigned int linkCount = links_arraysize;
             for (unsigned int i = 0; i < linkCount; i++) {
-                bool differentLink = ((links_var[i].getLinkID() != routerLSA->getLinks(i).getLinkID()) ||
-                                      (links_var[i].getLinkData() != routerLSA->getLinks(i).getLinkData()) ||
-                                      (links_var[i].getType() != routerLSA->getLinks(i).getType()) ||
-                                      (links_var[i].getNumberOfTOS() != routerLSA->getLinks(i).getNumberOfTOS()) ||
-                                      (links_var[i].getLinkCost() != routerLSA->getLinks(i).getLinkCost()) ||
-                                      (links_var[i].getTosDataArraySize() != routerLSA->getLinks(i).getTosDataArraySize()));
+                auto thisLink = getLinks(i);
+                auto lsaLink = routerLSA->getLinks(i);
+                bool differentLink = ((thisLink.getLinkID() != lsaLink.getLinkID()) ||
+                                      (thisLink.getLinkData() != lsaLink.getLinkData()) ||
+                                      (thisLink.getType() != lsaLink.getType()) ||
+                                      (thisLink.getNumberOfTOS() != lsaLink.getNumberOfTOS()) ||
+                                      (thisLink.getLinkCost() != lsaLink.getLinkCost()) ||
+                                      (thisLink.getTosDataArraySize() != lsaLink.getTosDataArraySize()));
 
                 if (!differentLink) {
-                    unsigned int tosCount = links_var[i].getTosDataArraySize();
+                    unsigned int tosCount = thisLink.getTosDataArraySize();
                     for (unsigned int j = 0; j < tosCount; j++) {
-                        bool differentTOS = ((links_var[i].getTosData(j).tos != routerLSA->getLinks(i).getTosData(j).tos) ||
-                                             (links_var[i].getTosData(j).tosMetric[0] != routerLSA->getLinks(i).getTosData(j).tosMetric[0]) ||
-                                             (links_var[i].getTosData(j).tosMetric[1] != routerLSA->getLinks(i).getTosData(j).tosMetric[1]) ||
-                                             (links_var[i].getTosData(j).tosMetric[2] != routerLSA->getLinks(i).getTosData(j).tosMetric[2]));
+                        bool differentTOS = ((thisLink.getTosData(j).tos != lsaLink.getTosData(j).tos) ||
+                                             (thisLink.getTosData(j).tosMetric[0] != lsaLink.getTosData(j).tosMetric[0]) ||
+                                             (thisLink.getTosData(j).tosMetric[1] != lsaLink.getTosData(j).tosMetric[1]) ||
+                                             (thisLink.getTosData(j).tosMetric[2] != lsaLink.getTosData(j).tosMetric[2]));
 
                         if (differentTOS) {
                             differentLink = true;

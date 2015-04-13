@@ -34,6 +34,7 @@ packet RTCPPacket
 {
     byteLength = 4;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     int8 version = 2;
     bool padding = 0;
     short count = 0;
@@ -45,5 +46,6 @@ packet RTCPCompoundPacket
 {
     byteLength = 0;
     @customize(true);  // see the generated C++ header for more info
+    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     cArray rtcpPackets;
 }
