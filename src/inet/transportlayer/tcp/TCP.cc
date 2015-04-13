@@ -93,6 +93,7 @@ void TCP::initialize(int stage)
         WATCH_PTRMAP(tcpAppConnMap);
 
         recordStatistics = par("recordStats");
+        useDataNotification = par("useDataNotification");
 
         cModule *netw = simulation.getSystemModule();
     }

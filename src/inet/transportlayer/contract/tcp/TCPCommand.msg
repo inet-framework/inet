@@ -39,6 +39,7 @@ enum TcpCommandCode
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
     TCP_C_QUEUE_BYTES_LIMIT = 8; // set send queue limit (in bytes)
+    TCP_C_READ = 9;       // send request to TCP to deliver data
 }
 
 
@@ -60,6 +61,7 @@ enum TcpStatusInd
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry ~TCPStatusInfo)
     TCP_I_SEND_MSG = 10;         // send queue abated, send more messages
+    TCP_I_DATA_NOTIFICATION = 11; // notify the upper layer that data has arrived
 }
 
 
