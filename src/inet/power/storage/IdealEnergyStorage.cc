@@ -23,6 +23,36 @@ namespace power {
 
 Define_Module(IdealEnergyStorage);
 
+void IdealEnergyStorage::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        WATCH(energyBalance);
+}
+
+void IdealEnergyStorage::setPowerConsumption(int energyConsumerId, W consumedPower)
+{
+    Enter_Method_Silent();
+    updateResidualCapacity();
+    EnergySourceBase::setPowerConsumption(energyConsumerId, consumedPower);
+}
+
+void IdealEnergyStorage::setPowerGeneration(int energyGeneratorId, W generatedPower)
+{
+    Enter_Method_Silent();
+    updateResidualCapacity();
+    EnergySinkBase::setPowerGeneration(energyGeneratorId, generatedPower);
+}
+
+void IdealEnergyStorage::updateResidualCapacity()
+{
+    simtime_t now = simTime();
+    if (now != lastResidualCapacityUpdate) {
+        energyBalance += s((now - lastResidualCapacityUpdate).dbl()) * (totalGeneratedPower - totalConsumedPower);
+        lastResidualCapacityUpdate = now;
+        emit(residualCapacityChangedSignal, energyBalance.get());
+    }
+}
+
 } // namespace power
 
 } // namespace inet
