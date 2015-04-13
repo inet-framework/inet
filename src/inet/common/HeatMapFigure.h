@@ -23,12 +23,8 @@
 namespace inet {
 
 
-class INET_API HeatMapFigure :
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
-        public cPixmapFigure
-#else
-        public cTextFigure
-#endif
+class INET_API HeatMapFigure : public cPixmapFigure
 {
   protected:
     double alpha = 0.5;
@@ -50,6 +46,7 @@ class INET_API HeatMapFigure :
     virtual void heatLine(int x1, int y1, int x2, int y2);
     virtual void coolDown();
 };
+#endif
 
 } // namespace inet
 
