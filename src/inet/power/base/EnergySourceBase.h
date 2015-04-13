@@ -62,6 +62,8 @@ class INET_API EnergySourceBase : public virtual IEnergySource
     W totalConsumedPower;
 
   protected:
+    virtual void initialize(int stage);
+
     W computeTotalConsumedPower();
 
   public:

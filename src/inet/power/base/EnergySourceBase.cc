@@ -26,6 +26,12 @@ EnergySourceBase::EnergySourceBase() :
 {
 }
 
+void EnergySourceBase::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        WATCH(totalConsumedPower);
+}
+
 const IEnergyConsumer *EnergySourceBase::getEnergyConsumer(int energyConsumerId) const
 {
     return energyConsumers[energyConsumerId].energyConsumer;
