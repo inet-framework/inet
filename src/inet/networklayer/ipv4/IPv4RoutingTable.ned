@@ -56,6 +56,7 @@ simple IPv4RoutingTable like IRoutingTable
                           // interface address; should be left empty ("") for hosts
         bool forwarding = default(true);  // turns IP forwarding on/off
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
+        bool useAdminDist = default(false);     // Use Cisco like administrative distances
         string routingFile = default("");  // routing table file name
         @signal[NF_ROUTE_ADDED](type=IPv4Route);
         @signal[NF_ROUTE_DELETED](type=IPv4Route);

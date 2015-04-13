@@ -55,6 +55,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
     bool isrouter = false;
     bool multicastForward = false;    //If node is forwarding multicast info
+    bool useAdminDist = false;     // Use Cisco like administrative distances
 
 #ifdef WITH_xMIPv6
     bool ishome_agent = false;    //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
@@ -86,8 +87,17 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
     // internal: routes of different type can only be added via well-defined functions
     virtual void addRoute(IPv6Route *route);
+
     // helper for addRoute()
-    static bool routeLessThan(const IPv6Route *a, const IPv6Route *b);
+    class RouteLessThan
+    {
+        const IPv6RoutingTable &c;
+      public:
+        RouteLessThan(const IPv6RoutingTable& c) : c(c) {}
+        bool operator () (const IPv6Route *a, const IPv6Route *b) { return c.routeLessThan(a, b); }
+    };
+    bool routeLessThan(const IPv6Route *a, const IPv6Route *b) const;
+
     // internal
     virtual void configureInterfaceForIPv6(InterfaceEntry *ie);
     /**

@@ -337,14 +337,14 @@
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,           3a78-42cc
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           5841-7fa2
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           775c-282a
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            5769-0196
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            f97f-f0ac
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            92d4-a6f2
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            954c-991b
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            954c-991b
 
 /examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            b7f7-2a0d
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            777d-0117
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            15a0-a9a9
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            ec02-3e44
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            647e-f0fc
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            b2e2-93e1
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            19ac-f402
