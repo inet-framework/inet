@@ -63,6 +63,15 @@ namespace inet {
 #  define EVSTREAM                      EV
 #endif    // OMNETPP_VERSION < 0x500
 
+// Around OMNeT++ 5.0 beta 2, the "ev" and "simulation" macros were eliminated, and replaced
+// by the functions/methods getEnvir() and getSimulation(), the INET codebase updated.
+// The following lines let the code compile with earlier OMNeT++ versions as well.
+#ifdef ev
+inline cEnvir *getEnvir() {return cSimulation::getActiveEnvir();}
+inline cSimulation *getSimulation() {return cSimulation::getActiveSimulation();}
+inline bool hasGUI() {return cSimulation::getActiveEnvir()->isGUI();}
+#endif  //ev
+
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
 double INET_API erfc(double x);
