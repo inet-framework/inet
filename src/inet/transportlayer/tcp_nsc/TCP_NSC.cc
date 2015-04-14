@@ -675,7 +675,7 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         handleAppMessage(msgP);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

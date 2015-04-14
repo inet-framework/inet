@@ -64,7 +64,7 @@ void TokenBucketMeter::handleMessage(cMessage *msg)
         send(packet, "redOut");
     }
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[50] = "";
         if (numRcvd > 0)
             sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);

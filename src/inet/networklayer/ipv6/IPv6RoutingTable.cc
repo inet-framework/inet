@@ -162,7 +162,7 @@ void IPv6RoutingTable::parseXMLConfigFile()
 
 void IPv6RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     std::stringstream os;

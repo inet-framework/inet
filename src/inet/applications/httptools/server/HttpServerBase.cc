@@ -179,7 +179,7 @@ void HttpServerBase::finish()
 
 void HttpServerBase::updateDisplay()
 {
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[1024];
         sprintf(buf, "%ld", htmlDocsServed);
         cDisplayString& ds = host->getDisplayString();

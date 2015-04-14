@@ -159,7 +159,7 @@ void MoBANCoordinator::setTargetPosition()
     nextChange = simTime() + duration;
 
     //show posture name in the graphical interface
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char dis_str[100];
         sprintf(dis_str, "%s until %f", currentPosture->getPostureName(), nextChange.dbl());
         getDisplayString().setTagArg("t", 0, dis_str);

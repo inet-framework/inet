@@ -58,7 +58,7 @@ namespace inet {
 #endif // if OMNETPP_VERSION < 0x404
 
 #if OMNETPP_VERSION < 0x500
-#  define EVSTREAM                      ev.getOStream()
+#  define EVSTREAM                      getEnvir()->getOStream()
 #else // if OMNETPP_VERSION < 0x500
 #  define EVSTREAM                      EV
 #endif    // OMNETPP_VERSION < 0x500

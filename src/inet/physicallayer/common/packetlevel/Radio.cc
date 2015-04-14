@@ -397,7 +397,7 @@ void Radio::updateDisplayString()
     // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
-    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange)) {
+    if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
         cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {

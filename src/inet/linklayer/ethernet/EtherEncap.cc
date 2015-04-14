@@ -69,7 +69,7 @@ void EtherEncap::handleMessage(cMessage *msg)
         }
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

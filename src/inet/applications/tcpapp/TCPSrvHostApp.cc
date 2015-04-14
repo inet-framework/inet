@@ -49,7 +49,7 @@ void TCPSrvHostApp::initialize(int stage)
 
 void TCPSrvHostApp::updateDisplay()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     char buf[32];

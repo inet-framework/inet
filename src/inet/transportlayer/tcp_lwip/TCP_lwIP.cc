@@ -471,7 +471,7 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
             scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

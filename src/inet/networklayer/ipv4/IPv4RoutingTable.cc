@@ -140,7 +140,7 @@ void IPv4RoutingTable::configureRouterId()
 
 void IPv4RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     char buf[80];

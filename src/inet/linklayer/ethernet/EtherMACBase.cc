@@ -687,7 +687,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     else
         color = "";
 
-    if (ev.isGUI() && connectionColoring) {
+    if (hasGUI() && connectionColoring) {
         if (connected) {
             transmissionChannel->getDisplayString().setTagArg("ls", 0, color);
             transmissionChannel->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");

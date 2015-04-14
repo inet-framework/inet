@@ -85,7 +85,7 @@ void STPBase::stop()
 
 void STPBase::colorLink(unsigned int i, bool forwarding)
 {
-    if (ev.isGUI() && visualize) {
+    if (hasGUI() && visualize) {
         cGate *inGate = switchModule->gate("ethg$i", i);
         cGate *outGate = switchModule->gate("ethg$o", i);
         cGate *outGateNext = outGate ? outGate->getNextGate() : nullptr;
@@ -117,7 +117,7 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
 
 void STPBase::updateDisplay()
 {
-    if (ev.isGUI() && visualize) {
+    if (hasGUI() && visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
             Ieee8021dInterfaceData *port = getPortInterfaceData(i);
 

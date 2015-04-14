@@ -114,7 +114,7 @@ void TraCIMobility::initialize(int stage)
             scheduleAt(simTime() + accidentStart, startAccidentMsg);
         }
 
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplayString();
     }
 
@@ -218,7 +218,7 @@ void TraCIMobility::move()
     }
 
     lastPosition = nextPos;
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
     fixIfHostGetsOutside();
     emitMobilityStateChangedSignal();

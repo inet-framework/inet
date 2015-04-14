@@ -90,7 +90,7 @@ void Loopback::handleMessage(cMessage *msg)
     numSent++;
     send(msg, "netwOut");
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

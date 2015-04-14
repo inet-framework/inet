@@ -55,7 +55,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    virtual void handleMessage(cMessage *msg);
 
    inline void setStatusString(const char* status) {
-      if(ev.isGUI()) {
+      if(hasGUI()) {
          getDisplayString().setTagArg("t", 0, status);
       }
    }

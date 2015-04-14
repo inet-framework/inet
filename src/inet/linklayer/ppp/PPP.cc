@@ -103,7 +103,7 @@ void PPP::initialize(int stage)
     // update display string when addresses have been autoconfigured etc.
     else if (stage == INITSTAGE_LAST) {
         // display string stuff
-        if (ev.isGUI()) {
+        if (hasGUI()) {
             if (datarateChannel) {    // not nullptr if connected
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
             }
@@ -207,7 +207,7 @@ void PPP::refreshOutGateConnection(bool connected)
     if (datarateChannel && !oldChannel)
         datarateChannel->subscribe(POST_MODEL_CHANGE, this);
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         if (connected) {
             if (!oldChannel)
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
@@ -237,7 +237,7 @@ void PPP::startTransmitting(cPacket *msg)
     delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
 
-    if (ev.isGUI())
+    if (hasGUI())
         displayBusy();
 
     // fire notification
@@ -270,7 +270,7 @@ void PPP::handleMessage(cMessage *msg)
         EV_INFO << "Transmission successfully completed.\n";
         emit(txStateSignal, 0L);
 
-        if (ev.isGUI())
+        if (hasGUI())
             displayIdle();
 
         // fire notification
@@ -332,7 +332,7 @@ void PPP::handleMessage(cMessage *msg)
                 // We are currently busy, so just queue up the packet.
                 EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
-                if (ev.isGUI() && txQueue.length() >= 3)
+                if (hasGUI() && txQueue.length() >= 3)
                     getDisplayString().setTagArg("i", 1, "red");
 
                 if (txQueueLimit && txQueue.length() > txQueueLimit)
@@ -350,7 +350,7 @@ void PPP::handleMessage(cMessage *msg)
         }
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

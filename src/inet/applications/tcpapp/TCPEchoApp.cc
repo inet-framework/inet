@@ -145,7 +145,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         delete msg;
     }
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
         getDisplayString().setTagArg("t", 0, buf);

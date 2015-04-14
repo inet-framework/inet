@@ -194,7 +194,7 @@ void TCP::handleMessage(cMessage *msg)
             removeConnection(conn);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

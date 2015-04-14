@@ -206,7 +206,7 @@ void UDPBasicApp::handleMessageWhenUp(cMessage *msg)
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
         getDisplayString().setTagArg("t", 0, buf);

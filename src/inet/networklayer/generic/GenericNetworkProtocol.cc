@@ -104,7 +104,7 @@ void GenericNetworkProtocol::endService(cPacket *pk)
         handlePacketFromNetwork(dgram);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

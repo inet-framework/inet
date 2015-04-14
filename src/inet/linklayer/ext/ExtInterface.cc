@@ -69,13 +69,13 @@ void ExtInterface::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         // if not connected, make it gray
-        if (ev.isGUI() && !connected) {
+        if (hasGUI() && !connected) {
             getDisplayString().setTagArg("i", 1, "#707070");
             getDisplayString().setTagArg("i", 2, "100");
         }
 
         // update display string when addresses have been autoconfigured etc.
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplayString();
     }
 }
@@ -161,7 +161,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         }
     }
     delete (msg);
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -181,7 +181,7 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     const char *str;

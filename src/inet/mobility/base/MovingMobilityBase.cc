@@ -81,7 +81,7 @@ void MovingMobilityBase::moveAndUpdate()
 void MovingMobilityBase::updateVisualRepresentation()
 {
     MobilityBase::updateVisualRepresentation();
-    if (leaveMovementTrail && visualRepresentation && ev.isGUI()) {
+    if (leaveMovementTrail && visualRepresentation && hasGUI()) {
         cFigure::Point startPosition;
         if (movementTrail->getNumFigures() == 0)
             startPosition = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
