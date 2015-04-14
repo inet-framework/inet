@@ -103,7 +103,7 @@ void SCTPServer::sendOrSchedule(cPacket *msg)
     if (delay == 0)
         send(msg, "sctpOut");
     else
-        scheduleAt(simulation.getSimTime() + delay, msg);
+        scheduleAt(simTime() + delay, msg);
 }
 
 void SCTPServer::generateAndSend()
@@ -247,7 +247,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend();
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
+                        scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second.sentPackets = numRequestsToSend;
                     }
@@ -280,7 +280,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                             sprintf(as, "%d", assocId);
                             cPacket *abortMsg = new cPacket(as);
                             abortMsg->setKind(SCTP_I_ABORT);
-                            scheduleAt(simulation.getSimTime() + par("waitToClose"), abortMsg);
+                            scheduleAt(simTime() + par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << assocId << "\n";
@@ -302,13 +302,13 @@ void SCTPServer::handleMessage(cMessage *msg)
                 if (schedule == false) {
                     if (delayFirstRead > 0 && !delayFirstReadTimer->isScheduled()) {
                         cmsg = makeReceiveRequest(PK(msg));
-                        scheduleAt(simulation.getSimTime() + delayFirstRead, cmsg);
-                        scheduleAt(simulation.getSimTime() + delayFirstRead, delayFirstReadTimer);
+                        scheduleAt(simTime() + delayFirstRead, cmsg);
+                        scheduleAt(simTime() + delayFirstRead, delayFirstReadTimer);
                     }
                     else if (readInt && firstData) {
                         firstData = false;
                         cmsg = makeReceiveRequest(PK(msg));
-                        scheduleAt(simulation.getSimTime() + par("readingInterval"), delayTimer);
+                        scheduleAt(simTime() + par("readingInterval"), delayTimer);
                         sendOrSchedule(cmsg);
                     }
                     else if (delayFirstRead == 0 && readInt == false) {
@@ -317,7 +317,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     }
                 }
                 else {
-                    EV_INFO << simulation.getSimTime() << " makeReceiveRequest\n";
+                    EV_INFO << simTime() << " makeReceiveRequest\n";
                     cmsg = makeReceiveRequest(PK(msg));
                     sendOrSchedule(cmsg);
                 }
@@ -328,13 +328,13 @@ void SCTPServer::handleMessage(cMessage *msg)
             case SCTP_I_DATA: {
                 notificationsReceived--;
                 packetsRcvd++;
-                EV_INFO << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
+                EV_INFO << simTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
                 id = ind->getAssocId();
                 auto j = serverAssocStatMap.find(id);
                 auto k = bytesPerAssoc.find(id);
                 if (j->second.rcvdBytes == 0)
-                    j->second.start = simulation.getSimTime();
+                    j->second.start = simTime();
 
                 j->second.rcvdBytes += PK(msg)->getByteLength();
                 k->second->record(j->second.rcvdBytes);
@@ -344,14 +344,14 @@ void SCTPServer::handleMessage(cMessage *msg)
                         j->second.rcvdPackets--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                         auto m = endToEndDelay.find(id);
-                        m->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                        m->second->record(simTime() - smsg->getCreationTime());
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
                         if (j->second.rcvdPackets == 0) {
                             if (serverAssocStatMap[assocId].peerClosed == true && serverAssocStatMap[assocId].abortSent == false) {
                                 sendOrSchedule(makeAbortNotification(ind));
                                 serverAssocStatMap[assocId].abortSent = true;
-                                j->second.stop = simulation.getSimTime();
+                                j->second.stop = simTime();
                                 j->second.lifeTime = j->second.stop - j->second.start;
                                 delete msg;
                                 break;
@@ -363,7 +363,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                                 qinfo->setAssocId(id);
                                 cmsg->setControlInfo(qinfo);
                                 sendOrSchedule(cmsg);
-                                j->second.stop = simulation.getSimTime();
+                                j->second.stop = simTime();
                                 j->second.lifeTime = j->second.stop - j->second.start;
                             }
                         }
@@ -375,7 +375,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     cmd->setAssocId(id);
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                     auto n = endToEndDelay.find(id);
-                    n->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                    n->second->record(simTime() - smsg->getCreationTime());
                     cPacket *cmsg = new cPacket("SVData");
                     bytesSent += smsg->getBitLength() / 8;
                     cmd->setSendUnordered(cmd->getSendUnordered());
@@ -406,7 +406,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     qinfo->setAssocId(id);
                     cmsg->setControlInfo(qinfo);
                     sendOrSchedule(cmsg);
-                    i->second.stop = simulation.getSimTime();
+                    i->second.stop = simTime();
                     i->second.lifeTime = i->second.stop - i->second.start;
                 }
                 delete command;
@@ -427,7 +427,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 id = command->getAssocId();
                 EV_INFO << "server: SCTP_I_CLOSED for assoc "  << id << endl;
                 ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
-                i->second.stop = simulation.getSimTime();
+                i->second.stop = simTime();
                 i->second.lifeTime = i->second.stop - i->second.start;
                 if (delayTimer->isScheduled())
                     cancelEvent(delayTimer);
@@ -448,9 +448,9 @@ void SCTPServer::handleMessage(cMessage *msg)
 void SCTPServer::handleTimer(cMessage *msg)
 {
     if (msg == delayTimer) {
-        EV_INFO << simulation.getSimTime() << " delayTimer expired\n";
+        EV_INFO << simTime() << " delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
-        scheduleAt(simulation.getSimTime() + par("readingInterval"), delayTimer);
+        scheduleAt(simTime() + par("readingInterval"), delayTimer);
         return;
     }
     else if (msg == delayFirstReadTimer) {
@@ -458,8 +458,8 @@ void SCTPServer::handleTimer(cMessage *msg)
 
         if (readInt && !delayTimer->isScheduled()) {
             double tempInterval = par("readingInterval");
-            scheduleAt(simulation.getSimTime() + (simtime_t)tempInterval, delayTimer);
-            scheduleAt(simulation.getSimTime() + (simtime_t)tempInterval, makeDefaultReceive());
+            scheduleAt(simTime() + (simtime_t)tempInterval, delayTimer);
+            scheduleAt(simTime() + (simtime_t)tempInterval, makeDefaultReceive());
         }
         return;
     }
@@ -469,7 +469,7 @@ void SCTPServer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
+                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -485,7 +485,7 @@ void SCTPServer::handleTimer(cMessage *msg)
         break;
 
         case SCTP_C_RECEIVE:
-            EV_INFO << simulation.getSimTime() << " SCTPServer:SCTP_C_RECEIVE\n";
+            EV_INFO << simTime() << " SCTPServer:SCTP_C_RECEIVE\n";
             if (readInt || delayFirstRead > 0)
                 schedule = false;
             else

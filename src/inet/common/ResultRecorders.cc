@@ -66,7 +66,7 @@ void GroupCountRecorder::finish(cResultFilter *prev) {
     for(auto & elem : groupcounts) {
         std::stringstream name;
         name << getResultName().c_str() << ":" << elem.first;
-        ev.recordScalar(getComponent(), name.str().c_str(), elem.second, &attributes); // note: this is NaN if count==0
+        getEnvir()->recordScalar(getComponent(), name.str().c_str(), elem.second, &attributes); // note: this is NaN if count==0
     }
 }
 

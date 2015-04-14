@@ -157,7 +157,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
     datMsg->encapsulate(smsg);
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);
-    datMsg->setEnqueuingTime(simulation.getSimTime());
+    datMsg->setEnqueuingTime(simTime());
     datMsg->setSackNow(sendCommand->getSackNow());
 
     // ------ PR-SCTP & Drop messages to free buffer space ----------------
@@ -165,7 +165,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
     switch (sendCommand->getPrMethod()) {
         case PR_TTL:
             if (sendCommand->getPrValue() > 0) {
-                datMsg->setExpiryTime(simulation.getSimTime() + sendCommand->getPrValue());
+                datMsg->setExpiryTime(simTime() + sendCommand->getPrValue());
             }
             break;
 

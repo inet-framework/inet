@@ -67,7 +67,7 @@ void PacketDump::sctpDump(const char *label, sctp::SCTPMessage *sctpmsg,
 
     // seq and time (not part of the tcpdump format)
     char buf[30];
-    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf;
 
 #ifndef WITH_SCTP
@@ -359,7 +359,7 @@ void PacketDump::dump(const char *label, const char *msg)
     // seq and time (not part of the tcpdump format)
     char buf[30];
 
-    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf << msg << endl;
 }
 
@@ -432,7 +432,7 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPPacket *udppkt,
     std::ostream& out = *outp;
 
     char buf[30];
-    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf;
 
 #ifndef WITH_UDP
@@ -476,7 +476,7 @@ void PacketDump::dumpARP(bool l2r, const char *label, ARPPacket *dgram, const ch
 #ifdef WITH_IPv4
     std::ostream& out = *outp;
     char buf[30];
-    sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
+    sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf << " src: " << dgram->getSrcIPAddress() << ", " << dgram->getSrcMACAddress()
         << "; dest: " << dgram->getDestIPAddress() << ", " << dgram->getDestMACAddress() << endl;
 #endif // ifdef WITH_IPv4

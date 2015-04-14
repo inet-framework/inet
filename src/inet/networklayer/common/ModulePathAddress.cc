@@ -81,7 +81,7 @@ std::string ModulePathAddress::str() const
         return s.str();
     }
     else /* if (id > 0) */ {
-        cModule *module = simulation.getModule(id);
+        cModule *module = getSimulation()->getModule(id);
         if (module) {
             std::string fullPath = module->getFullPath();
             return strchr(fullPath.c_str(), '.') + 1;

@@ -158,7 +158,7 @@ void IPv4RoutingTable::handleMessage(cMessage *msg)
 
 void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (simulation.getContextType() == CTX_INITIALIZE)
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();

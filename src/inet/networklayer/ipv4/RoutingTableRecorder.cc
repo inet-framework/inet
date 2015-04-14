@@ -83,7 +83,7 @@ void RoutingTableRecorder::hookListeners()
     systemModule->subscribe(NF_ROUTE_CHANGED, listener);
 
     // hook on eventlog manager
-    cEnvir *envir = simulation.getEnvir();
+    cEnvir *envir = getSimulation()->getEnvir();
     cIndexedEventlogManager *eventlogManager = dynamic_cast<cIndexedEventlogManager *>(envir->getEventlogManager());
     if (eventlogManager)
         eventlogManager->addEventlogListener(this);
@@ -105,8 +105,8 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *source, simsign
 
 void RoutingTableRecorder::recordSnapshot()
 {
-    for (int id = 0; id < simulation.getLastComponentId(); id++) {
-        cModule *module = simulation.getModule(id);
+    for (int id = 0; id < getSimulation()->getLastComponentId(); id++) {
+        cModule *module = getSimulation()->getModule(id);
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(module);
         if (ift) {
             cModule *host = getContainingNode(module);
@@ -114,8 +114,8 @@ void RoutingTableRecorder::recordSnapshot()
                 recordInterface(host, ift->getInterface(i), -1);
         }
     }
-    for (int id = 0; id < simulation.getLastComponentId(); id++) {
-        cModule *module = simulation.getModule(id);
+    for (int id = 0; id < getSimulation()->getLastComponentId(); id++) {
+        cModule *module = getSimulation()->getModule(id);
         IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
         if (rt) {
             cModule *host = getContainingNode(module);
@@ -139,7 +139,7 @@ void RoutingTableRecorder::recordSnapshot()
 
 void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *interface, simsignal_t signalID)
 {
-    cEnvir *envir = simulation.getEnvir();
+    cEnvir *envir = getSimulation()->getEnvir();
     // moduleId, ifname, address
     std::stringstream content;
     content << host->getId() << " " << interface->getName() << " ";
@@ -166,7 +166,7 @@ void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *
 
 void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int signalID)
 {
-    cEnvir *envir = simulation.getEnvir();
+    cEnvir *envir = getSimulation()->getEnvir();
     // moduleId, dest, dest netmask, nexthop
     std::stringstream content;
     content << host->getId() << " " << route->getDestinationAsGeneric().str() << " " << route->getPrefixLength() << " " << route->getNextHopAsGeneric().str();
@@ -253,7 +253,7 @@ void RoutingTableRecorder::ensureRoutingLogFileOpen()
         // hack to ensure that results/ folder is created
         getSimulation()->getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
 
-        std::string fname = ev.getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
+        std::string fname = getEnvir()->getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
         routingLogFile = fopen(fname.c_str(), "w");
         if (!routingLogFile)
             throw cRuntimeError("Cannot open file %s", fname.c_str());
@@ -295,7 +295,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
     ensureRoutingLogFileOpen();
     fprintf(routingLogFile, "%s  %" LL "d  %s  %d  %s %s\n",
             tag,
-            simulation.getEventNumber(),
+            getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
             host->getId(),
             ie->getName(),
@@ -322,7 +322,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
     ensureRoutingLogFileOpen();
     fprintf(routingLogFile, "%s %" LL "d  %s  %d  %s  %s  %d  %s\n",
             tag,
-            simulation.getEventNumber(),
+            getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
             host->getId(),
             (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),

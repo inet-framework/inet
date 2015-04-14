@@ -168,8 +168,8 @@ void SCTPClient::connect()
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
-        EV_INFO << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime() + par("streamRequestTime"), cmsg);
+        EV_INFO << "StreamReset Timer scheduled at " << simTime() << "\n";
+        scheduleAt(simTime() + par("streamRequestTime"), cmsg);
     }
 
     for (unsigned int i = 0; i < outStreams; i++) {
@@ -229,7 +229,7 @@ void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simulation.getSimTime() + par("thinkTime"), timeMsg);
+            scheduleAt(simTime() + par("thinkTime"), timeMsg);
         }
         else {
             if (queueSize > 0) {
@@ -265,7 +265,7 @@ void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
 
         if ((!timer && numPacketsToReceive == 0) && par("waitToClose").doubleValue() > 0) {
             timeMsg->setKind(MSGKIND_ABORT);
-            scheduleAt(simulation.getSimTime() + par("waitToClose"), timeMsg);
+            scheduleAt(simTime() + par("waitToClose"), timeMsg);
         }
 
         if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
@@ -389,7 +389,7 @@ void SCTPClient::sendRequest(bool last)
     msg->setDataLen(sendBytes);
     msg->setEncaps(false);
     msg->setByteLength(sendBytes);
-    msg->setCreationTime(simulation.getSimTime());
+    msg->setCreationTime(simTime());
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
@@ -421,7 +421,7 @@ void SCTPClient::handleTimer(cMessage *msg)
                         numRequestsToSend--;
                 }
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simulation.getSimTime() + par("thinkTime"), timeMsg);
+                    scheduleAt(simTime() + par("thinkTime"), timeMsg);
 
                 if ((!timer && numRequestsToSend == 0) && par("waitToClose").doubleValue() == 0) {
                     socket.shutdown();
@@ -453,7 +453,7 @@ void SCTPClient::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_RESET:
-            EV_INFO << "StreamReset Timer expired at Client at " << simulation.getSimTime() << "...send notification\n";
+            EV_INFO << "StreamReset Timer expired at Client at " << simTime() << "...send notification\n";
             sendStreamResetNotification();
             delete msg;
             break;
@@ -536,7 +536,7 @@ void SCTPClient::socketFailure(int, void *, int code)
     numBroken++;
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simulation.getSimTime() + par("reconnectInterval"), timeMsg);
+    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)

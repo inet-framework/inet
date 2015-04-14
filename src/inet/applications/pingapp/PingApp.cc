@@ -137,7 +137,7 @@ bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 void PingApp::startSendingPingRequests()
 {
     ASSERT(!timer->isScheduled());
-    pid = simulation.getUniqueNumber();
+    pid = getSimulation()->getUniqueNumber();
     lastStart = simTime();
     scheduleNextPingRequest(-1);
 }

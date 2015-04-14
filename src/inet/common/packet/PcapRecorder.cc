@@ -123,7 +123,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
-    if (!ev.isDisabled()) {
+    if (!getEnvir()->isDisabled()) {
         EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
         packetDumper.dumpPacket(l2r, msg);
     }
@@ -159,13 +159,13 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 #endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
 #ifdef WITH_IPv4
     if (ip4Packet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simulation.getSimTime();
+        const simtime_t stime = simTime();
         pcapDumper.writeFrame(stime, ip4Packet);
     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ip6Packet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simulation.getSimTime();
+        const simtime_t stime = simTime();
         pcapDumper.writeIPv6Frame(stime, ip6Packet);
     }
 #endif // ifdef WITH_IPv6

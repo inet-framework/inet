@@ -114,7 +114,7 @@ void SCTPNatPeer::sendOrSchedule(cPacket *msg)
         send(msg, "sctpOut");
     }
     else {
-        scheduleAt(simulation.getSimTime() + delay, msg);
+        scheduleAt(simTime() + delay, msg);
     }
 }
 
@@ -170,8 +170,8 @@ void SCTPNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
-        EV << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime() + (double)par("streamRequestTime"), cmsg);
+        EV << "StreamReset Timer scheduled at " << simTime() << "\n";
+        scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
@@ -199,8 +199,8 @@ void SCTPNatPeer::connect(L3Address connectAddress, int32 connectPort)
     else if (streamReset == true) {
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
-        EV << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime() + (double)par("streamRequestTime"), cmsg);
+        EV << "StreamReset Timer scheduled at " << simTime() << "\n";
+        scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
@@ -281,7 +281,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                         if ((simtime_t)par("thinkTime") > 0) {
                             generateAndSend();
                             timeoutMsg->setKind(SCTP_C_SEND);
-                            scheduleAt(simulation.getSimTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+                            scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
                             numRequestsToSend--;
                             i->second = numRequestsToSend;
                         }
@@ -317,7 +317,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                                 sprintf(as, "%d", serverAssocId);
                                 cPacket *abortMsg = new cPacket(as);
                                 abortMsg->setKind(SCTP_I_ABORT);
-                                scheduleAt(simulation.getSimTime() + (simtime_t)par("waitToClose"), abortMsg);
+                                scheduleAt(simTime() + (simtime_t)par("waitToClose"), abortMsg);
                             }
                             else {
                                 EV << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -351,7 +351,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                 delete ind;
                 delete msg;
                 if (!cmsg->isScheduled() && schedule == false) {
-                    scheduleAt(simulation.getSimTime() + (simtime_t)par("delayFirstRead"), cmsg);
+                    scheduleAt(simTime() + (simtime_t)par("delayFirstRead"), cmsg);
                 }
                 else if (schedule == true)
                     sendOrSchedule(cmsg);
@@ -393,9 +393,9 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                                 i->second--;
                                 SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                                 auto j = endToEndDelay.find(id);
-                                j->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                                j->second->record(simTime() - smsg->getCreationTime());
                                 auto k = histEndToEndDelay.find(id);
-                                k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
+                                k->second->collect(simTime() - smsg->getCreationTime());
 
                                 if (i->second == 0) {
                                     cPacket *cmsg = new cPacket("Request");
@@ -414,9 +414,9 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
 
                             SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                             auto j = endToEndDelay.find(id);
-                            j->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                            j->second->record(simTime() - smsg->getCreationTime());
                             auto k = histEndToEndDelay.find(id);
-                            k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
+                            k->second->collect(simTime() - smsg->getCreationTime());
                             cPacket *cmsg = new cPacket("SVData");
                             bytesSent += smsg->getBitLength() / 8;
                             cmd->setSendUnordered(cmd->getSendUnordered());
@@ -507,7 +507,7 @@ void SCTPNatPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend();
                 if ((simtime_t)par("thinkTime") > 0)
-                    scheduleAt(simulation.getSimTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+                    scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -627,7 +627,7 @@ void SCTPNatPeer::socketFailure(int32, void *, int32 code)
 
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simulation.getSimTime() + (simtime_t)par("reconnectInterval"), timeMsg);
+    scheduleAt(simTime() + (simtime_t)par("reconnectInterval"), timeMsg);
 }
 
 void SCTPNatPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
@@ -672,7 +672,7 @@ void SCTPNatPeer::sendRequest(bool last)
     msg->setDataLen(numBytes);
     msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
-    msg->setCreationTime(simulation.getSimTime());
+    msg->setCreationTime(simTime());
     cmsg->encapsulate(msg);
     if (ordered)
         cmsg->setKind(SCTP_C_SEND_ORDERED);
@@ -705,7 +705,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
         smsg->setEncaps(true);
         smsg->encapsulate(msg);
-        smsg->setCreationTime(simulation.getSimTime());
+        smsg->setCreationTime(simTime());
         smsg->setByteLength(16);
         smsg->setDataLen(16);
         cmsg->encapsulate(smsg);
@@ -734,7 +734,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
                     numRequestsToSend--;
                 }
                 timeMsg->setKind(MSGKIND_SEND);
-                scheduleAt(simulation.getSimTime() + (simtime_t)par("thinkTime"), timeMsg);
+                scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeMsg);
             }
             else {
                 if (queueSize > 0) {
@@ -757,7 +757,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
 
                 if (numPacketsToReceive == 0 && (simtime_t)par("waitToClose") > 0) {
                     timeMsg->setKind(MSGKIND_ABORT);
-                    scheduleAt(simulation.getSimTime() + (simtime_t)par("waitToClose"), timeMsg);
+                    scheduleAt(simTime() + (simtime_t)par("waitToClose"), timeMsg);
                 }
                 if (numRequestsToSend == 0 && (simtime_t)par("waitToClose") == 0) {
                     EV << "socketEstablished:no more packets to send, call shutdown\n";
@@ -875,7 +875,7 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
         smsg->setEncaps(true);
         smsg->encapsulate(msg);
-        smsg->setCreationTime(simulation.getSimTime());
+        smsg->setCreationTime(simTime());
         smsg->setByteLength(16);
         smsg->setDataLen(16);
         cmsg->encapsulate(smsg);

@@ -115,7 +115,7 @@ class AccessModuleWrap
     {
         if (!pModule) {
             pModule = FindModule<T *>::findSubModule(
-                        FindModule<>::findHost(from != nullptr ? from : simulation.getContextModule()));
+                        FindModule<>::findHost(from != nullptr ? from : getSimulation()->getContextModule()));
         }
         return pModule;
     }

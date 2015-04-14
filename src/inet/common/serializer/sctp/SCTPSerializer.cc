@@ -98,7 +98,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
         unsigned char chunkType = chunk->getChunkType();
         switch (chunkType) {
             case DATA: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: Data sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: Data sent \n";
                 SCTPDataChunk *dataChunk = check_and_cast<SCTPDataChunk *>(chunk);
                 struct data_chunk *dc = (struct data_chunk *)(buf + writtenbytes);    // append data to buffer
                 unsigned char flags = 0;
@@ -511,7 +511,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 
             case HEARTBEAT :
                 {
-                    EV_INFO << simulation.getSimTime() << "  SCTPAssociation:: Heartbeat sent \n";
+                    EV_INFO << simTime() << "  SCTPAssociation:: Heartbeat sent \n";
                     SCTPHeartbeatChunk *heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(chunk);
 
                     // destination is send buffer:
@@ -560,7 +560,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 
             case HEARTBEAT_ACK :
                 {
-                    EV_INFO << simulation.getSimTime() << " SCTPAssociation:: HeartbeatAck sent \n";
+                    EV_INFO << simTime() << " SCTPAssociation:: HeartbeatAck sent \n";
                     SCTPHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SCTPHeartbeatAckChunk *>(chunk);
 
                     // destination is send buffer:
@@ -618,7 +618,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 }
 
             case ABORT: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: Abort sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: Abort sent \n";
                 SCTPAbortChunk *abortChunk = check_and_cast<SCTPAbortChunk *>(chunk);
 
                 // destination is send buffer:
@@ -636,7 +636,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             }
 
             case COOKIE_ECHO: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: CookieEcho sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: CookieEcho sent \n";
                 SCTPCookieEchoChunk *cookieChunk = check_and_cast<SCTPCookieEchoChunk *>(chunk);
 
                 struct cookie_echo_chunk *cec = (struct cookie_echo_chunk *)(buf + writtenbytes);
@@ -692,7 +692,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             }
 
             case COOKIE_ACK: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: CookieAck sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: CookieAck sent \n";
                 SCTPCookieAckChunk *cookieAckChunk = check_and_cast<SCTPCookieAckChunk *>(chunk);
 
                 struct cookie_ack_chunk *cac = (struct cookie_ack_chunk *)(buf + writtenbytes);
@@ -705,7 +705,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             }
 
             case SHUTDOWN: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: Shutdown sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: Shutdown sent \n";
                 SCTPShutdownChunk *shutdownChunk = check_and_cast<SCTPShutdownChunk *>(chunk);
 
                 struct shutdown_chunk *sac = (struct shutdown_chunk *)(buf + writtenbytes);
@@ -719,7 +719,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             }
 
             case SHUTDOWN_ACK: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: ShutdownAck sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: ShutdownAck sent \n";
                 SCTPShutdownAckChunk *shutdownAckChunk = check_and_cast<SCTPShutdownAckChunk *>(chunk);
 
                 struct shutdown_ack_chunk *sac = (struct shutdown_ack_chunk *)(buf + writtenbytes);
@@ -732,7 +732,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             }
 
             case SHUTDOWN_COMPLETE: {
-                EV_INFO << simulation.getSimTime() << " SCTPAssociation:: ShutdownComplete sent \n";
+                EV_INFO << simTime() << " SCTPAssociation:: ShutdownComplete sent \n";
                 SCTPShutdownCompleteChunk *shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk *>(chunk);
 
                 struct shutdown_complete_chunk *sac = (struct shutdown_complete_chunk *)(buf + writtenbytes);

@@ -63,7 +63,7 @@ InterfaceEntry *Loopback::createInterfaceEntry()
     InterfaceEntry *ie = new InterfaceEntry(this);
 
 //    // generate a link-layer address to be used as interface token for IPv6
-//    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+//    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
@@ -111,7 +111,7 @@ bool Loopback::isUpperMsg(cMessage *msg)
 
 void Loopback::updateDisplayString()
 {
-    if (ev.isDisabled()) {
+    if (getEnvir()->isDisabled()) {
         // speed up things
         getDisplayString().setTagArg("t", 0, "");
     }

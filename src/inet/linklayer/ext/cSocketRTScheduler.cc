@@ -257,7 +257,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
 int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 {
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
-    // in order to keep UI responsiveness by invoking ev.idle()
+    // in order to keep UI responsiveness by invoking getEnvir()->idle()
     timeval curTime;
     gettimeofday(&curTime, nullptr);
     while (targetTime.tv_sec-curTime.tv_sec >=2 ||
@@ -265,7 +265,7 @@ int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
     {
         if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
-        if (ev.idle())
+        if (getEnvir()->idle())
             return -1;
         gettimeofday(&curTime, nullptr);
     }

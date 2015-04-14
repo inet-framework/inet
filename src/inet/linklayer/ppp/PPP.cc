@@ -128,7 +128,7 @@ InterfaceEntry *PPP::createInterfaceEntry()
     e->setCarrier(connected);
 
     // generate a link-layer address to be used as interface token for IPv6
-    InterfaceToken token(0, simulation.getUniqueNumber(), 64);
+    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
     e->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
@@ -373,7 +373,7 @@ void PPP::displayIdle()
 
 void PPP::updateDisplayString()
 {
-    if (ev.isDisabled()) {
+    if (getEnvir()->isDisabled()) {
         // speed up things
         getDisplayString().setTagArg("t", 0, "");
     }

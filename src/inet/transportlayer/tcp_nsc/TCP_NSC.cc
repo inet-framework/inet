@@ -424,7 +424,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 ++changes;
 
                 TCP_NSC_Connection *conn;
-                int newConnId = ev.getUniqueNumber();
+                int newConnId = getEnvir()->getUniqueNumber();
                 // add into appConnMap
                 conn = &tcpAppConnMapM[newConnId];
                 conn->tcpNscM = this;

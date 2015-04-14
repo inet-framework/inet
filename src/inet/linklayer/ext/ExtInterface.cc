@@ -46,11 +46,11 @@ void ExtInterface::initialize(int stage)
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
-        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != nullptr) {
-            rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
-            //device = ev.config()->getAsString("Capture", "device", "lo0");
+        if (dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler()) != nullptr) {
+            rtScheduler = check_and_cast<cSocketRTScheduler *>(getSimulation()->getScheduler());
+            //device = getEnvir()->config()->getAsString("Capture", "device", "lo0");
             device = par("device");
-            //const char *filter = ev.config()->getAsString("Capture", "filter-string", "ip");
+            //const char *filter = getEnvir()->config()->getAsString("Capture", "filter-string", "ip");
             const char *filter = par("filterString");
             rtScheduler->setInterfaceModule(this, device, filter);
             connected = true;

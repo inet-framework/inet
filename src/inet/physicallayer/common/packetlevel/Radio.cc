@@ -56,7 +56,7 @@ Radio::Radio() :
 Radio::~Radio()
 {
     // NOTE: can't use the medium module here, because it may have been already deleted
-    cModule *medium = simulation.getModule(mediumModuleId);
+    cModule *medium = getSimulation()->getModule(mediumModuleId);
     if (medium != nullptr)
         check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
     cancelAndDelete(endTransmissionTimer);

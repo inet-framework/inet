@@ -135,7 +135,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
-    EV << "Sent from " << simulation.getModule(msg->getSenderModuleId())->getFullPath() << " at " << msg->getSendingTime() << " and was created " << msg->getCreationTime() << "\n";
+    EV << "Sent from " << getSimulation()->getModule(msg->getSenderModuleId())->getFullPath() << " at " << msg->getSendingTime() << " and was created " << msg->getCreationTime() << "\n";
 
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
