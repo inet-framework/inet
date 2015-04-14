@@ -35,41 +35,37 @@ namespace inet {
     typedef uint8_t  uint8;
 #endif  // OMNETPP_VERSION >= 0x500
 
+#if OMNETPP_VERSION < 0x500
+#  define EV_FATAL                 EV << "FATAL: "
+#  define EV_ERROR                 EV << "ERROR: "
+#  define EV_WARN                  EV << "WARN: "
+#  define EV_INFO                  EV
+#  define EV_DETAIL                EV << "DETAIL: "
+#  define EV_DEBUG                 EV << "DEBUG: "
+#  define EV_TRACE                 EV << "TRACE: "
+#  define EV_FATAL_C(category)     EV << "[" << category << "] FATAL: "
+#  define EV_ERROR_C(category)     EV << "[" << category << "] ERROR: "
+#  define EV_WARN_C(category)      EV << "[" << category << "] WARN: "
+#  define EV_INFO_C(category)      EV << "[" << category << "] "
+#  define EV_DETAIL_C(category)    EV << "[" << category << "] DETAIL: "
+#  define EV_DEBUG_C(category)     EV << "[" << category << "] DEBUG: "
+#  define EV_TRACE_C(category)     EV << "[" << category << "] TRACE: "
+#  define EV_STATICCONTEXT         /* Empty */
+#endif    // OMNETPP_VERSION < 0x500
+
+#if OMNETPP_VERSION < 0x404
+#  define Register_Abstract_Class(x)    /* nothing */
+#endif // if OMNETPP_VERSION < 0x404
 
 #if OMNETPP_VERSION < 0x500
-#  define EV_FATAL                         EV << "FATAL: "
-        #  define EV_ERROR                 EV << "ERROR: "
-        #  define EV_WARN                  EV << "WARN: "
-        #  define EV_INFO                  EV
-        #  define EV_DETAIL                EV << "DETAIL: "
-        #  define EV_DEBUG                 EV << "DEBUG: "
-        #  define EV_TRACE                 EV << "TRACE: "
+#  define EVSTREAM                      ev.getOStream()
+#else // if OMNETPP_VERSION < 0x500
+#  define EVSTREAM                      EV
+#endif    // OMNETPP_VERSION < 0x500
 
-        #  define EV_FATAL_C(category)     EV << "[" << category << "] FATAL: "
-        #  define EV_ERROR_C(category)     EV << "[" << category << "] ERROR: "
-        #  define EV_WARN_C(category)      EV << "[" << category << "] WARN: "
-        #  define EV_INFO_C(category)      EV << "[" << category << "] "
-        #  define EV_DETAIL_C(category)    EV << "[" << category << "] DETAIL: "
-        #  define EV_DEBUG_C(category)     EV << "[" << category << "] DEBUG: "
-        #  define EV_TRACE_C(category)     EV << "[" << category << "] TRACE: "
-
-        #  define EV_STATICCONTEXT         /* Empty */
-
-    #endif    // OMNETPP_VERSION < 0x500
-
-    #if OMNETPP_VERSION < 0x404
-        #  define Register_Abstract_Class(x)    /* nothing */
-    #endif // if OMNETPP_VERSION < 0x404
-
-    #if OMNETPP_VERSION < 0x500
-        #  define EVSTREAM                      ev.getOStream()
-    #else // if OMNETPP_VERSION < 0x500
-        #  define EVSTREAM                      EV
-    #endif    // OMNETPP_VERSION < 0x500
-
-    #ifdef _MSC_VER
+#ifdef _MSC_VER
 // complementary error function, not in MSVC
-    double INET_API erfc(double x);
+double INET_API erfc(double x);
 
 // ISO C99 function, not in MSVC
 inline long lrint(double x)
