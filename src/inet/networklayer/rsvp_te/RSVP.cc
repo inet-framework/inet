@@ -250,7 +250,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
         const char *str = getParameterStrValue(path, "owner", "");
         if (strlen(str)) {
-            cModule *mod = simulation.getModuleByPath(str);
+            cModule *mod = getModuleByPath(str);
             newPath.owner = mod->getId();
         }
         else {

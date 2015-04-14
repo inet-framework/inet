@@ -41,7 +41,7 @@ void TracingObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
-        environment = check_and_cast<IPhysicalEnvironment *>(simulation.getModuleByPath(par("environmentModule")));
+        environment = check_and_cast<IPhysicalEnvironment *>(getModuleByPath(par("environmentModule")));
         leaveIntersectionTrail = par("leaveIntersectionTrail");
         leaveFaceNormalVectorTrail = par("leaveFaceNormalVectorTrail");
         if (leaveIntersectionTrail || leaveFaceNormalVectorTrail) {

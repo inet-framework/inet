@@ -110,7 +110,7 @@ const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char 
 cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
 {
     const char *moduleAttr = getRequiredAttribute(node, attr);
-    cModule *mod = simulation.getModuleByPath(moduleAttr);
+    cModule *mod = getModuleByPath(moduleAttr);
     if (!mod)
         throw cRuntimeError("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
     return mod;

@@ -71,7 +71,7 @@ void Radio::initialize(int stage)
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
-        medium = check_and_cast<IRadioMedium *>(simulation.getModuleByPath("radioMedium"));
+        medium = check_and_cast<IRadioMedium *>(getModuleByPath("radioMedium"));
         mediumModuleId = check_and_cast<cModule *>(medium)->getId();
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");

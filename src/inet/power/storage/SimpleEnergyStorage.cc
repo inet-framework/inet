@@ -60,7 +60,7 @@ void SimpleEnergyStorage::initialize(int stage)
             nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
             if (!nodeStatus)
                 throw cRuntimeError("Cannot find node status");
-            lifecycleController = dynamic_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
+            lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
             if (!lifecycleController)
                 throw cRuntimeError("Cannot find lifecycle controller");
         }
