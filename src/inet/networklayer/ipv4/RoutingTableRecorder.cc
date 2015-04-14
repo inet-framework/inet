@@ -70,7 +70,7 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 
 void RoutingTableRecorder::hookListeners()
 {
-    cModule *systemModule = simulation.getSystemModule();
+    cModule *systemModule = getSimulation()->getSystemModule();
     cListener *listener = new RoutingTableNotificationBoardListener(this);
     systemModule->subscribe(NF_INTERFACE_CREATED, listener);
     systemModule->subscribe(NF_INTERFACE_DELETED, listener);
@@ -234,7 +234,7 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 
 void RoutingTableRecorder::hookListeners()
 {
-    cModule *systemModule = simulation.getSystemModule();
+    cModule *systemModule = getSimulation()->getSystemModule();
     systemModule->subscribe(NF_INTERFACE_CREATED, this);
     systemModule->subscribe(NF_INTERFACE_DELETED, this);
     systemModule->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
@@ -251,7 +251,7 @@ void RoutingTableRecorder::ensureRoutingLogFileOpen()
 {
     if (routingLogFile == nullptr) {
         // hack to ensure that results/ folder is created
-        simulation.getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
+        getSimulation()->getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
 
         std::string fname = ev.getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
         routingLogFile = fopen(fname.c_str(), "w");

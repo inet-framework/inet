@@ -99,7 +99,7 @@ void SCTP::initialize(int stage)
         sizeAssocMap = 0;
         nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
-        cModule *netw = simulation.getSystemModule();
+        cModule *netw = getSimulation()->getSystemModule();
         if (netw->hasPar("testTimeout")) {
             testTimeout = (simtime_t)netw->par("testTimeout");
         }

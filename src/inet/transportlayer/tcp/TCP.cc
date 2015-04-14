@@ -95,7 +95,7 @@ void TCP::initialize(int stage)
         recordStatistics = par("recordStats");
         useDataNotification = par("useDataNotification");
 
-        cModule *netw = simulation.getSystemModule();
+        cModule *netw = getSimulation()->getSystemModule();
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

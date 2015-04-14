@@ -51,7 +51,7 @@ cModule *getModuleByRelativePath(cModule *modp, const char *path)
 
 bool ModulePathAddress::tryParse(const char *addr)
 {
-    cModule *module = getModuleByRelativePath(simulation.getSystemModule(), addr);
+    cModule *module = getModuleByRelativePath(getSimulation()->getSystemModule(), addr);
     if (module) {
         // accepts network interface modules only:
         if (isNetworkNode(module))

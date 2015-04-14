@@ -46,7 +46,7 @@ void TracingObstacleLoss::initialize(int stage)
         leaveFaceNormalVectorTrail = par("leaveFaceNormalVectorTrail");
         if (leaveIntersectionTrail || leaveFaceNormalVectorTrail) {
             intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
-            cCanvas *canvas = simulation.getSystemModule()->getCanvas();
+            cCanvas *canvas = getSimulation()->getSystemModule()->getCanvas();
             canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
         }
     }

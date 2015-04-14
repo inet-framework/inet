@@ -45,7 +45,7 @@ class FindModule
      */
     static T findGlobalModule()
     {
-        return findSubModule(simulation.getSystemModule());
+        return findSubModule(getSimulation()->getSystemModule());
     }
 
     /**

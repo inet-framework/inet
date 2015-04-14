@@ -279,10 +279,10 @@ cModule *HttpController::getTcpApp(std::string node)
         std::string id = node.substr(pos + 1, pos - rpos - 1);
         std::string name = node.substr(0, pos);
         int numid = atoi(id.c_str());
-        receiverModule = simulation.getSystemModule()->getSubmodule(name.c_str(), numid);
+        receiverModule = getSimulation()->getSystemModule()->getSubmodule(name.c_str(), numid);
     }
     else {
-        receiverModule = simulation.getSystemModule()->getSubmodule(node.c_str());
+        receiverModule = getSimulation()->getSystemModule()->getSubmodule(node.c_str());
     }
 
     return receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
