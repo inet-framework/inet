@@ -66,7 +66,7 @@ void PIMHello::copy(const PIMHello& other)
         this->options_var[i] = other.options_var[i]->dup();
 }
 
-void PIMHello::parsimPack(cCommBuffer *b)
+void PIMHello::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
 {
     PIMHello_Base::parsimPack(b);
     b->pack(options_arraysize);

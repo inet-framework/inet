@@ -81,6 +81,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     bool forwarding = false;
     bool multicastForward = false;
     bool isNodeUp = false;
+    bool useAdminDist = false;     // Use Cisco like administrative distances
 
     // for convenience
     typedef IPv4MulticastRoute::OutInterface OutInterface;
@@ -130,7 +131,14 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     virtual void invalidateCache();
 
     // helper for sorting routing table, used by addRoute()
-    static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
+    class RouteLessThan
+    {
+        const IPv4RoutingTable &c;
+      public:
+        RouteLessThan(const IPv4RoutingTable& c) : c(c) {}
+        bool operator () (const IPv4Route *a, const IPv4Route *b) { return c.routeLessThan(a, b); }
+    };
+    bool routeLessThan(const IPv4Route *a, const IPv4Route *b) const;
 
     // helper for sorting multicast routing table, used by addMulticastRoute()
     static bool multicastRouteLessThan(const IPv4MulticastRoute *a, const IPv4MulticastRoute *b);

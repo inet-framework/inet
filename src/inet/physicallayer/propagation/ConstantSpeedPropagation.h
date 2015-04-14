@@ -27,6 +27,7 @@ namespace physicallayer {
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
   protected:
+    bool ignoreMovementDuringTransmission;
     bool ignoreMovementDuringPropagation;
     bool ignoreMovementDuringReception;
 

@@ -37,25 +37,28 @@ bool SummaryLSA::update(const OSPFSummaryLSA *lsa)
 
 bool SummaryLSA::differsFrom(const OSPFSummaryLSA *summaryLSA) const
 {
+    const OSPFLSAHeader& thisHeader = getHeader();
     const OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
-    bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
-                            ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
-                            ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
-                            (header_var.getLsaLength() != lsaHeader.getLsaLength()));
+    bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
+                            ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
+                            ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
+                            (thisHeader.getLsaLength() != lsaHeader.getLsaLength()));
     bool differentBody = false;
 
     if (!differentHeader) {
-        differentBody = ((networkMask_var != summaryLSA->getNetworkMask()) ||
-                         (routeCost_var != summaryLSA->getRouteCost()) ||
-                         (tosData_arraysize != summaryLSA->getTosDataArraySize()));
+        differentBody = ((getNetworkMask() != summaryLSA->getNetworkMask()) ||
+                         (getRouteCost() != summaryLSA->getRouteCost()) ||
+                         (getTosDataArraySize() != summaryLSA->getTosDataArraySize()));
 
         if (!differentBody) {
             unsigned int tosCount = tosData_arraysize;
             for (unsigned int i = 0; i < tosCount; i++) {
-                if ((tosData_var[i].tos != summaryLSA->getTosData(i).tos) ||
-                    (tosData_var[i].tosMetric[0] != summaryLSA->getTosData(i).tosMetric[0]) ||
-                    (tosData_var[i].tosMetric[1] != summaryLSA->getTosData(i).tosMetric[1]) ||
-                    (tosData_var[i].tosMetric[2] != summaryLSA->getTosData(i).tosMetric[2]))
+                auto thisTosData = getTosData(i);
+                auto lsaTosData = summaryLSA->getTosData(i);
+                if ((thisTosData.tos != summaryLSA->getTosData(i).tos) ||
+                    (thisTosData.tosMetric[0] != lsaTosData.tosMetric[0]) ||
+                    (thisTosData.tosMetric[1] != lsaTosData.tosMetric[1]) ||
+                    (thisTosData.tosMetric[2] != lsaTosData.tosMetric[2]))
                 {
                     differentBody = true;
                     break;

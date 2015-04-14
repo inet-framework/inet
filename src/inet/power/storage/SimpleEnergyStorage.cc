@@ -65,6 +65,7 @@ void SimpleEnergyStorage::initialize(int stage)
                 throw cRuntimeError("Cannot find lifecycle controller");
         }
         scheduleTimer();
+        WATCH(residualCapacity);
     }
 }
 

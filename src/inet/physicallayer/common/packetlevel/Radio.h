@@ -170,10 +170,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
-    virtual m computeMaxCommunicationRange() const;
-    virtual m computeMaxInterferenceRange() const;
-
     virtual void handleMessageWhenDown(cMessage *message) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);

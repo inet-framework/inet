@@ -104,25 +104,6 @@ std::ostream& Radio::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
-m Radio::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
-{
-    // TODO: retrieve carrier frequency from the transmitter?
-    Hz carrierFrequency = Hz(check_and_cast<const cModule *>(check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache())->par("carrierFrequency"));
-    double maxAntennaGain = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxAntennaGain();
-    double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
-    return medium->getPathLoss()->computeRange(medium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
-}
-
-m Radio::computeMaxCommunicationRange() const
-{
-    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinReceptionPower());
-}
-
-m Radio::computeMaxInterferenceRange() const
-{
-    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinInterferencePower());
-}
-
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
     Enter_Method_Silent();
@@ -420,19 +401,21 @@ void Radio::updateDisplayString()
         cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {
+            m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);
             char tag[32];
             sprintf(tag, "r%i1", getId());
             displayString.removeTag(tag);
             displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, computeMaxInterferenceRange().get());
+            displayString.setTagArg(tag, 0, maxInterferenceRage.get());
             displayString.setTagArg(tag, 2, "gray");
         }
         if (displayCommunicationRange) {
+            m maxCommunicationRange = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxCommunicationRange(this);
             char tag[32];
             sprintf(tag, "r%i2", getId());
             displayString.removeTag(tag);
             displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, computeMaxCommunicationRange().get());
+            displayString.setTagArg(tag, 0, maxCommunicationRange.get());
             displayString.setTagArg(tag, 2, "blue");
         }
     }

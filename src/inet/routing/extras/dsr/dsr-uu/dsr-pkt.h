@@ -18,7 +18,7 @@
 #endif
 #else
 
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 #include "inet/routing/extras/base/compatibility_dsr.h"
 
 namespace inet {

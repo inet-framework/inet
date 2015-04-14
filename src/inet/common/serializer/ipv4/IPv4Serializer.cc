@@ -20,7 +20,7 @@
 #include <algorithm>    // std::min
 #include <typeinfo>
 
-#include "platdep/sockets.h" // htonl, ntohl, etc. on Windows
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/serializer/headers/bsdint.h"

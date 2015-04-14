@@ -149,16 +149,23 @@ void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
     }
 }
 
-void TCPSegment::parsimPack(cCommBuffer *b)
+void TCPSegment::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
 {
     TCPSegment_Base::parsimPack(b);
-    doPacking(b, payloadList);
+    b->pack((int)payloadList.size());
+    for (PayloadList::const_iterator it = payloadList.begin(); it != payloadList.end(); it++)
+        doPacking(b, *it);
 }
 
 void TCPSegment::parsimUnpack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimUnpack(b);
-    doUnpacking(b, payloadList);
+    int n;
+    b->unpack(n);
+    for (int i = 0; i < n; i++) {
+        payloadList.push_back(TCPPayloadMessage());
+        doUnpacking(b, payloadList.back());
+    }
 }
 
 void TCPSegment::setPayloadArraySize(unsigned int size)

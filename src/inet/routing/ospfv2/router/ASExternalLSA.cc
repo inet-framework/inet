@@ -37,36 +37,39 @@ bool ASExternalLSA::update(const OSPFASExternalLSA *lsa)
 
 bool ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) const
 {
+    const OSPFLSAHeader& thisHeader = getHeader();
     const OSPFLSAHeader& lsaHeader = asExternalLSA->getHeader();
-    bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
-                            ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
-                            ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
-                            (header_var.getLsaLength() != lsaHeader.getLsaLength()));
+    bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
+                            ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
+                            ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
+                            (thisHeader.getLsaLength() != lsaHeader.getLsaLength()));
     bool differentBody = false;
 
     if (!differentHeader) {
+        const OSPFASExternalLSAContents& thisContents = getContents();
         const OSPFASExternalLSAContents& lsaContents = asExternalLSA->getContents();
-        unsigned int tosInfoCount = contents_var.getExternalTOSInfoArraySize();
 
-        differentBody = ((contents_var.getNetworkMask() != lsaContents.getNetworkMask()) ||
-                         (contents_var.getE_ExternalMetricType() != lsaContents.getE_ExternalMetricType()) ||
-                         (contents_var.getRouteCost() != lsaContents.getRouteCost()) ||
-                         (contents_var.getForwardingAddress() != lsaContents.getForwardingAddress()) ||
-                         (contents_var.getExternalRouteTag() != lsaContents.getExternalRouteTag()) ||
-                         (tosInfoCount != lsaContents.getExternalTOSInfoArraySize()));
+        unsigned int thisTosInfoCount = thisContents.getExternalTOSInfoArraySize();
+
+        differentBody = ((thisContents.getNetworkMask() != lsaContents.getNetworkMask()) ||
+                         (thisContents.getE_ExternalMetricType() != lsaContents.getE_ExternalMetricType()) ||
+                         (thisContents.getRouteCost() != lsaContents.getRouteCost()) ||
+                         (thisContents.getForwardingAddress() != lsaContents.getForwardingAddress()) ||
+                         (thisContents.getExternalRouteTag() != lsaContents.getExternalRouteTag()) ||
+                         (thisTosInfoCount != lsaContents.getExternalTOSInfoArraySize()));
 
         if (!differentBody) {
-            for (unsigned int i = 0; i < tosInfoCount; i++) {
-                const ExternalTOSInfo& currentTOSInfo = contents_var.getExternalTOSInfo(i);
+            for (unsigned int i = 0; i < thisTosInfoCount; i++) {
+                const ExternalTOSInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
                 const ExternalTOSInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
-                if ((currentTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
-                    (currentTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||
-                    (currentTOSInfo.tosData.tosMetric[1] != lsaTOSInfo.tosData.tosMetric[1]) ||
-                    (currentTOSInfo.tosData.tosMetric[2] != lsaTOSInfo.tosData.tosMetric[2]) ||
-                    (currentTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
-                    (currentTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
-                    (currentTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag))
+                if ((thisTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
+                    (thisTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||
+                    (thisTOSInfo.tosData.tosMetric[1] != lsaTOSInfo.tosData.tosMetric[1]) ||
+                    (thisTOSInfo.tosData.tosMetric[2] != lsaTOSInfo.tosData.tosMetric[2]) ||
+                    (thisTOSInfo.E_ExternalMetricType != lsaTOSInfo.E_ExternalMetricType) ||
+                    (thisTOSInfo.forwardingAddress != lsaTOSInfo.forwardingAddress) ||
+                    (thisTOSInfo.externalRouteTag != lsaTOSInfo.externalRouteTag))
                 {
                     differentBody = true;
                     break;

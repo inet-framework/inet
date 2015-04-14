@@ -1124,7 +1124,6 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                 state->rcv_wnd_scale++;
             }
-
             option.setValues(0, state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;

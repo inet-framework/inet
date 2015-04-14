@@ -30,17 +30,17 @@ Register_Class(SenderReport);
 std::string SenderReport::info() const
 {
     std::stringstream out;
-    out << "SenderReport.timeStamp=" << RTPTimeStamp_var;
+    out << "SenderReport.timeStamp=" << getRTPTimeStamp();
     return out.str();
 }
 
 void SenderReport::dump(std::ostream& os) const
 {
     os << "SenderReport:" << endl;
-    os << "  ntpTimeStamp = " << NTPTimeStamp_var << endl;
-    os << "  rtpTimeStamp = " << RTPTimeStamp_var << endl;
-    os << "  packetCount = " << packetCount_var << endl;
-    os << "  byteCount = " << byteCount_var << endl;
+    os << "  ntpTimeStamp = " << getNTPTimeStamp() << endl;
+    os << "  rtpTimeStamp = " << getRTPTimeStamp() << endl;
+    os << "  packetCount = " << getPacketCount() << endl;
+    os << "  byteCount = " << getByteCount() << endl;
 }
 
 //
@@ -52,20 +52,20 @@ Register_Class(ReceptionReport);
 std::string ReceptionReport::info() const
 {
     std::stringstream out;
-    out << "ReceptionReport.ssrc=" << ssrc_var;
+    out << "ReceptionReport.ssrc=" << getSsrc();
     return out.str();
 }
 
 void ReceptionReport::dump(std::ostream& os) const
 {
     os << "ReceptionReport:" << endl;
-    os << "  ssrc = " << ssrc_var << endl;
-    os << "  fractionLost = " << (int)fractionLost_var << endl;
-    os << "  packetsLostCumulative = " << packetsLostCumulative_var << endl;
-    os << "  extendedHighestSequenceNumber = " << sequenceNumber_var << endl;
-    os << "  jitter = " << jitter_var << endl;
-    os << "  lastSR = " << lastSR_var << endl;
-    os << "  delaySinceLastSR = " << delaySinceLastSR_var << endl;
+    os << "  ssrc = " << getSsrc() << endl;
+    os << "  fractionLost = " << (int)getFractionLost() << endl;
+    os << "  packetsLostCumulative = " << getPacketsLostCumulative() << endl;
+    os << "  extendedHighestSequenceNumber = " << getSequenceNumber() << endl;
+    os << "  jitter = " << getJitter() << endl;
+    os << "  lastSR = " << getLastSR() << endl;
+    os << "  delaySinceLastSR = " << getDelaySinceLastSR() << endl;
 }
 
 } // namespace rtp

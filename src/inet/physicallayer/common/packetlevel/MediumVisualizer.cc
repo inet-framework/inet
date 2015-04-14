@@ -29,13 +29,17 @@ MediumVisualizer::MediumVisualizer() :
     displayCommunication(false),
     drawCommunication2D(false),
     leaveCommunicationTrail(false),
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     leaveCommunicationHeat(false),
+#endif
     communicationHeatMapSize(100),
     updateCanvasInterval(NaN),
     updateCanvasTimer(nullptr),
     communicationLayer(nullptr),
-    communicationTrail(nullptr),
-    communicationHeat(nullptr)
+    communicationTrail(nullptr)
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
+    ,communicationHeat(nullptr)
+#endif
 {
 }
 
@@ -60,18 +64,20 @@ void MediumVisualizer::initialize(int stage)
             communicationTrail = new TrailFigure(100, true, "communication trail");
             canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
         }
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
         leaveCommunicationHeat = par("leaveCommunicationHeat");
         if (leaveCommunicationHeat) {
             communicationHeat = new HeatMapFigure(communicationHeatMapSize, "communication heat");
             communicationHeat->setTags("successful_reception heat");
             canvas->addFigure(communicationHeat, 0);
         }
+#endif
         updateCanvasInterval = par("updateCanvasInterval");
         updateCanvasTimer = new cMessage("updateCanvas");
     }
     else if (stage == INITSTAGE_LAST) {
-        if (communicationHeat != nullptr) {
 #if OMNETPP_CANVAS_VERSION >= 0x20140908
+        if (communicationHeat != nullptr) {
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
             const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
             Coord min = mediumLimitCache->getMinConstraintArea();
@@ -89,8 +95,8 @@ void MediumVisualizer::initialize(int stage)
             communicationHeat->setPosition(cFigure::Point((min.x + max.x) / 2, (min.y + max.y) / 2));
             communicationHeat->setWidth(max.x - min.x);
             communicationHeat->setHeight(max.y - min.y);
-#endif
         }
+#endif
     }
 }
 
@@ -181,6 +187,7 @@ void MediumVisualizer::receivePacket(const IReceptionDecision *decision)
 #endif
             communicationTrail->addFigure(communicationFigure);
         }
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
         if (leaveCommunicationHeat) {
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
             Coord min = mediumLimitCache->getMinConstraintArea();
@@ -192,6 +199,7 @@ void MediumVisualizer::receivePacket(const IReceptionDecision *decision)
             int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
             communicationHeat->heatLine(x1, y1, x2, y2);
         }
+#endif
     }
     if (displayCommunication)
         updateCanvas();
@@ -208,8 +216,10 @@ void MediumVisualizer::updateCanvas() const
     const IPropagation *propagation = radioMedium->getPropagation();
     const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
     ICommunicationCache *communicationCache = const_cast<ICommunicationCache *>(radioMedium->getCommunicationCache());
+#if OMNETPP_CANVAS_VERSION >= 0x20140908
     if (communicationHeat != nullptr)
         communicationHeat->coolDown();
+#endif
     for (const auto transmission : transmissions) {
         cFigure *groupFigure = communicationCache->getCachedFigure(transmission);
         if (groupFigure) {

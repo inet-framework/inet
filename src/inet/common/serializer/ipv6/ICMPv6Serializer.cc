@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <platdep/sockets.h>
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/ipv6/ICMPv6Serializer.h"
 

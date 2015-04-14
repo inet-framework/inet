@@ -51,7 +51,6 @@ class noncobject IPv6ExtensionHeaderPtr;
 packet IPv6Datagram
 {
     @customize(true);
-
     IPv6Address srcAddress;
     IPv6Address destAddress;
     unsigned char trafficClass;

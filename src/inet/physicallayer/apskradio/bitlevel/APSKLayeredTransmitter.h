@@ -75,7 +75,9 @@ class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModul
     virtual bps getBitrate() const { return bitrate; }
     virtual const Hz getBandwidth() const { return bandwidth; }
     virtual const Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual W getMaxPower() const { return power; }
+    virtual W getMaxPower() const override { return power; }
+    virtual m getMaxCommunicationRange() const override { return m(NaN); }
+    virtual m getMaxInterferenceRange() const override { return m(NaN); }
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
 

@@ -13,7 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "platdep/sockets.h"  // htonl, ntohl, etc. on Windows
+#include "inet/common/serializer/SerializerUtil.h"
+
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 
 #include "inet/common/serializer/headers/bsdint.h"
