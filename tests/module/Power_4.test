@@ -76,8 +76,6 @@ cmdenv-express-mode = false
 %contains: stdout
 ping hostDestination (10.0.0.2):
 sent: 81   received: 30   loss rate (%): 62.963
-round-trip min/avg/max (ms): 0.462262/0.501837/1.64952
-stddev (ms): 0.216763   variance:4.69864e-08
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
