@@ -18,7 +18,7 @@
 #include "ResultRecorders.h"
 #include <sstream>
 
-NAMESPACE_BEGIN
+namespace inet {
 
 Register_ResultRecorder("groupCount", GroupCountRecorder);
 
@@ -70,5 +70,5 @@ void GroupCountRecorder::finish(cResultFilter *prev) {
     }
 }
 
-NAMESPACE_END
+} // namespace inet
 

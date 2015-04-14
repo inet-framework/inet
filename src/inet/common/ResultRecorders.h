@@ -15,14 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __RESULTRECORDERS_H
-#define __RESULTRECORDERS_H
+#ifndef __INET_RESULTRECORDERS_H
+#define __INET_RESULTRECORDERS_H
 
-#include <map>
 #include <string>
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 
-NAMESPACE_BEGIN
+namespace inet {
 
 /**
  * Listener for counting the occurrences of signals with the same attribute
@@ -46,6 +45,6 @@ class SIM_API GroupCountRecorder : public cResultRecorder
         virtual void finish(cResultFilter *prev) override;
 };
 
-NAMESPACE_END
+} // namespace inet
 
 #endif
