@@ -385,7 +385,7 @@ class INET_API Topology : public cOwnedObject
      * Used by the simulation kernel for parallel execution.
      * See cObject for more details.
      */
-    virtual void parsimPack(cCommBuffer *buffer) override;
+    virtual void parsimPack(cCommBuffer *buffer) PARSIMPACK_CONST override;
 
     /**
      * Deserializes the object from an MPI receive buffer
