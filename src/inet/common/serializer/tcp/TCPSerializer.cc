@@ -16,8 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//Define_Module(TCPSerializer);
-#include <platdep/sockets.h>
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/tcp/TCPSerializer.h"
 

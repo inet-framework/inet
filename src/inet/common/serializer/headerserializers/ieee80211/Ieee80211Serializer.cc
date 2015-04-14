@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "platdep/sockets.h"  // htonl, ntohl, etc. on Windows
+#include "inet/common/serializer/SerializerUtil.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
 #include "inet/common/RawPacket.h"
