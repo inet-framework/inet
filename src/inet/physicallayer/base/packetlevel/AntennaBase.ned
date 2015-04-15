@@ -26,6 +26,6 @@ module AntennaBase like IAntenna
 {
     parameters:
         string mobilityModule = default(".mobility"); // the path to the mobility module relative to the network node
-        int numAntennas = default(1) // the number of antennas in the antenna array
+        int numAntennas = default(1); // the number of antennas in the antenna array
         @display("i=device/antennatower");
 }
