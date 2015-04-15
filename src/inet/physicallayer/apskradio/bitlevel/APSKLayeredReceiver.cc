@@ -100,11 +100,11 @@ std::ostream& APSKLayeredReceiver::printToStream(std::ostream& stream, int level
         stream << ", levelOfDetail = " << levelOfDetail
                << ", carrierFrequency = " << carrierFrequency;
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level - 1) 
-               << ", decoder = " << printObjectToString(decoder, level - 1) 
-               << ", demodulator = " << printObjectToString(demodulator, level - 1) 
-               << ", pulseFilter = " << printObjectToString(pulseFilter, level - 1) 
-               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level - 1) 
+        stream << ", errorModel = " << printObjectToString(errorModel, level - 1)
+               << ", decoder = " << printObjectToString(decoder, level - 1)
+               << ", demodulator = " << printObjectToString(demodulator, level - 1)
+               << ", pulseFilter = " << printObjectToString(pulseFilter, level - 1)
+               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level - 1)
                << ", energyDetection = " << energyDetection
                << ", sensitivity = " << sensitivity
                << ", bandwidth = " << bandwidth
@@ -161,12 +161,11 @@ const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketMo
         return check_and_cast<const APSKPhyFrame *>(packetModel->getPacket()->dup());
 }
 
-const IReceptionDecision *APSKLayeredReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *APSKLayeredReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const IRadio *receiver = reception->getReceiver();
     const IRadioMedium *medium = receiver->getMedium();
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);

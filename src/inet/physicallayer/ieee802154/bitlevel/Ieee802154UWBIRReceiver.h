@@ -49,7 +49,7 @@ class INET_API Ieee802154UWBIRReceiver : public ReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer
