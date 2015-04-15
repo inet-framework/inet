@@ -392,7 +392,7 @@ void ConvolutionalCoder::updateTrellisGraph(TrellisGraphNode **trellisGraph, uns
                 bool replace = false;
                 if (cumulativeHammingDistance == best.comulativeHammingDistance) {
                     tieBreakingCounter++;
-                    if (dblrand() < 1.0 / tieBreakingCounter)
+                    if (RNGCONTEXT dblrand() < 1.0 / tieBreakingCounter)
                         replace = true;
                 }
                 else if (cumulativeHammingDistance < best.comulativeHammingDistance) {

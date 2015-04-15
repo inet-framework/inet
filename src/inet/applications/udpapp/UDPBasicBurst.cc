@@ -98,7 +98,7 @@ L3Address UDPBasicBurst::chooseDestAddr()
     if (destAddresses.size() == 1)
         return destAddresses[0];
 
-    int k = genk_intrand(destAddrRNG, destAddresses.size());
+    int k = getRNG(destAddrRNG)->intRand(destAddresses.size());
     return destAddresses[k];
 }
 
