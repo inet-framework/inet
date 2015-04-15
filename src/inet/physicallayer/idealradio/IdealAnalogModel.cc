@@ -56,12 +56,12 @@ const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio
 
 const INoise *IdealAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
-    throw cRuntimeError("Unsupported operation");
+    return nullptr;
 }
 
 const ISNIR *IdealAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
-    throw cRuntimeError("Unsupported operation");
+    return nullptr;
 }
 
 } // namespace physicallayer
