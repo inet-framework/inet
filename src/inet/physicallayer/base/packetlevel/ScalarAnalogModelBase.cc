@@ -32,7 +32,7 @@ bool ScalarAnalogModelBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwid
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission) const
+W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const IRadio *transmitterRadio = transmission->getTransmitter();
@@ -40,7 +40,6 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
-    const IArrival *arrival = radioMedium->getArrival(receiverRadio, transmission);
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
     const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
