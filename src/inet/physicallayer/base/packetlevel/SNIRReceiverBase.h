@@ -41,7 +41,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      */
     virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
 
   public:
     SNIRReceiverBase();

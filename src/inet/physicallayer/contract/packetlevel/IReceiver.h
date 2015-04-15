@@ -102,7 +102,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver. This function must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
 
     /**
      * Returns the result of the reception process specifying whether it was
