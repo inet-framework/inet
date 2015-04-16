@@ -159,6 +159,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
 
         case ICMP_UNREACH: {
             pkt->setType(ICMP_DESTINATION_UNREACHABLE);
+            pkt->setCode(subcode);
             b.readUint16();   // unused
             b.readUint16();   // next hop MTU
             pkt->setByteLength(8);
@@ -172,8 +173,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
 
         case ICMP_TIMXCEED: {
             pkt->setType(ICMP_TIME_EXCEEDED);
-            b.writeByte(ICMP_TIMXCEED);
-            ASSERT(subcode == ICMP_TIMXCEED_INTRANS);
+            pkt->setCode(subcode);
             b.readUint32();   // unused
             pkt->setByteLength(8);
             Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
