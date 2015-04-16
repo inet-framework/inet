@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -18,6 +19,7 @@
 package inet.applications.httptools.server;
 
 import inet.applications.contract.ITCPApp;
+import inet.applications.contract.ISCTPApp;
 
 
 //
@@ -102,9 +104,10 @@ import inet.applications.contract.ITCPApp;
 //
 // @author  Kristjan V. Jonsson
 //
-simple HttpServer like ITCPApp
+simple HttpServer like ITCPApp, ISCTPApp
 {
     parameters:
+        string protocol = default("TCP");               // The transport protocol of the server
         string hostName = default("");                  // The domain name of the server
         int port = default(80);                         // The listening port number
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
@@ -115,5 +118,6 @@ simple HttpServer like ITCPApp
     gates:
         input tcpIn;
         output tcpOut;
+        input sctpIn;
+        output sctpOut;
 }
-

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -18,6 +19,7 @@
 package inet.applications.httptools.browser;
 
 import inet.applications.contract.ITCPApp;
+import inet.applications.contract.ISCTPApp;
 
 
 //
@@ -107,9 +109,10 @@ import inet.applications.contract.ITCPApp;
 //
 // @author  Kristjan V. Jonsson
 //
-simple HttpBrowser like ITCPApp
+simple HttpBrowser like ITCPApp, ISCTPApp
 {
     parameters:
+        string protocol = default("SCTP");              // The transport protocol of the browser
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         string logFile = default("");                   // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
         string scriptFile = default("");                // The browsing script file. Blank to disable.
@@ -119,5 +122,6 @@ simple HttpBrowser like ITCPApp
     gates:
         input tcpIn;
         output tcpOut;
+        input sctpIn;
+        output sctpOut;
 }
-
