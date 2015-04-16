@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
 
