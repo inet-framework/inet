@@ -39,7 +39,9 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
+class INET_API HttpServer : public HttpServerBase,
+                            public TCPSocket::CallbackInterface,
+                            public SCTPSocket::CallbackInterface
 {
   protected:
     TCPSocket tcpListensocket;
@@ -56,11 +58,15 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
+    // TCPSocket::CallbackInterface callback methods
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
+
+    // SCTPSocket::CallbackInterface callback methods
+    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) override;
 };
 
 } // namespace httptools

@@ -203,6 +203,10 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
     // Message deleted in handler - do not delete here!
 }
 
+void HttpBrowser::socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg)
+{
+}
+
 void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status)
 {
     // This is obviously not used at the present time.

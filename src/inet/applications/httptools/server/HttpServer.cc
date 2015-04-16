@@ -113,6 +113,10 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     delete msg;    // Delete the received message here. Must not be deleted in the handler!
 }
 
+void HttpServer::socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg)
+{
+}
+
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)
 {
     if (yourPtr == nullptr) {

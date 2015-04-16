@@ -46,8 +46,8 @@ namespace httptools {
  * @see HttpBrowserDirect
  */
 class INET_API HttpBrowser : public HttpBrowserBase,
-                             public TCPSocket::CallbackInterface
-//                              public SCTPSocket::CallbackInterface
+                             public TCPSocket::CallbackInterface,
+                             public SCTPSocket::CallbackInterface
 {
   protected:
     /*
@@ -140,6 +140,9 @@ class INET_API HttpBrowser : public HttpBrowserBase,
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override;
 
     virtual void socketDeleted(int connId, void *yourPtr) override;
+
+    // SCTPSocket::CallbackInterface callback methods
+    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) override;
 
     // Socket establishment and data submission
     /*
