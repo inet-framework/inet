@@ -74,4 +74,3 @@ class INET_API HttpServer : public HttpServerBase,
 } // namespace inet
 
 #endif // ifndef __INET_HTTPSERVER_H
-

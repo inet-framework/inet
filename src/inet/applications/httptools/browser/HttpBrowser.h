@@ -61,6 +61,7 @@ class INET_API HttpBrowser : public HttpBrowserBase,
     {
         HttpRequestQueue messageQueue;    // Queue of pending messages.
         TCPSocket *tcpSocket = nullptr;    // A reference to the socket object.
+        SCTPSocket *sctpSocket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
     };
 

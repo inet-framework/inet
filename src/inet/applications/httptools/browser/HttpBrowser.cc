@@ -221,50 +221,80 @@ void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
         return;
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *tcpSocket = sockdata->tcpSocket;
+    if(!useSCTP) {
+        SockData *sockdata = (SockData *)yourPtr;
+        TCPSocket *tcpSocket = sockdata->tcpSocket;
 
-    // close the connection (if not already closed)
-    if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
-        EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
-        tcpSocket->close();
+        // close the connection (if not already closed)
+        if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
+            EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
+            tcpSocket->close();
+        }
+    }
+    else {
+        SockData *sockdata = (SockData *)yourPtr;
+        SCTPSocket *sctpSocket = sockdata->sctpSocket;
+
+        // close the connection (if not already closed)
+        if (sctpSocket->getState() == SCTPSocket::PEER_CLOSED) {
+            EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
+            sctpSocket->close();
+        }
     }
 }
 
 void HttpBrowser::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "Socket " << connId << " closed" << endl;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "socketClosed failure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *tcpSocket = sockdata->tcpSocket;
-    tcpSockCollection.removeSocket(tcpSocket);
-    delete tcpSocket;
+    // Clean-up
+    if(!useSCTP) {
+        SockData *sockdata = (SockData *)yourPtr;
+        TCPSocket *tcpSocket = sockdata->tcpSocket;
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SockData *sockdata = (SockData *)yourPtr;
+        SCTPSocket *sctpSocket = sockdata->sctpSocket;
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+    }
 }
 
 void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
 {
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "socketFailure failure. Null pointer" << endl;
         return;
     }
 
-    if (code == TCP_I_CONNECTION_RESET)
+    if (code == TCP_I_CONNECTION_RESET) {
         EV_WARN << "Connection reset!\n";
-    else if (code == TCP_I_CONNECTION_REFUSED)
+    }
+    else if (code == TCP_I_CONNECTION_REFUSED) {
         EV_WARN << "Connection refused!\n";
+    }
 
-    SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *tcpSocket = sockdata->tcpSocket;
-    tcpSockCollection.removeSocket(tcpSocket);
-    delete tcpSocket;
+    // Clean-up
+    if(!useSCTP) {
+        SockData *sockdata = (SockData *)yourPtr;
+        TCPSocket *tcpSocket = sockdata->tcpSocket;
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SockData *sockdata = (SockData *)yourPtr;
+        SCTPSocket *sctpSocket = sockdata->sctpSocket;
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+    }
 }
 
 void HttpBrowser::socketDeleted(int connId, void *yourPtr)
@@ -304,24 +334,43 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
 
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
 
-    // Create and initialize the socket
-    TCPSocket *tcpSocket = new TCPSocket();
-    tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-    tcpSocket->setOutputGate(gate("tcpOut"));
-    tcpSockCollection.addSocket(tcpSocket);
+    if(!useSCTP) {
+        // Create and initialize the socket
+        TCPSocket *tcpSocket = new TCPSocket();
+        tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
+        tcpSocket->setOutputGate(gate("tcpOut"));
+        tcpSockCollection.addSocket(tcpSocket);
 
-    // Initialize the associated data structure
-    SockData *sockdata = new SockData;
-    sockdata->messageQueue = HttpRequestQueue(queue);
-    sockdata->tcpSocket = tcpSocket;
-    sockdata->pending = 0;
-    tcpSocket->setCallbackObject(this, sockdata);
+        // Initialize the associated data structure
+        SockData *sockdata = new SockData;
+        sockdata->messageQueue = HttpRequestQueue(queue);
+        sockdata->tcpSocket = tcpSocket;
+        sockdata->pending = 0;
+        tcpSocket->setCallbackObject(this, sockdata);
 
-    // Issue a connect to the socket for the specified module and port.
-    tcpSocket->connect(L3AddressResolver().resolve(moduleName), connectPort);
+        // Issue a connect to the socket for the specified module and port.
+        tcpSocket->connect(L3AddressResolver().resolve(moduleName), connectPort);
+    }
+    else {
+        // Create and initialize the socket
+        SCTPSocket *sctpSocket = new SCTPSocket();
+        sctpSocket->setOutputGate(gate("sctpOut"));
+        sctpSockCollection.addSocket(sctpSocket);
+
+        // Initialize the associated data structure
+        SockData *sockdata = new SockData;
+        sockdata->messageQueue = HttpRequestQueue(queue);
+        sockdata->sctpSocket = sctpSocket;
+        sockdata->pending = 0;
+        sctpSocket->setCallbackObject(this, sockdata);
+
+        // Issue a connect to the socket for the specified module and port.
+        AddressVector remoteAddressList;
+        remoteAddressList.push_back(L3AddressResolver().resolve(moduleName));
+        sctpSocket->connectx(remoteAddressList, connectPort);
+    }
 }
 
 } // namespace httptools
 
 } // namespace inet
-

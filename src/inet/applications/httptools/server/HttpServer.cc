@@ -42,12 +42,21 @@ void HttpServer::initialize(int stage)
 
         int port = par("port");
 
-        TCPSocket listensocket;
-        listensocket.setOutputGate(gate("tcpOut"));
-        listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        listensocket.bind(port);
-        listensocket.setCallbackObject(this);
-        listensocket.listen();
+        if(!useSCTP) {
+            TCPSocket tcpListenSocket;
+            tcpListenSocket.setOutputGate(gate("tcpOut"));
+            tcpListenSocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
+            tcpListenSocket.bind(port);
+            tcpListenSocket.setCallbackObject(this);
+            tcpListenSocket.listen();
+        }
+        else {
+            SCTPSocket sctpListenSocket;
+            sctpListenSocket.setOutputGate(gate("sctpOut"));
+            sctpListenSocket.bind(port);
+            sctpListenSocket.setCallbackObject(this);
+            sctpListenSocket.listen();
+        }
     }
 }
 
@@ -63,6 +72,7 @@ void HttpServer::finish()
 
     // Clean up sockets and data structures
     tcpSockCollection.deleteSockets();
+    sctpSockCollection.deleteSockets();
 }
 
 void HttpServer::handleMessage(cMessage *msg)
@@ -72,18 +82,31 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
-        if (!tcpSocket) {
-            EV_DEBUG << "No socket found for the message. Create a new one" << endl;
-            // new connection -- create new socket object and server process
-            tcpSocket = new TCPSocket(msg);
-            tcpSocket->setOutputGate(gate("tcpOut"));
-            tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-            tcpSocket->setCallbackObject(this, tcpSocket);
-            tcpSockCollection.addSocket(tcpSocket);
+        if(!useSCTP) {
+            TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
+            if (!tcpSocket) {
+                  EV_DEBUG << "No socket found for the message. Create a new one" << endl;
+                  // new connection -- create new socket object and server process
+                tcpSocket = new TCPSocket(msg);
+                tcpSocket->setOutputGate(gate("tcpOut"));
+                tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
+                tcpSocket->setCallbackObject(this, tcpSocket);
+                tcpSockCollection.addSocket(tcpSocket);
+            }
+            EV_DEBUG << "Process the message " << msg->getName() << endl;
+            tcpSocket->processMessage(msg);
         }
-        EV_DEBUG << "Process the message " << msg->getName() << endl;
-        tcpSocket->processMessage(msg);
+        else {
+            SCTPSocket *sctpSocket = sctpSockCollection.findSocketFor(msg);
+            if (!sctpSocket) {
+                sctpSocket = new SCTPSocket(msg);
+                sctpSocket->setOutputGate(gate("sctpOut"));
+                sctpSocket->setCallbackObject(this, sctpSocket);
+                sctpSockCollection.addSocket(sctpSocket);
+            }
+            EV_DEBUG << "Process the message " << msg->getName() << endl;
+            sctpSocket->processMessage(msg);
+        }
     }
     updateDisplay();
 }
@@ -100,7 +123,6 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
 
     // Should be a HttpReplyMessage
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
@@ -108,7 +130,14 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     // call the message handler to process the message.
     cMessage *reply = handleReceivedMessage(msg);
     if (reply != nullptr) {
-        tcpSocket->send(reply);    // Send to socket if the reply is non-zero.
+        if(!useSCTP) {
+           TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+           tcpSocket->send(reply);     // Send to socket if the reply is non-zero.
+        }
+        else {
+           SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+           sctpSocket->send(reply);    // Send to socket if the reply is non-zero.
+        }
     }
     delete msg;    // Delete the received message here. Must not be deleted in the handler!
 }
@@ -123,53 +152,80 @@ void HttpServer::socketPeerClosed(int connId, void *yourPtr)
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
 
     // close the connection (if not already closed)
-    if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
-        EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
-        tcpSocket->close();    // Call the close method to properly dispose of the socket.
+    if(!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
+            EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
+            tcpSocket->close();    // Call the close method to properly dispose of the socket.
+        }
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        if (sctpSocket->getState() == SCTPSocket::PEER_CLOSED) {
+            EV_INFO << "remote SCTP closed, closing here as well. Connection id is " << connId << endl;
+            sctpSocket->close();    // Call the close method to properly dispose of the socket.
+        }
     }
 }
 
 void HttpServer::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "connection closed. Connection id " << connId << endl;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
+
     // Cleanup
-    TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
-    tcpSockCollection.removeSocket(tcpSocket);
-    delete tcpSocket;
+    if(!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+   }
 }
 
 void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 {
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
-
     EV_INFO << "connection closed. Connection id " << connId << endl;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
-
-    if (code == TCP_I_CONNECTION_RESET)
-        EV_WARN << "Connection reset!\n";
-    else if (code == TCP_I_CONNECTION_REFUSED)
-        EV_WARN << "Connection refused!\n";
 
     // Cleanup
-    tcpSockCollection.removeSocket(tcpSocket);
-    delete tcpSocket;
+    if(!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        if (code == TCP_I_CONNECTION_RESET) {
+            EV_WARN << "Connection reset!\n";
+        }
+        else if (code == TCP_I_CONNECTION_REFUSED) {
+            EV_WARN << "Connection refused!\n";
+        }
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        if (code == SCTP_I_CONNECTION_RESET) {
+            EV_WARN << "Connection reset!\n";
+        }
+        else if (code == SCTP_I_CONNECTION_REFUSED) {
+            EV_WARN << "Connection refused!\n";
+        }
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+   }
 }
 
 } // namespace httptools
 
 } // namespace inet
-
