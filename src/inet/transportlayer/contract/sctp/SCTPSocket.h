@@ -183,7 +183,7 @@ class INET_API SCTPSocket
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests);
+    void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
