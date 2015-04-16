@@ -44,7 +44,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     switch (pkt->getType()) {
         case ICMP_ECHO_REQUEST: {
             PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
-            b.writeByte(ICMP_ECHO);
+            b.writeByte(ICMP_ECHO_REQUEST);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(pp->getOriginatorId());
@@ -59,7 +59,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 
         case ICMP_ECHO_REPLY: {
             PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
-            b.writeByte(ICMP_ECHOREPLY);
+            b.writeByte(ICMP_ECHO_REPLY);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(pp->getOriginatorId());
@@ -73,7 +73,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
         }
 
         case ICMP_DESTINATION_UNREACHABLE: {
-            b.writeByte(ICMP_UNREACH);
+            b.writeByte(ICMP_DESTINATION_UNREACHABLE);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(0);   // unused
@@ -85,7 +85,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
         }
 
         case ICMP_TIME_EXCEEDED: {
-            b.writeByte(ICMP_TIMXCEED);
+            b.writeByte(ICMP_TIME_EXCEEDED);
             b.writeByte(ICMP_TIMXCEED_INTRANS);
             b.writeUint16(0);   // checksum
             b.writeUint32(0);   // unused
@@ -113,7 +113,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
     b.readUint16();   // checksum
 
     switch (type) {
-        case ICMP_ECHO: {
+        case ICMP_ECHO_REQUEST: {
             PingPayload *pp = new PingPayload();
             pkt->setType(ICMP_ECHO_REQUEST);
             pkt->setCode(subcode);
@@ -135,7 +135,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             break;
         }
 
-        case ICMP_ECHOREPLY: {
+        case ICMP_ECHO_REPLY: {
             PingPayload *pp = new PingPayload();
             pkt->setType(ICMP_ECHO_REPLY);
             pkt->setCode(subcode);
@@ -157,7 +157,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             break;
         }
 
-        case ICMP_UNREACH: {
+        case ICMP_DESTINATION_UNREACHABLE: {
             pkt->setType(ICMP_DESTINATION_UNREACHABLE);
             pkt->setCode(subcode);
             b.readUint16();   // unused
@@ -171,7 +171,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             break;
         }
 
-        case ICMP_TIMXCEED: {
+        case ICMP_TIME_EXCEEDED: {
             pkt->setType(ICMP_TIME_EXCEEDED);
             pkt->setCode(subcode);
             b.readUint32();   // unused
