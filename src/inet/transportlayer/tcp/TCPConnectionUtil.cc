@@ -187,9 +187,9 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
     if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) {    // Header options present? TCP_HEADER_OCTETS = 20
         EV_INFO << "options ";
 
-        for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++) {
-            const TCPOption& option = tcpseg->getOptions(i);
-            short kind = option.getKind();
+        for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
+            const TCPOption *option = tcpseg->getHeaderOption(i);
+            short kind = option->getKind();
             EV_INFO << optionName(kind) << " ";
         }
     }
@@ -638,10 +638,8 @@ void TCPConnection::sendSegment(uint32 bytes)
     }
 
     // add header options and update header length (from tcpseg_temp)
-    tcpseg->setOptionsArraySize(tcpseg_temp->getOptionsArraySize());
-
-    for (uint i = 0; i < tcpseg_temp->getOptionsArraySize(); i++)
-        tcpseg->setOptions(i, tcpseg_temp->getOptions(i));
+    for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
+        tcpseg->addHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
 
     tcpseg->setHeaderLength(tcpseg_temp->getHeaderLength());
     delete tcpseg_temp;
@@ -888,10 +886,10 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
 {
     EV_INFO << "TCP Header Option(s) received:\n";
 
-    for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++) {
-        const TCPOption& option = tcpseg->getOptions(i);
-        short kind = option.getKind();
-        short length = option.getLength();
+    for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
+        const TCPOption *option = tcpseg->getHeaderOption(i);
+        short kind = option->getKind();
+        short length = option->getLength();
         bool ok = true;
 
         EV_DETAIL << "Option type " << kind << " (" << optionName(kind) << "), length " << length << "\n";
@@ -906,23 +904,23 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
                 break;
 
             case TCPOPTION_MAXIMUM_SEGMENT_SIZE:    // MSS=2
-                ok = processMSSOption(tcpseg, option);
+                ok = processMSSOption(tcpseg, *check_and_cast<const TCPOptionMaxSegmentSize *>(option));
                 break;
 
             case TCPOPTION_WINDOW_SCALE:    // WS=3
-                ok = processWSOption(tcpseg, option);
+                ok = processWSOption(tcpseg, *check_and_cast<const TCPOptionWindowScale *>(option));
                 break;
 
             case TCPOPTION_SACK_PERMITTED:    // SACK_PERMITTED=4
-                ok = processSACKPermittedOption(tcpseg, option);
+                ok = processSACKPermittedOption(tcpseg, *check_and_cast<const TCPOptionSackPermitted *>(option));
                 break;
 
             case TCPOPTION_SACK:    // SACK=5
-                ok = processSACKOption(tcpseg, option);
+                ok = processSACKOption(tcpseg, *check_and_cast<const TCPOptionSack *>(option));
                 break;
 
             case TCPOPTION_TIMESTAMP:    // TS=8
-                ok = processTSOption(tcpseg, option);
+                ok = processTSOption(tcpseg, *check_and_cast<const TCPOptionTimestamp *>(option));
                 break;
 
             // TODO add new TCPOptions here once they are implemented
@@ -936,21 +934,16 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
     }
 }
 
-bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option)
+bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOptionMaxSegmentSize& option)
 {
     if (option.getLength() != 4) {
-        EV_ERROR << "ERROR: option length incorrect\n";
+        EV_ERROR << "ERROR: MSS option length incorrect\n";
         return false;
     }
 
     if (fsm.getState() != TCP_S_LISTEN && fsm.getState() != TCP_S_SYN_SENT) {
         EV_ERROR << "ERROR: TCP Header Option MSS received, but in unexpected state\n";
         return false;
-    }
-
-    if (option.getValuesArraySize() == 0) {
-        // since option.getLength() was already checked, this is a programming error not a TCP error
-        throw cRuntimeError("TCPOption for MSS does not contain the data its getLength() promises");
     }
 
     // RFC 2581, page 1:
@@ -967,16 +960,16 @@ bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOption& option
     //
     // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
     // the value specified in the MSS option received during connection startup.
-    state->snd_mss = std::min(state->snd_mss, (uint32)option.getValues(0));
+    state->snd_mss = std::min(state->snd_mss, (uint32)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
         state->snd_mss = 536;
 
-    EV_INFO << "TCP Header Option MSS(=" << option.getValues(0) << ") received, SMSS is set to " << state->snd_mss << "\n";
+    EV_INFO << "TCP Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
 }
 
-bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOption& option)
+bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOptionWindowScale& option)
 {
     if (option.getLength() != 3) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -988,14 +981,9 @@ bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOption& option)
         return false;
     }
 
-    if (option.getValuesArraySize() == 0) {
-        // since option.getLength() was already checked, this is a programming error not a TCP error
-        throw cRuntimeError("TCPOption for WS does not contain the data its getLength() promises");
-    }
-
     state->rcv_ws = true;
     state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
-    state->snd_wnd_scale = option.getValues(0);
+    state->snd_wnd_scale = option.getWindowScale();
     EV_INFO << "TCP Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
     if (state->snd_wnd_scale > 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
@@ -1006,7 +994,7 @@ bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOption& option)
     return true;
 }
 
-bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
+bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOptionTimestamp& option)
 {
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1021,18 +1009,13 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
         return false;
     }
 
-    if (option.getValuesArraySize() != 2) {
-        // since option.getLength() was already checked, this is a programming error not a TCP error
-        throw cRuntimeError("TCPOption for TS does not contain the data its getLength() promises");
-    }
-
     if (!state->ts_enabled) {
         state->rcv_initial_ts = true;
         state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-        EV_INFO << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") received, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+        EV_INFO << "TCP Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
     }
     else
-        EV_INFO << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") received\n";
+        EV_INFO << "TCP Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
 
     // RFC 1323, page 35:
     // "Check whether the segment contains a Timestamps option and bit
@@ -1044,14 +1027,14 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
     //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
     //   variable TS.Recent."
     if (state->ts_enabled) {
-        if (seqLess(option.getValues(0), state->ts_recent)) {
+        if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) {    // PAWS_IDLE_TIME_THRESH = 24 days
-                EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getValues(0) << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
+                EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
                 return false;
             }
         }
         else if (seqLE(tcpseg->getSequenceNo(), state->last_ack_sent)) {    // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
-            state->ts_recent = option.getValues(0);
+            state->ts_recent = option.getSenderTimestamp();
             EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
         }
     }
@@ -1059,7 +1042,7 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOption& option)
     return true;
 }
 
-bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option)
+bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOptionSackPermitted& option)
 {
     if (option.getLength() != 2) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1079,9 +1062,6 @@ bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOpti
 
 TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
 {
-    TCPOption option;
-    uint t = 0;
-
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
@@ -1089,15 +1069,10 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
     {
         // MSS header option
         if (state->snd_mss > 0) {
-            option.setKind(TCPOPTION_MAXIMUM_SEGMENT_SIZE);    // MSS
-            option.setLength(4);
-            option.setValuesArraySize(1);
-
-            // Update MSS
-            option.setValues(0, state->snd_mss);
+            TCPOptionMaxSegmentSize *option = new TCPOptionMaxSegmentSize();
+            option->setMaxSegmentSize(state->snd_mss);
+            tcpseg->addHeaderOption(option);
             EV_INFO << "TCP Header Option MSS(=" << state->snd_mss << ") sent\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
         }
 
         // WS header option
@@ -1105,15 +1080,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             // 1 padding byte
-            option.setKind(TCPOPTION_NO_OPERATION);    // NOP
-            option.setLength(1);
-            option.setValuesArraySize(0);
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
-
-            option.setKind(TCPOPTION_WINDOW_SCALE);
-            option.setLength(3);
-            option.setValuesArraySize(1);
+            tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
 
             // Update WS variables
             //ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
@@ -1124,12 +1091,13 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                 state->rcv_wnd_scale++;
             }
-            option.setValues(0, state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
+
+            TCPOptionWindowScale *option = new TCPOptionWindowScale();
+            option->setWindowScale(state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
-            EV_INFO << "TCP Header Option WS(=" << option.getValues(0) << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
+            EV_INFO << "TCP Header Option WS(=" << option->getWindowScale() << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
+            tcpseg->addHeaderOption(option);
         }
 
         // SACK_PERMITTED header option
@@ -1138,24 +1106,16 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         {
             if (!state->ts_support) {    // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                option.setKind(TCPOPTION_NO_OPERATION);    // NOP
-                option.setLength(1);
-                option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
-                tcpseg->setOptions(t++, option);
-                tcpseg->setOptions(t++, option);
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
             }
 
-            option.setKind(TCPOPTION_SACK_PERMITTED);
-            option.setLength(2);
-            option.setValuesArraySize(0);
+            tcpseg->addHeaderOption(new TCPOptionSackPermitted());
 
             // Update SACK variables
             state->snd_sack_perm = true;
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
             EV_INFO << "TCP Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
         }
 
         // TS header option
@@ -1164,21 +1124,15 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         {
             if (!state->sack_support) {    // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                option.setKind(TCPOPTION_NO_OPERATION);    // NOP
-                option.setLength(1);
-                option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
-                tcpseg->setOptions(t++, option);
-                tcpseg->setOptions(t++, option);
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
             }
 
-            option.setKind(TCPOPTION_TIMESTAMP);
-            option.setLength(10);
-            option.setValuesArraySize(2);
+            TCPOptionTimestamp *option = new TCPOptionTimestamp();
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
-            option.setValues(0, convertSimtimeToTS(simTime()));
+            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
@@ -1187,16 +1141,12 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             // tamp value that was sent by the remote TCP in the TSval field
             // of a Timestamps option.  When TSecr is not valid, its value
             // must be zero."
-            if (tcpseg->getAckBit())
-                option.setValues(1, state->ts_recent);
-            else
-                option.setValues(1, 0);
+            option->setEchoedTimestamp(tcpseg->getAckBit() ? state->ts_recent : 0);
 
             state->snd_initial_ts = true;
             state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-            EV_INFO << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
+            EV_INFO << "TCP Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+            tcpseg->addHeaderOption(option);
         }
 
         // TODO add new TCPOptions here once they are implemented
@@ -1209,21 +1159,15 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         if (state->ts_enabled) {    // Is TS enabled?
             if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) {    // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
-                option.setKind(TCPOPTION_NO_OPERATION);    // NOP
-                option.setLength(1);
-                option.setValuesArraySize(0);
-                tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 2);
-                tcpseg->setOptions(t++, option);
-                tcpseg->setOptions(t++, option);
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
             }
 
-            option.setKind(TCPOPTION_TIMESTAMP);
-            option.setLength(10);
-            option.setValuesArraySize(2);
+            TCPOptionTimestamp *option = new TCPOptionTimestamp();
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
-            option.setValues(0, convertSimtimeToTS(simTime()));
+            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
@@ -1232,14 +1176,10 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             // tamp value that was sent by the remote TCP in the TSval field
             // of a Timestamps option.  When TSecr is not valid, its value
             // must be zero."
-            if (tcpseg->getAckBit())
-                option.setValues(1, state->ts_recent);
-            else
-                option.setValues(1, 0);
+            option->setEchoedTimestamp(tcpseg->getAckBit() ? state->ts_recent : 0);
 
-            EV_INFO << "TCP Header Option TS(TSval=" << option.getValues(0) << ", TSecr=" << option.getValues(1) << ") sent\n";
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(t++, option);
+            EV_INFO << "TCP Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
+            tcpseg->addHeaderOption(option);
         }
 
         // SACK header option
@@ -1256,21 +1196,20 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
             addSacks(tcpseg);
-            t = tcpseg->getOptionsArraySize();
         }
 
         // TODO add new TCPOptions here once they are implemented
         // TODO delegate to TCPAlgorithm as well -- it may want to append additional options
     }
 
-    if (tcpseg->getOptionsArraySize() != 0) {
-        uint options_len = tcpseg->getOptionsArrayLength();
+    if (tcpseg->getHeaderOptionArraySize() != 0) {
+        uint options_len = tcpseg->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) // Options length allowed? - maximum: 40 Bytes
             tcpseg->setHeaderLength(TCP_HEADER_OCTETS + options_len); // TCP_HEADER_OCTETS = 20
         else {
             tcpseg->setHeaderLength(TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20
-            tcpseg->setOptionsArraySize(0);    // drop all options
+            tcpseg->dropHeaderOptions();    // drop all options
             EV_ERROR << "ERROR: Options length exceeded! Segment will be sent without options" << "\n";
         }
     }
@@ -1280,12 +1219,10 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
 
 uint32 TCPConnection::getTSval(TCPSegment *tcpseg) const
 {
-    for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++) {
-        const TCPOption& option = tcpseg->getOptions(i);
-        short kind = option.getKind();
-
-        if (kind == TCPOPTION_TIMESTAMP)
-            return option.getValues(0);
+    for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
+        const TCPOption *option = tcpseg->getHeaderOption(i);
+        if (option->getKind() == TCPOPTION_TIMESTAMP)
+            return check_and_cast<const TCPOptionTimestamp *>(option)->getSenderTimestamp();
     }
 
     return 0;
@@ -1293,12 +1230,10 @@ uint32 TCPConnection::getTSval(TCPSegment *tcpseg) const
 
 uint32 TCPConnection::getTSecr(TCPSegment *tcpseg) const
 {
-    for (uint i = 0; i < tcpseg->getOptionsArraySize(); i++) {
-        const TCPOption& option = tcpseg->getOptions(i);
-        short kind = option.getKind();
-
-        if (kind == TCPOPTION_TIMESTAMP)
-            return option.getValues(1);
+    for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
+        const TCPOption *option = tcpseg->getHeaderOption(i);
+        if (option->getKind() == TCPOPTION_TIMESTAMP)
+            return check_and_cast<const TCPOptionTimestamp *>(option)->getEchoedTimestamp();
     }
 
     return 0;
@@ -1473,17 +1408,17 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
 
 uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
 {
-    ASSERT(SimTime::getScaleExp() <= -3);    // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    ASSERT(SimTime::getScaleExp() <= -3);
 
-    uint32 timestamp = (uint32)(simtime.dbl() * 1000);
+    uint32 timestamp = (uint32)(simtime.inUnit(SIMTIME_MS));
     return timestamp;
 }
 
 simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
 {
-    ASSERT(SimTime::getScaleExp() <= -3);    // FIXME TODO - If the scale factor is different, we need to adjust our simTime to uint32 casts - we are currently using ms precision
+    ASSERT(SimTime::getScaleExp() <= -3);
 
-    simtime_t simtime = (simtime_t)((double)timestamp * 0.001);
+    simtime_t simtime(timestamp, SIMTIME_MS);
     return simtime;
 }
 

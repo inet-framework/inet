@@ -51,10 +51,86 @@ namespace inet {
 using namespace serializer;
 using namespace tcp;
 
+void TCPSerializer::serializeOption(const TCPOption *option, Buffer &b, Context& c)
+{
+    unsigned short kind = option->getKind();
+    unsigned short length = option->getLength();    // length >= 1
+
+    b.writeByte(kind);
+    if (length > 1)
+        b.writeByte(length);
+
+    auto *opt = dynamic_cast<const TCPOptionUnknown *>(option);
+    if (opt) {
+        unsigned int datalen = opt->getBytesArraySize();
+        ASSERT(length == 2 + datalen);
+        for (unsigned int i = 0; i < datalen; i++)
+            b.writeByte(opt->getBytes(i));
+        return;
+    }
+
+    switch (kind) {
+        case TCPOPTION_END_OF_OPTION_LIST:    // EOL
+            check_and_cast<const TCPOptionEnd *>(option);
+            ASSERT(length == 1);
+            break;
+
+        case TCPOPTION_NO_OPERATION:    // NOP
+            check_and_cast<const TCPOptionNop *>(option);
+            ASSERT(length == 1);
+            break;
+
+        case TCPOPTION_MAXIMUM_SEGMENT_SIZE: {
+            auto *opt = check_and_cast<const TCPOptionMaxSegmentSize *>(option);
+            ASSERT(length == 4);
+            b.writeUint16(opt->getMaxSegmentSize());
+            break;
+        }
+
+        case TCPOPTION_WINDOW_SCALE: {
+            auto *opt = check_and_cast<const TCPOptionWindowScale *>(option);
+            ASSERT(length == 3);
+            b.writeByte(opt->getWindowScale());
+            break;
+        }
+
+        case TCPOPTION_SACK_PERMITTED: {
+            auto *opt = check_and_cast<const TCPOptionSackPermitted *>(option);
+            ASSERT(length == 2);
+            break;
+        }
+
+        case TCPOPTION_SACK: {
+            auto *opt = check_and_cast<const TCPOptionSack *>(option);
+            ASSERT(length == 2 + opt->getSackItemArraySize() * 8);
+            for (unsigned int i = 0; i < opt->getSackItemArraySize(); i++) {
+                SackItem si = opt->getSackItem(i);
+                b.writeUint32(si.getStart());
+                b.writeUint32(si.getEnd());
+            }
+            break;
+        }
+
+        case TCPOPTION_TIMESTAMP: {
+            auto *opt = check_and_cast<const TCPOptionTimestamp *>(option);
+            ASSERT(length == 10);
+            b.writeUint32(opt->getSenderTimestamp());
+            b.writeUint32(opt->getEchoedTimestamp());
+            break;
+        }
+
+        default: {
+            throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
+            break;
+        }
+    }    // switch
+}
+
 void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     const TCPSegment *tcpseg = check_and_cast<const TCPSegment *>(pkt);
+    ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);
     struct tcphdr *tcp = (struct tcphdr *)(b.accessNBytes(sizeof(struct tcphdr)));
     if (!tcp)
         return;
@@ -88,60 +164,123 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     tcp->th_win = htons(tcpseg->getWindow());
     tcp->th_urp = htons(tcpseg->getUrgentPointer());
 
-    unsigned short numOptions = tcpseg->getOptionsArraySize();
-    unsigned int lengthCounter = 0;
+    unsigned short numOptions = tcpseg->getHeaderOptionArraySize();
     unsigned char *options = (unsigned char *)tcp->th_options;
+    unsigned int optionsLength = tcpseg->getHeaderLength() - TCP_HEADER_OCTETS;
     if (numOptions > 0) {    // options present?
-        unsigned int maxOptLength = tcpseg->getHeaderLength() - TCP_HEADER_OCTETS;
+        Buffer sb(b, 0, optionsLength);
 
         for (unsigned short i = 0; i < numOptions; i++) {
-            TCPOption option = tcpseg->getOptions(i);
-            unsigned short kind = option.getKind();
-            unsigned short length = option.getLength();    // length >= 1
-            options = ((unsigned char *)tcp->th_options) + lengthCounter;
-
-            lengthCounter += length;
-
-            ASSERT(lengthCounter <= maxOptLength);
-
-            options[0] = kind;
-            if (length > 1) {
-                options[1] = length;
-            }
-            unsigned int optlen = option.getValuesArraySize();
-            for (unsigned int k = 0; k < optlen; k++) {
-                unsigned int value = option.getValues(k);
-                unsigned int p0 = 2 + 4 * k;
-                for (unsigned int p = std::min((unsigned int)length - 1, 5 + 4 * k); p >= p0; p--) {
-                    options[p] = value & 0xFF;
-                    value = value >> 8;
-                }
-            }
+            const TCPOption *option = tcpseg->getHeaderOption(i);
+            serializeOption(option, sb, c);
         }    // for
-             //padding:
-        options = (unsigned char *)(tcp->th_options);
-        while (lengthCounter % 4)
-            options[lengthCounter++] = 0;
+        //padding:
+        sb.fillNBytes(sb.getRemainder(), 0);
+        if (sb.hasError())
+            b.setError();
 
-        ASSERT(TCP_HEADER_OCTETS + lengthCounter <= TCP_MAX_HEADER_OCTETS);
-        tcp->th_offs = (TCP_HEADER_OCTETS + lengthCounter) / 4;    // TCP_HEADER_OCTETS = 20
+        tcp->th_offs = (TCP_HEADER_OCTETS + sb.getPos() + 3) / 4;    // TCP_HEADER_OCTETS = 20
     }    // if options present
-    b.seek(TCP_HEADER_OCTETS + lengthCounter);
+    b.seek(tcpseg->getHeaderLength());
 
     // write data
     if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
         unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
-        char *tcpData = (char *)options + lengthCounter;
+        char *tcpData = (char *)options + optionsLength;
 
         if (tcpseg->getByteArray().getDataArraySize() > 0) {
             ASSERT(tcpseg->getByteArray().getDataArraySize() == dataLength);
             tcpseg->getByteArray().copyDataToBuffer(tcpData, dataLength);
         }
         else
-            memset(tcpData, 't', dataLength); // fill data part with 't'
+            b.fillNBytes(dataLength, 't'); // fill data part with 't'
     }
     tcp->th_sum = htons(TCPIPchecksum::checksum(IP_PROT_TCP, tcp, writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
     b.seek(writtenbytes);
+}
+
+TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
+{
+    unsigned char kind = b.readByte();
+    unsigned char length = 0;
+
+    switch (kind) {
+        case TCPOPTION_END_OF_OPTION_LIST:    // EOL
+            return new TCPOptionEnd();
+
+        case TCPOPTION_NO_OPERATION:    // NOP
+            return new TCPOptionNop();
+
+        case TCPOPTION_MAXIMUM_SEGMENT_SIZE:
+            length = b.readByte();
+            if (length == 4) {
+                auto *option = new TCPOptionMaxSegmentSize();
+                option->setLength(length);
+                option->setMaxSegmentSize(b.readUint16());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_WINDOW_SCALE:
+            length = b.readByte();
+            if (length == 3) {
+                auto *option = new TCPOptionWindowScale();
+                option->setLength(length);
+                option->setWindowScale(b.readByte());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_SACK_PERMITTED:
+            length = b.readByte();
+            if (length == 2) {
+                auto *option = new TCPOptionSackPermitted();
+                option->setLength(length);
+                return option;
+            }
+            break;
+
+        case TCPOPTION_SACK:
+            length = b.readByte();
+            if (length > 2 && (length & 8) == 2) {
+                auto *option = new TCPOptionSack();
+                option->setLength(length);
+                option->setSackItemArraySize(length / 8);
+                unsigned int count = 0;
+                for (unsigned int i = 2; i < length; i += 8) {
+                    SackItem si;
+                    si.setStart(b.readUint32());
+                    si.setEnd(b.readUint32());
+                    option->setSackItem(count++, si);
+                }
+                return option;
+            }
+            break;
+
+        case TCPOPTION_TIMESTAMP:
+            length = b.readByte();
+            if (length == 10) {
+                auto *option = new TCPOptionTimestamp();
+                option->setLength(length);
+                option->setSenderTimestamp(b.readUint32());
+                option->setEchoedTimestamp(b.readUint32());
+                return option;
+            }
+            break;
+
+        default:
+            length = b.readByte();
+            break;
+    }    // switch
+
+    auto *option = new TCPOptionUnknown();
+    option->setKind(kind);
+    option->setLength(length);
+    if (length > 2)
+        option->setBytesArraySize(length - 2);
+    for (unsigned int i = 2; i < length; i++)
+        option->setBytes(i-2, b.readByte());
+    return option;
 }
 
 TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bufsize, bool withBytes)
@@ -183,57 +322,25 @@ cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
 
     if (hdrLength > TCP_HEADER_OCTETS) {    // options present?
         unsigned short optionBytes = hdrLength - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
-        if (!b.accessNBytes(optionBytes)) {
-            tcpseg->setBitError(true);
-            return tcpseg;
+        Buffer sb(b, 0, optionBytes);
+
+        while (sb.getRemainder()) {
+            TCPOption *option = deserializeOption(sb, c);
+            tcpseg->addHeaderOption(option);
         }
-        unsigned short optionsCounter = 0;    // index for tcpseg->setOptions[]
-
-        unsigned short length = 0;
-        for (unsigned short j = 0; j < optionBytes; j += length) {
-            unsigned char *options = ((unsigned char *)tcp->th_options) + j;
-            unsigned short kind = options[0];
-            length = options[1];
-
-            TCPOption tmpOption;
-            switch (kind) {
-                case TCPOPTION_END_OF_OPTION_LIST:    // EOL
-                case TCPOPTION_NO_OPERATION:    // NOP
-                    length = 1;
-                    break;
-
-                default:
-                    break;
-            }    // switch
-
-            // kind
-            tmpOption.setKind(kind);
-            // length
-            tmpOption.setLength(length);
-            // value
-            int optlen = (length + 1) / 4;
-            tmpOption.setValuesArraySize(optlen);
-            for (short int k = 0; k < optlen; k++) {
-                unsigned int value = 0;
-                for (short int l = 2 + 4 * k; l < length && l < 6 + 4 * k; l++) {
-                    value = (value << 8) + options[l];
-                }
-                tmpOption.setValues(k, value);
-            }
-            // write option to tcp header
-            tcpseg->setOptionsArraySize(tcpseg->getOptionsArraySize() + 1);
-            tcpseg->setOptions(optionsCounter, tmpOption);
-            optionsCounter++;
-        }    // for j
+        if (sb.hasError())
+            b.setError();
     }    // if options present
-
+    b.seek(hdrLength);
     tcpseg->setByteLength(b._getBufSize());
     unsigned int payloadLength = b.getRemainder();
     tcpseg->setPayloadLength(payloadLength);
     tcpseg->getByteArray().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
 
-    // Checksum: modelled by cMessage::hasBitError()
-    if (TCPIPchecksum::checksum(IP_PROT_TCP, tcp, b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
+    if (b.hasError())
+        tcpseg->setBitError(true);
+    // Checksum: modeled by cPacket::hasBitError()
+    if (tcp->th_sum != 0 && c.l3AddressesPtr && c.l3AddressesLength && TCPIPchecksum::checksum(IP_PROT_TCP, tcp, b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
         tcpseg->setBitError(true);
     return tcpseg;
 }

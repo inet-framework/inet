@@ -57,6 +57,7 @@ class INET_API Buffer
 
   public:
     Buffer(const Buffer& base, unsigned int trailerLength);
+    Buffer(const Buffer& base, unsigned int dummy, unsigned int maxLength);
     Buffer(void *buf, unsigned int bufLen) : buf(static_cast<unsigned char *>(buf)), bufsize(bufLen) {}
 
     // position
