@@ -162,13 +162,13 @@ void TCPSegment::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
 void TCPSegment::parsimUnpack(cCommBuffer *b)
 {
     TCPSegment_Base::parsimUnpack(b);
-    int n;
+    int i, n;
     b->unpack(n);
-    for (int i = 0; i < n; i++) {
-        payloadList.push_back(TCPPayloadMessage());
-        auto payload = payloadList.back();
+    for (i = 0; i < n; i++) {
+        TCPPayloadMessage payload;
         b->unpack(payload.endSequenceNo);
         payload.msg = check_and_cast<cPacket*>(b->unpackObject());
+        payloadList.push_back(payload);
     }
 }
 
