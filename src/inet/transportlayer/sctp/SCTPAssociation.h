@@ -1113,7 +1113,7 @@ class INET_API SCTPAssociation : public cObject
     /** Utility: start a timer */
     inline void scheduleTimeout(cMessage *msg, const simtime_t& timeout)
     {
-        sctpMain->scheduleAt(simulation.getSimTime() + timeout, msg);
+        sctpMain->scheduleAt(simTime() + timeout, msg);
     }
 
     /** Utility: cancel a timer */

@@ -67,7 +67,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     delete icmpMsg;
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[80];
         sprintf(buf, "errors: %ld", numReceived);
         getDisplayString().setTagArg("t", 0, buf);

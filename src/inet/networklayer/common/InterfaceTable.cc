@@ -82,7 +82,7 @@ void InterfaceTable::initialize(int stage)
 
 void InterfaceTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     char buf[80];
@@ -367,7 +367,7 @@ void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntry
 
     emit(signalID, const_cast<InterfaceEntryChangeDetails *>(details));
 
-    if (ev.isGUI() && par("displayAddresses").boolValue())
+    if (hasGUI() && par("displayAddresses").boolValue())
         updateLinkDisplayString(details->getInterfaceEntry());
 }
 

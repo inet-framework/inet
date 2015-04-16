@@ -152,7 +152,7 @@ void SCTPPeer::sendOrSchedule(cPacket *msg)
         send(msg, "sctpOut");
     }
     else {
-        scheduleAt(simulation.getSimTime() + delay, msg);
+        scheduleAt(simTime() + delay, msg);
     }
 }
 
@@ -213,8 +213,8 @@ void SCTPPeer::connect()
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
-        EV_INFO << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime() + par("streamRequestTime"), cmsg);
+        EV_INFO << "StreamReset Timer scheduled at " << simTime() << "\n";
+        scheduleAt(simTime() + par("streamRequestTime"), cmsg);
     }
 
     unsigned int streamNum = 0;
@@ -281,7 +281,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend(connectInfo);
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
+                        scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second = numRequestsToSend;
                     }
@@ -318,7 +318,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                             sprintf(as, "%d", serverAssocId);
                             cMessage *abortMsg = new cMessage(as);
                             abortMsg->setKind(SCTP_I_ABORT);
-                            scheduleAt(simulation.getSimTime() + par("waitToClose"), abortMsg);
+                            scheduleAt(simTime() + par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -349,7 +349,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             delete ind;
             delete msg;
             if (!cmsg->isScheduled() && schedule == false) {
-                scheduleAt(simulation.getSimTime() + par("delayFirstRead"), cmsg);
+                scheduleAt(simTime() + par("delayFirstRead"), cmsg);
             }
             else if (schedule == true)
                 sendOrSchedule(cmsg);
@@ -374,9 +374,9 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         i->second--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                         auto j = endToEndDelay.find(id);
-                        j->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                        j->second->record(simTime() - smsg->getCreationTime());
                         auto k = histEndToEndDelay.find(id);
-                        k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
+                        k->second->collect(simTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
                             cPacket *cmsg = new cPacket("Request");
@@ -396,9 +396,9 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     //FIXME: why do it: msg->dup(); ... ; delete msg;
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                     auto j = endToEndDelay.find(id);
-                    j->second->record(simulation.getSimTime() - smsg->getCreationTime());
+                    j->second->record(simTime() - smsg->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
-                    k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
+                    k->second->collect(simTime() - smsg->getCreationTime());
                     cPacket *cmsg = new cPacket("SVData");
                     bytesSent += smsg->getByteLength();
                     cmd->setPrValue(0);
@@ -456,7 +456,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             break;
     }
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[32];
         auto l = rcvdBytesPerAssoc.find(id);
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", l->second, bytesSent);
@@ -480,7 +480,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend > 0) {
                 generateAndSend(connectInfo);
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
+                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -543,7 +543,7 @@ void SCTPPeer::socketFailure(int, void *, int code)
     setStatusString("broken");
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simulation.getSimTime() + par("reconnectInterval"), timeMsg);
+    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
@@ -564,7 +564,7 @@ void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *s
 
 void SCTPPeer::setStatusString(const char *s)
 {
-    if (ev.isGUI())
+    if (hasGUI())
         getDisplayString().setTagArg("t", 0, s);
 }
 
@@ -589,7 +589,7 @@ void SCTPPeer::sendRequest(bool last)
     msg->setDataLen(numBytes);
     msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
-    msg->setCreationTime(simulation.getSimTime());
+    msg->setCreationTime(simTime());
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
@@ -621,7 +621,7 @@ void SCTPPeer::socketEstablished(int, void *)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simulation.getSimTime() + par("thinkTime"), timeMsg);
+            scheduleAt(simTime() + par("thinkTime"), timeMsg);
         }
         else {
             if (queueSize > 0) {
@@ -642,7 +642,7 @@ void SCTPPeer::socketEstablished(int, void *)
 
             if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0) {
                 timeMsg->setKind(MSGKIND_ABORT);
-                scheduleAt(simulation.getSimTime() + par("waitToClose"), timeMsg);
+                scheduleAt(simTime() + par("waitToClose"), timeMsg);
             }
 
             if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0) {

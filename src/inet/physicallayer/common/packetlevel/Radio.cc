@@ -56,7 +56,7 @@ Radio::Radio() :
 Radio::~Radio()
 {
     // NOTE: can't use the medium module here, because it may have been already deleted
-    cModule *medium = simulation.getModule(mediumModuleId);
+    cModule *medium = getSimulation()->getModule(mediumModuleId);
     if (medium != nullptr)
         check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
     cancelAndDelete(endTransmissionTimer);
@@ -71,7 +71,7 @@ void Radio::initialize(int stage)
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
-        medium = check_and_cast<IRadioMedium *>(simulation.getModuleByPath("radioMedium"));
+        medium = check_and_cast<IRadioMedium *>(getModuleByPath("radioMedium"));
         mediumModuleId = check_and_cast<cModule *>(medium)->getId();
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
@@ -397,7 +397,7 @@ void Radio::updateDisplayString()
     // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
-    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange)) {
+    if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
         cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {

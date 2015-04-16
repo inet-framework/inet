@@ -110,7 +110,7 @@ const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char 
 cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
 {
     const char *moduleAttr = getRequiredAttribute(node, attr);
-    cModule *mod = simulation.getModuleByPath(moduleAttr);
+    cModule *mod = getModuleByPath(moduleAttr);
     if (!mod)
         throw cRuntimeError("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
     return mod;
@@ -199,7 +199,7 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     cModuleType *moduleType = cModuleType::get(moduleTypeName);
     if (moduleType == nullptr)
         throw cRuntimeError("module type '%s' is not found", moduleType);
-    cModule *parentModule = simulation.getSystemModule()->getModuleByPath(parentModulePath);
+    cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);
     cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
@@ -213,7 +213,7 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
 void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
 {
     const char *modulePath = getRequiredAttribute(node, "module");
-    cModule *module = simulation.getSystemModule()->getModuleByPath(modulePath);
+    cModule *module = getSimulation()->getSystemModule()->getModuleByPath(modulePath);
     if (module == nullptr)
         throw cRuntimeError("module '%s' is not found", modulePath);
     module->callFinish();

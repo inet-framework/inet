@@ -250,7 +250,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
         const char *str = getParameterStrValue(path, "owner", "");
         if (strlen(str)) {
-            cModule *mod = simulation.getModuleByPath(str);
+            cModule *mod = getModuleByPath(str);
             newPath.owner = mod->getId();
         }
         else {
@@ -382,7 +382,7 @@ void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const Sender
     if (handler < 0)
         return; // handler not specified
 
-    cModule *mod = simulation.getModule(handler);
+    cModule *mod = getSimulation()->getModule(handler);
 
     if (!mod)
         return; // handler no longer exists

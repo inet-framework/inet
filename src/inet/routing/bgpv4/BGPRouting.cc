@@ -356,7 +356,6 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, RoutingTa
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
             ospf->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
-            simulation.setContext(this);
         }
     }
     return NEW_ROUTE_ADDED;     //FIXME model error? When returns NEW_ROUTE_ADDED then entry stored in _BGPRoutingTable, but sometimes not stored in _rt
@@ -450,7 +449,6 @@ bool BGPRouting::checkExternalRoute(const IPv4Route *route)
     OSPFRoute = route->getDestination();
     ospf::OSPFRouting *ospf = findModuleFromPar<ospf::OSPFRouting>(par("ospfRoutingModule"), this);
     bool returnValue = ospf->checkExternalRoute(OSPFRoute);
-    simulation.setContext(this);
     return returnValue;
 }
 

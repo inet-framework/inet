@@ -67,7 +67,7 @@ void DSCPMarker::handleMessage(cMessage *msg)
     else
         throw cRuntimeError("DSCPMarker expects cPackets");
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[50] = "";
         if (numRcvd > 0)
             sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);

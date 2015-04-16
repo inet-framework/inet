@@ -140,7 +140,7 @@ void IPv4RoutingTable::configureRouterId()
 
 void IPv4RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     char buf[80];
@@ -158,7 +158,7 @@ void IPv4RoutingTable::handleMessage(cMessage *msg)
 
 void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (simulation.getContextType() == CTX_INITIALIZE)
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();

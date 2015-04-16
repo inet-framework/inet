@@ -52,7 +52,7 @@ void TCPDump::initialize()
 
 void TCPDump::handleMessage(cMessage *msg)
 {
-    if (!ev.isDisabled() && msg->isPacket()) {
+    if (!getEnvir()->isDisabled() && msg->isPacket()) {
         bool l2r = msg->arrivedOn("hlIn");
         tcpdump.dumpPacket(l2r, PK(msg));
     }
@@ -61,7 +61,7 @@ void TCPDump::handleMessage(cMessage *msg)
     if (pcapDump.isOpen() && dynamic_cast<IPv4Datagram *>(msg)
         && (dumpBadFrames || !PK(msg)->hasBitError()))
     {
-        const simtime_t stime = simulation.getSimTime();
+        const simtime_t stime = simTime();
         IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
         pcapDump.writeFrame(stime, ipPacket);
     }

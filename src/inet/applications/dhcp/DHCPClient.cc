@@ -208,7 +208,7 @@ void DHCPClient::handleMessage(cMessage *msg)
         delete msg;
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

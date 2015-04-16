@@ -260,7 +260,7 @@ void NetPerfMeter::finish()
 
 // ###### Show I/O status ###################################################
 void NetPerfMeter::showIOStatus() {
-   if(ev.isGUI()) {
+   if(hasGUI()) {
       unsigned long long totalSentBytes = 0;
       for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
          iterator != SenderStatisticsMap.end(); iterator++) {

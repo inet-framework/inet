@@ -182,7 +182,7 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
         throw cRuntimeError("tunnel type %d not supported for createTunnel()", tunnelType);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         bubble("Created Tunnel");
 
     return vIfIndexTop--;    // decrement vIfIndex for use with next createTunnel() call
@@ -225,7 +225,7 @@ bool IPv6Tunneling::destroyTunnel(const IPv6Address& src, const IPv6Address& des
     // reset the index if we do not have a single tunnel anymore
     resetVIfIndex();
 
-    if (ev.isGUI())
+    if (hasGUI())
         bubble("Destroyed Tunnel");
 
     return true;

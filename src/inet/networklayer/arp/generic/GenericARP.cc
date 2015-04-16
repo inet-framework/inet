@@ -65,11 +65,11 @@ MACAddress GenericARP::mapUnicastAddress(L3Address addr)
             return addr.toMAC();
 
         case L3Address::MODULEID:
-            module = simulation.getModule(addr.toModuleId().getId());
+            module = getSimulation()->getModule(addr.toModuleId().getId());
             break;
 
         case L3Address::MODULEPATH:
-            module = simulation.getModule(addr.toModulePath().getId());
+            module = getSimulation()->getModule(addr.toModulePath().getId());
             break;
 
         default:

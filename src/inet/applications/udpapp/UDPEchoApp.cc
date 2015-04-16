@@ -36,7 +36,7 @@ void UDPEchoApp::initialize(int stage)
         WATCH(numEchoed);
     }
     else if (stage == INITSTAGE_LAST) {
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplay();
     }
 }
@@ -62,7 +62,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         // send back
         socket.sendTo(pk, srcAddress, srcPort);
 
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplay();
     }
     else {

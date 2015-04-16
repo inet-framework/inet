@@ -95,7 +95,7 @@ void TCP::initialize(int stage)
         recordStatistics = par("recordStats");
         useDataNotification = par("useDataNotification");
 
-        cModule *netw = simulation.getSystemModule();
+        cModule *netw = getSimulation()->getSystemModule();
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -194,7 +194,7 @@ void TCP::handleMessage(cMessage *msg)
             removeConnection(conn);
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -213,7 +213,7 @@ void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Add
 
 void TCP::updateDisplayString()
 {
-    if (ev.isDisabled()) {
+    if (getEnvir()->isDisabled()) {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");
@@ -454,7 +454,7 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Add
     key.appGateIndex = conn->appGateIndex;
     key.connId = conn->connId;
     tcpAppConnMap.erase(key);
-    key.connId = conn->connId = ev.getUniqueNumber();
+    key.connId = conn->connId = getEnvir()->getUniqueNumber();
     tcpAppConnMap[key] = conn;
 
     // ...and newConn will live on with the old connId

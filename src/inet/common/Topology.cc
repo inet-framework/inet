@@ -199,12 +199,12 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
 
     // Loop through all modules and find those that satisfy the criteria
 #if OMNETPP_VERSION < 0x500
-    for (int modId = 0; modId <= simulation.getLastModuleId(); modId++)
+    for (int modId = 0; modId <= getSimulation()->getLastModuleId(); modId++)
 #else // if OMNETPP_VERSION < 0x500
-    for (int modId = 0; modId <= simulation.getLastComponentId(); modId++)
+    for (int modId = 0; modId <= getSimulation()->getLastComponentId(); modId++)
 #endif // if OMNETPP_VERSION < 0x500
     {
-        cModule *module = simulation.getModule(modId);
+        cModule *module = getSimulation()->getModule(modId);
         if (module && predicate(module, data)) {
             Node *node = createNode(module);
             nodes.push_back(node);
@@ -217,7 +217,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
         // from or go to modules included in the topology.
 
         Node *node = elem;
-        cModule *mod = simulation.getModule(node->moduleId);
+        cModule *mod = getSimulation()->getModule(node->moduleId);
 
         for (cModule::GateIterator i(mod); !i.end(); i++) {
             cGate *gate = i();

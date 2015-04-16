@@ -61,7 +61,7 @@ InterfaceEntry *OSPFConfigReader::getInterfaceByXMLAttributesOf(const cXMLElemen
     }
 
     const char *toward = getRequiredAttribute(ifConfig, "toward");
-    cModule *destnode = simulation.getModuleByPath(toward);
+    cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
     if (!destnode)
         throw cRuntimeError("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
 

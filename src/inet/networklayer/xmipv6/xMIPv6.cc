@@ -711,7 +711,7 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     if (rt6->isMobileNode() && !rt6->isHomeAgent()) {    // rewrote condition to make it more clear - CB
         EV_WARN << "Wrong Node: not HA or CN" << endl;
 
-        if (ev.isGUI())
+        if (hasGUI())
             bubble("Wrong Node: not HA or CN");
 
         delete bu;
@@ -1067,7 +1067,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     // If all the above tests are passed the Received BU is valid
     EV_INFO << "BU validation passed" << endl;
 
-    if (ev.isGUI())
+    if (hasGUI())
         bubble("BU Validated");
 
     return true;    //result;

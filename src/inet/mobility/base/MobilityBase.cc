@@ -147,7 +147,7 @@ void MobilityBase::handleMessage(cMessage *message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
-    if (ev.isGUI() && visualRepresentation) {
+    if (hasGUI() && visualRepresentation) {
         cFigure::Point point = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
         char buf[32];
         snprintf(buf, sizeof(buf), "%lf", point.x);

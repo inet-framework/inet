@@ -751,7 +751,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 {
     SCTPPathVariables *path = nullptr;
 
-    EV_INFO << msg->getName() << " timer expired at " << simulation.getSimTime() << "\n";
+    EV_INFO << msg->getName() << " timer expired at " << simTime() << "\n";
 
     SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(msg->getControlInfo());
     L3Address addr = pinfo->getRemoteAddress();
@@ -767,7 +767,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
         process_TIMEOUT_INIT_REXMIT(event);
     }
     else if (msg == SackTimer) {
-        EV_DETAIL << simulation.getSimTime() << " delayed Sack: cTsnAck=" << state->gapList.getCumAckTSN() << " highestTsnReceived=" << state->gapList.getHighestTSNReceived() << " lastTsnReceived=" << state->lastTsnReceived << " ackState=" << state->ackState << " numGaps=" << state->gapList.getNumGaps(SCTPGapList::GT_Any) << "\n";
+        EV_DETAIL << simTime() << " delayed Sack: cTsnAck=" << state->gapList.getCumAckTSN() << " highestTsnReceived=" << state->gapList.getHighestTSNReceived() << " lastTsnReceived=" << state->lastTsnReceived << " ackState=" << state->ackState << " numGaps=" << state->gapList.getNumGaps(SCTPGapList::GT_Any) << "\n";
         sendSack();
     }
     else if (msg == T2_ShutdownTimer) {
@@ -816,14 +816,14 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     else if (msg == FairStartTimer) {
         auto it = sctpMain->assocStatMap.find(assocId);
         if (it != sctpMain->assocStatMap.end()) {
-            it->second.fairStart = simulation.getSimTime();
+            it->second.fairStart = simTime();
             fairTimer = true;
         }
     }
     else if (msg == FairStopTimer) {
         auto it = sctpMain->assocStatMap.find(assocId);
         if (it != sctpMain->assocStatMap.end()) {
-            it->second.fairStop = simulation.getSimTime();
+            it->second.fairStop = simTime();
             it->second.fairLifeTime = it->second.fairStop - it->second.fairStart;
             it->second.fairThroughput = it->second.fairAckedBytes / it->second.fairLifeTime.dbl();
             fairTimer = false;
@@ -1505,7 +1505,7 @@ void SCTPAssociation::stateEntered(int32 status)
             sackFrequency = sctpMain->par("sackFrequency");
             SCTP::AssocStat stat;
             stat.assocId = assocId;
-            stat.start = simulation.getSimTime();
+            stat.start = simTime();
             stat.stop = 0;
             stat.rcvdBytes = 0;
             stat.ackedBytes = 0;
@@ -1562,7 +1562,7 @@ void SCTPAssociation::stateEntered(int32 status)
                 const bool addIP = (bool)sctpMain->par("addIP");
                 EV_DETAIL << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
                 if (addIP == true && (double)sctpMain->par("addTime") > 0) {
-                    EV_DETAIL << "startTimer addTime to expire at " << simulation.getSimTime() + (double)sctpMain->par("addTime") << "\n";
+                    EV_DETAIL << "startTimer addTime to expire at " << simTime() + (double)sctpMain->par("addTime") << "\n";
 
                     scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
                 }

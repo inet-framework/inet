@@ -107,7 +107,7 @@ const char *notificationCategoryName(simsignal_t signalID)
 void printNotificationBanner(simsignal_t signalID, const cObject *obj)
 {
     EV << "** Notification at T=" << simTime()
-       << " to " << simulation.getContextModule()->getFullPath() << ": "
+       << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
        << notificationCategoryName(signalID) << " "
        << (obj ? obj->info() : "") << "\n";
 }

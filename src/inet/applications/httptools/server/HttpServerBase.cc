@@ -179,7 +179,7 @@ void HttpServerBase::finish()
 
 void HttpServerBase::updateDisplay()
 {
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[1024];
         sprintf(buf, "%ld", htmlDocsServed);
         cDisplayString& ds = host->getDisplayString();
@@ -409,7 +409,7 @@ std::string HttpServerBase::generateBody()
 void HttpServerBase::registerWithController()
 {
     // Find controller object and register
-    HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
+    HttpController *controller = check_and_cast_nullable<HttpController *>(getSimulation()->getSystemModule()->getSubmodule("controller"));
     if (controller == nullptr)
         throw cRuntimeError("Controller module not found");
     controller->registerServer(host->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);

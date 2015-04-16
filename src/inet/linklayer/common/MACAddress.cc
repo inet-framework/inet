@@ -145,7 +145,7 @@ MACAddress MACAddress::generateAutoAddress()
 #if OMNETPP_VERSION >= 0x500
     if (!simulationLifecycleListenerAdded) {
         // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
-        ev.addLifecycleListener(new MACAddress::SimulationLifecycleListener());
+        getEnvir()->addLifecycleListener(new MACAddress::SimulationLifecycleListener());
         simulationLifecycleListenerAdded = true;
     }
 #endif // if OMNETPP_VERSION >= 0x500

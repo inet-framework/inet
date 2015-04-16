@@ -139,7 +139,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
         throw cRuntimeError("L3AddressResolver: syntax error parsing address spec `%s'", s);
 
     // find module
-    cModule *mod = simulation.getModuleByPath(modname.c_str());
+    cModule *mod = getSimulation()->getModuleByPath(modname.c_str());
     if (!mod)
         throw cRuntimeError("L3AddressResolver: module `%s' not found", modname.c_str());
 
@@ -164,7 +164,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
     // find interface for dest node
     // get address from the given module/interface
     if (!destnodename.empty()) {
-        cModule *destnode = simulation.getModuleByPath(destnodename.c_str());
+        cModule *destnode = getSimulation()->getModuleByPath(destnodename.c_str());
         if (!destnode)
             throw cRuntimeError("L3AddressResolver: destination module `%s' not found", destnodename.c_str());
         result = addressOf(mod, destnode, addrType);
@@ -391,7 +391,7 @@ bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *
     else {
         // find address in the configurator's notebook
         // TODO: how do we know where is the configurator? get the path from a NED parameter?
-        L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(simulation.getModuleByPath("configurator"));
+        L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->getModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIPv4Address(ret, ie, netmask);
     }

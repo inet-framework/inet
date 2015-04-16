@@ -99,7 +99,7 @@ void SCTP::initialize(int stage)
         sizeAssocMap = 0;
         nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
-        cModule *netw = simulation.getSystemModule();
+        cModule *netw = getSimulation()->getSystemModule();
         if (netw->hasPar("testTimeout")) {
             testTimeout = (simtime_t)netw->par("testTimeout");
         }
@@ -287,7 +287,7 @@ void SCTP::handleMessage(cMessage *msg)
         }
         delete msg;
     }
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -359,7 +359,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
 void SCTP::updateDisplayString()
 {
 #if 0
-    if (ev.disable_tracing) {
+    if (getEnvir()->disable_tracing) {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");
@@ -743,7 +743,7 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
     if (sizeAssocMap > 0) {
         auto assocStatMapIterator = assocStatMap.find(assoc->assocId);
         if (assocStatMapIterator != assocStatMap.end()) {
-            assocStatMapIterator->second.stop = simulation.getSimTime();
+            assocStatMapIterator->second.stop = simTime();
             assocStatMapIterator->second.lifeTime = assocStatMapIterator->second.stop - assocStatMapIterator->second.start;
             assocStatMapIterator->second.throughput = assocStatMapIterator->second.ackedBytes * 8 / assocStatMapIterator->second.lifeTime.dbl();
         }

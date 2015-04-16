@@ -75,7 +75,7 @@ void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
     else
         send(packet, "defaultOut");
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[20] = "";
         if (numRcvd > 0)
             sprintf(buf + strlen(buf), "rcvd:%d ", numRcvd);

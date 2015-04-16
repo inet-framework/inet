@@ -148,10 +148,10 @@ std::vector<L3Address> PingTestApp::getAllAddresses()
 #if OMNETPP_VERSION < 0x500
     for (int i = 0; i <= simulation.getLastModuleId(); i++)
 #else // if OMNETPP_VERSION < 0x500
-    for (int i = 0; i <= simulation.getLastComponentId(); i++)
+    for (int i = 0; i <= getSimulation()->getLastComponentId(); i++)
 #endif // if OMNETPP_VERSION < 0x500
     {
-        IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(simulation.getModule(i));
+        IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(getSimulation()->getModule(i));
         if (ift) {
             for (int j = 0; j < ift->getNumInterfaces(); j++) {
                 InterfaceEntry *ie = ift->getInterface(j);

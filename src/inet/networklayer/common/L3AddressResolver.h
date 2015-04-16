@@ -93,7 +93,7 @@ class INET_API L3AddressResolver
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
      * or router ("host[2]"), and empty string (""). For the latter, it returns
      * the null address. If module name is specified, the module will be
-     * looked up using <tt>simulation.getModuleByPath()</tt>, and then
+     * looked up using <tt>getModuleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
     virtual L3Address resolve(const char *str, int addrType = DEFAULT_ADDR_TYPE);

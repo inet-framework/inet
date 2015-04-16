@@ -131,7 +131,7 @@ bool OSPFRouting::isNodeUp()
 
 void OSPFRouting::insertExternalRoute(int ifIndex, const IPv4AddressRange& netAddr)
 {
-    simulation.setContext(this);
+    Enter_Method_Silent();
     OSPFASExternalLSAContents newExternalContents;
     newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
     newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
@@ -142,6 +142,7 @@ void OSPFRouting::insertExternalRoute(int ifIndex, const IPv4AddressRange& netAd
 
 bool OSPFRouting::checkExternalRoute(const IPv4Address& route)
 {
+    Enter_Method_Silent();
     for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
         ASExternalLSA *externalLSA = ospfRouter->getASExternalLSA(i);
         IPv4Address externalAddr = externalLSA->getHeader().getLinkStateID();

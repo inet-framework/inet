@@ -198,7 +198,7 @@ void IPv6::endService(cPacket *msg)
         }
     }
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

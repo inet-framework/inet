@@ -23,7 +23,7 @@ TCPSocket::TCPSocket()
 {
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
-    connId = ev.getUniqueNumber();
+    connId = getEnvir()->getUniqueNumber();
     sockstate = NOT_BOUND;
 
     localPrt = remotePrt = -1;
@@ -225,7 +225,7 @@ void TCPSocket::requestStatus()
 
 void TCPSocket::renewSocket()
 {
-    connId = ev.getUniqueNumber();
+    connId = getEnvir()->getUniqueNumber();
     remoteAddr = localAddr = L3Address();
     remotePrt = localPrt = -1;
     sockstate = NOT_BOUND;

@@ -50,13 +50,13 @@ void TunInterface::handleMessage(cMessage *msg)
         emit(packetReceivedFromUpperSignal, msg);
         send(msg, "appOut");
     }
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
 void TunInterface::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 }
 

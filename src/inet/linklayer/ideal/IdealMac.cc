@@ -203,7 +203,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
 
     if (!dropFrameNotForUs(frame)) {
         int senderModuleId = frame->getSrcModuleId();
-        IdealMac *senderMac = dynamic_cast<IdealMac *>(simulation.getModule(senderModuleId));
+        IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
         if (senderMac)
             senderMac->acked(frame);
         // decapsulate and attach control info

@@ -85,7 +85,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
     else
         throw cRuntimeError("Message received from unknown gate!");
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

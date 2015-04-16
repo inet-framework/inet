@@ -49,7 +49,7 @@ class INET_API IPhysicalEnvironment
 
     static cFigure::Point computeCanvasPoint(Coord point)
     {
-        IPhysicalEnvironment *environment = dynamic_cast<IPhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
+        IPhysicalEnvironment *environment = dynamic_cast<IPhysicalEnvironment *>(getSimulation()->getSystemModule()->getSubmodule("environment"));
         if (environment != nullptr)
             return computeCanvasPoint(point, environment->getViewRotation(), environment->getViewTranslation());
         else

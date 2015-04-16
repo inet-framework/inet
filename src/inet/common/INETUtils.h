@@ -66,12 +66,12 @@ std::string vstringf(const char *fmt, va_list& args);
 /**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
  */
-cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = simulation.getContext()->getClassName());
+cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
 
 /**
  * Like cObjectFactory::createOne(), except it starts searching for the class in the given namespace
  */
-cObject *createOne(const char *className, const char *defaultNamespace = simulation.getContext()->getClassName());
+cObject *createOne(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
 
 } // namespace utils
 

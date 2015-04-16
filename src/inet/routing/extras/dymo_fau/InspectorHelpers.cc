@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab)
     {
         os << "Address=" << ab.getAddress();
         int id = ab.getAddress();
-        cModule *m = simulation.getModule(id);
+        cModule *m = getSimulation()->getModule(id);
         if (m) os << " (" << m->getFullName() << ")";
     }
 
