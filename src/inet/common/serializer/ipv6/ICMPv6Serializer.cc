@@ -90,7 +90,7 @@ void ICMPv6Serializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
             b.writeByte(frame->getCode());
             b.writeUint16(0);   // crc
             b.writeUint32(0);   // unused
-            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), b, c, ETHERTYPE, ETHERTYPE_IPv6, 0);
             break;
         }
 
