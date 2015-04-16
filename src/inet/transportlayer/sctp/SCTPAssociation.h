@@ -307,7 +307,7 @@ class INET_API SCTPPathVariables : public cObject
     cMessage *CwndTimer;
     cMessage *T3_RtxTimer;
     cMessage *BlockingTimer;
-    cPacket *ResetTimer;
+    cMessage *ResetTimer;
     cMessage *AsconfTimer;
     // ====== High-Speed CC ===============================================
     unsigned int highSpeedCCThresholdIdx;
@@ -983,7 +983,7 @@ class INET_API SCTPAssociation : public cObject
      * Normally returns true. A return value of false means that the
      * connection structure must be deleted by the caller (SCTP).
      */
-    bool processAppCommand(cPacket *msg);
+    bool processAppCommand(cMessage *msg);
     void removePath();
     void removePath(const L3Address& addr);
     void deleteStreams();
@@ -1022,12 +1022,12 @@ class INET_API SCTPAssociation : public cObject
     //@}
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
-    void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
-    void process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
-    void process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
+    void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg);
+    void process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg);
+    void process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg);
     void process_CLOSE(SCTPEventCode& event);
     void process_ABORT(SCTPEventCode& event);
-    void process_STATUS(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg);
+    void process_STATUS(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg);
     void process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand *sctpCommand);
     void process_PRIMARY(SCTPEventCode& event, SCTPCommand *sctpCommand);
     void process_STREAM_RESET(SCTPCommand *sctpCommand);
@@ -1123,7 +1123,7 @@ class INET_API SCTPAssociation : public cObject
     }
 
     /** Utility: sends packet to application */
-    void sendToApp(cPacket *msg);
+    void sendToApp(cMessage *msg);
 
     /** Utility: sends status indication (SCTP_I_xxx) to application */
     void sendIndicationToApp(const int32 code, const int32 value = 0);

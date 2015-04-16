@@ -391,7 +391,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
+    cMessage *msg = new cMessage(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
     SCTPConnectInfo *establishIndication = new SCTPConnectInfo("CI");
@@ -414,7 +414,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     }
 }
 
-void SCTPAssociation::sendToApp(cPacket *msg)
+void SCTPAssociation::sendToApp(cMessage *msg)
 {
     sctpMain->send(msg, "to_appl", appGateIndex);
 }
@@ -1749,7 +1749,7 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    cPacket *cmsg = new cPacket("DataArrivedNotification");
+    cMessage *cmsg = new cMessage("DataArrivedNotification");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SCTPCommand *cmd = new SCTPCommand("notification");
     cmd->setAssocId(assocId);
@@ -1891,7 +1891,7 @@ void SCTPAssociation::pushUlp()
             }
             EV_DETAIL << "Push TSN " << chunk->tsn
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
-            cPacket *msg = (cPacket *)chunk->userData;
+            cMessage *msg = (cMessage *)chunk->userData;
             msg->setKind(SCTP_I_DATA);
             SCTPRcvCommand *cmd = new SCTPRcvCommand("push");
             cmd->setAssocId(assocId);
