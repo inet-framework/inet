@@ -1328,12 +1328,19 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         IPv6ControlInfo *raCtrlInfo)
 {
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
+//    ASSERT(ie!=NULL);
 
-    if (ie->ipv6Data()->getAdvSendAdvertisements() && (!(rt6->isMobileRouter() && (strcmp(ie->getFullName(),"wlan0")==0))))
+    if (!rt6->isMobileRouter() && ie->ipv6Data()->getAdvSendAdvertisements() )
     {   // interface wlan0 of Mobile Router can process RA message
             EV << "Interface is an advertising interface, dropping RA message.\n";
             delete ra;
             return;
+    }
+    else if (rt6->isMobileRouter() && (ie!=NULL)) //ie = NULL if interface entry from external wlan card
+    {
+        EV << "Interface is an advertising interface, dropping RA message.\n";
+                    delete ra;
+                    return;
     }
     else
     {
