@@ -66,6 +66,7 @@ class INET_API HttpBrowser : public HttpBrowserBase,
 
     TCPSocketMap tcpSockCollection;    // List of active sockets
     SCTPSocketMap sctpSockCollection;    // List of active sockets
+    bool useSCTP = false;    // Use SCTP instead of TCP?
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
 

@@ -32,6 +32,8 @@ void HttpServer::initialize(int stage)
         numBroken = 0;
         socketsOpened = 0;
 
+        useSCTP = (par("protocol") == "SCTP");
+
         WATCH(numBroken);
         WATCH(socketsOpened);
     }

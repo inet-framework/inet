@@ -46,6 +46,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     TCPSocketMap tcpSockCollection;
     SCTPSocket sctpListensocket;
     SCTPSocketMap sctpSockCollection;
+    bool useSCTP = false;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 

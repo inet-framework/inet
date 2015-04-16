@@ -38,6 +38,10 @@ void HttpBrowser::initialize(int stage)
 {
     EV_DEBUG << "Initializing HTTP browser component (sockets version), stage " << stage << endl;
     HttpBrowserBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL) {
+       useSCTP = (par("protocol") == "SCTP");
+    }
 }
 
 void HttpBrowser::finish()
