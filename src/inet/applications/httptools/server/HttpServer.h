@@ -42,8 +42,10 @@ namespace httptools {
 class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
 {
   protected:
-    TCPSocket listensocket;
-    TCPSocketMap sockCollection;
+    TCPSocket tcpListensocket;
+    TCPSocketMap tcpSockCollection;
+    SCTPSocket sctpListensocket;
+    SCTPSocketMap sctpSockCollection;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 

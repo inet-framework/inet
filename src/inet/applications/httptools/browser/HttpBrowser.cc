@@ -31,7 +31,7 @@ HttpBrowser::HttpBrowser()
 HttpBrowser::~HttpBrowser()
 {
     // @todo Delete socket data structures
-    sockCollection.deleteSockets();
+    tcpSockCollection.deleteSockets();
 }
 
 void HttpBrowser::initialize(int stage)
@@ -71,8 +71,8 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
-        TCPSocket *socket = sockCollection.findSocketFor(msg);
-        if (socket == nullptr) {
+        TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
+        if (tcpSocket == nullptr) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
             delete msg;
@@ -80,7 +80,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
         // Submit to the socket handler. Calls the TCPSocket::CallbackInterface methods.
         // Message is deleted in the socket handler
-        socket->processMessage(msg);
+        tcpSocket->processMessage(msg);
     }
 }
 
@@ -161,10 +161,10 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 
     // Get the socket and associated data structure.
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
     if (sockdata->messageQueue.empty()) {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
-        socket->close();
+        tcpSocket->close();
         return;
     }
 
@@ -175,7 +175,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
         cPacket *pckt = check_and_cast<cPacket *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
-        socket->send(msg);
+        tcpSocket->send(msg);
         sockdata->pending++;
     }
 }
@@ -189,12 +189,12 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
     handleDataMessage(msg);
 
     if (--sockdata->pending == 0) {
         EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;
-        socket->close();
+        tcpSocket->close();
     }
     // Message deleted in handler - do not delete here!
 }
@@ -214,12 +214,12 @@ void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
 
     // close the connection (if not already closed)
-    if (socket->getState() == TCPSocket::PEER_CLOSED) {
+    if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
-        socket->close();
+        tcpSocket->close();
     }
 }
 
@@ -233,9 +233,9 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
-    sockCollection.removeSocket(socket);
-    delete socket;
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
+    tcpSockCollection.removeSocket(tcpSocket);
+    delete tcpSocket;
 }
 
 void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
@@ -254,9 +254,9 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
         EV_WARN << "Connection refused!\n";
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
-    sockCollection.removeSocket(socket);
-    delete socket;
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
+    tcpSockCollection.removeSocket(tcpSocket);
+    delete tcpSocket;
 }
 
 void HttpBrowser::socketDeleted(int connId, void *yourPtr)
@@ -266,8 +266,8 @@ void HttpBrowser::socketDeleted(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
-    ASSERT(connId == socket->getConnectionId());
+    TCPSocket *tcpSocket = sockdata->tcpSocket;
+    ASSERT(connId == tcpSocket->getConnectionId());
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {
         HttpRequestMessage *msg = queue.back();
@@ -297,20 +297,20 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
 
     // Create and initialize the socket
-    TCPSocket *socket = new TCPSocket();
-    socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-    socket->setOutputGate(gate("tcpOut"));
-    sockCollection.addSocket(socket);
+    TCPSocket *tcpSocket = new TCPSocket();
+    tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
+    tcpSocket->setOutputGate(gate("tcpOut"));
+    tcpSockCollection.addSocket(tcpSocket);
 
     // Initialize the associated data structure
     SockData *sockdata = new SockData;
     sockdata->messageQueue = HttpRequestQueue(queue);
-    sockdata->socket = socket;
+    sockdata->tcpSocket = tcpSocket;
     sockdata->pending = 0;
-    socket->setCallbackObject(this, sockdata);
+    tcpSocket->setCallbackObject(this, sockdata);
 
     // Issue a connect to the socket for the specified module and port.
-    socket->connect(L3AddressResolver().resolve(moduleName), connectPort);
+    tcpSocket->connect(L3AddressResolver().resolve(moduleName), connectPort);
 }
 
 } // namespace httptools
