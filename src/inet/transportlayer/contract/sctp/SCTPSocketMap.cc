@@ -28,7 +28,11 @@ SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
     if (!ind)
         throw cRuntimeError("SCTPSocketMap: findSocketFor(): no SCTPCommand control info in message (not from SCTP?)");
 
-    int connId = ind->getConnId();
+//     int connId = ind->getConnId();
+puts("FIXME!");
+int connId=-1;    
+::abort();    
+
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
     return (i == socketMap.end()) ? nullptr : i->second;

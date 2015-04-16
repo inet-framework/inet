@@ -365,9 +365,7 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
         sctpSocket->setCallbackObject(this, sockdata);
 
         // Issue a connect to the socket for the specified module and port.
-        AddressVector remoteAddressList;
-        remoteAddressList.push_back(L3AddressResolver().resolve(moduleName));
-        sctpSocket->connectx(remoteAddressList, connectPort);
+        sctpSocket->connect(L3AddressResolver().resolve(moduleName), connectPort);
     }
 }
 
