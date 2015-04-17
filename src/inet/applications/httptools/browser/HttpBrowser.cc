@@ -75,16 +75,30 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
-        TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
-        if (tcpSocket == nullptr) {
-            // Handle errors. @todo error instead of warning?
-            EV_WARN << "No socket found for message " << msg->getName() << endl;
-            delete msg;
-            return;
+        if (!useSCTP) {
+            TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
+            if (tcpSocket == nullptr) {
+                // Handle errors. @todo error instead of warning?
+                EV_WARN << "No socket found for message " << msg->getName() << endl;
+                delete msg;
+                return;
+            }
+            // Submit to the socket handler. Calls the TCPSocket::CallbackInterface methods.
+            // Message is deleted in the socket handler
+            tcpSocket->processMessage(msg);
         }
-        // Submit to the socket handler. Calls the TCPSocket::CallbackInterface methods.
-        // Message is deleted in the socket handler
-        tcpSocket->processMessage(msg);
+        else {
+            SCTPSocket *sctpSocket = sctpSockCollection.findSocketFor(msg);
+            if (sctpSocket == nullptr) {
+                // Handle errors. @todo error instead of warning?
+                EV_WARN << "No socket found for message " << msg->getName() << endl;
+                delete msg;
+                return;
+            }
+            // Submit to the socket handler. Calls the SCTPSocket::CallbackInterface methods.
+            // Message is deleted in the socket handler
+            sctpSocket->processMessage(msg);
+        }
     }
 }
 

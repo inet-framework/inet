@@ -45,6 +45,7 @@ SCTPSocket::SCTPSocket(bool type)
 {
     sockstate = NOT_BOUND;
     localPrt = remotePrt = 0;
+    inboundStreams = outboundStreams = 1;
     cb = nullptr;
     yourPtr = nullptr;
     gateToSctp = nullptr;
@@ -160,7 +161,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << sockstate << "\n";
 
-    if (oneToOne && sockstate != NOT_BOUND)
+    if (oneToOne && sockstate == NOT_BOUND)
        bind(0);
 
     if (oneToOne && sockstate != CLOSED)
@@ -198,7 +199,7 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
 {
     EV_INFO << "Socket connectx.  sockstate=" << sockstate << "\n";
 
-    if (oneToOne && sockstate != NOT_BOUND)
+    if (oneToOne && sockstate == NOT_BOUND)
        bind(0);
 
     if (oneToOne && sockstate != CLOSED)

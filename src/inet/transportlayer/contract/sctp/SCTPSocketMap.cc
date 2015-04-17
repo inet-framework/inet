@@ -28,14 +28,21 @@ SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
     if (!ind)
         throw cRuntimeError("SCTPSocketMap: findSocketFor(): no SCTPCommand control info in message (not from SCTP?)");
 
+    for (auto i = socketMap.begin(); i != socketMap.end(); ++i) {
+        if (i->second->belongsToSocket(msg)) {
+            return i->second;
+        }
+    }
+    
 //     int connId = ind->getConnId();
 puts("FIXME!");
-int connId=-1;    
-::abort();    
-
+// int connId=-1;    
+// ::abort();    
+/*
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
-    return (i == socketMap.end()) ? nullptr : i->second;
+    return (i == socketMap.end()) ? nullptr : i->second;*/
+    return nullptr;
 }
 
 void SCTPSocketMap::addSocket(SCTPSocket *socket)
