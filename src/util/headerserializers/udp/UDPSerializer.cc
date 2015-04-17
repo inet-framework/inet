@@ -38,7 +38,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #define SOURCE_IP_HEADER 8
 #define DEST_IP_HEADER 4
-#define PROTOCOL_IP_HEADER 4
+#define PROTOCOL_IP_HEADER 11
 
 using namespace INETFw;
 
