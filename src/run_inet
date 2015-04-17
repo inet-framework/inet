@@ -1,8 +1,17 @@
 #! /bin/sh
 DIR=`dirname $0`
 
+VALGRIND=""
+VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+
+if [ "$1" = "--valgrind" ] ; then
+   echo "##### Running with Valgrind! ######"
+   VALGRIND="/usr/bin/valgrind $VALGRIND_OPTIONS"
+   shift
+fi
+
 if [ -f $DIR/INET -o -f $DIR/INET.exe ]; then
-  $DIR/INET -n $DIR/../examples:$DIR $*
+  $VALGRIND $DIR/INET -n $DIR/../examples:$DIR $*
 else
   opp_run -l $DIR/INET -n $DIR/../examples:$DIR $*
 fi
