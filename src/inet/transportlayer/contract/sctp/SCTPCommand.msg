@@ -43,10 +43,10 @@ enum SCTPErrorCode
 
 
 //
-// Control info for SCTP connections. This class is to be set as control info
+// Control info for SCTP connections. This message is to be set as control info
 // (see cMessage::setControlInfo()) on all messages exchanged between ~SCTP and
 // application, in both directions. Some commands and indications
-// (SCTP_C_OPEN_xxx, SCTP_I_STATUS) use subclasses.
+// (SCTP_C_OPEN_xxx, SCTP_I_STATUS) use submessagees.
 //
 // connId identifies the connection locally within the application (internally,
 // ~SCTP uses the (app gate index, connId) pair to identify the socket).
@@ -54,7 +54,7 @@ enum SCTPErrorCode
 //
 // @see ~TcpCommandCode, ~TcpStatusInd, ~SCTPOpenCommand, ~SCTPStatusInfo, SCTPMain
 //
-class SCTPCommand extends cPacket
+packet SCTPCommand
 {
     int assocId = -1;   // identifies the socket within the application
     int sid = -1;
@@ -72,7 +72,7 @@ class SCTPCommand extends cPacket
 //
 // Currently not in use.
 //
-class SCTPErrorInfo extends SCTPCommand
+message SCTPErrorInfo extends SCTPCommand
 {
     int errorCode @enum(SCTPErrorCode);
     string messageText;
@@ -89,7 +89,7 @@ class SCTPErrorInfo extends SCTPCommand
 //
 // The sendQueueClass, receiveQueueClass and sctpAlgorithmClass fields
 // allow per-connection ~SCTP configuration. These fields may contain
-// names of classes subclassed from SCTPSendQueue, SCTPReceiveQueue
+// names of messagees submessageed from SCTPSendQueue, SCTPReceiveQueue
 // and SCTPAlgorithm, respectively. If not set, module parameters with
 // similar names are used.
 //
@@ -104,7 +104,7 @@ class SCTPErrorInfo extends SCTPCommand
 //
 // @see ~TcpCommandCode, ~SCTP
 //
-class SCTPOpenCommand extends SCTPCommand
+message SCTPOpenCommand extends SCTPCommand
 {
     AddressVector localAddresses;
     L3Address remoteAddr;            // required for active open
@@ -126,7 +126,7 @@ class SCTPOpenCommand extends SCTPCommand
 //
 // @see ~TcpCommandCode, ~SCTP
 //
-class SCTPSendCommand extends SCTPCommand
+message SCTPSendCommand extends SCTPCommand
 {
     unsigned int prMethod;
     bool last;
@@ -142,7 +142,7 @@ class SCTPSendCommand extends SCTPCommand
 //
 // @see ~TcpCommandCode, ~SCTP
 //
-class SCTPConnectInfo extends SCTPCommand
+message SCTPConnectInfo extends SCTPCommand
 {
     AddressVector remoteAddresses;
     int status;
@@ -158,7 +158,7 @@ class SCTPConnectInfo extends SCTPCommand
 //
 // @see ~TcpStatusInd, ~TcpCommandCode, ~SCTP
 //
-class SCTPStatusInfo extends SCTPCommand
+message SCTPStatusInfo extends SCTPCommand
 {
     int state;
     string stateName;
@@ -166,31 +166,31 @@ class SCTPStatusInfo extends SCTPCommand
     bool active;
 }
 
-class SCTPPathInfo extends SCTPCommand
+message SCTPPathInfo extends SCTPCommand
 {
     L3Address remoteAddress;
 }
 
-class SCTPResetInfo extends SCTPCommand
+message SCTPResetInfo extends SCTPCommand
 {
     L3Address remoteAddr;
     unsigned short requestType = 0;
     char streams[];
 }
 
-class SCTPInfo extends SCTPCommand
+message SCTPInfo extends SCTPCommand
 {
     int text = 0;
 }
 
-class SCTPRcvCommand extends SCTPCommand
+message SCTPRcvCommand extends SCTPCommand
 {
     uint32 ppid;
     uint32 tsn;
     uint32 cumTsn;
 }
 
-class SCTPSendQueueAbated extends SCTPCommand
+message SCTPSendQueueAbated extends SCTPCommand
 {
     uint64 bytesAvailable;
     uint64 bytesQueued;
@@ -198,11 +198,10 @@ class SCTPSendQueueAbated extends SCTPCommand
     uint64 queuedForStream[];
 }
 
-message SCTPSimpleMessage extends cPacket
+packet SCTPSimpleMessage
 {
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     char data[];
     simtime_t creationTime = 0;
     bool encaps = false;
 }
-
