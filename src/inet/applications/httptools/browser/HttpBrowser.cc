@@ -40,7 +40,7 @@ void HttpBrowser::initialize(int stage)
     HttpBrowserBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-       useSCTP = (par("protocol") == "SCTP");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
     }
 }
 
@@ -221,7 +221,7 @@ void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
         return;
     }
 
-    if(!useSCTP) {
+    if (!useSCTP) {
         SockData *sockdata = (SockData *)yourPtr;
         TCPSocket *tcpSocket = sockdata->tcpSocket;
 
@@ -252,7 +252,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
     }
 
     // Clean-up
-    if(!useSCTP) {
+    if (!useSCTP) {
         SockData *sockdata = (SockData *)yourPtr;
         TCPSocket *tcpSocket = sockdata->tcpSocket;
         tcpSockCollection.removeSocket(tcpSocket);
@@ -276,7 +276,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     }
 
     // Clean-up
-    if(!useSCTP) {
+    if (!useSCTP) {
         if (code == TCP_I_CONNECTION_RESET) {
             EV_WARN << "Connection reset!\n";
         }
@@ -333,7 +333,7 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
 
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
 
-    if(!useSCTP) {
+    if (!useSCTP) {
         // Create and initialize the socket
         TCPSocket *tcpSocket = new TCPSocket();
         tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);

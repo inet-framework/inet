@@ -32,7 +32,7 @@ void HttpServer::initialize(int stage)
         numBroken = 0;
         socketsOpened = 0;
 
-        useSCTP = (par("protocol") == "SCTP");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
 
         WATCH(numBroken);
         WATCH(socketsOpened);
@@ -42,7 +42,7 @@ void HttpServer::initialize(int stage)
 
         int port = par("port");
 
-        if(!useSCTP) {
+        if (!useSCTP) {
             TCPSocket tcpListenSocket;
             tcpListenSocket.setOutputGate(gate("tcpOut"));
             tcpListenSocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
@@ -82,7 +82,7 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        if(!useSCTP) {
+        if (!useSCTP) {
             TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
             if (!tcpSocket) {
                   EV_DEBUG << "No socket found for the message. Create a new one" << endl;
@@ -130,7 +130,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     // call the message handler to process the message.
     cMessage *reply = handleReceivedMessage(msg);
     if (reply != nullptr) {
-        if(!useSCTP) {
+        if (!useSCTP) {
            TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
            tcpSocket->send(reply);     // Send to socket if the reply is non-zero.
         }
@@ -154,7 +154,7 @@ void HttpServer::socketPeerClosed(int connId, void *yourPtr)
     }
 
     // close the connection (if not already closed)
-    if(!useSCTP) {
+    if (!useSCTP) {
         TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
         if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
             EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
@@ -179,7 +179,7 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
     }
 
     // Cleanup
-    if(!useSCTP) {
+    if (!useSCTP) {
         TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
         tcpSockCollection.removeSocket(tcpSocket);
         delete tcpSocket;
@@ -202,7 +202,7 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
     }
 
     // Cleanup
-    if(!useSCTP) {
+    if (!useSCTP) {
         TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
         if (code == TCP_I_CONNECTION_RESET) {
             EV_WARN << "Connection reset!\n";
