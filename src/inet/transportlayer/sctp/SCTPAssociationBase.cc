@@ -922,7 +922,7 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
     }
 }
 
-bool SCTPAssociation::processAppCommand(cPacket *msg)
+bool SCTPAssociation::processAppCommand(cMessage *msg)
 {
     printAssocBrief();
 

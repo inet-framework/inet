@@ -271,7 +271,7 @@ void SCTP::handleMessage(cMessage *msg)
                     key.assocId = assocId;
                     sctpAppAssocMap[key] = assoc;
                     EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
-                    bool ret = assoc->processAppCommand(PK(msg));
+                    bool ret = assoc->processAppCommand(msg);
                     if (!ret) {
                         removeAssociation(assoc);
                     }
@@ -280,7 +280,7 @@ void SCTP::handleMessage(cMessage *msg)
         }
         else {
             EV_INFO << "assoc found\n";
-            bool ret = assoc->processAppCommand(PK(msg));
+            bool ret = assoc->processAppCommand(msg);
 
             if (!ret)
                 removeAssociation(assoc);

@@ -30,7 +30,7 @@ namespace sctp {
 // Event processing code
 //
 
-void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
+void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
 {
     L3Address lAddr, rAddr;
 
@@ -74,7 +74,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
     }
 }
 
-void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
+void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
 {
     L3Address lAddr;
     int16 localPort;
@@ -112,7 +112,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
     }
 }
 
-void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
+void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
 {
     SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
 
@@ -132,7 +132,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
              << " appGateIndex=" << appGateIndex
              << " streamId=" << sendCommand->getSid() << endl;
 
-    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((msg->decapsulate()));
+    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((PK(msg)->decapsulate()));
     auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += smsg->getBitLength() / 8;
 
@@ -175,7 +175,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
         case PR_PRIO:
             datMsg->setPriority((uint32)sendCommand->getPrValue());
-            state->queuedDroppableBytes += msg->getByteLength();
+            state->queuedDroppableBytes += PK(msg)->getByteLength();
             break;
     }
 
@@ -209,7 +209,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
             if (datMsg->getPriority() > lowestPriority) {
                 EV_DEBUG << "msg will be abandoned, buffer is full and priority too low ("
                          << datMsg->getPriority() << ")\n";
-                state->queuedDroppableBytes -= msg->getByteLength();
+                state->queuedDroppableBytes -= PK(msg)->getByteLength();
                 delete smsg;
                 delete msg;
                 sendIndicationToApp(SCTP_I_ABANDONED);
@@ -358,7 +358,7 @@ void SCTPAssociation::process_ABORT(SCTPEventCode& event)
     }
 }
 
-void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
+void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
 {
     SCTPStatusInfo *statusInfo = new SCTPStatusInfo();
     statusInfo->setState(fsm->getState());
