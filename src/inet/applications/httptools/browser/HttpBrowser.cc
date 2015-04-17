@@ -275,15 +275,14 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
         return;
     }
 
-    if (code == TCP_I_CONNECTION_RESET) {
-        EV_WARN << "Connection reset!\n";
-    }
-    else if (code == TCP_I_CONNECTION_REFUSED) {
-        EV_WARN << "Connection refused!\n";
-    }
-
     // Clean-up
     if(!useSCTP) {
+        if (code == TCP_I_CONNECTION_RESET) {
+            EV_WARN << "Connection reset!\n";
+        }
+        else if (code == TCP_I_CONNECTION_REFUSED) {
+            EV_WARN << "Connection refused!\n";
+        }
         SockData *sockdata = (SockData *)yourPtr;
         TCPSocket *tcpSocket = sockdata->tcpSocket;
         tcpSockCollection.removeSocket(tcpSocket);
