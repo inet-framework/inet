@@ -33,15 +33,6 @@ SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
             return i->second;
         }
     }
-    
-//     int connId = ind->getConnId();
-puts("FIXME!");
-// int connId=-1;    
-// ::abort();    
-/*
-    auto i = socketMap.find(connId);
-    ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
-    return (i == socketMap.end()) ? nullptr : i->second;*/
     return nullptr;
 }
 
