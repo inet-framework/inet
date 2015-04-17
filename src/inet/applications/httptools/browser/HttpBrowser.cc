@@ -180,9 +180,15 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     // Get the socket and associated data structure.
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *tcpSocket = sockdata->tcpSocket;
+    SCTPSocket *sctpSocket = sockdata->sctpSocket;
     if (sockdata->messageQueue.empty()) {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
-        tcpSocket->close();
+        if (!useSCTP) {
+            tcpSocket->close();
+        }
+        else {
+            sctpSocket->close();
+        }
         return;
     }
 
@@ -193,7 +199,12 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
         cPacket *pckt = check_and_cast<cPacket *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
-        tcpSocket->send(msg);
+        if (!useSCTP) {
+            tcpSocket->send(msg);
+        }
+        else {
+            sctpSocket->send(msg);
+        }
         sockdata->pending++;
     }
 }
@@ -208,11 +219,17 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
 
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *tcpSocket = sockdata->tcpSocket;
+    SCTPSocket *sctpSocket = sockdata->sctpSocket;
     handleDataMessage(msg);
 
     if (--sockdata->pending == 0) {
         EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;
-        tcpSocket->close();
+        if (!useSCTP) {
+            tcpSocket->close();
+        }
+        else {
+            sctpSocket->close();
+        }
     }
     // Message deleted in handler - do not delete here!
 }
