@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -285,7 +286,12 @@ cModule *HttpController::getTcpApp(std::string node)
         receiverModule = getSimulation()->getSystemModule()->getSubmodule(node.c_str());
     }
 
-    return receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
+    cModule* module = receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
+    if (module == nullptr) {
+        // There is no tcpApp. If we are using SCTP, return the sctpApp instead.
+        module = receiverModule->getSubmodule("sctpApp", 0);    // TODO: CHECK INDEX
+    }
+    return module;
 }
 
 void HttpController::setSpecialStatus(const char *www, ServerStatus status, double p, double amortize)
