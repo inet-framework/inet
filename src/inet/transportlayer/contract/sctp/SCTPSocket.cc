@@ -45,6 +45,7 @@ SCTPSocket::SCTPSocket(bool type)
 {
     sockstate = NOT_BOUND;
     localPrt = remotePrt = 0;
+    inboundStreams = outboundStreams = 1;
     cb = nullptr;
     yourPtr = nullptr;
     gateToSctp = nullptr;
