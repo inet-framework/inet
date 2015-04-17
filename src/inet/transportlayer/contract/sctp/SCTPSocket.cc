@@ -159,7 +159,11 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
 void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << sockstate << "\n";
-    if (oneToOne && sockstate != NOT_BOUND && sockstate != CLOSED)
+
+    if (oneToOne && sockstate != NOT_BOUND)
+       bind(0);
+
+    if (oneToOne && sockstate != CLOSED)
         throw cRuntimeError("SCTPSocket::connect(): connect() or listen() already called");
 
     if (!oneToOne && sockstate != LISTENING)
@@ -193,10 +197,11 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << sockstate << "\n";
-    /*if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
-        throw cRuntimeError( "SCTPSocket::connect(): connect() or listen() already called");*/
 
-    if (oneToOne && sockstate != NOT_BOUND && sockstate != CLOSED)
+    if (oneToOne && sockstate != NOT_BOUND)
+       bind(0);
+
+    if (oneToOne && sockstate != CLOSED)
         throw cRuntimeError("SCTPSocket::connect(): connect() or listen() already called");
 
     if (!oneToOne && sockstate != LISTENING)
