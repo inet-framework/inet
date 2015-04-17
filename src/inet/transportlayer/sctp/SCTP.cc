@@ -460,7 +460,7 @@ SCTPAssociation *SCTP::findAssocForInitAck(SCTPInitAckChunk *initAckChunk, L3Add
 {
     SCTPAssociation *assoc = nullptr;
     int numberAddresses = initAckChunk->getAddressesArraySize();
-    for (uint32 j = 0; j < numberAddresses; j++) {
+    for (int32 j = 0; j < numberAddresses; j++) {
         if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
             continue;
         assoc = findAssocForMessage(initAckChunk->getAddresses(j), destAddr, srcPort, destPort, findListen);

@@ -2324,7 +2324,7 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
                 int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
                 /* check if chunk found in queue has to be fragmented */
-                if (b > state->fragPoint + SCTP_DATA_CHUNK_LENGTH) {
+                if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
                     /* START FRAGMENTATION */
                     SCTPDataMsg *datMsgQueued = (SCTPDataMsg *)streamQ->pop();
                     cPacket *datMsgQueuedEncMsg = datMsgQueued->getEncapsulatedPacket();
@@ -2494,9 +2494,9 @@ bool SCTPAssociation::nextChunkFitsIntoPacket(SCTPPathVariables *path, int32 byt
             int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
 
             /* Check if next message would be fragmented */
-            if (b > state->fragPoint + SCTP_DATA_CHUNK_LENGTH) {
+            if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
                 /* Test if fragment fits */
-                if (bytes >= state->fragPoint)
+                if (bytes >= (int32)state->fragPoint)
                     return true;
                 else
                     return false;
