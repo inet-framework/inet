@@ -271,7 +271,7 @@ void SCTP::handleMessage(cMessage *msg)
                     key.assocId = assocId;
                     sctpAppAssocMap[key] = assoc;
                     EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
-                    bool ret = assoc->processAppCommand(PK(msg));
+                    bool ret = assoc->processAppCommand(msg);
                     if (!ret) {
                         removeAssociation(assoc);
                     }
@@ -280,7 +280,7 @@ void SCTP::handleMessage(cMessage *msg)
         }
         else {
             EV_INFO << "assoc found\n";
-            bool ret = assoc->processAppCommand(PK(msg));
+            bool ret = assoc->processAppCommand(msg);
 
             if (!ret)
                 removeAssociation(assoc);
@@ -460,7 +460,7 @@ SCTPAssociation *SCTP::findAssocForInitAck(SCTPInitAckChunk *initAckChunk, L3Add
 {
     SCTPAssociation *assoc = nullptr;
     int numberAddresses = initAckChunk->getAddressesArraySize();
-    for (uint32 j = 0; j < numberAddresses; j++) {
+    for (int32 j = 0; j < numberAddresses; j++) {
         if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
             continue;
         assoc = findAssocForMessage(initAckChunk->getAddresses(j), destAddr, srcPort, destPort, findListen);
