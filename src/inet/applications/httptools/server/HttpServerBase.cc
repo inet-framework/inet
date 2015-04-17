@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -300,7 +301,8 @@ HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, 
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -352,7 +354,8 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -371,7 +374,8 @@ HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szErrStr);
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szErrStr);
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());

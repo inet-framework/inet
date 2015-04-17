@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -403,7 +404,8 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
-    HttpRequestMessage *msg = new HttpRequestMessage(szReq);
+    HttpRequestMessage *msg = new HttpRequestMessage;
+    msg->setName(szReq);
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
@@ -453,7 +455,8 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
 
-    HttpRequestMessage *msg = new HttpRequestMessage(szReq);
+    HttpRequestMessage *msg = new HttpRequestMessage;
+    msg->setName(szReq);
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);

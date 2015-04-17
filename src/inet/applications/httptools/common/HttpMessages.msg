@@ -63,12 +63,19 @@
 //
 
 
+cplusplus {{
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+}}
+
 namespace inet::httptools;
+
+class noncobject ::inet::SCTPSimpleMessage;
+
 
 //
 // Base class for HTTP messages
 //
-packet HttpBaseMessage
+packet HttpBaseMessage extends ::inet::SCTPSimpleMessage
 {
     @omitGetVerb(true);
     string targetUrl;               // The target URL - request set for browsers, echoed by servers.

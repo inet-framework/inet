@@ -144,6 +144,7 @@ class INET_API HttpBrowser : public HttpBrowserBase,
 
     // SCTPSocket::CallbackInterface callback methods
     virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) override;
+    virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) override;
 
     // Socket establishment and data submission
     /*

@@ -209,6 +209,11 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     }
 }
 
+void HttpBrowser::socketEstablished(int assocId, void *yourPtr, unsigned long int buffer)
+{
+    socketEstablished(assocId, yourPtr);
+}
+
 void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << connId << ": " << msg->getName() << endl;
