@@ -344,8 +344,6 @@ void SCTPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointe
 
 void SCTPSocket::processMessage(cMessage *msg)
 {
-EV_INFO << "QQQQ.iif " << msg->getFullPath() << "   ptr=" << (void*)this << endl;
-printf("QQQQ.in kind=%d   STATE=%d\n",msg->getKind(), sockstate);   
     SCTPStatusInfo *status;
     switch (msg->getKind()) {
         case SCTP_I_DATA:
