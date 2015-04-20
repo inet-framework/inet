@@ -95,6 +95,7 @@ class INET_API Buffer
 
     // read/write
     void *accessNBytes(unsigned int length);    // returns nullptr when haven't got enough space
+    const void *accessNBytes(unsigned int length) const { return const_cast<Buffer *>(this)->accessNBytes(length); }    // returns nullptr when haven't got enough space
 
     //TODO bit manipulation???
 
@@ -131,7 +132,7 @@ class INET_API SerializerBase : public cOwnedObject
     /**
      * Puts a packet sniffed from the wire into an EtherFrame.
      */
-    virtual cPacket *deserialize(Buffer &b, Context& context) = 0;
+    virtual cPacket *deserialize(const Buffer &b, Context& context) = 0;
 
   public:
     SerializerBase(const char *name = nullptr) : cOwnedObject(name) {}
@@ -141,22 +142,22 @@ class INET_API SerializerBase : public cOwnedObject
     void serializePacket(const cPacket *pkt, Buffer &b, Context& context);
 
     static SerializerBase & lookupDeserializer(Context& context, ProtocolGroup group, int id);
-    static cPacket *lookupAndDeserialize(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
-    cPacket *deserializePacket(Buffer &b, Context& context);
+    static cPacket *lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
+    cPacket *deserializePacket(const Buffer &b, Context& context);
 };
 
 class INET_API DefaultSerializer : public SerializerBase
 {
   public:
-    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context);
-    virtual cPacket *deserialize(Buffer &b, Context& context);
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(const Buffer &b, Context& context) override;
 };
 
 class INET_API ByteArraySerializer : public SerializerBase
 {
   public:
-    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context);
-    virtual cPacket *deserialize(Buffer &b, Context& context);
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(const Buffer &b, Context& context) override;
 };
 
 class INET_API SerializerRegistrationList : public cNamedObject, noncopyable

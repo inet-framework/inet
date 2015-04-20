@@ -385,7 +385,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     b.writeUint32(ethernetCRC(b._getBuf(), b.getPos()));
 }
 
-void Ieee80211Serializer::parseDataOrMgmtFrame(Buffer &b, Ieee80211DataOrMgmtFrame *Frame, short type)
+void Ieee80211Serializer::parseDataOrMgmtFrame(const Buffer &b, Ieee80211DataOrMgmtFrame *Frame, short type)
 {
     Frame->setType(type);
     b.seek(0);
@@ -412,7 +412,7 @@ void Ieee80211Serializer::parseDataOrMgmtFrame(Buffer &b, Ieee80211DataOrMgmtFra
     }
 }
 
-cPacket* Ieee80211Serializer::deserialize(Buffer &b, Context& c)
+cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     cPacket *frame = nullptr;

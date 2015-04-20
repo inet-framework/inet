@@ -38,7 +38,7 @@ class TCPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket* deserialize(Buffer &b, Context& context) override;
+    virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
     void serializeOption(const tcp::TCPOption *option, Buffer &b, Context& c);
     tcp::TCPOption *deserializeOption(Buffer &b, Context& c);

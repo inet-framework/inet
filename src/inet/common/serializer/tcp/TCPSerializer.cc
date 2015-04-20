@@ -285,7 +285,7 @@ TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bu
     return check_and_cast_nullable<TCPSegment *>(deserialize(b, c));
 }
 
-cPacket* TCPSerializer::deserialize(Buffer &b, Context& c)
+cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
 {
     struct tcphdr tcp;
     memset(&tcp, 0, sizeof(tcp));

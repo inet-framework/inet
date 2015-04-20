@@ -257,7 +257,7 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
         throw cRuntimeError("%s serializer error: packet %s (%s) length is %d but serialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
-cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
+cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
 {
     if (b.getRemainder() == 0)
         return nullptr;
@@ -314,7 +314,7 @@ void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& 
         b.setError();
 }
 
-cPacket *SerializerBase::lookupAndDeserialize(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+cPacket *SerializerBase::lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
 {
     cPacket *encapPacket = nullptr;
     SerializerBase& serializer = lookupDeserializer(context, group, id);
@@ -332,7 +332,7 @@ void DefaultSerializer::serialize(const cPacket *pkt, Buffer &b, Context& contex
     context.errorOccured = true;
 }
 
-cPacket *DefaultSerializer::deserialize(Buffer &b, Context& context)
+cPacket *DefaultSerializer::deserialize(const Buffer &b, Context& context)
 {
     unsigned int byteLength = b.getRemainder();
     if (byteLength) {
@@ -361,7 +361,7 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
         throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
 }
 
-cPacket *ByteArraySerializer::deserialize(Buffer &b, Context& context)
+cPacket *ByteArraySerializer::deserialize(const Buffer &b, Context& context)
 {
     RawPacket *bam = nullptr;
     unsigned int bytes = b.getRemainder();

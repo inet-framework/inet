@@ -121,13 +121,13 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     ip->ip_sum = htons(TCPIPchecksum::checksum(ip, IP_HEADER_BYTES));
 }
 
-cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
+cPacket* IPv4Serializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 
     IPv4Datagram *dest = new IPv4Datagram("parsed-ipv4");
     unsigned int bufsize = b.getRemainder();
-    struct ip *ip = static_cast<struct ip *>(b.accessNBytes(IP_HEADER_BYTES));
+    const struct ip *ip = static_cast<const struct ip *>(b.accessNBytes(IP_HEADER_BYTES));
     if (!ip ) {
         delete dest;
         return nullptr;

@@ -103,7 +103,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16To(startpos + 2, TCPIPchecksum::checksum(b._getBuf() + startpos, b.getPos() - startpos));
 }
 
-cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
+cPacket *ICMPSerializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 

@@ -75,7 +75,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16To(chksumPos, TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), endPos, c.l3AddressesPtr, c.l3AddressesLength));
 }
 
-cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
+cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     UDPPacket *pkt = new UDPPacket("parsed-udp");
