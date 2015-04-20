@@ -202,11 +202,8 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
         throw cRuntimeError("SCTPSocket::connect(): connect() or listen() already called");
 
     if (!oneToOne && sockstate != LISTENING)
-        throw cRuntimeError("SCTPSocket::connect: One-to-many style socket must be listening");
+        throw cRuntimeError("SCTPSocket::connect(): one-to-many style socket must be listening");
 
-    cMessage *msg = new cMessage("Associate", SCTP_C_ASSOCIATE);
-    remoteAddr = remoteAddress;
-    remotePrt = remotePort;
     SCTPOpenCommand *openCmd = new SCTPOpenCommand();
     if (oneToOne)
         openCmd->setAssocId(assocId);
@@ -215,15 +212,18 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
     EV_INFO << "Socket connect. Assoc=" << openCmd->getAssocId() << ", sockstate=" << stateName(sockstate) << "\n";
     openCmd->setLocalAddresses(localAddresses);
     openCmd->setLocalPort(localPrt);
-    openCmd->setRemoteAddr(remoteAddr);
-    openCmd->setRemotePort(remotePrt);
+    openCmd->setRemoteAddr(remoteAddress);
+    openCmd->setRemotePort(remotePort);
     openCmd->setOutboundStreams(outboundStreams);
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setNumRequests(numRequests);
     openCmd->setPrMethod(prMethod);
     openCmd->setStreamReset(streamReset);
-    msg->setControlInfo(openCmd);
-    sendToSCTP(msg);
+
+    cMessage *cmsg = new cMessage("Associate", SCTP_C_ASSOCIATE);
+    cmsg->setControlInfo(openCmd);
+    sendToSCTP(cmsg);
+
     if (oneToOne)
         sockstate = CONNECTING;
 }
@@ -231,36 +231,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << sockstate << "\n";
-
-    if (oneToOne && sockstate == NOT_BOUND)
-       bind(0);
-
-    if (oneToOne && sockstate != CLOSED)
-        throw cRuntimeError("SCTPSocket::connect(): connect() or listen() already called");
-
-    if (!oneToOne && sockstate != LISTENING)
-        throw cRuntimeError("SCTPSocket::connect(): one-to-many style socket must be listening");
-
-    cMessage *msg = new cMessage("Associate", SCTP_C_ASSOCIATE);
-    remoteAddresses = remoteAddressList;
-    remoteAddr = remoteAddresses.front();
-    remotePrt = remotePort;
-    SCTPOpenCommand *openCmd = new SCTPOpenCommand();
-    openCmd->setAssocId(assocId);
-    openCmd->setLocalAddresses(localAddresses);
-    openCmd->setLocalPort(localPrt);
-    openCmd->setRemoteAddr(remoteAddr);
-    openCmd->setRemoteAddresses(remoteAddresses);
-    openCmd->setRemotePort(remotePrt);
-    openCmd->setOutboundStreams(outboundStreams);
-    openCmd->setInboundStreams(inboundStreams);
-    openCmd->setNumRequests(numRequests);
-    openCmd->setPrMethod(prMethod);
-    openCmd->setStreamReset(streamReset);
-    msg->setControlInfo(openCmd);
-    sendToSCTP(msg);
-    if (oneToOne)
-        sockstate = CONNECTING;
+    connect(remoteAddresses.front(), remotePort, streamReset, prMethod, numRequests);
 }
 
 void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
