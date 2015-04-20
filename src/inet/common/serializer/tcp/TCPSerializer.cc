@@ -317,7 +317,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
 
     if (hdrLength > TCP_HEADER_OCTETS) {    // options present?
         unsigned short optionBytes = hdrLength - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
-        Buffer sb(b, 0, optionBytes);
+        Buffer sb(b, optionBytes);
 
         while (sb.getRemainder()) {
             TCPOption *option = deserializeOption(sb, c);

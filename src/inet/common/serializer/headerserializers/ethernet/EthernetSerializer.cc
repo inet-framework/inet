@@ -45,7 +45,7 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         uint16_t ethType = frame->getEtherType();
         b.writeUint16(ethType);
         cPacket *encapPkt = frame->getEncapsulatedPacket();
-        SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, ethType, 4);
+        SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, ethType, b.getRemainderWithout(4));
     }
     else if (dynamic_cast<const EtherFrameWithLLC *>(pkt)) {
         const EtherFrameWithLLC *frame = static_cast<const EtherFrameWithLLC *>(pkt);
@@ -61,17 +61,17 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeUint16(frame->getLocalcode());
             if (frame->getOrgCode() == 0) {
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), b.getRemainderWithout(4));
             }
             else {
                 //TODO
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), b.getRemainderWithout(4));
             }
         }
         else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
             cPacket *encapPkt = frame->getEncapsulatedPacket();
-            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 4);
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, b.getRemainderWithout(4));
         }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
@@ -138,7 +138,7 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     etherPacket->setSrc(srcAddr);
     etherPacket->setByteLength(b.getPos() + 4); // +4 for trailing crc
 
-    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, protocolGroup, protocolType, 4);
+    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, protocolGroup, protocolType, b.getRemainderWithout(4));
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());

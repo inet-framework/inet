@@ -85,10 +85,10 @@ SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGr
         return serializers.byteArraySerializer;
 }
 
-void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength)
 {
     ASSERT(pkt);
-    Buffer subBuffer(b, trailerLength);
+    Buffer subBuffer(b, maxLength);
     SerializerBase & serializer = lookupSerializer(pkt, context, group, id);
     serializer.serializePacket(pkt, subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
@@ -96,11 +96,11 @@ void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& 
         b.setError();
 }
 
-cPacket *SerializerBase::lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+cPacket *SerializerBase::lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength)
 {
     cPacket *encapPacket = nullptr;
     SerializerBase& serializer = lookupDeserializer(context, group, id);
-    Buffer subBuffer(b, trailerLength);
+    Buffer subBuffer(b, maxLength);
     encapPacket = serializer.deserializePacket(subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
     return encapPacket;

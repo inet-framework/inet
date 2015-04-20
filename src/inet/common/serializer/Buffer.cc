@@ -22,25 +22,10 @@ namespace inet {
 
 namespace serializer {
 
-Buffer::Buffer(const Buffer& base, unsigned int trailerLength)
+Buffer::Buffer(const Buffer& base, unsigned int maxLength)
 {
     buf = base.buf + base.pos;
-    bufsize = base.bufsize - base.pos;
-    if (bufsize >= trailerLength) {
-        bufsize -= trailerLength;
-    }
-    else {
-        bufsize = 0;
-        errorFound = true;
-    }
-}
-
-Buffer::Buffer(const Buffer& base, unsigned int dummy, unsigned int maxLength)
-{
-    buf = base.buf + base.pos;
-    bufsize = base.bufsize - base.pos;
-    if (bufsize > maxLength)
-        bufsize = maxLength;
+    bufsize = std::min(base.bufsize - base.pos, maxLength);
 }
 
 unsigned char Buffer::readByte() const

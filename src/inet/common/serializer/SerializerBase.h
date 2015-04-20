@@ -79,11 +79,11 @@ class INET_API SerializerBase : public cOwnedObject
     SerializerBase(const char *name = nullptr) : cOwnedObject(name) {}
 
     static SerializerBase & lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id);
-    static void lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
+    static void lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength = (unsigned int)(-1));
     void serializePacket(const cPacket *pkt, Buffer &b, Context& context);
 
     static SerializerBase & lookupDeserializer(Context& context, ProtocolGroup group, int id);
-    static cPacket *lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength);
+    static cPacket *lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength = (unsigned int)(-1));
     cPacket *deserializePacket(const Buffer &b, Context& context);
 };
 

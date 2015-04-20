@@ -117,7 +117,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeUint16(dataFrame->getEtherType());  // snap_hdr.ethertype
 
             const cPacket *encapPacket = dataFrame->getEncapsulatedPacket();
-            SerializerBase::lookupAndSerialize(encapPacket, b, c, ETHERTYPE, dataFrame->getEtherType(), 4);   // 4 byte for store crc at end of packet
+            SerializerBase::lookupAndSerialize(encapPacket, b, c, ETHERTYPE, dataFrame->getEtherType(), b.getRemainderWithout(4));   // 4 byte for store crc at end of packet
             packetLength = b.getPos();
         }
         else if (dynamic_cast<const Ieee80211AuthenticationFrame *>(pkt))
@@ -471,7 +471,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             b.accessNBytes(6);
             dataFrame->setEtherType(b.readUint16());    // ethertype
 
-            cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, dataFrame->getEtherType(), 4);
+            cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, dataFrame->getEtherType(), b.getRemainderWithout(4));
             if (encapPacket) {
                 dataFrame->encapsulate(encapPacket);
                 dataFrame->setName(encapPacket->getName());

@@ -106,13 +106,13 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         if ((dgram->getMoreFragments() || fragmentOffset != 0) && (payloadLength < totalLength)) {  // IP fragment  //FIXME hack: encapsulated packet contains entire packet if payloadLength < totalLength
             char *buf = new char[totalLength];
             Buffer tmpBuffer(buf, totalLength);
-            SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
+            SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol());
             tmpBuffer.seek(fragmentOffset);
             b.writeNBytes(tmpBuffer, payloadLength);
             delete [] buf;
         }
         else    // no fragmentation, or the encapsulated packet is represents only the fragment
-            SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+            SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol());
     }
     else {
         b.fillNBytes(payloadLength, '?');
@@ -169,15 +169,14 @@ cPacket* IPv4Serializer::deserialize(const Buffer &b, Context& c)
 
     dest->setByteLength(headerLength);
     unsigned int payloadLength = totalLength - headerLength;
-    unsigned int trailerLength = payloadLength < b.getRemainder() ? b.getRemainder() - payloadLength : 0;
     cPacket *encapPacket = nullptr;
     if (dest->getMoreFragments() || dest->getFragmentOffset() != 0) {  // IP fragment
-        Buffer subBuffer(b, trailerLength);
+        Buffer subBuffer(b, payloadLength);
         encapPacket = serializers.byteArraySerializer.deserialize(subBuffer, c);
         b.accessNBytes(subBuffer.getPos());
     }
     else
-        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), trailerLength);
+        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), payloadLength);
 
     if (encapPacket) {
         dest->encapsulate(encapPacket);

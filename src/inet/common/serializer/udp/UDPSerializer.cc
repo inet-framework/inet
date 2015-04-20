@@ -66,7 +66,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16(0);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
-        SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 0);
+        SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0);
     }
     else {
         b.fillNBytes(packetLength - UDP_HDR_LEN, 0);   // payload place
@@ -86,7 +86,7 @@ cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
     uint16_t chksum = b.readUint16();
     if (length > UDP_HDR_LEN) {
         unsigned int payloadLength = length - UDP_HDR_LEN;
-        Buffer subBuffer(b, payloadLength < b.getRemainder() ? b.getRemainder() - payloadLength : 0);
+        Buffer subBuffer(b, payloadLength);
         cPacket *encapPacket = serializers.byteArraySerializer.deserializePacket(subBuffer, c);
         b.accessNBytes(payloadLength);
         pkt->encapsulate(encapPacket);

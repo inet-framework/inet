@@ -43,14 +43,14 @@ class INET_API Buffer
     mutable bool errorFound = false;
 
   public:
-    Buffer(const Buffer& base, unsigned int trailerLength);
-    Buffer(const Buffer& base, unsigned int dummy, unsigned int maxLength);
+    Buffer(const Buffer& base, unsigned int maxLength);
     Buffer(void *buf, unsigned int bufLen) : buf(static_cast<unsigned char *>(buf)), bufsize(bufLen) {}
 
     // position
     void seek(unsigned int newpos) const { if (newpos <= bufsize) { pos = newpos; } else { pos = bufsize; errorFound = true; } }
     unsigned int getPos() const  { return pos; }
     unsigned int getRemainder() const  { return bufsize - pos; }
+    unsigned int getRemainderWithout(unsigned int bytes) const  { return bufsize - pos > bytes ? (bufsize - pos) - bytes : 0; }
 
     bool hasError() const  { return errorFound; }
     void setError() const  { errorFound = true; }
