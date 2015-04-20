@@ -709,7 +709,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         smsg->setByteLength(16);
         smsg->setDataLen(16);
         cmsg->encapsulate(smsg);
-        clientSocket.send(cmsg, true, true);
+        clientSocket.send(cmsg, 0, 0.0, 0, true, true);
 
         if ((bool)par("multi")) {
             cPacket *cmesg = new cPacket("Notification");
@@ -879,7 +879,7 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
         smsg->setByteLength(16);
         smsg->setDataLen(16);
         cmsg->encapsulate(smsg);
-        clientSocket.send(cmsg, false, true);
+        clientSocket.send(cmsg, 0, 0.0, 0, false, true);
     }
 }
 
