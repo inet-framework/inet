@@ -120,7 +120,7 @@ const char *SCTPSocket::stateName(int state)
 void SCTPSocket::sendToSCTP(cMessage *msg)
 {
     if (!gateToSctp)
-        throw cRuntimeError("SCTPSocket: setOutputGate() must be invoked before socket can be used");
+        throw cRuntimeError("SCTPSocket::sendToSCTP(): setOutputGate() must be invoked before socket can be used");
 
     check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
 }
@@ -166,10 +166,9 @@ void SCTPSocket::bindx(AddressVector lAddresses, int lPort)
 void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesToPush)
 {
     if (sockstate != CLOSED)
-        throw cRuntimeError(sockstate == NOT_BOUND ? "SCTPSocket: must call bind() before listen()"
-                : "SCTPSocket::listen(): connect() or listen() already called");
-
-    cMessage *msg = new cMessage("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
+        throw cRuntimeError(sockstate == NOT_BOUND ?
+                "SCTPSocket::listen(): must call bind() before listen()" :
+                "SCTPSocket::listen(): connect() or listen() already called");
 
     SCTPOpenCommand *openCmd = new SCTPOpenCommand();
     openCmd->setLocalAddresses(localAddresses);
@@ -184,10 +183,11 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     openCmd->setNumRequests(requests);
     openCmd->setStreamReset(reset);
     openCmd->setMessagesToPush(messagesToPush);
-    msg->setControlInfo(openCmd);
-    EV_INFO << "Assoc " << openCmd->getAssocId() << "::send PassiveOPEN to SCTP from socket:listen \n";
 
-    sendToSCTP(msg);
+    EV_INFO << "Assoc " << openCmd->getAssocId() << ": PassiveOPEN to SCTP from SCTPSocket:listen()\n";
+    cMessage *cmsg = new cMessage("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
+    cmsg->setControlInfo(openCmd);
+    sendToSCTP(cmsg);
     sockstate = LISTENING;
 }
 
@@ -267,7 +267,7 @@ void SCTPSocket::sendNotification(cMessage *msg)
         throw cRuntimeError("SCTPSocket::sendNotification(%s): not connected or connecting", msg->getName());
     }
     else if (!oneToOne && sockstate != LISTENING) {
-        throw cRuntimeError("SCTPSocket::sendNotification(): one-to-many style socket must be listening");
+        throw cRuntimeError("SCTPSocket::sendNotification(%s): one-to-many style socket must be listening", msg->getName());
     }
 
     sendToSCTP(msg);
@@ -280,7 +280,7 @@ void SCTPSocket::sendRequest(cMessage *msg)
 
 void SCTPSocket::close()
 {
-    EV_INFO << "SCTPSocket: close\n";
+    EV_INFO << "SCTPSocket::close()\n";
 
     cMessage *msg = new cMessage("CLOSE", SCTP_C_CLOSE);
     SCTPCommand *cmd = new SCTPCommand();
@@ -292,7 +292,7 @@ void SCTPSocket::close()
 
 void SCTPSocket::shutdown()
 {
-    EV << "SCTPSocket: shutdown\n";
+    EV << "SCTPSocket::shutdown()\n";
 
     cMessage *msg = new cMessage("SHUTDOWN", SCTP_C_SHUTDOWN);
     SCTPCommand *cmd = new SCTPCommand();
@@ -306,7 +306,6 @@ void SCTPSocket::abort()
     if (sockstate != NOT_BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
         cMessage *msg = new cMessage("ABORT", SCTP_C_ABORT);
         SCTPCommand *cmd = new SCTPCommand();
-        //sctpEV3<<"Message cmd="<<&cmd<<"\n";
         cmd->setAssocId(assocId);
         msg->setControlInfo(cmd);
         sendToSCTP(msg);
@@ -468,7 +467,7 @@ void SCTPSocket::processMessage(cMessage *msg)
         }
 
         default:
-            throw cRuntimeError("SCTPSocket: invalid msg kind %d, one of the SCTP_I_xxx constants expected", msg->getKind());
+            throw cRuntimeError("SCTPSocket::processMessage(): invalid msg kind %d, one of the SCTP_I_xxx constants expected", msg->getKind());
     }
 
     if (msg != NULL) {
