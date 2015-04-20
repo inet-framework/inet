@@ -65,7 +65,6 @@ class INET_API SCTPSocket
 
   protected:
     int assocId;
-    int sockId;
     int sockstate;
     bool oneToOne;
 
@@ -101,7 +100,7 @@ class INET_API SCTPSocket
      * The assocId will be picked up from the message: it should have arrived
      * from SCTPMain and contain SCTPCommmand control info.
      */
-    SCTPSocket(cPacket *msg);
+    SCTPSocket(cMessage *msg);
 
     /**
      * Destructor
@@ -188,14 +187,20 @@ class INET_API SCTPSocket
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     /**
-     * Sends data packet.
+     * Send data message.
      */
-    void send(cMessage *msg, bool last = true, bool primary = true);
-    void send(cMessage *msg, int prMethod, double prValue, bool last);
-    void send(cMessage *msg, int prMethod, double prValue, bool last, int32 streamId);
+    void send(cMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
 
+    /**
+     * Send notification.
+     */
     void sendNotification(cMessage *msg);
+
+    /**
+     * Send request.
+     */
     void sendRequest(cMessage *msg);
+
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation
      * means "I have no more data to send", and thus results in a one-way
