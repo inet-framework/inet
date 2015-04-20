@@ -61,7 +61,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     int packetLength = pkt->getByteLength();
     b.writeUint16(pkt->getSourcePort());
     b.writeUint16(pkt->getDestinationPort());
-    b.writeUint16(pkt->getTotalLength());
+    b.writeUint16(pkt->getTotalLengthField());
     unsigned int chksumPos = b.getPos();
     b.writeUint16(0);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
@@ -82,7 +82,7 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
     pkt->setSourcePort(b.readUint16());
     pkt->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();
-    pkt->setTotalLength(length);
+    pkt->setTotalLengthField(length);
     uint16_t chksum = b.readUint16();
     if (length > UDP_HDR_LEN) {
         unsigned int payloadLength = length - UDP_HDR_LEN;

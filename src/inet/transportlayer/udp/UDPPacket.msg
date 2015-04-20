@@ -36,6 +36,6 @@ packet UDPPacket
     unsigned short srcPort;
     unsigned short destPort;
     byteLength = UDP_HDR_LEN;
-    int totalLength = -1;   // -1 means: getTotalLength() uses getByteLength()
+    int totalLengthField = -1;   // -1 means: getTotalLengthField() uses getByteLength()
 }
 
