@@ -218,7 +218,7 @@ void SCTP::handleMessage(cMessage *msg)
                 delete sctpmsg;
             }
             else {
-                EV_INFO << "assoc " << assoc->assocId << "found\n";
+                EV_INFO << "assoc " << assoc->assocId << " found\n";
                 bool ret = assoc->processSCTPMessage(sctpmsg, srcAddr, destAddr);
                 if (!ret) {
                     EV_DEBUG << "SCTPMain:: removeAssociation \n";
@@ -295,7 +295,7 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
 {
     SCTPMessage *msg = new SCTPMessage();
 
-    EV_DEBUG << "\n\nSCTPMain:sendABORT \n";
+    EV_DEBUG << "\n\nSCTP::sendAbortFromMain()\n";
 
     msg->setSrcPort(sctpmsg->getDestPort());
     msg->setDestPort(sctpmsg->getSrcPort());
