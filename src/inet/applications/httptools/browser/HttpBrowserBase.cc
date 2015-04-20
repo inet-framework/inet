@@ -117,6 +117,7 @@ void HttpBrowserBase::initialize(int stage)
         controller = getModuleFromPar<HttpController>(par("httpBrowserControllerModule"), this);
 
         httpProtocol = par("httpProtocol");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
 
         logFileName = par("logFile").stdstringValue();
         enableLogging = logFileName != "";
@@ -415,6 +416,14 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->setKind(HTTPT_REQUEST_MESSAGE);
 
+    if(useSCTP) {
+        msg->setDataArraySize(msg->getByteLength());
+        for (int i = 0; i < msg->getByteLength(); i++) {
+            msg->setData(i, 'G');   // dummy data
+        }
+        msg->setDataLen(msg->getByteLength());
+    }
+
     logRequest(msg);
     htmlRequested++;
 
@@ -465,6 +474,14 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->setKind(HTTPT_REQUEST_MESSAGE);
+
+    if(useSCTP) {
+        msg->setDataArraySize(msg->getByteLength());
+        for (int i = 0; i < msg->getByteLength(); i++) {
+            msg->setData(i, 'G');   // dummy data
+        }
+        msg->setDataLen(msg->getByteLength());
+    }
 
     logRequest(msg);
 
@@ -562,4 +579,3 @@ void HttpBrowserBase::readScriptedEvents(const char *filename)
 } // namespace httptools
 
 } // namespace inet
-

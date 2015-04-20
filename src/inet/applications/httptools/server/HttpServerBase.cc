@@ -61,6 +61,7 @@ void HttpServerBase::initialize(int stage)
         outputFormat = lf_short;
 
         httpProtocol = par("httpProtocol");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
 
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement == nullptr)
@@ -244,8 +245,16 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
         replymsg = generateErrorReply(request, 400);
     }
 
-    if (replymsg != nullptr)
+    if (replymsg != nullptr) {
+        if(useSCTP) {
+            replymsg->setDataArraySize(replymsg->getByteLength());
+            for (int i = 0; i < replymsg->getByteLength(); i++) {
+                  replymsg->setData(i, 'R');   // dummy data
+            }
+            replymsg->setDataLen(replymsg->getByteLength());
+        }
         logResponse(replymsg);
+    }
 
     return replymsg;
 }
@@ -384,6 +393,14 @@ HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request
     replymsg->setResult(code);
     replymsg->setByteLength((int)rdErrorMsgSize->draw());
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+
+    if(useSCTP) {
+        replymsg->setDataArraySize(replymsg->getByteLength());
+        for (int i = 0; i < replymsg->getByteLength(); i++) {
+            replymsg->setData(i, 'E');   // dummy data
+        }
+        replymsg->setDataLen(replymsg->getByteLength());
+    }
 
     badRequests++;
     return replymsg;

@@ -38,10 +38,6 @@ void HttpBrowser::initialize(int stage)
 {
     EV_DEBUG << "Initializing HTTP browser component (sockets version), stage " << stage << endl;
     HttpBrowserBase::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL) {
-        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
-    }
 }
 
 void HttpBrowser::finish()
@@ -241,6 +237,18 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
 
 void HttpBrowser::socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg)
 {
+    // SCTP data is available => tell SCTP to forward it!
+    const SCTPCommand* dataIndication = check_and_cast<const SCTPCommand*>(msg->getControlInfo());
+
+    SCTPSendCommand* command = new SCTPSendCommand("SendCommand");
+    command->setAssocId(dataIndication->getAssocId());
+    command->setSid(dataIndication->getSid());
+    command->setNumMsgs(dataIndication->getNumMsgs());
+
+    cPacket* cmsg = new cPacket("SCTP_C_RECEIVE");
+    cmsg->setKind(SCTP_C_RECEIVE);
+    cmsg->setControlInfo(command);
+    send(cmsg, "sctpOut");
 }
 
 void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status)

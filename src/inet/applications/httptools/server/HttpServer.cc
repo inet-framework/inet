@@ -32,8 +32,6 @@ void HttpServer::initialize(int stage)
         numBroken = 0;
         socketsOpened = 0;
 
-        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
-
         WATCH(numBroken);
         WATCH(socketsOpened);
     }
@@ -144,6 +142,18 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
 
 void HttpServer::socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg)
 {
+    // SCTP data is available => tell SCTP to forward it!
+    const SCTPCommand* dataIndication = check_and_cast<const SCTPCommand*>(msg->getControlInfo());
+
+    SCTPSendCommand* command = new SCTPSendCommand("SendCommand");
+    command->setAssocId(dataIndication->getAssocId());
+    command->setSid(dataIndication->getSid());
+    command->setNumMsgs(dataIndication->getNumMsgs());
+
+    cPacket* cmsg = new cPacket("SCTP_C_RECEIVE");
+    cmsg->setKind(SCTP_C_RECEIVE);
+    cmsg->setControlInfo(command);
+    send(cmsg, "sctpOut");
 }
 
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)

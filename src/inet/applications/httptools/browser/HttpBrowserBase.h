@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -114,6 +115,8 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     long sessionCount = 0;
     long connectionsCount = 0;
 
+    bool useSCTP = false;    // Use SCTP instead of TCP?
+
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -158,4 +161,3 @@ class INET_API HttpBrowserBase : public HttpNodeBase
 } // namespace inet
 
 #endif // ifndef __INET_HTTPBROWSERBASE_H
-

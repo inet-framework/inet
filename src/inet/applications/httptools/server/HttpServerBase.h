@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -80,6 +81,8 @@ class INET_API HttpServerBase : public HttpNodeBase
     rdObject *rdNumResources = nullptr;    ///< Number of resources per HTML page.
     rdObject *rdTextImageResourceRatio = nullptr;    ///< The ratio of text resources to images referenced in HTML pages.
     rdObject *rdErrorMsgSize = nullptr;    ///< The size of error messages.
+
+    bool useSCTP = false;    // Use SCTP instead of TCP?
 
   protected:
     virtual void initialize(int stage) override;
