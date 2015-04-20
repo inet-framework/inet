@@ -87,7 +87,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     ip->ip_p = dgram->getTransportProtocol();
     ip->ip_src.s_addr = htonl(dgram->getSrcAddress().getInt());
     ip->ip_dst.s_addr = htonl(dgram->getDestAddress().getInt());
-    ip->ip_len = htons(dgram->getTotalLength());
+    ip->ip_len = htons(dgram->getTotalLengthField());
     ip->ip_sum = 0;
     c.l3AddressesPtr = &ip->ip_src.s_addr;
     c.l3AddressesLength = sizeof(ip->ip_src.s_addr) + sizeof(ip->ip_dst.s_addr);
@@ -149,7 +149,7 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     dest->setFragmentOffset((ntohs(ip->ip_off) & IP_OFFMASK) * 8);
     dest->setTypeOfService(ip->ip_tos);
     totalLength = ntohs(ip->ip_len);
-    dest->setTotalLength(totalLength);
+    dest->setTotalLengthField(totalLength);
     headerLength = ip->ip_hl << 2;
 
     if (headerLength < IP_HEADER_BYTES) {
