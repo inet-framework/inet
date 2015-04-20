@@ -184,6 +184,11 @@ class INET_API SCTPSocket
      */
     void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
+    /**
+     * Active OPEN to the given remote socket.
+     * The current implementation just calls connect() with the first address
+     * of the given list. This behaviour may be improved in the future.
+     */
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     /**
