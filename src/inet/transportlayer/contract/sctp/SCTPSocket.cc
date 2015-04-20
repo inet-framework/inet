@@ -204,6 +204,9 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
     if (!oneToOne && sockstate != LISTENING)
         throw cRuntimeError("SCTPSocket::connect(): one-to-many style socket must be listening");
 
+    remoteAddr = remoteAddress;
+    remotePrt = remotePort;
+
     SCTPOpenCommand *openCmd = new SCTPOpenCommand();
     if (oneToOne)
         openCmd->setAssocId(assocId);
@@ -212,8 +215,8 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
     EV_INFO << "Socket connect. Assoc=" << openCmd->getAssocId() << ", sockstate=" << stateName(sockstate) << "\n";
     openCmd->setLocalAddresses(localAddresses);
     openCmd->setLocalPort(localPrt);
-    openCmd->setRemoteAddr(remoteAddress);
-    openCmd->setRemotePort(remotePort);
+    openCmd->setRemoteAddr(remoteAddr);
+    openCmd->setRemotePort(remotePrt);
     openCmd->setOutboundStreams(outboundStreams);
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setNumRequests(numRequests);
@@ -231,7 +234,8 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connectx.  sockstate=" << sockstate << "\n";
-    connect(remoteAddresses.front(), remotePort, streamReset, prMethod, numRequests);
+    remoteAddresses = remoteAddressList;
+    connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
 
 void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
