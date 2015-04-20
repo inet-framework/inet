@@ -59,7 +59,6 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     ASSERT(b.getPos() == 0);
     const UDPPacket *pkt = check_and_cast<const UDPPacket *>(_pkt);
     int packetLength = pkt->getByteLength();
-    ASSERT(packetLength >= 8);
     b.writeUint16(pkt->getSourcePort());
     b.writeUint16(pkt->getDestinationPort());
     b.writeUint16(pkt->getTotalLength());
@@ -67,7 +66,6 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16(0);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
-        ASSERT(encapPkt->getByteLength() == packetLength - UDP_HDR_LEN);
         SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 0);
     }
     else {
