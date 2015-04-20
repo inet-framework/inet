@@ -23,10 +23,12 @@ namespace inet {
 
 namespace physicallayer {
 
-void ConvolutionalCoder::printToStream(std::ostream& stream) const
+std::ostream& ConvolutionalCoder::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ConvolutionalCoder, "
-           << "convolutionalCode = " << convolutionalCode;
+    stream << "ConvolutionalCoder";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level - 1);
+    return stream;
 }
 
 BitVector ConvolutionalCoder::getPuncturedIndices(unsigned int length) const

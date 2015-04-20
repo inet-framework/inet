@@ -37,21 +37,22 @@ bool NetworkLSA::update(const OSPFNetworkLSA *lsa)
 
 bool NetworkLSA::differsFrom(const OSPFNetworkLSA *networkLSA) const
 {
+    const OSPFLSAHeader& thisHeader = getHeader();
     const OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
-    bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
-                            ((header_var.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
-                            ((header_var.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
-                            (header_var.getLsaLength() != lsaHeader.getLsaLength()));
+    bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
+                            ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
+                            ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
+                            (thisHeader.getLsaLength() != lsaHeader.getLsaLength()));
     bool differentBody = false;
 
     if (!differentHeader) {
-        differentBody = ((networkMask_var != networkLSA->getNetworkMask()) ||
-                         (attachedRouters_arraysize != networkLSA->getAttachedRoutersArraySize()));
+        differentBody = ((getNetworkMask() != networkLSA->getNetworkMask()) ||
+                         (getAttachedRoutersArraySize() != networkLSA->getAttachedRoutersArraySize()));
 
         if (!differentBody) {
             unsigned int routerCount = attachedRouters_arraysize;
             for (unsigned int i = 0; i < routerCount; i++) {
-                if (attachedRouters_var[i] != networkLSA->getAttachedRouters(i)) {
+                if (getAttachedRouters(i) != networkLSA->getAttachedRouters(i)) {
                     differentBody = true;
                     break;
                 }

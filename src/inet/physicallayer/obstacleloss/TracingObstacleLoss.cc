@@ -41,12 +41,12 @@ void TracingObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
-        environment = check_and_cast<IPhysicalEnvironment *>(simulation.getModuleByPath(par("environmentModule")));
+        environment = check_and_cast<IPhysicalEnvironment *>(getModuleByPath(par("environmentModule")));
         leaveIntersectionTrail = par("leaveIntersectionTrail");
         leaveFaceNormalVectorTrail = par("leaveFaceNormalVectorTrail");
         if (leaveIntersectionTrail || leaveFaceNormalVectorTrail) {
             intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
-            cCanvas *canvas = simulation.getSystemModule()->getCanvas();
+            cCanvas *canvas = getSimulation()->getSystemModule()->getCanvas();
             canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
         }
     }
@@ -60,9 +60,9 @@ void TracingObstacleLoss::finish()
     recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
-void TracingObstacleLoss::printToStream(std::ostream& stream) const
+std::ostream& TracingObstacleLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "TracingObstacleLoss";
+    return stream << "TracingObstacleLoss";
 }
 
 double TracingObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const

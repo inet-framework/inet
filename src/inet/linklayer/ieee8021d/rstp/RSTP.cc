@@ -852,7 +852,7 @@ void RSTP::flushOtherPorts(unsigned int portNum)
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         Ieee8021dInterfaceData *iPort = getPortInterfaceData(i);
-        iPort->setTCWhile(simulation.getSimTime() + tcWhileTime);
+        iPort->setTCWhile(simTime() + tcWhileTime);
         if (i != portNum)
             macTable->flush(i);
     }

@@ -62,6 +62,8 @@ class INET_API EnergySinkBase : public virtual IEnergySink
     W totalGeneratedPower;
 
   protected:
+    virtual void initialize(int stage);
+
     W computeTotalGeneratedPower();
 
   public:

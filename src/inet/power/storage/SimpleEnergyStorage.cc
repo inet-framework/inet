@@ -26,13 +26,13 @@ namespace power {
 Define_Module(SimpleEnergyStorage);
 
 SimpleEnergyStorage::SimpleEnergyStorage() :
-    nominalCapacity(J(sNaN)),
-    residualCapacity(J(sNaN)),
-    printCapacityStep(J(sNaN)),
+    nominalCapacity(J(NaN)),
+    residualCapacity(J(NaN)),
+    printCapacityStep(J(NaN)),
     lastResidualCapacityUpdate(-1),
     timer(nullptr),
-    nodeShutdownCapacity(J(sNaN)),
-    nodeStartCapacity(J(sNaN)),
+    nodeShutdownCapacity(J(NaN)),
+    nodeStartCapacity(J(NaN)),
     lifecycleController(nullptr),
     node(nullptr),
     nodeStatus(nullptr)
@@ -60,11 +60,12 @@ void SimpleEnergyStorage::initialize(int stage)
             nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
             if (!nodeStatus)
                 throw cRuntimeError("Cannot find node status");
-            lifecycleController = dynamic_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
+            lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
             if (!lifecycleController)
                 throw cRuntimeError("Cannot find lifecycle controller");
         }
         scheduleTimer();
+        WATCH(residualCapacity);
     }
 }
 

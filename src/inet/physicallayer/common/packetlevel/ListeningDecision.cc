@@ -27,11 +27,13 @@ ListeningDecision::ListeningDecision(const IListening *listening, bool isListeni
 {
 }
 
-void ListeningDecision::printToStream(std::ostream& stream) const
+std::ostream& ListeningDecision::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ListeningDecision, "
-           << "listening = { " << listening << " }, "
-           << (isListeningPossible_ ? "possible" : "impossible");
+    stream << "ListeningDecision";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", listening = " << printObjectToString(listening, level - 1) 
+               << (isListeningPossible_ ? ", possible" : ", impossible");
+    return stream;
 }
 
 } // namespace physicallayer

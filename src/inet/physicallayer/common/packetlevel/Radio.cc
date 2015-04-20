@@ -56,7 +56,7 @@ Radio::Radio() :
 Radio::~Radio()
 {
     // NOTE: can't use the medium module here, because it may have been already deleted
-    cModule *medium = simulation.getModule(mediumModuleId);
+    cModule *medium = getSimulation()->getModule(mediumModuleId);
     if (medium != nullptr)
         check_and_cast<IRadioMedium *>(medium)->removeRadio(this);
     cancelAndDelete(endTransmissionTimer);
@@ -71,7 +71,7 @@ void Radio::initialize(int stage)
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
-        medium = check_and_cast<IRadioMedium *>(simulation.getModuleByPath("radioMedium"));
+        medium = check_and_cast<IRadioMedium *>(getModuleByPath("radioMedium"));
         mediumModuleId = check_and_cast<cModule *>(medium)->getId();
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
@@ -90,32 +90,18 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         updateDisplayString();
-        EV_DEBUG << "Radio initialized with " << antenna << ", " << transmitter << ", " << receiver << endl;
+        EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
 }
 
-m Radio::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
+std::ostream& Radio::printToStream(std::ostream& stream, int level) const
 {
-    // TODO: retrieve carrier frequency from the transmitter?
-    Hz carrierFrequency = Hz(check_and_cast<const cModule *>(check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache())->par("carrierFrequency"));
-    double maxAntennaGain = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxAntennaGain();
-    double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
-    return medium->getPathLoss()->computeRange(medium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
-}
-
-m Radio::computeMaxCommunicationRange() const
-{
-    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinReceptionPower());
-}
-
-m Radio::computeMaxInterferenceRange() const
-{
-    return computeMaxRange(transmitter->getMaxPower(), check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMinInterferencePower());
-}
-
-void Radio::printToStream(std::ostream& stream) const
-{
-    stream << (cSimpleModule *)this;
+    stream << static_cast<const cSimpleModule *>(this);
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", antenna = " << printObjectToString(antenna, level - 1)
+               << ", transmitter = " << printObjectToString(transmitter, level - 1)
+               << ", receiver = " << printObjectToString(receiver, level - 1);
+    return stream;
 }
 
 void Radio::setRadioMode(RadioMode newRadioMode)
@@ -411,23 +397,25 @@ void Radio::updateDisplayString()
     // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
-    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange)) {
+    if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
         cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {
+            m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);
             char tag[32];
             sprintf(tag, "r%i1", getId());
             displayString.removeTag(tag);
             displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, computeMaxInterferenceRange().get());
+            displayString.setTagArg(tag, 0, maxInterferenceRage.get());
             displayString.setTagArg(tag, 2, "gray");
         }
         if (displayCommunicationRange) {
+            m maxCommunicationRange = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxCommunicationRange(this);
             char tag[32];
             sprintf(tag, "r%i2", getId());
             displayString.removeTag(tag);
             displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, computeMaxCommunicationRange().get());
+            displayString.setTagArg(tag, 0, maxCommunicationRange.get());
             displayString.setTagArg(tag, 2, "blue");
         }
     }

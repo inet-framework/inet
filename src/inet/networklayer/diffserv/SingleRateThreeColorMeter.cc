@@ -76,7 +76,7 @@ void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
             break;
     }
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[80] = "";
         if (numRcvd > 0)
             sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);

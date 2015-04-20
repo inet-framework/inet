@@ -23,11 +23,13 @@ namespace physicallayer {
 
 Define_Module(RayleighFading);
 
-void RayleighFading::printToStream(std::ostream& stream) const
+std::ostream& RayleighFading::printToStream(std::ostream& stream, int level) const
 {
-    stream << "RayleighFading, "
-           << "alpha = " << alpha << ", "
-           << "systemLoss = " << systemLoss;
+    stream << "RayleighFading";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << "systemLoss = " << systemLoss;
+    return stream;
 }
 
 double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

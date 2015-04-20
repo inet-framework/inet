@@ -18,7 +18,6 @@
 
 cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
-#include "simtime_t.h"
 }}
 
 namespace inet;

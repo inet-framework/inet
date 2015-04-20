@@ -40,7 +40,7 @@ void NetworkInfo::handleMessage(cMessage *msg)
 
 void NetworkInfo::processCommand(const cXMLElement& node)
 {
-    cModule *target = simulation.getModuleByPath(node.getAttribute("target"));
+    cModule *target = getModuleByPath(node.getAttribute("target"));
 
     if (!strcmp(node.getTagName(), "routing")) {
         const char *filename = node.getAttribute("file");

@@ -155,7 +155,7 @@ MACAddress EtherAppCli::resolveDestMACAddress()
     if (destAddress[0]) {
         // try as mac address first, then as a module
         if (!destMACAddress.tryParse(destAddress)) {
-            cModule *destStation = simulation.getModuleByPath(destAddress);
+            cModule *destStation = getModuleByPath(destAddress);
             if (!destStation)
                 throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
 

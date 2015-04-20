@@ -29,10 +29,10 @@ namespace physicallayer {
 
 Define_Module(DimensionalAnalogModel);
 
-void DimensionalAnalogModel::printToStream(std::ostream& stream) const
+std::ostream& DimensionalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "DimensionalAnalogModel, ";
-    DimensionalAnalogModelBase::printToStream(stream);
+    stream << "DimensionalAnalogModel";
+    return DimensionalAnalogModelBase::printToStream(stream, level);
 }
 
 const IReception *DimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const

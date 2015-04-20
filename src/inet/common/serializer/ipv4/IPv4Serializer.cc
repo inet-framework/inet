@@ -20,7 +20,7 @@
 #include <algorithm>    // std::min
 #include <typeinfo>
 
-#include "platdep/sockets.h" // htonl, ntohl, etc. on Windows
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/serializer/headers/bsdint.h"
@@ -98,19 +98,24 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     }
 
     const cPacket *encapPacket = dgram->getEncapsulatedPacket();
+    unsigned int payloadLength = dgram->getByteLength() - b.getPos();
 
-    if (dgram->getMoreFragments() || dgram->getFragmentOffset() != 0) {  // IP fragment
-        unsigned int totalLength = encapPacket->getByteLength();
-        char *buf = new char[totalLength];
-        Buffer tmpBuffer(buf, totalLength);
-        SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
-        unsigned int segmentLength = dgram->getByteLength() - b.getPos();
-        tmpBuffer.seek(dgram->getFragmentOffset());
-        b.writeNBytes(tmpBuffer, segmentLength);
-        delete [] buf;
+    if (encapPacket) {
+        if (dgram->getMoreFragments() || dgram->getFragmentOffset() != 0) {  // IP fragment
+            unsigned int totalLength = encapPacket->getByteLength();
+            char *buf = new char[totalLength];
+            Buffer tmpBuffer(buf, totalLength);
+            SerializerBase::lookupAndSerialize(encapPacket, tmpBuffer, c, IP_PROT, dgram->getTransportProtocol(), 0);
+            tmpBuffer.seek(dgram->getFragmentOffset());
+            b.writeNBytes(tmpBuffer, payloadLength);
+            delete [] buf;
+        }
+        else
+            SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
     }
-    else
-        SerializerBase::lookupAndSerialize(encapPacket, b, c, IP_PROT, dgram->getTransportProtocol(), 0);
+    else {
+        b.fillNBytes(payloadLength, '?');
+    }
 
     ip->ip_sum = htons(TCPIPchecksum::checksum(ip, IP_HEADER_BYTES));
 }
@@ -145,10 +150,14 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;
 
-    if (TCPIPchecksum::checksum(ip, IP_HEADER_BYTES) != 0)
+    if (headerLength < IP_HEADER_BYTES) {
+        dest->setBitError(true);
+        headerLength = IP_HEADER_BYTES;
+    }
+    if (headerLength > b._getBufSize() || TCPIPchecksum::checksum(ip, headerLength) != 0)
         dest->setBitError(true);
 
-    if (headerLength > sizeof(struct ip)) {
+    if (headerLength > IP_HEADER_BYTES) {
         EV_ERROR << "Handling a captured IPv4 packet with options. Dropping the options.\n";
     }
     b.seek(headerLength);
@@ -156,18 +165,22 @@ cPacket* IPv4Serializer::deserialize(Buffer &b, Context& c)
     if (totalLength > bufsize)
         EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
-    dest->setByteLength(IP_HEADER_BYTES);
-
+    dest->setByteLength(headerLength);
+    unsigned int payloadLength = totalLength - headerLength;
+    unsigned int trailerLength = payloadLength < b.getRemainder() ? b.getRemainder() - payloadLength : 0;
     cPacket *encapPacket = nullptr;
     if (dest->getMoreFragments() || dest->getFragmentOffset() != 0) {  // IP fragment
-        encapPacket = serializers.byteArraySerializer.deserialize(b, c);
+        Buffer subBuffer(b, trailerLength);
+        encapPacket = serializers.byteArraySerializer.deserialize(subBuffer, c);
+        b.accessNBytes(subBuffer.getPos());
     }
     else
-        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), 0);
+        encapPacket = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, dest->getTransportProtocol(), trailerLength);
 
-    ASSERT(encapPacket);
-    dest->encapsulate(encapPacket);
-    dest->setName(encapPacket->getName());
+    if (encapPacket) {
+        dest->encapsulate(encapPacket);
+        dest->setName(encapPacket->getName());
+    }
     return dest;
 }
 

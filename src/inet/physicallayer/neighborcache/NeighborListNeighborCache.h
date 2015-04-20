@@ -64,7 +64,7 @@ class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
     NeighborListNeighborCache();
     ~NeighborListNeighborCache();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const override;

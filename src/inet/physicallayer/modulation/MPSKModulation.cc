@@ -42,10 +42,10 @@ MPSKModulation::~MPSKModulation()
     delete constellation;
 }
 
-void MPSKModulation::printToStream(std::ostream& stream) const
+std::ostream& MPSKModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "MPSKModulaiton, ";
-    APSKModulationBase::printToStream(stream);
+    stream << "MPSKModulaiton";
+    return APSKModulationBase::printToStream(stream, level);
 }
 
 double MPSKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const

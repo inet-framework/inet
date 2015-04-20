@@ -32,7 +32,7 @@ class INET_API _4PPMModulation : public PPMModulationBase
   public:
     _4PPMModulation();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "4PPMModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "4PPMModulation"; }
 };
 
 } // namespace physicallayer

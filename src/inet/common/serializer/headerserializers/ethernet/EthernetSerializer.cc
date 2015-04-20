@@ -13,7 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "platdep/sockets.h"  // htonl, ntohl, etc. on Windows
+#include "inet/common/serializer/SerializerUtil.h"
+
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 
 #include "inet/common/serializer/headers/bsdint.h"
@@ -67,6 +68,10 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
                 SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
             }
+        }
+        else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
+            cPacket *encapPkt = frame->getEncapsulatedPacket();
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 4);
         }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());

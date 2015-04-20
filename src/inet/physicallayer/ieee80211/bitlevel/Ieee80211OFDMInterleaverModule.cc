@@ -33,9 +33,9 @@ void Ieee80211OFDMInterleaverModule::initialize(int stage)
     }
 }
 
-void Ieee80211OFDMInterleaverModule::printToStream(std::ostream& stream) const
+std::ostream& Ieee80211OFDMInterleaverModule::printToStream(std::ostream& stream, int level) const
 {
-    stream << interleaver;
+    return interleaver->printToStream(stream, level);
 }
 
 Ieee80211OFDMInterleaverModule::~Ieee80211OFDMInterleaverModule()

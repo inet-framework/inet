@@ -26,9 +26,9 @@ MFSKModulation::MFSKModulation(unsigned int codeWordSize) :
 {
 }
 
-void MFSKModulation::printToStream(std::ostream& stream) const
+std::ostream& MFSKModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "MFSKModulaiton";
+    return stream << "MFSKModulaiton";
 }
 
 double MFSKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const

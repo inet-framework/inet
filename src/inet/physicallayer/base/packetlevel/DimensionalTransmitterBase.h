@@ -70,7 +70,7 @@ class INET_API DimensionalTransmitterBase : public FlatTransmitterBase
   public:
     DimensionalTransmitterBase();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

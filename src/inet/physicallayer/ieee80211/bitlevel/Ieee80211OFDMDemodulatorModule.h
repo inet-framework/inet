@@ -39,7 +39,7 @@ class INET_API Ieee80211OFDMDemodulatorModule : public IDemodulator, public cSim
   public:
     virtual ~Ieee80211OFDMDemodulatorModule();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Demodulator"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return ofdmDemodulator->printToStream(stream, level); }
     const Ieee80211OFDMModulation *getModulation() const { return ofdmDemodulator->getModulation(); }
     const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
 };

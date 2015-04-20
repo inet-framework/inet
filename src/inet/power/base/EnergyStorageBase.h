@@ -33,6 +33,9 @@ namespace power {
  */
 class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase, public EnergySinkBase, public virtual IEnergyStorage
 {
+  protected:
+    virtual void initialize(int stage) override;
+
   public:
     virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
     virtual void removeEnergyConsumer(int energyConsumerId) override;

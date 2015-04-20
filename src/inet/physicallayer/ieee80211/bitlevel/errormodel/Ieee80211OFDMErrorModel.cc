@@ -42,6 +42,17 @@ void Ieee80211OFDMErrorModel::initialize(int stage)
     }
 }
 
+std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMErrorModel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", signalSymbolErrorRate = " << signalSymbolErrorRate
+               << ", dataSymbolErrorRate = " << dataSymbolErrorRate
+               << ", signalBitErrorRate = " << signalBitErrorRate
+               << ", dataBitErrorRate = " << dataBitErrorRate;
+    return stream;
+}
+
 const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
@@ -86,7 +97,7 @@ const IReceptionSymbolModel *Ieee80211OFDMErrorModel::computeSymbolModel(const L
     double signalSER = isNaN(signalSymbolErrorRate) ? BPSKModulation::singleton.calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
     double dataSER = isNaN(dataSymbolErrorRate) ? dataModulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getPayloadBitRate()) : dataSymbolErrorRate;
     const std::vector<const ISymbol *> *symbols = transmissionSymbolModel->getSymbols();
-    std::vector<const ISymbol *> *corruptedSymbols = new std::vector<const ISymbol *>(); // FIXME: memory leak
+    std::vector<const ISymbol *> *corruptedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol
     corruptedSymbols->push_back(corruptOFDMSymbol(check_and_cast<const Ieee80211OFDMSymbol *>(symbols->at(0)), signalSER, signalFieldConstellationSize, constellationForSignalField));
     // The remaining are all data field symbols

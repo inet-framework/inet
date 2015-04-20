@@ -41,9 +41,9 @@ void Ieee802154UWBIRReceiver::initialize(int stage)
     }
 }
 
-void Ieee802154UWBIRReceiver::printToStream(std::ostream& stream) const
+std::ostream& Ieee802154UWBIRReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee802154UWBIRReceiver";
+    return stream << "Ieee802154UWBIRReceiver";
 }
 
 const IListening *Ieee802154UWBIRReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

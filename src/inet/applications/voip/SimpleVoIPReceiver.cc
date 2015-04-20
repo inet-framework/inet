@@ -262,7 +262,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     emit(mosSignal, mos);
 
     // add calculated MOS value to fingerprint
-    cHasher *hasher = simulation.getHasher();
+    cHasher *hasher = getSimulation()->getHasher();
     if (hasher)
         hasher->add(mos);
 

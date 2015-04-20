@@ -30,10 +30,10 @@ namespace physicallayer {
 
 Define_Module(LayeredDimensionalAnalogModel);
 
-void LayeredDimensionalAnalogModel::printToStream(std::ostream& stream) const
+std::ostream& LayeredDimensionalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "LayeredDimensionalAnalogModel";
-    DimensionalAnalogModelBase::printToStream(stream);
+    return DimensionalAnalogModelBase::printToStream(stream, level);
 }
 
 const IReception *LayeredDimensionalAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const

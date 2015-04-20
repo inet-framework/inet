@@ -7,11 +7,11 @@ namespace physicallayer {
 Define_Module(BreakpointPathLoss);
 
 BreakpointPathLoss::BreakpointPathLoss() :
-    l01(sNaN),
-    l02(sNaN),
-    alpha1(sNaN),
-    alpha2(sNaN),
-    breakpointDistance(m(sNaN))
+    l01(NaN),
+    l02(NaN),
+    alpha1(NaN),
+    alpha2(NaN),
+    breakpointDistance(m(NaN))
 {
 }
 
@@ -26,14 +26,16 @@ void BreakpointPathLoss::initialize(int stage)
     }
 }
 
-void BreakpointPathLoss::printToStream(std::ostream& stream) const
+std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "BreakpointPathLoss, "
-           << "L01 = " << l01 << ", "
-           << "L02 = " << l02 << ", "
-           << "alpha1 = " << alpha1 << ", "
-           << "alpha2 = " << alpha2 << ", "
-           << "breakpointDistance = " << breakpointDistance;
+    stream << "BreakpointPathLoss";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", L01 = " << l01
+               << ", L02 = " << l02
+               << ", alpha1 = " << alpha1
+               << ", alpha2 = " << alpha2
+               << ", breakpointDistance = " << breakpointDistance;
+    return stream;
 }
 
 double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

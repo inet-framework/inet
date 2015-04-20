@@ -36,12 +36,14 @@ void RicianFading::initialize(int stage)
     }
 }
 
-void RicianFading::printToStream(std::ostream& stream) const
+std::ostream& RicianFading::printToStream(std::ostream& stream, int level) const
 {
-    stream << "RicianFading, "
-           << "alpha = " << alpha << ", "
-           << "system loss = " << systemLoss << ", "
-           << "k = " << k;
+    stream << "RicianFading";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << ", system loss = " << systemLoss
+               << ", k = " << k;
+    return stream;
 }
 
 double RicianFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

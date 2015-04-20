@@ -40,12 +40,14 @@ void StochasticErrorModel::initialize(int stage)
     }
 }
 
-void StochasticErrorModel::printToStream(std::ostream& stream) const
+std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "StochasticErrorModel, "
-           << "packetErrorRate = " << packetErrorRate << ", "
-           << "bitErrorRate = " << bitErrorRate << ", "
-           << "symbolErrorRate = " << symbolErrorRate;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << "StochasticErrorModel"
+               << "packetErrorRate = " << packetErrorRate
+               << "bitErrorRate = " << bitErrorRate
+               << "symbolErrorRate = " << symbolErrorRate;
+    return stream;
 }
 
 double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir) const

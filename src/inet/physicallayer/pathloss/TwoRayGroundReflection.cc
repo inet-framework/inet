@@ -38,13 +38,15 @@ void TwoRayGroundReflection::initialize(int stage)
     }
 }
 
-void TwoRayGroundReflection::printToStream(std::ostream& stream) const
+std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int level) const
 {
-    stream << "TwoRayGroundReflection, "
-           << "alpha = " << alpha << ", "
-           << "systemLoss = " << systemLoss << ", "
-           << "ht = " << ht << ", "
-           << "hr = " << hr;
+    stream << "TwoRayGroundReflection";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", alpha = " << alpha
+               << ", systemLoss = " << systemLoss
+               << ", ht = " << ht
+               << ", hr = " << hr;
+    return stream;
 }
 
 double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

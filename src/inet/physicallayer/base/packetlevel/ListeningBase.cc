@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/base/packetlevel/ListeningBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
@@ -30,13 +31,15 @@ ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtim
 {
 }
 
-void ListeningBase::printToStream(std::ostream& stream) const
+std::ostream& ListeningBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "receiver = { " << receiver << " }, "
-           << "startTime = " << startTime << ", "
-           << "endTime = " << endTime << ", "
-           << "startPosition = " << startPosition << ", "
-           << "endPosition = " << endPosition;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", receiverId = " << receiver->getId()
+               << ", startTime = " << startTime
+               << ", endTime = " << endTime
+               << ", startPosition = " << startPosition
+               << ", endPosition = " << endPosition;
+    return stream;
 }
 
 } // namespace physicallayer

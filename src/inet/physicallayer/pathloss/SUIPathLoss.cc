@@ -70,11 +70,13 @@ void SUIPathLoss::initialize(int stage)
     }
 }
 
-void SUIPathLoss::printToStream(std::ostream& stream) const
+std::ostream& SUIPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "SUIPathLoss, "
-           << "ht = " << ht << ", "
-           << "hr = " << hr;
+    stream << "SUIPathLoss";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", ht = " << ht
+               << ", hr = " << hr;
+    return stream;
 }
 
 double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

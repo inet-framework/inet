@@ -25,9 +25,21 @@
 #include <omnetpp.h>
 #include "inet/common/Compat.h"
 
+using namespace omnetpp;
+
 #if OMNETPP_VERSION < 0x0406
 #  error At least OMNeT++/OMNEST version 4.6 required
 #endif // if OMNETPP_VERSION < 0x0406
+
+// OMNETPP_BUILDNUM was introduced around OMNeT++ 5.0beta2, with the initial value of 1001.
+// The following lines fake a build number for earlier versions.
+#ifndef OMNETPP_BUILDNUM
+#  if OMNETPP_VERSION < 0x0500
+#    define OMNETPP_BUILDNUM 0
+#  else
+#    define OMNETPP_BUILDNUM 1000
+#  endif
+#endif
 
 #define INET_VERSION  0x0263
 #define INET_PATCH_LEVEL 0x01
@@ -42,7 +54,14 @@
 
 #include "inet/common/InitStages.h"
 
-/// main namespace of INET framework
+// cObject::parsimPack() became const around build #1001
+#if OMNETPP_BUILDNUM >= 1001
+#define PARSIMPACK_CONST const
+#else
+#define PARSIMPACK_CONST
+#endif
+
+// main namespace of INET framework
 namespace inet {
 
 typedef unsigned short ushort;

@@ -16,8 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-//Define_Module(TCPSerializer);
-#include <platdep/sockets.h>
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/tcp/TCPSerializer.h"
 
@@ -69,6 +68,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     tcp->th_seq = htonl(tcpseg->getSequenceNo());
     tcp->th_ack = htonl(tcpseg->getAckNo());
     tcp->th_offs = TCP_HEADER_OCTETS / 4;
+    tcp->th_x2 = 0;     // unused
 
     // set flags
     unsigned char flags = 0;

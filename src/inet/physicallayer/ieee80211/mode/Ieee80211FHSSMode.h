@@ -68,6 +68,7 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual inline const simtime_t getDuration(int bitLength) const override { return bitLength / getNetBitrate().get(); }
     virtual const GFSKModulationBase *getModulation() const override { return modulation; }
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**
@@ -83,6 +84,8 @@ class INET_API Ieee80211FhssMode : public IIeee80211Mode
 
   public:
     Ieee80211FhssMode(const Ieee80211FhssPreambleMode *preambleMode, const Ieee80211FhssHeaderMode *headerMode, const Ieee80211FhssDataMode *dataMode);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211FhssMode"; }
 
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }

@@ -33,9 +33,9 @@ void AdditiveScramblerModule::initialize(int stage)
     }
 }
 
-void AdditiveScramblerModule::printToStream(std::ostream& stream) const
+std::ostream& AdditiveScramblerModule::printToStream(std::ostream& stream, int level) const
 {
-    stream << scrambler;
+    return scrambler->printToStream(stream, level);
 }
 
 AdditiveScramblerModule::~AdditiveScramblerModule()

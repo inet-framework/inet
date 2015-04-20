@@ -26,9 +26,11 @@ SignalAnalogModel::SignalAnalogModel(const simtime_t duration) :
 {
 }
 
-void SignalAnalogModel::printToStream(std::ostream& stream) const
+std::ostream& SignalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "duration = " << duration;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", duration = " << duration;
+    return stream;
 }
 
 NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duration, Hz carrierFrequency, Hz bandwidth) :
@@ -36,6 +38,15 @@ NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duratio
     carrierFrequency(carrierFrequency),
     bandwidth(bandwidth)
 {
+}
+
+std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level) const
+{
+    if (level >= PRINT_LEVEL_DEBUG)
+       stream << ", carrierFrequency = " << carrierFrequency;
+    if (level >= PRINT_LEVEL_TRACE)
+       stream << ", bandwidth = " << bandwidth;
+    return stream;
 }
 
 } // namespace physicallayer

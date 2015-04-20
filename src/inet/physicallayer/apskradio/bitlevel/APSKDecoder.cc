@@ -52,6 +52,18 @@ void APSKDecoder::initialize(int stage)
     }
 }
 
+std::ostream& APSKDecoder::printToStream(std::ostream& stream, int level) const
+{
+    stream << "APSKDecoder";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", code = " << code;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", descrambler = " << printObjectToString(descrambler, level - 1)
+               << ", fecDecoder = " << printObjectToString(fecDecoder, level - 1)
+               << ", deinterleaver = " << printObjectToString(deinterleaver, level - 1);
+    return stream;
+}
+
 const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitModel) const
 {
     bool isPacketErrorless = true;

@@ -68,6 +68,7 @@ void IPv6RoutingTable::initialize(int stage)
         WATCH_MAP(destCache);    // FIXME commented out for now
         isrouter = par("isRouter");
         multicastForward = par("multicastForwarding");
+        useAdminDist = par("useAdminDist");
         WATCH(isrouter);
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -161,7 +162,7 @@ void IPv6RoutingTable::parseXMLConfigFile()
 
 void IPv6RoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     std::stringstream os;
@@ -177,7 +178,7 @@ void IPv6RoutingTable::handleMessage(cMessage *msg)
 
 void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (simulation.getContextType() == CTX_INITIALIZE)
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();
@@ -677,7 +678,7 @@ void IPv6RoutingTable::addRoutingProtocolRoute(IPv6Route *route)
     addRoute(route);
 }
 
-bool IPv6RoutingTable::routeLessThan(const IPv6Route *a, const IPv6Route *b)
+bool IPv6RoutingTable::routeLessThan(const IPv6Route *a, const IPv6Route *b) const
 {
     // helper for sort() in addRoute(). We want routes with longer
     // prefixes to be at front, so we compare them as "less".
@@ -686,7 +687,7 @@ bool IPv6RoutingTable::routeLessThan(const IPv6Route *a, const IPv6Route *b)
         return a->getPrefixLength() > b->getPrefixLength();
 
     // smaller administrative distance is better
-    if (a->getAdminDist() != b->getAdminDist())
+    if (useAdminDist && (a->getAdminDist() != b->getAdminDist()))
         return a->getAdminDist() < b->getAdminDist();
 
     // smaller metric is better
@@ -726,7 +727,7 @@ void IPv6RoutingTable::internalAddRoute(IPv6Route *route)
 
     // we keep entries sorted by prefix length in routeList, so that we can
     // stop at the first match when doing the longest prefix matching
-    std::sort(routeList.begin(), routeList.end(), routeLessThan);
+    std::sort(routeList.begin(), routeList.end(), RouteLessThan(*this));
 }
 
 IPv6Route *IPv6RoutingTable::internalRemoveRoute(IPv6Route *route)

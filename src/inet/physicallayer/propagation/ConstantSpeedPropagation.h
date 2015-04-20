@@ -27,6 +27,7 @@ namespace physicallayer {
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
   protected:
+    bool ignoreMovementDuringTransmission;
     bool ignoreMovementDuringPropagation;
     bool ignoreMovementDuringReception;
 
@@ -37,7 +38,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
   public:
     ConstantSpeedPropagation();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const override;
 };
 

@@ -36,7 +36,7 @@ class INET_API ListeningBase : public IListening
   public:
     ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IRadio *getReceiver() const override { return receiver; }
 

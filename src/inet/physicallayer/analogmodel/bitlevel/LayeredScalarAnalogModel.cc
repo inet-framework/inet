@@ -30,6 +30,11 @@ namespace physicallayer {
 
 Define_Module(LayeredScalarAnalogModel);
 
+std::ostream& LayeredScalarAnalogModel::printToStream(std::ostream& stream, int level) const
+{
+    return stream << "LayeredScalarAnalogModel";
+}
+
 const IReception *LayeredScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const simtime_t receptionStartTime = arrival->getStartTime();

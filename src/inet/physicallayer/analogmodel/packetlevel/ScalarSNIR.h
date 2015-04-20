@@ -35,7 +35,7 @@ class INET_API ScalarSNIR : public SNIRBase
   public:
     ScalarSNIR(const IReception *reception, const INoise *noise);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getMin() const override;
 };

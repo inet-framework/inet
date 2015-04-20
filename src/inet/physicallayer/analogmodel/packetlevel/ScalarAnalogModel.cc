@@ -25,6 +25,12 @@ namespace physicallayer {
 
 Define_Module(ScalarAnalogModel);
 
+std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level) const
+{
+    stream << "ScalarAnalogModel";
+    return ScalarAnalogModelBase::printToStream(stream, level);
+}
+
 const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());

@@ -25,7 +25,7 @@ namespace physicallayer {
 
 SNIRReceiverBase::SNIRReceiverBase() :
     ReceiverBase(),
-    snirThreshold(sNaN)
+    snirThreshold(NaN)
 {
 }
 
@@ -36,9 +36,11 @@ void SNIRReceiverBase::initialize(int stage)
         snirThreshold = math::dB2fraction(par("snirThreshold"));
 }
 
-void SNIRReceiverBase::printToStream(std::ostream& stream) const
+std::ostream& SNIRReceiverBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "snirThreshold = " << snirThreshold;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", snirThreshold = " << snirThreshold;
+    return stream;
 }
 
 const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const

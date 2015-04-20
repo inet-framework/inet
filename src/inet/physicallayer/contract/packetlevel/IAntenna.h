@@ -39,6 +39,11 @@ class INET_API IAntenna : public IPrintableObject
     virtual IMobility *getMobility() const = 0;
 
     /**
+     * Returns the number of antennas in the array.
+     */
+    virtual int getNumAntennas() const = 0;
+
+    /**
      * Returns the maximum possible antenna gain independent of any direction.
      */
     virtual double getMaxGain() const = 0;
@@ -46,9 +51,9 @@ class INET_API IAntenna : public IPrintableObject
     /**
      * Returns the antenna gain in the provided direction. The direction is
      * relative to the antenna geometry, so the result depends only on the
-     * antenna characteristics. For transmissions it determines how well the
+     * antenna characteristics. For transmissions, it determines how well the
      * antenna converts input power into radio waves headed in the specified
-     * direction. For receptions it determines how well the antenna converts
+     * direction. For receptions, it determines how well the antenna converts
      * radio waves arriving from the the specified direction.
      */
     virtual double computeGain(const EulerAngles direction) const = 0;

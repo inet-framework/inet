@@ -1,3 +1,5 @@
+.PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy
+
 all: checkmakefiles
 	cd src && $(MAKE) all
 
@@ -9,8 +11,18 @@ cleanall: checkmakefiles
 	cd src && $(MAKE) MODE=debug clean
 	rm -f src/Makefile
 
-makefiles:
-	cd src && opp_makemake -f --deep --make-so -o INET -O out -pINET --no-deep-includes -Xinet/applications/voipstream -Xinet/linklayer/ext -Xinet/transportlayer/tcp_lwip -Xinet/transportlayer/tcp_nsc -I../src -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_MANET -DWITH_TRACI -DWITH_AODV -DWITH_RIP -DWITH_RADIO -DWITH_POWER -DWITH_IEEE80211 -DWITH_GENERIC -DWITH_IDEALWIRELESS -DWITH_FLOOD -DWITH_PIM -DWITH_IEEE802154 -DWITH_APSKRADIO -DWITH_TUN -DWITH_BMAC -DWITH_LMAC -DWITH_CSMA
+MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET --no-deep-includes -Xinet/applications/voipstream -Xinet/linklayer/ext -Xinet/transportlayer/tcp_lwip -Xinet/transportlayer/tcp_nsc -I../src -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_IPv4 -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_MANET -DWITH_TRACI -DWITH_AODV -DWITH_RIP -DWITH_RADIO -DWITH_POWER -DWITH_IEEE80211 -DWITH_GENERIC -DWITH_IDEALWIRELESS -DWITH_FLOOD -DWITH_PIM -DWITH_IEEE802154 -DWITH_APSKRADIO -DWITH_TUN -DWITH_BMAC -DWITH_LMAC -DWITH_CSMA
+
+makefiles: makefiles-so
+
+makefiles-so:
+	cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) 
+
+makefiles-lib:
+	cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) 
+
+makefiles-exe:
+	cd src && opp_makemake $(MAKEMAKE_OPTIONS) 
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

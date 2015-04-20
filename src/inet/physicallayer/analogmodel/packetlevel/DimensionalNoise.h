@@ -35,7 +35,7 @@ class INET_API DimensionalNoise : public NarrowbandNoiseBase
     DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power);
     virtual ~DimensionalNoise() { delete power; }
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const ConstMapping *getPower() const { return power; }
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const override;
 };

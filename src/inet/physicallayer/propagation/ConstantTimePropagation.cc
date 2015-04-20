@@ -46,11 +46,12 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
     return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, position, position, orientation, orientation);
 }
 
-void ConstantTimePropagation::printToStream(std::ostream& stream) const
+std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ConstantTimePropagation, "
-           << "propagationTime = " << propagationTime;
-    PropagationBase::printToStream(stream);
+    stream << "ConstantTimePropagation";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", propagationTime = " << propagationTime;
+    return PropagationBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

@@ -27,11 +27,12 @@ ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const cPacket 
 {
 }
 
-void ScalarTransmission::printToStream(std::ostream& stream) const
+std::ostream& ScalarTransmission::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarTransmission, "
-           << "power = " << power << ", ";
-    FlatTransmissionBase::printToStream(stream);
+    stream << "ScalarTransmission";
+    if (level >= PRINT_LEVEL_DETAIL)
+       stream << ", power = " << power;
+    return FlatTransmissionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

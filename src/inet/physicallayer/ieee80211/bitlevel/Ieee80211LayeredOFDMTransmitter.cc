@@ -16,24 +16,25 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulatorModule.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 
 namespace inet {
 
@@ -74,6 +75,26 @@ void Ieee80211LayeredOFDMTransmitter::initialize(int stage)
         else
             throw cRuntimeError("Unknown level of detail='%s'", levelOfDetailStr);
     }
+}
+
+std::ostream& Ieee80211LayeredOFDMTransmitter::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211LayeredOFDMTransmitter";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", levelOfDetail = " << levelOfDetail
+               << ", mode = " << printObjectToString(mode, level - 1)
+               << ", signalEncoder = " << printObjectToString(signalEncoder, level - 1)
+               << ", dataEncoder = " << printObjectToString(dataEncoder, level - 1)
+               << ", signalModulator = " << printObjectToString(signalModulator, level - 1)
+               << ", dataModulator = " << printObjectToString(dataModulator, level - 1)
+               << ", pulseShaper = " << printObjectToString(pulseShaper, level - 1)
+               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level - 1)
+               << ", isCompliant = " << isCompliant
+               << ", bandwidth = " << bandwidth
+               << ", channelSpacing = " << channelSpacing
+               << ", carrierFrequency = " << carrierFrequency
+               << ", power = " << power;
+    return stream;
 }
 
 BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) const
@@ -301,11 +322,10 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
 
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    if (isCompliant) {
-        // TODO: get mode from the MAC
-        // Kludge
-        mode = &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
-    }
+    TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
+    Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<Ieee80211TransmissionRequest *>(transmissionRequest);
+    if (isCompliant)
+        mode = ieee80211TransmissionRequest != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(ieee80211TransmissionRequest->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
     else if (!mode)
         mode = computeMode(bandwidth);
     const ITransmissionBitModel *bitModel = nullptr;

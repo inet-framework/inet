@@ -1335,6 +1335,7 @@ AODVRREP *AODVRouting::createHelloMessage()
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
     helloMessage->setLifeTime(allowedHelloLoss * helloInterval);
+    helloMessage->setByteLength(20);
 
     return helloMessage;
 }
@@ -1603,6 +1604,7 @@ AODVRREPACK *AODVRouting::createRREPACK()
 {
     AODVRREPACK *rrepACK = new AODVRREPACK("AODV-RREPACK");
     rrepACK->setPacketType(RREPACK);
+    rrepACK->setByteLength(2);
     return rrepACK;
 }
 

@@ -35,7 +35,7 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 
     virtual RadioFrame *dup() const override { return new RadioFrame(*this); }
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const ITransmission *getTransmission() const override { return transmission; }
 };

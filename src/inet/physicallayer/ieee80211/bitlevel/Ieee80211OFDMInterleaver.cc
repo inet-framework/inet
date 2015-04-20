@@ -21,10 +21,12 @@ namespace inet {
 
 namespace physicallayer {
 
-void Ieee80211OFDMInterleaver::printToStream(std::ostream& stream) const
+std::ostream& Ieee80211OFDMInterleaver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMInterleaver, "
-           << "interleaving = " << interleaving;
+    stream << "Ieee80211Interleaver";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", interleaving = " << printObjectToString(interleaving, level - 1);
+    return stream;
 }
 
 BitVector Ieee80211OFDMInterleaver::interleave(const BitVector& deinterleavedBits) const

@@ -44,6 +44,9 @@ Common:
  - New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB 
    where AA is the major while BB is the minor version in hex) and 
    INET_PATCH_LEVEL (format: 0xCC is the patch level in hex).
+ - On Linux, specifying --valgrind as the first argument for the opp_run script
+   (or a run script in the examples folder) will start the simulation using the
+   'valgrind' memory profiler.
 
 Mobility:
  - Added a new StaticConcentricMobility similar to StaticGridMobility that places
@@ -111,6 +114,7 @@ Physical layer:
    supports both the flat and the layered physical layer models and provide PHY
    characteristics. The implemented 802.11 modes are: DSSS, HR-DSSS, FHSS, IR,
    OFDM, ERP-OFDM.
+ - Also implemented 802.11 High Throughput mode that makes available Wifi n modes.
  - Added a simple hypothetical APSK physical layer implementation that supports
    packet-level, bit-level, and symbol-level simulations with widely configurable
    bit-domain and symbol-domain parameters.

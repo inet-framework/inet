@@ -30,6 +30,15 @@ namespace physicallayer {
 class INET_API IPrintableObject
 {
   public:
+    enum PrintLevel {
+        PRINT_LEVEL_INFO,
+        PRINT_LEVEL_DETAIL,
+        PRINT_LEVEL_DEBUG,
+        PRINT_LEVEL_TRACE,
+        PRINT_LEVEL_COMPLETE = INT_MAX
+    };
+
+  public:
     virtual ~IPrintableObject() {}
 
     /**
@@ -38,32 +47,49 @@ class INET_API IPrintableObject
      * Function calls to operator<< with pointers or references either const
      * or not are all forwarded to this function.
      */
-    virtual void printToStream(std::ostream& stream) const = 0;
-};
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const { return stream << "<object@" << (void *)this << ">"; }
 
-inline std::ostream& operator<<(std::ostream& stream, IPrintableObject *object)
-{
-    object->printToStream(stream);
-    return stream;
-};
+    virtual std::string getInfoStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_INFO); return s.str(); }
 
-inline std::ostream& operator<<(std::ostream& stream, IPrintableObject& object)
-{
-    object.printToStream(stream);
-    return stream;
+    virtual std::string getDetailStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_DETAIL); return s.str(); }
+
+    virtual std::string getDebugStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_DEBUG); return s.str(); }
+
+    virtual std::string getTraceStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_TRACE); return s.str(); }
+
+    virtual std::string getCompleteStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_COMPLETE); return s.str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
-    object->printToStream(stream);
-    return stream;
+#if OMNETPP_VERSION >= 0x0500
+    return object->printToStream(stream, cLogLevel::globalRuntimeLoglevel - 3);
+#else
+    return object->printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
+#endif
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
-    object.printToStream(stream);
-    return stream;
+#if OMNETPP_VERSION >= 0x0500
+    return object.printToStream(stream, cLogLevel::globalRuntimeLoglevel - 3);
+#else
+    return object.printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
+#endif
 };
+
+inline std::string printObjectToString(const IPrintableObject *object, int level)
+{
+    std::stringstream s;
+    if (object == nullptr)
+        return "nullptr";
+    else {
+        s << "{ ";
+        object->printToStream(s, level);
+        s << " }";
+        return s.str();
+    }
+}
 
 } // namespace physicallayer
 

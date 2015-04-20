@@ -100,7 +100,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the pointer to the network module to which this node corresponds.
          */
-        cModule *getModule() const { return simulation.getModule(moduleId); }
+        cModule *getModule() const { return getSimulation()->getModule(moduleId); }
 
         /**
          * Returns the weight of this node. Weight is used with the
@@ -385,7 +385,7 @@ class INET_API Topology : public cOwnedObject
      * Used by the simulation kernel for parallel execution.
      * See cObject for more details.
      */
-    virtual void parsimPack(cCommBuffer *buffer) override;
+    virtual void parsimPack(cCommBuffer *buffer) PARSIMPACK_CONST override;
 
     /**
      * Deserializes the object from an MPI receive buffer

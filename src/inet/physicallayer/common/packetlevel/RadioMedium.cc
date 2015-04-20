@@ -17,11 +17,9 @@
 
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -37,26 +35,20 @@ RadioMedium::RadioMedium() :
     obstacleLoss(nullptr),
     analogModel(nullptr),
     backgroundNoise(nullptr),
-    environment(nullptr),
+    physicalEnvironment(nullptr),
     material(nullptr),
     rangeFilter(RANGE_FILTER_ANYWHERE),
     radioModeFilter(false),
     listeningFilter(false),
     macAddressFilter(false),
     recordCommunicationLog(false),
-    displayCommunication(false),
-    drawCommunication2D(false),
-    leaveCommunicationTrail(false),
-    updateCanvasInterval(sNaN),
-    updateCanvasTimer(nullptr),
     removeNonInterferingTransmissionsTimer(nullptr),
     mediumLimitCache(nullptr),
     neighborCache(nullptr),
     communicationCache(nullptr),
-    communicationLayer(nullptr),
-    communicationTrail(nullptr),
+    mediumVisualizer(nullptr),
     transmissionCount(0),
-    sendCount(0),
+    radioFrameSendCount(0),
     receptionComputationCount(0),
     interferenceComputationCount(0),
     receptionDecisionComputationCount(0),
@@ -76,7 +68,6 @@ RadioMedium::RadioMedium() :
 
 RadioMedium::~RadioMedium()
 {
-    cancelAndDelete(updateCanvasTimer);
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
     for (const auto transmission : transmissions)
         delete transmission;
@@ -96,8 +87,9 @@ void RadioMedium::initialize(int stage)
         mediumLimitCache = check_and_cast<IMediumLimitCache *>(getSubmodule("mediumLimitCache"));
         neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));
         communicationCache = check_and_cast<ICommunicationCache *>(getSubmodule("communicationCache"));
-        environment = dynamic_cast<IPhysicalEnvironment *>(simulation.getModuleByPath("environment"));
-        material = environment != nullptr ? environment->getMaterialRegistry()->getMaterial("air") : nullptr;
+        physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(getModuleByPath("environment"));
+        mediumVisualizer = dynamic_cast<MediumVisualizer *>(getSubmodule("mediumVisualizer"));
+        material = physicalEnvironment != nullptr ? physicalEnvironment->getMaterialRegistry()->getMaterial("air") : nullptr;
         const char *rangeFilterString = par("rangeFilter");
         if (!strcmp(rangeFilterString, ""))
             rangeFilter = RANGE_FILTER_ANYWHERE;
@@ -111,32 +103,14 @@ void RadioMedium::initialize(int stage)
         listeningFilter = par("listeningFilter");
         macAddressFilter = par("macAddressFilter");
         // initialize timers
-        updateCanvasTimer = new cMessage("updateCanvas");
         removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissions");
         // initialize logging
         recordCommunicationLog = par("recordCommunicationLog");
         if (recordCommunicationLog)
             communicationLog.open();
-        // initialize graphics
-        displayCommunication = par("displayCommunication");
-        drawCommunication2D = par("drawCommunication2D");
-        cCanvas *canvas = getParentModule()->getCanvas();
-        if (displayCommunication) {
-            communicationLayer = new cGroupFigure("communication");
-            canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
-        }
-        leaveCommunicationTrail = par("leaveCommunicationTrail");
-        if (leaveCommunicationTrail) {
-            communicationTrail = new TrailFigure(100, true, "communication trail");
-            canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
-        }
-        updateCanvasInterval = par("updateCanvasInterval");
     }
-    else if (stage == INITSTAGE_LAST) {
-        EV_DEBUG << "Initialized ";
-        printToStream(EVSTREAM);
-        EV_DEBUG << endl;
-    }
+    else if (stage == INITSTAGE_LAST)
+        EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
 }
 
 void RadioMedium::finish()
@@ -147,7 +121,7 @@ void RadioMedium::finish()
     double snirCacheHitPercentage = 100 * (double)cacheSNIRHitCount / (double)cacheSNIRGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
     EV_INFO << "Transmission count = " << transmissionCount << endl;
-    EV_INFO << "Radio frame send count = " << sendCount << endl;
+    EV_INFO << "Radio frame send count = " << radioFrameSendCount << endl;
     EV_INFO << "Reception computation count = " << receptionComputationCount << endl;
     EV_INFO << "Interference computation count = " << interferenceComputationCount << endl;
     EV_INFO << "Reception decision computation count = " << receptionDecisionComputationCount << endl;
@@ -158,7 +132,7 @@ void RadioMedium::finish()
     EV_INFO << "SNIR cache hit = " << snirCacheHitPercentage << " %" << endl;
     EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
     recordScalar("transmission count", transmissionCount);
-    recordScalar("radio frame send count", sendCount);
+    recordScalar("radio frame send count", radioFrameSendCount);
     recordScalar("reception computation count", receptionComputationCount);
     recordScalar("interference computation count", interferenceComputationCount);
     recordScalar("reception decision computation count", receptionDecisionComputationCount);
@@ -170,40 +144,28 @@ void RadioMedium::finish()
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
 }
 
-void RadioMedium::printToStream(std::ostream &stream) const
+std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
 {
-    stream << "RadioMedium, "
-           << "propagation = { " << propagation << " }, "
-           << "pathLoss = { " << pathLoss << " }, "
-           << "analogModel = { " << analogModel << " }, ";
-    if (obstacleLoss != nullptr)
-        stream << "obstacleLoss = { " << obstacleLoss << " }, ";
-    else
-        stream << "obstacleLoss = nullptr, ";
-    if (backgroundNoise != nullptr)
-        stream << "backgroundNoise = { " << backgroundNoise << " }, ";
-    else
-        stream << "backgroundNoise = nullptr, ";
-    stream << "mediumLimitCache = { " << mediumLimitCache << " }, ";
-    if (neighborCache != nullptr)
-        stream << "neighborCache = { " << neighborCache << " }, ";
-    else
-        stream << "neighborCache = nullptr, ";
-
-
-    stream << "communicationCache = { " << communicationCache << " }";
+    stream << static_cast<const cSimpleModule *>(this);
+    if (level >= PRINT_LEVEL_TRACE) {
+        stream << ", propagation = " << printObjectToString(propagation, level - 1)
+               << ", pathLoss = " << printObjectToString(pathLoss, level - 1)
+               << ", analogModel = " << printObjectToString(analogModel, level - 1)
+               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level - 1)
+               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level - 1)
+               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level - 1)
+               << ", neighborCache = " << printObjectToString(neighborCache, level - 1)
+               << ", communicationCache = " << printObjectToString(communicationCache, level - 1) ;
+    }
+    return stream;
 }
 
 void RadioMedium::handleMessage(cMessage *message)
 {
     if (message == removeNonInterferingTransmissionsTimer) {
         removeNonInterferingTransmissions();
-        if (displayCommunication)
-            updateCanvas();
-    }
-    else if (message == updateCanvasTimer) {
-        updateCanvas();
-        scheduleUpdateCanvasTimer();
+        if (mediumVisualizer != nullptr)
+            mediumVisualizer->mediumChanged();
     }
     else
         throw cRuntimeError("Unknown message");
@@ -270,11 +232,8 @@ void RadioMedium::removeNonInterferingTransmissions()
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
     for (auto it = transmissions.cbegin(); it != transmissions.cbegin() + transmissionIndex; it++) {
         const ITransmission *transmission = *it;
-        if (displayCommunication) {
-            cFigure *figure = communicationCache->getCachedFigure(transmission);
-            if (figure != nullptr)
-                delete communicationLayer->removeFigure(figure);
-        }
+        if (mediumVisualizer != nullptr)
+            mediumVisualizer->removeTransmission(transmission);
         communicationCache->removeTransmission(transmission);
         delete transmission;
     }
@@ -504,8 +463,8 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         Enter_Method_Silent();
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmissions[0]), removeNonInterferingTransmissionsTimer);
     }
-    if (updateCanvasInterval > 0 && !updateCanvasTimer->isScheduled())
-        scheduleUpdateCanvasTimer();
+    if (mediumVisualizer != nullptr)
+        mediumVisualizer->addTransmission(transmission);
 }
 
 void RadioMedium::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
@@ -552,7 +511,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
         cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
         communicationCache->setCachedFrame(receiverRadio, transmission, frameCopy);
-        sendCount++;
+        radioFrameSendCount++;
     }
 }
 
@@ -571,41 +530,6 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     sendToAffectedRadios(const_cast<IRadio *>(radio), radioFrame);
     cMethodCallContextSwitcher contextSwitcher(this);
     communicationCache->setCachedFrame(transmission, radioFrame->dup());
-    if (displayCommunication) {
-        cFigure::Point position = environment->computeCanvasPoint(transmission->getStartPosition());
-        cGroupFigure *groupFigure = new cGroupFigure();
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        cRingFigure *communicationFigure = new cRingFigure();
-#else
-        cFigure::Color color(64 + rand() % 64, 64 + rand() % 64, 64 + rand() % 64);
-        cOvalFigure *communicationFigure = new cOvalFigure();
-#endif
-        communicationFigure->setTags("ongoing_transmission");
-        communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
-        communicationFigure->setFillColor(color);
-        communicationFigure->setLineWidth(1);
-        communicationFigure->setLineColor(cFigure::BLACK);
-        groupFigure->addFigure(communicationFigure);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-        communicationFigure->setFilled(true);
-        communicationFigure->setFillOpacity(0.5);
-        communicationFigure->setLineOpacity(0.5);
-        communicationFigure->setScaleLineWidth(false);
-        cLabelFigure *nameFigure = new cLabelFigure();
-        nameFigure->setPosition(position);
-#else
-        cTextFigure *nameFigure = new cTextFigure();
-        nameFigure->setLocation(position);
-#endif
-        nameFigure->setTags("ongoing_transmission packet_name label");
-        nameFigure->setText(radioFrame->getName());
-        nameFigure->setColor(color);
-        groupFigure->addFigure(nameFigure);
-        communicationLayer->addFigure(groupFigure);
-        communicationCache->setCachedFigure(transmission, groupFigure);
-        updateCanvas();
-    }
     return radioFrame;
 }
 
@@ -618,26 +542,9 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     const IReceptionDecision *decision = getReceptionDecision(radio, listening, transmission);
     communicationCache->removeCachedDecision(radio, transmission);
     cPacket *macFrame = decision->getMacFrame()->dup();
-    // TODO: the bit error shouldn't be set in bit level simulations, because it should be already set by the deserializer
-    macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<ReceptionIndication *>(decision->getIndication()));
-    if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
-        cLineFigure *communicationFigure = new cLineFigure();
-        communicationFigure->setTags("successful_reception recent_history");
-        cFigure::Point start = environment->computeCanvasPoint(transmission->getStartPosition());
-        cFigure::Point end = environment->computeCanvasPoint(decision->getReception()->getStartPosition());
-        communicationFigure->setStart(start);
-        communicationFigure->setEnd(end);
-        communicationFigure->setLineColor(cFigure::BLUE);
-        communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
-        communicationFigure->setLineWidth(1);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-        communicationFigure->setScaleLineWidth(false);
-#endif
-        communicationTrail->addFigure(communicationFigure);
-    }
-    if (displayCommunication)
-        updateCanvas();
+    if (mediumVisualizer != nullptr)
+        mediumVisualizer->receivePacket(decision);
     delete decision;
     return macFrame;
 }
@@ -678,8 +585,8 @@ bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission 
     bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interference);
     delete interference;
     EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << " and results in reception is " << (isReceptionAttempted ? "attempted" : "ignored") << endl;
-    if (displayCommunication)
-        const_cast<RadioMedium *>(this)->updateCanvas();
+    if (mediumVisualizer != nullptr)
+        mediumVisualizer->mediumChanged();
     return isReceptionAttempted;
 }
 
@@ -720,87 +627,11 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, delay > 0 ? delay : 0, duration, gate);
                     communicationCache->setCachedFrame(receiverRadio, transmission, frameCopy);
-                    sendCount++;
+                    radioFrameSendCount++;
                 }
             }
         }
     }
-}
-
-void RadioMedium::updateCanvas()
-{
-    for (const auto transmission : transmissions) {
-        cFigure *groupFigure = communicationCache->getCachedFigure(transmission);
-        if (groupFigure) {
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-            cRingFigure *communicationFigure = (cRingFigure *)groupFigure->getFigure(0);
-#else
-            cOvalFigure *communicationFigure = (cOvalFigure *)groupFigure->getFigure(0);
-#endif
-            const Coord transmissionStart = transmission->getStartPosition();
-            double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-            double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
-            if (endRadius < 0) endRadius = 0;
-            // KLUDGE: to workaround overflow bugs in drawing
-            if (startRadius > 10000)
-                startRadius = 10000;
-            if (endRadius > 10000)
-                endRadius = 10000;
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-            if (drawCommunication2D) {
-                // determine the rotated 2D canvas points by computing the 2D affine trasnformation from the 3D transformation of the environment
-                cFigure::Point o = environment->computeCanvasPoint(transmissionStart);
-                cFigure::Point x = environment->computeCanvasPoint(transmissionStart + Coord(1, 0, 0));
-                cFigure::Point y = environment->computeCanvasPoint(transmissionStart + Coord(0, 1, 0));
-                double t1 = o.x;
-                double t2 = o.y;
-                double a = x.x - t1;
-                double b = x.y - t2;
-                double c = y.x - t1;
-                double d = y.y - t2;
-                communicationFigure->setTransform(cFigure::Transform(a, b, c, d, t1, t2));
-                communicationFigure->setBounds(cFigure::Rectangle(-startRadius, -startRadius, startRadius * 2, startRadius * 2));
-                communicationFigure->setInnerRx(endRadius);
-                communicationFigure->setInnerRy(endRadius);
-            }
-            else {
-#else
-            {
-#endif
-                // a sphere looks like a circle from any view angle
-                cFigure::Point center = environment->computeCanvasPoint(transmissionStart);
-                communicationFigure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
-                communicationFigure->setInnerRx(endRadius);
-                communicationFigure->setInnerRy(endRadius);
-#endif
-            }
-        }
-    }
-}
-
-void RadioMedium::scheduleUpdateCanvasTimer()
-{
-    simtime_t now = simTime();
-    for (const auto transmission : transmissions) {
-        const simtime_t startTime = transmission->getStartTime();
-        const simtime_t endTime = transmission->getEndTime();
-        simtime_t maxPropagationTime = communicationCache->getCachedInterferenceEndTime(transmission) - endTime - mediumLimitCache->getMaxTransmissionDuration();
-        if ((startTime <= now && now <= startTime + maxPropagationTime) ||
-            (endTime <= now && now <= endTime + maxPropagationTime))
-        {
-            scheduleAt(simTime() + updateCanvasInterval, updateCanvasTimer);
-            return;
-        }
-    }
-    simtime_t nextEndTime = -1;
-    for (const auto transmission : transmissions) {
-        const simtime_t endTime = transmission->getEndTime();
-        if (endTime > now && (nextEndTime == -1 || endTime < nextEndTime))
-            nextEndTime = endTime;
-    }
-    if (nextEndTime > now)
-        scheduleAt(nextEndTime, updateCanvasTimer);
 }
 
 } // namespace physicallayer

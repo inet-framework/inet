@@ -201,7 +201,7 @@ void GenericRoutingTable::configureLoopback()
 
 void GenericRoutingTable::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
 //TODO

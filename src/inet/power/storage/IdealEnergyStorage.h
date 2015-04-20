@@ -33,10 +33,21 @@ namespace power {
  */
 class INET_API IdealEnergyStorage : public EnergyStorageBase
 {
+  protected:
+    J energyBalance = J(0);
+    simtime_t lastResidualCapacityUpdate;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    void updateResidualCapacity();
+
   public:
     virtual J getNominalCapacity() override { return J(INFINITY); }
-
     virtual J getResidualCapacity() override { return J(INFINITY); }
+
+    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
+    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
 };
 
 } // namespace power

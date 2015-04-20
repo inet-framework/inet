@@ -27,7 +27,7 @@ Define_Module(IsotropicDimensionalBackgroundNoise);
 
 IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
     interpolationMode((Mapping::InterpolationMethod)-1),
-    power(W(sNaN))
+    power(W(NaN))
 {
 }
 
@@ -58,12 +58,15 @@ void IsotropicDimensionalBackgroundNoise::initialize(int stage)
     }
 }
 
-void IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream) const
+std::ostream& IsotropicDimensionalBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IsotropicDimensionalBackgroundNoise, "
-           // TODO: << "dimensions = { " << dimensions << " }, "
-           << "interpolationMode = " << interpolationMode << ", "
-           << "power = " << power;
+    stream << "IsotropicDimensionalBackgroundNoise";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", power = " << power;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", interpolationMode = " << interpolationMode
+               << ", dimensions = " << dimensions ;
+    return stream;
 }
 
 const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening *listening) const

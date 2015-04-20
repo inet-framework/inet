@@ -37,7 +37,7 @@ class INET_API NakagamiFading : public FreeSpacePathLoss
 
   public:
     NakagamiFading();
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
 };
 

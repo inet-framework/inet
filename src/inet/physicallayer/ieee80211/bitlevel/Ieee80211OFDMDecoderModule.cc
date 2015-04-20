@@ -43,6 +43,11 @@ void Ieee80211OFDMDecoderModule::initialize(int stage)
     }
 }
 
+std::ostream& Ieee80211OFDMDecoderModule::printToStream(std::ostream& stream, int level) const
+{
+    return ofdmDecoder->printToStream(stream, level);
+}
+
 const IReceptionPacketModel *Ieee80211OFDMDecoderModule::decode(const IReceptionBitModel *bitModel) const
 {
     return ofdmDecoder->decode(bitModel);

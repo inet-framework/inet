@@ -388,6 +388,20 @@ class INET_API DimensionSet    /*:public std::set<Dimension>*/
     {
         return Storage.empty();
     }
+
+    /** @brief Output operator for a dimension.*/
+    friend std::ostream& operator<<(std::ostream& out, const DimensionSet& d)
+    {
+        using std::operator<<;
+
+        out << "(";
+        for (const_iterator it = d.Storage.begin(); it != d.Storage.end(); ++it) {
+            if (it != d.Storage.begin())
+                out << ", ";
+            out << *it;
+        }
+        return out << ")";
+    }
 };
 
 /**

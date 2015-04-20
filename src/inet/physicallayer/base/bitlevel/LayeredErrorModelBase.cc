@@ -66,7 +66,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
         const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(transmissionSymbolModel->getPayloadModulation());
         const std::vector<const ISymbol*> *transmittedSymbols = transmissionSymbolModel->getSymbols();
-        std::vector<const ISymbol*> *receivedSymbols = new std::vector<const ISymbol *>(); // FIXME: memory leak
+        std::vector<const ISymbol*> *receivedSymbols = new std::vector<const ISymbol *>();
         for (unsigned int i = 0; i < transmittedSymbols->size(); i++) {
             if (uniform(0, 1) < symbolErrorRate) {
                 const APSKSymbol *transmittedSymbol = check_and_cast<const APSKSymbol *>(transmittedSymbols->at(i));

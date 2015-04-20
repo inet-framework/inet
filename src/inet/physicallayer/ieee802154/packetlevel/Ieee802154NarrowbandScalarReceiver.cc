@@ -37,10 +37,10 @@ void Ieee802154NarrowbandScalarReceiver::initialize(int stage)
     }
 }
 
-void Ieee802154NarrowbandScalarReceiver::printToStream(std::ostream& stream) const
+std::ostream& Ieee802154NarrowbandScalarReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee802154NarrowbandScalarReceiver, ";
-    FlatReceiverBase::printToStream(stream);
+    stream << "Ieee802154NarrowbandScalarReceiver";
+    return FlatReceiverBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

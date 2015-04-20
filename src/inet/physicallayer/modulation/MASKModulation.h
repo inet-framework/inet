@@ -36,7 +36,7 @@ class INET_API MASKModulation : public APSKModulationBase
     MASKModulation(double maxAmplitude, unsigned int codeWordSize);
     virtual ~MASKModulation();
 
-    virtual void printToStream(std::ostream& stream) const;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const;

@@ -41,7 +41,7 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
   public:
     ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IRadio *getReceiver() const override { return receiver; }
     virtual const ITransmission *getTransmission() const override { return transmission; }

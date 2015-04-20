@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <platdep/sockets.h>
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/udp/UDPSerializer.h"
 
@@ -64,13 +64,14 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16(pkt->getDestinationPort());
     b.writeUint16(packetLength);
     unsigned int chksumPos = b.getPos();
-    b.accessNBytes(2);  // place for checksum
+    b.writeUint16(0);  // place for checksum
     const cPacket *encapPkt = pkt->getEncapsulatedPacket();
     if (encapPkt) {
+        ASSERT(encapPkt->getByteLength() == packetLength - UDP_HDR_LEN);
         SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 0);
     }
     else {
-        b.fillNBytes(packetLength - 8, 0);   // payload place
+        b.fillNBytes(packetLength - UDP_HDR_LEN, 0);   // payload place
     }
     unsigned int endPos = b.getPos();
     b.writeUint16To(chksumPos, TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), endPos, c.l3AddressesPtr, c.l3AddressesLength));
@@ -84,12 +85,17 @@ cPacket *UDPSerializer::deserialize(Buffer &b, Context& c)
     pkt->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();
     uint16_t chksum = b.readUint16();
-    cPacket *encapPacket = serializers.byteArraySerializer.deserialize(b, c);
-    uint16_t calcChkSum = 0;
-    if (chksum != 0)
-        calcChkSum = TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), b.getPos(), c.l3AddressesPtr, c.l3AddressesLength);
-    pkt->encapsulate(encapPacket);
-    if (calcChkSum != 0 || pkt->getByteLength() != length)
+    if (length > UDP_HDR_LEN) {
+        unsigned int payloadLength = length - UDP_HDR_LEN;
+        Buffer subBuffer(b, payloadLength < b.getRemainder() ? b.getRemainder() - payloadLength : 0);
+        cPacket *encapPacket = serializers.byteArraySerializer.deserializePacket(subBuffer, c);
+        b.accessNBytes(payloadLength);
+        pkt->encapsulate(encapPacket);
+    }
+    if (chksum != 0 && c.l3AddressesPtr && c.l3AddressesLength)
+        chksum = TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), b.getPos(), c.l3AddressesPtr, c.l3AddressesLength);
+    else chksum = 0;
+    if (length < UDP_HDR_LEN || chksum != 0 || pkt->getByteLength() != length)
         pkt->setBitError(true);
     return pkt;
 }

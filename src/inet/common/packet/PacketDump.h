@@ -47,7 +47,7 @@ class INET_API PacketDump
     /**
      * Constructor. The output stream initially points to the C++ standard
      * output (std::cout); you probably want to call
-     * <code>setOutStream(ev.getOStream())</code> to redirect it to EV.
+     * <code>setOutStream(getEnvir()->getOStream())</code> to redirect it to EV.
      */
     PacketDump();
 

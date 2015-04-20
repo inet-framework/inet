@@ -46,11 +46,11 @@ void ExtInterface::initialize(int stage)
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
-        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != nullptr) {
-            rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
-            //device = ev.config()->getAsString("Capture", "device", "lo0");
+        if (dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler()) != nullptr) {
+            rtScheduler = check_and_cast<cSocketRTScheduler *>(getSimulation()->getScheduler());
+            //device = getEnvir()->config()->getAsString("Capture", "device", "lo0");
             device = par("device");
-            //const char *filter = ev.config()->getAsString("Capture", "filter-string", "ip");
+            //const char *filter = getEnvir()->config()->getAsString("Capture", "filter-string", "ip");
             const char *filter = par("filterString");
             rtScheduler->setInterfaceModule(this, device, filter);
             connected = true;
@@ -69,13 +69,13 @@ void ExtInterface::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         // if not connected, make it gray
-        if (ev.isGUI() && !connected) {
+        if (hasGUI() && !connected) {
             getDisplayString().setTagArg("i", 1, "#707070");
             getDisplayString().setTagArg("i", 2, "100");
         }
 
         // update display string when addresses have been autoconfigured etc.
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplayString();
     }
 }
@@ -161,7 +161,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         }
     }
     delete (msg);
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -181,7 +181,7 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::updateDisplayString()
 {
-    if (!ev.isGUI())
+    if (!hasGUI())
         return;
 
     const char *str;

@@ -66,8 +66,8 @@ class INET_API Ieee80211HTModeBase
         virtual int getNumberOfDataSubcarriers() const;
         virtual int getNumberOfPilotSubcarriers() const;
         virtual int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
-        virtual const GuardIntervalType getGuardIntervalType() const { return guardIntervalType; }
-        virtual const unsigned int getNumberOfSpatialStreams() const { return numberOfSpatialStreams; }
+        virtual GuardIntervalType getGuardIntervalType() const { return guardIntervalType; }
+        virtual int getNumberOfSpatialStreams() const { return numberOfSpatialStreams; }
         virtual unsigned int getMcsIndex() const { return mcsIndex; }
         virtual Hz getBandwidth() const { return bandwidth; }
         virtual bps getNetBitrate() const;
@@ -191,7 +191,7 @@ class INET_API Ieee80211HTMCS
         virtual const Ieee80211OFDMModulation* getStreamExtension1Modulation() const { return stream2Modulation; }
         virtual const Ieee80211OFDMModulation* getStreamExtension2Modulation() const { return stream3Modulation; }
         virtual const Ieee80211OFDMModulation* getStreamExtension3Modulation() const { return stream4Modulation; }
-        virtual const Hz getBandwidth() const { return bandwidth; }
+        virtual Hz getBandwidth() const { return bandwidth; }
 };
 
 class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211HTModeBase, public Ieee80211HTTimingRelatedParametersBase
@@ -213,6 +213,7 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
         inline int getServiceBitLength() const { return 16; }
         inline int getTailBitLength() const { return 6 * numberOfBccEncoders; }
 
+        virtual int getNumberOfSpatialStreams() const override { return Ieee80211HTModeBase::getNumberOfSpatialStreams(); }
         virtual int getBitLength(int dataBitLength) const override;
         virtual const simtime_t getDuration(int dataBitLength) const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }

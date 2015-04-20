@@ -275,7 +275,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
+    check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)
@@ -1124,7 +1124,6 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
                 scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                 state->rcv_wnd_scale++;
             }
-
             option.setValues(0, state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;

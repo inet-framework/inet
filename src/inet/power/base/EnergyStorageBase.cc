@@ -21,6 +21,14 @@ namespace inet {
 
 namespace power {
 
+void EnergyStorageBase::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        EnergySourceBase::initialize(stage);
+        EnergySinkBase::initialize(stage);
+    }
+}
+
 int EnergyStorageBase::addEnergyConsumer(const IEnergyConsumer *energyConsumer)
 {
     EnergySourceBase::addEnergyConsumer(energyConsumer);

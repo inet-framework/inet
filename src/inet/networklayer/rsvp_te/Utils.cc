@@ -123,7 +123,7 @@ cModule *getPayloadOwner(cPacket *msg)
         msg = msg->getEncapsulatedPacket();
 
     if (msg->hasPar("owner"))
-        return simulation.getModule(msg->par("owner"));
+        return getSimulation()->getModule(msg->par("owner"));
     else
         return nullptr;
 }

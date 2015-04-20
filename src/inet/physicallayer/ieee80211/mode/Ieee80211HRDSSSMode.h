@@ -84,6 +84,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual const simtime_t getDuration(int bitLength) const override;
     virtual IModulation *getModulation() const override { return nullptr; } // TODO:
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**
@@ -99,6 +100,8 @@ class INET_API Ieee80211HrDsssMode : public IIeee80211Mode
 
   public:
     Ieee80211HrDsssMode(const Ieee80211HrDsssPreambleMode *preambleMode, const Ieee80211HrDsssHeaderMode *headerMode, const Ieee80211HrDsssDataMode *dataMode);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211HrDsssMode"; }
 
     inline Hz getChannelSpacing() const { return MHz(5); }
     inline Hz getBandwidth() const { return MHz(22); }

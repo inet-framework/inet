@@ -260,7 +260,7 @@ void NetPerfMeter::finish()
 
 // ###### Show I/O status ###################################################
 void NetPerfMeter::showIOStatus() {
-   if(ev.isGUI()) {
+   if(hasGUI()) {
       unsigned long long totalSentBytes = 0;
       for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
          iterator != SenderStatisticsMap.end(); iterator++) {
@@ -892,7 +892,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
                                           const unsigned int streamID)
 {
    EV << simTime() << ", " << getFullPath() << ": Transmit frame of size "
-                       << frameSize << " on stream #" << streamID << endl;
+      << frameSize << " on stream #" << streamID << endl;
    assert(OnTimer == NULL);
 
    // ====== TCP ============================================================
@@ -1009,9 +1009,6 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
    unsigned long frameSize;
    if(FrameSizeExpressionVector.size() == 0) {
       frameSize = par("frameSize");
-      // FIXME Merge
-      if(!frameSize)
-          frameSize = 1424;
    }
    else {
       frameSize =

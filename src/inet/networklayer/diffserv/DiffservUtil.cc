@@ -16,8 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "cnedvalue.h"
-
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/INETUtils.h"
 

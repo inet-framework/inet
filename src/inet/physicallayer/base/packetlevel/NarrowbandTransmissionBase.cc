@@ -29,12 +29,14 @@ NarrowbandTransmissionBase::NarrowbandTransmissionBase(const IRadio *transmitter
 {
 }
 
-void NarrowbandTransmissionBase::printToStream(std::ostream& stream) const
+std::ostream& NarrowbandTransmissionBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "modulation = { " << modulation << " }, "
-           << "carrierFrequency = " << carrierFrequency << ", "
-           << "bandwidth = " << bandwidth << ", ";
-    TransmissionBase::printToStream(stream);
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", carrierFrequency = " << carrierFrequency;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", bandwidth = " << bandwidth
+               << ", modulation = " << printObjectToString(modulation, level - 1) ;
+    return TransmissionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

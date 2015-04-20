@@ -26,6 +26,12 @@ EnergySinkBase::EnergySinkBase() :
 {
 }
 
+void EnergySinkBase::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        WATCH(totalGeneratedPower);
+}
+
 W EnergySinkBase::computeTotalGeneratedPower()
 {
     W totalGeneratedPower = W(0);

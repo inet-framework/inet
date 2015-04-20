@@ -102,7 +102,7 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
     const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
     const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
-    virtual void printToStream(std::ostream& stream) const { stream << "IEEE 802.11 OFDM Receiver"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

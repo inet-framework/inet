@@ -33,7 +33,7 @@ class INET_API NarrowbandNoiseBase : public NoiseBase
   public:
     NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }

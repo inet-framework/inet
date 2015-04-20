@@ -25,7 +25,7 @@ Define_Module(ConstantGainAntenna);
 
 ConstantGainAntenna::ConstantGainAntenna() :
     AntennaBase(),
-    gain(sNaN)
+    gain(NaN)
 {
 }
 
@@ -36,9 +36,12 @@ void ConstantGainAntenna::initialize(int stage)
         gain = math::dB2fraction(par("gain"));
 }
 
-void ConstantGainAntenna::printToStream(std::ostream& stream) const
+std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ConstantGainAntenna, gain = " << gain;
+    stream << "ConstantGainAntenna";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", gain = " << gain;
+    return AntennaBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

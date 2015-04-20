@@ -1192,7 +1192,7 @@ DYMO_RoutingTable* DYMOFau::getDYMORoutingTable()
 
 cModule* DYMOFau::getRouterByAddress(IPv4Address address)
 {
-    return dynamic_cast<cModule*>(simulation.getModule(address.getInt() - AUTOASSIGN_ADDRESS_BASE.getInt()));
+    return dynamic_cast<cModule*>(getSimulation()->getModule(address.getInt() - AUTOASSIGN_ADDRESS_BASE.getInt()));
 }
 
 /* Called for packets whose delivery fails at the link layer */

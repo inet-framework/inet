@@ -90,7 +90,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
     smsg->setEncaps(true);
     smsg->encapsulate(msg);
-    smsg->setCreationTime(simulation.getSimTime());
+    smsg->setCreationTime(simTime());
     smsg->setByteLength(16);
     smsg->setDataLen(16);
     cmsg->encapsulate(PK(smsg));
@@ -130,7 +130,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     smsg = new SCTPSimpleMessage("nat_data");
     smsg->setEncaps(true);
     smsg->encapsulate(msg);
-    smsg->setCreationTime(simulation.getSimTime());
+    smsg->setCreationTime(simTime());
     smsg->setByteLength(16);
     smsg->setDataLen(16);
     cmsg->encapsulate(PK(smsg));

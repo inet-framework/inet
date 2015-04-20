@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <platdep/sockets.h>
+#include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/ipv4/IGMPSerializer.h"
 
@@ -191,6 +191,33 @@ cPacket *IGMPSerializer::deserialize(Buffer &b, Context& c)
             }
             break;
 
+        case IGMPV3_MEMBERSHIP_REPORT:
+            {
+                IGMPv3Report *pkt;
+                packet = pkt = new IGMPv3Report();
+                b.readUint16(); //reserved
+                unsigned int s = b.readUint16();
+                pkt->setGroupRecordArraySize(s);
+                unsigned int i;
+                for (i = 0; i < s && !b.hasError(); i++) {
+                    GroupRecord gr;
+                    gr.recordType = b.readByte();
+                    uint16_t auxDataLen = 4 * b.readByte();
+                    unsigned int gac = b.readUint16();
+                    gr.groupAddress = b.readIPv4Address();
+                    for (unsigned int j = 0; j < gac && !b.hasError(); j++) {
+                        gr.sourceList.push_back(b.readIPv4Address());
+                    }
+                    pkt->setGroupRecord(i, gr);
+                    b.accessNBytes(auxDataLen);
+                }
+                if (i < s) {
+                    pkt->setGroupRecordArraySize(i);
+                }
+                pkt->setByteLength(b.getPos() - startPos);
+            }
+            break;
+
         default:
             EV_ERROR << "IGMPSerializer: can not create IGMP packet: type " << type << " not supported\n";
             b.seek(startPos);
@@ -199,7 +226,8 @@ cPacket *IGMPSerializer::deserialize(Buffer &b, Context& c)
             break;
     }
 
-    if (TCPIPchecksum::checksum(igmp, packet->getByteLength()) != 0)
+    ASSERT(packet);
+    if (b.hasError() || TCPIPchecksum::checksum(igmp, packet->getByteLength()) != 0)
         packet->setBitError(true);
     return packet;
 }

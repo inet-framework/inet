@@ -62,12 +62,14 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + refillPeriod, msg);
 }
 
-void QuadTreeNeighborCache::printToStream(std::ostream& stream) const
+std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level) const
 {
-    stream << "QuadTreeNeighborCache, "
-           << "maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant << ", "
-           << "refillPeriod = " << refillPeriod << ", "
-           << "maxSpeed = " << maxSpeed;
+    stream << "QuadTreeNeighborCache";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant
+               << ", refillPeriod = " << refillPeriod
+               << ", maxSpeed = " << maxSpeed;
+    return stream;
 }
 
 void QuadTreeNeighborCache::addRadio(const IRadio *radio)

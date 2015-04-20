@@ -42,13 +42,13 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
   public:
     NarrowbandReceiverBase();
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
     virtual const IModulation *getModulation() const { return modulation; }
-    virtual void setModulation(const IModulation *) { this->modulation = modulation; }
+    virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }

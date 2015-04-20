@@ -45,7 +45,7 @@ class FindModule
      */
     static T findGlobalModule()
     {
-        return findSubModule(simulation.getSystemModule());
+        return findSubModule(getSimulation()->getSystemModule());
     }
 
     /**
@@ -115,7 +115,7 @@ class AccessModuleWrap
     {
         if (!pModule) {
             pModule = FindModule<T *>::findSubModule(
-                        FindModule<>::findHost(from != nullptr ? from : simulation.getContextModule()));
+                        FindModule<>::findHost(from != nullptr ? from : getSimulation()->getContextModule()));
         }
         return pModule;
     }

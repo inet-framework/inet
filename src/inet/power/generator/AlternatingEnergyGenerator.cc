@@ -27,7 +27,7 @@ AlternatingEnergyGenerator::AlternatingEnergyGenerator() :
     isSleeping(false),
     energyGeneratorId(-1),
     energySink(nullptr),
-    powerGeneration(W(sNaN)),
+    powerGeneration(W(NaN)),
     timer(nullptr)
 {
 }

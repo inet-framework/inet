@@ -32,7 +32,7 @@ class INET_API ScalarTransmission : public FlatTransmissionBase, public virtual 
   public:
     ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power);
 
-    virtual void printToStream(std::ostream& stream) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual W getPower() const { return power; }
     virtual W computeMinPower(const simtime_t startTime, const simtime_t endTime) const { return power; }
 };

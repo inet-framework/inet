@@ -26,6 +26,7 @@ Define_Module(ConstantSpeedPropagation);
 
 ConstantSpeedPropagation::ConstantSpeedPropagation() :
     PropagationBase(),
+    ignoreMovementDuringTransmission(false),
     ignoreMovementDuringPropagation(false),
     ignoreMovementDuringReception(false)
 {
@@ -35,23 +36,29 @@ void ConstantSpeedPropagation::initialize(int stage)
 {
     PropagationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        ignoreMovementDuringTransmission = par("ignoreMovementDuringTransmission");
         ignoreMovementDuringPropagation = par("ignoreMovementDuringPropagation");
         ignoreMovementDuringReception = par("ignoreMovementDuringReception");
+        // TODO:
+        if (!ignoreMovementDuringTransmission)
+            throw cRuntimeError("ignoreMovementDuringTransmission is yet not implemented");
     }
 }
 
 const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
 {
-//    return mobility->getPosition(time);
+    // TODO: return mobility->getPosition(time);
     throw cRuntimeError("Movement approximation is not implemented");
 }
 
-void ConstantSpeedPropagation::printToStream(std::ostream& stream) const
+std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ConstantSpeedPropagation, "
-           << "ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation << ", "
-           << "ignoreMovementDuringReception = " << ignoreMovementDuringReception << ", ";
-    PropagationBase::printToStream(stream);
+    stream << "ConstantSpeedPropagation";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", ignoreMovementDuringTransmission = " << ignoreMovementDuringTransmission
+               << ", ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation
+               << ", ignoreMovementDuringReception = " << ignoreMovementDuringReception;
+    return PropagationBase::printToStream(stream, level);
 }
 
 const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const

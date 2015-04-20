@@ -42,9 +42,9 @@ void Ieee802154UWBIRTransmitter::initialize(int stage)
     }
 }
 
-void Ieee802154UWBIRTransmitter::printToStream(std::ostream& stream) const
+std::ostream& Ieee802154UWBIRTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee802154UWBIRTransmitter";
+    return stream << "Ieee802154UWBIRTransmitter";
 }
 
 simtime_t Ieee802154UWBIRTransmitter::getFrameDuration(int psduLength) const

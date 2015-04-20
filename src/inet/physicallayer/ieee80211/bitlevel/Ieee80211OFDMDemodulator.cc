@@ -27,9 +27,17 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMDemodulator::Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *ofdmModulation) :
-    subcarrierModulation(ofdmModulation)
+Ieee80211OFDMDemodulator::Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *subcarrierModulation) :
+    subcarrierModulation(subcarrierModulation)
 {
+}
+
+std::ostream& Ieee80211OFDMDemodulator::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211OFDMDemodulator";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level - 1);
+    return stream;
 }
 
 BitVector Ieee80211OFDMDemodulator::demodulateSymbol(const Ieee80211OFDMSymbol *signalSymbol) const

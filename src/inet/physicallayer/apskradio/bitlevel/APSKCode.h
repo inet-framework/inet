@@ -38,6 +38,8 @@ class INET_API APSKCode : public ICode
     APSKCode(const ConvolutionalCode *convCode, const IInterleaving *interleaving, const IScrambling *scrambling);
     ~APSKCode();
 
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
     const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
     const IInterleaving *getInterleaving() const { return interleaving; }
     const IScrambling *getScrambling() const { return scrambling; }

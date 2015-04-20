@@ -38,6 +38,14 @@ void APSKModulator::initialize(int stage)
         modulation = APSKModulationBase::findModulation(par("modulation"));
 }
 
+std::ostream& APSKModulator::printToStream(std::ostream& stream, int level) const
+{
+    stream << "APSKModulator";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", modulation = " << printObjectToString(modulation, level - 1);
+    return stream;
+}
+
 const ITransmissionSymbolModel *APSKModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     const BitVector *bits = bitModel->getBits();

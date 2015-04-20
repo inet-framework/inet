@@ -40,7 +40,7 @@ class INET_API APSKModulator : public IModulator, public cSimpleModule
   public:
     APSKModulator();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "APSKModulator"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IModulation *getModulation() const { return modulation; }
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
 };

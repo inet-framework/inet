@@ -55,6 +55,7 @@ struct EroObj_t;
 //
 packet RSVPMessage
 {
+    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     int rsvpKind;
 }
 

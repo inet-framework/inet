@@ -27,10 +27,12 @@ NoiseBase::NoiseBase(simtime_t startTime, simtime_t endTime) :
 {
 }
 
-void NoiseBase::printToStream(std::ostream& stream) const
+std::ostream& NoiseBase::printToStream(std::ostream& stream, int level) const
 {
-    stream << "startTime = " << startTime << ", "
-           << "endTime = " << endTime;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", startTime = " << startTime
+               << ", endTime = " << endTime;
+    return stream;
 }
 
 } // namespace physicallayer

@@ -22,10 +22,10 @@ namespace inet {
 namespace physicallayer {
 
 ScalarAnalogDigitalConverter::ScalarAnalogDigitalConverter() :
-    power(W(sNaN)),
-    carrierFrequency(Hz(sNaN)),
-    bandwidth(Hz(sNaN)),
-    sampleRate(sNaN)
+    power(W(NaN)),
+    carrierFrequency(Hz(NaN)),
+    bandwidth(Hz(NaN)),
+    sampleRate(NaN)
 {}
 
 const IReceptionSampleModel *ScalarAnalogDigitalConverter::convertAnalogToDigital(const IReceptionAnalogModel *analogModel) const

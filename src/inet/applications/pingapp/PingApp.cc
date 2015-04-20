@@ -107,7 +107,7 @@ void PingApp::handleMessage(cMessage *msg)
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));
 
-    if (ev.isGUI()) {
+    if (hasGUI()) {
         char buf[40];
         sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
         getDisplayString().setTagArg("t", 0, buf);
@@ -137,7 +137,7 @@ bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 void PingApp::startSendingPingRequests()
 {
     ASSERT(!timer->isScheduled());
-    pid = simulation.getUniqueNumber();
+    pid = getSimulation()->getUniqueNumber();
     lastStart = simTime();
     scheduleNextPingRequest(-1);
 }

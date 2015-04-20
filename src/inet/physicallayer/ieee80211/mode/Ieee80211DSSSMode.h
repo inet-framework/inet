@@ -75,6 +75,7 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual const simtime_t getDuration(int bitLength) const override;
     virtual const DPSKModulationBase *getModulation() const override { return modulation; }
+    virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
 /**
@@ -90,6 +91,8 @@ class INET_API Ieee80211DsssMode : public IIeee80211Mode
 
   public:
     Ieee80211DsssMode(const Ieee80211DsssPreambleMode *preambleMode, const Ieee80211DsssHeaderMode *headerMode, const Ieee80211DsssDataMode *dataMode);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211DsssMode"; }
 
     virtual const IIeee80211PreambleMode *getPreambleMode() const override { return preambleMode; }
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }

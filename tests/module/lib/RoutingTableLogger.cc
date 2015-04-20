@@ -123,7 +123,7 @@ void RoutingTableLogger::processCommand(const cXMLElement &command)
     while(tokenizer.hasMoreTokens())
     {
         const char *nodeName = tokenizer.nextToken();
-        cModule *node = simulation.getModuleByPath(nodeName);
+        cModule *node = getModuleByPath(nodeName);
         if (!node)
             error("module '%s' not found at %s", nodeName, command.getSourceLocation());
 

@@ -87,6 +87,29 @@ const IReceptionAnalogModel *Ieee80211LayeredOFDMReceiver::createAnalogModel(con
     return nullptr;
 }
 
+std::ostream& Ieee80211LayeredOFDMReceiver::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211LayeredOFDMReceiver";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", levelOfDetail = " << levelOfDetail
+               << ", mode = " << printObjectToString(mode, level - 1)
+               << ", errorModel = " << printObjectToString(errorModel, level - 1)
+               << ", dataDecoder = " << printObjectToString(dataDecoder, level - 1)
+               << ", signalDecoder = " << printObjectToString(signalDecoder, level - 1)
+               << ", dataDemodulator = " << printObjectToString(dataDemodulator, level - 1)
+               << ", signalDemodulator = " << printObjectToString(signalDemodulator, level - 1)
+               << ", pulseFilter = " << printObjectToString(pulseFilter, level - 1)
+               << ", analogDigitalConverter = " << printObjectToString(analogDigitalConverter, level - 1)
+               << ", energyDetection = " << energyDetection
+               << ", sensitivity = " << energyDetection
+               << ", carrierFrequency = " << carrierFrequency
+               << ", bandwidth = " << bandwidth
+               << ", channelSpacing = " << channelSpacing
+               << ", snirThreshold = " << snirThreshold
+               << ", isCompliant = " << isCompliant;
+    return stream;
+}
+
 const IReceptionSampleModel *Ieee80211LayeredOFDMReceiver::createSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
@@ -322,7 +345,13 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
         mergedBits->appendBit(dataBits->getBit(i));
     Ieee80211PhySerializer deserializer;
     cPacket *phyFrame = deserializer.deserialize(mergedBits);
-    return new ReceptionPacketModel(phyFrame, mergedBits, bps(NaN), 0, !phyFrame->hasBitError());
+    bool isReceptionSuccessful = true;
+    cPacket *packet = phyFrame;
+    while (packet != nullptr) {
+        isReceptionSuccessful &= !packet->hasBitError();
+        packet = packet->getEncapsulatedPacket();
+    }
+    return new ReceptionPacketModel(phyFrame, mergedBits, bps(NaN), 0, isReceptionSuccessful);
 }
 
 const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const

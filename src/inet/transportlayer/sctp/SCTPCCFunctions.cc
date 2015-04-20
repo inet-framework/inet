@@ -611,7 +611,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables *path,
         const uint32 ackedBytes,
         const bool ctsnaAdvanced)
 {
-    EV_INFO << simulation.getSimTime() << "====> cwndUpdateBytesAcked:"
+    EV_INFO << simTime() << "====> cwndUpdateBytesAcked:"
             << " path=" << path->remoteAddress
             << " ackedBytes=" << ackedBytes
             << " ctsnaAdvanced=" << ((ctsnaAdvanced == true) ? "yes" : "no")

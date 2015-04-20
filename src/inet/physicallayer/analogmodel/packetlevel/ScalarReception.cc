@@ -27,11 +27,12 @@ ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *trans
 {
 }
 
-void ScalarReception::printToStream(std::ostream& stream) const
+std::ostream& ScalarReception::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarReception, "
-           << "power = " << power << ", ";
-    FlatReceptionBase::printToStream(stream);
+    stream << "ScalarReception";
+    if (level >= PRINT_LEVEL_DETAIL)
+       stream << ", power = " << power;
+    return FlatReceptionBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

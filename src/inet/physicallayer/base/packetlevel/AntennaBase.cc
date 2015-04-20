@@ -23,14 +23,22 @@ namespace inet {
 namespace physicallayer {
 
 AntennaBase::AntennaBase() :
-    mobility(nullptr)
+    mobility(nullptr),
+    numAntennas(-1)
 {
 }
 
 void AntennaBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         mobility = getModuleFromPar<IMobility>(par("mobilityModule"), getContainingNode(this));
+        numAntennas = par("numAntennas");
+    }
+}
+
+std::ostream& AntennaBase::printToStream(std::ostream& stream, int level) const
+{
+    return stream;
 }
 
 } // namespace physicallayer

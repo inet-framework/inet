@@ -132,7 +132,7 @@ void GlobalARP::handleMessage(cMessage *msg)
     else
         processARPPacket(check_and_cast<ARPPacket *>(msg));
 
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 

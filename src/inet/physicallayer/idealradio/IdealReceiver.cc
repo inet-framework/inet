@@ -39,10 +39,12 @@ void IdealReceiver::initialize(int stage)
     }
 }
 
-void IdealReceiver::printToStream(std::ostream& stream) const
+std::ostream& IdealReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealReceiver, "
-           << (ignoreInterference ? "ignoring interference" : "considering interference");
+    stream << "IdealReceiver";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << (ignoreInterference ? ", ignoring interference" : ", considering interference");
+    return stream;
 }
 
 bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
@@ -68,7 +70,7 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
         else {
             const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
             for (auto interferingReception : *interferingReceptions) {
-                
+
                 IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
                 if (interferingPower == IdealReception::POWER_RECEIVABLE || interferingPower == IdealReception::POWER_INTERFERING)
                     return false;
@@ -89,7 +91,7 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
 {
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto interferingReception : *interferingReceptions) {
-        
+
         IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
         if (interferingPower != IdealReception::POWER_UNDETECTABLE)
             return new ListeningDecision(listening, true);

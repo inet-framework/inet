@@ -104,7 +104,7 @@ void MoBANLocal::setTargetPosition()
 
 void MoBANLocal::updateVisualRepresentation()
 {
-    if (ev.isGUI() && visualRepresentation) {
+    if (hasGUI() && visualRepresentation) {
         Coord coordinatorPosition = coordinator->getCurrentPosition();
         visualRepresentation->getDisplayString().setTagArg("p", 0, lastPosition.x + coordinatorPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, lastPosition.y + coordinatorPosition.y);

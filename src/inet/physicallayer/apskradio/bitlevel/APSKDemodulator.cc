@@ -40,6 +40,14 @@ void APSKDemodulator::initialize(int stage)
         modulation = APSKModulationBase::findModulation(par("modulation"));
 }
 
+std::ostream& APSKDemodulator::printToStream(std::ostream& stream, int level) const
+{
+    stream << "APSKDemodulator";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", modulation = " << printObjectToString(modulation, level - 1);
+    return stream;
+}
+
 const IReceptionBitModel *APSKDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();

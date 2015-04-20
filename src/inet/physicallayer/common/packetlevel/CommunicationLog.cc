@@ -24,7 +24,7 @@ namespace physicallayer {
 
 void CommunicationLog::open()
 {
-    output.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+    output.open(getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
 }
 
 void CommunicationLog::close()

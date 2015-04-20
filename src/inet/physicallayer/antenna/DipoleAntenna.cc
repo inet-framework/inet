@@ -42,9 +42,12 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
     return 1.5 * q * q;
 }
 
-void DipoleAntenna::printToStream(std::ostream& stream) const
+std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
 {
-    stream << "DipoleAntenna, length = " << length;
+    stream << "DipoleAntenna";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", length = " << length;
+    return AntennaBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

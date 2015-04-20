@@ -35,12 +35,15 @@ SignalBitModel::~SignalBitModel()
     delete bits;
 }
 
-void SignalBitModel::printToStream(std::ostream& stream) const
+std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "headerBitLength = " << headerBitLength << ", "
-           << "headerBitRate = " << headerBitRate << ", "
-           << "payloadBitLength = " << payloadBitLength << ", "
-           << "payloadBitRate = " << payloadBitRate;
+    stream << "SignalBitModel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", headerBitLength = " << headerBitLength
+               << ", headerBitRate = " << headerBitRate
+               << ", payloadBitLength = " << payloadBitLength
+               << ", payloadBitRate = " << payloadBitRate;
+    return stream;
 }
 
 TransmissionBitModel::TransmissionBitModel(const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :

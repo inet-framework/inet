@@ -21,12 +21,15 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 
 namespace inet {
+
 namespace physicallayer {
 
 class INET_API Ieee80211ErpOfdmMode : public Ieee80211OFDMMode
 {
     public:
         Ieee80211ErpOfdmMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode);
+
+        virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ErpOfdmMode"; }
 
         // The slot time is 20 μs in accordance with 17.3.3, except that an optional 9 μs
         // slot time may be used when the BSS consists of only ERP STAs. TODO: isOnlyERPSTAs
@@ -51,9 +54,9 @@ class INET_API Ieee80211ErpOfdmCompliantModes
         static const Ieee80211ErpOfdmMode erpOfdmMode54Mbps;
 };
 
-
-
 } /* namespace physicallayer */
+
 } /* namespace inet */
 
 #endif // ifndef __INET_IEEE80211ERPOFDMMODE_H
+

@@ -42,9 +42,9 @@ void NetAnimTrace::initialize()
 
     dump();
 
-    simulation.getSystemModule()->subscribe(POST_MODEL_CHANGE, this);
-    simulation.getSystemModule()->subscribe(messageSentSignal, this);
-    simulation.getSystemModule()->subscribe(mobilityStateChangedSignal, this);
+    getSimulation()->getSystemModule()->subscribe(POST_MODEL_CHANGE, this);
+    getSimulation()->getSystemModule()->subscribe(messageSentSignal, this);
+    getSimulation()->getSystemModule()->subscribe(mobilityStateChangedSignal, this);
 }
 
 void NetAnimTrace::handleMessage(cMessage *msg)
@@ -59,7 +59,7 @@ void NetAnimTrace::finish()
 
 void NetAnimTrace::dump()
 {
-    cModule *parent = simulation.getSystemModule();
+    cModule *parent = getSimulation()->getSystemModule();
     for (cModule::SubmoduleIterator it(parent); !it.end(); it++)
         if (it() != this)
             addNode(it());
@@ -127,7 +127,7 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 bool NetAnimTrace::isRelevantModule(cModule *mod)
 {
-    return mod->getParentModule() == simulation.getSystemModule();
+    return mod->getParentModule() == getSimulation()->getSystemModule();
 }
 
 void NetAnimTrace::addNode(cModule *mod)
