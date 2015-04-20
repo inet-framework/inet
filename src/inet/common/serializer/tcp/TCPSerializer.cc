@@ -160,27 +160,23 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     tcp.th_flags = (TH_FLAGS & flags);
     tcp.th_win = htons(tcpseg->getWindow());
     tcp.th_urp = htons(tcpseg->getUrgentPointer());
-
-    b.seek(TCP_HEADER_OCTETS);
-    unsigned short numOptions = tcpseg->getHeaderOptionArraySize();
     if (tcpseg->getHeaderLength() % 4 != 0)
         throw cRuntimeError("invalid TCP header length=%u: must be dividable by 4", tcpseg->getHeaderLength());
-    unsigned int optionsLength = tcpseg->getHeaderLength() > TCP_HEADER_OCTETS ? tcpseg->getHeaderLength() - TCP_HEADER_OCTETS : 0;
+    tcp.th_offs = tcpseg->getHeaderLength() / 4;
+    b.writeNBytes(TCP_HEADER_OCTETS, &tcp);
+    unsigned short numOptions = tcpseg->getHeaderOptionArraySize();
+    unsigned int optionsLength = 0;
     if (numOptions > 0) {    // options present?
-        Buffer sb(b, 0, optionsLength);
-
         for (unsigned short i = 0; i < numOptions; i++) {
             const TCPOption *option = tcpseg->getHeaderOption(i);
-            serializeOption(option, sb, c);
+            serializeOption(option, b, c);
+            optionsLength += option->getLength();
         }    // for
         //padding:
-        sb.fillNBytes(sb.getRemainder(), 0);
-        if (sb.hasError())
-            b.setError();
-
-        tcp.th_offs = tcpseg->getHeaderLength() / 4;
+        optionsLength %= 4;
+        if (optionsLength)
+            b.fillNBytes(4 - optionsLength, 0);
     }    // if options present
-    b.seek(TCP_HEADER_OCTETS + optionsLength);
 
     // write data
     if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
@@ -195,10 +191,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.fillNBytes(dataLength, 't'); // fill data part with 't'
     }
     writtenbytes = b.getPos();
-    b.seek(0);
-    b.writeNBytes(TCP_HEADER_OCTETS, &tcp);
     b.writeUint16To(16, TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
-    b.seek(writtenbytes);
 }
 
 TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
