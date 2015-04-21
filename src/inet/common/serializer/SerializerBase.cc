@@ -41,7 +41,7 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
 
 cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
 {
-    if (b.getRemainder() == 0)
+    if (b.getRemainingSize() == 0)
         return nullptr;
 
     unsigned int startPos = b.getPos();
@@ -116,7 +116,7 @@ void DefaultSerializer::serialize(const cPacket *pkt, Buffer &b, Context& contex
 
 cPacket *DefaultSerializer::deserialize(const Buffer &b, Context& context)
 {
-    unsigned int byteLength = b.getRemainder();
+    unsigned int byteLength = b.getRemainingSize();
     if (byteLength) {
         cPacket *pkt = new cPacket();
         pkt->setByteLength(byteLength);
@@ -134,7 +134,7 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
 {
     const RawPacket *bam = check_and_cast<const RawPacket *>(pkt);
     unsigned int length = bam->getByteLength();
-    unsigned int wl = std::min(length, b.getRemainder());
+    unsigned int wl = std::min(length, b.getRemainingSize());
     wl = bam->copyDataToBuffer(b.accessNBytes(0), wl);
     b.accessNBytes(wl);
     if (length > wl)
@@ -146,7 +146,7 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
 cPacket *ByteArraySerializer::deserialize(const Buffer &b, Context& context)
 {
     RawPacket *bam = nullptr;
-    unsigned int bytes = b.getRemainder();
+    unsigned int bytes = b.getRemainingSize();
     if (bytes) {
         bam = new RawPacket("parsed-bytes");
         bam->setDataFromBuffer(b.accessNBytes(bytes), bytes);

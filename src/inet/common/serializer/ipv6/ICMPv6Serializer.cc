@@ -149,9 +149,9 @@ cPacket *ICMPv6Serializer::deserialize(const Buffer &b, Context& context)
             pp->setName(name);
             pkt->setName(name);
 
-            pp->setByteLength(4 + b.getRemainder());
-            pp->setDataArraySize(b.getRemainder());
-            for (unsigned int i = 0; b.getRemainder() > 0; i++)
+            pp->setByteLength(4 + b.getRemainingSize());
+            pp->setDataArraySize(b.getRemainingSize());
+            for (unsigned int i = 0; b.getRemainingSize() > 0; i++)
                 pp->setData(i, b.readByte());
             pkt->encapsulate(pp);
             break;
@@ -171,9 +171,9 @@ cPacket *ICMPv6Serializer::deserialize(const Buffer &b, Context& context)
             pp->setName(name);
             pkt->setName(name);
 
-            pp->setByteLength(4 + b.getRemainder());
-            pp->setDataArraySize(b.getRemainder());
-            for (unsigned int i = 0; b.getRemainder() > 0; i++)
+            pp->setByteLength(4 + b.getRemainingSize());
+            pp->setDataArraySize(b.getRemainingSize());
+            for (unsigned int i = 0; b.getRemainingSize() > 0; i++)
                 pp->setData(i, b.readByte());
             pkt->encapsulate(pp);
             break;
@@ -187,7 +187,7 @@ cPacket *ICMPv6Serializer::deserialize(const Buffer &b, Context& context)
 
             b.readUint32(); // reserved
             pkt->setTargetAddress(b.readIPv6Address());
-            while (b.getRemainder()) {   // has options
+            while (b.getRemainingSize()) {   // has options
                 unsigned int pos = b.getPos();
                 unsigned char type = b.readByte();
                 unsigned char length = b.readByte();

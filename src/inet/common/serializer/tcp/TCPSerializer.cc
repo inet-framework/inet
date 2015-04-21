@@ -184,7 +184,7 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 
         if (tcpseg->getByteArray().getDataArraySize() > 0) {
             ASSERT(tcpseg->getByteArray().getDataArraySize() == dataLength);
-            tcpseg->getByteArray().copyDataToBuffer(b.accessNBytes(0), b.getRemainder());
+            tcpseg->getByteArray().copyDataToBuffer(b.accessNBytes(0), b.getRemainingSize());
             b.accessNBytes(dataLength);
         }
         else
@@ -319,7 +319,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
         unsigned short optionBytes = hdrLength - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
         Buffer sb(b, optionBytes);
 
-        while (sb.getRemainder()) {
+        while (sb.getRemainingSize()) {
             TCPOption *option = deserializeOption(sb, c);
             tcpseg->addHeaderOption(option);
         }
@@ -328,7 +328,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     }    // if options present
     b.seek(hdrLength);
     tcpseg->setByteLength(b._getBufSize());
-    unsigned int payloadLength = b.getRemainder();
+    unsigned int payloadLength = b.getRemainingSize();
     tcpseg->setPayloadLength(payloadLength);
     tcpseg->getByteArray().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
 

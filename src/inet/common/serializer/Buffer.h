@@ -49,8 +49,8 @@ class INET_API Buffer
     // position
     void seek(unsigned int newpos) const { if (newpos <= bufsize) { pos = newpos; } else { pos = bufsize; errorFound = true; } }
     unsigned int getPos() const  { return pos; }
-    unsigned int getRemainder() const  { return bufsize - pos; }
-    unsigned int getRemainderWithout(unsigned int bytes) const  { return bufsize - pos > bytes ? (bufsize - pos) - bytes : 0; }
+    unsigned int getRemainingSize() const  { return bufsize - pos; }
+    unsigned int getRemainingSize(unsigned int reservedSize) const  { return bufsize - pos > reservedSize ? (bufsize - pos) - reservedSize : 0; }
 
     bool hasError() const  { return errorFound; }
     void setError() const  { errorFound = true; }
