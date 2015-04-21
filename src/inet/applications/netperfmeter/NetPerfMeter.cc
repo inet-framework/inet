@@ -65,7 +65,7 @@ static cNEDValue pareto(cComponent *context, cNEDValue argv[], int argc)
     const double location = argv[0].doubleValueInUnit(argv[0].getUnit());
     const double shape    = argv[1].doubleValueInUnit(argv[1].getUnit());
 
-    const double r      = uniform(0.0, 1.0, rng);
+    const double r      = RNGCONTEXT uniform(0.0, 1.0, rng);
     const double result = location / pow(r, 1.0 / shape);
 
     // printf("%1.6f  => %1.6f   (location=%1.6f shape=%1.6f)\n", r, result, location, shape);

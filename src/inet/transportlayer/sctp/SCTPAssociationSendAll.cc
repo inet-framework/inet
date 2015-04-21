@@ -288,7 +288,7 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
             SCTPPathVariables *path = *iterator;
             if (path != firstPath) {
                 sendOnPath(path);
-                path->sendAllRandomizer = uniform(0, (1 << 31));
+                path->sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
             }
         }
         if ((state->strictCwndBooking) &&
@@ -702,7 +702,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
         EV_INFO << pathId->remoteAddress;
     }
     EV_INFO << ") at t=" << simTime() << " #####" << endl;
-    
+
     unsigned int safetyCounter = 0;
     while (sendingAllowed) {
         if (safetyCounter++ >= 1000) {
