@@ -554,6 +554,7 @@ void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo 
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
+    delete status;
 }
 
 void SCTPClient::setPrimaryPath(const char *str)
