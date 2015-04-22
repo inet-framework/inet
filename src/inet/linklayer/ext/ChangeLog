@@ -7,16 +7,16 @@
 	The HAVE_PCAP macro is no longer used. To use the emulation feature
 	you have to install the libpcap-dev package, turn on the feature and
 	rebuild INET. Running ./configure in the omnetpp root and make changes to
-	inet/src/makefrag is no longer required. 
+	inet/src/makefrag is no longer required.
 
 2015-03-23  Artur Scussel
 
 	On Linux pcap is now configured to use immediate mode. This results in
 	much better response times (sub ms ping responses over a local network)
 	and reduces the CPU time required for the packet capturing. On Windows
-	and MAC this API is not available so the interface still polls the 
+	and MAC this API is not available so the interface still polls the
 	card every 500us. This still gives sub ms accuracy, but requires a bit more
-	CPU usage. 
+	CPU usage.
 
 2015-02-05  Zoltan Bojthe
 
@@ -31,6 +31,17 @@
 	ExtInterface fixes
 
 2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
 
 2014-07-30  Andras Varga
 
@@ -58,8 +69,8 @@
 
 2015-03-22  Artur Scussel
 
-	and 500us on othe platforms. This allows getting much smaller response times when a 
-	component receives a packet from the outside world while maintaining relatively low CPU 
+	and 500us on othe platforms. This allows getting much smaller response times when a
+	component receives a packet from the outside world while maintaining relatively low CPU
 	usage for polling.
 
 2015-03-04  ------ inet-2.6 released ------

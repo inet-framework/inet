@@ -25,6 +25,17 @@
 
 2014-11-07  ------ inet-2.99.0 released ------
 
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
 2014-07-30  Andras Varga
 
 	Changes on the inet-3.x branch so far:

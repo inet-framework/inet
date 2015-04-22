@@ -5,11 +5,22 @@
 2015-04-16  Rudolf Hornig
 
 	NodeBase implements the INode interface. As all "node type" modules
-	implement this module interface it is now possible to create networks 
-	(using the <"actualNodeType"> like INode construct) where the actual node 
+	implement this module interface it is now possible to create networks
+	(using the <"actualNodeType"> like INode construct) where the actual node
 	type can be configured from an ini file.
 
 2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
 
 ====== inet-2.x ======
 
