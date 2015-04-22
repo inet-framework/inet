@@ -25,11 +25,6 @@ namespace inet {
 
 using namespace sctp;
 
-static inline int32_t getNewAssocId()
-{
-    return SCTP::getNewAssocId();
-}
-
 SCTPSocket::SCTPSocket(bool type)
 {
     sockstate = NOT_BOUND;
@@ -41,7 +36,7 @@ SCTPSocket::SCTPSocket(bool type)
     lastStream = -1;
     oneToOne = type;
     if (oneToOne)
-        assocId = getNewAssocId();
+        assocId = SCTP::getNewAssocId();
     else
         assocId = 0;
     EV_INFO << "sockstate=" << stateName(sockstate) << "\n";
@@ -167,7 +162,7 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     if (oneToOne)
         openCmd->setAssocId(assocId);
     else
-        openCmd->setAssocId(getNewAssocId());
+        openCmd->setAssocId(SCTP::getNewAssocId());
     openCmd->setFork(fork);
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setOutboundStreams(outboundStreams);
@@ -202,7 +197,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
     if (oneToOne)
         openCmd->setAssocId(assocId);
     else
-        openCmd->setAssocId(getNewAssocId());
+        openCmd->setAssocId(SCTP::getNewAssocId());
     EV_INFO << "Socket connect. Assoc=" << openCmd->getAssocId() << ", sockstate=" << stateName(sockstate) << "\n";
     openCmd->setLocalAddresses(localAddresses);
     openCmd->setLocalPort(localPrt);
