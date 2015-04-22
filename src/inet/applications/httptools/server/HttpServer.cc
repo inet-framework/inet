@@ -83,8 +83,8 @@ void HttpServer::handleMessage(cMessage *msg)
         if (!useSCTP) {
             TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
             if (!tcpSocket) {
-                  EV_DEBUG << "No socket found for the message. Create a new one" << endl;
-                  // new connection -- create new socket object and server process
+                EV_DEBUG << "No socket found for the message. Create a new one" << endl;
+                // new connection -- create new socket object and server process
                 tcpSocket = new TCPSocket(msg);
                 tcpSocket->setOutputGate(gate("tcpOut"));
                 tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
