@@ -55,7 +55,7 @@ SCTPSocket::SCTPSocket(bool type)
         assocId = getNewAssocId();
     else
         assocId = 0;
-    EV_INFO << "sockstate=" << sockstate << "\n";
+    EV_INFO << "sockstate=" << stateName(sockstate) << "\n";
 }
 
 SCTPSocket::SCTPSocket(cMessage *msg)
@@ -195,7 +195,7 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
 
 void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
-    EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << sockstate << "\n";
+    EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
     if (oneToOne && sockstate == NOT_BOUND)
        bind(0);
@@ -235,7 +235,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
 
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
-    EV_INFO << "Socket connectx.  sockstate=" << sockstate << "\n";
+    EV_INFO << "Socket connectx.  sockstate=" << stateName(sockstate) << "\n";
     remoteAddresses = remoteAddressList;
     connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
@@ -406,7 +406,6 @@ void SCTPSocket::processMessage(cMessage *msg)
         case SCTP_I_CLOSED:
             EV_INFO << "SCTP_I_CLOSED called\n";
             sockstate = CLOSED;
-
             if (cb) {
                 cb->socketClosed(assocId, yourPtr);
             }
@@ -423,7 +422,6 @@ void SCTPSocket::processMessage(cMessage *msg)
 
         case SCTP_I_STATUS:
             status = check_and_cast<SCTPStatusInfo *>(msg->removeControlInfo());
-
             if (cb) {
                 cb->socketStatusArrived(assocId, yourPtr, status);
             }
