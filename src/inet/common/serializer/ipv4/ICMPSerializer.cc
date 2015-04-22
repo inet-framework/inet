@@ -44,7 +44,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     switch (pkt->getType()) {
         case ICMP_ECHO_REQUEST: {
             PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
-            b.writeByte(ICMP_ECHO);
+            b.writeByte(ICMP_ECHO_REQUEST);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(pp->getOriginatorId());
@@ -59,7 +59,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 
         case ICMP_ECHO_REPLY: {
             PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
-            b.writeByte(ICMP_ECHOREPLY);
+            b.writeByte(ICMP_ECHO_REPLY);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(pp->getOriginatorId());
@@ -73,24 +73,24 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
         }
 
         case ICMP_DESTINATION_UNREACHABLE: {
-            b.writeByte(ICMP_UNREACH);
+            b.writeByte(ICMP_DESTINATION_UNREACHABLE);
             b.writeByte(pkt->getCode());
             b.writeUint16(0);   // checksum
             b.writeUint16(0);   // unused
             b.writeUint16(0);   // next hop MTU
-            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
-            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, b.getRemainingSize());    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4);
             b.accessNBytes(std::min((unsigned int)(pkt->getByteLength() - ICMP_MINLEN), s.getPos()));
             break;
         }
 
         case ICMP_TIME_EXCEEDED: {
-            b.writeByte(ICMP_TIMXCEED);
+            b.writeByte(ICMP_TIME_EXCEEDED);
             b.writeByte(ICMP_TIMXCEED_INTRANS);
             b.writeUint16(0);   // checksum
             b.writeUint32(0);   // unused
-            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
-            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, b.getRemainingSize());    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            SerializerBase::lookupAndSerialize(pkt->getEncapsulatedPacket(), s, c, ETHERTYPE, ETHERTYPE_IPv4);
             b.accessNBytes(std::min((unsigned int)(pkt->getByteLength() - ICMP_MINLEN), s.getPos()));
             break;
         }
@@ -103,7 +103,7 @@ void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     b.writeUint16To(startpos + 2, TCPIPchecksum::checksum(b._getBuf() + startpos, b.getPos() - startpos));
 }
 
-cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
+cPacket *ICMPSerializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 
@@ -113,7 +113,7 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
     b.readUint16();   // checksum
 
     switch (type) {
-        case ICMP_ECHO: {
+        case ICMP_ECHO_REQUEST: {
             PingPayload *pp = new PingPayload();
             pkt->setType(ICMP_ECHO_REQUEST);
             pkt->setCode(subcode);
@@ -127,15 +127,15 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             pp->setName(name);
             pkt->setName(name);
 
-            pp->setByteLength(4 + b.getRemainder());
-            pp->setDataArraySize(b.getRemainder());
-            for (unsigned int i = 0; b.getRemainder() > 0; i++)
+            pp->setByteLength(4 + b.getRemainingSize());
+            pp->setDataArraySize(b.getRemainingSize());
+            for (unsigned int i = 0; b.getRemainingSize() > 0; i++)
                 pp->setData(i, b.readByte());
             pkt->encapsulate(pp);
             break;
         }
 
-        case ICMP_ECHOREPLY: {
+        case ICMP_ECHO_REPLY: {
             PingPayload *pp = new PingPayload();
             pkt->setType(ICMP_ECHO_REPLY);
             pkt->setCode(subcode);
@@ -149,35 +149,35 @@ cPacket *ICMPSerializer::deserialize(Buffer &b, Context& c)
             pp->setName(name);
             pkt->setName(name);
 
-            pp->setByteLength(4 + b.getRemainder());
-            pp->setDataArraySize(b.getRemainder());
-            for (unsigned int i = 0; b.getRemainder() > 0; i++)
+            pp->setByteLength(4 + b.getRemainingSize());
+            pp->setDataArraySize(b.getRemainingSize());
+            for (unsigned int i = 0; b.getRemainingSize() > 0; i++)
                 pp->setData(i, b.readByte());
             pkt->encapsulate(pp);
             break;
         }
 
-        case ICMP_UNREACH: {
+        case ICMP_DESTINATION_UNREACHABLE: {
             pkt->setType(ICMP_DESTINATION_UNREACHABLE);
+            pkt->setCode(subcode);
             b.readUint16();   // unused
             b.readUint16();   // next hop MTU
             pkt->setByteLength(8);
-            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
-            cPacket *pp = SerializerBase::lookupAndDeserialize(s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, b.getRemainingSize());    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            cPacket *pp = SerializerBase::lookupAndDeserialize(s, c, ETHERTYPE, ETHERTYPE_IPv4);
             b.accessNBytes(s.getPos());
             pkt->encapsulate(pp);
             pkt->setByteLength(b.getPos());
             break;
         }
 
-        case ICMP_TIMXCEED: {
+        case ICMP_TIME_EXCEEDED: {
             pkt->setType(ICMP_TIME_EXCEEDED);
-            b.writeByte(ICMP_TIMXCEED);
-            ASSERT(subcode == ICMP_TIMXCEED_INTRANS);
+            pkt->setCode(subcode);
             b.readUint32();   // unused
             pkt->setByteLength(8);
-            Buffer s(b, 0);    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
-            cPacket *pp = SerializerBase::lookupAndDeserialize(s, c, ETHERTYPE, ETHERTYPE_IPv4, 0);
+            Buffer s(b, b.getRemainingSize());    // save buffer error bit (encapsulated packet usually larger than ICMPPacket payload size)
+            cPacket *pp = SerializerBase::lookupAndDeserialize(s, c, ETHERTYPE, ETHERTYPE_IPv4);
             b.accessNBytes(s.getPos());
             pkt->encapsulate(pp);
             pkt->setByteLength(b.getPos());

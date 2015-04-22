@@ -33,7 +33,13 @@ class INET_API UDPPacket : public UDPPacket_Base, public ITransportPacket
     UDPPacket(const UDPPacket& other) : UDPPacket_Base(other) {copy(other);}
     UDPPacket& operator=(const UDPPacket& other) {if (this==&other) return *this; UDPPacket_Base::operator=(other); copy(other); return *this;}
 
-    virtual UDPPacket *dup() const {return new UDPPacket(*this);}
+    virtual UDPPacket *dup() const override { return new UDPPacket(*this); }
+
+    /**
+     * getter/setter for totalLength field of UDP packet
+     * if set to -1, then getter returns getByteLength()
+     */
+    int getTotalLengthField() const override { return totalLengthField_var == -1 ? getByteLength() : totalLengthField_var; }
 
     virtual unsigned int getSourcePort() const override { return UDPPacket_Base::getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { UDPPacket_Base::setSrcPort(port); }

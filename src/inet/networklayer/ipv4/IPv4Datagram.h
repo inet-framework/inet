@@ -38,6 +38,12 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     virtual IPv4Datagram *dup() const override { return new IPv4Datagram(*this); }
 
     /**
+     * getter/setter for totalLength field in datagram
+     * if set to -1, then getter returns getByteLength()
+     */
+    int getTotalLengthField() const override;
+
+    /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
      */
     virtual int getDiffServCodePoint() const override { return getTypeOfService() & 0x3f; }

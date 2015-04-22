@@ -36,14 +36,15 @@ namespace tcp {
 // helper functions for SACK
 //
 
-bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& option)
+bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOptionSack& option)
 {
     if (option.getLength() % 8 != 2) {
         EV_ERROR << "ERROR: option length incorrect\n";
         return false;
     }
 
-    uint n = option.getValuesArraySize() / 2;
+    uint n = option.getSackItemArraySize();
+    ASSERT(option.getLength() == 2 + n*8);
 
     if (!state->sack_enabled) {
         EV_ERROR << "ERROR: " << n << " SACK(s) received, but sack_enabled is set to false\n";
@@ -59,12 +60,10 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
 
     if (n > 0) {    // sacks present?
         EV_INFO << n << " SACK(s) received:\n";
-        uint count = 0;
-
         for (uint i = 0; i < n; i++) {
             Sack tmp;
-            tmp.setStart(option.getValues(count++));
-            tmp.setEnd(option.getValues(count++));
+            tmp.setStart(option.getSackItem(i).getStart());
+            tmp.setEnd(option.getSackItem(i).getEnd());
 
             EV_INFO << (i + 1) << ". SACK: " << tmp.str() << endl;
 
@@ -98,7 +97,7 @@ bool TCPConnection::processSACKOption(TCPSegment *tcpseg, const TCPOption& optio
                 // block, if there is one.  This comparison can determine if the first
                 // SACK block is reporting duplicate data that lies above the cumulative
                 // ACK."
-                Sack tmp2(option.getValues(2), option.getValues(3));
+                Sack tmp2(option.getSackItem(1).getStart(), option.getSackItem(1).getEnd());
 
                 if (tmp2.contains(tmp)) {
                     EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpseg->getAckNo()
@@ -441,9 +440,8 @@ void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 
 TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 {
-    TCPOption option;
     uint options_len = 0;
-    uint used_options_len = tcpseg->getOptionsArrayLength();
+    uint used_options_len = tcpseg->getHeaderOptionArrayLength();
     bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
 
     uint32 start = state->start_seqno;
@@ -578,7 +576,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         return *tcpseg;
     }
 
-    uint optArrSize = tcpseg->getOptionsArraySize();
+    uint optArrSize = tcpseg->getHeaderOptionArraySize();
 
     uint optArrSizeAligned = optArrSize;
 
@@ -587,31 +585,23 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
         optArrSizeAligned++;
     }
 
-    tcpseg->setOptionsArraySize(optArrSizeAligned + 1);
-
-    if (optArrSizeAligned > optArrSize) {
-        option.setKind(TCPOPTION_NO_OPERATION);    // NOP
-        option.setLength(1);
-        option.setValuesArraySize(0);
-
-        while (optArrSize < optArrSizeAligned)
-            tcpseg->setOptions(optArrSize++, option);
+    while (optArrSize < optArrSizeAligned) {
+        tcpseg->addHeaderOption(new TCPOptionNop());
+        optArrSize++;
     }
 
     ASSERT(used_options_len % 4 == 2);
 
-    option.setKind(TCPOPTION_SACK);
-    option.setLength(8 * n + 2);
-    option.setValuesArraySize(2 * n);
+    TCPOptionSack *option = new TCPOptionSack();
+    option->setLength(8 * n + 2);
+    option->setSackItemArraySize(n);
 
     // write sacks from sacks_array to options
     uint counter = 0;
 
-    for (it = state->sacks_array.begin(); it != state->sacks_array.end() && counter < 2 * n; it++) {
+    for (it = state->sacks_array.begin(); it != state->sacks_array.end() && counter < n; it++) {
         ASSERT(it->getStart() != it->getEnd());
-
-        option.setValues(counter++, it->getStart());
-        option.setValues(counter++, it->getEnd());
+        option->setSackItem(counter++, *it);
     }
 
     // independent of "n" we always need 2 padding bytes (NOP) to make: (used_options_len % 4 == 0)
@@ -619,7 +609,7 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 
     ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE);    // Options length allowed? - maximum: 40 Bytes
 
-    tcpseg->setOptions(optArrSizeAligned, option);
+    tcpseg->addHeaderOption(option);
 
     // update number of sent sacks
     state->snd_sacks += n;
@@ -627,17 +617,15 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
     if (sndSacksVector)
         sndSacksVector->record(state->snd_sacks);
 
-    counter = 0;
     EV_INFO << n << " SACK(s) added to header:\n";
 
-    for (uint t = 0; t < (n * 2); t += 2) {
-        counter++;
-        EV_INFO << counter << ". SACK:" << " [" << option.getValues(t) << ".." << option.getValues(t + 1) << ")";
+    for (uint t = 0; t < n; t++) {
+        EV_INFO << t << ". SACK:" << " [" << option->getSackItem(t).getStart() << ".." << option->getSackItem(t).getEnd() << ")";
 
-        if (t == 1) {
+        if (t == 0) {
             if (state->snd_dsack)
                 EV_INFO << " (D-SACK)";
-            else if (seqLE(option.getValues(t + 1), state->rcv_nxt)) {
+            else if (seqLE(option->getSackItem(t).getEnd(), state->rcv_nxt)) {
                 EV_INFO << " (received segment filled out a gap)";
                 state->snd_dsack = true;    // Note: Set snd_dsack to delete first sack from sacks_array
             }

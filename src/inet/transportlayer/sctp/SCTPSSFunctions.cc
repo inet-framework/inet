@@ -182,7 +182,7 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
             }
         }
         if (SCTPWaitingSendStreamsList.size() > 0) {
-            rnd = (int)(ceil(uniform(1, SCTPWaitingSendStreamsList.size()) - 0.5));
+            rnd = (int)(ceil(RNGCONTEXT uniform(1, SCTPWaitingSendStreamsList.size()) - 0.5));
             EV_DETAIL << "Stream Scheduler: go to " << rnd << ". element of waiting stream list.\n";
             sid = SCTPWaitingSendStreamsList[rnd - 1];
             if (!peek)

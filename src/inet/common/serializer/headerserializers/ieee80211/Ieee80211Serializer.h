@@ -34,9 +34,9 @@ namespace serializer {
 class INET_API Ieee80211Serializer : public SerializerBase
 {
     protected:
-        void parseDataOrMgmtFrame(Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
+        void parseDataOrMgmtFrame(const Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
         virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-        virtual cPacket* deserialize(Buffer &b, Context& context) override;
+        virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
     public:
         Ieee80211Serializer(const char *name = nullptr) : SerializerBase(name) {}

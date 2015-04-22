@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2015 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,26 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.node.inet;
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
-
-namespace inet;
-
-enum UdpConstants{
-    UDP_HDR_LEN = 8;
-};
 //
-// Represents an UDP packet, to be used with the ~UDP module.
+// Contains the common interface for all node types in a network.
 //
-packet UDPPacket
+moduleinterface INode
 {
-    @customize(true);
-
-    unsigned short srcPort;
-    unsigned short destPort;
-    byteLength = UDP_HDR_LEN;
-    int totalLengthField = -1;   // -1 means: getTotalLengthField() uses getByteLength()
+    parameters:
+        @display("bgb=,448");
+        @node;
+        @labels(node,ethernet-node,wireless-node);
+    gates:
+        input radioIn[numRadios] @directIn;
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
 }
-

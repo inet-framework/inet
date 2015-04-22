@@ -72,6 +72,16 @@ inline cSimulation *getSimulation() {return cSimulation::getActiveSimulation();}
 inline bool hasGUI() {return cSimulation::getActiveEnvir()->isGUI();}
 #endif  //ev
 
+// Around OMNeT++ 5.0 beta 2, random variate generation functions like exponential() became
+// members of cComponent. By prefixing calls with the following macro you can make the code
+// compile with earlier OMNeT++ versions as well.
+#if OMNETPP_BUILDNUM >= 1002
+#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
+#else
+#define RNGCONTEXT
+#endif
+
+
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
 double INET_API erfc(double x);

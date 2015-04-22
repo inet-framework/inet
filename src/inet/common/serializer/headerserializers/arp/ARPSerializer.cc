@@ -43,7 +43,7 @@ struct arphdr {
 } __PACKED__;
 */
 
-MACAddress ARPSerializer::readMACAddress(Buffer& b, unsigned int size)
+MACAddress ARPSerializer::readMACAddress(const Buffer& b, unsigned int size)
 {
     unsigned int curpos = b.getPos();
     MACAddress addr = b.readMACAddress();
@@ -51,7 +51,7 @@ MACAddress ARPSerializer::readMACAddress(Buffer& b, unsigned int size)
     return addr;
 }
 
-IPv4Address ARPSerializer::readIPv4Address(Buffer& b, unsigned int size)
+IPv4Address ARPSerializer::readIPv4Address(const Buffer& b, unsigned int size)
 {
     unsigned int curpos = b.getPos();
     IPv4Address addr = b.readIPv4Address();
@@ -75,7 +75,7 @@ void ARPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
         throw cRuntimeError("ARPSerializer: encapsulated packet not supported!");
 }
 
-cPacket* ARPSerializer::deserialize(Buffer &b, Context& context)
+cPacket* ARPSerializer::deserialize(const Buffer &b, Context& context)
 {
     ARPPacket *pkt = new ARPPacket("parsed ARP");
 
