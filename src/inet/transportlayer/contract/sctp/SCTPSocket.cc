@@ -18,15 +18,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
-
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-
-#ifdef WITH_SCTP
 #include "inet/transportlayer/sctp/SCTP.h"
-#else // ifdef WITH_SCTP
-//#define sctpEV3 (!SCTP::testing==true)?std::cerr:std::cerr
-#define sctpEV3    EV
-#endif // ifdef WITH_SCTP
 
 namespace inet {
 
@@ -34,11 +27,7 @@ using namespace sctp;
 
 static inline int32_t getNewAssocId()
 {
-#ifdef WITH_SCTP
     return SCTP::getNewAssocId();
-#else // ifdef WITH_SCTP
-    return -1;
-#endif // ifdef WITH_SCTP
 }
 
 SCTPSocket::SCTPSocket(bool type)
