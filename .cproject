@@ -39,12 +39,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -79,12 +77,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -134,12 +130,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -171,12 +165,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -203,7 +195,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -243,12 +235,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -283,12 +273,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -338,12 +326,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -375,12 +361,10 @@
 									<listOptionValue builtIn="false" value="WITH_DHCP"/>
 									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
 									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_EXT_IF"/>
 									<listOptionValue builtIn="false" value="WITH_MPLS"/>
 									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
 									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
 									<listOptionValue builtIn="false" value="WITH_MANET"/>
-									<listOptionValue builtIn="false" value="WITH_TRACI"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
 									<listOptionValue builtIn="false" value="WITH_RIP"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
@@ -407,7 +391,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/linklayer/ext|inet/applications/voipstream|inet/transportlayer/tcp_lwip|inet/transportlayer/tcp_nsc|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

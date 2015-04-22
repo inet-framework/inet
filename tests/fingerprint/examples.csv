@@ -372,9 +372,6 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            db21-a060
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            b1c5-f6db
 
-# /examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
-# /examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
-
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            68a1-bafe
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2f37-be67
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            7728-94ae
