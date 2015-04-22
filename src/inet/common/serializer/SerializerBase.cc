@@ -28,218 +28,8 @@ EXECUTE_ON_SHUTDOWN(
         serializers.clear();
         );
 
-
 DefaultSerializer SerializerRegistrationList::defaultSerializer;
 ByteArraySerializer SerializerRegistrationList::byteArraySerializer;
-
-Buffer::Buffer(const Buffer& base, unsigned int trailerLength)
-{
-    buf = base.buf + base.pos;
-    bufsize = base.bufsize - base.pos;
-    if (bufsize >= trailerLength) {
-        bufsize -= trailerLength;
-    }
-    else {
-        bufsize = 0;
-        errorFound = true;
-    }
-}
-
-unsigned char Buffer::readByte() const
-{
-    if (pos >= bufsize) {
-        errorFound = true;
-        return 0;
-    }
-    return buf[pos++];
-}
-
-void Buffer::readNBytes(unsigned int length, void *_dest) const
-{
-    unsigned char *dest = static_cast<unsigned char *>(_dest);
-    while (length--) {
-        if (pos >= bufsize) {
-            errorFound = true;
-            *dest++ = 0;
-        } else
-            *dest++ = buf[pos++];
-    }
-}
-
-uint16_t Buffer::readUint16() const
-{
-    uint16_t ret = 0;
-    if (pos < bufsize) ret += ((uint16_t)(buf[pos++]) << 8);
-    if (pos < bufsize) ret += ((uint16_t)(buf[pos++]));
-    else errorFound = true;
-    return ret;
-}
-
-uint32_t Buffer::readUint32() const
-{
-    uint32_t ret = 0;
-    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) << 24);
-    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) << 16);
-    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]) <<  8);
-    if (pos < bufsize) ret += ((uint32_t)(buf[pos++]));
-    else errorFound = true;
-    return ret;
-}
-
-uint64_t Buffer::readUint64() const
-{
-    uint64_t ret = 0;
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 56);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 48);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 40);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 32);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 24);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) << 16);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]) <<  8);
-    if (pos < bufsize) ret += ((uint64_t)(buf[pos++]));
-    else errorFound = true;
-    return ret;
-}
-
-void Buffer::writeByte(unsigned char data)
-{
-    if (pos >= bufsize) {
-        errorFound = true;
-        return;
-    }
-    buf[pos++] = data;
-}
-
-void Buffer::writeByteTo(unsigned int position, unsigned char data)
-{
-    if (position >= bufsize) {
-        errorFound = true;
-        return;
-    }
-    buf[position] = data;
-}
-
-void Buffer::writeNBytes(unsigned int length, const void *_src)
-{
-    const unsigned char *src = static_cast<const unsigned char *>(_src);
-    while (pos < bufsize && length > 0) {
-        buf[pos++] = *src++;
-        length--;
-    }
-    if (length)
-        errorFound = true;
-}
-
-void Buffer::writeNBytes(Buffer& inputBuffer, unsigned int length)
-{
-    while (pos < bufsize && length > 0) {
-        buf[pos++] = inputBuffer.readByte();
-        length--;
-    }
-    if (length)
-        errorFound = true;
-}
-
-void Buffer::fillNBytes(unsigned int length, unsigned char data)
-{
-    while (pos < bufsize && length > 0) {
-        buf[pos++] = data;
-        length--;
-    }
-    if (length)
-        errorFound = true;
-}
-
-void Buffer::writeUint16(uint16_t data)    // hton
-{
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 8);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)data;
-    else
-        errorFound = true;
-}
-
-void Buffer::writeUint16To(unsigned int position, uint16_t data)    // hton
-{
-    if (position < bufsize)
-        buf[position++] = (uint8_t)(data >> 8);
-    if (position < bufsize)
-        buf[position++] = (uint8_t)data;
-    else
-        errorFound = true;
-}
-
-void Buffer::writeUint32(uint32_t data)    // hton
-{
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 24);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 16);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 8);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)data;
-    else
-        errorFound = true;
-}
-
-void Buffer::writeUint64(uint64_t data)    // hton
-{
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 56);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 48);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 40);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 32);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 24);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 16);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)(data >> 8);
-    if (pos < bufsize)
-        buf[pos++] = (uint8_t)data;
-    else
-        errorFound = true;
-}
-
-void *Buffer::accessNBytes(unsigned int length)
-{
-    if (pos + length <= bufsize) {
-        void *ret = buf + pos;
-        pos += length;
-        return ret;
-    }
-    pos = bufsize;
-    errorFound = true;
-    return nullptr;
-}
-
-MACAddress Buffer::readMACAddress() const
-{
-    MACAddress addr;
-    for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
-        addr.setAddressByte(i, readByte());
-    return addr;
-}
-
-void Buffer::writeMACAddress(const MACAddress& addr)
-{
-    unsigned char buff[MAC_ADDRESS_SIZE];
-    addr.getAddressBytes(buff);
-    writeNBytes(MAC_ADDRESS_SIZE, buff);
-}
-
-IPv6Address Buffer::readIPv6Address() const
-{
-    uint32_t d[4];
-    for (int i = 0; i < 4; i++)
-        d[i] = readUint32();
-    return IPv6Address(d[0], d[1], d[2], d[3]);
-}
 
 void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
 {
@@ -249,14 +39,18 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
         throw cRuntimeError("%s serializer error: packet %s (%s) length is %d but serialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
-cPacket *SerializerBase::deserializePacket(Buffer &b, Context& context)
+cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
 {
+    if (b.getRemainingSize() == 0)
+        return nullptr;
+
     unsigned int startPos = b.getPos();
     cPacket *pkt = deserialize(b, context);
     if (pkt == nullptr) {
         b.seek(startPos);
         pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
+    ASSERT(pkt);
     if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
         const char *encclass = pkt->getEncapsulatedPacket() ? pkt->getEncapsulatedPacket()->getClassName() : "<nullptr>";
         throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
@@ -291,10 +85,10 @@ SerializerBase & SerializerBase::lookupDeserializer(Context& context, ProtocolGr
         return serializers.byteArraySerializer;
 }
 
-void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength)
 {
     ASSERT(pkt);
-    Buffer subBuffer(b, trailerLength);
+    Buffer subBuffer(b, maxLength);
     SerializerBase & serializer = lookupSerializer(pkt, context, group, id);
     serializer.serializePacket(pkt, subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
@@ -302,11 +96,11 @@ void SerializerBase::lookupAndSerialize(const cPacket *pkt, Buffer &b, Context& 
         b.setError();
 }
 
-cPacket *SerializerBase::lookupAndDeserialize(Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int trailerLength)
+cPacket *SerializerBase::lookupAndDeserialize(const Buffer &b, Context& context, ProtocolGroup group, int id, unsigned int maxLength)
 {
     cPacket *encapPacket = nullptr;
     SerializerBase& serializer = lookupDeserializer(context, group, id);
-    Buffer subBuffer(b, trailerLength);
+    Buffer subBuffer(b, maxLength);
     encapPacket = serializer.deserializePacket(subBuffer, context);
     b.accessNBytes(subBuffer.getPos());
     return encapPacket;
@@ -320,9 +114,9 @@ void DefaultSerializer::serialize(const cPacket *pkt, Buffer &b, Context& contex
     context.errorOccured = true;
 }
 
-cPacket *DefaultSerializer::deserialize(Buffer &b, Context& context)
+cPacket *DefaultSerializer::deserialize(const Buffer &b, Context& context)
 {
-    unsigned int byteLength = b.getRemainder();
+    unsigned int byteLength = b.getRemainingSize();
     if (byteLength) {
         cPacket *pkt = new cPacket();
         pkt->setByteLength(byteLength);
@@ -340,7 +134,7 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
 {
     const RawPacket *bam = check_and_cast<const RawPacket *>(pkt);
     unsigned int length = bam->getByteLength();
-    unsigned int wl = std::min(length, b.getRemainder());
+    unsigned int wl = std::min(length, b.getRemainingSize());
     wl = bam->copyDataToBuffer(b.accessNBytes(0), wl);
     b.accessNBytes(wl);
     if (length > wl)
@@ -349,10 +143,10 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
         throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
 }
 
-cPacket *ByteArraySerializer::deserialize(Buffer &b, Context& context)
+cPacket *ByteArraySerializer::deserialize(const Buffer &b, Context& context)
 {
     RawPacket *bam = nullptr;
-    unsigned int bytes = b.getRemainder();
+    unsigned int bytes = b.getRemainingSize();
     if (bytes) {
         bam = new RawPacket("parsed-bytes");
         bam->setDataFromBuffer(b.accessNBytes(bytes), bytes);

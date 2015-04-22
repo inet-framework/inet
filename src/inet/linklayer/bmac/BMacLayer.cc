@@ -399,8 +399,11 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_ACK, message BMAC_ACK_TIMEOUT, new state"
                                  " SLEEP" << endl;
                     //drop the packet
-                    delete macQueue.front();
+                    cMessage *mac = macQueue.front();
                     macQueue.pop_front();
+                    emit(NF_LINK_BREAK, mac);
+                    delete mac;
+
                     // if something in the queue, wakeup soon.
                     if (macQueue.size() > 0)
                         scheduleAt(simTime() + dblrand() * checkInterval, wakeup);

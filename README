@@ -141,7 +141,6 @@ Bottom-up:
      powercontrol/       enable/disable power control aware modules (maintainer: JCM)
      radio/              global modules for radio models - radio channel access 
      scenario/           create sim scenarios, change parameters over time
-     traci/              allows connecting to a TraCI server (maintainer: CS, origin:http://veins.car2x.org)
 
  tests/                  automatic tests for the INEt framework
 

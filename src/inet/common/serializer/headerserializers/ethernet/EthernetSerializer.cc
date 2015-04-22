@@ -45,11 +45,11 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         uint16_t ethType = frame->getEtherType();
         b.writeUint16(ethType);
         cPacket *encapPkt = frame->getEncapsulatedPacket();
-        SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, ethType, 4);
+        SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, ethType, b.getRemainingSize(4));
     }
     else if (dynamic_cast<const EtherFrameWithLLC *>(pkt)) {
         const EtherFrameWithLLC *frame = static_cast<const EtherFrameWithLLC *>(pkt);
-        b.writeUint16(frame->getByteLength());
+        b.writeUint16(frame->getFrameByteLength());
         b.writeByte(frame->getSsap());
         b.writeByte(frame->getDsap());
         b.writeByte(frame->getControl());
@@ -61,17 +61,17 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeUint16(frame->getLocalcode());
             if (frame->getOrgCode() == 0) {
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), b.getRemainingSize(4));
             }
             else {
                 //TODO
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), 4);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), b.getRemainingSize(4));
             }
         }
         else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
             cPacket *encapPkt = frame->getEncapsulatedPacket();
-            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, 4);
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, b.getRemainingSize(4));
         }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
@@ -87,37 +87,72 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
     }
     if (b.getPos() + 4 < pkt->getByteLength())
-        b.fillNBytes(pkt->getByteLength() - b.getPos() -4 , 0);
+        b.fillNBytes((pkt->getByteLength() - 4) - b.getPos(), 0);
     uint32_t fcs = ethernetCRC(b._getBuf(), b.getPos());
     b.writeUint32(fcs);
 }
 
-cPacket* EthernetSerializer::deserialize(Buffer &b, Context& c)
+cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
 {
-
     ASSERT(b.getPos() == 0);
+    EtherFrame *etherPacket = nullptr;
+    ProtocolGroup protocolGroup = UNKNOWN;
+    int protocolType = -1;
 
-    //FIXME should detect and create the real packet type.
-    EthernetIIFrame *etherPacket = new EthernetIIFrame;
+    int frameLength = b.getRemainingSize();
+    MACAddress destAddr = b.readMACAddress();
+    MACAddress srcAddr = b.readMACAddress();
+    uint16_t typeOrLength = b.readUint16();
 
-    etherPacket->setDest(b.readMACAddress());
-    etherPacket->setSrc(b.readMACAddress());
-    etherPacket->setEtherType(b.readUint16());
-    etherPacket->setByteLength(ETHER_MAC_FRAME_BYTES);
+    // detect and create the real packet type.
+    if (typeOrLength >= 1536 || typeOrLength == 0) {
+        EthernetIIFrame *ethernetIIPacket = new EthernetIIFrame();
+        ethernetIIPacket->setEtherType(typeOrLength);
+        protocolGroup = ETHERTYPE;
+        protocolType = typeOrLength;
+        etherPacket = ethernetIIPacket;
+    }
+    else {
+        frameLength = typeOrLength;
+        EtherFrameWithLLC *ethLLC = nullptr;
+        uint8_t ssap = b.readByte();
+        uint8_t dsap = b.readByte();
+        uint8_t ctrl = b.readByte();
+        if (dsap == 0xAA && ssap == 0xAA) { // snap frame
+            EtherFrameWithSNAP *ethSnap = new EtherFrameWithSNAP();
+            ethSnap->setOrgCode(((uint32_t)b.readByte() << 16) + b.readUint16());
+            protocolGroup = ETHERTYPE;
+            protocolType = b.readUint16();
+            ethSnap->setLocalcode(protocolType);
+            ethLLC = ethSnap;
+        }
+        else
+            ethLLC = new EtherFrameWithLLC();
+        ethLLC->setDsap(dsap);
+        ethLLC->setSsap(ssap);
+        ethLLC->setControl(ctrl);
+        etherPacket = ethLLC;
+    }
 
-    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, etherPacket->getEtherType(), 4);
+    etherPacket->setDest(destAddr);
+    etherPacket->setSrc(srcAddr);
+    etherPacket->setByteLength(b.getPos() + 4); // +4 for trailing crc
+
+    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, protocolGroup, protocolType, b.getRemainingSize(4));
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());
-    if (b.getRemainder() > 4) { // padding
-        etherPacket->addByteLength(b.getRemainder() - 4);
-        b.accessNBytes(b.getRemainder() - 4);
+    if (b.getRemainingSize() > 4) { // padding
+        etherPacket->addByteLength(b.getRemainingSize() - 4);
+        b.accessNBytes(b.getRemainingSize() - 4);
     }
-    etherPacket->setFrameByteLength(etherPacket->getByteLength());
+    etherPacket->setFrameByteLength(frameLength);
     uint32_t calculatedFcs = ethernetCRC(b._getBuf(), b.getPos());
     uint32_t receivedFcs = b.readUint32();
     EV_DEBUG << "Calculated FCS: " << calculatedFcs << ", received FCS: " << receivedFcs << endl;
     if (receivedFcs != calculatedFcs)
+        etherPacket->setBitError(true);
+    if (etherPacket->getByteLength() != frameLength)
         etherPacket->setBitError(true);
     return etherPacket;
 }

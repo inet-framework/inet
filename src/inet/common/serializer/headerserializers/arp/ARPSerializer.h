@@ -40,10 +40,10 @@ class ARPSerializer : public SerializerBase
     /**
      * Puts a packet sniffed from the wire into an ARPPacket.
      */
-    virtual cPacket *deserialize(Buffer &b, Context& context) override;
+    virtual cPacket *deserialize(const Buffer &b, Context& context) override;
 
-    MACAddress readMACAddress(Buffer& b, unsigned int size);
-    IPv4Address readIPv4Address(Buffer& b, unsigned int size);
+    MACAddress readMACAddress(const Buffer& b, unsigned int size);
+    IPv4Address readIPv4Address(const Buffer& b, unsigned int size);
 
   public:
     ARPSerializer(const char *name = nullptr) : SerializerBase(name) {}

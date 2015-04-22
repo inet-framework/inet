@@ -47,7 +47,7 @@ bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, Bit
         Ieee80211Frame *encapsulatedPacket = check_and_cast<Ieee80211Frame*>(ofdmPhyFrame->getEncapsulatedPacket());
         Ieee80211Serializer ieee80211Serializer;
         // Here we just write the header which is exactly 5 bytes in length.
-        Buffer subBuffer(b, 0);
+        Buffer subBuffer(b, b.getRemainingSize());
         Context c;
         ieee80211Serializer.serializePacket(encapsulatedPacket, subBuffer, c);
         b.accessNBytes(subBuffer.getPos());

@@ -33,7 +33,7 @@ void InterfaceStateDown::processEvent(Interface *intf, Interface::InterfaceEvent
 {
     if (event == Interface::INTERFACE_UP) {
         MessageHandler *messageHandler = intf->getArea()->getRouter()->getMessageHandler();
-        messageHandler->startTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01));    // add some deviation to avoid startup collisions
+        messageHandler->startTimer(intf->getHelloTimer(), RNGCONTEXT truncnormal(0.1, 0.01));    // add some deviation to avoid startup collisions
         messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
             case Interface::POINTTOPOINT:
