@@ -573,13 +573,13 @@ void NetworkConfiguratorBase::dumpTopology(Topology& topology)
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             ASSERT(linkOut->getLocalNode() == node);
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
-            EV_INFO << "     -> " << remoteNode->module->getFullPath() << " " << linkOut->getWeight() << endl;
+            EV_INFO << "     -> " << remoteNode->module->getFullPath() << endl;
         }
         for (int j = 0; j < node->getNumInLinks(); j++) {
             Topology::LinkIn *linkIn = node->getLinkIn(j);
             ASSERT(linkIn->getLocalNode() == node);
             Node *remoteNode = (Node *)linkIn->getRemoteNode();
-            EV_INFO << "     <- " << remoteNode->module->getFullPath() << " " << linkIn->getWeight() << endl;
+            EV_INFO << "     <- " << remoteNode->module->getFullPath() << endl;
         }
     }
 }

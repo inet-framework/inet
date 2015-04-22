@@ -39,7 +39,7 @@ inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
 {
-  protected:
+  public:
     class LinkInfo;
     class InterfaceInfo;
 
@@ -194,6 +194,17 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     // generic helper functions
     virtual void dumpTopology(Topology& topology);
 };
+
+inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link& link)
+{
+    return stream << (link.sourceInterfaceInfo != nullptr ? link.sourceInterfaceInfo->getFullName() : "") << " -> "
+                  << (link.destinationInterfaceInfo != nullptr ? link.destinationInterfaceInfo->getFullName() : "");
+}
+
+inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link *link)
+{
+    return stream << *link;
+}
 
 } // namespace inet
 
