@@ -107,6 +107,8 @@ Link layer:
    using immediate mode to reduce the CPU usage while still maintaining a fast
    sub millisec response time (Artur Scussel). On Windows and MAC OS X the polling 
    interval was reduced to improve the response time.
+ - Added support for sending NF_LINK_BREAK signal from BMAC and CSMA. This is 
+   required for certain routing protocols (i.e. AODV) to function properly.
 
 Physical layer:
  - Extended the physical layer contract interfaces for layered implementations.
