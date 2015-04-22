@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-04-22  ------ inet-2.99.1 released ------
+
 2015-02-25  Levente Meszaros
 
 	Replaced opMode and preambleMode members with Ieee80211Mode in

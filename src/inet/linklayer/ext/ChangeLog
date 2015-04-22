@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-04-22  ------ inet-2.99.1 released ------
+
 2015-03-30  Rudolf Hornig
 
 	The HAVE_PCAP macro is no longer used. To use the emulation feature
