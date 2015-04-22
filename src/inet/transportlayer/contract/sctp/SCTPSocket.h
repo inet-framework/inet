@@ -23,11 +23,9 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
-
-class SCTPStatusInfo;
-namespace sctp { class SCTP; }
 
 typedef std::vector<L3Address> AddressVector;
 
@@ -52,7 +50,8 @@ class INET_API SCTPSocket
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) {}    // {delete status;}
+        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) { delete status; }
+        virtual void socketDeleted(int assocId, void *yourPtr) {}
         virtual void sendRequestArrived() {}
         virtual void msgAbandonedArrived(int assocId) {}
         virtual void shutdownReceivedArrived(int connId) {}
@@ -92,7 +91,6 @@ class INET_API SCTPSocket
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
      */
-    // SCTPSocket();
     SCTPSocket(bool type = true);
 
     /**
