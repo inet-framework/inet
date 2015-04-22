@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-04-22  ------ inet-2.99.1 released ------
+
 2015-04-02  Benjamin Seregi & Levente Meszaros
 
     Added IEEE 802.11 High Throughput mode descriptor. This mode is defined

@@ -4,8 +4,8 @@ cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; 
 INET_ROOT=`pwd`
 
 # tag and release names...
-relname=`$INET_ROOT/_scripts/get_version`
-escaped_relname=`$INET_ROOT/_scripts/get_version | sed 's/\./\\\\./g'`
+relname=inet-`$INET_ROOT/_scripts/get_version`
+escaped_relname=inet-`$INET_ROOT/_scripts/get_version | sed 's/\./\\\\./g'`
 
 # check tag format
 echo "About to add --- $relname released --- line to ChangeLogs"
