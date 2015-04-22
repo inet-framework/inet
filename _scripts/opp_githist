@@ -1,0 +1,49 @@
+#! /usr/bin/env python
+
+import argparse
+import fnmatch
+import os
+import subprocess
+
+rootPath = '.'
+err = 0
+
+parser = argparse.ArgumentParser(description='Tool for view history with gitk for one or more files in the current directory')
+parser.add_argument('filepattern', nargs='*',
+                    default=['*'],
+                    help='pattern or filename for filtering the history, default value is "*"',
+                    )
+
+args = parser.parse_args()
+
+#print 'filepattern:', args.filepattern
+paths = set()
+
+for filename in os.listdir(rootPath):
+  for filepattern in args.filepattern:
+    if fnmatch.fnmatch(filename, filepattern):
+        fullpath = os.path.join(rootPath, filename)
+        proc = subprocess.Popen(['git', 'log', '-p', '--follow', fullpath], stdout=subprocess.PIPE)
+        for line in proc.stdout:
+            if line.startswith('diff --git '):
+                line = line[11:].rstrip()
+#                print '===diff=== ',line
+                for onefile in line.split(' '):
+                    onefile = onefile[2:]
+                    if fnmatch.fnmatch(os.path.basename(onefile), filepattern):
+                        histdir = os.path.dirname(onefile)
+                        paths.add(histdir + '/' + filepattern)
+#                        print "   ---pattern---",fullpath+': '+histdir
+                    else:
+                        paths.add(onefile)
+#                        print "   ---onefile---",onefile
+
+gitdir = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).rstrip()
+os.chdir(gitdir)
+
+if len(paths) > 0:
+    cmd = ['gitk', '--'] + sorted(paths)
+    print '( cd ', gitdir, '; ', ' '.join(cmd), ' )'
+    subprocess.call(cmd)
+else:
+    print 'Files not found for specified filepattern(s)'
