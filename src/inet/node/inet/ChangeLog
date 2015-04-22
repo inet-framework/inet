@@ -2,6 +2,13 @@
 
 2015-04-22  ------ inet-2.99.1 released ------
 
+2015-04-16  Rudolf Hornig
+
+	NodeBase implements the INode interface. As all "node type" modules
+	implement this module interface it is now possible to create networks 
+	(using the <"actualNodeType"> like INode construct) where the actual node 
+	type can be configured from an ini file.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 ====== inet-2.x ======

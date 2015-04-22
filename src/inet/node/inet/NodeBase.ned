@@ -40,7 +40,7 @@ import inet.power.contract.IEnergyGenerator;
 //    - use this model only as a base type. In simulations use ~Router,
 //      ~StandardHost, ~WirelessHost and ~AdhocHost
 //
-module NodeBase
+module NodeBase like INode
 {
     parameters:
         @display("bgb=,448");

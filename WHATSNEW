@@ -38,6 +38,11 @@ All components:
    present conditionally.
  - Moved interface classes under contract subdirectories. Moved base classes
    under base subdirectories.
+ 
+ Nodes:
+ - All "node type" modules implement the INode module interface so it is now 
+   possible to create networks (using the <"actualNodeType"> like INode construct) 
+   where the actual node type can be configured from an ini file.
 
 Common:
  - Added create-module and delete-module commands to ScenarioManager.
@@ -51,6 +56,8 @@ Common:
 Mobility:
  - Added a new StaticConcentricMobility similar to StaticGridMobility that places
    nodes on concentric circles.
+ - Removed TracCI and TraCIScenarioManager because these modules are maintained
+   in the Veins framework.
 
 Serializer:
  - Refactored packet serializer classes to use a safe buffer class to read and

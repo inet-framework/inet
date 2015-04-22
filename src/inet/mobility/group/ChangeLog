@@ -2,6 +2,11 @@
 
 2015-04-22  ------ inet-2.99.1 released ------
 
+2015-04-22 Rudolf Hornig
+
+	TraCI mobility was removed. It is part of the Veins project
+	and it was seriously out of date.
+
 2015-01-21  Zoltan Bojthe
 
 	Applied C++ source code modernizer.
