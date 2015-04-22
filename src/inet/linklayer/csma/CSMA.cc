@@ -571,6 +571,7 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
         txAttempts = 0;
         // TODO: send dropped signal
         // emit(packetDropped, mac);
+        emit(NF_LINK_BREAK, mac);
         delete mac;
     }
     manageQueue();
