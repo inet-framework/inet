@@ -149,6 +149,7 @@ packet IPv4Datagram
     bool moreFragments;
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
+    int totalLengthField = -1;       // -1 means: getTotalLengthField() uses getByteLength()
     unsigned char typeOfService;  // ToS byte
     abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS

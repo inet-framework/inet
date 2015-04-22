@@ -60,15 +60,15 @@ unsigned char SCTPSerializer::sharedKey[512];
 
 void SCTPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
 {
-    int32 len = serialize(check_and_cast<const SCTPMessage *>(pkt), static_cast<unsigned char *>(b.accessNBytes(0)), b.getRemainder());
+    int32 len = serialize(check_and_cast<const SCTPMessage *>(pkt), static_cast<unsigned char *>(b.accessNBytes(0)), b.getRemainingSize());
     b.accessNBytes(len);
 }
 
-cPacket* SCTPSerializer::deserialize(Buffer &b, Context& context)
+cPacket* SCTPSerializer::deserialize(const Buffer &b, Context& context)
 {
     SCTPMessage *dest = new SCTPMessage("parsed-sctp");
-    parse(static_cast<uint8 *>(b.accessNBytes(0)), b.getRemainder(), dest);
-    b.accessNBytes(b.getRemainder());
+    parse(static_cast<const uint8 *>(b.accessNBytes(0)), b.getRemainingSize(), dest);
+    b.accessNBytes(b.getRemainingSize());
     return dest;
 }
 

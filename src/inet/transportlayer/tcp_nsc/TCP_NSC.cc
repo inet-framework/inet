@@ -314,14 +314,16 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
         {
             // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
             //       with IP header size difference
-            unsigned short numOptions = tcpsegP->getOptionsArraySize();
+            unsigned short numOptions = tcpsegP->getHeaderOptionArraySize();
             for (unsigned short i = 0; i < numOptions; i++) {
-                TCPOption& option = tcpsegP->getOptions(i);
-                if (option.getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
-                    unsigned int value = option.getValues(0);
-                    value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
-                    option.setValues(0, value);
-                    //tcpsegP->setOptions(i, option);
+                TCPOption* option = tcpsegP->getHeaderOption(i);
+                if (option->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
+                    TCPOptionMaxSegmentSize *mssOption = dynamic_cast<TCPOptionMaxSegmentSize *>(option);
+                    if (mssOption) {
+                        unsigned int value = mssOption->getMaxSegmentSize();
+                        value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
+                        mssOption->setMaxSegmentSize(value);
+                    }
                 }
             }
         }

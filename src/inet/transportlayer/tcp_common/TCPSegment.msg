@@ -21,6 +21,15 @@ cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
 #include "inet/common/ByteArray.h"
+
+namespace inet {
+namespace tcp {
+class Sack;
+class TCPOption;
+typedef TCPOption *TCPOptionPtr;
+}
+}
+
 }}
 
 namespace inet::tcp;
@@ -103,20 +112,77 @@ enum TCPOptionNumbers
 //
 // This structure represents a single SACK (selective acknowledgment):
 //
-class Sack
+class SackItem
 {
-    @customize(true);
     @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     unsigned int start;     // start seq no. of sack block
     unsigned int end;       // end seq no. of sack block
 }
 
+class Sack extends SackItem
+{
+    @customize(true);
+}
+
 // Header Options (optional):
+class TCPOptionPtr;
 class TCPOption
 {
-    unsigned short kind @enum(TCPOptionNumbers) = TCPOPTION_END_OF_OPTION_LIST;  // option kind
-    unsigned short length = 1;                          // option length
-    unsigned int values[];                              // option value(s)
+    unsigned short kind @enum(TCPOptionNumbers) = -1;  // option kind
+    unsigned short length = 1;                    // option length
+}
+
+class TCPOptionEnd extends TCPOption
+{
+    kind = TCPOPTION_END_OF_OPTION_LIST;
+    length = 1;
+}
+
+class TCPOptionNop extends TCPOption
+{
+    kind = TCPOPTION_NO_OPERATION;
+    length = 1;
+}
+
+class TCPOptionMaxSegmentSize extends TCPOption
+{
+    kind = TCPOPTION_MAXIMUM_SEGMENT_SIZE;
+    length = 4;
+    uint16_t maxSegmentSize;   // uint16_t
+}
+
+class TCPOptionWindowScale extends TCPOption
+{
+    kind = TCPOPTION_WINDOW_SCALE;
+    length = 3;
+    unsigned short windowScale;   // uint8_t
+}
+
+class TCPOptionSackPermitted extends TCPOption
+{
+    kind = TCPOPTION_SACK_PERMITTED;
+    length = 2;
+}
+
+class TCPOptionSack extends TCPOption
+{
+    kind = TCPOPTION_SACK;
+    length = 2;     // 2 + getSackArraySize() * 8
+    SackItem sackItem[];
+}
+
+class TCPOptionTimestamp extends TCPOption
+{
+    kind = TCPOPTION_TIMESTAMP;
+    length = 10;
+    uint32_t   senderTimestamp;
+    uint32_t   echoedTimestamp;
+}
+
+class TCPOptionUnknown extends TCPOption
+{
+    kind = -1;
+    uint8_t bytes[];
 }
 
 //
@@ -180,7 +246,7 @@ packet TCPSegment
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
-    TCPOption options[];
+    abstract TCPOptionPtr headerOption[];
 
     // Payload length in octets (not an actual TCP header field).
     // This may not always be the same as encapsulatedPacket()->getByteLength();

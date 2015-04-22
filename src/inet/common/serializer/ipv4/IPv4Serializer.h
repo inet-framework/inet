@@ -31,7 +31,7 @@ class IPv4Serializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket* deserialize(Buffer &b, Context& context) override;
+    virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
   public:
     IPv4Serializer(const char *name = nullptr) : SerializerBase(name) {}

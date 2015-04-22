@@ -417,11 +417,11 @@ class INET_API TCPConnection
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOption& option);
-    virtual bool processWSOption(TCPSegment *tcpseg, const TCPOption& option);
-    virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOption& option);
-    virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOption& option);
-    virtual bool processTSOption(TCPSegment *tcpseg, const TCPOption& option);
+    virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOptionMaxSegmentSize& option);
+    virtual bool processWSOption(TCPSegment *tcpseg, const TCPOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOptionSackPermitted& option);
+    virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOptionSack& option);
+    virtual bool processTSOption(TCPSegment *tcpseg, const TCPOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
