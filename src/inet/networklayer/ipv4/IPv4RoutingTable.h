@@ -78,6 +78,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     IInterfaceTable *ift = nullptr;    // cached pointer
 
     IPv4Address routerId;
+    const char *netmaskRoutes = nullptr;
     bool forwarding = false;
     bool multicastForward = false;
     bool isNodeUp = false;
