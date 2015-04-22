@@ -97,8 +97,19 @@ void IPv4NetworkConfigurator::computeConfiguration()
     // read and configure manual multicast routes from the XML configuration
     readManualMulticastRouteConfiguration(topology);
     // calculate shortest paths, and add corresponding static routes
-    if (addStaticRoutesParameter)
-        TIME(addStaticRoutes(topology));
+    if (addStaticRoutesParameter) {
+        cXMLElementList autorouteElements = configuration->getChildrenByTagName("autoroute");
+        if (autorouteElements.size() == 0) {
+            cXMLElement defaultAutorouteElement("autoroute", "", nullptr);
+            defaultAutorouteElement.setAttribute("sourceHosts", "**");
+            defaultAutorouteElement.setAttribute("destinationInterfaces", "**");
+            TIME(addStaticRoutes(topology, &defaultAutorouteElement));
+        }
+        else {
+            for (auto & autorouteElement : autorouteElements)
+                TIME(addStaticRoutes(topology, autorouteElement));
+        }
+    }
     printElapsedTime("computeConfiguration", initializeStartTime);
 }
 
@@ -1218,22 +1229,71 @@ bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& rout
     return false;
 }
 
-void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology)
+void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *autorouteElement)
 {
-    // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
+    // set node weights
+    cXMLElement defaultNodeElement("node", "", nullptr);
+    defaultNodeElement.setAttribute("cost", "default");
+    cXMLElementList nodeElements = autorouteElement->getChildrenByTagName("node");
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        cXMLElement *selectedNodeElement = &defaultNodeElement;
+        Node *node = (Node *)topology.getNode(i);
+        for (auto & nodeElement : nodeElements) {
+            Matcher nodeHostsMatcher(nodeElement->getAttribute("hosts"));
+            std::string hostFullPath = node->module->getFullPath();
+            std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
+            if (nodeHostsMatcher.matchesAny() || nodeHostsMatcher.matches(hostShortenedFullPath.c_str()) || nodeHostsMatcher.matches(hostFullPath.c_str())) {
+                selectedNodeElement = nodeElement;
+                break;
+            }
+        }
+        double weight = computeNodeWeight(node, selectedNodeElement);
+        EV_DEBUG << "Setting node weight, node = " << node->module->getFullPath() << ", weight = " << weight << endl;
+        node->setWeight(weight);
+    }
+    // set link weights
+    cXMLElement defaultLinkElement("link", "", nullptr);
+    defaultLinkElement.setAttribute("cost", "default");
+    cXMLElementList linkElements = autorouteElement->getChildrenByTagName("link");
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (int j = 0; j < node->getNumInLinks(); j++) {
+            cXMLElement *selectedLinkElement = &defaultLinkElement;
+            Link *link = (Link *)node->getLinkIn(j);
+            for (auto & linkElement : linkElements) {
+                Matcher linkInterfaceMatcher(linkElement->getAttribute("interfaces"));
+                std::string sourceFullPath = link->sourceInterfaceInfo->getFullPath();
+                std::string destinationFullPath = link->destinationInterfaceInfo->getFullPath();
+                if (linkInterfaceMatcher.matchesAny() ||
+                    linkInterfaceMatcher.matches(sourceFullPath.c_str()) ||
+                    linkInterfaceMatcher.matches(destinationFullPath.c_str()))
+                {
+                    selectedLinkElement = linkElement;
+                    break;
+                }
+            }
+            double weight = computeLinkWeight(link, selectedLinkElement);
+            EV_DEBUG << "Setting link weight, link = "
+                     << (link->sourceInterfaceInfo ? link->sourceInterfaceInfo->interfaceEntry->getFullPath() : "") << " -> "
+                     << (link->destinationInterfaceInfo ? link->destinationInterfaceInfo->interfaceEntry->getFullPath() : "")
+                     << ", weight = " << weight << endl;
+            link->setWeight(weight);
+        }
+    }
     // add static routes for all routing tables
+    Matcher sourceHostsMatcher(autorouteElement->getAttribute("sourceHosts"));
+    Matcher destinationInterfacesMatcher(autorouteElement->getAttribute("destinationInterfaces"));
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *sourceNode = (Node *)topology.getNode(i);
+        std::string hostFullPath = sourceNode->module->getFullPath();
+        std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
+        if (!sourceHostsMatcher.matchesAny() && !sourceHostsMatcher.matches(hostShortenedFullPath.c_str()) && !sourceHostsMatcher.matches(hostFullPath.c_str()))
+            continue;
         if (!sourceNode->interfaceTable)
             continue;
-
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
-        if (!strcmp(linkWeightMode, "constant"))
-            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
-        else
-            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
-
+        topology.calculateWeightedSingleShortestPathsTo(sourceNode);
         // check if adding the default routes would be ok (this is an optimization)
         if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo) {
             if (sourceNode->interfaceInfos[0]->addDefaultRoute) {
@@ -1296,6 +1356,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology)
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = static_cast<InterfaceInfo *>(destinationNode->interfaceInfos[j]);
+                        if (!destinationInterfacesMatcher.matchesAny() && !destinationInterfacesMatcher.matches(destinationInterfaceInfo->interfaceEntry->getFullPath().c_str()))
+                            continue;
                         InterfaceEntry *destinationInterfaceEntry = destinationInterfaceInfo->interfaceEntry;
                         IPv4Address destinationAddress = destinationInterfaceInfo->getAddress();
                         IPv4Address destinationNetmask = destinationInterfaceInfo->getNetmask();

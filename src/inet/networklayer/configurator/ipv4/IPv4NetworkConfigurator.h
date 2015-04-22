@@ -196,7 +196,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      * The algorithm uses Dijkstra's weighted shortest path algorithm.
      * May add default routes and subnet routes if possible and requested.
      */
-    virtual void addStaticRoutes(Topology& topology);
+    virtual void addStaticRoutes(Topology& topology, cXMLElement *element);
 
     /**
      * Destructively optimizes the given IPv4 routes by merging some of them.

@@ -75,7 +75,6 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         node->module = module;
         node->interfaceTable = findInterfaceTable(node);
         node->routingTable = findRoutingTable(node);
-        node->setWeight(computeNodeWeight(node));
     }
 
     // extract links and interfaces
@@ -154,12 +153,10 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                 Link *linkIJ = new Link();
                 linkIJ->sourceInterfaceInfo = interfaceInfoI;
                 linkIJ->destinationInterfaceInfo = interfaceInfoJ;
-                linkIJ->setWeight(computeWirelessLinkWeight(linkIJ));
                 topology.addLink(linkIJ, interfaceInfoI->node, interfaceInfoJ->node);
                 Link *linkJI = new Link();
                 linkJI->sourceInterfaceInfo = interfaceInfoJ;
                 linkJI->destinationInterfaceInfo = interfaceInfoI;
-                linkJI->setWeight(computeWirelessLinkWeight(linkJI));
                 topology.addLink(linkJI, interfaceInfoJ->node, interfaceInfoI->node);
             }
         }
@@ -174,7 +171,6 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 
 void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
-    linkOut->setWeight(computeWiredLinkWeight(static_cast<Link *>(static_cast<Topology::Link *>(linkOut))));
     Node *node = (Node *)linkOut->getRemoteNode();
     int inputGateId = linkOut->getRemoteGateId();
     IInterfaceTable *interfaceTable = node->interfaceTable;
@@ -279,18 +275,32 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceIn
     return nullptr;
 }
 
-double NetworkConfiguratorBase::computeNodeWeight(Node *node)
+double NetworkConfiguratorBase::computeNodeWeight(Node *node, cXMLElement *nodeElement)
 {
-    if (node->routingTable && !node->routingTable->isForwardingEnabled())
-        return DBL_MAX;
+    const char *costAttribute = nodeElement->getAttribute("cost");
+    if (!strcmp(costAttribute, "infinite"))
+        return INFINITY;
+    else if (node->routingTable && !node->routingTable->isForwardingEnabled())
+        return INFINITY;
     else
         return 0;
 }
 
-double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link)
+double NetworkConfiguratorBase::computeLinkWeight(Link *link, cXMLElement *linkElement)
+{
+    if (link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->interfaceEntry))
+        return computeWirelessLinkWeight(link, linkElement);
+    else
+        return computeWiredLinkWeight(link, linkElement);
+}
+
+double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, cXMLElement *linkElement)
 {
     Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
-    if (!strcmp(linkWeightMode, "constant"))
+    const char *costAttribute = linkElement->getAttribute("cost");
+    if (!strcmp(costAttribute, "infinite"))
+        return INFINITY;
+    else if (!strcmp(linkWeightMode, "constant"))
         return defaultLinkWeight;
     else if (!strcmp(linkWeightMode, "dataRate")) {
         cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
@@ -316,9 +326,12 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link)
         throw cRuntimeError("Unknown linkWeightMode");
 }
 
-double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
+double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, cXMLElement *linkElement)
 {
-    if (!strcmp(linkWeightMode, "constant"))
+    const char *costAttribute = linkElement->getAttribute("cost");
+    if (!strcmp(costAttribute, "infinite"))
+        return INFINITY;
+    else if (!strcmp(linkWeightMode, "constant"))
         return defaultLinkWeight;
     else if (!strcmp(linkWeightMode, "dataRate")) {
 #ifdef WITH_RADIO
@@ -532,7 +545,6 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
     for (auto & elem : nameMatchers)
         if (elem->matches(interfaceName))
             return true;
-
 
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
