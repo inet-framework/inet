@@ -102,6 +102,13 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,               50s,             5a86-6051
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                50s,             ef20-f939
 
+/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             2852-a9ad
+/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             7668-a4c4
+/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             2865-adff
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             3144-998d
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        5ecc-79a0
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            ed1c-bafb
+
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            b4fd-7612
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            b4fd-7612
 
