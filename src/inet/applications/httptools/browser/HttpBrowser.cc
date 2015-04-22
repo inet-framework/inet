@@ -347,8 +347,14 @@ void HttpBrowser::socketDeleted(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *tcpSocket = sockdata->tcpSocket;
-    ASSERT(connId == tcpSocket->getConnectionId());
+    if (!useSCTP) {
+        TCPSocket *tcpSocket = sockdata->tcpSocket;
+        ASSERT(connId == tcpSocket->getConnectionId());
+    }
+    else {
+        SCTPSocket *sctpSocket = sockdata->sctpSocket;
+        ASSERT(connId == sctpSocket->getConnectionId());
+    }
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {
         HttpRequestMessage *msg = queue.back();
