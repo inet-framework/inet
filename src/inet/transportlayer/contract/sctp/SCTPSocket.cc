@@ -95,7 +95,9 @@ SCTPSocket::SCTPSocket(cMessage *msg)
 
 SCTPSocket::~SCTPSocket()
 {
-    localAddresses.clear();
+    if (cb) {
+        cb->socketDeleted(assocId, yourPtr);
+    }
 }
 
 const char *SCTPSocket::stateName(int state)
@@ -425,7 +427,6 @@ void SCTPSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->socketStatusArrived(assocId, yourPtr, status);
             }
-            delete status;
             break;
 
         case SCTP_I_ABANDONED:
