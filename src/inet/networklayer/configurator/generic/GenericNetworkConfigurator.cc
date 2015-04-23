@@ -66,10 +66,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
 
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
-        if (!strcmp(linkWeightMode, "constant"))
-            topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
-        else
-            topology.calculateWeightedSingleShortestPathsTo(sourceNode);
+        topology.calculateWeightedSingleShortestPathsTo(sourceNode);
 
         // add a route to all destinations in the network
         for (int j = 0; j < topology.getNumNodes(); j++) {

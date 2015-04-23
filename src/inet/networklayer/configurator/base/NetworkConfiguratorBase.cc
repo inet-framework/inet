@@ -55,8 +55,6 @@ NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *link
 void NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        linkWeightMode = par("linkWeightMode");
-        defaultLinkWeight = par("defaultLinkWeight");
         minLinkWeight = par("minLinkWeight");
         configuration = par("config");
     }
@@ -274,117 +272,150 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceIn
     return nullptr;
 }
 
-double NetworkConfiguratorBase::computeNodeWeight(Node *node, cXMLElement *nodeElement)
+static double parseCostAttribute(const char *costAttribute)
 {
-    const char *costAttribute = nodeElement->getAttribute("cost");
-    if (!strcmp(costAttribute, "infinite"))
+    if (!strncmp(costAttribute, "inf", 3))
         return INFINITY;
-    else if (node->routingTable && !node->routingTable->isForwardingEnabled())
-        return INFINITY;
-    else
-        return 0;
+    else {
+        double cost = atof(costAttribute);
+        if (cost <= 0)
+            throw cRuntimeError("Cost cannot be less than or equal to zero");
+        return cost;
+    }
 }
 
-double NetworkConfiguratorBase::computeLinkWeight(Link *link, cXMLElement *linkElement)
+double NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters)
 {
-    if (link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->interfaceEntry))
-        return computeWirelessLinkWeight(link, linkElement);
-    else
-        return computeWiredLinkWeight(link, linkElement);
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        if (node->routingTable && !node->routingTable->isForwardingEnabled())
+            return INFINITY;
+        else
+            return 0;
+    }
 }
 
-double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, cXMLElement *linkElement)
+double NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
-    Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
-    const char *costAttribute = linkElement->getAttribute("cost");
-    if (!strcmp(costAttribute, "infinite"))
-        return INFINITY;
-    else if (!strcmp(linkWeightMode, "constant"))
-        return defaultLinkWeight;
-    else if (!strcmp(linkWeightMode, "dataRate")) {
-        cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
-        if (transmissionChannel) {
-            double dataRate = transmissionChannel->getNominalDatarate();
-            return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
+    if ((link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->interfaceEntry)) ||
+        (link->destinationInterfaceInfo && isWirelessInterface(link->destinationInterfaceInfo->interfaceEntry)))
+        return computeWirelessLinkWeight(link, metric, parameters);
+    else
+        return computeWiredLinkWeight(link, metric, parameters);
+}
+
+double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+{
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
+        if (!strcmp(metric, "hopCount"))
+            return 1;
+        else if (!strcmp(metric, "delay")) {
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
+            if (transmissionChannel != nullptr)
+                return transmissionChannel->getDelay().dbl();
+            else
+                return minLinkWeight;
+        }
+        else if (!strcmp(metric, "dataRate")) {
+            cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
+            if (transmissionChannel != nullptr) {
+                double dataRate = transmissionChannel->getNominalDatarate();
+                return dataRate != 0 ? 1 / dataRate : minLinkWeight;
+            }
+            else
+                return minLinkWeight;
+        }
+        else if (!strcmp(metric, "errorRate")) {
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
+            if (transmissionChannel) {
+                InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
+                double bitErrorRate = transmissionChannel->getBitErrorRate();
+                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
+                return minLinkWeight - log(1 - packetErrorRate);
+            }
+            else
+                return minLinkWeight;
         }
         else
-            return defaultLinkWeight;
+            throw cRuntimeError("Unknown metric");
     }
-    else if (!strcmp(linkWeightMode, "errorRate")) {
-        cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
-        if (transmissionChannel) {
-            InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
-            double bitErrorRate = transmissionChannel->getBitErrorRate();
-            double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
-            return defaultLinkWeight - log(1 - packetErrorRate);
-        }
-        else
-            return defaultLinkWeight;
-    }
-    else
-        throw cRuntimeError("Unknown linkWeightMode");
 }
 
-double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, cXMLElement *linkElement)
+double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
-    const char *costAttribute = linkElement->getAttribute("cost");
-    if (!strcmp(costAttribute, "infinite"))
-        return INFINITY;
-    else if (!strcmp(linkWeightMode, "constant"))
-        return defaultLinkWeight;
-    else if (!strcmp(linkWeightMode, "dataRate")) {
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        if (!strcmp(metric, "hopCount"))
+            return 1;
 #ifdef WITH_RADIO
-        // compute the packet error rate between the two interfaces using a dummy transmission
-        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
-        IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
-        const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
-        double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
-        return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
-#else
-        throw cRuntimeError("Radio feature is disabled");
+        else if (!strcmp(metric, "delay")) {
+            // compute the delay between the two interfaces using a dummy transmission
+            const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
+            const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
+            const cPacket *macFrame = new cPacket();
+            const IRadioMedium *radioMedium = receiverRadio->getMedium();
+            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+            const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            return arrival->getStartPropagationTime().dbl();
+        }
+        else if (!strcmp(metric, "dataRate")) {
+            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
+            IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
+            double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
+            return dataRate != 0 ? 1 / dataRate : minLinkWeight;
+        }
+        else if (!strcmp(metric, "errorRate")) {
+            // compute the packet error rate between the two interfaces using a dummy transmission
+            const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
+            const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
+            cPacket *macFrame = new cPacket();
+            macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
+            const IReceiver *receiver = receiverRadio->getReceiver();
+            const IRadioMedium *medium = receiverRadio->getMedium();
+            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+            const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+            const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
+            const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
+            const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
+            const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
+            const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
+            const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
+            double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 1;
+            delete receptionIndication;
+            delete receptionDecision;
+            delete snir;
+            delete interference;
+            delete reception;
+            delete listening;
+            delete arrival;
+            delete transmission;
+            delete macFrame;
+            // we want to have a maximum PER product along the path,
+            // but still minimize the hop count if the PER is negligible
+            return minLinkWeight - log(1 - packetErrorRate);
+        }
 #endif
+        else
+            throw cRuntimeError("Unknown metric");
     }
-    else if (!strcmp(linkWeightMode, "errorRate")) {
-#ifdef WITH_RADIO
-        // compute the packet error rate between the two interfaces using a dummy transmission
-        InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
-        InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-        cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
-        IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
-        IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-        cPacket *macFrame = new cPacket();
-        macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
-        const IReceiver *receiver = receiverRadio->getReceiver();
-        const IRadioMedium *medium = receiverRadio->getMedium();
-        const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
-        const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
-        const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-        const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
-        const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
-        const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
-        const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
-        const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
-        const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
-        double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 1;
-        delete receptionIndication;
-        delete receptionDecision;
-        delete snir;
-        delete interference;
-        delete reception;
-        delete listening;
-        delete arrival;
-        delete transmission;
-        delete macFrame;
-        // we want to have a maximum PER product along the path,
-        // but still minimize the hop count if the PER is negligible
-        return minLinkWeight - log(1 - packetErrorRate);
-#else
-        throw cRuntimeError("Radio feature is disabled");
-#endif
-    }
-    else
-        throw cRuntimeError("Unknown linkWeightMode");
 }
 
 /**

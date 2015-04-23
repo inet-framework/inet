@@ -1232,8 +1232,10 @@ bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& rout
 void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *autorouteElement)
 {
     // set node weights
+    const char *metric = autorouteElement->getAttribute("metric");
+    if (metric == nullptr)
+        metric = "hopCount";
     cXMLElement defaultNodeElement("node", "", nullptr);
-    defaultNodeElement.setAttribute("cost", "default");
     cXMLElementList nodeElements = autorouteElement->getChildrenByTagName("node");
     for (int i = 0; i < topology.getNumNodes(); i++) {
         cXMLElement *selectedNodeElement = &defaultNodeElement;
@@ -1247,13 +1249,12 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 break;
             }
         }
-        double weight = computeNodeWeight(node, selectedNodeElement);
+        double weight = computeNodeWeight(node, metric, selectedNodeElement);
         EV_DEBUG << "Setting node weight, node = " << node->module->getFullPath() << ", weight = " << weight << endl;
         node->setWeight(weight);
     }
     // set link weights
     cXMLElement defaultLinkElement("link", "", nullptr);
-    defaultLinkElement.setAttribute("cost", "default");
     cXMLElementList linkElements = autorouteElement->getChildrenByTagName("link");
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
@@ -1272,7 +1273,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                     break;
                 }
             }
-            double weight = computeLinkWeight(link, selectedLinkElement);
+            double weight = computeLinkWeight(link, metric, selectedLinkElement);
             EV_DEBUG << "Setting link weight, link = " << link << ", weight = " << weight << endl;
             link->setWeight(weight);
         }
