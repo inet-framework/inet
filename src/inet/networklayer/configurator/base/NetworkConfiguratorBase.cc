@@ -366,7 +366,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, cXMLElemen
         const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
         const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
         const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
-        double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 0;
+        double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 1;
         delete receptionIndication;
         delete receptionDecision;
         delete snir;
