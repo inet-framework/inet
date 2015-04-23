@@ -82,30 +82,32 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable && !isBridgeNode(node)) {
+        if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
-                    // create a new network link
-                    LinkInfo *linkInfo = new LinkInfo();
-                    topology.linkInfos.push_back(linkInfo);
-
-                    // store interface as belonging to the new network link
-                    InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
-                    linkInfo->interfaceInfos.push_back(interfaceInfo);
                     interfacesSeen.insert(interfaceEntry);
-
-                    // visit neighbors (and potentially the whole LAN, recursively)
-                    if (isWirelessInterface(interfaceEntry)) {
-                        std::vector<Node *> empty;
-                        const char *wirelessId = getWirelessId(interfaceEntry);
-                        extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
-                    }
+                    if (isBridgeNode(node))
+                        createInterfaceInfo(topology, node, nullptr, interfaceEntry);
                     else {
-                        Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
-                        if (linkOut) {
+                        // create a new network link
+                        LinkInfo *linkInfo = new LinkInfo();
+                        topology.linkInfos.push_back(linkInfo);
+                        // store interface as belonging to the new network link
+                        InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
+                        linkInfo->interfaceInfos.push_back(interfaceInfo);
+                        // visit neighbors (and potentially the whole LAN, recursively)
+                        if (isWirelessInterface(interfaceEntry)) {
                             std::vector<Node *> empty;
-                            extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            const char *wirelessId = getWirelessId(interfaceEntry);
+                            extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
+                        }
+                        else {
+                            Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
+                            if (linkOut) {
+                                std::vector<Node *> empty;
+                                extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            }
                         }
                     }
                 }
@@ -130,15 +132,12 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (auto & elem : topology.linkInfos) {
-        LinkInfo *linkInfo = elem;
-        for (auto & _j : linkInfo->interfaceInfos) {
-            InterfaceInfo *interfaceInfo = _j;
-            InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-            if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
-                const char *wirelessId = getWirelessId(interfaceEntry);
-                wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
-            }
+    for (auto & elem : topology.interfaceInfos) {
+        InterfaceInfo *interfaceInfo = elem.second;
+        InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
+        if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
+            const char *wirelessId = getWirelessId(interfaceEntry);
+            wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
     }
 
