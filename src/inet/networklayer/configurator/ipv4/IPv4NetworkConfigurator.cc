@@ -1286,7 +1286,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (!sourceHostsMatcher.matchesAny() && !sourceHostsMatcher.matches(hostShortenedFullPath.c_str()) && !sourceHostsMatcher.matches(hostFullPath.c_str()))
             continue;
-        if (!sourceNode->interfaceTable)
+        if (isBridgeNode(sourceNode))
             continue;
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
@@ -1331,7 +1331,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                     continue;
                 if (destinationNode->getNumPaths() == 0)
                     continue;
-                if (!destinationNode->interfaceTable)
+                if (isBridgeNode(destinationNode))
                     continue;
 
                 // determine next hop interface
@@ -1341,15 +1341,14 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 InterfaceInfo *nextHopInterfaceInfo = nullptr;
                 while (node != sourceNode) {
                     link = (Link *)node->getPath(0);
-                    if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
+                    if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo)
                         nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
                     node = (Node *)node->getPath(0)->getRemoteNode();
                 }
 
                 // determine source interface
-                if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
+                if (nextHopInterfaceInfo && link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
-
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = static_cast<InterfaceInfo *>(destinationNode->interfaceInfos[j]);
