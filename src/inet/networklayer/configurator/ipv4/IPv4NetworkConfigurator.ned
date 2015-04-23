@@ -235,6 +235,9 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //      Add subnet route to the routing table.
 //
 //  - <wireless>
+//    The wireless element specifies the members of a wireless network. It is
+//    primarily useful when the members cannot be automatically determined using
+//    the SSID parameters.
 //
 //    - @id (optional)
 //      identifies wireless network, unique value used if missed
@@ -356,6 +359,54 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //         by naming one of the neighbour nodes on its link.
 //      Incoming multicast datagrams are forwarded to each child interface except the
 //      one they arrived in.
+//
+//  - <autoroute>
+//    The autoroute element specifies parameters for the automatic static routing.
+//    If this element is not specified then the configurator assumes a default.
+//    The default specifies that all routing tables will be modified and all the
+//    shortest path to all interfaces will be computed.
+//
+//    - @sourceHosts
+//      Optional selector attribute that specifies a list of host full path patterns.
+//      It determines the set of routing tables that will be modified. The default
+//      value is "**".
+//
+//    - @destinationInterfaces
+//      Optional parameter attribute that specifies a list of interface full path
+//      patterns. It determines the set of destination interfaces for which the
+//      shortest path will be computed. The default value is "**".
+//
+//    - @metric
+//      Optional parameter attribute that determines the metric that is used to
+//      compute the shortest paths. Valid values are: "hopCount", "delay", "dataRate",
+//      and "errorRate". The default value is "hopCount".
+//
+//    - <node>
+//      The node optional subelement specifies cost parameters for the shortest
+//      path algorithm. If this subelement is not specified then the configurator
+//      determines cost by default according to the selected metric.
+//
+//      - @hosts
+//        Mandatory selector attribute that specifies a list of node full path
+//        patterns. It determines the affected set of nodes.
+//
+//      - @cost
+//        Mandatory parameter attribute that specifies the cost. Valid values are
+//        "infinite" and numbers.
+//
+//    - <link>
+//      The node subelement specifies cost parameters for the shortest path algorithm.
+//      If this subelement is not specified then the configurator determines link
+//      cost by default according to the selected metric.
+//
+//      - @interfaces
+//        Mandatory selector attribute that specifies a list of interface full
+//        path patterns. It determines the affected set of links connected to
+//        the given interfaces.
+//
+//      - @cost
+//        Mandatory parameter attribute that specifies the cost. Valid values are
+//        "infinite" and numbers.
 //
 simple IPv4NetworkConfigurator extends NetworkConfiguratorBase
 {
