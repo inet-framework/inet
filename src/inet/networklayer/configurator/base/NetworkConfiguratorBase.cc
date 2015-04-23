@@ -130,8 +130,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (auto & elem : topology.interfaceInfos) {
-        InterfaceInfo *interfaceInfo = elem.second;
+    for (auto & entry : topology.interfaceInfos) {
+        InterfaceInfo *interfaceInfo = entry.second;
         InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
         if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
             const char *wirelessId = getWirelessId(interfaceEntry);
@@ -140,8 +140,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (auto & elem : wirelessIdToInterfaceInfosMap) {
-        std::vector<InterfaceInfo *>& interfaceInfos = elem.second;
+    for (auto & entry : wirelessIdToInterfaceInfosMap) {
+        std::vector<InterfaceInfo *>& interfaceInfos = entry.second;
         for (int i = 0; i < (int)interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
             for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
@@ -160,10 +160,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (auto & elem : topology.linkInfos) {
-        LinkInfo *linkInfo = elem;
+    for (auto & linkInfo : topology.linkInfos)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
-    }
 }
 
 void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
@@ -265,9 +263,9 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
 {
-    for (auto & elem : node->interfaceInfos)
-        if (elem->interfaceEntry == interfaceEntry)
-            return elem;
+    for (auto & interfaceInfo : node->interfaceInfos)
+        if (interfaceInfo->interfaceEntry == interfaceEntry)
+            return interfaceInfo;
 
     return nullptr;
 }
@@ -430,8 +428,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElementList wirelessElements = configuration->getChildrenByTagName("wireless");
-    for (auto & wirelessElements_i : wirelessElements) {
-        cXMLElement *wirelessElement = wirelessElements_i;
+    for (auto & wirelessElement : wirelessElements) {
         const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
         const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
         try {
@@ -475,8 +472,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = nullptr;
-    for (auto & elem : linkInfo->interfaceInfos) {
-        InterfaceInfo *interfaceInfo = elem;
+    for (auto & interfaceInfo : linkInfo->interfaceInfos) {
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         IRoutingTable *routingTable = interfaceInfo->node->routingTable;
 
@@ -528,16 +524,16 @@ NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 
 NetworkConfiguratorBase::Matcher::~Matcher()
 {
-    for (auto & elem : matchers)
-        delete elem;
+    for (auto & matcher : matchers)
+        delete matcher;
 }
 
 bool NetworkConfiguratorBase::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
-    for (auto & elem : matchers)
-        if (elem->matches(s))
+    for (auto & matcher : matchers)
+        if (matcher->matches(s))
             return true;
 
     return false;
@@ -560,10 +556,10 @@ NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 
 NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
 {
-    for (auto & elem : nameMatchers)
-        delete elem;
-    for (auto & elem : towardsMatchers)
-        delete elem;
+    for (auto & nameMatcher : nameMatchers)
+        delete nameMatcher;
+    for (auto & towardsMatcher : towardsMatchers)
+        delete towardsMatcher;
 }
 
 bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfaceInfo)
@@ -572,22 +568,21 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
         return true;
 
     const char *interfaceName = interfaceInfo->interfaceEntry->getName();
-    for (auto & elem : nameMatchers)
-        if (elem->matches(interfaceName))
+    for (auto & nameMatcher : nameMatchers)
+        if (nameMatcher->matches(interfaceName))
             return true;
 
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
-    for (auto & elem : linkInfo->interfaceInfos) {
-        InterfaceInfo *candidateInfo = elem;
+    for (auto & candidateInfo : linkInfo->interfaceInfos) {
         cModule *candidateModule = candidateInfo->interfaceEntry->getInterfaceTable()->getHostModule();
         if (candidateModule == ownerModule)
             continue;
         std::string candidateFullPath = candidateModule->getFullPath();
         std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
-        for (auto & _j : towardsMatchers)
-            if (_j->matches(candidateShortenedFullPath.c_str()) ||
-                _j->matches(candidateFullPath.c_str()))
+        for (auto & towardsMatcher : towardsMatchers)
+            if (towardsMatcher->matches(candidateShortenedFullPath.c_str()) ||
+                towardsMatcher->matches(candidateFullPath.c_str()))
                 return true;
 
     }
