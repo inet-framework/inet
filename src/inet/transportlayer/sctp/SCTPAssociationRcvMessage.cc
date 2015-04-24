@@ -198,6 +198,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     else if (initAckChunk->getInitTag() == 0) {
                         sendAbort();
                         sctpMain->removeAssociation(this);
+                        return true;
                     }
                     i = numberOfChunks - 1;
                     delete initAckChunk;
@@ -237,8 +238,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     delete header;
                     sendAbort();
                     sctpMain->removeAssociation(this);
-                    trans = true;
-                    break;
+                    return true;
                 }
                 if (!(fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED || fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
                     SCTPDataChunk *dataChunk;
@@ -272,6 +272,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     else {
                         sendAbort();
                         sctpMain->removeAssociation(this);
+                        return true;
                     }
                     delete dataChunk;
                 }
