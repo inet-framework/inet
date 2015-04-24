@@ -175,7 +175,7 @@ class INET_API SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-    void listen(bool fork = false, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
+    void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
     /**
      * Active OPEN to the given remote socket.
