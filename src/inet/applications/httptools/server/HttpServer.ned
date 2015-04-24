@@ -108,6 +108,7 @@ simple HttpServer like ITCPApp, ISCTPApp
 {
     parameters:
         string protocol = default("TCP");               // The transport protocol of the server
+        int maxMsgSize = default(1452);                 // Maximum SCTP response message size (larger responses will be splitted accordingly)
         string hostName = default("");                  // The domain name of the server
         int port = default(80);                         // The listening port number
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.

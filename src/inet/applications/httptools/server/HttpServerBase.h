@@ -83,6 +83,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     rdObject *rdErrorMsgSize = nullptr;    ///< The size of error messages.
 
     bool useSCTP = false;    // Use SCTP instead of TCP?
+    long maxMsgSize;    // Maximum SCTP response message size (larger responses will be splitted accordingly)
 
   protected:
     virtual void initialize(int stage) override;
@@ -96,7 +97,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);
     HttpReplyMessage *generateErrorReply(HttpRequestMessage *request, int code);
     virtual std::string generateBody();
-    cPacket *handleReceivedMessage(cMessage *msg);
+    SCTPSimpleMessage *handleReceivedMessage(cMessage *msg);
     void registerWithController();
     void readSiteDefinition(std::string file);
     std::string readHtmlBodyFile(std::string file, std::string path);

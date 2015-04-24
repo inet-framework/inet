@@ -112,7 +112,7 @@ import inet.applications.contract.ISCTPApp;
 simple HttpBrowser like ITCPApp, ISCTPApp
 {
     parameters:
-        string protocol = default("SCTP");              // The transport protocol of the browser
+        string protocol = default("TCP");               // The transport protocol of the browser
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         string logFile = default("");                   // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
         string scriptFile = default("");                // The browsing script file. Blank to disable.

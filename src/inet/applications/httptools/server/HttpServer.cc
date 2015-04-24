@@ -53,7 +53,7 @@ void HttpServer::initialize(int stage)
             sctpListenSocket.setOutputGate(gate("sctpOut"));
             sctpListenSocket.bind(port);
             sctpListenSocket.setCallbackObject(this);
-            sctpListenSocket.listen();
+            sctpListenSocket.listen(true);
         }
     }
 }
@@ -126,15 +126,36 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
-    cMessage *reply = handleReceivedMessage(msg);
+    SCTPSimpleMessage *reply = handleReceivedMessage(msg);
     if (reply != nullptr) {
         if (!useSCTP) {
-           TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
-           tcpSocket->send(reply);     // Send to socket if the reply is non-zero.
+            TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+            tcpSocket->send(reply);     // Send to socket if the reply is non-zero.
         }
         else {
-           SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
-           sctpSocket->send(reply);    // Send to socket if the reply is non-zero.
+            SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+
+            const long totalReplyLength = reply->getByteLength();
+            if (totalReplyLength > maxMsgSize) {
+                long toSend = totalReplyLength;
+                while (toSend > maxMsgSize) {
+                    const long txLength = std::min(toSend, maxMsgSize);
+
+                    SCTPSimpleMessage* dummyMsg = new SCTPSimpleMessage;
+                    dummyMsg->setByteLength(txLength);
+                    dummyMsg->setDataArraySize(dummyMsg->getByteLength());
+                    for (int i = 0; i < dummyMsg->getByteLength(); i++) {
+                        dummyMsg->setData(i, 'd');   // dummy data
+                    }
+                    dummyMsg->setDataLen(dummyMsg->getByteLength());
+                    sctpSocket->send(dummyMsg);
+                    toSend -= txLength;
+                }
+                reply->setByteLength(toSend);
+                reply->setDataLen(toSend);
+            }
+
+            sctpSocket->send(reply);    // Send to socket if the reply is non-zero.
         }
     }
     delete msg;    // Delete the received message here. Must not be deleted in the handler!

@@ -62,6 +62,9 @@ void HttpServerBase::initialize(int stage)
 
         httpProtocol = par("httpProtocol");
         useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
+        maxMsgSize = par("maxMsgSize");
+        if (maxMsgSize < 128)
+            throw cRuntimeError("maxMsgSize setting does not make sense");
 
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement == nullptr)
@@ -204,7 +207,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
     updateDisplay();
 }
 
-cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
+SCTPSimpleMessage *HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request == nullptr)
