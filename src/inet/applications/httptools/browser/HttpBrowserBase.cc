@@ -277,14 +277,7 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 
 void HttpBrowserBase::handleDataMessage(cMessage *msg)
 {
-    HttpReplyMessage *appmsg = dynamic_cast<HttpReplyMessage *>(msg);
-    if (appmsg == nullptr) {
-        if (dynamic_cast<SCTPSimpleMessage*>(msg) != nullptr) {
-            // Dummy data -> return. Wait for last fragment.
-            return;
-        }
-        throw cRuntimeError("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
-    }
+    HttpReplyMessage *appmsg = check_and_cast<HttpReplyMessage *>(msg);
 
     logResponse(appmsg);
 

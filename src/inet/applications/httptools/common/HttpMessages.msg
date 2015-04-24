@@ -118,3 +118,12 @@ packet HttpReplyMessage extends HttpBaseMessage
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
     int contentType @enum(HttpContentType) = CT_UNKNOWN;
 }
+
+
+//
+// Message class for HTTP fragments (SCTP only)
+//
+packet HttpFragmentMessage extends HttpBaseMessage
+{
+    @omitGetVerb(true);
+}

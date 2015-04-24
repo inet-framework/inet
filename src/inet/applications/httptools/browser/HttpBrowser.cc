@@ -218,6 +218,10 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
         return;
     }
 
+    if (dynamic_cast<HttpFragmentMessage*>(msg) != nullptr) {
+        return;    // SCTP: wait for last fragment.
+    }
+
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *tcpSocket = sockdata->tcpSocket;
     SCTPSocket *sctpSocket = sockdata->sctpSocket;
