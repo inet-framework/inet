@@ -708,8 +708,6 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
         trans = performStateTransition(SCTP_E_RCV_INIT_ACK);
         //delete state->initChunk; will be deleted when state ESTABLISHED is entered
         if (trans) {
-            state->initialPrimaryPath = remoteAddr;
-            state->setPrimaryPath(getPath(remoteAddr));
             initPeerTsn = initAckChunk->getInitTSN();
             localVTag = initAckChunk->getInitTag();
             state->gapList.setInitialCumAckTSN(initPeerTsn - 1);
@@ -747,6 +745,8 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
                 qCounter.roomRetransQ[remoteAddr] = 0;
                 qCounter.bookedTransQ[remoteAddr] = 0;
             }
+            state->initialPrimaryPath = remoteAddr;
+            state->setPrimaryPath(getPath(remoteAddr));
             inboundStreams = ((initAckChunk->getNoOutStreams() < inboundStreams) ? initAckChunk->getNoOutStreams() : inboundStreams);
             outboundStreams = ((initAckChunk->getNoInStreams() < outboundStreams) ? initAckChunk->getNoInStreams() : outboundStreams);
             (this->*ssFunctions.ssInitStreams)(inboundStreams, outboundStreams);

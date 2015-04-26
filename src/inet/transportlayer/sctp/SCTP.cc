@@ -551,6 +551,16 @@ void SCTP::updateSockPair(SCTPAssociation *assoc, L3Address localAddr, L3Address
     key.localPort = assoc->localPort = localPort;
     key.remotePort = assoc->remotePort = remotePort;
 
+    // Do not update a sock pair that is already stored
+    for (auto i = sctpAssocMap.begin(); i != sctpAssocMap.end(); i++) {
+        if (i->second == assoc &&
+            i->first.localAddr == key.localAddr &&
+            i->first.remoteAddr == key.remoteAddr &&
+            i->first.localPort == key.localPort
+            && i->first.remotePort == key.remotePort)
+            return;
+    }
+
     for (auto i = sctpAssocMap.begin(); i != sctpAssocMap.end(); i++) {
         if (i->second == assoc) {
             sctpAssocMap.erase(i);
