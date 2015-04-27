@@ -16,15 +16,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import inet.applications.tunapp.PacketdrillHost;
+import inet.node.inet.PacketDrillHost;
 
 
-network PDUdp
+network PacketDrillUdp
 {
     parameters:
 
     submodules:
-        pdhost: PacketdrillHost {
+        pdhost: PacketDrillHost {
             parameters:
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("p=544,194;i=device/server_l");

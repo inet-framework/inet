@@ -16,48 +16,48 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __PACKETDRILL_H
-#define __PACKETDRILL_H
+#ifndef __INET_PACKETDRILL_H
+#define __INET_PACKETDRILL_H
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tunapp/PDUtils.h"
+#include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
-#include "inet/applications/tunapp/PDApp.h"
+#include "PacketDrillApp.h"
 
 namespace inet {
 
-class PDApp;
+class PacketDrillApp;
 }
 
 class INET_API PacketDrill
 {
     public:
-        PacketDrill(PDApp* mod);
+        PacketDrill(PacketDrillApp* mod);
         ~PacketDrill();
 
         static cPacket *buildUDPPacket(int address_family, enum direction_t direction,
         uint16 udp_payload_bytes,
         char **error);
 
-        static PDApp *pdapp;
+        static PacketDrillApp *pdapp;
 
         static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);
 
-        int evaluate(PDExpression *in, PDExpression *out, char **error);
+        int evaluate(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 
-        int evaluate_binary_expression(PDExpression *in, PDExpression *out, char **error);
+        int evaluate_binary_expression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 
-        int evaluate_pollfd_expression(PDExpression *in, PDExpression *out, char **error);
+        int evaluate_pollfd_expression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 
-        int evaluate_msghdr_expression(PDExpression *in, PDExpression *out, char **error);
+        int evaluate_msghdr_expression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 
-        int evaluate_iovec_expression(PDExpression *in, PDExpression *out, char **error);
+        int evaluate_iovec_expression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 
-        int evaluateListExpression(PDExpression *in, PDExpression *out, char **error);
+        int evaluateListExpression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 };
 
 #endif

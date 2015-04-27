@@ -8,13 +8,13 @@ SUT is a server, i.e. it opens a socket, sends 1000 bytes, receives 500 bytes an
 %inifile: omnetpp.ini
 
 [General]
-network = PDUdp
+network = PacketDrillUdp
 debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../udptests/udpSendRecv.pkt"
-**.pdhost.tunApp[0].typename = "PDApp"
+**.pdhost.tunApp[0].typename = "PacketDrillApp"
 **.pdhost.numUdpTunApps = 1
 **.hasTun = true
 **.pdhost.numTunInterfaces = 1

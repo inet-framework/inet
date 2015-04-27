@@ -17,9 +17,7 @@
 
 package inet.applications.tunapp;
 
-//import inet.applications.contract.IPacketdrillApp;
-
-simple PDApp //like IPacketdrillApp
+simple PacketDrillApp
 {
     parameters:
         string scriptFile;
@@ -31,7 +29,6 @@ simple PDApp //like IPacketdrillApp
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double latency @unit(s) = default(0.1s);
         @display("i=block/app");
-        @class(PDApp);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

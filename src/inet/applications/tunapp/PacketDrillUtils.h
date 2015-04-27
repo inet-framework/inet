@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __PDUTILS_H
-#define __PDUTILS_H
+#ifndef __INET_PACKETDRILLUTILS_H
+#define __INET_PACKETDRILLUTILS_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -131,16 +131,16 @@ enum status_t {
 
 //namespace inet {
 
-class PDConfig;
-class PDScript;
-class PDExpression;
-class PDStruct;
+class PacketDrillConfig;
+class PacketDrillScript;
+class PacketDrillExpression;
+class PacketDrillStruct;
 
 /* A system call and its expected result. */
 struct syscall_spec {
     const char *name;            /* name of system call */
     cQueue *arguments;           /* arguments to system call */
-    PDExpression *result;        /* expected result from call */
+    PacketDrillExpression *result;        /* expected result from call */
     struct errno_spec *error;    /* errno symbol or NULL */
     char *note;                  /* extra note from strace */
     int64 end_usecs;             /* finish time, if it blocks */
@@ -159,29 +159,29 @@ struct syscall_spec {
  * implementation for this function is in the bison parser file
  * parser.y.
  */
-extern int parse_script(PDConfig *config,
-    PDScript *script,
+extern int parse_script(PacketDrillConfig *config,
+    PacketDrillScript *script,
     struct invocation *callback_invocation);
 
 /* Top-level info about the invocation of a test script */
 struct invocation {
-    PDConfig *config;    /* run-time configuration */
-    PDScript *script;    /* parse tree of the script to run */
+    PacketDrillConfig *config;    /* run-time configuration */
+    PacketDrillScript *script;    /* parse tree of the script to run */
 };
 
 /* Two expressions combined via a binary operator */
 struct binary_expression {
     char *op;    /* binary operator */
-    PDExpression *lhs;    /* left hand side expression */
-    PDExpression *rhs;    /* right hand side expression */
+    PacketDrillExpression *lhs;    /* left hand side expression */
+    PacketDrillExpression *rhs;    /* right hand side expression */
 };
 
 
-class PDConfig
+class PacketDrillConfig
 {
     public:
-        PDConfig();
-        ~PDConfig();
+        PacketDrillConfig();
+        ~PacketDrillConfig();
 
     private:
         enum ip_version_t ip_version;    /* v4, v4-mapped-v6, v6 */
@@ -201,11 +201,11 @@ class PDConfig
 };
 
 
-class PDPacket
+class PacketDrillPacket
 {
     public:
-        PDPacket();
-        ~PDPacket();
+        PacketDrillPacket();
+        ~PacketDrillPacket();
 
     private:
         cPacket* inetPacket;
@@ -218,11 +218,11 @@ class PDPacket
         void setInetPacket(cPacket *pkt) { inetPacket = pkt->dup(); delete pkt;};
 };
 
-class PDEvent : public cObject
+class PacketDrillEvent : public cObject
 {
     public:
-        PDEvent(enum event_t type_);
-        ~PDEvent();
+        PacketDrillEvent(enum event_t type_);
+        ~PacketDrillEvent();
 
     private:
         int lineNumber;    /* location in test script file */
@@ -233,7 +233,7 @@ class PDEvent : public cObject
         enum eventTime_t timeType;    /* type of time */
         enum event_t type;    /* type of the event */
         union {
-            PDPacket *packet;
+            PacketDrillPacket *packet;
             struct syscall_spec *syscall;
         } event;    /* pointer to the event */
 
@@ -255,18 +255,18 @@ class PDEvent : public cObject
         enum eventTime_t getTimeType() { return timeType; };
         void setType(enum event_t tt) { type = tt; };
         enum event_t getType() { return type; };
-        PDPacket* getPacket() { return event.packet; };
-        void setPacket(PDPacket* packet) { event.packet = packet; };
+        PacketDrillPacket* getPacket() { return event.packet; };
+        void setPacket(PacketDrillPacket* packet) { event.packet = packet; };
         void setSyscall(struct syscall_spec *syscall) { event.syscall = syscall; };
         struct syscall_spec *getSyscall() { return event.syscall; };
 };
 
 
-class PDExpression : public cObject
+class PacketDrillExpression : public cObject
 {
     public:
-        PDExpression(enum expression_t type_);
-        ~PDExpression();
+        PacketDrillExpression(enum expression_t type_);
+        ~PacketDrillExpression();
 
     private:
         enum expression_t type;
@@ -299,11 +299,11 @@ class PDExpression : public cObject
 };
 
 
-class PDScript
+class PacketDrillScript
 {
     public:
-        PDScript(const char* file);
-        ~PDScript();
+        PacketDrillScript(const char* file);
+        ~PacketDrillScript();
 
     private:
         struct option_list *optionList;
@@ -314,27 +314,27 @@ class PDScript
 
     public:
         void readScript();
-        int parseScriptAndSetConfig(PDConfig *config, const char *script_buffer);
+        int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
 
         char *getBuffer() { return buffer; };
         int getLength() { return length; };
         cQueue *getEventList() { return eventList; };
         struct option_list *getOptionList() { return optionList; };
         void setOptionList(struct option_list *optL) { optionList = optL;};
-        void addEvent(PDEvent *evt) { eventList->insert(evt); };
+        void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
 };
 
-class PDStruct: public cObject
+class PacketDrillStruct: public cObject
 {
     public:
-        PDStruct();
-        PDStruct(uint32 v1, uint32 v2);
+        PacketDrillStruct();
+        PacketDrillStruct(uint32 v1, uint32 v2);
 
         uint32 getValue1() { return value1; };
         void setValue1(uint32 value) { value1 = value; };
         uint32 getValue2() { return value2; };
         void setValue2(uint32 value) { value2 = value; };
-        virtual PDStruct *dup() const { return new PDStruct(*this); };
+        virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); };
 
     private:
         uint32 value1;
