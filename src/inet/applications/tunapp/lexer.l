@@ -48,7 +48,7 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "PDUtils.h"
+#include "PacketDrillUtils.h"
 
 /* This include of the bison-generated .h file must go last so that we
  * can first include all of the declarations on which it depends.

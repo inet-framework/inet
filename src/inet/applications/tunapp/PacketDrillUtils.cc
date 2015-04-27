@@ -20,7 +20,7 @@
 #include <netinet/in.h>
 #include <assert.h>
 
-#include "PDUtils.h"
+#include "PacketDrillUtils.h"
 
 using namespace inet;
 
@@ -44,36 +44,36 @@ struct int_symbol *platform_symbols(void)
 }
 
 
-PDConfig::PDConfig()
+PacketDrillConfig::PacketDrillConfig()
 {
     ip_version = IP_VERSION_4;
     tolerance_usecs = 4000;
     mtu = TUN_DRIVER_DEFAULT_MTU;
 }
 
-PDConfig::~PDConfig()
+PacketDrillConfig::~PacketDrillConfig()
 {
 }
 
-/***************** PDPacket *******************/
+/***************** PacketDrillPacket *******************/
 
-PDPacket::PDPacket()
+PacketDrillPacket::PacketDrillPacket()
 {
 }
 
-PDPacket::~PDPacket()
+PacketDrillPacket::~PacketDrillPacket()
 {
     delete inetPacket;
 }
 
-/***************** PDExpression *******************/
+/***************** PacketDrillExpression *******************/
 
-PDExpression::PDExpression(enum expression_t type_)
+PacketDrillExpression::PacketDrillExpression(enum expression_t type_)
 {
     type = type_;
 }
 
-PDExpression::~PDExpression()
+PacketDrillExpression::~PacketDrillExpression()
 {
     if (type == EXPR_LIST) {
         delete value.list;
@@ -85,7 +85,7 @@ PDExpression::~PDExpression()
  * an error message in *error.
  */
 
-int PDExpression::unescapeCstringExpression(const char *input_string, char **error)
+int PacketDrillExpression::unescapeCstringExpression(const char *input_string, char **error)
 {
     int bytes = strlen(input_string);
     type = EXPR_STRING;
@@ -141,7 +141,7 @@ int PDExpression::unescapeCstringExpression(const char *input_string, char **err
  * valid int32 or uint32, and matches the expected type. Returns STATUS_OK on
  * success; on failure returns STATUS_ERR and sets error message.
  */
-int PDExpression::getS32(int32 *val, char **error)
+int PacketDrillExpression::getS32(int32 *val, char **error)
 {
     if (type != EXPR_INTEGER)
         return STATUS_ERR;
@@ -155,7 +155,7 @@ int PDExpression::getS32(int32 *val, char **error)
 
 
 /* Do a symbol->int lookup, and return true if we found the symbol. */
-bool PDExpression::lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols)
+bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols)
 {
     int i;
     for (i = 0; symbols[i].name != NULL ; ++i) {
@@ -167,7 +167,7 @@ bool PDExpression::lookupIntSymbol(const char *input_symbol, int64 *output_integ
     return false;
 }
 
-int PDExpression::symbolToInt(const char *input_symbol, int64 *output_integer, char **error)
+int PacketDrillExpression::symbolToInt(const char *input_symbol, int64 *output_integer, char **error)
 {
     if (lookupIntSymbol(input_symbol, output_integer, platform_symbols()))
         return STATUS_OK;
@@ -176,20 +176,20 @@ int PDExpression::symbolToInt(const char *input_symbol, int64 *output_integer, c
 }
 
 
-/**************** PDEvent ****************/
+/**************** PacketDrillEvent ****************/
 
-PDEvent::PDEvent(enum event_t type_)
+PacketDrillEvent::PacketDrillEvent(enum event_t type_)
 {
     type = type_;
     eventTimeEnd = NO_TIME_RANGE;
     eventOffset = NO_TIME_RANGE;
 }
 
-PDEvent::~PDEvent()
+PacketDrillEvent::~PacketDrillEvent()
 {
 }
 
-PDScript::PDScript(const char *scriptFile)
+PacketDrillScript::PacketDrillScript(const char *scriptFile)
 {
     eventList = new cQueue("eventList");
     buffer = NULL;
@@ -197,16 +197,16 @@ PDScript::PDScript(const char *scriptFile)
     scriptPath = strdup(scriptFile);
 }
 
-PDScript::~PDScript()
+PacketDrillScript::~PacketDrillScript()
 {
     printf("Name eventlist: %s\n", eventList->getName());
 
     delete eventList;
 }
 
-/**************** PDScript ****************/
+/**************** PacketDrillScript ****************/
 
-void PDScript::readScript()
+void PacketDrillScript::readScript()
 {
     int size = 0;
 
@@ -251,7 +251,7 @@ void PDScript::readScript()
     EV_INFO << "Script " << scriptPath << " was read with " << length << "length\n";
 }
 
-int PDScript::parseScriptAndSetConfig(PDConfig *config, const char *script_buffer)
+int PacketDrillScript::parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer)
 {
     int res;
     struct invocation invocation = {
@@ -271,13 +271,13 @@ int PDScript::parseScriptAndSetConfig(PDConfig *config, const char *script_buffe
 }
 
 
-/***************  PDStruct  ************************/
+/***************  PacketDrillStruct  ************************/
 
-PDStruct::PDStruct()
+PacketDrillStruct::PacketDrillStruct()
 {
 }
 
-PDStruct::PDStruct(uint32 v1, uint32 v2)
+PacketDrillStruct::PacketDrillStruct(uint32 v1, uint32 v2)
 {
     value1 = v1;
     value2 = v2;

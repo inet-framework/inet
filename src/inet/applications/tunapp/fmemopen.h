@@ -23,8 +23,8 @@
  * implementation here.
  */
 
-#ifndef __FMEMOPEN_H__
-#define __FMEMOPEN_H__
+#ifndef __INET_FMEMOPEN_H__
+#define __INET_FMEMOPEN_H__
 
 #ifndef HAVE_FMEMOPEN
 
@@ -34,4 +34,4 @@ extern FILE *fmemopen(char *buf, size_t size, const char *mode);
 
 #endif  /* HAVE_FMEMOPEN */
 
-#endif /* __FMEMOPEN_H__ */
+#endif /* __INET_FMEMOPEN_H__ */

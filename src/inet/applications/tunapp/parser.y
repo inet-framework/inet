@@ -76,8 +76,8 @@
 
 #include "fmemopen.h"
 
-#include "inet/applications/tunapp/PDUtils.h"
-#include "inet/applications/tunapp/PacketDrill.h"
+#include "PacketDrillUtils.h"
+#include "PacketDrill.h"
 
 
 /* This include of the bison-generated .h file must go last so that we
@@ -112,13 +112,13 @@ static int current_script_line = -1;
  * We use this object to look up configuration info needed during
  * parsing.
  */
-static PDConfig *in_config = NULL;
+static PacketDrillConfig *in_config = NULL;
 
 /* The output of the parser: an output script containing
  * 1) a linked list of options
  * 2) a linked list of events
  */
-static PDScript *out_script = NULL;
+static PacketDrillScript *out_script = NULL;
 
 
 /* The test invocation to pass back to parse_and_finalize_config(). */
@@ -137,7 +137,7 @@ int yywrap(void)
  * text script file with the given path name and fills in the script
  * object with the parsed representation.
  */
-int parse_script(PDConfig *config, PDScript *script, struct invocation *callback_invocation){
+int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct invocation *callback_invocation){
     /* This bison-generated parser is not multi-thread safe, so we
      * have a lock to prevent more than one thread using the
      * parser at the same time. This is useful in the wire server
@@ -186,8 +186,8 @@ static void yyerror(const char *message) {
 /* Create and initalize a new integer expression with the given
  * literal value and format string.
  */
-static PDExpression *new_integer_expression(int64 num, const char *format) {
-    PDExpression *expression = new PDExpression(EXPR_INTEGER);
+static PacketDrillExpression *new_integer_expression(int64 num, const char *format) {
+    PacketDrillExpression *expression = new PacketDrillExpression(EXPR_INTEGER);
     expression->setNum(num);
     expression->setFormat(format);
     return expression;
@@ -218,11 +218,11 @@ static PDExpression *new_integer_expression(int64 num, const char *format) {
     int32 window;
     uint32 sequence_number;
     struct option_list *option;
-    PDEvent *event;
-    PDPacket *packet;
+    PacketDrillEvent *event;
+    PacketDrillPacket *packet;
     struct syscall_spec *syscall;
-    PDStruct *sack_block;
-    PDExpression *expression;
+    PacketDrillStruct *sack_block;
+    PacketDrillExpression *expression;
     cQueue *expression_list;
     struct errno_spec *errno_info;
 }
@@ -303,34 +303,34 @@ event
 
 event_time
 : '+' time {
-    $$ = new PDEvent(INVALID_EVENT);
+    $$ = new PacketDrillEvent(INVALID_EVENT);
     $$->setLineNumber(@2.first_line);
     $$->setEventTime($2);
     $$->setTimeType(RELATIVE_TIME);
     printf("relative done\n");
 }
 | time {
-    $$ = new PDEvent(INVALID_EVENT);
+    $$ = new PacketDrillEvent(INVALID_EVENT);
     $$->setLineNumber(@1.first_line);
     $$->setEventTime($1);
     $$->setTimeType(ABSOLUTE_TIME);
     printf("absolute done\n");
 }
 | '*' {
-    $$ = new PDEvent(INVALID_EVENT);
+    $$ = new PacketDrillEvent(INVALID_EVENT);
     $$->setLineNumber(@1.first_line);
     $$->setTimeType(ANY_TIME);
     printf("any done\n");
 }
 | time '~' time {
-    $$ = new PDEvent(INVALID_EVENT);
+    $$ = new PacketDrillEvent(INVALID_EVENT);
     $$->setLineNumber(@1.first_line);
     $$->setTimeType(ABSOLUTE_RANGE_TIME);
     $$->setEventTime($1);
     $$->setEventTimeEnd($3);
 }
 | '+' time '~' '+' time {
-    $$ = new PDEvent(INVALID_EVENT);
+    $$ = new PacketDrillEvent(INVALID_EVENT);
     $$->setLineNumber(@1.first_line);
     $$->setTimeType(RELATIVE_RANGE_TIME);
     $$->setEventTime($2);
@@ -355,10 +355,10 @@ time
 
 action
 : packet_spec {
-    $$ = new PDEvent(PACKET_EVENT);  $$->setPacket($1);
+    $$ = new PacketDrillEvent(PACKET_EVENT);  $$->setPacket($1);
 }
 | syscall_spec {
-    $$ = new PDEvent(SYSCALL_EVENT);
+    $$ = new PacketDrillEvent(SYSCALL_EVENT);
     $$->setSyscall($1);
 }
 ;
@@ -373,7 +373,7 @@ packet_spec
 udp_packet_spec
 : packet_prefix UDP '(' INTEGER ')' {
     char *error = NULL;
-    PDPacket *outer = $1, *inner = NULL;
+    PacketDrillPacket *outer = $1, *inner = NULL;
 
     enum direction_t direction = outer->getDirection();
 
@@ -382,7 +382,7 @@ udp_packet_spec
         pkt->setName("parserInbound");
     else
         pkt->setName("parserOutbound");
-    inner = new PDPacket();
+    inner = new PacketDrillPacket();
     inner->setInetPacket(pkt);
     inner->setDirection(direction);
 
@@ -393,7 +393,7 @@ udp_packet_spec
 
 packet_prefix
 : direction {
-    $$ = new PDPacket();
+    $$ = new PacketDrillPacket();
     $$->setDirection($1);
 }
 ;
@@ -461,7 +461,7 @@ expression_list
 
 expression
 : ELLIPSIS {
-    $$ = new PDExpression(EXPR_ELLIPSIS);
+    $$ = new PacketDrillExpression(EXPR_ELLIPSIS);
 }
 | decimal_integer {
     $$ = $1; }
@@ -469,16 +469,16 @@ expression
     $$ = $1;
 }
 | WORD {
-    $$ = new PDExpression(EXPR_WORD);
+    $$ = new PacketDrillExpression(EXPR_WORD);
     $$->setString($1);
 }
 | MYSTRING {
-    $$ = new PDExpression(EXPR_STRING);
+    $$ = new PacketDrillExpression(EXPR_STRING);
     $$->setString($1);
     $$->setFormat("\"%s\"");
 }
 | MYSTRING ELLIPSIS {
-    $$ = new PDExpression(EXPR_STRING);
+    $$ = new PacketDrillExpression(EXPR_STRING);
     $$->setString($1);
     $$->setFormat("\"%s\"...");
 }
@@ -506,7 +506,7 @@ hex_integer
 
 binary_expression
 : expression '|' expression {    /* bitwise OR */
-    $$ = new PDExpression(EXPR_BINARY);
+    $$ = new PacketDrillExpression(EXPR_BINARY);
     struct binary_expression *binary = (struct binary_expression *) malloc(sizeof(struct binary_expression));
     binary->op = strdup("|");
     binary->lhs = $1;
@@ -517,11 +517,11 @@ binary_expression
 
 array
 : '[' ']' {
-    $$ = new PDExpression(EXPR_LIST);
+    $$ = new PacketDrillExpression(EXPR_LIST);
     $$->setList(NULL);
 }
 | '[' expression_list ']' {
-    $$ = new PDExpression(EXPR_LIST);
+    $$ = new PacketDrillExpression(EXPR_LIST);
     $$->setList($2);
 }
 ;

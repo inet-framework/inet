@@ -21,16 +21,16 @@
 #include <string.h>
 #include <assert.h>
 
-#include "inet/applications/tunapp/PacketDrill.h"
-#include "inet/applications/tunapp/PDUtils.h"
+#include "PacketDrill.h"
+#include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
 
 
-PDApp *PacketDrill::pdapp;
+PacketDrillApp *PacketDrill::pdapp;
 
-PacketDrill::PacketDrill(PDApp *mod)
+PacketDrill::PacketDrill(PacketDrillApp *mod)
 {
     pdapp = mod;
 }
@@ -71,7 +71,7 @@ IPv4Datagram* PacketDrill::makeIPPacket(int protocol, enum direction_t direction
 cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direction,
                                      uint16 udp_payload_bytes, char **error)
 {
-    PDApp *app = PacketDrill::pdapp;
+    PacketDrillApp *app = PacketDrill::pdapp;
     UDPPacket *udpPacket = new UDPPacket("UDPInject");
     udpPacket->setByteLength(8);
     cPacket *payload = new cPacket("payload");
@@ -94,7 +94,7 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
     return pkt;
 }
 
-int PacketDrill::evaluate(PDExpression *in, PDExpression *out, char **error)
+int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out, char **error)
 {
     int result = STATUS_OK;
     int64 number;
@@ -143,8 +143,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PDExpression *outExpr = new PDExpression(((PDExpression *)it())->getType());
-        if (evaluate((PDExpression *)it(), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)it())->getType());
+        if (evaluate((PacketDrillExpression *)it(), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }
@@ -153,15 +153,15 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
     return STATUS_OK;
 }
 
-int PacketDrill::evaluate_binary_expression(PDExpression *in, PDExpression *out, char **error)
+int PacketDrill::evaluate_binary_expression(PacketDrillExpression *in, PacketDrillExpression *out, char **error)
 {
     int result = STATUS_ERR;
     assert(in->getType() == EXPR_BINARY);
     assert(in->getBinary());
     out->setType(EXPR_INTEGER);
 
-    PDExpression *lhs = nullptr;
-    PDExpression *rhs = nullptr;
+    PacketDrillExpression *lhs = nullptr;
+    PacketDrillExpression *rhs = nullptr;
     if ((evaluate(in->getBinary()->lhs, lhs, error)) ||
         (evaluate(in->getBinary()->rhs, rhs, error))) {
         delete(rhs);
@@ -185,7 +185,7 @@ int PacketDrill::evaluate_binary_expression(PDExpression *in, PDExpression *out,
     return result;
 }
 
-int PacketDrill::evaluateListExpression(PDExpression *in, PDExpression *out, char **error)
+int PacketDrill::evaluateListExpression(PacketDrillExpression *in, PacketDrillExpression *out, char **error)
 {
     assert(in->getType() == EXPR_LIST);
     assert(out->getType() == EXPR_LIST);

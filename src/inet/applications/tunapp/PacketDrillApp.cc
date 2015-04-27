@@ -2,16 +2,16 @@
 // Copyright (C) 2015 Irene Ruengeler
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
@@ -21,13 +21,13 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/applications/tunapp/PDUtils.h"
-#include "inet/applications/tunapp/PDApp.h"
-#include "inet/applications/tunapp/PDInfo_m.h"
+#include "PacketDrillUtils.h"
+#include "PacketDrillApp.h"
+#include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
 
-Define_Module(PDApp);
+Define_Module(PacketDrillApp);
 
 namespace inet {
 
@@ -36,7 +36,7 @@ namespace inet {
 
 
 
-void PDApp::initialize(int stage)
+void PacketDrillApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -63,23 +63,23 @@ void PDApp::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         pd = new PacketDrill(this);
-        config = new PDConfig();
+        config = new PacketDrillConfig();
         scriptFile = (const char *)(par("scriptFile"));
-        script = new PDScript(scriptFile);
+        script = new PacketDrillScript(scriptFile);
         localAddress = L3Address(par("localAddress"));
         remoteAddress = L3Address(par("remoteAddress"));
         localPort = par("localPort");
         remotePort = par("remotePort");
         protocol = 0;
 
-        cMessage* timeMsg = new cMessage("PDAppTimer");
+        cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
         timeMsg->setKind(MSGKIND_START);
         scheduleAt((simtime_t)par("startTime"), timeMsg);
     }
 }
 
 
-void PDApp::handleMessage(cMessage *msg)
+void PacketDrillApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         handleTimer(msg);
@@ -88,11 +88,11 @@ void PDApp::handleMessage(cMessage *msg)
             if (outboundPackets->getLength() == 0) {
                 cMessage *nextmsg = simulation.getScheduler()->getNextEvent();
                 if ((simTime() + par("latency")) < nextmsg->getArrivalTime()) {
-                    delete (PDInfo *)msg->getContextPointer();
+                    delete (PacketDrillInfo *)msg->getContextPointer();
                     delete msg;
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                 } else {
-                    PDInfo *info = new PDInfo();
+                    PacketDrillInfo *info = new PacketDrillInfo();
                     info->setLiveTime(simulation.getSimTime());
                     msg->setContextPointer(info);
                     receivedPackets->insert(PK(msg));
@@ -101,7 +101,7 @@ void PDApp::handleMessage(cMessage *msg)
                 IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(outboundPackets->pop());
                 IPv4Datagram *live = check_and_cast<IPv4Datagram*>(msg);
                 if (datagram && live) {
-                    PDInfo *info = (PDInfo *)datagram->getContextPointer();
+                    PacketDrillInfo *info = (PacketDrillInfo *)datagram->getContextPointer();
                     if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                             info->getScriptTimeEnd(), info->getOffset(), simulation.getSimTime(), "outbound packet")
                             == STATUS_ERR) {
@@ -110,7 +110,7 @@ void PDApp::handleMessage(cMessage *msg)
                         throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                     }
                     if (!compareDatagram(datagram, live)) {
-                        delete (PDInfo *)msg->getContextPointer();
+                        delete (PacketDrillInfo *)msg->getContextPointer();
                         delete msg;
                         throw cTerminationException("Packetdrill error: Datagrams are not the same");
                     }
@@ -120,12 +120,12 @@ void PDApp::handleMessage(cMessage *msg)
                         scheduleEvent();
                     }
                 }
-                delete (PDInfo *)msg->getContextPointer();
+                delete (PacketDrillInfo *)msg->getContextPointer();
                 delete msg;
                 delete datagram;
             }
         } else if (msg->getArrivalGate()->isName("udpIn")) {
-            PDEvent *event = (PDEvent *)(script->getEventList()->get(eventCounter));
+            PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
             if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                     event->getEventOffset(), simulation.getSimTime(), "inbound packet") == STATUS_ERR) {
                 delete msg;
@@ -149,7 +149,7 @@ void PDApp::handleMessage(cMessage *msg)
                 }
                 delete msg;
             } else {
-                PDInfo* info = new PDInfo();
+                PacketDrillInfo* info = new PacketDrillInfo();
                 info->setLiveTime(simulation.getSimTime());
                 msg->setContextPointer(info);
                 receivedPackets->insert(PK(msg));
@@ -165,7 +165,7 @@ void PDApp::handleMessage(cMessage *msg)
     }
 }
 
-void PDApp::adjustTimes(PDEvent *event)
+void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
 {
     simtime_t offset, offsetLastEvent;
     if (event->getTimeType() == ANY_TIME ||
@@ -173,7 +173,7 @@ void PDApp::adjustTimes(PDEvent *event)
         event->getTimeType() == RELATIVE_RANGE_TIME) {
         offset = simulation.getSimTime() - simStartTime;
         cQueue *eventList = script->getEventList();
-        offsetLastEvent = ((PDEvent *)(eventList->get(eventCounter - 1)))->getEventTime() - simStartTime;
+        offsetLastEvent = ((PacketDrillEvent *)(eventList->get(eventCounter - 1)))->getEventTime() - simStartTime;
         offset = (offset.dbl() > offsetLastEvent.dbl()) ? offset : offsetLastEvent;
         event->setEventOffset(offset);
         event->setEventTime(event->getEventTime() + offset + simStartTime);
@@ -185,11 +185,11 @@ void PDApp::adjustTimes(PDEvent *event)
     }
 }
 
-void PDApp::scheduleEvent()
+void PacketDrillApp::scheduleEvent()
 {
     cQueue *eventList = script->getEventList();
     eventList->setName("eventQueue");
-    PDEvent *event = (PDEvent *)(eventList->get(eventCounter));
+    PacketDrillEvent *event = (PacketDrillEvent *)(eventList->get(eventCounter));
     event->setEventNumber(eventCounter);
     adjustTimes(event);
     cancelEvent(eventTimer);
@@ -197,7 +197,7 @@ void PDApp::scheduleEvent()
     scheduleAt(event->getEventTime(), eventTimer);
 }
 
-void PDApp::runEvent(PDEvent* event)
+void PacketDrillApp::runEvent(PacketDrillEvent* event)
 {
     char str[128];
     if (event->getType() == PACKET_EVENT) {
@@ -208,7 +208,7 @@ void PDApp::runEvent(PDEvent* event)
             if (receivedPackets->getLength() > 0) {
                 IPv4Datagram *live = check_and_cast<IPv4Datagram *>(receivedPackets->pop());
                 if (ip && live) {
-                    PDInfo *liveInfo = (PDInfo *)live->getContextPointer();
+                    PacketDrillInfo *liveInfo = (PacketDrillInfo *)live->getContextPointer();
                     if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(),
                             event->getEventTimeEnd(), event->getEventOffset(), liveInfo->getLiveTime(),
                             "outbound packet") == STATUS_ERR) {
@@ -230,7 +230,7 @@ void PDApp::runEvent(PDEvent* event)
                 delete live;
                 delete ip;
             } else {
-                PDInfo *info = new PDInfo("outbound");
+                PacketDrillInfo *info = new PacketDrillInfo("outbound");
                 info->setScriptTime(event->getEventTime());
                 info->setScriptTimeEnd(event->getEventTimeEnd());
                 info->setOffset(event->getEventOffset());
@@ -248,7 +248,7 @@ void PDApp::runEvent(PDEvent* event)
     }
 }
 
-void PDApp::handleTimer(cMessage *msg)
+void PacketDrillApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_START: {
@@ -263,7 +263,7 @@ void PDApp::handleTimer(cMessage *msg)
         }
 
         case MSGKIND_EVENT: {
-            PDEvent *event = (PDEvent *)msg->getContextPointer();
+            PacketDrillEvent *event = (PacketDrillEvent *)msg->getContextPointer();
             runEvent(event);
             if ((!recvFromSet && outboundPackets->length() == 0) &&
                 (!eventTimer->isScheduled() && eventCounter < numEvents - 1)) {
@@ -277,7 +277,7 @@ void PDApp::handleTimer(cMessage *msg)
     }
 }
 
-void PDApp::runSystemCallEvent(PDEvent* event, struct syscall_spec *syscall)
+void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_spec *syscall)
 {
     char *error = NULL;
     const char *name = syscall->name;
@@ -299,7 +299,7 @@ void PDApp::runSystemCallEvent(PDEvent* event, struct syscall_spec *syscall)
     } else if (!strcmp(name, "sendto")) {
         syscallSendTo(syscall, args, &error);
     } else if (!strcmp(name, "recvfrom")) {
-        syscallRecvFrom((PDEvent*)event, syscall, args, &error);
+        syscallRecvFrom((PacketDrillEvent*)event, syscall, args, &error);
     } else if (!strcmp(name, "close")) {
         syscallClose(syscall, args, &error);
     } else if (!strcmp(name, "connect")) {
@@ -320,23 +320,23 @@ void PDApp::runSystemCallEvent(PDEvent* event, struct syscall_spec *syscall)
     return;
 }
 
-int PDApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int domain, type;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 3) {
         return STATUS_ERR;
     }
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS)) {
         return STATUS_ERR;
     }
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || exp->getS32(&type, error)) {
         return STATUS_ERR;
     }
-    exp = (PDExpression *)args->get(2);
+    exp = (PacketDrillExpression *)args->get(2);
     if (!exp || exp->getS32(&protocol, error)) {
         return STATUS_ERR;
     }
@@ -355,20 +355,20 @@ int PDApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, char **erro
     return STATUS_OK;
 }
 
-int PDApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 3)
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(2);
+    exp = (PacketDrillExpression *)args->get(2);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -382,17 +382,17 @@ int PDApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char **error)
     return STATUS_OK;
 }
 
-int PDApp::syscallListen(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd, backlog;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 2)
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || exp->getS32(&backlog, error))
         return STATUS_ERR;
 
@@ -406,7 +406,7 @@ int PDApp::syscallListen(struct syscall_spec *syscall, cQueue *args, char **erro
     return STATUS_OK;
 }
 
-int PDApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     if (!listenSet)
         return STATUS_ERR;
@@ -421,20 +421,20 @@ int PDApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, char **erro
 }
 
 
-int PDApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 3)
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(2);
+    exp = (PacketDrillExpression *)args->get(2);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -450,29 +450,29 @@ int PDApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, char **err
 }
 
 
-int PDApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd, count, flags;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 6)
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(2);
+    exp = (PacketDrillExpression *)args->get(2);
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(3);
+    exp = (PacketDrillExpression *)args->get(3);
     if (!exp || exp->getS32(&flags, error))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(4);
+    exp = (PacketDrillExpression *)args->get(4);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(5);
+    exp = (PacketDrillExpression *)args->get(5);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -492,29 +492,29 @@ int PDApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **erro
 }
 
 
-int PDApp::syscallRecvFrom(PDEvent *event, struct syscall_spec *syscall, cQueue *args, char **err)
+int PacketDrillApp::syscallRecvFrom(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **err)
 {
     int script_fd, count, flags;
-    PDExpression *exp;
+    PacketDrillExpression *exp;
 
     if (args->getLength() != 6)
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(0);
+    exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, err))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(1);
+    exp = (PacketDrillExpression *)args->get(1);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(2);
+    exp = (PacketDrillExpression *)args->get(2);
     if (!exp || exp->getS32(&count, err))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(3);
+    exp = (PacketDrillExpression *)args->get(3);
     if (!exp || exp->getS32(&flags, err))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(4);
+    exp = (PacketDrillExpression *)args->get(4);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PDExpression *)args->get(5);
+    exp = (PacketDrillExpression *)args->get(5);
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -526,7 +526,7 @@ int PDApp::syscallRecvFrom(PDEvent *event, struct syscall_spec *syscall, cQueue 
             delete msg;
             throw cTerminationException("Packetdrill error: Wrong payload length");
         }
-        PDInfo *info = (PDInfo *)msg->getContextPointer();
+        PacketDrillInfo *info = (PacketDrillInfo *)msg->getContextPointer();
         if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                 event->getEventOffset(), info->getLiveTime(), "inbound packet") == STATUS_ERR) {
             delete info;
@@ -542,13 +542,13 @@ int PDApp::syscallRecvFrom(PDEvent *event, struct syscall_spec *syscall, cQueue 
     return STATUS_OK;
 }
 
-int PDApp::syscallClose(struct syscall_spec *syscall, cQueue *args, char **error)
+int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd;
 
     if (args->getLength() != 1)
         return STATUS_ERR;
-    PDExpression *exp = (PDExpression *)args->get(0);
+    PacketDrillExpression *exp = (PacketDrillExpression *)args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
 
@@ -566,14 +566,14 @@ int PDApp::syscallClose(struct syscall_spec *syscall, cQueue *args, char **error
     return STATUS_OK;
 }
 
-void PDApp::finish()
+void PacketDrillApp::finish()
 {
     delete receivedPackets;
     delete outboundPackets;
-    EV_INFO << "PDApp finished\n";
+    EV_INFO << "PacketDrillApp finished\n";
 }
 
-PDApp::~PDApp()
+PacketDrillApp::~PacketDrillApp()
 {
     delete eventTimer;
     delete script;
@@ -581,7 +581,7 @@ PDApp::~PDApp()
 
 // Verify that something happened at the expected time.
 
-int PDApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, simtime_t scriptTimeEnd, simtime_t offset,
+int PacketDrillApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, simtime_t scriptTimeEnd, simtime_t offset,
         simtime_t liveTime, const char *description)
 {
     simtime_t expectedTime = scriptTime;
@@ -618,7 +618,7 @@ int PDApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, simtime_t
     }
 }
 
-bool PDApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram)
+bool PacketDrillApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram)
 {
     if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
         return false;
@@ -665,7 +665,7 @@ bool PDApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveData
     return true;
 }
 
-bool PDApp::compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp)
+bool PacketDrillApp::compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp)
 {
     if (!(storedUdp->getSourcePort() == liveUdp->getSourcePort())) {
         return false;
