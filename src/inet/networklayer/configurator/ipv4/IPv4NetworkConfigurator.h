@@ -80,7 +80,6 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
 
         IPv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return IPv4Address(address); }
         IPv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return IPv4Address(netmask); }
-        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
     };
 
     /**

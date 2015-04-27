@@ -101,8 +101,6 @@ void IPv4NetworkConfigurator::computeConfiguration()
         cXMLElementList autorouteElements = configuration->getChildrenByTagName("autoroute");
         if (autorouteElements.size() == 0) {
             cXMLElement defaultAutorouteElement("autoroute", "", nullptr);
-            defaultAutorouteElement.setAttribute("sourceHosts", "**");
-            defaultAutorouteElement.setAttribute("destinationInterfaces", "**");
             TIME(addStaticRoutes(topology, &defaultAutorouteElement));
         }
         else {
@@ -1225,7 +1223,10 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
         cXMLElement *selectedNodeElement = &defaultNodeElement;
         Node *node = (Node *)topology.getNode(i);
         for (auto & nodeElement : nodeElements) {
-            Matcher nodeHostsMatcher(nodeElement->getAttribute("hosts"));
+            const char* hosts = nodeElement->getAttribute("hosts");
+            if (hosts == nullptr)
+                hosts = "**";
+            Matcher nodeHostsMatcher(hosts);
             std::string hostFullPath = node->module->getFullPath();
             std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
             if (nodeHostsMatcher.matchesAny() || nodeHostsMatcher.matches(hostShortenedFullPath.c_str()) || nodeHostsMatcher.matches(hostFullPath.c_str())) {
@@ -1246,12 +1247,17 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
             cXMLElement *selectedLinkElement = &defaultLinkElement;
             Link *link = (Link *)node->getLinkIn(j);
             for (auto & linkElement : linkElements) {
-                Matcher linkInterfaceMatcher(linkElement->getAttribute("interfaces"));
+                const char* interfaces = linkElement->getAttribute("interfaces");
+                if (interfaces == nullptr)
+                    interfaces = "**";
+                Matcher linkInterfaceMatcher(interfaces);
                 std::string sourceFullPath = link->sourceInterfaceInfo->getFullPath();
+                std::string sourceShortenedFullPath = sourceFullPath.substr(sourceFullPath.find('.') + 1);
                 std::string destinationFullPath = link->destinationInterfaceInfo->getFullPath();
+                std::string destinationShortenedFullPath = destinationFullPath.substr(destinationFullPath.find('.') + 1);
                 if (linkInterfaceMatcher.matchesAny() ||
-                    linkInterfaceMatcher.matches(sourceFullPath.c_str()) ||
-                    linkInterfaceMatcher.matches(destinationFullPath.c_str()))
+                    linkInterfaceMatcher.matches(sourceFullPath.c_str()) || linkInterfaceMatcher.matches(sourceShortenedFullPath.c_str()) ||
+                    linkInterfaceMatcher.matches(destinationFullPath.c_str()) || linkInterfaceMatcher.matches(destinationShortenedFullPath.c_str()))
                 {
                     selectedLinkElement = linkElement;
                     break;
@@ -1263,8 +1269,14 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
         }
     }
     // add static routes for all routing tables
-    Matcher sourceHostsMatcher(autorouteElement->getAttribute("sourceHosts"));
-    Matcher destinationInterfacesMatcher(autorouteElement->getAttribute("destinationInterfaces"));
+    const char* sourceHosts = autorouteElement->getAttribute("sourceHosts");
+    if (sourceHosts == nullptr)
+        sourceHosts = "**";
+    const char* destinationInterfaces = autorouteElement->getAttribute("destinationInterfaces");
+    if (destinationInterfaces == nullptr)
+        destinationInterfaces = "**";
+    Matcher sourceHostsMatcher(sourceHosts);
+    Matcher destinationInterfacesMatcher(destinationInterfaces);
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *sourceNode = (Node *)topology.getNode(i);
         std::string hostFullPath = sourceNode->module->getFullPath();
@@ -1337,7 +1349,11 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                     for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = static_cast<InterfaceInfo *>(destinationNode->interfaceInfos[j]);
-                        if (!destinationInterfacesMatcher.matchesAny() && !destinationInterfacesMatcher.matches(destinationInterfaceInfo->interfaceEntry->getFullPath().c_str()))
+                        std::string destinationFullPath = destinationInterfaceInfo->interfaceEntry->getFullPath();
+                        std::string destinationShortenedFullPath = destinationFullPath.substr(destinationFullPath.find('.') + 1);
+                        if (!destinationInterfacesMatcher.matchesAny() &&
+                            !destinationInterfacesMatcher.matches(destinationFullPath.c_str()) &&
+                            !destinationInterfacesMatcher.matches(destinationShortenedFullPath.c_str()))
                             continue;
                         InterfaceEntry *destinationInterfaceEntry = destinationInterfaceInfo->interfaceEntry;
                         IPv4Address destinationAddress = destinationInterfaceInfo->getAddress();
