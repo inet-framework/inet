@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -131,7 +132,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     bool optimizeRoutesParameter;
 
     // internal state
-    Topology topology;
+    Topology fullTopology;
 
   public:
     /**
@@ -196,7 +197,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      * The algorithm uses Dijkstra's weighted shortest path algorithm.
      * May add default routes and subnet routes if possible and requested.
      */
-    virtual void addStaticRoutes(Topology& topology);
+    virtual void addStaticRoutes(Topology& topology, unsigned int networkID);
 
     /**
      * Destructively optimizes the given IPv4 routes by merging some of them.
@@ -221,6 +222,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
+    virtual void performConfigurations(Topology& topology, unsigned int networkID);
     virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);

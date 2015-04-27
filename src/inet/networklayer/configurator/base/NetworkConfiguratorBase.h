@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -102,6 +103,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
         InterfaceInfo *gatewayInterfaceInfo = nullptr;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
+        unsigned int networkID;    // Identifier of the network
 
       public:
         LinkInfo() {  }
@@ -116,6 +118,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         std::vector<LinkInfo *> linkInfos;    // all links in the network
         std::map<InterfaceEntry *, InterfaceInfo *> interfaceInfos;    // all interfaces in the network
+        std::set<unsigned int> networkSet;    // independent networks set
 
       public:
         virtual ~Topology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
@@ -154,6 +157,12 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         bool matchesAny() { return matchesany; }
     };
 
+  public:
+    static unsigned int getNetworkID(cModule*        module,
+            InterfaceEntry* interfaceEntry);
+    static unsigned int getNetworkID(cModule*           module,
+            Topology::LinkOut* link);
+
   protected:
     // parameters
     const char *linkWeightMode = nullptr;
@@ -171,7 +180,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
      * Creates vertices from modules having @node property.
      * Creates edges from connections (wired and wireless) between network interfaces.
      */
-    virtual void extractTopology(Topology& topology);
+    virtual void extractTopology(Topology&          topology,
+            const unsigned int networkID = 0);
 
     // helper functions
     virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -38,6 +39,7 @@ namespace inet {
 using namespace inet::physicallayer;
 #endif
 
+
 NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
 {
     this->node = node;
@@ -61,10 +63,65 @@ void NetworkConfiguratorBase::initialize(int stage)
     }
 }
 
-void NetworkConfiguratorBase::extractTopology(Topology& topology)
+// ###### Search filter to find nodes #######################################
+struct NodeFilterParameters
+{
+    unsigned int NetworkID;
+};
+
+static bool nodeFilter(cModule* module, void* userData)
+{
+    // ====== Check whether node qualifies for specified networkID ===========
+    const NodeFilterParameters* parameters   = (const NodeFilterParameters*)userData;
+    cProperty*                  nodeProperty = module->getProperties()->get("node");
+    if (nodeProperty) {
+        // ====== Are nodes in arbitrary networks requested? ==================
+        if (parameters->NetworkID == 0) {
+            return(true);   // return all nodes
+        }
+
+        // ====== Is there an interface in the right network? =================
+        IInterfaceTable* interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
+        if (interfaceTable) {
+            for (int k = 0;k < interfaceTable->getNumInterfaces(); k++) {
+                InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
+                if (!interfaceEntry->isLoopback()) {
+                    const unsigned int interfaceNetworkID = NetworkConfiguratorBase::getNetworkID(module, interfaceEntry);
+                    if ( (interfaceNetworkID == 0) ||
+                            (interfaceNetworkID == parameters->NetworkID) ) {
+                        // Node has an interface in the right network => add it.
+                        return(true);
+                    }
+                }
+            }
+        }
+    }
+
+    return(false);
+}
+
+void NetworkConfiguratorBase::extractTopology(Topology& topology, const unsigned int networkID)
 {
     // extract topology
-    topology.extractByProperty("node");
+    NodeFilterParameters parameters;
+    parameters.NetworkID = networkID;
+    topology.extractFromNetwork(&nodeFilter, &parameters);
+
+    if (networkID != 0) {
+        // The topology here is already pruned from nodes without connection in this network.
+        // However, the links have not been pruned yet (between still-existing nodes)!
+        for (int i = 0; i < topology.getNumNodes(); i++) {
+            Node* node = (Node *)topology.getNode(i);
+            for (int j = 0; j < node->getNumOutLinks(); j++) {
+                Topology::LinkOut* link          = node->getLinkOut(j);
+                const unsigned int linkNetworkID = getNetworkID(node->getModule(), link);
+                if ( (linkNetworkID != 0) && (linkNetworkID != networkID) ) {
+                    link->disable();   // Not possible to prune in topology => disable link.
+                }
+            }
+        }
+    }
+
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
@@ -86,26 +143,35 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
-                    // create a new network link
-                    LinkInfo *linkInfo = new LinkInfo();
-                    topology.linkInfos.push_back(linkInfo);
+                    // handle independent networks
+                    const unsigned int linkNetworkID = getNetworkID(node->module, interfaceEntry);
+                    if ( (linkNetworkID == networkID) ||
+                            (linkNetworkID == 0) ||
+                            (networkID == 0) ) {
+                        topology.networkSet.insert(linkNetworkID);
 
-                    // store interface as belonging to the new network link
-                    InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
-                    linkInfo->interfaceInfos.push_back(interfaceInfo);
-                    interfacesSeen.insert(interfaceEntry);
+                        // create a new network link
+                        LinkInfo *linkInfo = new LinkInfo();
+                        linkInfo->networkID = linkNetworkID;
+                        topology.linkInfos.push_back(linkInfo);
 
-                    // visit neighbors (and potentially the whole LAN, recursively)
-                    if (isWirelessInterface(interfaceEntry)) {
-                        std::vector<Node *> empty;
-                        const char *wirelessId = getWirelessId(interfaceEntry);
-                        extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
-                    }
-                    else {
-                        Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
-                        if (linkOut) {
+                        // store interface as belonging to the new network link
+                        InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
+                        linkInfo->interfaceInfos.push_back(interfaceInfo);
+                        interfacesSeen.insert(interfaceEntry);
+
+                        // visit neighbors (and potentially the whole LAN, recursively)
+                        if (isWirelessInterface(interfaceEntry)) {
                             std::vector<Node *> empty;
-                            extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            const char *wirelessId = getWirelessId(interfaceEntry);
+                            extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
+                        }
+                        else {
+                            Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
+                            if (linkOut) {
+                                std::vector<Node *> empty;
+                                extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            }
                         }
                     }
                 }
@@ -394,7 +460,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 
             // Note: "hosts", "interfaces" must ALL match on the interface for the rule to apply
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
-                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
+                    (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
             {
                 const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
@@ -541,7 +607,7 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
         std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
         for (auto & _j : towardsMatchers)
             if (_j->matches(candidateShortenedFullPath.c_str()) ||
-                _j->matches(candidateFullPath.c_str()))
+                    _j->matches(candidateFullPath.c_str()))
                 return true;
 
     }
@@ -568,5 +634,38 @@ void NetworkConfiguratorBase::dumpTopology(Topology& topology)
     }
 }
 
-} // namespace inet
+// ###### Get Network ID from InterfaceEntry ################################
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule* module, InterfaceEntry* interfaceEntry)
+{
+    unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
+    const int    outputGateID = interfaceEntry->getNodeOutputGateId();
+    if (outputGateID != -1) {
+        cGate*       outputGate   = module->gate(outputGateID);
+        cChannel*    channel      = outputGate->getChannel();
+        if (channel) {
+            if (channel->hasPar("netID")) {
+                networkID = channel->par("netID");
+            }
+        }
+    }
+    return(networkID);
+}
 
+// ###### Get Network ID from LinkOut #######################################
+unsigned int NetworkConfiguratorBase::getNetworkID(cModule* module, Topology::LinkOut* link)
+{
+    unsigned int networkID    = 0;   // default behaviour: link belongs to all networks.
+    const int    outputGateID = link->getLocalGateId();
+    if (outputGateID != -1) {
+        cGate*       outputGate   = module->gate(outputGateID);
+        cChannel*    channel      = outputGate->getChannel();
+        if (channel) {
+            if (channel->hasPar("netID")) {
+                networkID = channel->par("netID");
+            }
+        }
+    }
+    return(networkID);
+}
+
+} // namespace inet
