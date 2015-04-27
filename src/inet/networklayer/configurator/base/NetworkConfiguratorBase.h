@@ -195,8 +195,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
 
 inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link& link)
 {
-    return stream << (link.sourceInterfaceInfo != nullptr ? link.sourceInterfaceInfo->getFullName() : "") << " -> "
-                  << (link.destinationInterfaceInfo != nullptr ? link.destinationInterfaceInfo->getFullName() : "");
+    return stream << (link.sourceInterfaceInfo != nullptr ? link.sourceInterfaceInfo->getFullPath() : "") << " -> "
+                  << (link.destinationInterfaceInfo != nullptr ? link.destinationInterfaceInfo->getFullPath() : "");
 }
 
 inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link *link)

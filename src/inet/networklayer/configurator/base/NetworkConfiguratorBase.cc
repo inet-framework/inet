@@ -448,18 +448,23 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
-    cModule *module = interfaceEntry->getInterfaceModule();
-    if (!module)
-        module = hostModule;
-    cModule *mgmtModule = module->getSubmodule("mgmt");
-    if (mgmtModule) {
+    cModule *interfaceModule = interfaceEntry->getInterfaceModule();
+    cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
+    if (mgmtModule != nullptr) {
         if (mgmtModule->hasPar("ssid"))
             return mgmtModule->par("ssid");
         else if (mgmtModule->hasPar("accessPointAddress"))
             return mgmtModule->par("accessPointAddress");
     }
+#ifdef WITH_RADIO
+    cModule *radioModule = interfaceModule->getSubmodule("radio");
+    const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
+    if (radio != nullptr) {
+        const cModule *mediumModule = dynamic_cast<const cModule *>(radio->getMedium());
+        return mediumModule->getFullName();
+    }
+#endif
 
     // default: put all such wireless interfaces on the same LAN
     return "SSID";
