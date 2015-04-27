@@ -1327,8 +1327,9 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         IPv6ControlInfo *raCtrlInfo)
 {
+    // ra CtrlInfo terbukti ngga null
     InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
-//    ASSERT(ie!=NULL);
+    ASSERT(ie!=NULL); // pada MR, ie dianggap null. raCtrlInfo->getInterfaceId returns -1. error.
 
     if (!rt6->isMobileRouter() && ie->ipv6Data()->getAdvSendAdvertisements() )
     {   // interface wlan0 of Mobile Router can process RA message
