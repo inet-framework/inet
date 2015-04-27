@@ -36,26 +36,58 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include <netinet/in.h>  // htonl, ntohl, ...
 #endif
 
+#define SOURCE_IP_HEADER 8
+#define DEST_IP_HEADER 4
+#define PROTOCOL_IP_HEADER 11
 
 using namespace INETFw;
 
+struct pseudo_header
+{
+    int32 source;
+    int32 dest;
+    uint8 reserve;
+    uint8 protocol;
+    int16 udpLen;
+};
 
 int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
 {
     struct udphdr *udphdr = (struct udphdr *) (buf);
-    int packetLength;
+    int16 packetLength;
+    char *check_sum;
+    struct pseudo_header* psh;
 
-    packetLength = pkt->getByteLength();
+    packetLength = (int16)pkt->getByteLength();
+
+    ByteArrayMessage *encapPacket = new ByteArrayMessage("Payload-from-wire");
+    encapPacket = (ByteArrayMessage*)(pkt->getEncapsulatedPacket());
+    memcpy(buf+sizeof(struct udphdr),encapPacket->getFullName(),packetLength - sizeof(struct udphdr));
+
     udphdr->uh_sport = htons(pkt->getSourcePort());
     udphdr->uh_dport = htons(pkt->getDestinationPort());
     udphdr->uh_ulen = htons(packetLength);
-    udphdr->uh_sum = TCPIPchecksum::checksum(buf, packetLength);
+
+    check_sum = (char*)malloc(sizeof(struct pseudo_header) + packetLength);
+    psh = (struct pseudo_header*)check_sum;
+
+    //To build the pseudo header, it needs the source and dest addresses from the ip header,
+    //as well the protocol, for this reason memcpy copies from buf-SOURCE_IP_HEADER, buf-DEST_IP_HEADER
+    //and buf-PROTOCOL_IP_HEADER
+    memcpy(&(psh->source),buf-SOURCE_IP_HEADER,4);
+    memcpy(&(psh->dest),buf-DEST_IP_HEADER,4);
+    memset(&(psh->reserve),0,1);
+    memcpy(&(psh->protocol),buf-PROTOCOL_IP_HEADER,1);
+    psh->udpLen = udphdr->uh_ulen;
+    memcpy(check_sum+sizeof(struct pseudo_header), buf, packetLength);
+
+    udphdr->uh_sum = TCPIPchecksum::checksum(check_sum,sizeof(struct pseudo_header) + packetLength);
+
     return packetLength;
 }
 
 void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *dest)
 {
-
     struct udphdr *udphdr = (struct udphdr*) buf;
 
     dest->setSourcePort(ntohs(udphdr->uh_sport));
@@ -63,6 +95,7 @@ void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPac
     dest->setByteLength(8);
     ByteArrayMessage *encapPacket = new ByteArrayMessage("Payload-from-wire");
     encapPacket->setDataFromBuffer(buf + sizeof(struct udphdr), ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
+    encapPacket->addByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
     encapPacket->setName((const char *)buf + sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
