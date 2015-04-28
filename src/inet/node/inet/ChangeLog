@@ -1,5 +1,19 @@
 ====== inet-3.x ======
 
+2015-04-16  Rudolf Hornig
+
+    Added INode module interface so simulation may use this interface to create
+    networks with node types configurable from ini files.
+
+2015-03-16  Levente Mészáros
+
+    Fixed PIM issues when all features are turned off. Added IPIMRouting and
+    merged MulticastRouter parameters into Router.
+
+2015-01-28  Irene Ruengeler
+
+    Implemented a virtual TUN interface.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-04-16  Rudolf Hornig

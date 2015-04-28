@@ -1,5 +1,50 @@
 ====== inet-3.x ======
 
+2015-04-23  Levente Mészáros
+
+    Added radio medium lookup based on module parameter. Added snir parameter to
+    computeReceptionDecision.
+
+2015-04-13  Levente Mészáros
+
+    Deleted duplicated code used in communication range computation.
+
+2015-04-09  Levente Mészáros
+
+    Moved setting the biterror from the medium to the decision. This is needed
+    by the bitlevel model that computes biterrors in the deserializer.
+
+    Added communication heat map to MediumVisualizer.
+    Extracted MediumVisualizer from RadioMedium.
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-30  Levente Mészáros
+
+    Extracted MediumLimitCache from RadioMedium.
+
+2015-03-24  Levente Mészáros
+
+    Refactored the computation of communication figures. The new code simply
+    computes the transformation matrix. Changed various line widths to unscaled.
+
+2015-03-20  Levente Mészáros
+
+    Extracted separate CommunicationLog class.
+
+2015-03-18  Levente Mészáros
+
+    Replaced the default communication cache. Fixed computation of medium limits
+    during initialization.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed common/layered to common/bitlevel. Moved
+    remaining common contents to common/packetlevel.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-02  Levente Mészáros

@@ -1,5 +1,29 @@
 ====== inet-3.x ======
 
+2015-04-20  Zoltan Bojthe
+
+    UDPPacket totalLength field renamed to totalLengthField.
+
+2015-04-10  Zoltan Bojthe
+
+    Added totalLength field to UDPPacket. The total length maybe different from
+    than getByteLength().
+
+2015-03-30  Levente Mészáros
+
+    Fixed double delete after merging master.
+
+
+2015-03-18  Levente Mészáros
+
+    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+    SCTPMessage. This change allows generic handling of transport packets. For
+    example, see TunLoopbackApp.
+
+2015-03-11  Zoltan Bojthe
+
+    Fixed udp packet size.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe
@@ -26,7 +50,6 @@
 	all previous locations of the sources in this directory, and to view
 	the full history in gitk. Normal invocations of gitk can only show
 	file history back to the most recent move operation.
-
 
 2014-07-30  Andras Varga
 

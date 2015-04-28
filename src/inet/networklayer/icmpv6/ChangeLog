@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2015-03-10  Zoltan Bojthe
+
+    Fixed ICMPv6 serializer.
+
+2015-02-10  Zoltan Bojthe
+
+    Fixed IPv6NeighborDiscovery packet length.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe

@@ -1,5 +1,17 @@
 ====== inet-3.x ======
 
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-26  Levente Mészáros
+
+    Added a separate flag for leaving a trail for face normal vectors.
+
+2015-03-24  Levente Mészáros
+
+    Changed various line widths to unscaled.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe

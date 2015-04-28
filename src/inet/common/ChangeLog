@@ -1,5 +1,43 @@
 ====== inet-3.x ======
 
+2015-04-22  Andras Varga
+
+    Fixed PacketPrinter, do not access stale Transmission pointer in packet.
+
+2015-04-14  Andras Varga
+
+    Moved ResultRecorders to the INET namespace.
+
+2015-04-09  Levente Mészáros
+
+    Added reusable HeatMapFigure.
+
+2015-03-25  Benjamin Seregi
+
+    Added DelayedInitializer that supports static initalization without having
+    worry about the order.
+
+2015-03-31  Rudolf Hornig
+
+    Added patch level to the version information + a macro in NETDefs.h.
+
+2015-03-24  Levente Mészáros
+
+    Added fade out support to TrailFigure.
+
+2015-03-12  Zoltan Bojthe
+
+    Renamed ByteArrayMessage to RawPacket.
+
+2015-03-11  Zoltan Bojthe
+
+    Fixed NULL pointer error in PacketDump when IPv4Datagram doesn't have
+    encapsulated packet (typically DSRPkt)
+
+2015-03-16  Levente Mészáros
+
+    Moved generic dimensional data structures to common.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-31  Rudolf Hornig
