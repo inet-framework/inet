@@ -145,7 +145,7 @@ module EthernetInterface like IWiredNic
 
         // there are output hooks, there is egressTC
         if numOutputHooks > 0 && egressTCType != "" {
-            outputHook[numInputHooks-1].out --> egressTC.in;
+            outputHook[numOutputHooks-1].out --> egressTC.in;
         }
 }
 
