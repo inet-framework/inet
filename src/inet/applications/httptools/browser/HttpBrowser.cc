@@ -219,6 +219,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
     }
 
     if (dynamic_cast<HttpFragmentMessage*>(msg) != nullptr) {
+        delete msg;
         return;    // SCTP: wait for last fragment.
     }
 
