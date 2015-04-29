@@ -1337,7 +1337,9 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
             delete ra;
             return;
     }
-    else if (rt6->isMobileRouter() && (ie!=NULL)) //ie = NULL if interface entry from external wlan card
+
+    //ini sementara bisa untuk non-nested nemo... tapi kalo udah nested, ini bisa jadi masalah(???)
+    else if (rt6->isMobileRouter() && !strcmp(ie->getClassName(), "Ieee802Ctrl")) //ie = NULL if interface entry from external wlan card
     {
         EV << "Interface is an advertising interface, dropping RA message.\n";
                     delete ra;
@@ -1592,6 +1594,8 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                 if (rt6->isMobileRouter())
                 {
                     rt6->createSubPrefix(prefix, prefixLength, validLifetime, preferredLifetime);
+                    IPv6Address destAddr = IPv6Address("FF02::1");
+                    createAndSendRAPacket(destAddr, ie);
                 }
             }
             /*- If the Prefix Information option's Valid Lifetime field is zero,
