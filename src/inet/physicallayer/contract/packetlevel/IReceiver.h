@@ -22,6 +22,7 @@
 #include "inet/physicallayer/contract/packetlevel/INoise.h"
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 #include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
@@ -101,14 +102,14 @@ class INET_API IReceiver : public IPrintableObject
      * receiver. This function must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
 
     /**
      * Returns the result of the reception process specifying whether it was
      * successful or not and any other physical properties. This function must
      * be purely functional and support optimistic parallel computation.
      */
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
 };
 
 } // namespace physicallayer

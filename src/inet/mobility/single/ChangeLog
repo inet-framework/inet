@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-03-26  Levente Mészáros
+
+    Added lastSpeed calculation to RectangleMobility.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe

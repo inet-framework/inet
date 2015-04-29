@@ -39,7 +39,7 @@ inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
 {
-  protected:
+  public:
     class LinkInfo;
     class InterfaceInfo;
 
@@ -156,8 +156,6 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
 
   protected:
     // parameters
-    const char *linkWeightMode = nullptr;
-    double defaultLinkWeight = NaN;
     double minLinkWeight = NaN;
     cXMLElement *configuration = nullptr;
 
@@ -178,9 +176,10 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
-    virtual double computeNodeWeight(Node *node);
-    virtual double computeWiredLinkWeight(Link *link);
-    virtual double computeWirelessLinkWeight(Link *link);
+    virtual double computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters);
+    virtual double computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
+    virtual double computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
+    virtual double computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual bool isBridgeNode(Node *node);
     virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
     virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
@@ -193,6 +192,17 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     // generic helper functions
     virtual void dumpTopology(Topology& topology);
 };
+
+inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link& link)
+{
+    return stream << (link.sourceInterfaceInfo != nullptr ? link.sourceInterfaceInfo->getFullPath() : "") << " -> "
+                  << (link.destinationInterfaceInfo != nullptr ? link.destinationInterfaceInfo->getFullPath() : "");
+}
+
+inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link *link)
+{
+    return stream << *link;
+}
 
 } // namespace inet
 

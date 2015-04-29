@@ -61,7 +61,7 @@ bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, con
         return ReceiverBase::computeIsReceptionAttempted(listening, reception, interference);
 }
 
-bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const IdealReception::Power power = check_and_cast<const IdealReception *>(reception)->getPower();
     if (power == IdealReception::POWER_RECEIVABLE) {
@@ -99,10 +99,14 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
     return new ListeningDecision(listening, false);
 }
 
-const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     ReceptionIndication *indication = new ReceptionIndication();
-    bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference);
+    bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference, snir);
+    double errorRate = isReceptionSuccessful ? 0 : 1;
+    indication->setSymbolErrorRate(errorRate);
+    indication->setBitErrorRate(errorRate);
+    indication->setPacketErrorRate(errorRate);
     return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }
 

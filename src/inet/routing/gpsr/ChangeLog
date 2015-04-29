@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2015-03-23  Zoltan Bojthe
+
+    Get address length from IL3AddressType (instead of getting from ned parameter)
+    Renamed coordByteLength to positionByteLength and set to 2*4 byte
+    Removed confusing addressByteLength.
+
+2015-02-12  Zoltan Bojthe
+
+    Fixed packet length.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe

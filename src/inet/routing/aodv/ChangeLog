@@ -1,10 +1,22 @@
 ====== inet-3.x ======
 
+2015-04-10  Benjamin Seregi
+
+    Fixed missing byte length.
+
+2015-02-12  Benjamin Seregi
+
+    Added control packet lengths.
+
+2015-02-19  Benjamin Seregi
+
+    Fixed bug: if not an AODV entry, skip the update of precursor.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-04-22 Rudolf Hornig
 
-	Added support for detecting NF_LINK_BREAK signal when BMAC or CSMA is used 
+	Added support for detecting NF_LINK_BREAK signal when BMAC or CSMA is used
 	for media access control in the link layer.
 
 2015-01-21  Zoltan Bojthe

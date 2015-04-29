@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-02-12  Zoltan Bojthe
+
+    Fixed BPDU packet length.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-07  Zoltan Bojthe

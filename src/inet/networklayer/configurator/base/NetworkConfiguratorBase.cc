@@ -30,6 +30,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
 #endif
 
 namespace inet {
@@ -54,8 +55,6 @@ NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *link
 void NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        linkWeightMode = par("linkWeightMode");
-        defaultLinkWeight = par("defaultLinkWeight");
         minLinkWeight = par("minLinkWeight");
         configuration = par("config");
     }
@@ -74,7 +73,6 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         node->module = module;
         node->interfaceTable = findInterfaceTable(node);
         node->routingTable = findRoutingTable(node);
-        node->setWeight(computeNodeWeight(node));
     }
 
     // extract links and interfaces
@@ -82,30 +80,32 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable && !isBridgeNode(node)) {
+        if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
-                    // create a new network link
-                    LinkInfo *linkInfo = new LinkInfo();
-                    topology.linkInfos.push_back(linkInfo);
-
-                    // store interface as belonging to the new network link
-                    InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
-                    linkInfo->interfaceInfos.push_back(interfaceInfo);
                     interfacesSeen.insert(interfaceEntry);
-
-                    // visit neighbors (and potentially the whole LAN, recursively)
-                    if (isWirelessInterface(interfaceEntry)) {
-                        std::vector<Node *> empty;
-                        const char *wirelessId = getWirelessId(interfaceEntry);
-                        extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
-                    }
+                    if (isBridgeNode(node))
+                        createInterfaceInfo(topology, node, nullptr, interfaceEntry);
                     else {
-                        Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
-                        if (linkOut) {
+                        // create a new network link
+                        LinkInfo *linkInfo = new LinkInfo();
+                        topology.linkInfos.push_back(linkInfo);
+                        // store interface as belonging to the new network link
+                        InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
+                        linkInfo->interfaceInfos.push_back(interfaceInfo);
+                        // visit neighbors (and potentially the whole LAN, recursively)
+                        if (isWirelessInterface(interfaceEntry)) {
                             std::vector<Node *> empty;
-                            extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            const char *wirelessId = getWirelessId(interfaceEntry);
+                            extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
+                        }
+                        else {
+                            Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
+                            if (linkOut) {
+                                std::vector<Node *> empty;
+                                extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
+                            }
                         }
                     }
                 }
@@ -130,21 +130,18 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (auto & elem : topology.linkInfos) {
-        LinkInfo *linkInfo = elem;
-        for (auto & _j : linkInfo->interfaceInfos) {
-            InterfaceInfo *interfaceInfo = _j;
-            InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-            if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
-                const char *wirelessId = getWirelessId(interfaceEntry);
-                wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
-            }
+    for (auto & entry : topology.interfaceInfos) {
+        InterfaceInfo *interfaceInfo = entry.second;
+        InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
+        if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
+            const char *wirelessId = getWirelessId(interfaceEntry);
+            wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (auto & elem : wirelessIdToInterfaceInfosMap) {
-        std::vector<InterfaceInfo *>& interfaceInfos = elem.second;
+    for (auto & entry : wirelessIdToInterfaceInfosMap) {
+        std::vector<InterfaceInfo *>& interfaceInfos = entry.second;
         for (int i = 0; i < (int)interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
             for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
@@ -153,27 +150,22 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                 Link *linkIJ = new Link();
                 linkIJ->sourceInterfaceInfo = interfaceInfoI;
                 linkIJ->destinationInterfaceInfo = interfaceInfoJ;
-                linkIJ->setWeight(computeWirelessLinkWeight(linkIJ));
                 topology.addLink(linkIJ, interfaceInfoI->node, interfaceInfoJ->node);
                 Link *linkJI = new Link();
                 linkJI->sourceInterfaceInfo = interfaceInfoJ;
                 linkJI->destinationInterfaceInfo = interfaceInfoI;
-                linkJI->setWeight(computeWirelessLinkWeight(linkJI));
                 topology.addLink(linkJI, interfaceInfoJ->node, interfaceInfoI->node);
             }
         }
     }
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (auto & elem : topology.linkInfos) {
-        LinkInfo *linkInfo = elem;
+    for (auto & linkInfo : topology.linkInfos)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
-    }
 }
 
 void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
-    linkOut->setWeight(computeWiredLinkWeight(static_cast<Link *>(static_cast<Topology::Link *>(linkOut))));
     Node *node = (Node *)linkOut->getRemoteNode();
     int inputGateId = linkOut->getRemoteGateId();
     IInterfaceTable *interfaceTable = node->interfaceTable;
@@ -271,104 +263,157 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry)
 {
-    for (auto & elem : node->interfaceInfos)
-        if (elem->interfaceEntry == interfaceEntry)
-            return elem;
+    for (auto & interfaceInfo : node->interfaceInfos)
+        if (interfaceInfo->interfaceEntry == interfaceEntry)
+            return interfaceInfo;
 
     return nullptr;
 }
 
-double NetworkConfiguratorBase::computeNodeWeight(Node *node)
+static double parseCostAttribute(const char *costAttribute)
 {
-    if (node->routingTable && !node->routingTable->isForwardingEnabled())
-        return DBL_MAX;
-    else
-        return 0;
+    if (!strncmp(costAttribute, "inf", 3))
+        return INFINITY;
+    else {
+        double cost = atof(costAttribute);
+        if (cost <= 0)
+            throw cRuntimeError("Cost cannot be less than or equal to zero");
+        return cost;
+    }
 }
 
-double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link)
+double NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters)
 {
-    Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
-    if (!strcmp(linkWeightMode, "constant"))
-        return defaultLinkWeight;
-    else if (!strcmp(linkWeightMode, "dataRate")) {
-        cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
-        if (transmissionChannel) {
-            double dataRate = transmissionChannel->getNominalDatarate();
-            return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
-        }
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        if (node->routingTable && !node->routingTable->isForwardingEnabled())
+            return INFINITY;
         else
-            return defaultLinkWeight;
+            return 0;
     }
-    else if (!strcmp(linkWeightMode, "errorRate")) {
-        cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
-        if (transmissionChannel) {
-            InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
-            double bitErrorRate = transmissionChannel->getBitErrorRate();
-            double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
-            return defaultLinkWeight - log(1 - packetErrorRate);
-        }
-        else
-            return defaultLinkWeight;
-    }
-    else
-        throw cRuntimeError("Unknown linkWeightMode");
 }
 
-double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link)
+double NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
-    if (!strcmp(linkWeightMode, "constant"))
-        return defaultLinkWeight;
-    else if (!strcmp(linkWeightMode, "dataRate")) {
-#ifdef WITH_RADIO
-        // compute the packet error rate between the two interfaces using a dummy transmission
-        cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
-        IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
-        const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
-        double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
-        return dataRate != 0 ? 1 / dataRate : defaultLinkWeight;
-#else
-        throw cRuntimeError("Radio feature is disabled");
-#endif
+    if ((link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->interfaceEntry)) ||
+        (link->destinationInterfaceInfo && isWirelessInterface(link->destinationInterfaceInfo->interfaceEntry)))
+        return computeWirelessLinkWeight(link, metric, parameters);
+    else
+        return computeWiredLinkWeight(link, metric, parameters);
+}
+
+double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+{
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
+        if (!strcmp(metric, "hopCount"))
+            return 1;
+        else if (!strcmp(metric, "delay")) {
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
+            if (transmissionChannel != nullptr)
+                return transmissionChannel->getDelay().dbl();
+            else
+                return minLinkWeight;
+        }
+        else if (!strcmp(metric, "dataRate")) {
+            cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
+            if (transmissionChannel != nullptr) {
+                double dataRate = transmissionChannel->getNominalDatarate();
+                return dataRate != 0 ? 1 / dataRate : minLinkWeight;
+            }
+            else
+                return minLinkWeight;
+        }
+        else if (!strcmp(metric, "errorRate")) {
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->getTransmissionChannel());
+            if (transmissionChannel) {
+                InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
+                double bitErrorRate = transmissionChannel->getBitErrorRate();
+                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
+                return minLinkWeight - log(1 - packetErrorRate);
+            }
+            else
+                return minLinkWeight;
+        }
+        else
+            throw cRuntimeError("Unknown metric");
     }
-    else if (!strcmp(linkWeightMode, "errorRate")) {
+}
+
+double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+{
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else {
+        if (!strcmp(metric, "hopCount"))
+            return 1;
 #ifdef WITH_RADIO
-        // compute the packet error rate between the two interfaces using a dummy transmission
-        InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
-        InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-        cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-        cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
-        IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
-        IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-        const FlatReceiverBase *receiver = dynamic_cast<const FlatReceiverBase *>(receiverRadio->getReceiver());
-        if (receiver) {
+        else if (!strcmp(metric, "delay")) {
+            // compute the delay between the two interfaces using a dummy transmission
+            const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
+            const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
+            const cPacket *macFrame = new cPacket();
+            const IRadioMedium *radioMedium = receiverRadio->getMedium();
+            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+            const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            return arrival->getStartPropagationTime().dbl();
+        }
+        else if (!strcmp(metric, "dataRate")) {
+            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
+            IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
+            double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
+            return dataRate != 0 ? 1 / dataRate : minLinkWeight;
+        }
+        else if (!strcmp(metric, "errorRate")) {
+            // compute the packet error rate between the two interfaces using a dummy transmission
+            const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
+            const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
+            const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             cPacket *macFrame = new cPacket();
             macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
+            const IReceiver *receiver = receiverRadio->getReceiver();
             const IRadioMedium *medium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-            const INoise *noise = medium->getBackgroundNoise()->computeNoise(listening);
+            const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
+            const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
-            double packetErrorRate = receiver->getErrorModel()->computePacketErrorRate(snir);
+            const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
+            const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
+            double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 1;
+            delete receptionIndication;
+            delete receptionDecision;
             delete snir;
+            delete interference;
             delete reception;
-            delete noise;
             delete listening;
             delete arrival;
             delete transmission;
+            delete macFrame;
             // we want to have a maximum PER product along the path,
             // but still minimize the hop count if the PER is negligible
             return minLinkWeight - log(1 - packetErrorRate);
         }
-        return defaultLinkWeight;
-#else
-        throw cRuntimeError("Radio feature is disabled");
 #endif
+        else
+            throw cRuntimeError("Unknown metric");
     }
-    else
-        throw cRuntimeError("Unknown linkWeightMode");
 }
 
 /**
@@ -383,8 +428,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElementList wirelessElements = configuration->getChildrenByTagName("wireless");
-    for (auto & wirelessElements_i : wirelessElements) {
-        cXMLElement *wirelessElement = wirelessElements_i;
+    for (auto & wirelessElement : wirelessElements) {
         const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
         const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
         try {
@@ -404,18 +448,23 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
-    cModule *module = interfaceEntry->getInterfaceModule();
-    if (!module)
-        module = hostModule;
-    cModule *mgmtModule = module->getSubmodule("mgmt");
-    if (mgmtModule) {
+    cModule *interfaceModule = interfaceEntry->getInterfaceModule();
+    cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
+    if (mgmtModule != nullptr) {
         if (mgmtModule->hasPar("ssid"))
             return mgmtModule->par("ssid");
         else if (mgmtModule->hasPar("accessPointAddress"))
             return mgmtModule->par("accessPointAddress");
     }
+#ifdef WITH_RADIO
+    cModule *radioModule = interfaceModule->getSubmodule("radio");
+    const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
+    if (radio != nullptr) {
+        const cModule *mediumModule = dynamic_cast<const cModule *>(radio->getMedium());
+        return mediumModule->getFullName();
+    }
+#endif
 
     // default: put all such wireless interfaces on the same LAN
     return "SSID";
@@ -428,8 +477,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = nullptr;
-    for (auto & elem : linkInfo->interfaceInfos) {
-        InterfaceInfo *interfaceInfo = elem;
+    for (auto & interfaceInfo : linkInfo->interfaceInfos) {
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         IRoutingTable *routingTable = interfaceInfo->node->routingTable;
 
@@ -481,16 +529,16 @@ NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 
 NetworkConfiguratorBase::Matcher::~Matcher()
 {
-    for (auto & elem : matchers)
-        delete elem;
+    for (auto & matcher : matchers)
+        delete matcher;
 }
 
 bool NetworkConfiguratorBase::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
-    for (auto & elem : matchers)
-        if (elem->matches(s))
+    for (auto & matcher : matchers)
+        if (matcher->matches(s))
             return true;
 
     return false;
@@ -513,10 +561,10 @@ NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 
 NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
 {
-    for (auto & elem : nameMatchers)
-        delete elem;
-    for (auto & elem : towardsMatchers)
-        delete elem;
+    for (auto & nameMatcher : nameMatchers)
+        delete nameMatcher;
+    for (auto & towardsMatcher : towardsMatchers)
+        delete towardsMatcher;
 }
 
 bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfaceInfo)
@@ -525,23 +573,21 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
         return true;
 
     const char *interfaceName = interfaceInfo->interfaceEntry->getName();
-    for (auto & elem : nameMatchers)
-        if (elem->matches(interfaceName))
+    for (auto & nameMatcher : nameMatchers)
+        if (nameMatcher->matches(interfaceName))
             return true;
-
 
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
-    for (auto & elem : linkInfo->interfaceInfos) {
-        InterfaceInfo *candidateInfo = elem;
+    for (auto & candidateInfo : linkInfo->interfaceInfos) {
         cModule *candidateModule = candidateInfo->interfaceEntry->getInterfaceTable()->getHostModule();
         if (candidateModule == ownerModule)
             continue;
         std::string candidateFullPath = candidateModule->getFullPath();
         std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
-        for (auto & _j : towardsMatchers)
-            if (_j->matches(candidateShortenedFullPath.c_str()) ||
-                _j->matches(candidateFullPath.c_str()))
+        for (auto & towardsMatcher : towardsMatchers)
+            if (towardsMatcher->matches(candidateShortenedFullPath.c_str()) ||
+                towardsMatcher->matches(candidateFullPath.c_str()))
                 return true;
 
     }
@@ -557,13 +603,13 @@ void NetworkConfiguratorBase::dumpTopology(Topology& topology)
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             ASSERT(linkOut->getLocalNode() == node);
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
-            EV_INFO << "     -> " << remoteNode->module->getFullPath() << " " << linkOut->getWeight() << endl;
+            EV_INFO << "     -> " << remoteNode->module->getFullPath() << endl;
         }
         for (int j = 0; j < node->getNumInLinks(); j++) {
             Topology::LinkIn *linkIn = node->getLinkIn(j);
             ASSERT(linkIn->getLocalNode() == node);
             Node *remoteNode = (Node *)linkIn->getRemoteNode();
-            EV_INFO << "     <- " << remoteNode->module->getFullPath() << " " << linkIn->getWeight() << endl;
+            EV_INFO << "     <- " << remoteNode->module->getFullPath() << endl;
         }
     }
 }

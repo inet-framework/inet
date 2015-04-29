@@ -49,7 +49,7 @@ void FlatReceiverBase::initialize(int stage)
 std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level >= PRINT_LEVEL_TRACE)
-        stream << "errorModel = " << printObjectToString(errorModel, level - 1) 
+        stream << "errorModel = " << printObjectToString(errorModel, level - 1)
                << "energyDetection = " << energyDetection
                << "sensitivity = " << sensitivity;
     return NarrowbandReceiverBase::printToStream(stream, level);
@@ -83,13 +83,9 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
-    const ITransmission *transmission = reception->getTransmission();
-    const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
-    if (!SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference))
+    if (!SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference, snir))
         return false;
     else if (!errorModel)
         return true;

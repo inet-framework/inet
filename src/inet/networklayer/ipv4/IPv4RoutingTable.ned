@@ -54,6 +54,7 @@ simple IPv4RoutingTable like IRoutingTable
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
+        string netmaskRoutes = default("*"); // maintain netmask routes for interfaces
         bool forwarding = default(true);  // turns IP forwarding on/off
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
         bool useAdminDist = default(false);     // Use Cisco like administrative distances

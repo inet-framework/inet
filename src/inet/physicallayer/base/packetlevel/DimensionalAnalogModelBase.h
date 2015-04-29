@@ -37,7 +37,7 @@ class INET_API DimensionalAnalogModelBase : public AnalogModelBase
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ConstMapping *computeReceptionPower(const IRadio *radio, const ITransmission *transmission) const;
+    virtual const ConstMapping *computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
     virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };
