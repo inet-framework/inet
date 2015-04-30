@@ -391,10 +391,10 @@ void SCTPAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cMessage *msg = new cMessage(indicationName(SCTP_I_ESTABLISHED));
+    cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
-    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("CI");
+    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("ConnectInfo");
     establishIndication->setAssocId(assocId);
     establishIndication->setLocalAddr(localAddr);
     establishIndication->setRemoteAddr(remoteAddr);

@@ -594,9 +594,13 @@ void SCTPPeer::sendRequest(bool last)
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
+    SCTPSendCommand* sendCommand = new SCTPSendCommand;
+    sendCommand->setLast(last);
+    cmsg->setControlInfo(sendCommand);
+    
     // send SCTPMessage with SCTPSimpleMessage enclosed
     emit(sentPkSignal, msg);
-    clientSocket.send(cmsg, 0, 0.0, 0, last);
+    clientSocket.sendMsg(cmsg);
     bytesSent += numBytes;
 }
 
@@ -703,7 +707,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
         delete msg;
-        clientSocket.send(cmsg, 0, 0, 0, true);
+        clientSocket.sendMsg(cmsg);
     }
 
     if (par("numPacketsToReceive").longValue() > 0) {
