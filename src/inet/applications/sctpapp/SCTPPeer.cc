@@ -393,8 +393,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     SCTPSendCommand *cmd = new SCTPSendCommand();
                     cmd->setAssocId(id);
 
-                    //FIXME: why do it: msg->dup(); ... ; delete msg;
-                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     auto j = endToEndDelay.find(id);
                     j->second->record(simTime() - smsg->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
@@ -411,7 +410,6 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     cmsg->setKind(SCTP_C_SEND);
                     cmsg->setControlInfo(cmd);
                     packetsSent++;
-                    delete msg;
                     sendOrSchedule(cmsg);
                 }
             } else {
@@ -698,15 +696,13 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        //FIXME why do it: msg->dup(); ... ; delete msg;
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
         cPacket *cmsg = new cPacket("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        delete msg;
         clientSocket.sendMsg(cmsg);
     }
 
