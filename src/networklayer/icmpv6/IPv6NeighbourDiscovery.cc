@@ -1593,9 +1593,19 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 
                 if (rt6->isMobileRouter())
                 {
+                    // create subprefix, then send RA to the interfaces
                     rt6->createSubPrefix(prefix, prefixLength, validLifetime, preferredLifetime);
-                    IPv6Address destAddr = IPv6Address("FF02::1");
-                    createAndSendRAPacket(destAddr, ie);
+
+                    for (int i = 0; i < ift->getNumInterfaces(); i++)
+                            {
+                                InterfaceEntry *ie = ift->getInterface(i);
+
+                                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
+                                {
+                                    EV << "Create RA timer for interface" << ie->getName() << "\n";
+                                    createRATimer(ie);
+                                }
+                            }
                 }
             }
             /*- If the Prefix Information option's Valid Lifetime field is zero,
@@ -2536,7 +2546,7 @@ void IPv6NeighbourDiscovery::processRedirectPacket(IPv6Redirect *redirect,
 void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
         IPv6NDPrefixInformation& prefixInfo, InterfaceEntry* ie, bool hFlag)
 {
-    EV << "Processing Prefix Info for address auto-configuration.\n";
+    EV << "Processing Prefix Info for address auto-configuration in interface " << ie->getName() << ".\n";
     IPv6Address prefix = prefixInfo.getPrefix();
     uint prefixLength = prefixInfo.getPrefixLength();
     simtime_t preferredLifetime = prefixInfo.getPreferredLifetime();

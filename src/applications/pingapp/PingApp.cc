@@ -191,7 +191,7 @@ void PingApp::sendPingRequest()
         EV << "Starting up: destination = " << destAddr << "  source = " << srcAddr << "\n";
     }
 
-    EV << "Sending ping #" << sendSeqNo << "\n";
+    EV << "Sending ping #" << sendSeqNo << " to " << destAddr << "\n";
 
     char name[32];
     sprintf(name, "ping%ld", sendSeqNo);
