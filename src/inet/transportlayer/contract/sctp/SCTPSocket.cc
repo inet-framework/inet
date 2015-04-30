@@ -224,7 +224,7 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
     connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
 
-void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
+void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
 {
     if (oneToOne && sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED) {
         throw cRuntimeError("SCTPSocket::send(): not connected or connecting");
@@ -243,12 +243,17 @@ void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 strea
     sendCommand->setSendUnordered( (msg->getKind() == SCTP_C_SEND_ORDERED) ?
                                       COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED );
 
-     cPacket* cmsg = new cPacket("SCTP_C_SEND");
-     cmsg->setKind(SCTP_C_SEND);
-     cmsg->encapsulate(PK(msg));
-     cmsg->setControlInfo(sendCommand);
+    cPacket* cmsg = new cPacket("SCTP_C_SEND");
+    cmsg->setKind(SCTP_C_SEND);
+    cmsg->encapsulate(msg);
+    cmsg->setControlInfo(sendCommand);
 
-     sendToSCTP(cmsg);
+    sendToSCTP(cmsg);
+}
+
+void SCTPSocket::sendMsg(cMessage *cmsg)
+{
+    sendToSCTP(cmsg);
 }
 
 void SCTPSocket::sendNotification(cMessage *msg)

@@ -192,7 +192,12 @@ class INET_API SCTPSocket
     /**
      * Send data message.
      */
-    void send(cMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
+    void send(SCTPSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
+
+    /**
+     * Send data message (provided within control message).
+     */
+    void sendMsg(cMessage *cmsg);
 
     /**
      * Send notification.
