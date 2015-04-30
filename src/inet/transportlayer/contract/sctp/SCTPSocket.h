@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -1893,7 +1893,7 @@ void SCTPAssociation::pushUlp()
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
             cMessage *msg = (cMessage *)chunk->userData;
             msg->setKind(SCTP_I_DATA);
-            SCTPRcvCommand *cmd = new SCTPRcvCommand("push");
+            SCTPRcvInfo *cmd = new SCTPRcvInfo("push");
             cmd->setAssocId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);
