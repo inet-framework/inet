@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -89,11 +89,11 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     void handleTimer(cMessage *msg);
-    void sendOrSchedule(cPacket *msg);
+    void sendOrSchedule(cMessage *msg);
 
-    cPacket *makeAbortNotification(SCTPCommand *msg);
-    cPacket *makeReceiveRequest(cPacket *msg);
-    cPacket *makeDefaultReceive();
+    cMessage *makeAbortNotification(SCTPCommand *msg);
+    cMessage *makeReceiveRequest(cMessage *msg);
+    cMessage *makeDefaultReceive();
     void generateAndSend();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override

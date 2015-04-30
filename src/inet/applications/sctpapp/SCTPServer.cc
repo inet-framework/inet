@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -98,7 +98,7 @@ void SCTPServer::initialize(int stage)
     }
 }
 
-void SCTPServer::sendOrSchedule(cPacket *msg)
+void SCTPServer::sendOrSchedule(cMessage *msg)
 {
     if (delay == 0)
         send(msg, "sctpOut");
@@ -108,7 +108,7 @@ void SCTPServer::sendOrSchedule(cPacket *msg)
 
 void SCTPServer::generateAndSend()
 {
-    cPacket *cmsg = new cPacket("CMSG");
+    cPacket *cmsg = new cPacket("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -140,10 +140,10 @@ void SCTPServer::generateAndSend()
     sendOrSchedule(cmsg);
 }
 
-cPacket *SCTPServer::makeReceiveRequest(cPacket *msg)
+cMessage *SCTPServer::makeReceiveRequest(cMessage *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-    cPacket *cmsg = new cPacket("ReceiveRequest");
+    cMessage *cmsg = new cMessage("ReceiveRequest");
     SCTPSendCommand *cmd = new SCTPSendCommand("Send2");
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
@@ -154,9 +154,9 @@ cPacket *SCTPServer::makeReceiveRequest(cPacket *msg)
     return cmsg;
 }
 
-cPacket *SCTPServer::makeDefaultReceive()
+cMessage *SCTPServer::makeDefaultReceive()
 {
-    cPacket *cmsg = new cPacket("DefaultReceive");
+    cMessage *cmsg = new cMessage("DefaultReceive");
     SCTPSendCommand *cmd = new SCTPSendCommand("Send3");
     cmd->setAssocId(assocId);
     cmd->setSid(0);
@@ -166,10 +166,10 @@ cPacket *SCTPServer::makeDefaultReceive()
     return cmsg;
 }
 
-cPacket *SCTPServer::makeAbortNotification(SCTPCommand *msg)
+cMessage *SCTPServer::makeAbortNotification(SCTPCommand *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg);
-    cPacket *cmsg = new cPacket("AbortNotification");
+    cMessage *cmsg = new cMessage("SCTP_C_ABORT");
     SCTPSendCommand *cmd = new SCTPSendCommand("Send4");
     assocId = ind->getAssocId();
     cmd->setAssocId(assocId);
@@ -185,7 +185,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 {
     // TODO: there is another memory leak somewhere...
     int id = 0;
-    cPacket *cmsg;
+    cMessage *cmsg;
     if (msg->isSelfMessage())
         handleTimer(msg);
     else {
@@ -266,7 +266,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                                 i->second.sentPackets = numRequestsToSend;
                             }
 
-                            cPacket *cmsg = new cPacket("Queue");
+                            cMessage *cmsg = new cMessage("SCTP_C_QUEUE_MSGS_LIMIT");
                             SCTPInfo *qinfo = new SCTPInfo("Info1");
                             qinfo->setText(queueSize);
                             cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
@@ -278,13 +278,13 @@ void SCTPServer::handleMessage(cMessage *msg)
                         if (j->second.rcvdPackets == 0 && par("waitToClose").doubleValue() > 0) {
                             char as[5];
                             sprintf(as, "%d", assocId);
-                            cPacket *abortMsg = new cPacket(as);
+                            cMessage *abortMsg = new cMessage(as);
                             abortMsg->setKind(SCTP_I_ABORT);
                             scheduleAt(simTime() + par("waitToClose"), abortMsg);
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << assocId << "\n";
-                            cPacket *cmsg = new cPacket("ShutdownRequest");
+                            cMessage *cmsg = new cMessage("ShutdownRequest");
                             SCTPCommand *cmd = new SCTPCommand("Send5");
                             cmsg->setKind(SCTP_C_SHUTDOWN);
                             cmd->setAssocId(assocId);
@@ -301,24 +301,24 @@ void SCTPServer::handleMessage(cMessage *msg)
 
                 if (schedule == false) {
                     if (delayFirstRead > 0 && !delayFirstReadTimer->isScheduled()) {
-                        cmsg = makeReceiveRequest(PK(msg));
+                        cmsg = makeReceiveRequest(msg);
                         scheduleAt(simTime() + delayFirstRead, cmsg);
                         scheduleAt(simTime() + delayFirstRead, delayFirstReadTimer);
                     }
                     else if (readInt && firstData) {
                         firstData = false;
-                        cmsg = makeReceiveRequest(PK(msg));
+                        cmsg = makeReceiveRequest(msg);
                         scheduleAt(simTime() + par("readingInterval"), delayTimer);
                         sendOrSchedule(cmsg);
                     }
                     else if (delayFirstRead == 0 && readInt == false) {
-                        cmsg = makeReceiveRequest(PK(msg));
+                        cmsg = makeReceiveRequest(msg);
                         sendOrSchedule(cmsg);
                     }
                 }
                 else {
                     EV_INFO << simTime() << " makeReceiveRequest\n";
-                    cmsg = makeReceiveRequest(PK(msg));
+                    cmsg = makeReceiveRequest(msg);
                     sendOrSchedule(cmsg);
                 }
                 delete msg;
@@ -357,7 +357,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                                 break;
                             }
                             else {
-                                cPacket *cmsg = new cPacket("Request");
+                                cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                                 SCTPInfo *qinfo = new SCTPInfo("Info2");
                                 cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                                 qinfo->setAssocId(id);
@@ -371,12 +371,12 @@ void SCTPServer::handleMessage(cMessage *msg)
                     delete msg;
                 }
                 else {
-                    SCTPSendCommand *cmd = new SCTPSendCommand("Send6");
+                    SCTPSendCommand *cmd = new SCTPSendCommand("SCTP_C_SEND");
                     cmd->setAssocId(id);
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                     auto n = endToEndDelay.find(id);
                     n->second->record(simTime() - smsg->getCreationTime());
-                    cPacket *cmsg = new cPacket("SVData");
+                    cPacket *cmsg = new cPacket("SCTP_C_SEND");
                     bytesSent += smsg->getBitLength() / 8;
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream + 1) % outboundStreams;
@@ -400,7 +400,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 auto i = serverAssocStatMap.find(id);
                 if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").longValue() == 0) {
-                    cPacket *cmsg = new cPacket("Request");
+                    cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                     SCTPInfo *qinfo = new SCTPInfo("Info3");
                     cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                     qinfo->setAssocId(id);
@@ -475,7 +475,7 @@ void SCTPServer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-            cPacket *cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+            cMessage *cmsg = new cMessage("SCTP_C_CLOSE", SCTP_C_CLOSE);
             SCTPCommand *cmd = new SCTPCommand("Send6");
             int id = atoi(msg->getName());
             cmd->setAssocId(id);
@@ -490,7 +490,7 @@ void SCTPServer::handleTimer(cMessage *msg)
                 schedule = false;
             else
                 schedule = true;
-            sendOrSchedule(PK(msg));
+            sendOrSchedule(msg);
             break;
 
         default:
