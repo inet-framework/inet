@@ -809,7 +809,7 @@ void SCTPNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     bytesRcvd += msg->getBitLength() / 8;
 
     if (echo) {
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
         cPacket *cmsg = new cPacket("SCTP_C_SEND");
         echoedBytesSent += smsg->getBitLength() / 8;
         cmsg->encapsulate(smsg);
@@ -818,8 +818,6 @@ void SCTPNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
         else
             cmsg->setKind(SCTP_C_SEND_ORDERED);
         packetsSent++;
-        delete msg;
-        // FIXME Merge del
         clientSocket.sendMsg(cmsg);
     }
     if ((int64)(long)par("numPacketsToReceive") > 0) {

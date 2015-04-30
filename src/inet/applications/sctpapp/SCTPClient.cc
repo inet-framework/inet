@@ -329,9 +329,7 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        // FIXME why do it: msg->dup(); delete msg;
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-        delete msg;
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
         cPacket *cmsg = new cPacket("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
