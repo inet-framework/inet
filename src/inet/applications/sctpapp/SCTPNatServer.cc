@@ -105,7 +105,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     send(cmsg, "sctpOut");
     EV << "info sent to peer1\n";
 
-    cPacket *abortMsg = new cPacket("abortPeer1", SCTP_C_SHUTDOWN);
+    cMessage *abortMsg = new cMessage("abortPeer1", SCTP_C_SHUTDOWN);
     abortMsg->setControlInfo(cmd->dup());
     send(abortMsg, "sctpOut");
     EV << "abortMsg sent to peer1\n";
@@ -152,7 +152,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
 
 void SCTPNatServer::generateAndSend()
 {
-    cPacket *cmsg = new cPacket("CMSG");
+    cPacket *cmsg = new cPacket("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = (int)par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -189,7 +189,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
             case SCTP_I_PEER_CLOSED:
             case SCTP_I_ABORT: {
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
-                cPacket *cmsg = new cPacket("Notification");
+                cMessage *cmsg = new cMessage("SCTP_C_ABORT");
                 SCTPSendCommand *cmd = new SCTPSendCommand();
                 id = ind->getAssocId();
                 cmd->setAssocId(id);
@@ -220,7 +220,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
             case SCTP_I_DATA_NOTIFICATION: {
                 notifications++;
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-                cPacket *cmsg = new cPacket("Notification");
+                cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
                 SCTPSendCommand *cmd = new SCTPSendCommand();
                 id = ind->getAssocId();
                 cmd->setAssocId(id);
@@ -337,7 +337,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 id = command->getAssocId();
                 EV << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-                cPacket *cmsg = new cPacket("Request");
+                cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                 SCTPInfo *qinfo = new SCTPInfo("Info");
                 cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                 qinfo->setAssocId(id);
@@ -441,7 +441,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
 
 void SCTPNatServer::handleTimer(cMessage *msg)
 {
-    cPacket *cmsg;
+    cMessage *cmsg;
     int32 id;
 
     SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->getControlInfo());
@@ -454,7 +454,7 @@ void SCTPNatServer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-            cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+            cmsg = new cMessage("SCTP_C_CLOSE", SCTP_C_CLOSE);
             SCTPCommand *cmd = new SCTPCommand();
             id = atoi(msg->getName());
             cmd->setAssocId(id);
