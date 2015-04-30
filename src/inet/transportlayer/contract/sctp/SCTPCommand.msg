@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -52,7 +53,7 @@ enum SCTPErrorCode
 // ~SCTP uses the (app gate index, connId) pair to identify the socket).
 // connId is to be chosen by the application in the open command.
 //
-// @see ~TcpCommandCode, ~TcpStatusInd, ~SCTPOpenCommand, ~SCTPStatusInfo, SCTPMain
+// @see ~SctpCommandCode, ~SctpStatusInd, ~SCTPOpenCommand, ~SCTPStatusInfo, SCTPMain
 //
 packet SCTPCommand
 {
@@ -102,7 +103,7 @@ message SCTPErrorInfo extends SCTPCommand
 // is accepted (with the original connId), and further incoming connections
 // will be refused by ~SCTP by sending an RST segment.
 //
-// @see ~TcpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~SCTP
 //
 message SCTPOpenCommand extends SCTPCommand
 {
@@ -124,9 +125,9 @@ message SCTPOpenCommand extends SCTPCommand
 //
 // Control info to be used with the SEND command.
 //
-// @see ~TcpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~SCTP
 //
-message SCTPSendCommand extends SCTPCommand
+message SCTPSendInfo extends SCTPCommand
 {
     unsigned int prMethod;
     bool last;
@@ -137,10 +138,23 @@ message SCTPSendCommand extends SCTPCommand
 
 
 //
+// Control info to be used with the DATA command.
+//
+// @see ~SctpCommandCode, ~SCTP
+//
+message SCTPRcvInfo extends SCTPCommand
+{
+    uint32 ppid;
+    uint32 tsn;
+    uint32 cumTsn;
+}
+
+
+//
 // Sent with message kind SCTP_I_ESTABLISHED, to let the app know
 // about the local and remote IP address and port.
 //
-// @see ~TcpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~SCTP
 //
 message SCTPConnectInfo extends SCTPCommand
 {
@@ -153,10 +167,10 @@ message SCTPConnectInfo extends SCTPCommand
 
 //
 // Sent with message kind SCTP_I_STATUS, in response to command SCTP_C_STATUS.
-// For explanation of variables, see RFC 793 or SCTPStateVariables in
-// SCTPConnection.h.
+// For explanation of variables, see RFC 4960 or SCTPStateVariables in
+// SCTPAssociation.h.
 //
-// @see ~TcpStatusInd, ~TcpCommandCode, ~SCTP
+// @see ~SctpStatusInd, ~SctpCommandCode, ~SCTP
 //
 message SCTPStatusInfo extends SCTPCommand
 {
@@ -181,13 +195,6 @@ message SCTPResetInfo extends SCTPCommand
 message SCTPInfo extends SCTPCommand
 {
     int text = 0;
-}
-
-message SCTPRcvCommand extends SCTPCommand
-{
-    uint32 ppid;
-    uint32 tsn;
-    uint32 cumTsn;
 }
 
 message SCTPSendQueueAbated extends SCTPCommand

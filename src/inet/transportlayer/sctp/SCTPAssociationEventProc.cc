@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 by Irene Ruengeler
-// Copyright (C) 2009-2012 by Thomas Dreibholz
+// Copyright (C) 2009-2015 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -114,7 +114,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 
 void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
 {
-    SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
+    SCTPSendInfo *sendCommand = check_and_cast<SCTPSendInfo *>(sctpCommand);
 
     if (fsm->getState() != SCTP_S_ESTABLISHED) {
         // TD 12.03.2009: since SCTP_S_ESTABLISHED is the only case, the
@@ -292,7 +292,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
 void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand *sctpCommand)
 {
-    SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
+    SCTPSendInfo *sendCommand = check_and_cast<SCTPSendInfo *>(sctpCommand);
     if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
         EV_DEBUG << "Application tries to read from invalid stream id....\n";
     }

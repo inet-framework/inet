@@ -120,7 +120,7 @@ void SCTPServer::generateAndSend()
     msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
     cmsg->encapsulate(msg);
-    SCTPSendCommand *cmd = new SCTPSendCommand("Send1");
+    SCTPSendInfo *cmd = new SCTPSendInfo("Send1");
     cmd->setAssocId(assocId);
     cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream + 1) % outboundStreams;
@@ -144,7 +144,7 @@ cMessage *SCTPServer::makeReceiveRequest(cMessage *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("ReceiveRequest");
-    SCTPSendCommand *cmd = new SCTPSendCommand("Send2");
+    SCTPSendInfo *cmd = new SCTPSendInfo("Send2");
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -157,7 +157,7 @@ cMessage *SCTPServer::makeReceiveRequest(cMessage *msg)
 cMessage *SCTPServer::makeDefaultReceive()
 {
     cMessage *cmsg = new cMessage("DefaultReceive");
-    SCTPSendCommand *cmd = new SCTPSendCommand("Send3");
+    SCTPSendInfo *cmd = new SCTPSendInfo("Send3");
     cmd->setAssocId(assocId);
     cmd->setSid(0);
     cmd->setNumMsgs(1);
@@ -170,7 +170,7 @@ cMessage *SCTPServer::makeAbortNotification(SCTPCommand *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg);
     cMessage *cmsg = new cMessage("SCTP_C_ABORT");
-    SCTPSendCommand *cmd = new SCTPSendCommand("Send4");
+    SCTPSendInfo *cmd = new SCTPSendInfo("Send4");
     assocId = ind->getAssocId();
     cmd->setAssocId(assocId);
     cmd->setSid(ind->getSid());
@@ -329,7 +329,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 notificationsReceived--;
                 packetsRcvd++;
                 EV_INFO << simTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
-                SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
+                SCTPRcvInfo *ind = check_and_cast<SCTPRcvInfo *>(msg->removeControlInfo());
                 id = ind->getAssocId();
                 auto j = serverAssocStatMap.find(id);
                 auto k = bytesPerAssoc.find(id);
@@ -371,7 +371,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     delete msg;
                 }
                 else {
-                    SCTPSendCommand *cmd = new SCTPSendCommand("SCTP_C_SEND");
+                    SCTPSendInfo *cmd = new SCTPSendInfo("SCTP_C_SEND");
                     cmd->setAssocId(id);
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     auto n = endToEndDelay.find(id);

@@ -94,7 +94,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     smsg->setByteLength(16);
     smsg->setDataLen(16);
     cmsg->encapsulate(PK(smsg));
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(info->peer1Assoc);
     cmd->setGate(info->peer1Gate);
     cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
@@ -134,7 +134,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     smsg->setByteLength(16);
     smsg->setDataLen(16);
     cmsg->encapsulate(PK(smsg));
-    cmd = new SCTPSendCommand();
+    cmd = new SCTPSendInfo();
     cmd->setAssocId(info->peer2Assoc);
     cmd->setGate(info->peer2Gate);
     cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
@@ -163,7 +163,7 @@ void SCTPNatServer::generateAndSend()
     msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
     cmsg->encapsulate(msg);
-    SCTPSendCommand *cmd = new SCTPSendCommand("Send1");
+    SCTPSendInfo *cmd = new SCTPSendInfo("Send1");
     cmd->setAssocId(assocId);
     cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream + 1) % outboundStreams;
@@ -190,7 +190,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
             case SCTP_I_ABORT: {
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
                 cMessage *cmsg = new cMessage("SCTP_C_ABORT");
-                SCTPSendCommand *cmd = new SCTPSendCommand();
+                SCTPSendInfo *cmd = new SCTPSendInfo();
                 id = ind->getAssocId();
                 cmd->setAssocId(id);
                 cmd->setSid(ind->getSid());
@@ -221,7 +221,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 notifications++;
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-                SCTPSendCommand *cmd = new SCTPSendCommand();
+                SCTPSendInfo *cmd = new SCTPSendInfo();
                 id = ind->getAssocId();
                 cmd->setAssocId(id);
                 cmd->setSid(ind->getSid());

@@ -170,7 +170,7 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     msg->setByteLength(numBytes);
     msg->setEncaps(false);
     cmsg->encapsulate(msg);
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(serverAssocId);
 
     if (ordered)
@@ -239,7 +239,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
         case SCTP_I_ABORT: {
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
             cMessage *cmsg = new cMessage("SCTP_C_ABORT");
-            SCTPSendCommand *cmd = new SCTPSendCommand();
+            SCTPSendInfo *cmd = new SCTPSendInfo();
             id = ind->getAssocId();
             cmd->setAssocId(id);
             cmd->setSid(ind->getSid());
@@ -339,7 +339,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             notificationsReceived++;
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-            SCTPSendCommand *cmd = new SCTPSendCommand();
+            SCTPSendInfo *cmd = new SCTPSendInfo();
             id = ind->getAssocId();
             cmd->setAssocId(id);
             cmd->setSid(ind->getSid());
@@ -390,7 +390,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     delete msg;
                 }
                 else {
-                    SCTPSendCommand *cmd = new SCTPSendCommand();
+                    SCTPSendInfo *cmd = new SCTPSendInfo();
                     cmd->setAssocId(id);
 
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
@@ -507,7 +507,7 @@ void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("CMSG");
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -592,7 +592,7 @@ void SCTPPeer::sendRequest(bool last)
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
-    SCTPSendCommand* sendCommand = new SCTPSendCommand;
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(last);
     cmsg->setControlInfo(sendCommand);
     

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -398,7 +398,7 @@ void SCTPClient::sendRequest(bool last)
     if (bufferSize < 0)
         last = true;
     
-    SCTPSendCommand* sendCommand = new SCTPSendCommand;
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(last);
     sendCommand->setPrMethod(par("prMethod"));
     sendCommand->setPrValue(par("prValue"));
@@ -488,7 +488,7 @@ void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *m
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
