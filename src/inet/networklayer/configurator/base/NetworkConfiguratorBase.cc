@@ -448,14 +448,18 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-    // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
     cModule *interfaceModule = interfaceEntry->getInterfaceModule();
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
     if (mgmtModule != nullptr) {
-        if (mgmtModule->hasPar("ssid"))
+        if (mgmtModule->hasPar("ssid") && *mgmtModule->par("ssid").stringValue())
             return mgmtModule->par("ssid");
-        else if (mgmtModule->hasPar("accessPointAddress"))
+        else if (mgmtModule->hasPar("accessPointAddress") && *mgmtModule->par("accessPointAddress").stringValue())
             return mgmtModule->par("accessPointAddress");
+    }
+    cModule *agentModule = interfaceModule->getSubmodule("agent");
+    if (agentModule != nullptr) {
+        if (agentModule->hasPar("default_ssid") && *agentModule->par("default_ssid").stringValue())
+            return agentModule->par("default_ssid");
     }
 #ifdef WITH_RADIO
     cModule *radioModule = interfaceModule->getSubmodule("radio");
