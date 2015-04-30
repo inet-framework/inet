@@ -373,7 +373,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 else {
                     SCTPSendCommand *cmd = new SCTPSendCommand("SCTP_C_SEND");
                     cmd->setAssocId(id);
-                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     auto n = endToEndDelay.find(id);
                     n->second->record(simTime() - smsg->getCreationTime());
                     cPacket *cmsg = new cPacket("SCTP_C_SEND");
@@ -387,7 +387,6 @@ void SCTPServer::handleMessage(cMessage *msg)
                     cmsg->setKind(SCTP_C_SEND);
                     cmsg->setControlInfo(cmd);
                     packetsSent++;
-                    delete msg;
                     sendOrSchedule(cmsg);
                 }
                 delete ind;
