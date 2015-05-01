@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-03-16  Levente Mészáros
+
+    Moved generic dimensional data structures to common.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-02  Levente Mészáros

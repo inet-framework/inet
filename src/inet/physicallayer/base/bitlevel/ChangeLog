@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations
+    into separate subdirectories. Renamed base/layered to base/bitlevel. Moved
+    remaining base contents to base/packetlevel.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Levente Meszaros

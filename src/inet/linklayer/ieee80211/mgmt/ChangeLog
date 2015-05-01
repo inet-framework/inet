@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-03-24  Zoltan Bojthe
+
+    Fixed 802.11 mgmt packet length.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-05  Zoltan Bojthe

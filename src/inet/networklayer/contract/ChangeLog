@@ -1,5 +1,18 @@
 ====== inet-3.x ======
 
+2015-03-23  Zoltan Bojthe
+
+    Added getAddressBitLength() and getAddressByteLength() functions to
+    IL3AddressType.
+
+2015-03-18  Levente Mészáros
+
+    Moved IARP interface under contract.
+
+2015-02-10  Zoltan Bojthe
+
+    Fixed packet length in IPv6NeighborDiscovery.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe

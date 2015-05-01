@@ -50,7 +50,7 @@ void NarrowbandReceiverBase::initialize(int stage)
 std::ostream& NarrowbandReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level - 1) 
+        stream << ", modulation = " << printObjectToString(modulation, level - 1)
                << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
     return SNIRReceiverBase::printToStream(stream, level);
@@ -81,12 +81,12 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
         return true;
 }
 
-const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() == narrowbandReception->getBandwidth())
-        return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference);
+        return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference, snir);
     else
         return new ReceptionDecision(reception, new ReceptionIndication(), false, false, false);
 }

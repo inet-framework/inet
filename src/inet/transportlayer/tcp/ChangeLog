@@ -1,5 +1,21 @@
 ====== inet-3.x ======
 
+2015-04-16  Zoltan Bojthe
+
+    Refactored and cleaned up TCP header options.
+
+2015-04-13  Irene Ruengeler
+
+    Added data receive handling via indications.
+
+2015-02-19  Zoltan Bojthe
+
+    Removed obsolete SACK_AS_C_ARRAY from TCPConnection.h
+
+2015-02-12  Zoltan Bojthe
+
+    Fixed packet length.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-10  Martin Becke
@@ -63,8 +79,8 @@
 
 2015-02-09  Martin Becke
 
-    Bugfix: an issue with too small initial value of 'ssthresh' in TCP
-    Bugfix: improper window scaling in TCP
+	Bugfix: an issue with too small initial value of 'ssthresh' in TCP
+	Bugfix: improper window scaling in TCP
 
 2014-11-07  ------ inet-2.5.1 released ------
 

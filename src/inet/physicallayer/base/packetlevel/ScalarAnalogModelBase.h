@@ -30,7 +30,7 @@ class INET_API ScalarAnalogModelBase : public AnalogModelBase
     virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
 
   public:
-    virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission) const;
+    virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const;
     virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const;
 };

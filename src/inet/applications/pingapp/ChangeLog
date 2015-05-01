@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2015-03-04  Zoltan Bojthe
+
+    Fixed packet length according to standard ping behavior.
+
+2015-03-13  Andras Varga
+
+    Added missing header guards.
+
 2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-04  Levente Mészáros

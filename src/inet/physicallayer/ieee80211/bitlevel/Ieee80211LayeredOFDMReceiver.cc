@@ -365,12 +365,11 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth)
     return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const IReceptionDecision *Ieee80211LayeredOFDMReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *Ieee80211LayeredOFDMReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const IRadio *receiver = reception->getReceiver();
     const IRadioMedium *medium = receiver->getMedium();
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
