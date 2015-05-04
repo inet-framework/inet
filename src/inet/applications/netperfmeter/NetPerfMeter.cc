@@ -80,10 +80,6 @@ NetPerfMeter::NetPerfMeter()
 {
    SendingAllowed = false;
    ConnectionID   = 0;
-   ConnectTimer   = NULL;
-   StartTimer     = NULL;
-   StopTimer      = NULL;
-   ResetTimer     = NULL;
    resetStatistics();
 }
 
@@ -137,7 +133,7 @@ void NetPerfMeter::initialize()
       TransportProtocol = UDP;
    }
    else {
-      opp_error("Bad protocol setting!");
+      throw cRuntimeError("Bad protocol setting!");
    }
 
    RequestedOutboundStreams = 1;

@@ -90,46 +90,46 @@ class INET_API NetPerfMeter : public cSimpleModule
       TIMER_ON       = 7
    };
 
-   Protocol                TransportProtocol;
-   bool                    ActiveMode;
-   bool                    SendingAllowed;
-   bool                    HasFinished;
-   unsigned int            MaxMsgSize;
-   unsigned int            QueueSize;
-   double                  UnorderedMode;
-   double                  UnreliableMode;
-   bool                    DecoupleSaturatedStreams;
+   Protocol                TransportProtocol  = (Protocol)-1;
+   bool                    ActiveMode = false;
+   bool                    SendingAllowed = false;
+   bool                    HasFinished = false;
+   unsigned int            MaxMsgSize = 0;
+   unsigned int            QueueSize = 0;
+   double                  UnorderedMode = NAN;
+   double                  UnreliableMode = NAN;
+   bool                    DecoupleSaturatedStreams = false;
    simtime_t               ConnectTime;
    simtime_t               StartTime;
    simtime_t               ResetTime;
    simtime_t               StopTime;
-   cMessage*               ConnectTimer;
-   cMessage*               StartTimer;
-   cMessage*               StopTimer;
-   cMessage*               ResetTimer;
-   cMessage*               OffTimer;
-   cMessage*               OnTimer;
-   unsigned int            OnOffCycleCounter;
-   int                     MaxOnOffCycles;
+   cMessage*               ConnectTimer = nullptr;
+   cMessage*               StartTimer = nullptr;
+   cMessage*               StopTimer = nullptr;
+   cMessage*               ResetTimer = nullptr;
+   cMessage*               OffTimer = nullptr;
+   cMessage*               OnTimer = nullptr;
+   unsigned int            OnOffCycleCounter = 0;
+   int                     MaxOnOffCycles = 0;
    std::vector<NetPerfMeterTransmitTimer*>
                            TransmitTimerVector;
 
-   unsigned int            RequestedOutboundStreams;
-   unsigned int            MaxInboundStreams;
-   unsigned int            ActualOutboundStreams;
-   unsigned int            ActualInboundStreams;
+   unsigned int            RequestedOutboundStreams = 0;
+   unsigned int            MaxInboundStreams = 0;
+   unsigned int            ActualOutboundStreams = 0;
+   unsigned int            ActualInboundStreams = 0;
    std::vector<cDynamicExpression>
                            FrameRateExpressionVector;
    std::vector<cDynamicExpression>
                            FrameSizeExpressionVector;
 
    // ====== Sockets and Connection Information =============================
-   SCTPSocket*             SocketSCTP;
-   SCTPSocket*             IncomingSocketSCTP;
-   TCPSocket*              SocketTCP;
-   TCPSocket*              IncomingSocketTCP;
-   UDPSocket*              SocketUDP;
-   int                     ConnectionID;
+   SCTPSocket*             SocketSCTP = nullptr;
+   SCTPSocket*             IncomingSocketSCTP = nullptr;
+   TCPSocket*              SocketTCP = nullptr;
+   TCPSocket*              IncomingSocketTCP = nullptr;
+   UDPSocket*              SocketUDP = nullptr;
+   int                     ConnectionID = 0;
    L3Address               PrimaryPath;
 
    // ====== Trace File Handling ============================================
@@ -139,7 +139,7 @@ class INET_API NetPerfMeter : public cSimpleModule
       unsigned int StreamID;
    };
    std::vector<TraceEntry> TraceVector;                  // Frame trace from file
-   size_t                  TraceIndex;                   // Position in trace file
+   size_t                  TraceIndex = 0;                   // Position in trace file
 
    // ====== Timers =========================================================
    simtime_t               TransmissionStartTime;        // Absolute transmission start time
@@ -147,7 +147,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    simtime_t               StatisticsResetTime;          // Absolute statistics reset time
 
    // ====== Variables ======================================================
-   unsigned int            LastStreamID;                 // Stream number of last message being sent
+   unsigned int            LastStreamID = 0;                 // Stream number of last message being sent
 
    // ====== Statistics =====================================================
    simtime_t               StatisticsStartTime;          // Absolute start time of statistics recording
@@ -181,8 +181,8 @@ class INET_API NetPerfMeter : public cSimpleModule
          ReceivedDelayHistogram.clearResult();
       }
 
-      unsigned long long ReceivedBytes;
-      unsigned long long ReceivedMessages;
+      unsigned long long ReceivedBytes = 0;
+      unsigned long long ReceivedMessages = 0;
       cDoubleHistogram   ReceivedDelayHistogram;
    };
 
