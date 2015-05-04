@@ -235,7 +235,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     chunks->length = htons(sizeof(struct tlv) + chunksize);
                     cp->length = htons(sizeof(struct tlv) + chunksize);
-                    sizeKeyVector += ntohs(cp->length);
+                    sizeKeyVector += sizeof(struct tlv) + chunksize;
                     parPtr += ADD_PADDING(sizeof(struct tlv) + chunksize);
                     struct hmac_algo *hmac = (struct hmac_algo *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                     struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)vector) + sizeKeyVector);
