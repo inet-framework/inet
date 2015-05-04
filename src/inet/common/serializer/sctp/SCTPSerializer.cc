@@ -1513,8 +1513,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 chunks = (struct tlv *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int num = ntohs(chunks->length) - 4;
                                 chunk->setChunkTypesArraySize(num);
-                                unsigned char *cv = (unsigned char *)malloc(64);
-                                cp = (struct tlv *)((unsigned char *)cv);
+                                cp = (struct tlv *)((unsigned char *)malloc(64));
                                 cp->type = chunks->type;
                                 cplen = ntohs(chunks->length);
                                 cp->length = chunks->length;
