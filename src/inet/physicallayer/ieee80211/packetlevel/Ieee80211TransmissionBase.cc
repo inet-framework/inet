@@ -21,8 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211TransmissionBase::Ieee80211TransmissionBase(const IIeee80211Mode *mode) :
-    mode(mode)
+Ieee80211TransmissionBase::Ieee80211TransmissionBase(const IIeee80211Mode *mode, const Ieee80211Channel *channel) :
+    mode(mode),
+    channel(channel)
 {
 }
 

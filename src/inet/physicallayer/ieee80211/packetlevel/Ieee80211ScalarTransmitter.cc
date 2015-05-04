@@ -55,6 +55,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     W transmissionPower = transmissionRequest && !isNaN(transmissionRequest->getPower().get()) ? transmissionRequest->getPower() : power;
     bps transmissionBitrate = transmissionRequest && !isNaN(transmissionRequest->getBitrate().get()) ? transmissionRequest->getBitrate() : bitrate;
     const IIeee80211Mode *transmissionMode = ieee80211TransmissionRequest != nullptr ? ieee80211TransmissionRequest->getMode() : transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
+    const Ieee80211Channel *transmissionChannel = nullptr;
     if (!modeSet->containsMode(transmissionMode))
         throw cRuntimeError("Unsupported mode requested");
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
@@ -68,7 +69,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     int headerBitLength = transmissionMode->getHeaderMode()->getBitLength();
     int64_t payloadBitLength = macFrame->getBitLength();
-    return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode);
+    return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

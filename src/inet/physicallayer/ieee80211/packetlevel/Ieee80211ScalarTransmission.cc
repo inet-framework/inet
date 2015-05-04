@@ -21,9 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211ScalarTransmission::Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power, const IIeee80211Mode *mode) :
+Ieee80211ScalarTransmission::Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power, const IIeee80211Mode *mode, const Ieee80211Channel *channel) :
     ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate, power),
-    Ieee80211TransmissionBase(mode)
+    Ieee80211TransmissionBase(mode, channel)
 {
 }
 

@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API Ieee80211ScalarTransmission : public ScalarTransmission, public Ieee80211TransmissionBase
 {
   public:
-    Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power, const IIeee80211Mode *mode);
+    Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power, const IIeee80211Mode *mode, const Ieee80211Channel *channel);
 };
 
 } // namespace physicallayer
