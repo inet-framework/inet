@@ -1703,7 +1703,9 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         // we supppose type 1 here, the same provided in heartbeat chunks
                         const struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbac) + size_heartbeat_ack_chunk + parptr);
                         if (ntohs(hbi->type) == 1) {    // sender specific hb info
-                            int32 infoLen = ntohs(hbi->length) - 4;
+                            uint16 ilen = ntohs(hbi->length);
+                            ASSERT(ilen >= 4 && ilen == cLen - size_heartbeat_ack_chunk);
+                            uint16 infoLen = ilen - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
                             chunk->setRemoteAddr(L3Address(IPv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
