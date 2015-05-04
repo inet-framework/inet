@@ -1247,6 +1247,7 @@ opp_string NetPerfMeter::format(const char* formatString, ...)
    va_list args;
    va_start(args, formatString);
    vsnprintf((char*)&str, sizeof(str), formatString, args);
+   va_end(args);
    return(opp_string(str));
 }
 
