@@ -85,7 +85,6 @@ simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
 
         double bitrate @unit("bps");
         string opMode @enum("b","g","a","p") = default("g");
-        string wifiPreambleMode @enum("LONG","SHORT") = default("LONG"); // preamble mode; see IEEE 2007, 19.3.2
 
 		// TODO: These bitrates are not a real degrees of freedom
 		// with OFDM modulation the basic bitrate is 6Mbps

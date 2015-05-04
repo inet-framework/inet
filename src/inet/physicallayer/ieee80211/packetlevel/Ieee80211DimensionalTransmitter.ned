@@ -34,6 +34,5 @@ module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
         // TODO: remove parameters when base module is changed
         int channelNumber;
         string opMode @enum("b","g","a","p");
-        string preambleMode @enum("long", "short");
         @class(Ieee80211DimensionalTransmitter);
 }
