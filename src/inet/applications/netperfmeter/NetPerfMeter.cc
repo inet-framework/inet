@@ -146,19 +146,19 @@ void NetPerfMeter::initialize()
    DecoupleSaturatedStreams = par("decoupleSaturatedStreams");
    RequestedOutboundStreams = par("outboundStreams");
    if((RequestedOutboundStreams < 1) || (RequestedOutboundStreams > 65535)) {
-      opp_error("Invalid number of outbound streams; use range from [1, 65535]");
+      throw cRuntimeError("Invalid number of outbound streams; use range from [1, 65535]");
    }
    MaxInboundStreams = par("maxInboundStreams");
    if((MaxInboundStreams < 1) || (MaxInboundStreams > 65535)) {
-      opp_error("Invalid number of inbound streams; use range from [1, 65535]");
+      throw cRuntimeError("Invalid number of inbound streams; use range from [1, 65535]");
    }
    UnorderedMode = par("unordered");
    if((UnorderedMode < 0.0) || (UnorderedMode > 1.0)) {
-      opp_error("Bad value for unordered probability; use range from [0.0, 1.0]");
+      throw cRuntimeError("Bad value for unordered probability; use range from [0.0, 1.0]");
    }
    UnreliableMode = par("unreliable");
    if((UnreliableMode < 0.0) || (UnreliableMode > 1.0)) {
-      opp_error("Bad value for unreliable probability; use range from [0.0, 1.0]");
+      throw cRuntimeError("Bad value for unreliable probability; use range from [0.0, 1.0]");
    }
    parseExpressionVector(FrameRateExpressionVector, par("frameRateString"), ";");
    parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
@@ -167,7 +167,7 @@ void NetPerfMeter::initialize()
    if(strcmp((const char*)par("traceFile"), "") != 0) {
       std::fstream traceFile((const char*)par("traceFile"));
       if(!traceFile.good()) {
-         opp_error("Unable to load trace file");
+         throw cRuntimeError("Unable to load trace file");
       }
       while(!traceFile.eof()) {
         TraceEntry traceEntry;
@@ -614,7 +614,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
       StartTimer->setKind(TIMER_START);
       TransmissionStartTime = ConnectTime + StartTime;
       if(TransmissionStartTime < simTime()) {
-         opp_error("Connection establishment has been too late. Check startTime parameter!");
+         throw cRuntimeError("Connection establishment has been too late. Check startTime parameter!");
       }
       scheduleAt(TransmissionStartTime, StartTimer);
 
@@ -685,7 +685,7 @@ void NetPerfMeter::createAndBindSocket()
    const char* localAddress = par("localAddress");
    const int   localPort    = par("localPort");
    if( (ActiveMode == false) && (localPort == 0) ) {
-      opp_error("No local port number given in active mode!");
+      throw cRuntimeError("No local port number given in active mode!");
    }
    L3Address localAddr;
    if (*localAddress)
@@ -1102,7 +1102,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
       }
       if( (frameRate <= 0.0) &&
          ((TransportProtocol == TCP) || (TransportProtocol == UDP)) ) {
-         opp_error("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
+         throw cRuntimeError("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
       }
 
       // ====== Transmit frame ==============================================
@@ -1139,7 +1139,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
       unsigned int streamID        = TraceVector[TraceIndex].StreamID;
       if(streamID >= ActualOutboundStreams) {
         if(TransportProtocol == SCTP) {
-           opp_error("Invalid streamID in trace");
+           throw cRuntimeError("Invalid streamID in trace");
         }
         streamID = 0;
       }
