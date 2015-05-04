@@ -1478,8 +1478,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 rand = (struct random_parameter *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int rlen = ntohs(rand->length) - 4;
                                 chunk->setRandomArraySize(rlen);
-                                unsigned char *rv = (unsigned char *)malloc(64);
-                                rp = (struct random_parameter *)((unsigned char *)rv);
+                                rp = (struct random_parameter *)((unsigned char *)malloc(64));
                                 rp->type = rand->type;
                                 rplen = ntohs(rand->length);
                                 rp->length = rand->length;
