@@ -2482,8 +2482,7 @@ const IIeee80211Mode *Ieee80211Mac::getControlAnswerMode(const IIeee80211Mode *r
      * TODO: Note that we're ignoring the last sentence for now, because
      * there is not yet any manipulation here of PHY options.
      */
-    bool found = false;
-    const IIeee80211Mode *bestMode;
+    const IIeee80211Mode *bestMode = nullptr;
     const IIeee80211Mode *mode = modeSet->getSlowestMode();
     while (mode != nullptr) {
         /* If the rate:
@@ -2496,7 +2495,7 @@ const IIeee80211Mode *Ieee80211Mac::getControlAnswerMode(const IIeee80211Mode *r
          * ...then it's our best choice so far.
          */
         if (modeSet->getIsMandatory(mode) &&
-            (!found || mode->getDataMode()->getGrossBitrate() > bestMode->getDataMode()->getGrossBitrate()) &&
+            (!bestMode || mode->getDataMode()->getGrossBitrate() > bestMode->getDataMode()->getGrossBitrate()) &&
             mode->getDataMode()->getGrossBitrate() <= reqMode->getDataMode()->getGrossBitrate() &&
             // TODO: same modulation class
             typeid(*mode) == typeid(*bestMode))
@@ -2506,7 +2505,6 @@ const IIeee80211Mode *Ieee80211Mac::getControlAnswerMode(const IIeee80211Mode *r
             // rate, but we need to continue and consider all the
             // mandatory rates before we can be sure we've got the right
             // one.
-            found = true;
         }
     }
 
@@ -2520,7 +2518,7 @@ const IIeee80211Mode *Ieee80211Mac::getControlAnswerMode(const IIeee80211Mode *r
      * Either way, it is serious - we can either disobey the standard or
      * fail, and I have chosen to do the latter...
      */
-    if (!found) {
+    if (!bestMode) {
         throw cRuntimeError("Can't find response rate for reqMode. Check standard and selected rates match.");
     }
 
