@@ -31,18 +31,18 @@ namespace inet {
 class REDDropper : public AlgorithmicDropperBase
 {
   protected:
-    double wq;
-    double *minths;
-    double *maxths;
-    double *maxps;
-    double *pkrates;
-    double *count;
+    double wq = 0.0;
+    double *minths = nullptr;
+    double *maxths = nullptr;
+    double *maxps = nullptr;
+    double *pkrates = nullptr;
+    double *count = nullptr;
 
-    double avg;
+    double avg = 0.0;
     simtime_t q_time;
 
   public:
-    REDDropper() : wq(0), minths(nullptr), maxths(nullptr), maxps(nullptr), avg(0.0) {}
+    REDDropper() {}
 
   protected:
     virtual ~REDDropper();
