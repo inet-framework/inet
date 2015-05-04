@@ -354,6 +354,7 @@ SCTPStateVariables::SCTPStateVariables()
     resetChunk = nullptr;
     asconfChunk = nullptr;
     shutdownChunk = nullptr;
+    shutdownAckChunk = nullptr;
     initChunk = nullptr;
     cookieChunk = nullptr;
     sctpmsg = nullptr;
@@ -415,6 +416,31 @@ SCTPStateVariables::SCTPStateVariables()
     queueLimit = 0;
     probingTimeout = 1;
     numRequests = 0;
+    sendQueueLimit = 0;
+    swsLimit = 0;
+    authAdded = false;
+    nrSack = false;
+    gapReportLimit = 0;
+    gapListOptimizationVariant = 0;
+    smartOverfullSACKHandling = false;
+    disableReneging = false;
+    rtxMethod = 0;
+    maxBurst = 0;
+    maxBurstVariant = 0;
+    initialWindow = 0;
+    allowCMT = false;
+    cmtSendAllComparisonFunction = nullptr;
+    cmtRetransmissionVariant = 0;
+    cmtCUCVariant = 0;
+    cmtBufferSplitVariant = 0;
+    cmtBufferSplittingUsesOSB = false;
+    cmtChunkReschedulingVariant = 0;
+    cmtChunkReschedulingThreshold = 0.5;
+    cmtSmartT3Reset = true;
+    cmtSmartFastRTX = true;
+    cmtSmartReneging = false;
+    cmtSlowPathRTTUpdate = false;
+    cmtUseSFR = true;
     numMsgsReq.resize(65536);
 
     for (unsigned int i = 0; i < 65536; i++) {
@@ -537,6 +563,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     snprintf(timerName, sizeof(timerName), "SACK_TIMER of Association %d", assocId);
     SackTimer = new cMessage(timerName);
 
+    StartTesting = nullptr;
     if (sctpMain->testTimeout > 0) {
         StartTesting = new cMessage("StartTesting");
         StartTesting->setContextPointer(this);
