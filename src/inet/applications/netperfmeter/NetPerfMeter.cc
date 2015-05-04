@@ -1010,6 +1010,7 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
       frameSize =
          FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].
             doubleValue(this, "B");
+      //FIXME frameSize is unsigned. This less-than-zero comparison of an unsigned value is never true
       if(frameSize < 0) {
          frameSize = par("frameSize");
       }
