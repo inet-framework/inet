@@ -1497,8 +1497,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 hmac = (struct hmac_algo *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int num = (ntohs(hmac->length) - 4) / 2;
                                 chunk->setHmacTypesArraySize(num);
-                                unsigned char *hv = (unsigned char *)malloc(64);
-                                hp = (struct hmac_algo *)((unsigned char *)hv);
+                                hp = (struct hmac_algo *)((unsigned char *)malloc(64));
                                 hp->type = hmac->type;
                                 hplen = ntohs(hmac->length);
                                 hp->length = hmac->length;
