@@ -348,7 +348,7 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
     else if (category==CT_IMAGE)
         size = (int) rdImageResourceSize->draw();
     else
-        error("Invalid resource category");
+        throw cRuntimeError("Invalid resource category");
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
