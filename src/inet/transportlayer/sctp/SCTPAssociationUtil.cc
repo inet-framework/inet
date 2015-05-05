@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -391,10 +391,10 @@ void SCTPAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cMessage *msg = new cMessage(indicationName(SCTP_I_ESTABLISHED));
+    cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
-    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("CI");
+    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("ConnectInfo");
     establishIndication->setAssocId(assocId);
     establishIndication->setLocalAddr(localAddr);
     establishIndication->setRemoteAddr(remoteAddr);
@@ -1749,7 +1749,7 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    cPacket *cmsg = new cPacket("SCTP_I_DATA_NOTIFICATION");
+    cMessage *cmsg = new cMessage("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SCTPCommand *cmd = new SCTPCommand("notification");
     cmd->setAssocId(assocId);
@@ -1893,7 +1893,7 @@ void SCTPAssociation::pushUlp()
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
             cMessage *msg = (cMessage *)chunk->userData;
             msg->setKind(SCTP_I_DATA);
-            SCTPRcvCommand *cmd = new SCTPRcvCommand("push");
+            SCTPRcvInfo *cmd = new SCTPRcvInfo("push");
             cmd->setAssocId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);

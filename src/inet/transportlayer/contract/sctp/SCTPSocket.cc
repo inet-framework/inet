@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -224,7 +225,7 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
     connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
 
-void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
+void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
 {
     if (oneToOne && sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED) {
         throw cRuntimeError("SCTPSocket::send(): not connected or connecting");
@@ -233,7 +234,7 @@ void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 strea
         throw cRuntimeError("SCTPSocket::send(): one-to-many style socket must be listening");
     }
 
-    SCTPSendCommand *sendCommand = new SCTPSendCommand();
+    SCTPSendInfo *sendCommand = new SCTPSendInfo();
     sendCommand->setAssocId(assocId);
     sendCommand->setSid(streamId);
     sendCommand->setPrValue(prValue);
@@ -243,12 +244,17 @@ void SCTPSocket::send(cMessage *msg, int32 prMethod, double prValue, int32 strea
     sendCommand->setSendUnordered( (msg->getKind() == SCTP_C_SEND_ORDERED) ?
                                       COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED );
 
-     cPacket* cmsg = new cPacket("SCTP_C_SEND");
-     cmsg->setKind(SCTP_C_SEND);
-     cmsg->encapsulate(PK(msg));
-     cmsg->setControlInfo(sendCommand);
+    cPacket* cmsg = new cPacket("SCTP_C_SEND");
+    cmsg->setKind(SCTP_C_SEND);
+    cmsg->encapsulate(msg);
+    cmsg->setControlInfo(sendCommand);
 
-     sendToSCTP(cmsg);
+    sendToSCTP(cmsg);
+}
+
+void SCTPSocket::sendMsg(cMessage *cmsg)
+{
+    sendToSCTP(cmsg);
 }
 
 void SCTPSocket::sendNotification(cMessage *msg)
@@ -465,7 +471,7 @@ void SCTPSocket::processMessage(cMessage *msg)
 void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
 {
     cMessage *msg = new cMessage("SET_STREAM_PRIO", SCTP_C_SET_STREAM_PRIO);
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(assocId);
     cmd->setSid(stream);
     cmd->setPpid(priority);

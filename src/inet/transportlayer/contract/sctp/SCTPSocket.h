@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -192,7 +193,12 @@ class INET_API SCTPSocket
     /**
      * Send data message.
      */
-    void send(cMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
+    void send(SCTPSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
+
+    /**
+     * Send data message (provided within control message).
+     */
+    void sendMsg(cMessage *cmsg);
 
     /**
      * Send notification.
