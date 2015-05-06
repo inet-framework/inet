@@ -167,7 +167,7 @@ void HttpServer::socketDataNotificationArrived(int assocId, void *yourPtr, cPack
     // SCTP data is available => tell SCTP to forward it!
     const SCTPCommand* dataIndication = check_and_cast<const SCTPCommand*>(msg->getControlInfo());
 
-    SCTPSendCommand* command = new SCTPSendCommand("SendCommand");
+    SCTPSendInfo* command = new SCTPSendInfo("SendInfo");
     command->setAssocId(dataIndication->getAssocId());
     command->setSid(dataIndication->getSid());
     command->setNumMsgs(dataIndication->getNumMsgs());

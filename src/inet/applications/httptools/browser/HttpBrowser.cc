@@ -192,14 +192,14 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     EV_DEBUG << "Proceeding to send messages on socket " << connId << endl;
     while (!sockdata->messageQueue.empty()) {
         cMessage *msg = sockdata->messageQueue.back();
-        cPacket *pckt = check_and_cast<cPacket *>(msg);
+        SCTPSimpleMessage *pckt = check_and_cast<SCTPSimpleMessage *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
         if (!useSCTP) {
-            tcpSocket->send(msg);
+            tcpSocket->send(pckt);
         }
         else {
-            sctpSocket->send(msg);
+            sctpSocket->send(pckt);
         }
         sockdata->pending++;
     }
@@ -245,7 +245,7 @@ void HttpBrowser::socketDataNotificationArrived(int assocId, void *yourPtr, cPac
     // SCTP data is available => tell SCTP to forward it!
     const SCTPCommand* dataIndication = check_and_cast<const SCTPCommand*>(msg->getControlInfo());
 
-    SCTPSendCommand* command = new SCTPSendCommand("SendCommand");
+    SCTPSendInfo* command = new SCTPSendInfo("SendInfo");
     command->setAssocId(dataIndication->getAssocId());
     command->setSid(dataIndication->getSid());
     command->setNumMsgs(dataIndication->getNumMsgs());
