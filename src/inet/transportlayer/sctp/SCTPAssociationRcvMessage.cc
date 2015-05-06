@@ -379,7 +379,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                         sendIndicationToApp(SCTP_I_CLOSED);
                         if (state->shutdownChunk) {
                             delete state->shutdownChunk;
-                            state->shutdownChunk = NULL;
+                            state->shutdownChunk = nullptr;
                         }
                     }
                     delete shutdownAckChunk;
