@@ -155,7 +155,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
-        string objectCacheType = default("GridObjectCache");
+        string objectCacheType = default("GridObjectCache");  // TODO should be empty by default as GridObjectCache require finite space* parameters which is not always present
         double temperature @unit(K) = default(293K);
         double spaceMinX @unit(m) = default(-1m/0); // min x position of space, unconstrained by default (negative infinity)
         double spaceMinY @unit(m) = default(-1m/0); // min y position of space, unconstrained by default (negative infinity)
