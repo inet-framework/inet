@@ -234,6 +234,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 if (state->stopReading) {
                     if (state->shutdownChunk) {
                         delete state->shutdownChunk;
+                        state->shutdownChunk = nullptr;
                     }
                     delete header;
                     sendAbort();
@@ -376,7 +377,10 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     {
                         trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_ACK);
                         sendIndicationToApp(SCTP_I_CLOSED);
-                        delete state->shutdownChunk;
+                        if (state->shutdownChunk) {
+                            delete state->shutdownChunk;
+                            state->shutdownChunk = nullptr;
+                        }
                     }
                     delete shutdownAckChunk;
                 }
