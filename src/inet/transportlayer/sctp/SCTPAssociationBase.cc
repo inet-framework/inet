@@ -776,7 +776,10 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (msg == T5_ShutdownGuardTimer) {
         stopTimer(T5_ShutdownGuardTimer);
-        delete state->shutdownChunk;
+        if (state->shutdownChunk) {
+            delete state->shutdownChunk;
+            state->shutdownChunk = nullptr;
+        }
         sendIndicationToApp(SCTP_I_CONN_LOST);
         sendAbort();
         sctpMain->removeAssociation(this);
