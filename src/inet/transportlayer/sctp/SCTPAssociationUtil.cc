@@ -1749,7 +1749,7 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    cMessage *cmsg = new cMessage("SCTP_I_DATA_NOTIFICATION");
+    cPacket *cmsg = new cPacket("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SCTPCommand *cmd = new SCTPCommand("notification");
     cmd->setAssocId(assocId);
