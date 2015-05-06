@@ -20,28 +20,99 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/thenewmac/reception/Ieee80211MacChannelState.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
+#include "inet/common/RawPacket.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+
+using namespace inet::physicallayer;
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacDataPump : public cSimpleModule
+class INET_API IIeee80211MacDataPump
 {
+    protected:
+        virtual void handleBusy() = 0;
+        virtual void handleIdle() = 0;
+        virtual void handleSlot() = 0;
+        virtual void handleTxRequest(cGate *sender) = 0;
+        virtual void handleResetMac() = 0;
+        virtual void handlePhyTxStartConfirm() = 0;
+        virtual void handlePhyTxEndConfirm() = 0;
+        virtual void handlePhyDataConfirm() = 0;
+
+        virtual void emitBusy() = 0;
+        virtual void emitIdle() = 0;
+        virtual void emitSlot() = 0;
+
     public:
-        virtual void handleFromCsSignal(IIeee80211MacChannelState::ChannelState channelState) = 0;
-        virtual void handleTxrqSignal() = 0;
+        virtual void emitResetMac() = 0;
 };
 
-class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump
+/* This process sends an Mpdu to the Phy while generating &
+ * appending the Fcs.
+ */
+class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee80211MacMacProcessBase
 {
+    protected:
+        enum DataPumpState {
+            DATA_PUMP_STATE_START,
+            DATA_PUMP_STATE_TX_IDLE,
+            DATA_PUMP_STATE_SEND_CRC,
+            DATA_PUMP_STATE_SEND_FRAME,
+            DATA_PUMP_STATE_WAIT_TX_END,
+            DATA_PUMP_STATE_WAIT_TX_START,
+            DATA_PUMP_STATE_INSERT_TIMESTAMP,
+        };
+
+    protected:
+        DataPumpState state = DATA_PUMP_STATE_START;
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
+        simtime_t dTx = SIMTIME_ZERO; // dcl dTx Duration
+        const RawPacket *rawPdu = nullptr; // dcl pdu Frame
+        const Ieee80211Frame *pdu = nullptr;
+        cGate *source = nullptr; // dcl source PId
+        bps rate = bps(NaN); // dcl rate Octet
+        int k = -1; // dcl k Integer
+        int fcs = -1; // dcl fcs Crc
+        int txLength = -1; // dcl txLength Integer
+        cMessage *resetMac = nullptr; // TODO: move a base class?
+
+        cGate *backoffProcedureGate = nullptr;
+
+    public:
+        virtual ~Ieee80211MacDataPump();
+
     protected:
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+        virtual void sendOneByte();
+        virtual void sendOneCrcByte();
+        virtual void insertTimestamp();
+        virtual int getFrameType() const;
+        virtual void handlePdu(const cPacket *pdu);
+
+        // Incoming signals
+        virtual void handleBusy() override;
+        virtual void handleIdle() override;
+        virtual void handleSlot() override;
+        virtual void handleTxRequest(cGate *sender) override;
+        virtual void handleResetMac() override;
+        virtual void handlePhyTxStartConfirm() override;
+        virtual void handlePhyDataConfirm() override;
+        virtual void handlePhyTxEndConfirm() override;
+
+        // Outgoing signals
+        virtual void emitBusy() override;
+        virtual void emitIdle() override;
+        virtual void emitSlot() override;
 
     public:
-        // Signal handlers
-        void handleFromCsSignal(IIeee80211MacChannelState::ChannelState channelState);
-        virtual void handleTxrqSignal();
+        virtual void emitResetMac() override { Ieee80211MacMacProcessBase::emitResetMac(); }
 };
 
 } /* namespace ieee80211 */

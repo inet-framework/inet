@@ -24,6 +24,9 @@ package inet.linklayer.ieee80211.thenewmac.transmission;
 //
 simple Ieee80211MacDataPump
 {
+    parameters:
+        string macsortsModule = default("^.^.macsorts");
+
     gates:
         input fromCs; // [Busy, Idle, Slot]
         output fwdCs; // [Busy, Idle, Slot]
