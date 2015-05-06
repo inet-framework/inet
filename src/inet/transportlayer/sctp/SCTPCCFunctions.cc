@@ -126,7 +126,7 @@ void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
 
     if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
         while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-                (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry)))) {
+                (path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES)) {
             path->highSpeedCCThresholdIdx++;
         }
     } else {
@@ -328,7 +328,7 @@ uint32 SCTPAssociation::updateOLIA(uint32 w, const uint32 s,
 
              multiplied by MSS_r * bytes_acked.
              */
-            double numerator2 = 1 / sctpPathMap.size();
+            double numerator2 = 1.0 / (double)sctpPathMap.size();
             double denominator2 = assocMaxWndPaths.size();
             double term2 = 0.0;
             if (denominator2 > 0.0) {
