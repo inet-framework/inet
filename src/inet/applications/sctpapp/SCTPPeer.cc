@@ -146,7 +146,7 @@ void SCTPPeer::initialize(int stage)
     }
 }
 
-void SCTPPeer::sendOrSchedule(cPacket *msg)
+void SCTPPeer::sendOrSchedule(cMessage *msg)
 {
     if (delay == 0) {
         send(msg, "sctpOut");
@@ -158,7 +158,7 @@ void SCTPPeer::sendOrSchedule(cPacket *msg)
 
 void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
 {
-    cPacket *cmsg = new cPacket("CMSG");
+    cPacket *cmsg = new cPacket("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -170,7 +170,7 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     msg->setByteLength(numBytes);
     msg->setEncaps(false);
     cmsg->encapsulate(msg);
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(serverAssocId);
 
     if (ordered)
@@ -238,8 +238,8 @@ void SCTPPeer::handleMessage(cMessage *msg)
         case SCTP_I_PEER_CLOSED:
         case SCTP_I_ABORT: {
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
-            cPacket *cmsg = new cPacket("Notification");
-            SCTPSendCommand *cmd = new SCTPSendCommand();
+            cMessage *cmsg = new cMessage("SCTP_C_ABORT");
+            SCTPSendInfo *cmd = new SCTPSendInfo();
             id = ind->getAssocId();
             cmd->setAssocId(id);
             cmd->setSid(ind->getSid());
@@ -301,7 +301,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                                 i->second = numRequestsToSend;
                             }
 
-                            cPacket *cmsg = new cPacket("Queue");
+                            cMessage *cmsg = new cMessage("SCTP_C_QUEUE_MSGS_LIMIT");
                             SCTPInfo *qinfo = new SCTPInfo();
                             qinfo->setText(queueSize);
                             cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
@@ -322,7 +322,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
-                            cPacket *cmsg = new cPacket("ShutdownRequest");
+                            cMessage *cmsg = new cMessage("SCTP_C_SHUTDOWN");
                             SCTPCommand *cmd = new SCTPCommand();
                             cmsg->setKind(SCTP_C_SHUTDOWN);
                             cmd->setAssocId(serverAssocId);
@@ -338,8 +338,8 @@ void SCTPPeer::handleMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION: {
             notificationsReceived++;
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-            cPacket *cmsg = new cPacket("Notification");
-            SCTPSendCommand *cmd = new SCTPSendCommand();
+            cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
+            SCTPSendInfo *cmd = new SCTPSendInfo();
             id = ind->getAssocId();
             cmd->setAssocId(id);
             cmd->setSid(ind->getSid());
@@ -379,7 +379,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         k->second->collect(simTime() - smsg->getCreationTime());
 
                         if (i->second == 0) {
-                            cPacket *cmsg = new cPacket("Request");
+                            cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                             SCTPInfo *qinfo = new SCTPInfo();
                             cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                             qinfo->setAssocId(id);
@@ -390,16 +390,15 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     delete msg;
                 }
                 else {
-                    SCTPSendCommand *cmd = new SCTPSendCommand();
+                    SCTPSendInfo *cmd = new SCTPSendInfo();
                     cmd->setAssocId(id);
 
-                    //FIXME: why do it: msg->dup(); ... ; delete msg;
-                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     auto j = endToEndDelay.find(id);
                     j->second->record(simTime() - smsg->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
                     k->second->collect(simTime() - smsg->getCreationTime());
-                    cPacket *cmsg = new cPacket("SVData");
+                    cPacket *cmsg = new cPacket("SCTP_C_SEND");
                     bytesSent += smsg->getByteLength();
                     cmd->setPrValue(0);
                     emit(sentPkSignal, smsg);
@@ -411,7 +410,6 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     cmsg->setKind(SCTP_C_SEND);
                     cmsg->setControlInfo(cmd);
                     packetsSent++;
-                    delete msg;
                     sendOrSchedule(cmsg);
                 }
             } else {
@@ -430,7 +428,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 clientSocket.processMessage(PK(msg));
             else if (i != rcvdPacketsPerAssoc.end()) {
                 if (i->second == 0) {
-                    cPacket *cmsg = new cPacket("Request");
+                    cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                     SCTPInfo *qinfo = new SCTPInfo();
                     cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                     qinfo->setAssocId(id);
@@ -486,7 +484,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-            cPacket *cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+            cMessage *cmsg = new cMessage("CLOSE", SCTP_C_CLOSE);
             SCTPCommand *cmd = new SCTPCommand();
             int id = atoi(msg->getName());
             cmd->setAssocId(id);
@@ -508,8 +506,8 @@ void SCTPPeer::handleTimer(cMessage *msg)
 void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-    cPacket *cmsg = new cPacket("CMSG");
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    cMessage *cmsg = new cMessage("CMSG");
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -560,6 +558,7 @@ void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *s
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
+    delete status;
 }
 
 void SCTPPeer::setStatusString(const char *s)
@@ -578,7 +577,7 @@ void SCTPPeer::sendRequest(bool last)
 
     EV_INFO << "SCTPClient: sending " << numBytes << " data bytes\n";
 
-    cPacket *cmsg = new cPacket("AppData");
+    cPacket *cmsg = new cPacket("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(numBytes);
@@ -593,9 +592,13 @@ void SCTPPeer::sendRequest(bool last)
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    sendCommand->setLast(last);
+    cmsg->setControlInfo(sendCommand);
+    
     // send SCTPMessage with SCTPSimpleMessage enclosed
     emit(sentPkSignal, msg);
-    clientSocket.send(cmsg, last);
+    clientSocket.sendMsg(cmsg);
     bytesSent += numBytes;
 }
 
@@ -655,7 +658,7 @@ void SCTPPeer::socketEstablished(int, void *)
 
 void SCTPPeer::sendQueueRequest()
 {
-    cPacket *cmsg = new cPacket("Queue");
+    cMessage *cmsg = new cMessage("SCTP_C_QUEUE_MSGS_LIMIT");
     SCTPInfo *qinfo = new SCTPInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
@@ -693,16 +696,14 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        //FIXME why do it: msg->dup(); ... ; delete msg;
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-        cPacket *cmsg = new cPacket("SVData");
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
+        cPacket *cmsg = new cPacket("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        delete msg;
-        clientSocket.send(cmsg, 0, 0, 1);
+        clientSocket.sendMsg(cmsg);
     }
 
     if (par("numPacketsToReceive").longValue() > 0) {
@@ -717,7 +718,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 void SCTPPeer::shutdownReceivedArrived(int connId)
 {
     if (numRequestsToSend == 0) {
-        cPacket *cmsg = new cPacket("Request");
+        cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
         SCTPInfo *qinfo = new SCTPInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setAssocId(connId);

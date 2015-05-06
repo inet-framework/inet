@@ -999,8 +999,8 @@ bool SCTPAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SCTPSendCommand *)sctpCommand)->getSid()] =
-                ((SCTPSendCommand *)sctpCommand)->getPpid();
+            state->ssPriorityMap[((SCTPSendInfo *)sctpCommand)->getSid()] =
+                ((SCTPSendInfo *)sctpCommand)->getPpid();
             break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT:

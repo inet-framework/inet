@@ -110,7 +110,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status) override;
 
     void sendRequest(bool last = true);
-    void sendOrSchedule(cPacket *msg);
+    void sendOrSchedule(cMessage *msg);
     void generateAndSend(SCTPConnectInfo *connectInfo);
     void sendRequestArrived() override;
     void sendQueueRequest();
