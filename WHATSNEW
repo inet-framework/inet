@@ -209,6 +209,7 @@ Examples:
    packet-level, bit-level, and symbol-level simulations for model verification.
  - Also added a simple hypothetical APSK radio example that supports configurable
    packet-level, bit-level, and symbol-level simulations for model verification.
+ - Added a work in progress Wireless tutorial in the tutorials/wireless folder.
 
 INET-2.99.0 (November 2014)
 ---------------------------
