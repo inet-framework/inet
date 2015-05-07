@@ -37,8 +37,9 @@ module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
         string opMode @enum("a", "b", "g", "n", "p") = default("g");    // operation mode
-        int channelNumber = default(0);                               // initial channel number
-        carrierFrequency @unit(Hz) = default(2.412GHz);               // the center frequency of the band is automatically set by the radio
+        string bandName @enum("2.4 GHz", "5 GHz") = default("2.4 GHz"); // band name
+        int channelNumber = default(0);                                 // initial channel number within the band (TODO: this is offset by 1)
+        carrierFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(2MHz);
         antennaType = default("IsotropicAntenna");
         transmitter.bitrate = default(11Mbps);
@@ -47,8 +48,9 @@ module Ieee80211Radio extends FlatRadioBase
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
-        *.channelNumber = channelNumber;
         *.opMode = opMode;
+        *.bandName = bandName;
+        *.channelNumber = channelNumber;
         @class(Ieee80211Radio);
         @signal[radioChannelChanged](type=long);
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
