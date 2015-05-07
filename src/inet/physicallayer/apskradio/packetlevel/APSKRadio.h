@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,20 +15,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.apskradio.packetlevel;
+#ifndef __INET_APSKRADIO_H
+#define __INET_APSKRADIO_H
 
-//
-// This radio model provides a hypothetical radio that simply uses one of the
-// well-known modulations without utilizing other techiques such as forward
-// error correction, interleaving, spreading, etc. It must be used in
-// conjunction with the ~APSKScalarRadioMedium model.
-//
-// See also ~APSKScalarRadioMedium, ~ScalarAnalogModel, ~APSKScalarTransmitter,
-// and ~APSKScalarReceiver.
-//
-module APSKScalarRadio extends APSKRadio
+#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+
+namespace inet {
+
+namespace physicallayer {
+
+class INET_API APSKRadio : public FlatRadioBase
 {
-    parameters:
-        transmitterType = default("APSKScalarTransmitter");
-        receiverType = default("APSKScalarReceiver");
-}
+  public:
+    APSKRadio();
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif // ifndef __INET_APSKRADIO_H
+

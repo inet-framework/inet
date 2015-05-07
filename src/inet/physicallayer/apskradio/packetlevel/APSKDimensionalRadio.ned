@@ -17,8 +17,6 @@
 
 package inet.physicallayer.apskradio.packetlevel;
 
-import inet.physicallayer.base.packetlevel.NarrowbandRadioBase;
-
 //
 // This radio model provides a hypothetical radio that simply uses one of the
 // well-known modulations without utilizing other techiques such as forward
@@ -28,10 +26,9 @@ import inet.physicallayer.base.packetlevel.NarrowbandRadioBase;
 // See also ~APSKDimensionalRadioMedium, ~DimensionalAnalogModel,
 // ~APSKDimensionalTransmitter, and ~APSKDimensionalReceiver.
 //
-module APSKDimensionalRadio extends NarrowbandRadioBase
+module APSKDimensionalRadio extends APSKRadio
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
         transmitterType = default("APSKDimensionalTransmitter");
         receiverType = default("APSKDimensionalReceiver");
 }
