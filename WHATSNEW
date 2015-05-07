@@ -38,7 +38,14 @@ All components:
    present conditionally.
  - Moved interface classes under contract subdirectories. Moved base classes
    under base subdirectories.
- 
+ - Introduced a new script called 'inet_featuretool' in the root folder of the
+   project that allows listing/enabling/disabling specific features from the
+   command line. Use 'inet_featuretool -h' for further info.
+   The 'make makefiles' command now uses this tool to extract the required
+   command line options to generate the makefile. This means that after
+   enabling/disabling a feature you always have to invoke 'make makefiles'
+   to regenerate the makefile based on the new feature enablement state.
+
 Nodes:
  - All "node type" modules implement the INode module interface so it is now 
    possible to create networks (using the <"actualNodeType"> like INode construct) 
