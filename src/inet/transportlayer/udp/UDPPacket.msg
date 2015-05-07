@@ -32,6 +32,7 @@ enum UdpConstants{
 packet UDPPacket
 {
     @customize(true);
+    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
 
     unsigned short srcPort;
     unsigned short destPort;

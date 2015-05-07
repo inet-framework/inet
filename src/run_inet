@@ -12,7 +12,7 @@ if [ "$1" = "--valgrind" ] ; then
 fi
 
 if [ -f $DIR/INET -o -f $DIR/INET.exe ]; then
-  $VALGRIND $DIR/INET -n $DIR/../examples:$DIR $*
+  $VALGRIND $DIR/INET -n $DIR/../tutorials:$DIR/../examples:$DIR $*
 else
-  $VALGRIND opp_run -l $DIR/INET -n $DIR/../examples:$DIR $*
+  $VALGRIND opp_run -l $DIR/INET -n  $DIR/../tutorials:$DIR/../examples:$DIR $*
 fi

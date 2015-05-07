@@ -237,7 +237,7 @@ TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
 
         case TCPOPTION_SACK:
             length = b.readByte();
-            if (length > 2 && (length & 8) == 2) {
+            if (length > 2 && (length % 8) == 2) {
                 auto *option = new TCPOptionSack();
                 option->setLength(length);
                 option->setSackItemArraySize(length / 8);
