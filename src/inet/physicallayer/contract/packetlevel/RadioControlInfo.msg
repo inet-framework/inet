@@ -16,13 +16,19 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 }}
 
 namespace inet::physicallayer;
 
+cplusplus {{
+typedef IModulation * IModulationPtr;
+}}
+
+class noncobject IModulationPtr;
 class noncobject bps;
 class noncobject W;
+class noncobject Hz;
 
 //
 // Message kinds for sending commands to the radio.
@@ -37,10 +43,12 @@ enum RadioCommandCode
 //
 class ConfigureRadioCommand
 {
-    int radioMode = -1;     // new radio mode or -1 if not set.
-    W power = W(NaN);       // new default transmission power in the range (0, +infinity) or NaN if not set.
-    bps bitrate = bps(NaN); // new default bitrate in the range (0, +infinity) or NaN if not set.
-    int channelNumber = -1; // new channel number in the range [0, numChannels] or -1 if not set.
+    int radioMode = -1;                  // new radio mode or -1 if not set.
+    W power = W(NaN);                    // new default transmission power in the range (0, +infinity) or NaN if not set.
+    bps bitrate = bps(NaN);              // new default bitrate in the range (0, +infinity) or NaN if not set.
+    IModulationPtr modulation = nullptr; // new default modulation or nullptr if not set.
+    Hz carrierFrequency = Hz(NaN);       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz bandwidth = Hz(NaN);              // new default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
 //
@@ -48,8 +56,10 @@ class ConfigureRadioCommand
 //
 class TransmissionRequest
 {
-    bps bitrate = bps(NaN); // override default bitrate in the range (0, +infinity) or NaN if not set.
-    W power = W(NaN);       // override default transmission power in the range (0, +infinity) or NaN if not set.
+    W power = W(NaN);              // override default transmission power in the range (0, +infinity) or NaN if not set.
+    bps bitrate = bps(NaN);        // override default bitrate in the range (0, +infinity) or NaN if not set.
+    Hz carrierFrequency = Hz(NaN); // override default carrier frequency in the range (0, +infinity) or NaN if not set.
+    Hz bandwidth = Hz(NaN);        // override default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
 //
