@@ -163,8 +163,6 @@ const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketMo
 
 const IReceptionDecision *APSKLayeredReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
-    const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
