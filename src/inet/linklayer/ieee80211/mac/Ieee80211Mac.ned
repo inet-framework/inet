@@ -84,7 +84,7 @@ simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
         double bitrate @unit("bps");
-        string opMode @enum("b","g","a","p") = default("g");
+        string opMode @enum("a", "b", "g", "n", "p") = default("g");
 
 		// TODO: These bitrates are not a real degrees of freedom
 		// with OFDM modulation the basic bitrate is 6Mbps

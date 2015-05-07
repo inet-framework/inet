@@ -36,8 +36,8 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
+        string opMode @enum("a", "b", "g", "n", "p") = default("g");    // operation mode
         int channelNumber = default(0);                               // initial channel number
-        string opMode @enum("b","g","a","p") = default("g");          // operation mode
         carrierFrequency @unit(Hz) = default(2.412GHz);               // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(2MHz);
         antennaType = default("IsotropicAntenna");

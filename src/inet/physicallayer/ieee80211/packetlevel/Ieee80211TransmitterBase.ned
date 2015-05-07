@@ -30,7 +30,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 module Ieee80211TransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:
+        string opMode @enum("a", "b", "g", "n", "p");
         int channelNumber;
-        string opMode @enum("b","g","a","p");
         modulation = default("BPSK"); // TODO: this is simply false
 }
