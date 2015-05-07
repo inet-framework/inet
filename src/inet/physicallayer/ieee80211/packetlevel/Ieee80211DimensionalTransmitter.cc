@@ -32,20 +32,16 @@ namespace physicallayer {
 Define_Module(Ieee80211DimensionalTransmitter);
 
 Ieee80211DimensionalTransmitter::Ieee80211DimensionalTransmitter() :
-    DimensionalTransmitterBase(),
-    modeSet(nullptr),
-    mode(nullptr)
+    Ieee80211TransmitterBase(),
+    DimensionalTransmitterBase()
 {
 }
 
 void Ieee80211DimensionalTransmitter::initialize(int stage)
 {
+    Ieee80211TransmitterBase::initialize(stage);
     DimensionalTransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
-        mode = modeSet->getMode(bitrate);
-    }
+}
 
 std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& stream, int level) const
 {
@@ -56,14 +52,11 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
 
 const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
-    TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<Ieee80211TransmissionRequest *>(transmissionRequest);
-    W transmissionPower = transmissionRequest && !isNaN(transmissionRequest->getPower().get()) ? transmissionRequest->getPower() : power;
-    bps transmissionBitrate = transmissionRequest && !isNaN(transmissionRequest->getBitrate().get()) ? transmissionRequest->getBitrate() : bitrate;
-    const IIeee80211Mode *transmissionMode = ieee80211TransmissionRequest != nullptr ? ieee80211TransmissionRequest->getMode() : transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
-    const Ieee80211Channel *transmissionChannel = nullptr;
-    if (!modeSet->containsMode(transmissionMode))
-        throw cRuntimeError("Unsupported mode requested");
+    const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
+    const IIeee80211Mode *transmissionMode = computeTransmissionMode(transmissionRequest);
+    const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(transmissionRequest);
+    W transmissionPower = computeTransmissionPower(transmissionRequest);
+    bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
     const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());

@@ -29,18 +29,14 @@ namespace physicallayer {
 Define_Module(Ieee80211ScalarReceiver);
 
 Ieee80211ScalarReceiver::Ieee80211ScalarReceiver() :
-    FlatReceiverBase(),
-    modeSet(nullptr)
+    Ieee80211ReceiverBase()
 {
 }
 
-void Ieee80211ScalarReceiver::initialize(int stage)
+std::ostream& Ieee80211ScalarReceiver::printToStream(std::ostream& stream, int level) const
 {
-    FlatReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
-    }
+    stream << "Ieee80211ScalarReceiver";
+    return Ieee80211ReceiverBase::printToStream(stream, level);
 }
 
 bool Ieee80211ScalarReceiver::computeIsReceptionPossible(const ITransmission *transmission) const

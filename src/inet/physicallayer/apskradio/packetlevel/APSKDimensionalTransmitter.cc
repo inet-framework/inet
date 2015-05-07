@@ -26,8 +26,15 @@ namespace physicallayer {
 Define_Module(APSKDimensionalTransmitter);
 
 APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
-    DimensionalTransmitterBase()
+    DimensionalTransmitterBase(),
+    FlatTransmitterBase()
 {
+}
+
+void APSKDimensionalTransmitter::initialize(int stage)
+{
+    FlatTransmitterBase::initialize(stage);
+    DimensionalTransmitterBase::initialize(stage);
 }
 
 std::ostream& APSKDimensionalTransmitter::printToStream(std::ostream& stream, int level) const

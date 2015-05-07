@@ -33,6 +33,8 @@ module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
     parameters:
         // TODO: remove parameters when base module is changed
         string opMode @enum("a", "b", "g", "n", "p");
+        string bandName @enum("2.4 GHz", "5 GHz");
         int channelNumber;
+        modulation = default("BPSK"); // TODO: this is simply wrong
         @class(Ieee80211DimensionalTransmitter);
 }
