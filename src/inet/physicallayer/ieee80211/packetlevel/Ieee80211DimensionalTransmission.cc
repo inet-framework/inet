@@ -27,6 +27,13 @@ Ieee80211DimensionalTransmission::Ieee80211DimensionalTransmission(const IRadio 
 {
 }
 
+std::ostream& Ieee80211DimensionalTransmission::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211DimensionalTransmission";
+    Ieee80211TransmissionBase::printToStream(stream, level);
+    return DimensionalTransmission::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

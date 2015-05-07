@@ -27,6 +27,14 @@ Ieee80211TransmissionBase::Ieee80211TransmissionBase(const IIeee80211Mode *mode,
 {
 }
 
+std::ostream& Ieee80211TransmissionBase::printToStream(std::ostream& stream, int level) const
+{
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", mode = " << printObjectToString(mode, level - 1)
+               << ", channel = " << printObjectToString(channel, level - 1);
+    return stream;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

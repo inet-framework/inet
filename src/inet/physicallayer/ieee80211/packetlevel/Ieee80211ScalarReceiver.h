@@ -37,6 +37,8 @@ class INET_API Ieee80211ScalarReceiver : public FlatReceiverBase
 
   public:
     Ieee80211ScalarReceiver();
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

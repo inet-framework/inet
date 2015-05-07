@@ -27,6 +27,13 @@ Ieee80211ScalarTransmission::Ieee80211ScalarTransmission(const IRadio *transmitt
 {
 }
 
+std::ostream& Ieee80211ScalarTransmission::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211ScalarTransmission";
+    Ieee80211TransmissionBase::printToStream(stream, level);
+    return ScalarTransmission::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

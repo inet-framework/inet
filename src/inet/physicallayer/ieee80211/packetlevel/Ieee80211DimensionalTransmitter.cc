@@ -46,6 +46,12 @@ void Ieee80211DimensionalTransmitter::initialize(int stage)
         modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
         mode = modeSet->getMode(bitrate);
     }
+
+std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211DimensionalTransmitter";
+    Ieee80211TransmitterBase::printToStream(stream, level);
+    return DimensionalTransmitterBase::printToStream(stream, level);
 }
 
 const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const

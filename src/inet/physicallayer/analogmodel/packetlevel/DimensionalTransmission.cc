@@ -27,6 +27,19 @@ DimensionalTransmission::DimensionalTransmission(const IRadio *transmitter, cons
 {
 }
 
+std::ostream& DimensionalTransmission::printToStream(std::ostream& stream, int level) const
+{
+    stream << "DimensionalTransmission";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << ", powerDimensionSet = " << power->getDimensionSet();
+    if (level >= PRINT_LEVEL_DEBUG)
+        stream << ", powerMax = " << MappingUtils::findMax(*power)
+               << ", powerMin = " << MappingUtils::findMin(*power);
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", power = " << power;
+    return FlatTransmissionBase::printToStream(stream, level);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

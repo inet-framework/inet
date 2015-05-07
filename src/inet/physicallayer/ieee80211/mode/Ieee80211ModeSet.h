@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ModeSet
+class INET_API Ieee80211ModeSet : public IPrintableObject
 {
   protected:
     class INET_API Entry
@@ -52,6 +52,8 @@ class INET_API Ieee80211ModeSet
 
   public:
     Ieee80211ModeSet(char name, const std::vector<Entry> entries);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
     const char getName() const { return name; }
 

@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211TransmissionBase
+class INET_API Ieee80211TransmissionBase : public IPrintableObject
 {
   protected:
     const IIeee80211Mode *mode;
@@ -33,6 +33,8 @@ class INET_API Ieee80211TransmissionBase
 
   public:
     Ieee80211TransmissionBase(const IIeee80211Mode *mode, const Ieee80211Channel *channel);
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }

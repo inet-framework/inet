@@ -27,8 +27,7 @@ Define_Module(ScalarAnalogModel);
 
 std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarAnalogModel";
-    return ScalarAnalogModelBase::printToStream(stream, level);
+    return stream << "ScalarAnalogModel";
 }
 
 const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
