@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+namespace inet::physicallayer;
+
 enum Ieee80211PLCPType
 {
     OFDM = 0;
