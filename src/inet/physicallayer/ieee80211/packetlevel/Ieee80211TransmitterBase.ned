@@ -31,6 +31,7 @@ module Ieee80211TransmitterBase extends NarrowbandTransmitterBase
 {
     parameters:
         string opMode @enum("a", "b", "g", "n", "p");
+        string bandName @enum("2.4 GHz", "5 GHz");
         int channelNumber;
-        modulation = default("BPSK"); // TODO: this is simply false
+        modulation = default("BPSK"); // TODO: this is simply wrong
 }
