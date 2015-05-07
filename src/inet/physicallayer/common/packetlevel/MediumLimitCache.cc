@@ -61,6 +61,7 @@ inline double maxIgnoreNaN(double a, double b)
 }
 
 MediumLimitCache::MediumLimitCache() :
+    radioMedium(nullptr),
     minConstraintArea(Coord::NIL),
     maxConstraintArea(Coord::NIL),
     maxSpeed(mps(NaN)),
