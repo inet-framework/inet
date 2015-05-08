@@ -46,8 +46,6 @@ namespace {
 
 void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
-    unsigned int packetLength = 0;
-
     if (dynamic_cast<const Ieee80211ACKFrame *>(pkt))
     {
         const Ieee80211ACKFrame *ackFrame = static_cast<const Ieee80211ACKFrame *>(pkt);
@@ -55,7 +53,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         b.writeByte(0);
         b.writeUint16(ackFrame->getDuration().inUnit(SIMTIME_MS));
         b.writeMACAddress(ackFrame->getReceiverAddress());
-        packetLength = b.getPos();
     }
     else if (dynamic_cast<const Ieee80211RTSFrame *>(pkt))
     {
@@ -65,7 +62,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         b.writeUint16(rtsFrame->getDuration().inUnit(SIMTIME_MS));
         b.writeMACAddress(rtsFrame->getReceiverAddress());
         b.writeMACAddress(rtsFrame->getTransmitterAddress());
-        packetLength = b.getPos();
     }
     else if (dynamic_cast<const Ieee80211CTSFrame *>(pkt))
     {
@@ -74,7 +70,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         b.writeByte(0);
         b.writeUint16(ctsFrame->getDuration().inUnit(SIMTIME_MS));
         b.writeMACAddress(ctsFrame->getReceiverAddress());
-        packetLength = b.getPos();
     }
     else if (dynamic_cast<const Ieee80211DataOrMgmtFrame *>(pkt))
     {
@@ -95,7 +90,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         b.writeUint16(dataOrMgmtFrame->getSequenceNumber() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
-        packetLength = b.getPos();
 
         if (dynamic_cast<const Ieee80211DataFrameWithSNAP *>(pkt))
         {
@@ -103,7 +97,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             if (dataFrame->getFromDS() && dataFrame->getToDS())
             {
                 b.writeMACAddress(dataFrame->getAddress4());
-                packetLength = b.getPos();
             }
             if (dataFrame->getType() == ST_DATA_WITH_QOS) {
                 b.writeUint16(dataFrame->getQos());
@@ -118,7 +111,6 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 
             const cPacket *encapPacket = dataFrame->getEncapsulatedPacket();
             SerializerBase::lookupAndSerialize(encapPacket, b, c, ETHERTYPE, dataFrame->getEtherType(), b.getRemainingSize(4));   // 4 byte for store crc at end of packet
-            packetLength = b.getPos();
         }
         else if (dynamic_cast<const Ieee80211AuthenticationFrame *>(pkt))
         {
