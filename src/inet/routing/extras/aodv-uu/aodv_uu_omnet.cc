@@ -492,7 +492,7 @@ void NS_CLASS handleMessage (cMessage *msg)
     struct in_addr dest_addr;
 
     if (is_init==false)
-        opp_error ("Aodv has not been initialized ");
+        throw cRuntimeError("Aodv has not been initialized ");
     if (msg==sendMessageEvent)
     {
         // timer event

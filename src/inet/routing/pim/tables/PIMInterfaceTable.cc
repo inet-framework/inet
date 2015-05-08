@@ -52,7 +52,7 @@ PIMInterfaceTable::~PIMInterfaceTable()
 
 void PIMInterfaceTable::handleMessage(cMessage *msg)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void PIMInterfaceTable::initialize(int stage)

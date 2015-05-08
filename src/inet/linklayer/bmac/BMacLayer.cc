@@ -551,7 +551,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             }
             break;
     }
-    opp_error("Undefined event of type %d in state %d (radio mode %d, radio reception state %d, radio transmission state %d)!",
+    throw cRuntimeError("Undefined event of type %d in state %d (radio mode %d, radio reception state %d, radio transmission state %d)!",
             msg->getKind(), macState, radio->getRadioMode(), radio->getReceptionState(), radio->getTransmissionState());
 }
 

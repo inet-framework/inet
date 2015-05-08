@@ -58,7 +58,7 @@ void STPTester::handleMessage(cMessage *msg)
         scheduleAt(simTime() + checkTime, msg);
     }
     else {
-        opp_error("This module only handle selfmessages");
+        throw cRuntimeError("This module only handle selfmessages");
     }
 }
 
