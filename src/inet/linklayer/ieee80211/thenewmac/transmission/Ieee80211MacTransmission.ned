@@ -18,9 +18,27 @@
 package inet.linklayer.ieee80211.thenewmac.transmission;
 
 //
-// Block Transmission (p. 2418)
+// Block Transmission
+// IEEE Std 802.11-2012 (p. 2418)
 //
-// Includes backoff FCS generate, and timestamp insert.
+// This block does octet-level transfers of MPDUs
+// from the MAC to the PHY transmitter, generating
+// FCS fields and inserting timestamp values where
+// necessary. Process Data_Pump begins transmitting
+// when TxRequest arrives. The sender of TxRequest
+// is assumed to have done the appropriate actions
+// prior to transimtting onto the WM. If these actions
+// include performing random backoff or invoking the
+// "backoff procedure" (see 9.2.5.2), a Backoff signal
+// is sent to process Backoff.
+// At the completion of each backoff, a BkDone signal
+// is returned to the sender of the Backoff signal at
+// the correct time to send a TxRequest. The medium
+// state updates (busy, idle, slot) from Channel_State
+// are forwarded to Backoff_Procedure via Data_Pump
+// to prevent decrementing the backoff count while
+// transmitting Cts or Ack frames. This block is used
+// in both station and AP.
 //
 module Ieee80211MacTransmission
 {
@@ -28,6 +46,7 @@ module Ieee80211MacTransmission
         input csFromCs;
         inout txTxrq[2];
         inout txBkof;
+
     submodules:
         dataPump: Ieee80211MacDataPump {
             @display("p=52,50");
