@@ -37,7 +37,7 @@ echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 #cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 #cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 #cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-#cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
