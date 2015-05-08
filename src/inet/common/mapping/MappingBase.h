@@ -468,7 +468,7 @@ class INET_API Argument
 
         key_iterator(const IteratorType& other) : IteratorType(other) {};
 
-        const reference operator*() const
+        reference operator*() const
         {
             return IteratorType::operator*().first;
         }
