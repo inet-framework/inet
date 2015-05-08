@@ -19,6 +19,9 @@ package inet.linklayer.ieee80211.thenewmac.transmission;
 
 simple Ieee80211MacBackoff
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+
     gates:
         inout bkof; // To TX: [BkDone] from TX: [Backoff, Cancel]
         input fwdCs; // From Data_Pump: [Busy, Idle, Slot]

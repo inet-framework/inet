@@ -20,35 +20,70 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/thenewmac/reception/Ieee80211MacChannelState.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacBackoff : public cSimpleModule
+class INET_API IIeee80211MacBackoff
 {
+    protected:
+        virtual void handleResetMac() = 0;
+        virtual void handleBackoff(cGate *sender) = 0;
+        virtual void handleIdle() = 0;
+        virtual void handleBusy() = 0;
+        virtual void handleSlot() = 0;
+        virtual void handleCancel() = 0;
+
+        virtual void emitBkDone(int signalPar) = 0; // TODO: revise variable name
+
     public:
-        enum BkofSignal
-        {
-            BKOF_BACKOFF,
-            BKOF_BKDONE,
-            BKOF_CANCEL
-        };
-    public:
-        virtual void handleBkofSignal(BkofSignal signal) = 0;
-        virtual void handleFwdCsSignal(IIeee80211MacChannelState::ChannelState channelState) = 0;
+        virtual void emitResetMac() = 0;
 };
 
-class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff
+/* This process performs the Backoff Procedure (see 9.2.5.2),
+ * returning Done(-1) when Tx may begin, or Done(n>=0) if cancelled.
+ * Backoff(cw,-1) starts new random backoff. Backoff(x,n>=0) resumes
+ * cancelled backoff. Backoff(0,0) sends Done(-1) when WM idle.
+ */
+class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff, public Ieee80211MacMacProcessBase
 {
+    public:
+        enum BackoffState
+        {
+            BACKOFF_STATE_NO_BACKOFF,
+            BACKOFF_STATE_CHANNEL_BUSY,
+            BACKOFF_STATE_CHANNEL_IDLE
+        };
+
+    protected:
+        BackoffState state = BACKOFF_STATE_NO_BACKOFF;
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
+        int slotCnt = -1;
+        int cw = -1;
+        int cnt = -1;
+        cGate *source = nullptr;
+
     protected:
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    protected:
+        virtual void handleResetMac() override;
+        virtual void handleBackoff(cGate *sender);
+        virtual void handleIdle() override;
+        virtual void handleBusy() override;
+        virtual void handleSlot() override;
+        virtual void handleCancel() override;
+        virtual void done();
+
+        virtual void emitBkDone(int signalPar);
+
     public:
-        // Signal handlers
-        void handleBkofSignal(BkofSignal signal) override;
-        void handleFwdCsSignal(IIeee80211MacChannelState::ChannelState channelState) override;
+        virtual void emitResetMac() override { Ieee80211MacMacProcessBase::emitResetMac(); }
 };
 
 } /* namespace inet */
