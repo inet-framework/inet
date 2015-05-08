@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.99.1 (March, 2015)
+INET-2.99.1 (May, 2015)
 --------------------------
 
 This release is the next development snapshot of the upcoming INET-3.0 version.
@@ -63,7 +63,7 @@ Common:
  - On Linux, specifying --valgrind as the first argument for the opp_run script
    (or a run script in the examples folder) will start the simulation using the
    'valgrind' memory profiler.
- - Added a reusable HeatMapFigure.
+ - Added a reusable HeatMapFigure and a GaugeFigure.
  - Added a reusable DelayedInitializer to support static member initialization
    without having to worry about the initialization order.
  - Renamed ByteArrayMessage to RawPacket.
@@ -103,6 +103,7 @@ SCTP:
  - After the handshake only send heartbeats on unconfirmed paths.
  - Fixed close command handling, i.e. stop reading when the command is sent.
  - Handle SACK and NR_SACK separately and use getByteLength instead of getBitLength.
+ - Fixed several bugs.
 
 TCP:
  - Refactored and cleaned up TCP header options.
@@ -117,6 +118,10 @@ Network Layer:
    routes are maintained or not.
  - Added useAdminDist parameter to IPv4RoutingTable to enable/disable the use
    of Cisco specific routing entry extension (disabled by default).
+
+Routing:
+ - Added PIM-DM and PIM-SM implementation based on the ANSA project 
+   (http://nes.fit.vutbr.cz/ansa)   
 
 Configurator:
  - Refactored supported metrics (hopCount, delay, dataRate, errorRate) and related

@@ -1,0 +1,7 @@
+====== inet-3.x ======
+
+2015-03-12  Levente Meszaros
+
+	Added initial implementation of different cache strategies.
+
+====== inet-2.x ======

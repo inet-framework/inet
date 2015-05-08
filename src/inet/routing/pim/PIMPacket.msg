@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+//          Tamas Borbely (tomi@omnetpp.org)
+
 
 cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
@@ -30,7 +32,7 @@ namespace inet;
 //struct IPAddress;
 class noncobject IPv4Address;
 
-enum PIMPacketType 
+enum PIMPacketType
 {
    Hello = 0;
    Register = 1;
@@ -56,7 +58,7 @@ enum PIMHelloOptionType
 
 class HelloOption
 {
-	short type enum(PIMHelloOptionType);
+    short type enum(PIMHelloOptionType);
 }
 
 class HoldtimeOption extends HelloOption
@@ -94,27 +96,27 @@ class noncobject HelloOptionPtr;
 
 struct EncodedAddress
 {
-	IPv4Address IPaddress;
-	bool 		S;				
-	bool		W;				//WC bit
-	bool		R;				//RPT bit
+    IPv4Address IPaddress;
+    bool         S;
+    bool        W;                //WC bit
+    bool        R;                //RPT bit
 }
 
 // Record for Join/Prune message
 // in structure it is not possible to use dynamic arrays, iit is needed to use class
 class JoinPruneGroup
 {
-	IPv4Address 	groupAddress;
-	EncodedAddress 	joinedSourceAddress[]; 
-	EncodedAddress 	prunedSourceAddress[]; 
+    IPv4Address     groupAddress;
+    EncodedAddress     joinedSourceAddress[];
+    EncodedAddress     prunedSourceAddress[];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Header
-packet PIMPacket 
+packet PIMPacket
 {
-   short 		version = 2;
-   short 		type enum(PIMPacketType);							
+   short         version = 2;
+   short         type enum(PIMPacketType);
 }
 
 // Hello message
@@ -122,77 +124,77 @@ packet PIMPacket
 packet PIMHello extends PIMPacket
 {
     @customize(true);
-	type = Hello;
-	abstract HelloOptionPtr  options[];
+    type = Hello;
+    abstract HelloOptionPtr  options[];
 }
 
 // Join/Prune message
 // DM, SM
 packet PIMJoinPrune extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = JoinPrune;
-	IPv4Address		upstreamNeighborAddress;	
-	int				holdTime;
-	//int				numGroups;
-	JoinPruneGroup	joinPruneGroups[];
+    short             type enum(PIMPacketType) = JoinPrune;
+    IPv4Address        upstreamNeighborAddress;
+    int                holdTime;
+    //int                numGroups;
+    JoinPruneGroup    joinPruneGroups[];
 }
 
 // Assert message
 // DM, SM
 packet PIMAssert extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = Assert;
-	IPv4Address		groupAddress;
-	IPv4Address		sourceAddress;	
-	bool			R;
-	int				metric;   
-	int				metricPreference;   
+    short             type enum(PIMPacketType) = Assert;
+    IPv4Address        groupAddress;
+    IPv4Address        sourceAddress;
+    bool            R;
+    int                metric;
+    int                metricPreference;
 }
 
 // Graft message, only message send by unicast
 // DM
 packet PIMGraft extends PIMJoinPrune
 {
-	short 			type enum(PIMPacketType) = Graft;	
-	int				holdTime = 0; 
+    short             type enum(PIMPacketType) = Graft;
+    int                holdTime = 0;
 }
 
 // GraftAck message
 // DM
 packet PIMGraftAck extends PIMGraft
 {
-	short 			type enum(PIMPacketType) = GraftAck;	
+    short             type enum(PIMPacketType) = GraftAck;
 }
 
 // State Refresh message
 // DM
 packet PIMStateRefresh extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = StateRefresh;	
-	IPv4Address		groupAddress;
-	IPv4Address		sourceAddress;	
-	IPv4Address		originatorAddress;	
-	int				metric;   
-	int				metricPreference;  
-	short			maskLen;
-	short			ttl;
-	bool			P;
-	int				interval; 
+    short             type enum(PIMPacketType) = StateRefresh;
+    IPv4Address        groupAddress;
+    IPv4Address        sourceAddress;
+    IPv4Address        originatorAddress;
+    int                metric;
+    int                metricPreference;
+    short            maskLen;
+    short            ttl;
+    bool            P;
+    int                interval;
 }
 // Register message
 // SM
 packet PIMRegister extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = Register;	
-	bool			B;
-	bool			N;
+    short             type enum(PIMPacketType) = Register;
+    bool            B;
+    bool            N;
 }
 
 // Register-Stop message
 // SM
 packet PIMRegisterStop extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = RegisterStop;	
-	IPv4Address		groupAddress;
-	IPv4Address		sourceAddress;
+    short             type enum(PIMPacketType) = RegisterStop;
+    IPv4Address        groupAddress;
+    IPv4Address        sourceAddress;
 }
