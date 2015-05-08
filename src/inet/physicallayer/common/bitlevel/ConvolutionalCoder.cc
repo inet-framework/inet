@@ -415,8 +415,10 @@ void ConvolutionalCoder::updateTrellisGraph(TrellisGraphNode **trellisGraph, uns
     }
 }
 
-BitVector ConvolutionalCoder::traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **trellisGraph) const
+std::pair<BitVector, bool> ConvolutionalCoder::traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **trellisGraph, bool isTruncatedMode) const
 {
+    if (!isTruncatedMode && bestNode.symbol == -1)
+        return std::pair<BitVector, bool>(BitVector(), false);
     TrellisGraphNode path = bestNode;
     BitVector reverseDecodedBits;
     int depth = bestNode.depth;
@@ -429,7 +431,7 @@ BitVector ConvolutionalCoder::traversePath(const TrellisGraphNode& bestNode, Tre
     BitVector decodedBits;
     for (int i = reverseDecodedBits.getSize() - 1; i >= 0; i--)
         decodedBits.appendBit(reverseDecodedBits.getBit(i));
-    return decodedBits;
+    return std::pair<BitVector, bool>(decodedBits, true);
 }
 
 std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBits) const
@@ -478,19 +480,20 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
                 bestNode = currentNode;
         }
     }
-    if (!isTruncatedMode && bestNode.symbol == -1) {
-        EV_DEBUG << "None of the paths in the trellis graph lead to the all-zeros state" << endl;
-        return std::pair<BitVector, bool>(BitVector(), false);
+    std::pair<BitVector, bool> result = traversePath(bestNode, trellisGraph, isTruncatedMode);
+    if (result.second)
+    {
+        EV_DEBUG << "Recovered message: " << result.first << endl
+                 << " Number of errors: " << bestNode.numberOfErrors
+                 << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
+                 << " End state: " << bestNode.state << endl;
     }
-    BitVector decodedMsg = traversePath(bestNode, trellisGraph);
+    else
+        EV_DEBUG << "None of the paths in the trellis graph lead to the all-zeros state" << endl;
     for (int i = 0; i < numberOfStates; i++)
         delete[] trellisGraph[i];
     delete[] trellisGraph;
-    EV_DEBUG << "Recovered message: " << decodedMsg << endl
-             << " Number of errors: " << bestNode.numberOfErrors
-             << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
-             << " End state: " << bestNode.state << endl;
-    return std::pair<BitVector, bool>(decodedMsg, true);
+    return result;
 }
 
 ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode *convolutionalCode) : convolutionalCode(convolutionalCode)

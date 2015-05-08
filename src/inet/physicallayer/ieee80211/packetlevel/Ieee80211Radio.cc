@@ -15,15 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
-
-using namespace ieee80211;
 
 namespace physicallayer {
 
@@ -32,45 +29,103 @@ Define_Module(Ieee80211Radio);
 simsignal_t Ieee80211Radio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 Ieee80211Radio::Ieee80211Radio() :
-    FlatRadioBase(),
-    channelNumber(-1)
+    FlatRadioBase()
 {
 }
 
 void Ieee80211Radio::initialize(int stage)
 {
     FlatRadioBase::initialize(stage);
-    if (stage == INITSTAGE_PHYSICAL_LAYER)
-        setChannelNumber(par("channelNumber"));
+    if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        int channelNumber = par("channelNumber");
+        if (channelNumber != -1)
+            setChannelNumber(channelNumber);
+    }
 }
 
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         FlatRadioBase::handleUpperCommand(message);
-        int newChannelNumber = configureCommand->getChannelNumber();
-        if (newChannelNumber != -1)
-            setChannelNumber(newChannelNumber);
+        Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
+        if (configureCommand != nullptr) {
+            char opMode = configureCommand->getOpMode();
+            if (opMode != 0)
+                setModeSet(Ieee80211ModeSet::getModeSet(opMode));
+            Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
+            if (modeSet != nullptr)
+                setModeSet(modeSet);
+            IIeee80211Mode *mode = configureCommand->getMode();
+            if (mode != nullptr)
+                setMode(mode);
+            IIeee80211Band *band = configureCommand->getBand();
+            if (band != nullptr)
+                setBand(band);
+            Ieee80211Channel *channel = configureCommand->getChannel();
+            if (channel != nullptr)
+                setChannel(channel);
+            int newChannelNumber = configureCommand->getChannelNumber();
+            if (newChannelNumber != -1)
+                setChannelNumber(newChannelNumber);
+        }
     }
     else
         FlatRadioBase::handleUpperCommand(message);
 }
 
+void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
+{
+    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    ieee80211Transmitter->setModeSet(modeSet);
+    ieee80211Receiver->setModeSet(modeSet);
+    EV << "Changing radio mode set to " << modeSet << endl;
+    endReceptionTimer = nullptr;
+    emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
+{
+    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    ieee80211Transmitter->setMode(mode);
+    EV << "Changing radio mode to " << mode << endl;
+    endReceptionTimer = nullptr;
+    emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::setBand(const IIeee80211Band *band)
+{
+    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    ieee80211Transmitter->setBand(band);
+    ieee80211Receiver->setBand(band);
+    EV << "Changing radio band to " << band << endl;
+    endReceptionTimer = nullptr;
+    emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
+{
+    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    ieee80211Transmitter->setChannel(channel);
+    ieee80211Receiver->setChannel(channel);
+    EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
+    endReceptionTimer = nullptr;
+    emit(radioChannelChangedSignal, channel->getChannelNumber());
+    emit(listeningChangedSignal, 0);
+}
+
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
-    if (channelNumber != newChannelNumber) {
-        Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-        NarrowbandTransmitterBase *narrowbandTransmitter = const_cast<NarrowbandTransmitterBase *>(check_and_cast<const NarrowbandTransmitterBase *>(transmitter));
-        NarrowbandReceiverBase *narrowbandReceiver = const_cast<NarrowbandReceiverBase *>(check_and_cast<const NarrowbandReceiverBase *>(receiver));
-        narrowbandTransmitter->setCarrierFrequency(carrierFrequency);
-        narrowbandReceiver->setCarrierFrequency(carrierFrequency);
-        EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";
-        channelNumber = newChannelNumber;
-        endReceptionTimer = nullptr;
-        emit(radioChannelChangedSignal, newChannelNumber);
-        emit(listeningChangedSignal, 0);
-    }
+    Ieee80211TransmitterBase *ieee80211Transmitter = const_cast<Ieee80211TransmitterBase *>(check_and_cast<const Ieee80211TransmitterBase *>(transmitter));
+    Ieee80211ReceiverBase *ieee80211Receiver = const_cast<Ieee80211ReceiverBase *>(check_and_cast<const Ieee80211ReceiverBase *>(receiver));
+    ieee80211Transmitter->setChannelNumber(newChannelNumber);
+    ieee80211Receiver->setChannelNumber(newChannelNumber);
+    EV << "Changing radio channel to " << newChannelNumber << ".\n";
+    endReceptionTimer = nullptr;
+    emit(radioChannelChangedSignal, newChannelNumber);
+    emit(listeningChangedSignal, 0);
 }
 
 } // namespace physicallayer

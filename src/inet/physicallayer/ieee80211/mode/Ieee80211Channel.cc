@@ -15,26 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211PHYSERIALIZER_H
-#define __INET_IEEE80211PHYSERIALIZER_H
-
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211PLCPFrame_m.h"
-#include "inet/common/BitVector.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 
 namespace inet {
-namespace serializer {
 
-class INET_API Ieee80211PhySerializer
+namespace physicallayer {
+
+Ieee80211Channel::Ieee80211Channel(const IIeee80211Band *band, int channelNumber) :
+    band(band),
+    channelNumber(channelNumber)
 {
-    protected:
-        void writeToBitVector(unsigned char *buf, unsigned int bufSize, BitVector *bitVector) const;
+}
 
-    public:
-        bool serialize(const inet::physicallayer::Ieee80211PLCPFrame *plcpHeader, BitVector *serializedPacket) const;
-        inet::physicallayer::Ieee80211PLCPFrame *deserialize(BitVector *serializedPacket) const;
-};
+std::ostream& Ieee80211Channel::printToStream(std::ostream& stream, int level) const
+{
+    stream << "Ieee80211Channel";
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", band = " << printObjectToString(band, level - 1)
+               << ", channelNumber = " << channelNumber;
+    return stream;
+}
 
-} /* namespace serializer */
-} /* namespace inet */
+} // namespace physicallayer
 
-#endif /* __INET_IEEE80211PHYSERIALIZER_H */
+} // namespace inet
+

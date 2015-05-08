@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,32 +15,34 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
-#define __INET_APSKDIMENSIONALTRANSMITTER_H
+#ifndef __INET_IEEE80211CHANNEL_H
+#define __INET_IEEE80211CHANNEL_H
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDimensionalTransmitter : public DimensionalTransmitterBase, public FlatTransmitterBase
+class INET_API Ieee80211Channel : public IPrintableObject
 {
   protected:
-    void initialize(int stage);
+    const IIeee80211Band *band;
+    int channelNumber;
 
   public:
-    APSKDimensionalTransmitter();
+    Ieee80211Channel(const IIeee80211Band *band, int channelNumber);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
+    virtual const IIeee80211Band *getBand() const { return band; }
+    virtual int getChannelNumber() const { return channelNumber; }
+    virtual Hz getCenterFrequency() const { return band->getCenterFreqency(channelNumber); }
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKDIMENSIONALTRANSMITTER_H
+#endif // ifndef __INET_IEEE80211CHANNEL_H
 

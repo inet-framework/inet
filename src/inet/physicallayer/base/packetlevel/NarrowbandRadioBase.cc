@@ -34,18 +34,17 @@ NarrowbandRadioBase::NarrowbandRadioBase() :
 void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         Radio::handleUpperCommand(message);
-        // TODO: add command subclass
-//        Hz newModulation = configureCommand->getModulation();
-//        if (newModulation != nullptr)
-//            setModulation(newModulation);
-//        Hz newCarrierFrequency = configureCommand->getCarrierFrequency();
-//        if (!isNaN(newCarrierFrequency.get()))
-//            setCarrierFrequency(newCarrierFrequency);
-//        Hz newBandwidth = configureCommand->getBandwidth();
-//        if (!isNaN(newBandwidth.get()))
-//            setBandwidth(newBandwidth);
+        ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
+        const IModulation *newModulation = configureCommand->getModulation();
+        if (newModulation != nullptr)
+            setModulation(newModulation);
+        Hz newCarrierFrequency = configureCommand->getCarrierFrequency();
+        if (!isNaN(newCarrierFrequency.get()))
+            setCarrierFrequency(newCarrierFrequency);
+        Hz newBandwidth = configureCommand->getBandwidth();
+        if (!isNaN(newBandwidth.get()))
+            setBandwidth(newBandwidth);
     }
     else
         Radio::handleUpperCommand(message);

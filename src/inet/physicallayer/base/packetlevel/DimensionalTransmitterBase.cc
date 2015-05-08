@@ -15,29 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 DimensionalTransmitterBase::DimensionalTransmitterBase() :
-    FlatTransmitterBase(),
     interpolationMode((Mapping::InterpolationMethod)-1)
 {
 }
 
 void DimensionalTransmitterBase::initialize(int stage)
 {
-    FlatTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
+        cModule *module = dynamic_cast<cModule *>(this);
         // TODO: factor parsing?
         // dimensions
-        const char *dimensionsString = par("dimensions");
+        const char *dimensionsString = module->par("dimensions");
         cStringTokenizer tokenizer(dimensionsString);
         while (tokenizer.hasMoreTokens()) {
             const char *dimensionString = tokenizer.nextToken();
@@ -49,7 +48,7 @@ void DimensionalTransmitterBase::initialize(int stage)
                 throw cRuntimeError("Unknown dimension");
         }
         // interpolation mode
-        const char *interpolationModeString = par("interpolationMode");
+        const char *interpolationModeString = module->par("interpolationMode");
         if (!strcmp("linear", interpolationModeString))
             interpolationMode = Mapping::LINEAR;
         else if (!strcmp("sample-hold", interpolationModeString))
@@ -57,7 +56,7 @@ void DimensionalTransmitterBase::initialize(int stage)
         else
             throw cRuntimeError("Unknown interpolation mode: '%s'", interpolationModeString);
         // time gains
-        cStringTokenizer timeGainsTokenizer(par("timeGains"));
+        cStringTokenizer timeGainsTokenizer(module->par("timeGains"));
         while (timeGainsTokenizer.hasMoreTokens()) {
             char *end;
             const char *timeString = timeGainsTokenizer.nextToken();
@@ -84,7 +83,7 @@ void DimensionalTransmitterBase::initialize(int stage)
             timeGains.push_back(TimeGainEntry(timeUnit, time, gain));
         }
         // frequency gains
-        cStringTokenizer frequencyGainsTokenizer(par("frequencyGains"));
+        cStringTokenizer frequencyGainsTokenizer(module->par("frequencyGains"));
         while (frequencyGainsTokenizer.hasMoreTokens()) {
             char *end;
             const char *frequencyString = frequencyGainsTokenizer.nextToken();
@@ -118,9 +117,9 @@ std::ostream& DimensionalTransmitterBase::printToStream(std::ostream& stream, in
     if (level >= PRINT_LEVEL_TRACE)
         stream << ", interpolationMode = " << interpolationMode
                << ", dimensions = " << dimensions ;
-               // TODO: << "timeGains = " << timeGains 
+               // TODO: << "timeGains = " << timeGains
                // TODO: << "frequencyGains = " << frequencyGains ;
-    return FlatTransmitterBase::printToStream(stream, level);
+    return stream;
 }
 
 ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const

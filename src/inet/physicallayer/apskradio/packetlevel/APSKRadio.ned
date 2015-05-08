@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2014 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,20 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace inet::physicallayer;
+package inet.physicallayer.apskradio.packetlevel;
 
-enum Ieee80211PLCPType
-{
-    OFDM = 0;
-    DSSS = 1;
-    Infrared = 2;
-    FHSS = 3;
-    HRDSSS = 4;
-    ERP = 5;
-    HT = 6;
-}
+import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
-packet Ieee80211PLCPFrame
+//
+// This radio model provides a hypothetical radio that simply uses one of the
+// well-known modulations without utilizing other techiques such as forward
+// error correction, interleaving, spreading, etc.
+//
+// See also ~APSKScalarRadio, and ~APSKD.
+//
+module APSKRadio extends FlatRadioBase
 {
-    short type @enum(Ieee80211PLCPType);
+    parameters:
+        antennaType = default("IsotropicAntenna");
+        @class(APSKRadio);
 }

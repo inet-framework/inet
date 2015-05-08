@@ -15,48 +15,50 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211RADIO_H
-#define __INET_IEEE80211RADIO_H
+#ifndef __INET_IEEE80211TRANSMITTERBASE_H
+#define __INET_IEEE80211TRANSMITTERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public FlatRadioBase
+class INET_API Ieee80211TransmitterBase : public FlatTransmitterBase
 {
-  public:
-    /**
-     * This signal is emitted every time the radio channel changes.
-     * The signal value is the new radio channel.
-     */
-    static simsignal_t radioChannelChangedSignal;
+  protected:
+    const Ieee80211ModeSet *modeSet;
+    const IIeee80211Mode *mode;
+    const IIeee80211Band *band;
+    const Ieee80211Channel *channel;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
-    virtual void handleUpperCommand(cMessage *message) override;
+    virtual const IIeee80211Mode *computeTransmissionMode(const TransmissionRequest *transmissionRequest) const;
+    virtual const Ieee80211Channel *computeTransmissionChannel(const TransmissionRequest *transmissionRequest) const;
+    virtual W computeTransmissionPower(const TransmissionRequest *transmissionRequest) const;
 
   public:
-    Ieee80211Radio();
+    Ieee80211TransmitterBase();
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setMode(const IIeee80211Mode *mode);
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
-    virtual void setChannelNumber(int newChannelNumber);
+    virtual void setChannelNumber(int channelNumber);
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211RADIO_H
+#endif // ifndef __INET_IEEE80211TRANSMITTERBASE_H
 

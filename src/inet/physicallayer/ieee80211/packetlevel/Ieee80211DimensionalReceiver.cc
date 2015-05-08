@@ -29,18 +29,14 @@ namespace physicallayer {
 Define_Module(Ieee80211DimensionalReceiver);
 
 Ieee80211DimensionalReceiver::Ieee80211DimensionalReceiver() :
-    FlatReceiverBase(),
-    modeSet(nullptr)
+    Ieee80211ReceiverBase()
 {
 }
 
-void Ieee80211DimensionalReceiver::initialize(int stage)
+std::ostream& Ieee80211DimensionalReceiver::printToStream(std::ostream& stream, int level) const
 {
-    FlatReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
-    }
+    stream << "Ieee80211DimensionalReceiver";
+    return Ieee80211ReceiverBase::printToStream(stream, level);
 }
 
 bool Ieee80211DimensionalReceiver::computeIsReceptionPossible(const ITransmission *transmission) const

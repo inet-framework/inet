@@ -190,7 +190,7 @@ double Ieee80211YansErrorModel::getSuccessRate(const IIeee80211Mode* mode, unsig
     double payloadSuccessRate = 0;
     if (dynamic_cast<const Ieee80211OFDMMode *>(mode))
     {
-        const Ieee80211OFDMMode *ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode);
+        const Ieee80211OFDMMode *ofdmMode = static_cast<const Ieee80211OFDMMode *>(mode);
         headerSuccessRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
                                                               ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
                                                               headerBitLength,
@@ -206,13 +206,13 @@ double Ieee80211YansErrorModel::getSuccessRate(const IIeee80211Mode* mode, unsig
     }
     else if (dynamic_cast<const Ieee80211DsssMode *>(mode))
     {
-        const Ieee80211DsssMode *dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode);
+        const Ieee80211DsssMode *dsssMode = static_cast<const Ieee80211DsssMode *>(mode);
         headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
         payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
     }
     else if (dynamic_cast<const Ieee80211HrDsssMode *>(mode))
     {
-        const Ieee80211HrDsssMode *hrDsssMode = dynamic_cast<const Ieee80211HrDsssMode *>(mode);
+        const Ieee80211HrDsssMode *hrDsssMode = static_cast<const Ieee80211HrDsssMode *>(mode);
         headerSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getHeaderMode()->getNetBitrate(), headerBitLength, snr);
         payloadSuccessRate = getDSSSAndHrDSSSChunkSuccessRate(hrDsssMode->getDataMode()->getNetBitrate(), payloadBitLength, snr);
     }

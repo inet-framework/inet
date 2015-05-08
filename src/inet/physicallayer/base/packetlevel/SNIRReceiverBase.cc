@@ -58,8 +58,6 @@ bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
-    const ITransmission *transmission = reception->getTransmission();
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference, snir);

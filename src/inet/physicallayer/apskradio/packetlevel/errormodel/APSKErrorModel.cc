@@ -46,14 +46,14 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir) const
 double APSKErrorModel::computeBitErrorRate(const ISNIR *snir) const
 {
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const APSKModulationBase *modulation = dynamic_cast<const APSKModulationBase *>(flatTransmission->getModulation());
+    const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
 double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
 {
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const APSKModulationBase *modulation = dynamic_cast<const APSKModulationBase *>(flatTransmission->getModulation());
+    const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateSER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
