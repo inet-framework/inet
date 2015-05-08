@@ -17,7 +17,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.node.inet;
+package inet.node.tun;
 
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
