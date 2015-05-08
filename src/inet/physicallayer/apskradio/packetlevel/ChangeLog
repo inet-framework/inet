@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-03  Levente Mészáros
 
     Added level parameter to printToStream functions.
@@ -19,8 +21,6 @@
     Consistently renamed packet level and bit level implementations into
     separate subdirectories. Renamed apsk/layered to apskradio/bitlevel. Moved
     remaining apsk contents to apsk/packetlevel.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe
 

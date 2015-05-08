@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-16  Zoltan Bojthe
 
     Refactored and cleaned up TCP header options
@@ -7,8 +9,6 @@
 2015-03-12  Zoltan Bojthe
 
     Fixed TCP/UDP checksum.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe
 

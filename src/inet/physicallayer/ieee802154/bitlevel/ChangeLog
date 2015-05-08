@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-03-18  Levente Mészáros
 
     802.15.4 UWBIR: Moved under bitlevel, because it actually simulates the

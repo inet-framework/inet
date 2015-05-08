@@ -1,11 +1,11 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-13  Zoltan Bojthe
 
     Added useAdminDist parameter to IPv6RoutingTable enable/disable the use of
     Cisco specific routing entry extension (disabled by default).
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-02  Till Steinbach
 

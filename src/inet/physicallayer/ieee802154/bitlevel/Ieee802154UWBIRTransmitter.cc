@@ -73,7 +73,7 @@ simtime_t Ieee802154UWBIRTransmitter::getThdr() const
         default:
             switch (cfg.prf) {
                 case Ieee802154UWBIRMode::NOMINAL_4_M:
-                    //error("This optional mode is not implemented.");
+                    //throw cRuntimeError("This optional mode is not implemented.");
                     return 0;
                     break;
                 case Ieee802154UWBIRMode::NOMINAL_16_M:

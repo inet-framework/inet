@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-15  Levente Mészáros
 
     Fixed noise and snir computation for IdealAnalogModel.
@@ -21,8 +23,6 @@
 
     Consistently renamed packet level and bit level implementations into
     separate subdirectories. Renamed ideal to idealradio.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe
 

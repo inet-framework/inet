@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+// Authors: Tomas Prochazka (xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz)
+//          Tamas Borbely (tomi@omnetpp.org)
 
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"

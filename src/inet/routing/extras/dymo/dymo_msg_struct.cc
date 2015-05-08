@@ -325,7 +325,7 @@ std::string DYMO_element::detailedInfo() const
         break;
     case DYMO_UERR_TYPE:
         uerr_type = (Dymo_UERR*) (this);
-        out << "type  : RERR ttl : "<< ttl << "\n";
+        out << "type  : UERR ttl : "<< ttl << "\n";
         break;
     case DYMO_HELLO_TYPE:
         hello_type = (Dymo_HELLO*) (this);

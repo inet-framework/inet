@@ -556,7 +556,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             break;
 
         default:
-            opp_error("Unknown mac state: %d", macState);
+            throw cRuntimeError("Unknown mac state: %d", macState);
             break;
     }
 }

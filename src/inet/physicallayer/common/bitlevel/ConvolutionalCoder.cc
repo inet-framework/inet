@@ -84,9 +84,9 @@ ShortBitVector ConvolutionalCoder::inputSymbolToOutputSymbol(const ShortBitVecto
     int shift = 0;
     for (int i = inputSymbol.getSize() - 1; i >= 0; i--) {
         ShortBitVector shiftRegisters;
-        shiftRegisters.appendBit(i >= inputSymbol.getSize() ? false : inputSymbol.getBit(i));
+        shiftRegisters.appendBit(inputSymbol.getBit(i));
         for (int k = shift; k < shift + memorySizes[i]; k++)
-            shiftRegisters.appendBit(k >= state.getSize() ? false : state.getBit(k));
+            shiftRegisters.appendBit((unsigned int)k >= state.getSize() ? false : state.getBit(k));
         const std::vector<ShortBitVector>& row = transferFunctionMatrix.at(i);
         for (unsigned int j = 0; j < row.size(); j++) {
             const ShortBitVector& generatorPolynomial = row.at(j);

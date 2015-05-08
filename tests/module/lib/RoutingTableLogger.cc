@@ -115,7 +115,7 @@ void RoutingTableLogger::processCommand(const cXMLElement &command)
   {
     const char *nodes = command.getAttribute("nodes");
     if (!nodes)
-        error("missing @nodes attribute");
+        throw cRuntimeError("missing @nodes attribute");
 
     DestFilter filter(command.getAttribute("dest"));
 
@@ -125,7 +125,7 @@ void RoutingTableLogger::processCommand(const cXMLElement &command)
         const char *nodeName = tokenizer.nextToken();
         cModule *node = getModuleByPath(nodeName);
         if (!node)
-            error("module '%s' not found at %s", nodeName, command.getSourceLocation());
+            throw cRuntimeError("module '%s' not found at %s", nodeName, command.getSourceLocation());
 
         IRoutingTable *rt = findRoutingTableInNode(node);
         dumpRoutes(node, rt, filter);

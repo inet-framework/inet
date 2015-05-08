@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-03  Levente Mészáros
 
     Added level parameter to printToStream functions.
@@ -9,8 +11,6 @@
     Consistently renamed packet level and bit level implementations into
     separate subdirectories. Moved apsk specific errormodels under
     apskradio/bitlevel and apskradio/packetlevel.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Levente Meszaros
 

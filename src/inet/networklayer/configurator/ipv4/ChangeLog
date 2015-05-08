@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-23  Levente Mészáros
 
     Refactored supported metrics (hopCount, delay, dataRate, errorRate) and
@@ -16,8 +18,6 @@
 2015-04-22  Levente Mészáros
 
     Added autoroute element to IPv4NetworkConfigurator, see documentation.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-06  Zoltan Bojthe
 

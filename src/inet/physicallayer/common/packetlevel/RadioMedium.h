@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include "inet/common/IntervalTree.h"
-#include "inet/common/TrailFigure.h"
+#include "inet/common/figures/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
