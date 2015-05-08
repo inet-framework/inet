@@ -52,8 +52,8 @@ class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModul
     Hz carrierFrequency;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
     virtual int computePaddingLength(BitVector *bits) const;
     virtual const APSKPhyFrame *createPhyFrame(const cPacket *macFrame) const;
@@ -78,7 +78,7 @@ class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModul
     virtual W getMaxPower() const override { return power; }
     virtual m getMaxCommunicationRange() const override { return m(NaN); }
     virtual m getMaxInterferenceRange() const override { return m(NaN); }
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

@@ -34,8 +34,8 @@ class INET_API ScalarSignalAnalogModel : public NarrowbandSignalAnalogModel, pub
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual W getPower() const { return power; }
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const { return power; }
+    virtual W getPower() const override { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override { return power; }
 };
 
 class INET_API ScalarTransmissionSignalAnalogModel : public ScalarSignalAnalogModel, public virtual ITransmissionAnalogModel

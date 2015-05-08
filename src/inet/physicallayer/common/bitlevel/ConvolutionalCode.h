@@ -45,10 +45,10 @@ class INET_API ConvolutionalCode : public IForwardErrorCorrection
     const char *getPuncturingMatrix() const { return puncturingMatrix; }
     const char *getTransferFunctionMatrix() const { return transferFunctionMatrix; }
     std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getCodeRate() const;
-    virtual int getEncodedLength(int decodedLength) const;
-    virtual int getDecodedLength(int encodedLength) const;
-    virtual double computeNetBitErrorRate(double grossBitErrorRate) const;
+    virtual double getCodeRate() const override;
+    virtual int getEncodedLength(int decodedLength) const override;
+    virtual int getDecodedLength(int encodedLength) const override;
+    virtual double computeNetBitErrorRate(double grossBitErrorRate) const override;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

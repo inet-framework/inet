@@ -85,7 +85,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
-    virtual void handleMessage(cMessage *msg) = 0;
+    virtual void handleMessage(cMessage *msg) override = 0;
 
     void updateDisplay();
     HttpReplyMessage *generateDocument(HttpRequestMessage *request, const char *resource, int size = 0);

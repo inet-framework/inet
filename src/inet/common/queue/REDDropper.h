@@ -48,7 +48,7 @@ class REDDropper : public AlgorithmicDropperBase
     virtual ~REDDropper();
     virtual void initialize() override;
     virtual bool shouldDrop(cPacket *packet) override;
-    virtual void sendOut(cPacket *packet);
+    virtual void sendOut(cPacket *packet) override;
 };
 
 } // namespace inet

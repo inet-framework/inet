@@ -31,17 +31,17 @@ class INET_API AdditiveScramblerModule : public cSimpleModule, public IScrambler
     const AdditiveScrambler *scrambler;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
     virtual ~AdditiveScramblerModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual BitVector scramble(const BitVector& bits) const { return scrambler->scramble(bits); }
-    virtual BitVector descramble(const BitVector& bits) const { return scrambler->descramble(bits); }
-    virtual const AdditiveScrambling *getScrambling() const { return scrambler->getScrambling(); }
+    virtual BitVector scramble(const BitVector& bits) const override { return scrambler->scramble(bits); }
+    virtual BitVector descramble(const BitVector& bits) const override { return scrambler->descramble(bits); }
+    virtual const AdditiveScrambling *getScrambling() const override { return scrambler->getScrambling(); }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

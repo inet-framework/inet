@@ -46,17 +46,17 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     virtual const IRadio *getReceiver() const override { return receiver; }
     virtual const ITransmission *getTransmission() const override { return transmission; }
 
-    virtual const simtime_t getStartTime() const { return startTime; }
-    virtual const simtime_t getEndTime() const { return endTime; }
-    virtual const simtime_t getDuration() const { return endTime - startTime; }
+    virtual const simtime_t getStartTime() const override { return startTime; }
+    virtual const simtime_t getEndTime() const override { return endTime; }
+    virtual const simtime_t getDuration() const override { return endTime - startTime; }
 
     virtual const Coord getStartPosition() const override { return startPosition; }
     virtual const Coord getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
 
-    virtual const IReceptionAnalogModel *getAnalogModel() const { return check_and_cast<const IReceptionAnalogModel *>(this); }
+    virtual const IReceptionAnalogModel *getAnalogModel() const override { return check_and_cast<const IReceptionAnalogModel *>(this); }
 };
 
 } // namespace physicallayer

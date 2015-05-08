@@ -36,10 +36,8 @@ class INET_API NarrowbandReceptionBase : public ReceptionBase, public virtual IN
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual Hz getBandwidth() const { return bandwidth; }
-
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
+    virtual Hz getCarrierFrequency() const override { return carrierFrequency; }
+    virtual Hz getBandwidth() const override { return bandwidth; }
 };
 
 } // namespace physicallayer

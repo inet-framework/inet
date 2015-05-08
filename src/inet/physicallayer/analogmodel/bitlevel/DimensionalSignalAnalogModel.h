@@ -37,8 +37,8 @@ class INET_API DimensionalSignalAnalogModel : public NarrowbandSignalAnalogModel
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ConstMapping *getPower() const { return power; }
-    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
+    virtual const ConstMapping *getPower() const override { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const override;
 };
 
 class INET_API DimensionalTransmissionSignalAnalogModel : public DimensionalSignalAnalogModel, public virtual ITransmissionAnalogModel

@@ -30,17 +30,17 @@ class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IIn
     const Ieee80211OFDMInterleaver *interleaver;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages."); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages."); }
 
   public:
     virtual ~Ieee80211OFDMInterleaverModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual BitVector interleave(const BitVector& bits) const { return interleaver->interleave(bits); }
-    virtual BitVector deinterleave(const BitVector& bits) const { return interleaver->deinterleave(bits); }
-    virtual const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaver->getInterleaving(); }
+    virtual BitVector interleave(const BitVector& bits) const override { return interleaver->interleave(bits); }
+    virtual BitVector deinterleave(const BitVector& bits) const override { return interleaver->deinterleave(bits); }
+    virtual const Ieee80211OFDMInterleaving *getInterleaving() const override { return interleaver->getInterleaving(); }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

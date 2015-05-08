@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API APSKDimensionalTransmitter : public DimensionalTransmitterBase, public FlatTransmitterBase
 {
   protected:
-    void initialize(int stage);
+    void initialize(int stage) override;
 
   public:
     APSKDimensionalTransmitter();
