@@ -27,5 +27,5 @@ digraph g {
   Ns2MotionMobility -> LineSegmentsMobilityBase
 
   TurtleMobility -> LineSegmentsMobilityBase
-};
+}
 

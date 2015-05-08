@@ -14,5 +14,5 @@ digraph g {
   TRANSMITTING -> TX_IDLE  [ label="tx finished\nno queued msgs" ]
   TRANSMITTING -> WAIT_IFG [ label="tx finished\nqueued msgs, no PAUSE" ]
   TRANSMITTING -> PAUSE    [ label="tx finished\nPAUSE frame rcvd" ]
-};
+}
 
