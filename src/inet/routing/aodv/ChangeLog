@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-10  Benjamin Seregi
 
     Fixed missing byte length.
@@ -11,8 +13,6 @@
 2015-02-19  Benjamin Seregi
 
     Fixed bug: if not an AODV entry, skip the update of precursor.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-04-22 Rudolf Hornig
 

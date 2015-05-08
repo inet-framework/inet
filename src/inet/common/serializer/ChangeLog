@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-08  Zoltan Bojthe
 
     Fixed fragmented packets in IPv4Serializer.
@@ -64,8 +66,6 @@
     IPv4Serializer, ICMPSerializer, ARPSerializer, IGMPSerializer,
     IPv6Serializer, ICMPv6Serializer,
     EthernetSerializer, Ieee80211Serializer
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Benjamin Seregi
 

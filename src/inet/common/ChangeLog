@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-22  Andras Varga
 
     Fixed PacketPrinter, do not access stale Transmission pointer in packet.
@@ -37,8 +39,6 @@
 2015-03-16  Levente Mészáros
 
     Moved generic dimensional data structures to common.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-31  Rudolf Hornig
 

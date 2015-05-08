@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-02  Zoltan Bojthe
 
     Fixed 802.11 beacon packet length.
@@ -30,8 +32,6 @@
 
     802.11 MAC: Fixed control frame mode. The specification requires the control
     frames to be sent with the slowest mandatory mode.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Levente Meszaros
 

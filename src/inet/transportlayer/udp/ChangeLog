@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-20  Zoltan Bojthe
 
     UDPPacket totalLength field renamed to totalLengthField.
@@ -23,8 +25,6 @@
 2015-03-11  Zoltan Bojthe
 
     Fixed udp packet size.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-21  Zoltan Bojthe
 

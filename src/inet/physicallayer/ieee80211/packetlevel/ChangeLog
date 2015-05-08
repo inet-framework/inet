@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-03  Levente Mészáros
 
     Added check for number of antennas. Added level parameter to printToStream
@@ -19,8 +21,6 @@
     Consistently renamed packet level and bit level implementations into
     separate subdirectories. Renamed ieee80211/layered to ieee80211/bitlevel.
     Moved remaining ieee80211 contents to ieee80211/packetlevel.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Levente Meszaros
 

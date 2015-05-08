@@ -1,11 +1,11 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-22  Rudolf Hornig
 
     Removed TraCI mobility as it is part of the Veins framework and is
     maintained there.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-04-22 Rudolf Hornig
 

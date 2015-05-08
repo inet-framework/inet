@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-09  Levente Mészáros
 
     Added tags to axes to allow hiding them in the user interface.
@@ -22,8 +24,6 @@
 
     Moved files under the common directory to prepare for adding the contract
     directory.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-03-02  Levente Mészáros & Zoltan Bojthe
 

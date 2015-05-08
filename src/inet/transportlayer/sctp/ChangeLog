@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-24  Irene Ruengeler
 
     Set the primary path when the path is established.
@@ -88,8 +90,6 @@
 2015-03-16  Irene Ruengeler
 
     Arithmetic for removal of chunk was wrong.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-01-30  Irene Ruengeler
 

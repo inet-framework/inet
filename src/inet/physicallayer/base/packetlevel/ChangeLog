@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-08  ------ inet-2.99.1 released ------
+
 2015-04-15  Levente Mészáros
 
     Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
@@ -24,8 +26,6 @@
     Consistently renamed packet level and bit level implementations into
     separate subdirectories. Renamed base/layered to base/bitlevel. Moved
     remaining base contents to base/packetlevel.
-
-2015-04-22  ------ inet-2.99.1 released ------
 
 2015-02-25  Levente Meszaros
 
