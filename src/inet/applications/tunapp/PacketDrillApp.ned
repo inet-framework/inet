@@ -32,6 +32,10 @@ simple PacketDrillApp
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
+        input sctpIn @labels(SCTPCommand/up);
+        output sctpOut @labels(SCTPCommand/down);
         input tunIn @labels(TunInterface/up);
         output tunOut @labels(TunInterface/down);
 }
