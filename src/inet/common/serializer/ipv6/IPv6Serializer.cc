@@ -57,7 +57,7 @@ Register_Serializer(IPv6Datagram, ETHERTYPE, ETHERTYPE_IPv6, IPv6Serializer);
 void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     const IPv6Datagram *dgram = check_and_cast<const IPv6Datagram *>(pkt);
-    int i;
+    unsigned int i;
     uint32_t flowinfo;
 
     EV << "Serialize IPv6 packet\n";
@@ -107,7 +107,7 @@ void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
                 const IPv6RoutingHeader *hdr = check_and_cast<const IPv6RoutingHeader *>(extHdr);
                 b.writeByte(hdr->getRoutingType());
                 b.writeByte(hdr->getSegmentsLeft());
-                for (int j = 0; j < hdr->getAddressArraySize(); j++) {
+                for (unsigned int j = 0; j < hdr->getAddressArraySize(); j++) {
                     b.writeIPv6Address(hdr->getAddress(j));
                 }
                 b.fillNBytes(4, '\0');

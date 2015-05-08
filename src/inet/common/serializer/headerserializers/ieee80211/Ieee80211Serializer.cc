@@ -151,7 +151,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             const Ieee80211SupportedRatesElement& supportedRates = Frame->getBody().getSupportedRates();
             b.writeByte(1);
             b.writeByte(supportedRates.numRates);
-            for (unsigned int i = 0; i < supportedRates.numRates; i++)
+            for (int i = 0; i < supportedRates.numRates; i++)
             {
                 uint8_t rate = ceil(supportedRates.rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -179,7 +179,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             const Ieee80211SupportedRatesElement& supportedRates = Frame->getBody().getSupportedRates();
             b.writeByte(1);
             b.writeByte(supportedRates.numRates);
-            for (unsigned int i = 0; i < supportedRates.numRates; i++) {
+            for (int i = 0; i < supportedRates.numRates; i++) {
                 uint8_t rate = ceil(supportedRates.rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
                 b.writeByte(rate);
@@ -212,7 +212,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             const Ieee80211SupportedRatesElement& supportedRates = Frame->getBody().getSupportedRates();
             b.writeByte(1);
             b.writeByte(supportedRates.numRates);
-            for (unsigned int i = 0; i < supportedRates.numRates; i++)
+            for (int i = 0; i < supportedRates.numRates; i++)
             {
                 uint8_t rate = ceil(supportedRates.rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -238,7 +238,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             // 4    Supported rates
             b.writeByte(1);
             b.writeByte(Frame->getBody().getSupportedRates().numRates);
-            for (unsigned int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
+            for (int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
             {
                 uint8_t rate = ceil(Frame->getBody().getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -261,7 +261,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             // 4    Supported rates
             b.writeByte(1);
             b.writeByte(Frame->getBody().getSupportedRates().numRates);
-            for (unsigned int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
+            for (int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
             {
                 uint8_t rate = ceil(Frame->getBody().getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -290,7 +290,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             // 5    Supported rates
             b.writeByte(1);
             b.writeByte(Frame->getBody().getSupportedRates().numRates);
-            for (unsigned int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
+            for (int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
             {
                 uint8_t rate = ceil(Frame->getBody().getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -336,7 +336,7 @@ void Ieee80211Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             // 5      Supported rates
             b.writeByte(1);
             b.writeByte(Frame->getBody().getSupportedRates().numRates);
-            for (unsigned int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
+            for (int i = 0; i < Frame->getBody().getSupportedRates().numRates; i++)
             {
                 uint8_t rate = ceil(Frame->getBody().getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
@@ -528,7 +528,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -553,7 +553,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -582,7 +582,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -603,7 +603,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -624,7 +624,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -654,7 +654,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
@@ -684,7 +684,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
             Ieee80211SupportedRatesElement supRat;
             b.readByte();
             supRat.numRates = b.readByte();
-            for (unsigned int i = 0; i < supRat.numRates; i++)
+            for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(b.readByte() & 0x7F) * 0.5;
             body.setSupportedRates(supRat);
 
