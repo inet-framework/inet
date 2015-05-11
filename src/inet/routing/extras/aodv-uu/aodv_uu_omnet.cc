@@ -47,7 +47,6 @@ using namespace ieee80211;
 
 namespace inetmanet {
 
-const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
 Define_Module(AODVUU);
