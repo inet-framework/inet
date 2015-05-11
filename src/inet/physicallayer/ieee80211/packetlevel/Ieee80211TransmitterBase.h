@@ -46,6 +46,7 @@ class INET_API Ieee80211TransmitterBase : public FlatTransmitterBase
 
   public:
     Ieee80211TransmitterBase();
+    virtual ~Ieee80211TransmitterBase();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

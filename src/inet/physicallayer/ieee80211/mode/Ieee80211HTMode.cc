@@ -23,7 +23,7 @@
 namespace inet {
 namespace physicallayer {
 
-std::map<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *> Ieee80211HTCompliantModes::modeCache;
+Ieee80211HTCompliantModes Ieee80211HTCompliantModes::singleton;
 
 Ieee80211HTMode::Ieee80211HTMode(const Ieee80211HTPreambleMode* preambleMode, const Ieee80211HTDataMode* dataMode, const BandMode carrierFrequencyMode) :
         preambleMode(preambleMode),
@@ -321,11 +321,21 @@ const simtime_t Ieee80211HTMode::getShortSlotTime() const
         throw cRuntimeError("Short slot time is not defined for this carrier frequency"); // TODO
 }
 
+Ieee80211HTCompliantModes::Ieee80211HTCompliantModes()
+{
+}
+
+Ieee80211HTCompliantModes::~Ieee80211HTCompliantModes()
+{
+    for (auto & entry : modeCache)
+        delete entry.second;
+}
+
 const Ieee80211HTMode* Ieee80211HTCompliantModes::getCompliantMode(const Ieee80211HTMCS *mcsMode, Ieee80211HTMode::BandMode carrierFrequencyMode, Ieee80211HTPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HTModeBase::GuardIntervalType guardIntervalType)
 {
     auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType);
-    auto mode = modeCache.find(htModeId);
-    if (mode == std::end(modeCache))
+    auto mode = singleton.modeCache.find(htModeId);
+    if (mode == std::end(singleton.modeCache))
     {
         const Ieee80211OFDMSignalMode *legacySignal = nullptr;
         const Ieee80211HTSignalMode *htSignal = nullptr;
@@ -341,7 +351,7 @@ const Ieee80211HTMode* Ieee80211HTCompliantModes::getCompliantMode(const Ieee802
         const Ieee80211HTDataMode *dataMode = new Ieee80211HTDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211HTPreambleMode *preambleMode = new Ieee80211HTPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211HTMode *htMode = new Ieee80211HTMode(preambleMode, dataMode, carrierFrequencyMode);
-        modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *>(htModeId, htMode));
+        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *>(htModeId, htMode));
         return htMode;
     }
     return mode->second;

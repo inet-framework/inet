@@ -39,6 +39,7 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
 
   public:
     Ieee80211ReceiverBase();
+    virtual ~Ieee80211ReceiverBase();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

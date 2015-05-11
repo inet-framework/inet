@@ -29,6 +29,11 @@ Ieee80211TransmitterBase::Ieee80211TransmitterBase() :
 {
 }
 
+Ieee80211TransmitterBase::~Ieee80211TransmitterBase()
+{
+    delete channel;
+}
+
 void Ieee80211TransmitterBase::initialize(int stage)
 {
     FlatTransmitterBase::initialize(stage);

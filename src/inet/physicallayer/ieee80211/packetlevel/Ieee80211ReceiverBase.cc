@@ -28,6 +28,11 @@ Ieee80211ReceiverBase::Ieee80211ReceiverBase() :
 {
 }
 
+Ieee80211ReceiverBase::~Ieee80211ReceiverBase()
+{
+    delete channel;
+}
+
 void Ieee80211ReceiverBase::initialize(int stage)
 {
     FlatReceiverBase::initialize(stage);
