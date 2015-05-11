@@ -52,9 +52,9 @@ DestFilter::DestFilter(const char *str)
             }
             else
             {
-                L3Address dest = L3Address(dest);
-                destAddresses.push_back(dest);
-                prefixLengths.push_back(dest.getAddressType()->getMaxPrefixLength());
+                L3Address destAddr = L3Address(dest);
+                destAddresses.push_back(destAddr);
+                prefixLengths.push_back(destAddr.getAddressType()->getMaxPrefixLength());
             }
         }
     }
