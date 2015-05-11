@@ -72,7 +72,7 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     // FIXME: We only have OFDM deserializer
     unsigned char *hdrBuf = new unsigned char[OFDM_PLCP_HEADER_LENGTH];
     const std::vector<uint8>& bitFields = serializedPacket->getBytes();
-    for (unsigned int i = 0; i < OFDM_PLCP_HEADER_LENGTH; i++)
+    for (int i = 0; i < OFDM_PLCP_HEADER_LENGTH; i++)
         hdrBuf[i] = bitFields[i];
     Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) hdrBuf;
     Ieee80211OFDMPLCPFrame *plcpFrame = new Ieee80211OFDMPLCPFrame();
@@ -80,7 +80,7 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     plcpFrame->setLength(hdr->length);
     plcpFrame->setType(OFDM);
     unsigned char *buf = new unsigned char[hdr->length + OFDM_PLCP_HEADER_LENGTH];
-    for (unsigned int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
+    for (int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
         buf[i] = bitFields[i];
     Ieee80211Serializer serializer;
     Buffer subBuffer(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);

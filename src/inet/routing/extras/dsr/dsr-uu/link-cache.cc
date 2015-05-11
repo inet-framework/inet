@@ -506,7 +506,7 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
 
     if (dst_node->cost != LC_COST_INF && dst_node->pred)
     {
-        struct lc_node *d, *n;
+        struct lc_node *d,*n;
         /*      struct lc_link *l; */
         int k = (dst_node->hops - 1);
         int i = 0;
@@ -557,7 +557,7 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
         /*          gettime(&l->expires); */
         /*      } */
 
-        d = dst_node;
+        d = dst_node; (void)d; // to avoid UNUSED variable warning
 
         /* Fill in the source route by traversing the nodes starting
          * from the destination predecessor */

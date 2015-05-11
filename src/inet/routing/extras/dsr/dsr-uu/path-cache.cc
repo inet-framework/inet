@@ -275,7 +275,7 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
     unsigned int vector_size = 0;
 
     unsigned int num_hop = UINT_MAX;
-    int status;
+    int status; (void)status; // NOP to avoidl UNUSED variable warning
     int i;
     double cost = 1.0/0.0;
     bool find;

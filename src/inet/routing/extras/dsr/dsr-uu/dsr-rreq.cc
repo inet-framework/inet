@@ -502,6 +502,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
 out:
     DSR_WRITE_UNLOCK(&rreq_tbl.lock);
 
+    (void)res;  // NOP to avoid UNUSED variable warning
     return 1;
 }
 

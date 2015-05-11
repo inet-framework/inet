@@ -651,7 +651,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
 {
     struct dsr_pkt *dp;
     struct in_addr dst, nxt_hop;
-    struct in_addr prev_hop;
+    // struct in_addr prev_hop;
     /* Cast the packet so that we can touch it */
     /* Do nothing for my own packets... */
     if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
@@ -666,7 +666,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
     if (dynamic_cast<DSRPkt *>(ipDgram))
     {
         p = check_and_cast <DSRPkt *> (ipDgram->dup());
-        prev_hop.s_addr = p->prevAddress().getInt();
+        // prev_hop.s_addr = p->prevAddress().getInt();
         dst.s_addr = p->getDestAddress().getInt();
         nxt_hop.s_addr = p->nextAddress().getInt();
         DEBUG("Xmit failure for %s nxt_hop=%s\n", print_ip(dst), print_ip(nxt_hop));

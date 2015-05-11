@@ -89,6 +89,7 @@ DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram(m)
 
 DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 {
+    (void)confvals_def; // NOP to avoid unused variable warning
     if (this==&m) return *this;
     clean();
     IPv4Datagram::operator=(m);
