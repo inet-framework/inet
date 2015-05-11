@@ -44,6 +44,7 @@ network Test
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------
+%subst: /DEBUG: //
 %contains-regex: stdout
 \*\* Event #\d+  T=0   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
 Starting up with destination = 192\.168\.0\.42, source = <none>\.
@@ -61,9 +62,9 @@ Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.host
-DEBUG: IPv4::flush\(\): packets in queue: empty
-DEBUG: IPv4::flush\(\): pending packets:
-DEBUG: IPv4::flush\(\): packets in hooks: 0
+IPv4::flush\(\): packets in queue: empty
+IPv4::flush\(\): pending packets:
+IPv4::flush\(\): packets in hooks: 0
 Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.host
