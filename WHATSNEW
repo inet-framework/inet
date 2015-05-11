@@ -118,10 +118,13 @@ Network Layer:
    routes are maintained or not.
  - Added useAdminDist parameter to IPv4RoutingTable to enable/disable the use
    of Cisco specific routing entry extension (disabled by default).
+ - Added IGMPv3 implementation (the orinal code came from the ANSA project).
+   It has been almost fully rewritten and extended by Tamas Borbely.
 
 Routing:
- - Added PIM-DM and PIM-SM implementation based on the ANSA project 
-   (http://nes.fit.vutbr.cz/ansa)   
+ - Added PIM-DM and PIM-SM implementation. The original codebase (from the ANSA project
+   http://nes.fit.vutbr.cz/ansa) has been extensively reviewed, refactored and 
+   extended by Tamas Borbely.
 
 Configurator:
  - Refactored supported metrics (hopCount, delay, dataRate, errorRate) and related

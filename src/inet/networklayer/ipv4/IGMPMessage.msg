@@ -37,7 +37,7 @@ enum IGMPType
     IGMPV1_MEMBERSHIP_REPORT = 0x12;
     IGMPV2_MEMBERSHIP_REPORT = 0x16;
     IGMPV2_LEAVE_GROUP = 0x17;
-	IGMPV3_MEMBERSHIP_REPORT = 0x22;
+    IGMPV3_MEMBERSHIP_REPORT = 0x22;
 }
 
 packet IGMPMessage
@@ -86,7 +86,7 @@ packet IGMPv2Leave extends IGMPMessage
 //
 // Note: in IGMPv3Query the maxResponseTime field is
 // renamed to maxResponseCode and it is interpreted
-// differently than in IGMPv2. 
+// differently than in IGMPv2.
 packet IGMPv3Query extends IGMPv2Query
 {
     @customize(true);

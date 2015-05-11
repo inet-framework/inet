@@ -50,9 +50,10 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-11-19  Zoltan Bojthe
+2014-11-19  Tamas Borbely
 
-	Added IGMPv3 implementation.
+	Added IGMPv3 implementation (based on ANS project). The code
+	has been extensively refactored and extended.
 
 2014-11-18  Levente Mészáros & Zoltan Bojthe
 

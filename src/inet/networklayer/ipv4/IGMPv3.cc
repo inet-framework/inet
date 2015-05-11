@@ -16,10 +16,8 @@
 
 /**
  * @file IGMPv3.cc
- * @author Adam Malik(mailto:towdie13@gmail.com), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+ * @author Adam Malik(towdie13@gmail.com), Vladimir Vesely (ivesely@fit.vutbr.cz), Tamas Borbely (tomi@omnetpp.org)
  * @date 12.5.2013
- * @brief
- * @detail
  */
 
 #include "inet/networklayer/ipv4/IGMPv3.h"
