@@ -127,17 +127,17 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
     virtual unsigned short getHeaderOptionArrayLength();
 
     /** Generated but unused method, should not be called. */
-    virtual void setHeaderOptionArraySize(unsigned int size);
+    virtual void setHeaderOptionArraySize(unsigned int size) override;
 
     /** Returns the number of TCP options in this TCP segment */
-    virtual unsigned int getHeaderOptionArraySize() const;
+    virtual unsigned int getHeaderOptionArraySize() const override;
 
     /** Returns the kth TCP options in this TCP segment */
-    virtual TCPOptionPtr& getHeaderOption(unsigned int k);
-    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const {return const_cast<TCPSegment*>(this)->getHeaderOption(k);}
+    virtual TCPOptionPtr& getHeaderOption(unsigned int k) override;
+    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const override {return const_cast<TCPSegment*>(this)->getHeaderOption(k);}
 
     /** Generated but unused method, should not be called. */
-    virtual void setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption);
+    virtual void setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption) override;
 
     /** Adds a TCP option to the TCP segment */
     virtual void addHeaderOption(TCPOption *headerOption);

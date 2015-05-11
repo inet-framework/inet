@@ -51,8 +51,8 @@ class INET_API LayeredReceptionDecision : public ReceptionDecision
     virtual const IReceptionSampleModel *getSampleModel() const { return sampleModel; }
     virtual const IReceptionAnalogModel *getAnalogModel() const { return analogModel; }
 
-    virtual const cPacket *getPhyFrame() const;
-    virtual const cPacket *getMacFrame() const;
+    virtual const cPacket *getPhyFrame() const override;
+    virtual const cPacket *getMacFrame() const override;
 };
 
 } // namespace physicallayer

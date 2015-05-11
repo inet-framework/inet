@@ -34,8 +34,8 @@ class INET_API ScalarTransmission : public FlatTransmissionBase, public virtual 
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual W getPower() const { return power; }
-    virtual W computeMinPower(const simtime_t startTime, const simtime_t endTime) const { return power; }
+    virtual W getPower() const override { return power; }
+    virtual W computeMinPower(const simtime_t startTime, const simtime_t endTime) const override { return power; }
 };
 
 } // namespace physicallayer

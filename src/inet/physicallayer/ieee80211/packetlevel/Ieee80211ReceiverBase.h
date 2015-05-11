@@ -35,7 +35,7 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
     const Ieee80211Channel *channel;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     Ieee80211ReceiverBase();

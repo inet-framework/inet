@@ -43,8 +43,8 @@ class INET_API APSKModulationBase : public IAPSKModulation
     const static APSKModulationBase *findModulation(const char *name);
 
     virtual const std::vector<APSKSymbol> *getConstellation() const { return constellation; }
-    virtual unsigned int getConstellationSize() const { return constellationSize; }
-    virtual unsigned int getCodeWordSize() const { return codeWordSize; }
+    virtual unsigned int getConstellationSize() const override { return constellationSize; }
+    virtual unsigned int getCodeWordSize() const override { return codeWordSize; }
 
     virtual const APSKSymbol *mapToConstellationDiagram(const ShortBitVector& symbol) const;
     virtual ShortBitVector demapToBitRepresentation(const APSKSymbol *symbol) const;

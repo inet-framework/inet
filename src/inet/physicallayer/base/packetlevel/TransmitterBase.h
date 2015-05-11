@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 {
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
   public:
     virtual W getMaxPower() const override { return W(NaN); }

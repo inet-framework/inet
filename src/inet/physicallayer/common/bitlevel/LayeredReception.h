@@ -45,7 +45,7 @@ class INET_API LayeredReception : public ReceptionBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IReceptionAnalogModel *getAnalogModel() const { return analogModel; }
+    virtual const IReceptionAnalogModel *getAnalogModel() const override { return analogModel; }
 };
 
 } // namespace physicallayer

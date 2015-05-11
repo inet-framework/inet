@@ -131,9 +131,9 @@ class INET_API ConvolutionalCoder : public IFECCoder
     ConvolutionalCoder(const ConvolutionalCode *convolutionalCode);
     ~ConvolutionalCoder();
 
-    BitVector encode(const BitVector& informationBits) const;
-    std::pair<BitVector, bool> decode(const BitVector& encodedBits) const;
-    const ConvolutionalCode *getForwardErrorCorrection() const { return convolutionalCode; }
+    BitVector encode(const BitVector& informationBits) const override;
+    std::pair<BitVector, bool> decode(const BitVector& encodedBits) const override;
+    const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCode; }
 
     /*
      * Getters for the encoder's/decoder's parameters

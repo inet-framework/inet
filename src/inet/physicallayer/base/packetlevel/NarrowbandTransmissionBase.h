@@ -39,8 +39,8 @@ class INET_API NarrowbandTransmissionBase : public TransmissionBase, public virt
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IModulation *getModulation() const { return modulation; }
-    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-    virtual Hz getBandwidth() const { return bandwidth; }
+    virtual Hz getCarrierFrequency() const override { return carrierFrequency; }
+    virtual Hz getBandwidth() const override { return bandwidth; }
 };
 
 } // namespace physicallayer

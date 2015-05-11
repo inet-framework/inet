@@ -468,7 +468,7 @@ class INET_API Argument
 
         key_iterator(const IteratorType& other) : IteratorType(other) {};
 
-        const reference operator*() const
+        reference operator*() const
         {
             return IteratorType::operator*().first;
         }
@@ -1745,21 +1745,6 @@ class INET_API SimpleConstMapping : public ConstMapping
     void initializeArguments(const Argument& min,
             const Argument& max,
             const Argument& interval);
-
-    /**
-     * @brief Returns the value of the mapping at the passed position.
-     *
-     * This method has to be implemented by every subclass and should
-     * only have constant complexity.
-     */
-    virtual argument_value_t getValue(const Argument& pos) const = 0;
-
-    /**
-     * @brief creates a clone of this mapping.
-     *
-     * This method has to be implemented by every subclass.
-     */
-    ConstMapping *constClone() const = 0;
 };
 
 } // namespace physicallayer

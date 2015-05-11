@@ -32,17 +32,17 @@ class INET_API StochasticLayeredErrorModel : public LayeredErrorModelBase
     double symbolErrorRate;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
   public:
     StochasticLayeredErrorModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
-    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
+    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
+    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
+    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer

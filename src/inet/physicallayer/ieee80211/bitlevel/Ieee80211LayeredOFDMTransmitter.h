@@ -59,9 +59,9 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     W power;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
     /* Packet domain */
     const ITransmissionPacketModel *createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const;
@@ -87,7 +87,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
   public:
     virtual ~Ieee80211LayeredOFDMTransmitter();
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
     virtual const IModulator *getModulator() const { return dataModulator; }
     virtual const IPulseShaper *getPulseShaper() const { return pulseShaper; }

@@ -35,15 +35,15 @@ class INET_API APSKDemodulator : public IDemodulator, public cSimpleModule
     const APSKModulationBase *modulation;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
   public:
     APSKDemodulator();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const APSKModulationBase *getModulation() const { return modulation; }
-    virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
+    virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;
 };
 
 } // namespace physicallayer

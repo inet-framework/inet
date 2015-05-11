@@ -40,7 +40,7 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     static simsignal_t radioChannelChangedSignal;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     virtual void handleUpperCommand(cMessage *message) override;
 

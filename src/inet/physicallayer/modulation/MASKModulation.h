@@ -38,8 +38,8 @@ class INET_API MASKModulation : public APSKModulationBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
-    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const;
+    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;
+    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
 };
 
 } // namespace physicallayer

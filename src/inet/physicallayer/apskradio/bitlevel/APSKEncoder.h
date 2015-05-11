@@ -40,16 +40,16 @@ class INET_API APSKEncoder : public IEncoder, public cSimpleModule
     const IInterleaver *interleaver;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
   public:
     APSKEncoder();
     virtual ~APSKEncoder();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const APSKCode *getCode() const { return code; }
-    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
+    virtual const APSKCode *getCode() const override { return code; }
+    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };
 
 } // namespace physicallayer

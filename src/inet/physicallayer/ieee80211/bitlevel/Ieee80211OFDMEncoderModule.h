@@ -34,16 +34,16 @@ class INET_API Ieee80211OFDMEncoderModule : public IEncoder, public cSimpleModul
     const Ieee80211OFDMCode *code;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
     virtual ~Ieee80211OFDMEncoderModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return encoder->printToStream(stream, level); }
-    const Ieee80211OFDMCode *getCode() const { return code; }
-    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
+    const Ieee80211OFDMCode *getCode() const override { return code; }
+    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

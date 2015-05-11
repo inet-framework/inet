@@ -32,16 +32,16 @@ class INET_API Ieee80211OFDMDemodulatorModule : public IDemodulator, public cSim
     const Ieee80211OFDMDemodulator *ofdmDemodulator;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
     virtual ~Ieee80211OFDMDemodulatorModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return ofdmDemodulator->printToStream(stream, level); }
     const Ieee80211OFDMModulation *getModulation() const { return ofdmDemodulator->getModulation(); }
-    const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const;
+    const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;
 };
 } /* namespace physicallayer */
 } /* namespace inet */

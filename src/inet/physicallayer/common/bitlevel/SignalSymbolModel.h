@@ -39,11 +39,11 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
     virtual ~SignalSymbolModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual int getPayloadSymbolLength() const { return payloadSymbolLength; }
-    virtual double getPayloadSymbolRate() const { return payloadSymbolRate; }
-    virtual int getHeaderSymbolLength() const { return headerSymbolLength; }
-    virtual double getHeaderSymbolRate() const { return headerSymbolRate; }
-    virtual const std::vector<const ISymbol *> *getSymbols() const { return symbols; }
+    virtual int getPayloadSymbolLength() const override { return payloadSymbolLength; }
+    virtual double getPayloadSymbolRate() const override { return payloadSymbolRate; }
+    virtual int getHeaderSymbolLength() const override { return headerSymbolLength; }
+    virtual double getHeaderSymbolRate() const override { return headerSymbolRate; }
+    virtual const std::vector<const ISymbol *> *getSymbols() const override { return symbols; }
 };
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
@@ -55,8 +55,8 @@ class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtua
   public:
     TransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation);
 
-    virtual const IModulation *getHeaderModulation() const { return headerModulation; }
-    virtual const IModulation *getPayloadModulation() const { return payloadModulation; }
+    virtual const IModulation *getHeaderModulation() const override { return headerModulation; }
+    virtual const IModulation *getPayloadModulation() const override { return payloadModulation; }
 };
 
 class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual IReceptionSymbolModel
