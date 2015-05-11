@@ -78,6 +78,7 @@ class INET_API Ieee80211CompliantBands
   public:
     static const Ieee80211EnumeratedBand band2_4GHz;
     static const Ieee80211ArithmeticalBand band5GHz;
+    static const Ieee80211ArithmeticalBand band5_9GHz;
 
     static const IIeee80211Band *findBand(const char *name);
     static const IIeee80211Band *getBand(const char *name);
