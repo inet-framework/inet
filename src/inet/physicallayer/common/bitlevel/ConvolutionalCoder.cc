@@ -483,8 +483,8 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
     std::pair<BitVector, bool> result = traversePath(bestNode, trellisGraph, isTruncatedMode);
     if (result.second)
     {
-        EV_DEBUG << "Recovered message: " << result.first << endl
-                 << " Number of errors: " << bestNode.numberOfErrors
+        EV_DEBUG << "Recovered message: " << result.first << endl;
+        EV_DEBUG << "Number of errors: " << bestNode.numberOfErrors
                  << " Cumulative error (Hamming distance): " << bestNode.comulativeHammingDistance
                  << " End state: " << bestNode.state << endl;
     }
