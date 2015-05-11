@@ -130,7 +130,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
     const L3Address& finalDestAddr = netwMsg->getFinalDestAddr();
     const L3Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
     const L3Address& srcAddr = netwMsg->getSrcAddr();
-    IMACProtocolControlInfo *ctrlInfo = check_and_cast<IMACProtocolControlInfo *>(netwMsg->getControlInfo());
+    check_and_cast<IMACProtocolControlInfo *>(netwMsg->getControlInfo());
     // KLUDGE: TODO: get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
     double rssi = 1;    // TODO: ctrlInfo->getRSSI();
@@ -314,13 +314,13 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
         // A route towards the node which originated the received packet already exists.
         // Replace its entry only if the route proposal that we just received has a stronger
         // RSSI.
-//		tRouteTableEntry entry = pos->second;
-//		if (entry.rssi > rssiThreshold) {
-//			entry.nextHop = lastHop;
-//			entry.rssi = rssi;
-//			if (origin == 0)
-//				nextHopSelectionForSink.record(lastHop);
-//		}
+//        tRouteTableEntry entry = pos->second;
+//        if (entry.rssi > rssiThreshold) {
+//            entry.nextHop = lastHop;
+//            entry.rssi = rssi;
+//            if (origin == 0)
+//                nextHopSelectionForSink.record(lastHop);
+//        }
     }
 }
 

@@ -95,7 +95,7 @@ void TCPSerializer::serializeOption(const TCPOption *option, Buffer &b, Context&
         }
 
         case TCPOPTION_SACK_PERMITTED: {
-            auto *opt = check_and_cast<const TCPOptionSackPermitted *>(option);
+            auto *opt = check_and_cast<const TCPOptionSackPermitted *>(option); (void)opt; // UNUSED
             ASSERT(length == 2);
             break;
         }

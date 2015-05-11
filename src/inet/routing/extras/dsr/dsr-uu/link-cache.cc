@@ -124,6 +124,7 @@ static inline int crit_link_query(void *pos, void *query)
     return 0;
 }
 
+/*
 static inline int crit_expire(void *pos, void *data)
 {
     struct lc_link *link = (struct lc_link *)pos;
@@ -132,8 +133,8 @@ static inline int crit_expire(void *pos, void *data)
 
     gettime(&now);
 
-    /* printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr)); */
-    /*  fflush(stdout); */
+//    printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr));
+//    fflush(stdout);
 
     if (timeval_diff(&link->expires, &now) <= 0)
     {
@@ -142,6 +143,7 @@ static inline int crit_expire(void *pos, void *data)
     }
     return 0;
 }
+ */
 
 static inline int do_lowest_cost(void *pos, void *data)
 {

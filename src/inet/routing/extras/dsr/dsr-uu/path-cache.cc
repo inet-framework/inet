@@ -79,10 +79,12 @@ struct path
     struct timeval expires;
 };
 
+/*
 static inline void __ph_delete_route(struct path *rt)
 {
     list_del(&rt->l);
 }
+*/
 
 static inline int crit_cache_query(void *pos, void *query)
 {
@@ -94,6 +96,8 @@ static inline int crit_cache_query(void *pos, void *query)
     return 0;
 }
 
+
+/*
 static inline int crit_expire(void *pos, void *data)
 {
     struct path *rt = (struct path *)pos;
@@ -101,8 +105,8 @@ static inline int crit_expire(void *pos, void *data)
 
     gettime(&now);
 
-    /* printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr)); */
-    /*  fflush(stdout); */
+//    printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr));
+//    fflush(stdout);
 
     if (timeval_diff(&rt->expires, &now) <= 0)
     {
@@ -111,8 +115,7 @@ static inline int crit_expire(void *pos, void *data)
     }
     return 0;
 }
-
-
+*/
 
 static inline struct path *path_create()
 {
@@ -154,8 +157,8 @@ static int __ph_route_tbl_add(struct path_table *rt_t,
     struct path * rt;
     struct path * rt_aux;
     struct path * rt_aux2;
-    int res;
-    int exist=0;
+    int res = 0;
+    int exist = 0;
     struct timeval now;
     long diff;
     int size;

@@ -779,7 +779,7 @@ IPv4Datagram *NS_CLASS pkt_decapsulate(IPv4Datagram *p)
 void NS_CLASS scheduleNextEvent()
 {
     simtime_t timer;
-    simtime_t timeout = timer_age_queue();
+    simtime_t timeout = timer_age_queue(); (void)timeout; // UNUSED
 
     if (!aodvTimerMap.empty())
     {

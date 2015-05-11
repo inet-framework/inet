@@ -45,7 +45,7 @@ Define_Module(NetPerfMeter);
 //
 // Based on rpareto from GNU R's VGAM package
 // (http://cran.r-project.org/web/packages/VGAM/index.html):
-// rpareto <- function (n, location, shape) 
+// rpareto <- function (n, location, shape)
 // {
 //     ans <- location/runif(n)^(1/shape)
 //     ans[location <= 0] <- NaN
@@ -1007,13 +1007,9 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
       frameSize = par("frameSize");
    }
    else {
-      frameSize =
-         FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].
-            doubleValue(this, "B");
-      //FIXME frameSize is unsigned. This less-than-zero comparison of an unsigned value is never true
-      if(frameSize < 0) {
-         frameSize = par("frameSize");
-      }
+      double doubleSize =
+         FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].doubleValue(this, "B");
+      frameSize = (doubleSize >= 0.0) ? (long)doubleSize : par("frameSize");
    }
    return(frameSize);
 }
@@ -1152,7 +1148,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
    }
 
    // ====== Schedule next frame transmission ===============================
-   if(TraceIndex < TraceVector.size()) {    
+   if(TraceIndex < TraceVector.size()) {
       const double nextFrameTime = TraceVector[TraceIndex].InterFrameDelay;
       assert(TransmitTimerVector[0] == NULL);
       TransmitTimerVector[0] = new NetPerfMeterTransmitTimer("TransmitTimer");

@@ -132,7 +132,7 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     if (dp->dst.s_addr != DSR_BROADCAST)
     {
         /* Get hardware destination address */
-        IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
+        check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
         IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
         p->setNextAddress(nextIp);
     }
