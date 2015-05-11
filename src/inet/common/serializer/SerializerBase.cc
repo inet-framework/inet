@@ -187,15 +187,13 @@ void SerializerRegistrationList::add(const char *name, int protocolGroup, int pr
 SerializerBase *SerializerRegistrationList::lookup(int protocolGroup, int protocolId) const
 {
     auto it = keyToSerializerMap.find(Key(protocolGroup, protocolId));
-    return it==keyToSerializerMap.end() ? NULL : it->second;
-    return nullptr;
+    return it==keyToSerializerMap.end() ? nullptr : it->second;
 }
 
 SerializerBase *SerializerRegistrationList::lookup(const char *name) const
 {
     auto it = stringToSerializerMap.find(name);
-    return it==stringToSerializerMap.end() ? NULL : it->second;
-    return nullptr;
+    return it==stringToSerializerMap.end() ? nullptr : it->second;
 }
 
 //
