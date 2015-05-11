@@ -37,7 +37,7 @@ simple Ieee80211AgentSTA
         double authenticationTimeout @unit(s) = default(5s); // timeout for the authentication procedure
         double associationTimeout @unit(s) = default(5s); // timeout for the association procedure
         double startingTime @unit("s") = default(-1s); // agent starting time.
-        string default_ssid = default(""); // default ssid
+        string default_ssid = default("SSID"); // default ssid
         @display("i=block/control");
         @signal[rcvdPk](type=cPacket);
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode

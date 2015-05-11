@@ -31,7 +31,7 @@ import inet.physicallayer.contract.packetlevel.ITransmitter;
 module IdealTransmitter like ITransmitter
 {
     parameters:
-        double headerBitLength @unit(b);                                       // number of header bits added to the length of the MAC frame
+        double headerBitLength @unit(b) = default(0b);                         // number of header bits added to the length of the MAC frame
         double bitrate @unit(bps);                                             // the bitrate of the transmitter is used to compute the duration of the transmission
         double maxCommunicationRange @unit(m);                                 // the maximum range where the reception of transmissions produced by this transmitter is possible
         double maxInterferenceRange @unit(m) = default(maxCommunicationRange); // the maximum range where transmissions produced by this transmitter interferes with other transmissions
