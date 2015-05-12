@@ -107,17 +107,14 @@ int NSCLASS dsr_recv(struct dsr_pkt *dp)
             DEBUG("Send ICMP\n");
             break;
         case DSR_PKT_SEND_BUFFERED:
-            if (dp->rrep_opt)
+            struct in_addr rrep_srt_dst;
+            int i;
+
+            for (i = 0; i < dp->num_rrep_opts; i++)
             {
-                struct in_addr rrep_srt_dst;
-                int i;
+                rrep_srt_dst.s_addr = dp->rrep_opt[i]->addrs[DSR_RREP_ADDRS_LEN(dp->rrep_opt[i]) / sizeof(struct in_addr)];
 
-                for (i = 0; i < dp->num_rrep_opts; i++)
-                {
-                    rrep_srt_dst.s_addr = dp->rrep_opt[i]->addrs[DSR_RREP_ADDRS_LEN(dp->rrep_opt[i]) / sizeof(struct in_addr)];
-
-                    send_buf_set_verdict(SEND_BUF_SEND, rrep_srt_dst);
-                }
+                send_buf_set_verdict(SEND_BUF_SEND, rrep_srt_dst);
             }
             break;
         case DSR_PKT_DELIVER:

@@ -50,7 +50,7 @@ void HeatMapFigure::heatPoint(int x, int y)
 void HeatMapFigure::heatLine(int x1, int y1, int x2, int y2)
 {
     // NOTE: http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-    bool steep = (fabs(y2 - y1) > fabs(x2 - x1));
+    bool steep = (std::abs(y2 - y1) > std::abs(x2 - x1));
     if (steep) {
         std::swap(x1, y1);
         std::swap(x2, y2);
@@ -60,7 +60,7 @@ void HeatMapFigure::heatLine(int x1, int y1, int x2, int y2)
         std::swap(y1, y2);
     }
     double dx = x2 - x1;
-    double dy = fabs(y2 - y1);
+    double dy = std::abs(y2 - y1);
     double error = dx / 2.0f;
     int yStep = (y1 < y2) ? 1 : -1;
     int y = y1;

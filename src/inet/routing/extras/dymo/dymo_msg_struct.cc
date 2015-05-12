@@ -325,10 +325,12 @@ std::string DYMO_element::detailedInfo() const
         break;
     case DYMO_UERR_TYPE:
         uerr_type = (Dymo_UERR*) (this);
+        (void)uerr_type; // NOP to avoid UNUSED variable warning
         out << "type  : UERR ttl : "<< ttl << "\n";
         break;
     case DYMO_HELLO_TYPE:
         hello_type = (Dymo_HELLO*) (this);
+        (void)hello_type; // NOP to avoid UNUSED variable warning
         out << "type  : HELLO ttl : "<< ttl << "\n";
         break;
     }

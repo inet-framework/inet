@@ -47,7 +47,6 @@ using namespace ieee80211;
 
 namespace inetmanet {
 
-const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
 Define_Module(AODVUU);
@@ -780,7 +779,7 @@ IPv4Datagram *NS_CLASS pkt_decapsulate(IPv4Datagram *p)
 void NS_CLASS scheduleNextEvent()
 {
     simtime_t timer;
-    simtime_t timeout = timer_age_queue();
+    simtime_t timeout = timer_age_queue(); (void)timeout; // UNUSED
 
     if (!aodvTimerMap.empty())
     {

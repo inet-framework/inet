@@ -410,7 +410,7 @@ cPacket* Ieee80211Serializer::deserialize(const Buffer &b, Context& c)
     cPacket *frame = nullptr;
 
     uint8_t type = b.readByte();
-    uint8_t fc_1 = b.readByte();   // fc_1
+    uint8_t fc_1 = b.readByte();  (void)fc_1; // fc_1
     switch(type)
     {
         case 0xD4: // ST_ACK    //TODO ((ST_ACK & 0x0F) << 4) | ((ST_ACK & 0x30) >> 2)

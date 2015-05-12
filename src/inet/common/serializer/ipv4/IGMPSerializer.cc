@@ -129,7 +129,7 @@ cPacket *IGMPSerializer::deserialize(const Buffer &b, Context& c)
     const void *igmp = b.accessNBytes(0);
     unsigned char type = b.readByte();
     unsigned char code = b.readByte();
-    uint16_t chksum = b.readUint16();
+    uint16_t chksum = b.readUint16(); (void)chksum;
 
     cPacket *packet = nullptr;
 

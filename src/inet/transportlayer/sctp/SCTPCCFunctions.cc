@@ -204,7 +204,7 @@ void SCTPAssociation::recalculateOLIABasis() {
     //max_w_paths: The set of paths in all_paths with largest congestion windows.
     //https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
     uint32 max_w_paths = 0;
-    uint32 max_w_paths_cnt = 0;
+    uint32 max_w_paths_cnt = 0; (void)max_w_paths_cnt; // FIXME this variable is unused
     uint32 best_paths_cnt = 0;
 
     // Create the sets

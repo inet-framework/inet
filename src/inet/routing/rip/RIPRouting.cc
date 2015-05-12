@@ -126,8 +126,8 @@ void RIPInterfaceEntry::configure(cXMLElement *config)
         strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
         strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
         strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
-        (RIPMode) - 1;
-    if (mode == -1)
+                static_cast<RIPMode>(-1);
+    if (mode == static_cast<RIPMode>(-1))
         throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
                 config->getSourceLocation(), ripModeAttr);
     this->mode = mode;

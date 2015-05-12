@@ -67,11 +67,11 @@ double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir) const
     if (!isNaN(bitErrorRate))
         return bitErrorRate;
     else {
-        const IReception *reception = snir->getReception();
-        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
-        const IModulation *modulation = narrowbandTransmission->getModulation();
-        double symbolErrorRate = computeSymbolErrorRate(snir);
         // TODO: compute bit error rate based on symbol error rate and modulation
+//        const IReception *reception = snir->getReception();
+//        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
+//        const IModulation *modulation = narrowbandTransmission->getModulation();
+//        double symbolErrorRate = computeSymbolErrorRate(snir);
         throw cRuntimeError("Not yet implemented");
     }
 }

@@ -35,8 +35,6 @@ class ICMPv6;
 class UDPPacket;
 class InterfaceEntry;
 
-const int UDP_HEADER_BYTES = 8;
-
 const bool DEFAULT_MULTICAST_LOOP = true;
 
 /**
