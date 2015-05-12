@@ -69,6 +69,7 @@ class INET_API HttpBrowser : public HttpBrowserBase,
     SCTPSocketMap sctpSockCollection;    // List of active sockets
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
+    simtime_t sessionStartTime = -1.0;   // Start time of the session
 
   protected:
     virtual void initialize(int stage) override;

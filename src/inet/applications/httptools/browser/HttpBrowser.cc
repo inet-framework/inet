@@ -236,6 +236,13 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
         else {
             sctpSocket->close();
         }
+
+        if (tcpSockCollection.size() + sctpSockCollection.size() == 1) {
+            ASSERT(sessionStartTime.dbl() >= 0.0);
+            const simtime_t completionTime = simTime();
+            recordScalar("Website Download Duration", completionTime - sessionStartTime);
+            sessionStartTime = -1.0;
+        }
     }
     // Message deleted in handler - do not delete here!
 }
@@ -387,6 +394,10 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     }
 
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
+
+    if(sessionStartTime <= 0.0) {   // Start website download duration measurement
+       sessionStartTime = simTime();
+    }
 
     if (!useSCTP) {
         // Create and initialize the socket
