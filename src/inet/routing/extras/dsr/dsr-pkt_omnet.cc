@@ -70,11 +70,11 @@ DSRPkt::~DSRPkt()
 
 void DSRPkt::clean()
 {
-    if (this->options)
-        delete [] this->options;
+    if (this->dsrOptions)
+        delete [] this->dsrOptions;
     if (costVectorSize>0)
         delete [] costVector;
-    this->options = nullptr;
+    this->dsrOptions = nullptr;
     this->costVectorSize = 0;
 }
 
@@ -82,7 +82,7 @@ DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram(m)
 {
 
     costVector = nullptr;
-    options = nullptr;
+    dsrOptions = nullptr;
     costVectorSize = 0;
     copy(m);
 }
@@ -99,10 +99,10 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 
 void DSRPkt::copy(const DSRPkt& m)
 {
-    struct dsr_opt_hdr *opth = m.options;
+    struct dsr_opt_hdr *opth = m.dsrOptions;
     int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
-    options = (struct dsr_opt_hdr *) new char[dsr_opts_len];
-    memcpy((char*)options, (char*)m.options, dsr_opts_len);
+    dsrOptions = (struct dsr_opt_hdr *) new char[dsr_opts_len];
+    memcpy((char*)dsrOptions, (char*)m.dsrOptions, dsr_opts_len);
 
     encap_protocol = m.encap_protocol;
     previous = m.previous;
@@ -124,7 +124,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 {
     costVectorSize = 0;
     costVector = nullptr;
-    options = nullptr;
+    dsrOptions = nullptr;
 
 
     setEncapProtocol((IPProtocolId)0);
@@ -151,10 +151,10 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
         opth = dp->dh.opth;
         int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
 
-        options = (dsr_opt_hdr *)new char[dsr_opts_len];
+        dsrOptions = (dsr_opt_hdr *)new char[dsr_opts_len];
 
-        memcpy((char*)options, (char*)opth, dsr_pkt_opts_len(dp));
-        setBitLength(getBitLength()+((DSR_OPT_HDR_LEN+options->p_len)*8));
+        memcpy((char*)dsrOptions, (char*)opth, dsr_pkt_opts_len(dp));
+        setBitLength(getBitLength()+((DSR_OPT_HDR_LEN+dsrOptions->p_len)*8));
         setHeaderLength(getByteLength());
 #ifdef NEWFRAGMENT
         setTotalPayloadLength(dp->totalPayloadLength);
@@ -186,7 +186,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
     }
 }
 
-void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
+void DSRPkt::modDsrOptions(struct dsr_pkt *dp, int interface_id)
 {
     setEncapProtocol((IPProtocolId)0);
     if (dp)
@@ -211,13 +211,13 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
         opth = dp->dh.opth;
         int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
 
-        if (options != nullptr)
-            delete [] options;
+        if (dsrOptions != nullptr)
+            delete [] dsrOptions;
 
-        options = (dsr_opt_hdr *)new char[dsr_opts_len];
-        memcpy((char*)options, (char*)opth, dsr_pkt_opts_len(dp));
+        dsrOptions = (dsr_opt_hdr *)new char[dsr_opts_len];
+        memcpy((char*)dsrOptions, (char*)opth, dsr_pkt_opts_len(dp));
 
-        setBitLength((DSR_OPT_HDR_LEN+IP_HDR_LEN+options->p_len)*8);
+        setBitLength((DSR_OPT_HDR_LEN+IP_HDR_LEN+dsrOptions->p_len)*8);
 
         if (dp->payload)
         {
@@ -264,10 +264,10 @@ std::string DSRPkt::detailedInfo() const
 {
     std::stringstream out;
     struct dsr_opt *dopt;
-    int dsr_len = options->p_len + DSR_OPT_HDR_LEN;
+    int dsr_len = dsrOptions->p_len + DSR_OPT_HDR_LEN;
     int l = DSR_OPT_HDR_LEN;
     out << " DSR Options "  << "\n"; // Khmm...
-    dopt = (struct dsr_opt *)(((char *)options) + DSR_OPT_HDR_LEN);
+    dopt = (struct dsr_opt *)(((char *)dsrOptions) + DSR_OPT_HDR_LEN);
     while (l < dsr_len && (dsr_len - l) > 2)
     {
         //DEBUG("dsr_len=%d l=%d\n", dsr_len, l);

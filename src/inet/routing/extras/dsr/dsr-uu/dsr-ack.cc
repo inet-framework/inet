@@ -185,7 +185,7 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
             int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
             options = (dsr_opt_hdr *)MALLOC (dsr_opts_len, GFP_ATOMIC);
             memcpy((char*)options,(char*)opth,dsr_pkt_opts_len(dp));
-            p->setOptions(options);
+            p->setDsrOptions(options);
             p->setBitLength (p->getBitLength()+((DSR_OPT_HDR_LEN+options->p_len)*8));
             p->setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
         }

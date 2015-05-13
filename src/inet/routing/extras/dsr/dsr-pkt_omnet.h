@@ -60,7 +60,7 @@ class DSRPkt : public IPv4Datagram
 {
 
   protected:
-    struct dsr_opt_hdr *options;
+    struct dsr_opt_hdr *dsrOptions;
     IPProtocolId encap_protocol;
     IPv4Address previous;
     IPv4Address next;
@@ -73,7 +73,7 @@ class DSRPkt : public IPv4Datagram
     void clean();
 
   public:
-    explicit DSRPkt(const char *name=nullptr) : IPv4Datagram(name) {costVector=nullptr; options=nullptr; costVectorSize=0; dsr_ttl=0; encap_protocol = (IPProtocolId)0; }
+    explicit DSRPkt(const char *name=nullptr) : IPv4Datagram(name) {costVector=nullptr; dsrOptions=nullptr; costVectorSize=0; dsr_ttl=0; encap_protocol = (IPProtocolId)0; }
     ~DSRPkt ();
     DSRPkt (const DSRPkt  &m);
     DSRPkt (struct dsr_pkt *dp,int interface_id);
@@ -85,7 +85,7 @@ class DSRPkt : public IPv4Datagram
     void setTimeToLive (int ttl) {setTtl(ttl);}
     int getTimeToLive() {return getTtl();}
 #endif
-    void    ModOptions (struct dsr_pkt *p,int);
+    void modDsrOptions (struct dsr_pkt *p,int);
     void setEncapProtocol(IPProtocolId procotol) {encap_protocol = procotol;}
     IPProtocolId getEncapProtocol() {return encap_protocol;}
 #ifdef MobilityFramework
@@ -99,8 +99,8 @@ class DSRPkt : public IPv4Datagram
     const IPv4Address nextAddress() const {return next;}
     void setNextAddress(const IPv4Address address_var) {next = address_var;}
 #endif
-    struct dsr_opt_hdr * getOptions() const {return options;}
-    void  setOptions(dsr_opt_hdr * op) {if (options !=nullptr) free(options);  options=op;}
+    struct dsr_opt_hdr * getDsrOptions() const {return dsrOptions;}
+    void  setDsrOptions(dsr_opt_hdr * op) {if (dsrOptions !=nullptr) free(dsrOptions);  dsrOptions=op;}
     virtual std::string detailedInfo() const override;
 
     void resetCostVector();

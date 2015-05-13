@@ -89,7 +89,7 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     {
         p = dp->ip_pkt;
         dp->ip_pkt = nullptr;
-        p->ModOptions(dp, interfaceId);
+        p->modDsrOptions(dp, interfaceId);
     }
     else
         p = new DSRPkt(dp, interfaceId);
