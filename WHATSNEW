@@ -208,6 +208,7 @@ Physical layer:
  - Renamed radio control info classes to TransmissionRequest and ReceptionIndication.
  - Added Ieee80211TransmissionRequest with an optional IIeee80211Mode parameter
    to allow the mac module to determine the exact physical layer operational mode.
+ - Added CosineAntenna and ParabolicAntenna.
  - Added basic antenna array support to be used with 802.11 HT modes.
  - Added arrival parameter to computeReceptionPower. Added snir parameter to
    computeIsReceptionSuccessful. Added snir parameter to computeReceptionDecision.
