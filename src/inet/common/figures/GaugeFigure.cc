@@ -27,6 +27,8 @@ Register_Class(GaugeFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
+#define M_PI 3.14159265358979323846
+
 static const double START_ANGLE = -M_PI/2;
 static const double END_ANGLE = M_PI;
 static const char *MODULE_NAME_PROPERTY = "moduleName";
