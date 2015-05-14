@@ -16,6 +16,7 @@
 //
 
 cplusplus {{
+#include "inet/common/TLVOption.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
@@ -23,6 +24,8 @@ cplusplus {{
 namespace inet;
 
 class noncobject L3Address;
+class noncobject TLVOptions;
+
 enum IPProtocolId;
 
 
@@ -36,4 +39,5 @@ packet GenericDatagram
     L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
     short hopLimit;
+    TLVOptions tlvOptions;
 }
