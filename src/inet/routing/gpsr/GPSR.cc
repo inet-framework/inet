@@ -20,6 +20,7 @@
 #include "inet/routing/gpsr/GPSR.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/IPSocket.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
@@ -243,7 +244,10 @@ GPSRPacket *GPSR::createPacket(L3Address destination, cPacket *content)
     gpsrPacket->setRoutingMode(GPSR_GREEDY_ROUTING);
     // KLUDGE: implement position registry protocol
     gpsrPacket->setDestinationPosition(getDestinationPosition(destination));
-    gpsrPacket->setBitLength(computePacketBitLength(gpsrPacket));
+    int bitLength = computePacketBitLength(gpsrPacket);
+    if (destination.getType() == L3Address::IPv4)
+        bitLength = utils::roundUp(bitLength, 8*4);
+    gpsrPacket->setBitLength(bitLength);
     gpsrPacket->encapsulate(content);
     return gpsrPacket;
 }
@@ -251,13 +255,14 @@ GPSRPacket *GPSR::createPacket(L3Address destination, cPacket *content)
 int GPSR::computePacketBitLength(GPSRPacket *packet)
 {
     // routingMode
-    int routingModeBits = 1;
+    int routingModeBits = 8;
     // destinationPosition, perimeterRoutingStartPosition, perimeterRoutingForwardPosition
     int positionsBits = 3 * 8 * positionByteLength;
     // currentFaceFirstSenderAddress, currentFaceFirstReceiverAddress, senderAddress
     int addressesBits = 3 * 8 * getSelfAddress().getAddressType()->getAddressByteLength();
-    // TODO: address size
-    return routingModeBits + positionsBits + addressesBits;
+    // type and length bits
+    int tlBits = 8 + 8;
+    return tlBits + routingModeBits + positionsBits + addressesBits;
 }
 
 //
