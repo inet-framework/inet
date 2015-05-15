@@ -28,6 +28,17 @@ class noncobject TLVOptions;
 
 enum IPProtocolId;
 
+//
+// Generic protocol TLV option types
+//
+enum GenericTLVOptionTypes
+{
+    GENERIC_TLVOPTION_NOP1 = 0;
+    GENERIC_TLVOPTION_NOPN = 1;
+    GENERIC_TLVOPTION_TLV_GPSR = 47;
+};
+
+
 
 //
 // Represents a generic network datagram with generic network addresses. 

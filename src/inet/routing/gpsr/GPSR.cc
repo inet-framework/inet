@@ -25,6 +25,18 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 
+#ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#endif
+
+#ifdef WITH_IPv6
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#endif
+
+#ifdef WITH_GENERIC
+#include "inet/networklayer/generic/GenericDatagram.h"
+#endif
+
 namespace inet {
 
 Define_Module(GPSR);
@@ -238,31 +250,28 @@ void GPSR::processBeacon(GPSRBeacon *beacon)
 // handling packets
 //
 
-GPSRPacket *GPSR::createPacket(L3Address destination, cPacket *content)
+GPSROption *GPSR::createGpsrOption(L3Address destination, cPacket *content)
 {
-    GPSRPacket *gpsrPacket = new GPSRPacket(content->getName());
-    gpsrPacket->setRoutingMode(GPSR_GREEDY_ROUTING);
+    GPSROption *gpsrOption = new GPSROption();
+    gpsrOption->setRoutingMode(GPSR_GREEDY_ROUTING);
     // KLUDGE: implement position registry protocol
-    gpsrPacket->setDestinationPosition(getDestinationPosition(destination));
-    int bitLength = computePacketBitLength(gpsrPacket);
-    if (destination.getType() == L3Address::IPv4)
-        bitLength = utils::roundUp(bitLength, 8*4);
-    gpsrPacket->setBitLength(bitLength);
-    gpsrPacket->encapsulate(content);
-    return gpsrPacket;
+    gpsrOption->setDestinationPosition(getDestinationPosition(destination));
+    gpsrOption->setLength(computeOptionLength(gpsrOption));
+    return gpsrOption;
 }
 
-int GPSR::computePacketBitLength(GPSRPacket *packet)
+int GPSR::computeOptionLength(GPSROption *option)
 {
     // routingMode
-    int routingModeBits = 8;
+    int routingModeBytes = 1;
     // destinationPosition, perimeterRoutingStartPosition, perimeterRoutingForwardPosition
-    int positionsBits = 3 * 8 * positionByteLength;
+    int positionsBytes = 3 * positionByteLength;
     // currentFaceFirstSenderAddress, currentFaceFirstReceiverAddress, senderAddress
-    int addressesBits = 3 * 8 * getSelfAddress().getAddressType()->getAddressByteLength();
-    // type and length bits
-    int tlBits = 8 + 8;
-    return tlBits + routingModeBits + positionsBits + addressesBits;
+    int addressesBytes = 3 * getSelfAddress().getAddressType()->getAddressByteLength();
+    // type and length
+    int tlBytes = 1 + 1;
+
+    return tlBytes + routingModeBytes + positionsBytes + addressesBytes;
 }
 
 //
@@ -359,8 +368,8 @@ L3Address GPSR::getSelfAddress() const
 
 L3Address GPSR::getSenderNeighborAddress(INetworkDatagram *datagram) const
 {
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
-    return packet->getSenderAddress();
+    const GPSROption *gpsrOption = getGprsOptionFromNetworkDatagram(datagram);
+    return gpsrOption->getSenderAddress();
 }
 
 //
@@ -452,10 +461,10 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
 
 L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
-    if (packet->getRoutingMode() == GPSR_GREEDY_ROUTING)
+    GPSROption *gpsrOption = getGprsOptionFromNetworkDatagram(datagram);
+    if (gpsrOption->getRoutingMode() == GPSR_GREEDY_ROUTING)
         return findGreedyRoutingNextHop(datagram, destination);
-    else if (packet->getRoutingMode() == GPSR_PERIMETER_ROUTING)
+    else if (gpsrOption->getRoutingMode() == GPSR_PERIMETER_ROUTING)
         return findPerimeterRoutingNextHop(datagram, destination);
     else
         throw cRuntimeError("Unknown routing mode");
@@ -464,10 +473,10 @@ L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destina
 L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using greedy routing: destination = " << destination << endl;
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSROption *gpsrOption = getGprsOptionFromNetworkDatagram(datagram);
     L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
-    Coord destinationPosition = packet->getDestinationPosition();
+    Coord destinationPosition = gpsrOption->getDestinationPosition();
     double bestDistance = (destinationPosition - selfPosition).length();
     L3Address bestNeighbor;
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
@@ -482,10 +491,10 @@ L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Add
     }
     if (bestNeighbor.isUnspecified()) {
         EV_DEBUG << "Switching to perimeter routing: destination = " << destination << endl;
-        packet->setRoutingMode(GPSR_PERIMETER_ROUTING);
-        packet->setPerimeterRoutingStartPosition(selfPosition);
-        packet->setCurrentFaceFirstSenderAddress(selfAddress);
-        packet->setCurrentFaceFirstReceiverAddress(L3Address());
+        gpsrOption->setRoutingMode(GPSR_PERIMETER_ROUTING);
+        gpsrOption->setPerimeterRoutingStartPosition(selfPosition);
+        gpsrOption->setCurrentFaceFirstSenderAddress(selfAddress);
+        gpsrOption->setCurrentFaceFirstReceiverAddress(L3Address());
         return findPerimeterRoutingNextHop(datagram, destination);
     }
     else
@@ -495,23 +504,23 @@ L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Add
 L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using perimeter routing: destination = " << destination << endl;
-    GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
+    GPSROption *gpsrOption = getGprsOptionFromNetworkDatagram(datagram);
     L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
-    Coord perimeterRoutingStartPosition = packet->getPerimeterRoutingStartPosition();
-    Coord destinationPosition = packet->getDestinationPosition();
+    Coord perimeterRoutingStartPosition = gpsrOption->getPerimeterRoutingStartPosition();
+    Coord destinationPosition = gpsrOption->getDestinationPosition();
     double selfDistance = (destinationPosition - selfPosition).length();
     double perimeterRoutingStartDistance = (destinationPosition - perimeterRoutingStartPosition).length();
     if (selfDistance < perimeterRoutingStartDistance) {
         EV_DEBUG << "Switching to greedy routing: destination = " << destination << endl;
-        packet->setRoutingMode(GPSR_GREEDY_ROUTING);
-        packet->setPerimeterRoutingStartPosition(Coord());
-        packet->setPerimeterRoutingForwardPosition(Coord());
+        gpsrOption->setRoutingMode(GPSR_GREEDY_ROUTING);
+        gpsrOption->setPerimeterRoutingStartPosition(Coord());
+        gpsrOption->setPerimeterRoutingForwardPosition(Coord());
         return findGreedyRoutingNextHop(datagram, destination);
     }
     else {
-        L3Address& firstSenderAddress = packet->getCurrentFaceFirstSenderAddress();
-        L3Address& firstReceiverAddress = packet->getCurrentFaceFirstReceiverAddress();
+        L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
+        L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
         L3Address nextNeighborAddress = getSenderNeighborAddress(datagram);
         bool hasIntersection;
         do {
@@ -527,8 +536,8 @@ L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3
             hasIntersection = !isNaN(intersection.x);
             if (hasIntersection) {
                 EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
-                packet->setCurrentFaceFirstSenderAddress(selfAddress);
-                packet->setCurrentFaceFirstReceiverAddress(L3Address());
+                gpsrOption->setCurrentFaceFirstSenderAddress(selfAddress);
+                gpsrOption->setCurrentFaceFirstReceiverAddress(L3Address());
             }
         } while (hasIntersection);
         if (firstSenderAddress == selfAddress && firstReceiverAddress == nextNeighborAddress) {
@@ -536,8 +545,8 @@ L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3
             return L3Address();
         }
         else {
-            if (packet->getCurrentFaceFirstReceiverAddress().isUnspecified())
-                packet->setCurrentFaceFirstReceiverAddress(nextNeighborAddress);
+            if (gpsrOption->getCurrentFaceFirstReceiverAddress().isUnspecified())
+                gpsrOption->setCurrentFaceFirstReceiverAddress(nextNeighborAddress);
             return nextNeighborAddress;
         }
     }
@@ -559,12 +568,157 @@ INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const 
     }
     else {
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
-        GPSRPacket *packet = check_and_cast<GPSRPacket *>(check_and_cast<cPacket *>(datagram)->getEncapsulatedPacket());
-        packet->setSenderAddress(getSelfAddress());
+        GPSROption *gpsrOption = getGprsOptionFromNetworkDatagram(datagram);
+        gpsrOption->setSenderAddress(getSelfAddress());
         // KLUDGE: find output interface
         outputInterfaceEntry = interfaceTable->getInterface(1);
         return ACCEPT;
     }
+}
+
+void GPSR::setGprsOptionOnNetworkDatagram(INetworkDatagram *datagram)
+{
+    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
+    GPSROption *gpsrOption = createGpsrOption(datagram->getDestinationAddress(), networkPacket->getEncapsulatedPacket());
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4Datagram *>(networkPacket)) {
+        gpsrOption->setType(IPOPTION_TLV_GPSR);
+        IPv4Datagram *dgram = static_cast<IPv4Datagram *>(networkPacket);
+        int oldHlen = dgram->calculateHeaderByteLength();
+        ASSERT(dgram->getHeaderLength() == oldHlen);
+        dgram->addOption(gpsrOption);
+        int newHlen = dgram->calculateHeaderByteLength();
+        dgram->setHeaderLength(newHlen);
+        dgram->addByteLength(newHlen - oldHlen);
+        dgram->setTotalLengthField(dgram->getTotalLengthField() + newHlen - oldHlen);
+    }
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6Datagram *>(networkPacket)) {
+        gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
+        IPv6Datagram *dgram = static_cast<IPv6Datagram *>(networkPacket);
+        int oldHlen = dgram->calculateHeaderByteLength();
+        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        if (hdr == nullptr) {
+            hdr = new IPv6HopByHopOptionsHeader();
+            dgram->addExtensionHeader(hdr);
+        }
+        hdr->getTlvOptions().add(gpsrOption);
+        hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
+        int newHlen = dgram->calculateHeaderByteLength();
+        dgram->addByteLength(newHlen - oldHlen);
+    }
+    else
+#endif
+#ifdef WITH_GENERIC
+    if (dynamic_cast<GenericDatagram *>(networkPacket)) {
+        gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
+        GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
+        int oldHlen = dgram->getTlvOptions().getLength();
+        dgram->getTlvOptions().add(gpsrOption);
+        int newHlen = dgram->getTlvOptions().getLength();
+        dgram->addByteLength(newHlen - oldHlen);
+    }
+    else
+#endif
+    {
+    }
+}
+
+GPSROption *GPSR::findGprsOptionInNetworkDatagram(INetworkDatagram *datagram)
+{
+    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
+    GPSROption *gpsrOption = nullptr;
+
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4Datagram *>(networkPacket)) {
+        IPv4Datagram *dgram = static_cast<IPv4Datagram *>(networkPacket);
+        gpsrOption = check_and_cast_nullable<GPSROption *>(dgram->findOptionByType(IPOPTION_TLV_GPSR));
+    }
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6Datagram *>(networkPacket)) {
+        IPv6Datagram *dgram = static_cast<IPv6Datagram *>(networkPacket);
+        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        if (hdr != nullptr) {
+            int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
+            if (i >= 0)
+                gpsrOption = check_and_cast_nullable<GPSROption *>(&(hdr->getTlvOptions().at(i)));
+        }
+    }
+    else
+#endif
+#ifdef WITH_GENERIC
+    if (dynamic_cast<GenericDatagram *>(networkPacket)) {
+        GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
+        int i = (dgram->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
+        if (i >= 0)
+            gpsrOption = check_and_cast_nullable<GPSROption *>(&(dgram->getTlvOptions().at(i)));
+    }
+    else
+#endif
+    {
+    }
+    return gpsrOption;
+}
+
+void GPSR::removeGprsOptionFromNetworkDatagram(INetworkDatagram *datagram)
+{
+    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
+
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4Datagram *>(networkPacket)) {
+        IPv4Datagram *dgram = static_cast<IPv4Datagram *>(networkPacket);
+        int oldHlen = dgram->calculateHeaderByteLength();
+        ASSERT(dgram->getHeaderLength() == oldHlen);
+        dgram->getOptions().deleteOptionByType(IPOPTION_TLV_GPSR);
+        int newHlen = dgram->calculateHeaderByteLength();
+        dgram->setHeaderLength(newHlen);
+        dgram->addByteLength(newHlen - oldHlen);
+        dgram->setTotalLengthField(dgram->getTotalLengthField() + newHlen - oldHlen);
+    }
+    else
+#endif
+#ifdef WITH_IPv6
+    if (dynamic_cast<IPv6Datagram *>(networkPacket)) {
+        IPv6Datagram *dgram = static_cast<IPv6Datagram *>(networkPacket);
+        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        if (hdr != nullptr) {
+            int oldHlen = dgram->calculateHeaderByteLength();
+            hdr->getTlvOptions().deleteOptionByType(IPv6TLVOPTION_TLV_GPSR);
+            if (hdr->getTlvOptions().getTlvOptionArraySize() == 0) {
+                dgram->removeExtensionHeader(IP_PROT_IPv6EXT_HOP);
+            }
+            else
+                hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
+            int newHlen = dgram->calculateHeaderByteLength();
+            dgram->addByteLength(newHlen - oldHlen);
+        }
+    }
+    else
+#endif
+#ifdef WITH_GENERIC
+    if (dynamic_cast<GenericDatagram *>(networkPacket)) {
+        GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
+        int oldHlen = dgram->getTlvOptions().getLength();
+        dgram->getTlvOptions().deleteOptionByType(GENERIC_TLVOPTION_TLV_GPSR);
+        int newHlen = dgram->getTlvOptions().getLength();
+        dgram->addByteLength(newHlen - oldHlen);
+    }
+    else
+#endif
+    {
+    }
+}
+
+GPSROption *GPSR::getGprsOptionFromNetworkDatagram(INetworkDatagram *datagram)
+{
+    GPSROption *gpsrOption = findGprsOptionInNetworkDatagram(datagram);
+    if (gpsrOption == nullptr)
+        throw cRuntimeError("GPSR option not found in datagram!");
+    return gpsrOption;
 }
 
 //
@@ -582,13 +736,7 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagra
 
 INetfilter::IHook::Result GPSR::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry)
 {
-    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
-    GPSRPacket *gpsrPacket = dynamic_cast<GPSRPacket *>(networkPacket->getEncapsulatedPacket());
-    if (gpsrPacket) {
-        networkPacket->decapsulate();
-        networkPacket->encapsulate(gpsrPacket->decapsulate());
-        delete gpsrPacket;
-    }
+    removeGprsOptionFromNetworkDatagram(datagram);
     return ACCEPT;
 }
 
@@ -598,9 +746,7 @@ INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram,
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
-        cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
-        GPSRPacket *gpsrPacket = createPacket(datagram->getDestinationAddress(), networkPacket->decapsulate());
-        networkPacket->encapsulate(gpsrPacket);
+        setGprsOptionOnNetworkDatagram(datagram);
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
     }
 }

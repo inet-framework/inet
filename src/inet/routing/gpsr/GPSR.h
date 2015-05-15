@@ -106,8 +106,17 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processBeacon(GPSRBeacon *beacon);
 
     // handling packets
-    GPSRPacket *createPacket(L3Address destination, cPacket *content);
-    int computePacketBitLength(GPSRPacket *packet);
+    GPSROption *createGpsrOption(L3Address destination, cPacket *content);
+    int computeOptionLength(GPSROption *gpsrOption);
+    void setGprsOptionOnNetworkDatagram(INetworkDatagram *datagram);
+    void removeGprsOptionFromNetworkDatagram(INetworkDatagram *datagram);
+
+    // returns nullptr if not found
+    GPSROption *findGprsOptionInNetworkDatagram(INetworkDatagram *datagram);
+
+    // throws an error when not found
+    GPSROption *getGprsOptionFromNetworkDatagram(INetworkDatagram *datagram);
+    const GPSROption *getGprsOptionFromNetworkDatagram(INetworkDatagram *datagram) const { return const_cast<GPSR *>(this)->getGprsOptionFromNetworkDatagram(datagram); }
 
     // configuration
     bool isNodeUp() const;

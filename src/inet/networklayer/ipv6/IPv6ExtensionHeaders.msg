@@ -35,6 +35,17 @@ class noncobject IPv6ExtensionHeader;
 class noncobject TLVOptions;
 
 //
+// IPv6 TLV option types
+//
+enum IPv6TLVOptionTypes
+{
+    IPv6TLVOPTION_NOP1 = 0;
+    IPv6TLVOPTION_NOPN = 1;
+    IPv6TLVOPTION_TLV_GPSR = 47;
+};
+
+
+//
 // Hop-by-Hop Options Header.
 // RFC 2460 Section 4.3
 // Next Header Value: 0
