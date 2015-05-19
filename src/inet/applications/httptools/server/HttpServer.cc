@@ -126,7 +126,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
-    SCTPSimpleMessage *reply = handleReceivedMessage(msg);
+    HttpReplyMessage *reply = handleReceivedMessage(msg);
     if (reply != nullptr) {
         if (!useSCTP) {
             TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
@@ -135,29 +135,51 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
         else {
             SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
 
+            // Fragment reply into SCTP messages of at most maxMsgSize bytes,
+            // if the reply is longer than maxMsgSize.
             const long totalReplyLength = reply->getByteLength();
             if (totalReplyLength > maxMsgSize) {
                 long toSend = totalReplyLength;
                 long j      = 0;
-                while (toSend > maxMsgSize) {
+                while (toSend > 0) {
                     const long txLength = std::min(toSend, maxMsgSize);
-
-                    HttpFragmentMessage* dummyMsg = new HttpFragmentMessage;
-                    dummyMsg->setByteLength(txLength);
-                    dummyMsg->setDataArraySize(dummyMsg->getByteLength());
-                    for (int i = 0; i < dummyMsg->getByteLength(); i++) {
-                        dummyMsg->setData(i, reply->getData(j++));
-                    }
-                    dummyMsg->setDataLen(dummyMsg->getByteLength());
-                    sctpSocket->send(dummyMsg);
-
                     toSend -= txLength;
+
+                    // Only the last message is of type HttpReplyMessage. Otherwise,
+                    // the messages are of type HttpFragmentMessage. The receiver
+                    // can then simply ignore them and wait for the last message
+                    // (i.e. HttpReplyMessage type) to have the full HTTP response.
+                    HttpBaseMessage* fragmentMsg =
+                      (toSend > 0) ? (HttpBaseMessage*)new HttpFragmentMessage :
+                                     (HttpBaseMessage*)reply->dup();
+
+                    fragmentMsg->setByteLength(txLength);
+                    fragmentMsg->setDataArraySize(fragmentMsg->getByteLength());
+                    for (int i = 0; i < fragmentMsg->getByteLength(); i++) {
+                        fragmentMsg->setData(i, reply->getData(j++));
+                    }
+
+                    /*
+                    // Debugging code: add a fragment ID to each fragment.
+                    static long fragmentID = 0;
+                    char fragmentStr[16];
+                    snprintf((char*)&fragmentStr, sizeof(fragmentStr), "**F-%06ld**", ++fragmentID);
+                    for (int i = 0; i < std::min((int)strlen(fragmentStr), (int)fragmentMsg->getByteLength()); i++) {
+                        fragmentMsg->setData(i, fragmentStr[i]);
+                    }
+                    */
+
+                    fragmentMsg->setDataLen(fragmentMsg->getByteLength());
+                    sctpSocket->send(fragmentMsg);
+
                 }
-                reply->setByteLength(toSend);
-                reply->setDataLen(toSend);
+                delete reply;
+            }
+            else {
+               // Reply size <= maxMsgSize => send it as is.
+               sctpSocket->send(reply);
             }
 
-            sctpSocket->send(reply);    // Send to socket if the reply is non-zero.
         }
     }
     delete msg;    // Delete the received message here. Must not be deleted in the handler!

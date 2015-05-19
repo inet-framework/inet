@@ -97,7 +97,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);
     HttpReplyMessage *generateErrorReply(HttpRequestMessage *request, int code);
     virtual std::string generateBody();
-    SCTPSimpleMessage *handleReceivedMessage(cMessage *msg);
+    HttpReplyMessage *handleReceivedMessage(cMessage *msg);
     void registerWithController();
     void readSiteDefinition(std::string file);
     std::string readHtmlBodyFile(std::string file, std::string path);

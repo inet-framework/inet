@@ -98,6 +98,24 @@ void HttpBrowser::handleMessage(cMessage *msg)
     }
 }
 
+void HttpBrowser::checkStartDownloadDurationMeasurement()
+{
+    if(sessionStartTime <= 0.0) {   // Start website download duration measurement
+       sessionStartTime = simTime();
+    }
+}
+
+void HttpBrowser::checkEndOfDownloadDurationMeasurement()
+{
+
+    if (tcpSockCollection.size() + sctpSockCollection.size() == 0) {
+        ASSERT(sessionStartTime.dbl() >= 0.0);
+        const simtime_t completionTime = simTime();
+        recordScalar("Website Download Duration", completionTime - sessionStartTime);
+        sessionStartTime = -1.0;
+    }
+}
+
 void HttpBrowser::sendRequestToServer(BrowseEvent be)
 {
     int connectPort;
@@ -236,13 +254,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
         else {
             sctpSocket->close();
         }
-
-        if (tcpSockCollection.size() + sctpSockCollection.size() == 1) {
-            ASSERT(sessionStartTime.dbl() >= 0.0);
-            const simtime_t completionTime = simTime();
-            recordScalar("Website Download Duration", completionTime - sessionStartTime);
-            sessionStartTime = -1.0;
-        }
+        checkEndOfDownloadDurationMeasurement();
     }
     // Message deleted in handler - do not delete here!
 }
@@ -320,6 +332,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
         sctpSockCollection.removeSocket(sctpSocket);
         delete sctpSocket;
     }
+    checkEndOfDownloadDurationMeasurement();
 }
 
 void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
@@ -350,6 +363,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
         sctpSockCollection.removeSocket(sctpSocket);
         delete sctpSocket;
     }
+    checkEndOfDownloadDurationMeasurement();
 }
 
 void HttpBrowser::socketDeleted(int connId, void *yourPtr)
@@ -395,9 +409,7 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
 
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
 
-    if(sessionStartTime <= 0.0) {   // Start website download duration measurement
-       sessionStartTime = simTime();
-    }
+    checkStartDownloadDurationMeasurement();
 
     if (!useSCTP) {
         // Create and initialize the socket

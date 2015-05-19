@@ -207,7 +207,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
     updateDisplay();
 }
 
-SCTPSimpleMessage *HttpServerBase::handleReceivedMessage(cMessage *msg)
+HttpReplyMessage *HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request == nullptr)
