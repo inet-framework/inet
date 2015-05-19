@@ -241,8 +241,8 @@ void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, in
     sendCommand->setPrMethod(prMethod);
     sendCommand->setLast(last);
     sendCommand->setPrimary(primary);
-    sendCommand->setSendUnordered( (msg->getKind() == SCTP_C_SEND_ORDERED) ?
-                                      COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED );
+    sendCommand->setSendUnordered( (msg->getKind() == SCTP_C_SEND_UNORDERED) ?
+                                   COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED );
 
     cPacket* cmsg = new cPacket("SCTP_C_SEND");
     cmsg->setKind(SCTP_C_SEND);
