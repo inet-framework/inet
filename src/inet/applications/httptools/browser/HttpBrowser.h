@@ -168,6 +168,9 @@ class INET_API HttpBrowser : public HttpBrowserBase,
   public:
     HttpBrowser();
     virtual ~HttpBrowser();
+    
+  private:
+    void appendRemoteInterface(char* szModuleName);
 };
 
 } // namespace httptools
