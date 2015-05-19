@@ -138,6 +138,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
             const long totalReplyLength = reply->getByteLength();
             if (totalReplyLength > maxMsgSize) {
                 long toSend = totalReplyLength;
+                long j      = 0;
                 while (toSend > maxMsgSize) {
                     const long txLength = std::min(toSend, maxMsgSize);
 
@@ -145,7 +146,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
                     dummyMsg->setByteLength(txLength);
                     dummyMsg->setDataArraySize(dummyMsg->getByteLength());
                     for (int i = 0; i < dummyMsg->getByteLength(); i++) {
-                        dummyMsg->setData(i, 'd');   // dummy data
+                        dummyMsg->setData(i, reply->getData(j++));
                     }
                     dummyMsg->setDataLen(dummyMsg->getByteLength());
                     sctpSocket->send(dummyMsg);

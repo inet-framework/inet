@@ -403,6 +403,8 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
+    const int szReqLength = strlen(szReq);
+
     HttpRequestMessage *msg = new HttpRequestMessage;
     msg->setName(szReq);
     msg->setTargetUrl(www.c_str());
@@ -417,7 +419,7 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
     if(useSCTP) {
         msg->setDataArraySize(msg->getByteLength());
         for (int i = 0; i < msg->getByteLength(); i++) {
-            msg->setData(i, 'G');   // dummy data
+            msg->setData(i, (i < szReqLength) ? szReq[i] : 0x00);
         }
         msg->setDataLen(msg->getByteLength());
     }
@@ -461,6 +463,7 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
+    const int szReqLength = strlen(szReq);
 
     HttpRequestMessage *msg = new HttpRequestMessage;
     msg->setName(szReq);
@@ -476,7 +479,7 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
     if(useSCTP) {
         msg->setDataArraySize(msg->getByteLength());
         for (int i = 0; i < msg->getByteLength(); i++) {
-            msg->setData(i, 'G');   // dummy data
+            msg->setData(i, (i < szReqLength) ? szReq[i] : 0x00);
         }
         msg->setDataLen(msg->getByteLength());
     }
