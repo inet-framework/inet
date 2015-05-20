@@ -593,8 +593,8 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
         }
     }
 #endif /* WITH_xMIPv6 */
-    else if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<ICMPv6Message *>(packet)) {
-        handleReceivedICMP(dynamic_cast<ICMPv6Message *>(packet));
+    else if (protocol == IP_PROT_IPv6_ICMP) {
+        handleReceivedICMP(check_and_cast<ICMPv6Message *>(packet));
         packet = nullptr;
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6) {
