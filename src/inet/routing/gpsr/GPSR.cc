@@ -129,7 +129,7 @@ void GPSR::processSelfMessage(cMessage *message)
 void GPSR::processMessage(cMessage *message)
 {
     if (dynamic_cast<UDPPacket *>(message))
-        processUDPPacket((UDPPacket *)message);
+        processUDPPacket(static_cast<UDPPacket *>(message));
     else
         throw cRuntimeError("Unknown message");
 }
@@ -216,7 +216,7 @@ void GPSR::processUDPPacket(UDPPacket *packet)
 
 GPSRBeacon *GPSR::createBeacon()
 {
-    GPSRBeacon *beacon = new GPSRBeacon();
+    GPSRBeacon *beacon = new GPSRBeacon("GPSRBeacon");
     beacon->setAddress(getSelfAddress());
     beacon->setPosition(mobility->getCurrentPosition());
     beacon->setByteLength(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength);
