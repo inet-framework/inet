@@ -97,8 +97,8 @@ module IPv6NetworkLayer like INetworkLayer
         iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
 
         // IPv6 to ICMPv6
-        ipv6.icmpOut --> icmpv6.ipv6In;
-        ipv6.icmpIn <-- icmpv6.ipv6Out;
+        ipv6.transportOut++ --> icmpv6.ipv6In;
+        ipv6.transportIn++ <-- icmpv6.ipv6Out;
 
         // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;

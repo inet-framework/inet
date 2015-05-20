@@ -127,8 +127,8 @@ void IPv6::handleMessage(cMessage *msg)
         if (msg->getArrivalGate()->isName("transportIn")) {
             mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         }
-//        else
-//            throw cRuntimeError("RegisterTransportProtocolCommand %d arrived invalid gate '%s'", command->getProtocol(), msg->getArrivalGate()->getFullName());
+        else
+            throw cRuntimeError("RegisterTransportProtocolCommand %d arrived invalid gate '%s'", command->getProtocol(), msg->getArrivalGate()->getFullName());
         delete msg;
     }
     else
@@ -161,7 +161,6 @@ void IPv6::endService(cPacket *msg)
 
     if (msg->getArrivalGate()->isName("transportIn")
         || (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage *>(msg))
-        || (msg->getArrivalGate()->isName("icmpIn") && dynamic_cast<ICMPv6Message *>(msg))    //Added this for ICMP msgs from ICMP module-WEI
         || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
         || (msg->getArrivalGate()->isName("xMIPv6In") && dynamic_cast<MobilityHeader *>(msg))    // Zarrar
@@ -643,7 +642,8 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
         // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        send(msg, "icmpOut");
+        int gateindex = mapping.getOutputGateForProtocol(IP_PROT_IPv6_ICMP);
+        send(msg, "transportOut", gateindex);
     }
 }
 

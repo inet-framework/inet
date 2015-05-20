@@ -80,8 +80,6 @@ simple IPv6
         output transportOut[] @labels(IPv6ControlInfo/up,TCPSegment,UDPPacket);
         input queueIn[] @labels(IPv6Datagram);
         output queueOut[] @labels(IPv6Datagram);
-        input icmpIn;
-        output icmpOut;
         input ndIn;
         output ndOut;
         // tunneling gates - CB
