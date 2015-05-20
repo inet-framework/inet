@@ -664,55 +664,6 @@ GPSROption *GPSR::findGprsOptionInNetworkDatagram(INetworkDatagram *datagram)
     return gpsrOption;
 }
 
-void GPSR::removeGprsOptionFromNetworkDatagram(INetworkDatagram *datagram)
-{
-    cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
-
-#ifdef WITH_IPv4
-    if (dynamic_cast<IPv4Datagram *>(networkPacket)) {
-        IPv4Datagram *dgram = static_cast<IPv4Datagram *>(networkPacket);
-        int oldHlen = dgram->calculateHeaderByteLength();
-        ASSERT(dgram->getHeaderLength() == oldHlen);
-        dgram->getOptions().deleteOptionByType(IPOPTION_TLV_GPSR);
-        int newHlen = dgram->calculateHeaderByteLength();
-        dgram->setHeaderLength(newHlen);
-        dgram->addByteLength(newHlen - oldHlen);
-        dgram->setTotalLengthField(dgram->getTotalLengthField() + newHlen - oldHlen);
-    }
-    else
-#endif
-#ifdef WITH_IPv6
-    if (dynamic_cast<IPv6Datagram *>(networkPacket)) {
-        IPv6Datagram *dgram = static_cast<IPv6Datagram *>(networkPacket);
-        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
-        if (hdr != nullptr) {
-            int oldHlen = dgram->calculateHeaderByteLength();
-            hdr->getTlvOptions().deleteOptionByType(IPv6TLVOPTION_TLV_GPSR);
-            if (hdr->getTlvOptions().getTlvOptionArraySize() == 0) {
-                dgram->removeExtensionHeader(IP_PROT_IPv6EXT_HOP);
-            }
-            else
-                hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
-            int newHlen = dgram->calculateHeaderByteLength();
-            dgram->addByteLength(newHlen - oldHlen);
-        }
-    }
-    else
-#endif
-#ifdef WITH_GENERIC
-    if (dynamic_cast<GenericDatagram *>(networkPacket)) {
-        GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
-        int oldHlen = dgram->getTlvOptions().getLength();
-        dgram->getTlvOptions().deleteOptionByType(GENERIC_TLVOPTION_TLV_GPSR);
-        int newHlen = dgram->getTlvOptions().getLength();
-        dgram->addByteLength(newHlen - oldHlen);
-    }
-    else
-#endif
-    {
-    }
-}
-
 GPSROption *GPSR::getGprsOptionFromNetworkDatagram(INetworkDatagram *datagram)
 {
     GPSROption *gpsrOption = findGprsOptionInNetworkDatagram(datagram);
@@ -732,12 +683,6 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagra
         return ACCEPT;
     else
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
-}
-
-INetfilter::IHook::Result GPSR::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry)
-{
-    removeGprsOptionFromNetworkDatagram(datagram);
-    return ACCEPT;
 }
 
 INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
