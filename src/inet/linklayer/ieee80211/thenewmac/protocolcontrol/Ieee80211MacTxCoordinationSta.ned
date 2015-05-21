@@ -19,11 +19,15 @@ package inet.linklayer.ieee80211.thenewmac.protocolcontrol;
 
 simple Ieee80211MacTxCoordinationSta
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+        
     gates:
         inout txOBackoff; // From Backoff: [BkDone], to Backoff: [Backoff, Cancel]
         inout txODataPump; // From DataPump: [TxConfirm], to DataPump: [TxRequest]
         input txRx; // From Rx_Coordination: [Ack, Cts, Cfend, Cfpoll, TxCfAck]
-        inout tdat;
-        output rctl;
-        inout tmgt;
+        inout tdat; // From ... [PduRequest], to ... [AtimW, PduConfirm, CfPolled]
+        output rctl; // To ... [ChangeNav]
+        inout tmgt; // From ... [Doze, MmCancel, SwChnl, Tbtt, Wake] To ... [PsmDone, SwDone]
 }
