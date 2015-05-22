@@ -22,5 +22,21 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacMib);
 
+void Ieee80211MacMib::handleMessage(cMessage* msg)
+{
+    throw cRuntimeError("This module doesnt handle self messages");
+}
+
+void Ieee80211MacMib::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+
+        macmib->getOperationTable()->setDot11LongRetryLimit(par("longRetryLimit"));
+    }
+}
+
 } /* namespace inet */
 } /* namespace ieee80211 */
+

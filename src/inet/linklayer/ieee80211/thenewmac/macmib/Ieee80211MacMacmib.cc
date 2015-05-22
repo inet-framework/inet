@@ -15,33 +15,33 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211MACMIB_H
-#define __INET_IEEE80211MACMIB_H
-
-#include "inet/common/INETDefs.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
-#include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
+#include "Ieee80211MacMacmib.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacMib : public Ieee80211MacMacProcessBase
+Define_Module(Ieee80211MacMacmibPackage);
+
+void Ieee80211MacMacmibPackage::handleMessage(cMessage* msg)
 {
+    throw cRuntimeError("This module doesn't handle self message");
+}
 
-};
-
-class INET_API Ieee80211MacMib : public IIeee80211MacMib
+void Ieee80211MacMacmibPackage::initialize(int stage)
 {
-    protected:
-        Ieee80211MacMacmibPackage *macmib = nullptr;
+    if (stage == INITSTAGE_LOCAL)
+    {
+        countersTable = new Ieee80211MacMacmibCountersTable();
+        operationTable = new Ieee80211MacMacmibOperationTable();
+    }
+}
 
-    protected:
-        void handleMessage(cMessage *msg) override;
-        void initialize(int stage) override;
-};
+Ieee80211MacMacmibPackage::~Ieee80211MacMacmibPackage()
+{
+    delete countersTable;
+    delete operationTable;
+}
 
 } /* namespace inet */
 } /* namespace ieee80211 */
 
-#endif // ifndef __INET_IEEE80211MACMIB_H

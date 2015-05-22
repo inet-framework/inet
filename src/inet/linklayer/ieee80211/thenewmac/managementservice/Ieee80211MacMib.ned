@@ -15,8 +15,35 @@
 
 package inet.linklayer.ieee80211.thenewmac.managementservice;
 
+// 
+// Declarations of MIB attributes exported from this process
+//
 simple Ieee80211MacMib
 {
+    parameters:
+        string macmibPackage = default("^.^.macmib");
+        
+        string authenticationAlgorithms @enum("open_system", "shared_key");
+        bool excludeUnencrypted;
+        int fragmentationThreshold;
+        string groupAddresses;
+        int longRetryLimit;
+        double maxReceiveLifetime;
+        double maxTransmitMsduLifetime;
+        double mediumOccupancyLimit;
+        bool privacyInvoked;
+        bool mReceiveDTIMs;
+        int cfpPeriod;
+        double cfpMaxDuration;
+        double authenticationResponseTimeout;
+        int rtsThreshold;
+        int shortRetryLimit;
+        int wepDefaultKeyId;
+        int currentChannelNumber;
+        int currentSet;
+        int currentPattern;
+        int currentIndex;
+        
     gates:
         output mres;
 }
