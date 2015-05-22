@@ -18,6 +18,8 @@
 package inet.linklayer.ieee80211.thenewmac;
 
 import inet.linklayer.ieee80211.thenewmac.dataservice.Ieee80211MacDataService;
+import inet.linklayer.ieee80211.thenewmac.macmib.Ieee80211MacMacmib;
+import inet.linklayer.ieee80211.thenewmac.macsorts.Ieee80211MacMacsorts;
 import inet.linklayer.ieee80211.thenewmac.managementservice.Ieee80211MacManagementService;
 import inet.linklayer.ieee80211.thenewmac.mlme.Ieee80211MacMlme;
 import inet.linklayer.ieee80211.thenewmac.mpdugeneration.Ieee80211MacMpduGeneration;
@@ -28,7 +30,7 @@ import inet.linklayer.ieee80211.thenewmac.transmission.Ieee80211MacTransmission;
 
 module Ieee80211NewMac
 {
-    @display("bgb=354,417");
+    @display("bgb=450,417");
     submodules:
         dataService: Ieee80211MacDataService {
             @display("p=64,58");
@@ -51,7 +53,12 @@ module Ieee80211NewMac
         reception: Ieee80211MacReception {
             @display("p=277,351");
         }
-
+        macsorts: Ieee80211MacMacsorts {
+            @display("p=410,58");
+        }
+        macmib: Ieee80211MacMacmib {
+            @display("p=410,140");
+        }
     connections:
         transmission.csFromCs <-- reception.csToTx;
         transmission.txTxrq[0] <--> protocolControl.txTxO[0]; // DataPump <-->  Tx_Coordination_sta
