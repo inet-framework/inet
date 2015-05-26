@@ -602,6 +602,7 @@ void GPSR::setGprsOptionOnNetworkDatagram(INetworkDatagram *datagram)
         IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr == nullptr) {
             hdr = new IPv6HopByHopOptionsHeader();
+            hdr->setByteLength(8);
             dgram->addExtensionHeader(hdr);
         }
         hdr->getTlvOptions().add(gpsrOption);
