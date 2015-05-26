@@ -66,8 +66,6 @@ void ARP::initialize(int stage)
         cacheTimeout = par("cacheTimeout");
         respondToProxyARP = par("respondToProxyARP");
 
-        netwOutGate = gate("netwOut");
-
         // init statistics
         numRequestsSent = numRepliesSent = 0;
         numResolutions = numFailedResolutions = 0;
@@ -85,6 +83,7 @@ void ARP::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         isUp = isNodeUp();
+        registerProtocol(Protocol::arp, gate("ifOut"));
     }
 }
 
@@ -217,7 +216,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
 
     // send out
     EV_INFO << "Sending " << msg << " to network protocol.\n";
-    send(msg, netwOutGate);
+    send(msg, "ifOut");
 }
 
 void ARP::sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress)

@@ -108,6 +108,11 @@ module InternetCloud
                     parameters:
                         @display("p=450,108");
                 }
+                dp: MessageDispatcher {
+                    parameters:
+                        @display("p=350,286;b=380,5,,,,1");
+                }
+
             connections allowunconnected:
                 // transport Layer
                 ip.transportOut --> icmp.localIn;
@@ -115,11 +120,14 @@ module InternetCloud
 
                 icmp.errorOut --> errorHandling.in;
 
-                ip.arpOut --> arp.netwIn;
-                ip.arpIn <-- arp.netwOut;
+                arp.netwIn <-- dp.upperLayerOut++;
+                arp.netwOut --> dp.upperLayerIn++;
 
-                ip.queueIn <-- { @display("m=s"); } <-- ifIn;
-                ip.queueOut --> { @display("m=s"); } --> ifOut;
+                ip.queueIn <-- { @display("m=s"); } <-- dp.upperLayerOut++;
+                ip.queueOut --> { @display("m=s"); } --> dp.upperLayerIn++;
+
+                dp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
+                dp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
         }
     submodules:
         interfaceTable: InterfaceTable {

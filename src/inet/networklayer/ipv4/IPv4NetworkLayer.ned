@@ -55,6 +55,8 @@ module IPv4NetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
         input igmpIn;
         output igmpOut;
+        input arpIn;
+        output arpOut;
 
     submodules:
         configurator: IPv4NodeConfigurator {
@@ -90,6 +92,10 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=650,100");
         }
+        ifdp: MessageDispatcher {
+            parameters:
+                @display("p=450,400;b=480,5");
+        }
 
     connections allowunconnected:
         dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
@@ -113,13 +119,16 @@ module IPv4NetworkLayer like INetworkLayer
         ip.transportOut --> dp.lowerLayerIn++;
         ip.transportIn <-- dp.lowerLayerOut++;
 
+        arp.ifOut --> ifdp.upperLayerIn++;
+        arp.ifIn <-- ifdp.upperLayerOut++;
+
         igmp.routerOut --> igmpOut;
         igmp.routerIn <-- igmpIn;
 
-        ip.arpOut --> arp.netwIn;
-        ip.arpIn <-- arp.netwOut;
+        ip.queueIn <-- ifdp.upperLayerOut++;
+        ip.queueOut --> ifdp.upperLayerIn++;
 
-        ip.queueIn <-- { @display("m=s"); } <-- ifIn;
-        ip.queueOut --> { @display("m=s"); } --> ifOut;
+        ifdp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
+        ifdp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
 }
 

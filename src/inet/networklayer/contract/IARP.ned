@@ -31,5 +31,7 @@ moduleinterface IARP
     gates:
         input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ARPPacket+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
+        input ifIn @labels(ARPPacket,Ieee802Ctrl);
+        output ifOut @labels(ARPPacket,Ieee802Ctrl);
 }
 
