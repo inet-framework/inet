@@ -82,5 +82,15 @@ simtime_t PositionTable::getOldestPosition() const
     return oldestPosition;
 }
 
+std::ostream& operator << (std::ostream& o, const PositionTable& t)
+{
+    o << "{ ";
+    for(auto elem : t.addressToPositionMap) {
+        o << elem.first << ":(" << elem.second.first << ";" << elem.second.second << ") ";
+    }
+    o << "}";
+    return o;
+}
+
 } // namespace inet
 
