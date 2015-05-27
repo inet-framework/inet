@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "inet/linklayer/ppp/PPP.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -234,8 +235,8 @@ void PPP::refreshOutGateConnection(bool connected)
 void PPP::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
-    delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
+    delete msg->removeControlInfo();
 
     if (hasGUI())
         displayBusy();
@@ -308,10 +309,15 @@ void PPP::handleMessage(cMessage *msg)
             PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
             emit(rxPkOkSignal, pppFrame);
             cPacket *payload = decapsulate(pppFrame);
+            SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
+            controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+            controlInfo->setNetworkProtocol(pppFrame->getProtocol());
+            payload->setControlInfo(controlInfo);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
             EV_INFO << "Sending " << payload << " to upper layer.\n";
             send(payload, "netwOut");
+            delete pppFrame;
         }
     }
     else {    // arrived on gate "netwIn"
@@ -408,7 +414,9 @@ void PPP::updateDisplayString()
 
 PPPFrame *PPP::encapsulate(cPacket *msg)
 {
+    IMACProtocolControlInfo *controlInfo = check_and_cast<IMACProtocolControlInfo *>(msg->getControlInfo());
     PPPFrame *pppFrame = new PPPFrame(msg->getName());
+    pppFrame->setProtocol(controlInfo->getNetworkProtocol());
     pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
     pppFrame->encapsulate(msg);
     return pppFrame;
@@ -416,9 +424,7 @@ PPPFrame *PPP::encapsulate(cPacket *msg)
 
 cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 {
-    cPacket *msg = pppFrame->decapsulate();
-    delete pppFrame;
-    return msg;
+    return pppFrame->decapsulate();
 }
 
 void PPP::flushQueue()

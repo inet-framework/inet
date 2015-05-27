@@ -47,6 +47,7 @@ const int PPP_OVERHEAD_BYTES = 7;
 //
 packet PPPFrame
 {
+    int protocol = -1;
 }
 
 
