@@ -106,7 +106,7 @@ packet Ieee80211NewPsPoll
     MACAddress ta;
 }
 
-packet Ieee80211CfEnd
+packet Ieee80211NewCfEnd
 {
     Ieee80211FrameControl frameControl;
     // The Duration field is set to 0.
@@ -115,4 +115,49 @@ packet Ieee80211CfEnd
     MACAddress ra;
     // The BSSID field is the address of the STA contained in the AP.
     MACAddress bssid;
+}
+
+packet Ieee80211NewCfEndCfAck
+{
+    Ieee80211FrameControl frameControl;
+    // The Duration field is set to 0.
+    simtime_t duration = 0;
+    // The RA field is the broadcast group address.
+    MACAddress ra;
+    // The BSSID field is the address of the STA contained in the AP.
+    MACAddress bssid;
+    int fcs;
+}
+
+class SequenceControl
+{
+    int fragmentNumber;
+    int sequenceNumber;
+}
+
+// 8.3.2.1 Data frame format - p. 413
+packet Ieee80211NewDataFrame
+{
+    Ieee80211FrameControl frameControl;
+    simtime_t duration;
+    MACAddress address1;
+    MACAddress address2;
+    MACAddress address3;
+    SequenceControl sequenceControl;
+    MACAddress address4;
+    // TODO: QoS Control
+    // HT Control
+    int fcs;
+}
+
+packet Ieee80211NewManagementFrame
+{
+    Ieee802111FrameControl frameControl;
+    simtime_t duration;
+    MACAddress address1;
+    MACAddress address2;
+    MACAddress address3;
+    SequenceControl sequenceControl;
+    // TODO: HT Control
+    int fcs;
 }
