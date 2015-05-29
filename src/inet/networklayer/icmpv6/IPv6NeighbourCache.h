@@ -72,23 +72,23 @@ class INET_API IPv6NeighbourCache
     struct Neighbour
     {
         // Neighbour info
-        const Key *nceKey;    // points back to the key that links to this NCE
+        const Key *nceKey = nullptr;    // points back to the key that links to this NCE
         MACAddress macAddress;
-        bool isRouter;
-        bool isHomeAgent;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
+        bool isRouter = false;
+        bool isHomeAgent = false;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
 
         // Neighbour Unreachability Detection variables
-        ReachabilityState reachabilityState;
+        ReachabilityState reachabilityState = (ReachabilityState)(-1);
         simtime_t reachabilityExpires;    // reachabilityLastConfirmed+reachableTime
-        short numProbesSent;
-        cMessage *nudTimeoutEvent;    // DELAY or PROBE timer
+        short numProbesSent = 0;
+        cMessage *nudTimeoutEvent = nullptr;    // DELAY or PROBE timer
 
         //WEI-We could have a separate AREntry in the ND module.
         //But we should merge those information in the neighbour cache for a
         //cleaner solution. if reachability state is INCOMPLETE, it means that
         //addr resolution is being performed for this NCE.
         unsigned int numOfARNSSent;
-        cMessage *arTimer;    //Address Resolution self-message timer
+        cMessage *arTimer = nullptr;    //Address Resolution self-message timer
         MsgPtrVector pendingPackets;    //ptrs to queued packets associated with this NCE
         IPv6Address nsSrcAddr;    //the src addr that was used to send the previous NS
 
@@ -102,25 +102,13 @@ class INET_API IPv6NeighbourCache
         simtime_t routerExpiryTime;    // time when router lifetime expires
 
         // for double-linked list of default routers, see DefaultRouterList
-        Neighbour *prevDefaultRouter;
-        Neighbour *nextDefaultRouter;
+        Neighbour *prevDefaultRouter = nullptr;
+        Neighbour *nextDefaultRouter = nullptr;
 
         // is it on the Default Router List?
         bool isDefaultRouter() const { return prevDefaultRouter && nextDefaultRouter; }
 
-        Neighbour()
-        {
-            nceKey = nullptr;
-            isRouter = isHomeAgent = false;
-            reachabilityState = (ReachabilityState) - 1    /*=unset*/;
-            reachabilityExpires = 0;
-            numProbesSent = 0;
-            nudTimeoutEvent = nullptr;
-            numOfARNSSent = 0;
-            arTimer = nullptr;
-            routerExpiryTime = 0;
-            prevDefaultRouter = nextDefaultRouter = nullptr;
-        }
+        Neighbour() {}
     };
 
     // Design note: we could have polymorphic entries in the neighbour cache
