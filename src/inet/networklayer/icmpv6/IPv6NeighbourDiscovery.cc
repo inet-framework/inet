@@ -184,7 +184,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         processNDMessage(ndMsg, ctrlInfo);
     }
     else if (dynamic_cast<IPv6Datagram *>(msg)) {    // not ND message
-        IPv6Datagram *datagram = (IPv6Datagram *)msg;
+        IPv6Datagram *datagram = static_cast<IPv6Datagram *>(msg);
         processIPv6Datagram(datagram);
     }
     else
@@ -296,7 +296,6 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
 {
     for (auto advIfEntry : advIfList) {
-        
         if (advIfEntry->interfaceId == ie->getInterfaceId()) {
             return advIfEntry;
         }
@@ -465,6 +464,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(const IPv6Address& destAddr
 void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour *nce)
 {
     ASSERT(nce->reachabilityState == IPv6NeighbourCache::STALE);
+    ASSERT(nce->nudTimeoutEvent == nullptr);
     const Key *nceKey = nce->nceKey;
     EV_INFO << "Initiating Neighbour Unreachability Detection";
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
@@ -509,8 +509,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     if (nce->numProbesSent == (int)ie->ipv6Data()->_getMaxUnicastSolicit()) {
         EV_DETAIL << "Max number of probes have been sent." << endl;
         EV_DETAIL << "Neighbour is Unreachable, removing NCE." << endl;
-        neighbourCache.remove(nceKey->address, nceKey->interfaceID);
-        delete timeoutMsg;
+        neighbourCache.remove(nceKey->address, nceKey->interfaceID); // remove nce from cache, cancel and delete timeoutMsg;
         return;
     }
 
@@ -707,13 +706,13 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
        solicitations, address resolution has failed. The sender MUST return ICMP
        destination unreachable indications with code 3 (Address Unreachable) for
        each packet queued awaiting address resolution.*/
-    MsgPtrVector pendingPackets = nce->pendingPackets;
+    MsgPtrVector& pendingPackets = nce->pendingPackets;
     EV_INFO << "Pending Packets empty:" << pendingPackets.empty() << endl;
 
     while (!pendingPackets.empty()) {
         auto i = pendingPackets.begin();
         cMessage *msg = (*i);
-        IPv6Datagram *ipv6Msg = (IPv6Datagram *)msg;
+        IPv6Datagram *ipv6Msg = check_and_cast<IPv6Datagram *>(msg);
         //Assume msg is the packet itself. I need the datagram's source addr.
         //The datagram's src addr will be the destination of the unreachable msg.
         EV_INFO << "Sending ICMP unreachable destination." << endl;
@@ -749,7 +748,7 @@ void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
 {
     MsgPtrVector& pendingPackets = nce->pendingPackets;
 
-    while (!pendingPackets.empty()) {    //FIXME: pendingPackets are always empty!!!!
+    while (!pendingPackets.empty()) {
         auto i = pendingPackets.begin();
         cMessage *msg = (*i);
         pendingPackets.erase(i);
