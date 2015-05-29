@@ -141,6 +141,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * it's unroutable or forwarding is off.
      */
     virtual void routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress, bool fromHL);
+    virtual void routePacketStep2(IPv6Datagram *datagram, int interfaceID, IPv6Address nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().

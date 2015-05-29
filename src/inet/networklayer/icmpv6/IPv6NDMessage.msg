@@ -172,3 +172,11 @@ packet IPv6Redirect extends IPv6NDMessage
     MACAddress targetLinkLayerAddress;
         //Redirected Header Encapsulated Msg
 }
+
+class IPv6NDControlInfo
+{
+    IPv6Address nextHop;   // next hop address
+    int interfaceId = -1; // interface on which the datagram should be sent
+    bool fromHL = false;    // packet came from higher layer
+}
+

@@ -231,9 +231,17 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 {
     EV_INFO << "Packet " << msg << " arrived from IPv6 module.\n";
 
-    int nextHopIfID;
-    EV_INFO << "Determining Next Hop" << endl;
-    IPv6Address nextHopAddr = determineNextHop(msg->getDestAddress(), nextHopIfID);
+    IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->getControlInfo());
+    int nextHopIfID = ctrl->getInterfaceId();
+    IPv6Address nextHopAddr = ctrl->getNextHop();
+    //bool fromHL = ctrl->getFromHL();
+
+    if (nextHopIfID == -1 || nextHopAddr.isUnspecified()) {
+        EV_INFO << "Determining Next Hop" << endl;
+        nextHopAddr = determineNextHop(msg->getDestAddress(), nextHopIfID);
+        ctrl->setInterfaceId(nextHopIfID);
+        ctrl->setNextHop(nextHopAddr);
+    }
 
     if (nextHopIfID == -1) {
         //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
@@ -283,7 +291,8 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::REACHABLE) {
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
+        //sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
+        send(msg, "ipv6Out");
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::DELAY) {    //TODO: What if NCE is in PROBE state?
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";

@@ -170,14 +170,26 @@ void IPv6::endService(cPacket *msg)
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
         handleMessageFromHL(msg);
     }
+    else if (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6Datagram *>(msg)) {
+        IPv6Datagram *datagram = static_cast<IPv6Datagram *>(msg);
+        IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
+        bool fromHL = ctrl->getFromHL();
+        IPv6Address nextHop = ctrl->getNextHop();
+        int interfaceId = ctrl->getInterfaceId();
+        delete ctrl;
+        routePacketStep2(datagram, interfaceId, nextHop, fromHL);
+    }
     else {
         // datagram from network or from ND: localDeliver and/or route
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(msg);
         bool fromHL = false;
         if (datagram->getArrivalGate()->isName("ndIn")) {
-            cMsgPar& p = msg->par("IPv6-fromHL");
-            fromHL = p.boolValue();
-            delete msg->getParList().remove(&p);
+            IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
+            fromHL = ctrl->getFromHL();
+            IPv6Address nextHop = ctrl->getNextHop();
+            int interfaceId = ctrl->getInterfaceId();
+            delete ctrl;
+            routePacketStep2(datagram, interfaceId, nextHop, fromHL);
         }
 
         // Do not handle header biterrors, because
@@ -281,7 +293,7 @@ void IPv6::datagramLocalOut(IPv6Datagram *datagram, const InterfaceEntry *destIE
 }
 
 //FIXME should use parameters!!!
-void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, IPv6Address requestedNextHopAddress___, bool fromHL)
+void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress, bool fromHL)
 {
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
@@ -327,8 +339,8 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, 
     }
 
     // routing
-    int interfaceId = -1;
-    IPv6Address nextHop;
+    int interfaceId = destIE ? destIE->getInterfaceId() : -1;
+    IPv6Address nextHop(requestedNextHopAddress);
 
 #ifdef WITH_xMIPv6
     // tunneling support - CB
@@ -370,11 +382,16 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, 
             return;
     // don't raise error if sent to ND or ICMP!
 
+    routePacketStep2(datagram, interfaceId, nextHop, fromHL);
+}
+
+void IPv6::routePacketStep2(IPv6Datagram *datagram, int interfaceId, IPv6Address nextHop, bool fromHL)
+{
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie != nullptr);
-    EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
-
     ASSERT(!nextHop.isUnspecified());
+    IPv6Address destAddress = datagram->getDestAddress();
+    EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
 
 #ifdef WITH_xMIPv6
     if (rt->isMobileNode()) {
@@ -395,7 +412,11 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, 
     if (macAddr.isUnspecified()) {
         if (!ie->isPointToPoint()) {
             EV_INFO << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
-            datagram->addPar("IPv6-fromHL") = fromHL;
+            IPv6NDControlInfo *ctrl = new IPv6NDControlInfo();
+            ctrl->setFromHL(fromHL);
+            ctrl->setNextHop(nextHop);
+            ctrl->setInterfaceId(interfaceId);
+            datagram->setControlInfo(ctrl);
             send(datagram, "ndOut");
             return;
         }
@@ -816,7 +837,6 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
         int& interfaceId, IPv6Datagram *datagram, bool fromHL)
 {
     // try destination cache
-    //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
     nextHop = rt->lookupDestCache(destAddress, interfaceId);
 
     if (interfaceId == -1) {
@@ -832,7 +852,11 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             }
             else {    // host
                 EV_INFO << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                datagram->addPar("IPv6-fromHL") = fromHL;
+                IPv6NDControlInfo *ctrl = new IPv6NDControlInfo();
+                ctrl->setFromHL(fromHL);
+                ctrl->setNextHop(nextHop);
+                ctrl->setInterfaceId(interfaceId);
+                datagram->setControlInfo(ctrl);
                 send(datagram, "ndOut");
             }
             return false;
