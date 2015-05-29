@@ -277,29 +277,33 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         }
     }
 
-    if (nce->reachabilityState == IPv6NeighbourCache::INCOMPLETE) {
+    switch (nce->reachabilityState) {
+    case IPv6NeighbourCache::INCOMPLETE:
         EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
         EV_INFO << "Add packet to entry's queue until Address Resolution is complete.\n";
         bubble("Packet added to queue until Address Resolution is complete.");
         nce->pendingPackets.push_back(msg);
         pendingQueue.insert(msg);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::STALE) {
+        break;
+    case IPv6NeighbourCache::STALE:
         EV_INFO << "Reachability State is STALE.\n";
         send(msg, "ipv6Out");
         initiateNeighbourUnreachabilityDetection(nce);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::REACHABLE) {
+        break;
+    case IPv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
         //sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
         send(msg, "ipv6Out");
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::DELAY) {    //TODO: What if NCE is in PROBE state?
+        break;
+    case IPv6NeighbourCache::DELAY:
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
         sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
-    }
-    else
+        break;
+    case IPv6NeighbourCache::PROBE:
+    default:
         throw cRuntimeError("Unknown Neighbour cache entry state.");
+        break;
+    }
 }
 
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
