@@ -298,7 +298,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
-    EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": \n";
+    EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
 
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress)) {
@@ -339,7 +339,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv
     }
 
     // routing
-    int interfaceId = destIE ? destIE->getInterfaceId() : -1;
+    int interfaceId = -1;
     IPv6Address nextHop(requestedNextHopAddress);
 
 #ifdef WITH_xMIPv6
@@ -367,6 +367,9 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv
       // so tunneling examples could not work with xMIPv6
     interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL);
 #endif /* WITH_xMIPv6 */
+
+    if (interfaceId == -1 && destIE != nullptr)
+        interfaceId = destIE->getInterfaceId();         // set interfaceId to destIE when not tunneling
 
     if (interfaceId > ift->getBiggestInterfaceId()) {
         // a virtual tunnel interface provides a path to the destination: do tunneling
