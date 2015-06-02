@@ -240,7 +240,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
-        EV_INFO << "No interfaces exist, dropping packet\n";
+        EV_WARN << "No interfaces exist, dropping packet\n";
         delete msg;
         return;
     }
@@ -292,7 +292,6 @@ void IPv6::datagramLocalOut(IPv6Datagram *datagram, const InterfaceEntry *destIE
         routeMulticastPacket(datagram, destIE, nullptr, true);
 }
 
-//FIXME should use parameters!!!
 void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress, bool fromHL)
 {
     // TBD add option handling code here
@@ -403,7 +402,7 @@ void IPv6::routePacketStep2(IPv6Datagram *datagram, int interfaceId, IPv6Address
         if (datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
             && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
         {
-            EV_INFO << "Using HoA instead of CoA... dropping datagram" << endl;
+            EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
             delete datagram;
             numDropped++;
             return;
