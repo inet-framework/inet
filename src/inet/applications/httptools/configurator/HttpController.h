@@ -155,7 +155,7 @@ class HttpController : public cSimpleModule
 
   protected:
     /** Helper used by the server registration to locate the tcpApp getModule(server or browser) */
-    cModule *getTcpApp(std::string node);
+    cModule *getTcpApp(const char *node);
 
     /** Set special status of a WWW server. Triggered by an event message. */
     void setSpecialStatus(const char *www, ServerStatus status, double p, double amortize);
