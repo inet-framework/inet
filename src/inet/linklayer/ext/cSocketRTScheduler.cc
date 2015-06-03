@@ -208,7 +208,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // TBD assert that it's somehow not smaller than previous event's time
     notificationMsg->setArrival(module, -1, t);
 
-    simulation.msgQueue.insert(notificationMsg);
+    getSimulation()->msgQueue.insert(notificationMsg);
 }
 
 bool cSocketRTScheduler::receiveWithTimeout(long usec)

@@ -114,7 +114,7 @@ void CSMA::initialize(int stage)
         if (radioModule->hasPar("timeRXToTX")) {
             simtime_t rxToTx = radioModule->par("timeRXToTX").doubleValue();
             if (rxToTx > aTurnaroundTime) {
-                opp_warning("Parameter \"aTurnaroundTime\" (%f) does not match"
+                throw cRuntimeError("Parameter \"aTurnaroundTime\" (%f) does not match"
                             " the radios RX to TX switching time (%f)! It"
                             " should be equal or bigger",
                         SIMTIME_DBL(aTurnaroundTime), SIMTIME_DBL(rxToTx));
