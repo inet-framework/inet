@@ -34,7 +34,32 @@ class INET_API IIeee80211MacMib : public Ieee80211MacMacProcessBase
 class INET_API Ieee80211MacMib : public IIeee80211MacMib
 {
     protected:
-        Ieee80211MacMacmibPackage *macmib = nullptr;
+        /* Declarations of MIB attributes exported from
+        this process */
+
+        /* Read-Write attributes */
+//        dot11AuthenticationAlgorithms AuthTypeSet:=incl(open_system, shared_key),
+        bool dot11ExcludeUnencrypted;
+        int dot11FragmentationThreshold;
+        std::vector<MACAddress> dot11GroupAddresses;
+        int dot11LongRetryLimit;
+        simtime_t dot11MaxReceiveLifetime;
+        int dot11MaxTransmitMsduLifetime;
+        simtime_t dot11MediumOccupancyLimit;
+        bool dot11PrivacyInvoked;
+        bool mReceiveDTIMs;
+        int dot11CfpPeriod;
+        simtime_t dot11CfpMaxDuration;
+        simtime_t dot11AuthenticationResponseTimeout;
+        int dot11RtsThreshold;
+        int dot11ShortRetryLimit;
+        int dot11WepDefaultKeyId;
+        int dot11CurrentChannelNumber;
+        int dot11CurrentSet;
+        int dot11CurrentPattern;
+        int dot11CurrentIndex;
+
+        /* Write-Only attributes */
 
     protected:
         void handleMessage(cMessage *msg) override;

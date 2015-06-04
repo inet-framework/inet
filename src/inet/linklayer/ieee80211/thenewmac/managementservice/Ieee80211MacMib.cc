@@ -31,9 +31,9 @@ void Ieee80211MacMib::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
-
-        macmib->getOperationTable()->setDot11LongRetryLimit(par("longRetryLimit"));
+//        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+//
+//        macmib->getOperationTable()->setDot11LongRetryLimit(par("longRetryLimit"));
     }
 }
 
