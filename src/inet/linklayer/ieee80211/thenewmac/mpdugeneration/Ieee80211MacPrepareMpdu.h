@@ -19,17 +19,78 @@
 #define __INET_IEEE80211MACPREPAREMPDU_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
+#include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacPrepareMpdu : public cSimpleModule
+class INET_API IIeee80211MacPrepareMpdu
 {
+    public:
+        typedef Ieee80211MacFragmentationSupport::FragSdu FragSdu;
+    protected:
+        virtual void handleMsduRequest(cPacket *sdu, CfPriority priorty) = 0;
+        virtual void handleResetMac() = 0;
+        virtual void handleMmRequest(cPacket *sdu, CfPriority priority) = 0;
+        virtual void handleFragConfirm(FragSdu *fsdu, TxResult txResult) = 0;
+
+        virtual void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus) = 0;
+        virtual void emitFragRequest(FragSdu *fsdu) = 0;
+        virtual void emitMmConfirm(cPacket *rsdu, TxResult txResult) = 0;
 };
 
 
-class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu
+class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public Ieee80211MacMacProcessBase
 {
+    protected:
+        enum PrepareMpduState
+        {
+            PREPARE_MPDU_STATE_START,
+            PREPARE_MPDU_STATE_NO_BSS,
+            PREPARE_MPDU_STATE_PREPARE_BSS,
+            PREPARE_MDPU_STATE_PREPARE_IBSS,
+            PREPARE_MPDU_STATE_PREPARE_AP
+        };
+
+    protected:
+        PrepareMpduState state = PREPARE_MPDU_STATE_START;
+        Ieee80211MacMacmibPackage *macmib = nullptr;
+
+        bool bcmc;
+        bool keyOk;
+        bool useWep = false;
+        int f;
+        FragSdu *fsdu = nullptr;
+        int mpduOvhd;
+        int pduSize;
+        int thld;
+        CfPriority pri;
+        TxResult rrsl;
+        cPacket *sdu;
+        cPacket *rsdu;
+
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
+        cGate *msdu = nullptr;
+        cGate *fragMsdu = nullptr;
+
+    protected:
+        void handleMessage(cMessage *msg) override;
+        void initialize(int stage) override;
+
+        void fragment();
+        void makePdus();
+
+        void handleMsduRequest(cPacket *sdu, CfPriority priorty);
+        void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
+        void emitFragRequest(FragSdu *fsdu);
+        void handleResetMac();
+        void handleMmRequest(cPacket *sdu, CfPriority priority);
+        void handleFragConfirm(FragSdu *fsdu, TxResult txResult);
+        void emitMmConfirm(cPacket *rsdu, TxResult txResult);
 };
 
 } /* namespace inet */

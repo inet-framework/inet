@@ -17,8 +17,12 @@ package inet.linklayer.ieee80211.thenewmac.mpdugeneration;
 
 simple Ieee80211MacPrepareMpdu
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+
 	gates:
 	    inout fragMsdu; // From PM_Filter_STA: [FragConfirm] to PM_Filter_STA: [FragRequest]
 	    inout mmpdu; // From Mlme_Sta_Services: [MmRequest] to Mlme_Sta_Services: [MmConfirm]
-	    inout msdu;
+	    inout msdu; // From MSDU_from_LLC: [MsduRequest] to MSDU_from_LLC: [MsduConfirm]
 }
