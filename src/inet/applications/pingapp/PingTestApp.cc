@@ -81,17 +81,17 @@ void PingTestApp::initialize(int stage)
         WATCH(outOfOrderArrivalCount);
         WATCH(numPongs);
 
-        if (strcmp(par("destAddresses").stringValue(), "")) {
-            // schedule first ping (use empty destAddr to disable)
-            cMessage *msg = new cMessage("sendPing");
-            scheduleAt(startTime, msg);
-        }
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        if (strcmp(par("destAddresses").stringValue(), "")) {
+            // schedule first ping (use empty destAddr to disable)
+            cMessage *msg = new cMessage("sendPing");
+            scheduleAt(startTime, msg);
+        }
     }
 }
 
