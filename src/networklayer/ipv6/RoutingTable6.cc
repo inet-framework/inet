@@ -936,14 +936,14 @@ bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stag
     return true;
 }
 
-void RoutingTable6::createSubPrefix(IPv6Address superPrefix, int superPrefixLength, simtime_t validLifetime, uint preferredLifetime)
+IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation superPrefixInfo)
 {
     // TODO~~~
     // Ambil prefix dari prefixInfo
     // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
-    int prefixLength = superPrefixLength + 4;
-    uint32 segment0 = superPrefix.getSegment0();
-    uint32 segment1 = superPrefix.getSegment1();
+    int prefixLength = superPrefixInfo.getPrefixLength() + 4;
+    uint32 segment0 = superPrefixInfo.getPrefix().getSegment0();
+    uint32 segment1 = superPrefixInfo.getPrefix().getSegment1();
 
     //harusnya prefix di-assign ke tiap interface, selain wlan0
     for (int k = 0; k < ift->getNumInterfaces(); k++)
@@ -955,19 +955,15 @@ void RoutingTable6::createSubPrefix(IPv6Address superPrefix, int superPrefixLeng
             continue;  // already has one
         IPv6Address prefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0);
 
-        IPv6InterfaceData::AdvPrefix p;
-        p.prefix = prefix;
-        p.prefixLength = prefixLength; //changed from 64 to 48. so that the prefix can be subnetted
-        p.advValidLifetime = validLifetime;
-        p.advOnLinkFlag = true;
-        p.advPreferredLifetime = preferredLifetime;
-        p.advAutonomousFlag = true;
-        ie->ipv6Data()->addAdvPrefix(p);
+        IPv6NDPrefixInformation p;
+        p.setPrefix(prefix);
+        p.setPrefixLength(prefixLength);
+        p.setValidLifetime(superPrefixInfo.getValidLifetime());
+        p.setOnlinkFlag(superPrefixInfo.getOnlinkFlag());
+        p.setPreferredLifetime(superPrefixInfo.getPreferredLifetime());
+        p.setAutoAddressConfFlag(superPrefixInfo.getAutoAddressConfFlag());
 
-        if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
-            ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
-
-        EV<<"\ninterface " << ie->getFullName() <<" got prefix " << p.prefix <<"\n";
+        return p;
     }
 
 }

@@ -20,6 +20,7 @@ class INET_API DHCPv6OdongClient : public cSimpleModule, public INotifiable, pub
         int serverPort;
         int clientPort;
         UDPSocket socket; // UDP socket for client-server communication
+        bool isOperational; //lifecycle (?)
         cMessage* leaseTimer; // length of time the lease is valid
         cMessage* startTimer; // self message to start DHCP initialization
 
@@ -28,8 +29,14 @@ class INET_API DHCPv6OdongClient : public cSimpleModule, public INotifiable, pub
             LEASE_TIMEOUT, START_DHCP
         };
 
+        enum ClientState
+        {
+             IDLE, INIT, INIT_REBOOT
+        };
+
         std::string hostName;
         simtime_t startTime;
+        ClientState clientState;
 
         MACAddress clientMacAddress;
         NotificationBoard *nb;
@@ -62,7 +69,17 @@ class INET_API DHCPv6OdongClient : public cSimpleModule, public INotifiable, pub
         // Assign prefix to the router
         virtual void bindLease();
 
+        virtual void unboundLease();
+
         virtual void initClient();
+
+        virtual void initRebootedClient();
+
+        virtual InterfaceEntry *chooseInterface();
+
+        static const char *getStateName(ClientState state);
+
+        const char *getAndCheckMessageTypeName(DHCPv6MessageType type);
 
         virtual void updateDisplayString();
 
