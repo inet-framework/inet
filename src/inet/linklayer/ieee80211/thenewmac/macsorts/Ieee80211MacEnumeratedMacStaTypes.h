@@ -171,7 +171,7 @@ enum TxStatus /* <transmission status> parm of MaUnitdataStatus */
     TxStatus_noBss,
     TxStatus_excessiveDataLength,
     TxStatus_nonNullSourceRouting,
-    TxStatus_nsupportedPriority,
+    TxStatus_unsupportedPriority,
     TxStatus_unavailablePriority,
     TxStatus_unsupportedServiceClass,
     TxStatus_unavailableServiceClass,
