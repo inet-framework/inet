@@ -16,9 +16,9 @@
 //
 
 #include "Ieee80211MacTxCoordinationSta.h"
-#include "Ieee80211MacTxCoordinationSignals_m.h"
-#include "inet/linklayer/ieee80211/thenewmac/transmission/Ieee80211MacBackoffSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -52,9 +52,9 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
         {
             handleTbtt();
         }
-        else if (dynamic_cast<Ieee80211MacBackoffBkDone *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg))
         {
-            Ieee80211MacBackoffBkDone *bkDone = dynamic_cast<Ieee80211MacBackoffBkDone *>(msg);
+            Ieee80211MacSignalBkDone *bkDone = dynamic_cast<Ieee80211MacSignalBkDone *>(msg);
             handleBkDone(bkDone->getSlotCount());
         }
         else if (strcmp("TxCfAck", msg->getName()) == 0)
@@ -160,11 +160,11 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu) // TODO: FragSdu
+void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu)
 {
+    this->fsdu = fsdu;
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
-        this->fsdu = fsdu;
         if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
             txcReq();
     }
@@ -180,6 +180,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu) // TODO: Fra
             }
             else
             {
+                Ieee80211NewManagementFrame *atimFrame = new Ieee80211NewManagementFrame("ATIM frame");
 //                tpdu:= mkFrame(atim,sdu!dst,dot11MacAddress, )
                 emitBackoff(ccw, -1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_ATIM;
@@ -417,7 +418,7 @@ void Ieee80211MacTxCoordinationSta::emitAtimW()
 
 void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
 {
-    Ieee80211MacTxCoordinationTxRequest *txRequest = new Ieee80211MacTxCoordinationTxRequest("TxRequest");
+    Ieee80211MacSignalTxRequest *txRequest = new Ieee80211MacSignalTxRequest("TxRequest");
     txRequest->encapsulate(tpdu);
     txRequest->setTxrate(txrate.get());
     send(txRequest, dataPumpProcedureGate);
@@ -433,7 +434,7 @@ void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
 
 void Ieee80211MacTxCoordinationSta::emitPduConfirm(FragSdu* fsdu, TxResult txResult)
 {
-    Ieee80211MacTxCoordinationPduConfirm *pduConfirm = new Ieee80211MacTxCoordinationPduConfirm("PduConfirm");
+    Ieee80211MacSignalPduConfirm *pduConfirm = new Ieee80211MacSignalPduConfirm("PduConfirm");
     pduConfirm->setFsdu(*fsdu);
     pduConfirm->setTxResult(txResult);
     send(pduConfirm, tdatGate);
@@ -601,7 +602,7 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
 
 void Ieee80211MacTxCoordinationSta::emitCancel()
 {
-    Ieee80211MacTxCoordinationCancel *cancel = new Ieee80211MacTxCoordinationCancel("Cancel");
+    Ieee80211MacSignalCancel *cancel = new Ieee80211MacSignalCancel("Cancel");
     send(cancel, backoffProcedureGate);
 }
 
