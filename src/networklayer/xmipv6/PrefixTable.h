@@ -65,6 +65,11 @@ public:
      * Returns the prefix for the given HoA
      */
     IPv6Address getPrefix(const IPv6Address& HoA) const;
+
+    /*
+     * Returns the last prefix on the table
+     */
+    IPv6Address getLastPrefix() const;
 };
 
 #endif

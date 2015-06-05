@@ -39,6 +39,7 @@ class InterfaceEntry;
 class IPv6ControlInfo;
 class IPv6Datagram;
 class RoutingTable6;
+class PrefixTable;
 
 #ifdef WITH_xMIPv6
 class xMIPv6;
@@ -101,6 +102,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
         IInterfaceTable *ift;
         RoutingTable6 *rt6;
         ICMPv6 *icmpv6;
+
+        PrefixTable *pt;
 
 #ifdef WITH_xMIPv6
         xMIPv6 *mipv6; // in case the node has MIP support

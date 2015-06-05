@@ -1318,6 +1318,8 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
                 //cara bodoh dulu, semua interface dikasih subprefix, ga peduli dia host atau router
             {
                 prefixInfo = rt6->createSubPrefix(prefixInfo);
+                //TODO::prefixnya di-input ke Prefix Table
+                pt->addOrUpdatePT(destAddr, prefixInfo.getPrefix());
             }
 
             //Now we pop the prefix info into the RA.
@@ -1408,18 +1410,6 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
                 ie->ipv6Data()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); //populate the HoA of MN, the HA global scope address and the home network prefix
             }
 #endif /* WITH_xMIPv6 */
-
-            IPv6InterfaceData::AdvPrefix advPrefix;
-            advPrefix.prefix = prefixInfo.getPrefix();
-            advPrefix.prefixLength = prefixInfo.getPrefixLength();
-            advPrefix.advValidLifetime = prefixInfo.getValidLifetime();
-            advPrefix.advPreferredLifetime = prefixInfo.getPreferredLifetime();
-
-            advPrefix.advAutonomousFlag = prefixInfo.getAutoAddressConfFlag();
-            advPrefix.advOnLinkFlag = prefixInfo.getOnlinkFlag();
-            advPrefix.advRtrAddr = prefixInfo.getRouterAddressFlag();
-
-            ie->ipv6Data()->setAdvPrefix(i,advPrefix);
         }
     }
     delete raCtrlInfo;

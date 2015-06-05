@@ -28,10 +28,13 @@
 
 #include "IPv6NDMessage_m.h"
 
+#include "PrefixTable.h"
+
 
 class IInterfaceTable;
 class InterfaceEntry;
 class RoutingTable6;
+class PrefixTable;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
@@ -152,6 +155,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
   protected:
     IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
+    PrefixTable *pt;
 
     bool isrouter;
     bool multicastForward;  //If node is forwarding multicast info

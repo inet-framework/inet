@@ -938,6 +938,10 @@ bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stag
 
 IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation superPrefixInfo)
 {
+    IPv6Address prefix(0,0,0,0);
+
+    prefix = pt->getLastPrefix();
+
     // TODO~~~
     // Ambil prefix dari prefixInfo
     // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
@@ -945,25 +949,18 @@ IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation s
     uint32 segment0 = superPrefixInfo.getPrefix().getSegment0();
     uint32 segment1 = superPrefixInfo.getPrefix().getSegment1();
 
-    //harusnya prefix di-assign ke tiap interface, selain wlan0
-    for (int k = 0; k < ift->getNumInterfaces(); k++)
-    {
-        InterfaceEntry *ie = ift->getInterface(k);
-        if (!ie->ipv6Data() || ie->isLoopback())
-            continue;
-        if (ie->ipv6Data()->getNumAdvPrefixes()>0)
-            continue;  // already has one
-        IPv6Address prefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0);
+//    IPv6Address prefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0);
 
-        IPv6NDPrefixInformation p;
-        p.setPrefix(prefix);
-        p.setPrefixLength(prefixLength);
-        p.setValidLifetime(superPrefixInfo.getValidLifetime());
-        p.setOnlinkFlag(superPrefixInfo.getOnlinkFlag());
-        p.setPreferredLifetime(superPrefixInfo.getPreferredLifetime());
-        p.setAutoAddressConfFlag(superPrefixInfo.getAutoAddressConfFlag());
+    //TODO:: karena sekarang createSubPrefix di HomeAgent, ngesubnetnya ga bisa pake index interface
+    //ngesubnet dari PrefixTable aja...
 
-        return p;
-    }
+    IPv6NDPrefixInformation p;
+    p.setPrefix(prefix);
+    p.setPrefixLength(prefixLength);
+    p.setValidLifetime(superPrefixInfo.getValidLifetime());
+    p.setOnlinkFlag(superPrefixInfo.getOnlinkFlag());
+    p.setPreferredLifetime(superPrefixInfo.getPreferredLifetime());
+    p.setAutoAddressConfFlag(superPrefixInfo.getAutoAddressConfFlag());
 
+    return p;
 }
