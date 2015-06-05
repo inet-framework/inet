@@ -19,16 +19,30 @@
 #define __INET_IEEE80211MACMSDUFROMLLC_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
+#include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacMsduFromLlc: public cSimpleModule
+class INET_API IIeee80211MacMsduFromLlc
 {
+    protected:
+        virtual void handleMaUnitDataRequest() = 0;
+        virtual void handleMsduConfirm() = 0;
 };
 
-class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc
+class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public Ieee80211MacMacProcessBase
 {
+    protected:
+        Ieee80211MacMacsorts *macsorts = nullptr;
+        Ieee80211MacMacmibPackage *macmib = nullptr;
+
+    protected:
+        void handleMaUnitDataRequest();
+        void handleMsduConfirm();
 };
 
 } /* namespace inet */

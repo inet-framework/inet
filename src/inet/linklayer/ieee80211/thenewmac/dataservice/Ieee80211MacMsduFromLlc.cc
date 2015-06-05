@@ -22,5 +22,13 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacMsduFromLlc);
 
+void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest()
+{
+}
+
+void Ieee80211MacMsduFromLlc::handleMsduConfirm()
+{
+}
+
 } /* namespace inet */
 } /* namespace ieee80211 */
