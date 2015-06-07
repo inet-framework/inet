@@ -942,17 +942,23 @@ IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation s
 
     prefix = pt->getLastPrefix();
 
+    int prefixLength = superPrefixInfo.getPrefixLength() + 4;
+
     // TODO~~~
     // Ambil prefix dari prefixInfo
     // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
-    int prefixLength = superPrefixInfo.getPrefixLength() + 4;
-    uint32 segment0 = superPrefixInfo.getPrefix().getSegment0();
-    uint32 segment1 = superPrefixInfo.getPrefix().getSegment1();
-
-//    IPv6Address prefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0);
-
-    //TODO:: karena sekarang createSubPrefix di HomeAgent, ngesubnetnya ga bisa pake index interface
-    //ngesubnet dari PrefixTable aja...
+    if (prefix == IPv6Address::UNSPECIFIED_ADDRESS)
+    {
+//        IPv6Address newPrefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0)
+        prefix = superPrefixInfo.getPrefix();
+    }
+    else
+    {
+          uint32 segment0 = prefix.getSegment0();
+          uint32 segment1 = prefix.getSegment1();
+          segment1 = segment1+(1<<64-prefixLength);
+          prefix = IPv6Address(segment0, segment1, 0,0);
+    }
 
     IPv6NDPrefixInformation p;
     p.setPrefix(prefix);

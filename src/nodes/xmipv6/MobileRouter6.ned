@@ -25,6 +25,7 @@ package inet.nodes.xmipv6;
 
 import inet.linklayer.INic;
 import inet.linklayer.IWiredNic;
+import inet.networklayer.xmipv6.PrefixTable;
 import inet.nodes.ipv6.StandardHost6;
 
 //
@@ -37,8 +38,8 @@ module MobileRouter6 extends StandardHost6
     parameters:
         @display("i=abstract/router;bgb=731,479");
         IPForward = true;
-        
-        
+
+
 
 //        numRadios = 1;
 
@@ -46,10 +47,10 @@ module MobileRouter6 extends StandardHost6
         networkLayer.mipv6support.isMobileNode = false; //is Mobile Node
         networkLayer.mipv6support.isHomeAgent = false; //is Home Agent
         networkLayer.mipv6support.isMobileRouter = true; //is Mobile Router
-        
-        gates:
-            inout pintu;
-            
+
+    gates:
+        inout pintu;
+
 //    submodules:
 //        iWiredNic: <"ForwardInterface"> like IWiredNic {
 //            @display("p=667,406");
@@ -58,6 +59,10 @@ module MobileRouter6 extends StandardHost6
 //        pintu <--> iWiredNic.phys;
 //        networkLayer.ifOut++ --> iWiredNic.upperLayerIn;
 //        networkLayer.ifIn++ <-- iWiredNic.upperLayerOut;
-         
+
+    submodules:
+        prefixTable: PrefixTable {
+            @display("p=53,54");
+        }
 }
 

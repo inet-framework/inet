@@ -64,12 +64,12 @@ IPv6Address PrefixTable::getPrefix(const IPv6Address& HoA) const
         return pos->second.mobileNetworkPrefix;
 }
 
-//kayaknya fungsi ini bakal muspro
 IPv6Address PrefixTable::getLastPrefix() const
 {
     PrefixTable6::const_iterator pos = prefixTable.end();
     --pos;
-    return pos->second.mobileNetworkPrefix;
+    if (prefixTable.empty())
+        return IPv6Address::UNSPECIFIED_ADDRESS;
+    else
+        return pos->second.mobileNetworkPrefix;
 }
-
-//todo:: new function:: getNextSubPrefix :: dari prefix yg ada --> dicari satu per satu for i=0 until end (isInPrefixTable)

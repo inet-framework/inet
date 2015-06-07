@@ -1314,7 +1314,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
             //- In the Preferred Lifetime field: the entry's AdvPreferredLifetime.
             prefixInfo.setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
 
-            if (rt6->isHomeAgent() || rt6->isMobileRouter())
+            if ((rt6->isHomeAgent() || rt6->isMobileRouter()) && advPrefix.advRtrAddr == true)
                 //cara bodoh dulu, semua interface dikasih subprefix, ga peduli dia host atau router
             {
                 prefixInfo = rt6->createSubPrefix(prefixInfo);
@@ -1384,7 +1384,6 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++)
         {
 
-
             IPv6NDPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
             if (prefixInfo.getAutoAddressConfFlag() == true)//If auto addr conf is set
             {
@@ -1410,6 +1409,18 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
                 ie->ipv6Data()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); //populate the HoA of MN, the HA global scope address and the home network prefix
             }
 #endif /* WITH_xMIPv6 */
+        }
+        if (rt6->isMobileRouter()) //agar MR kirim RA ke anak2nya setelah dia dapet prefix
+        {
+            for (int i = 0; i < ift->getNumInterfaces(); i++)
+            {
+                InterfaceEntry *ie = ift->getInterface(i);
+
+                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
+                {
+                    createRATimer(ie);
+                }
+            }
         }
     }
     delete raCtrlInfo;
@@ -1604,9 +1615,6 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 
                 if (rt6->isMobileRouter())
                 {
-                    // create subprefix, then send RA to the interfaces
-                    // TODO :: ini salah!! harusnya ini bukan di MR (??)
-
                     for (int i = 0; i < ift->getNumInterfaces(); i++)
                             {
                                 InterfaceEntry *ie = ift->getInterface(i);

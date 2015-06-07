@@ -21,6 +21,7 @@
 
 package inet.nodes.xmipv6;
 
+import inet.networklayer.xmipv6.PrefixTable;
 import inet.nodes.ipv6.Router6;
 
 
@@ -33,5 +34,9 @@ module HomeAgent6 extends Router6
     networkLayer.mipv6support.isMobileNode = false; //is Mobile Node
     networkLayer.mipv6support.isHomeAgent = true; //is Home Agent
     networkLayer.mipv6support.isMobileRouter = false;
+    submodules:
+        prefixTable: PrefixTable {
+            @display("p=53,53");
+        }
 }
 
