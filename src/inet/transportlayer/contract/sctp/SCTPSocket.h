@@ -65,6 +65,7 @@ class INET_API SCTPSocket
 
   protected:
     int assocId;
+    static int32 nextAssocId;
     int sockstate;
     bool oneToOne;
 
@@ -112,6 +113,12 @@ class INET_API SCTPSocket
      * (or SCTPSocket).
      */
     int getConnectionId() const { return assocId; }
+
+    /**
+     * Generates a new integer, to be used as assocId. (assocId is part of the key
+     * which associates connections with their apps).
+     */
+    static int32 getNewAssocId() { return ++nextAssocId; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,

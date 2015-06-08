@@ -30,14 +30,13 @@
 
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
 
 namespace inet {
 
 namespace sctp {
 
 Define_Module(SCTP);
-
-int32 SCTP::nextAssocId = 0;
 
 void SCTP::printInfoAssocMap()
 {
@@ -730,7 +729,7 @@ void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAsso
     key.appGateIndex = assoc->appGateIndex;
     key.assocId = assoc->assocId;
     sctpAppAssocMap.erase(key);
-    key.assocId = assoc->assocId = getNewAssocId();
+    key.assocId = assoc->assocId = SCTPSocket::getNewAssocId();
     sctpAppAssocMap[key] = assoc;
 
     // ...and newAssoc will live on with the old assocId
