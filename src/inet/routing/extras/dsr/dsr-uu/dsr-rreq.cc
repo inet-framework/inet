@@ -124,7 +124,7 @@ static inline int crit_delete_tbl_enty(void *pos, void *data)
     return 1;
 }
 
-
+/*
 static inline int crit_duplicate_path(struct id_entry *e, struct rreq_tbl_query *q)
 {
     dsr_list_t *p;
@@ -144,14 +144,13 @@ static inline int crit_duplicate_path(struct id_entry *e, struct rreq_tbl_query 
                 worst = id_e;
         }
     }
-    /*
-        if (worst->cost>=*(q->cost))
-            return 0;
-        else
-            return 1;
-    */
+//    if (worst->cost>=*(q->cost))
+//        return 0;
+//    else
+//        return 1;
     return 0;
 }
+*/
 
 static inline int crit_duplicate_2(void *pos, void *data)
 {
@@ -503,6 +502,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
 out:
     DSR_WRITE_UNLOCK(&rreq_tbl.lock);
 
+    (void)res;  // NOP to avoid UNUSED variable warning
     return 1;
 }
 

@@ -39,16 +39,6 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
         { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
     }),
-    Ieee80211ModeSet('a', {
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS20MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS20MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode36Mbps },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
-    }),
     Ieee80211ModeSet('b', {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },

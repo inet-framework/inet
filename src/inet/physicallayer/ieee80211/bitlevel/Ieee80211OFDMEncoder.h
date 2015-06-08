@@ -43,9 +43,9 @@ class INET_API Ieee80211OFDMEncoder : public IEncoder
     Ieee80211OFDMEncoder(const Ieee80211OFDMCode *code);
     ~Ieee80211OFDMEncoder();
 
-    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
+    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    const Ieee80211OFDMCode *getCode() const { return code; }
+    const Ieee80211OFDMCode *getCode() const override { return code; }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

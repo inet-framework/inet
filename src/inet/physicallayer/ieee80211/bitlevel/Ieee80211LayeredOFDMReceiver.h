@@ -65,7 +65,7 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
     bool isCompliant;
 
   protected:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /* Analog and sample domain */
     const IReceptionAnalogModel *createAnalogModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
@@ -98,10 +98,10 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
   public:
     virtual ~Ieee80211LayeredOFDMReceiver();
 
-    bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-    const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
-    const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
+    bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
+    const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 } /* namespace physicallayer */

@@ -76,4 +76,5 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(BMacLayer);
+        @signal[NF_LINK_BREAK](type=BMacFrame);
 }

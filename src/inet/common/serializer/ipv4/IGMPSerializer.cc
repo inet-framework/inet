@@ -123,13 +123,13 @@ void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     b.writeUint16To(2, TCPIPchecksum::checksum(igmp, b.getPos() - startPos));
 }
 
-cPacket *IGMPSerializer::deserialize(Buffer &b, Context& c)
+cPacket *IGMPSerializer::deserialize(const Buffer &b, Context& c)
 {
     unsigned int startPos = b.getPos();
-    void *igmp = b.accessNBytes(0);
+    const void *igmp = b.accessNBytes(0);
     unsigned char type = b.readByte();
     unsigned char code = b.readByte();
-    uint16_t chksum = b.readUint16();
+    uint16_t chksum = b.readUint16(); (void)chksum;
 
     cPacket *packet = nullptr;
 

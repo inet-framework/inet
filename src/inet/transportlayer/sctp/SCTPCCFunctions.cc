@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 // Copyright (C) 2015 Martin Becke
 //
 // This program is free software; you can redistribute it and/or
@@ -126,7 +126,7 @@ void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
 
     if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
         while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-                (path->highSpeedCCThresholdIdx < (sizeof(HighSpeedCwndAdjustmentTable) / sizeof(HighSpeedCwndAdjustmentEntry)))) {
+                (path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES)) {
             path->highSpeedCCThresholdIdx++;
         }
     } else {
@@ -204,7 +204,7 @@ void SCTPAssociation::recalculateOLIABasis() {
     //max_w_paths: The set of paths in all_paths with largest congestion windows.
     //https://tools.ietf.org/html/draft-khalili-mptcp-congestion-control-05
     uint32 max_w_paths = 0;
-    uint32 max_w_paths_cnt = 0;
+    uint32 max_w_paths_cnt = 0; (void)max_w_paths_cnt; // FIXME this variable is unused
     uint32 best_paths_cnt = 0;
 
     // Create the sets
@@ -328,7 +328,7 @@ uint32 SCTPAssociation::updateOLIA(uint32 w, const uint32 s,
 
              multiplied by MSS_r * bytes_acked.
              */
-            double numerator2 = 1 / sctpPathMap.size();
+            double numerator2 = 1.0 / (double)sctpPathMap.size();
             double denominator2 = assocMaxWndPaths.size();
             double term2 = 0.0;
             if (denominator2 > 0.0) {

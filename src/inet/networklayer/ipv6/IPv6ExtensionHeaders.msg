@@ -18,6 +18,7 @@
 //
 
 cplusplus {{
+#include "inet/common/TLVOption.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
@@ -31,6 +32,19 @@ class noncobject IPv6Address;
 
 class noncobject IPv6ExtensionHeader;
 
+class noncobject TLVOptions;
+
+//
+// IPv6 TLV option types
+//
+enum IPv6TLVOptionTypes
+{
+    IPv6TLVOPTION_NOP1 = 0;
+    IPv6TLVOPTION_NOPN = 1;
+    IPv6TLVOPTION_TLV_GPSR = 47;
+};
+
+
 //
 // Hop-by-Hop Options Header.
 // RFC 2460 Section 4.3
@@ -39,7 +53,8 @@ class noncobject IPv6ExtensionHeader;
 class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_HOP;
-    byteLength = 8; // FIXME verify
+    byteLength = 8;     // utils::roundUp(2 + tlvOptions.getLength(), 8);
+    TLVOptions tlvOptions;
 }
 
 //
@@ -66,7 +81,7 @@ class IPv6RoutingHeader extends IPv6ExtensionHeader
 class IPv6FragmentHeader extends IPv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_FRAGMENT;
-    byteLength = IPv6_FRAGMENT_HEADER_LENGTH; // FIXME verify
+    byteLength = IPv6_FRAGMENT_HEADER_LENGTH;
     unsigned short fragmentOffset;
     unsigned int identification;  // datagram ID: identifies which datagram this fragment belongs to.
     bool moreFragments; //Is this the last fragment?
@@ -80,8 +95,8 @@ class IPv6FragmentHeader extends IPv6ExtensionHeader
 class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_DEST;
-    byteLength = 8; // FIXME verify
-    // byteLength = 20; // FIXME only valid for Home Address Option!
+    byteLength = 8;    // utils::roundUp(2 + tlvOptions.getLength(), 8);
+    TLVOptions tlvOptions;
 }
 
 //

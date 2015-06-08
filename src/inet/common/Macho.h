@@ -1828,6 +1828,7 @@ class Machine : public _MachineBase
     {
         // Compile time check: TOP must directly derive from TopBase<TOP>
         typedef typename _SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
+        MustDeriveFromTopBase x; (void)x; // just to avoid local type not used warning
 
         allocate(theStateCount);
 
@@ -1843,6 +1844,7 @@ class Machine : public _MachineBase
     {
         // Compile time check: TOP must directly derive from TopBase<TOP>
         typedef typename _SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
+        MustDeriveFromTopBase x; (void)x; // to avoid local type not used warning
 
         allocate(theStateCount);
 

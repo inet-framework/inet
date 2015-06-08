@@ -124,6 +124,7 @@ static inline int crit_link_query(void *pos, void *query)
     return 0;
 }
 
+/*
 static inline int crit_expire(void *pos, void *data)
 {
     struct lc_link *link = (struct lc_link *)pos;
@@ -132,8 +133,8 @@ static inline int crit_expire(void *pos, void *data)
 
     gettime(&now);
 
-    /* printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr)); */
-    /*  fflush(stdout); */
+//    printf("ptr=0x%x exp_ptr=0x%x now_ptr=0x%x %s<->%s\n", (unsigned int)link, (unsigned int)&link->expires, (unsigned int)&now, print_ip(link->src->addr), print_ip(link->dst->addr));
+//    fflush(stdout);
 
     if (timeval_diff(&link->expires, &now) <= 0)
     {
@@ -142,6 +143,7 @@ static inline int crit_expire(void *pos, void *data)
     }
     return 0;
 }
+ */
 
 static inline int do_lowest_cost(void *pos, void *data)
 {
@@ -504,7 +506,7 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
 
     if (dst_node->cost != LC_COST_INF && dst_node->pred)
     {
-        struct lc_node *d, *n;
+        struct lc_node *d,*n;
         /*      struct lc_link *l; */
         int k = (dst_node->hops - 1);
         int i = 0;
@@ -555,7 +557,7 @@ struct dsr_srt *NSCLASS lc_srt_find(struct in_addr src, struct in_addr dst)
         /*          gettime(&l->expires); */
         /*      } */
 
-        d = dst_node;
+        d = dst_node; (void)d; // to avoid UNUSED variable warning
 
         /* Fill in the source route by traversing the nodes starting
          * from the destination predecessor */

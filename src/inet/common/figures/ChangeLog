@@ -1,0 +1,18 @@
+====== inet-3.x ======
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-05-06  Rudolf Hornig
+
+	Added GaugeFigue that can show the value of a single signal as an analog instrument.
+
+2015-04-09  Levente Mészáros
+
+	Added reusable HeatMapFigure.
+
+2015-03-24  Levente Mészáros
+
+	Added fade out support to TrailFigure.
+
+====== inet-2.x ======
+

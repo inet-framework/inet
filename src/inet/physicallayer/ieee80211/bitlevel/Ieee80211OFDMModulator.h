@@ -47,8 +47,8 @@ class INET_API Ieee80211OFDMModulator : public IModulator
   public:
     Ieee80211OFDMModulator(const Ieee80211OFDMModulation *subcarrierModulation, unsigned int polarityVectorOffset);
 
-    virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
-    const Ieee80211OFDMModulation *getModulation() const { return subcarrierModulation; }
+    virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
+    const Ieee80211OFDMModulation *getModulation() const override { return subcarrierModulation; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 

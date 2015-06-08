@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,11 +24,9 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 namespace inet {
-
-class SCTPStatusInfo;
-namespace sctp { class SCTP; }
 
 typedef std::vector<L3Address> AddressVector;
 
@@ -52,7 +51,8 @@ class INET_API SCTPSocket
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) {}    // {delete status;}
+        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) { delete status; }
+        virtual void socketDeleted(int assocId, void *yourPtr) {}
         virtual void sendRequestArrived() {}
         virtual void msgAbandonedArrived(int assocId) {}
         virtual void shutdownReceivedArrived(int connId) {}
@@ -65,7 +65,6 @@ class INET_API SCTPSocket
 
   protected:
     int assocId;
-    int sockId;
     int sockstate;
     bool oneToOne;
 
@@ -93,7 +92,6 @@ class INET_API SCTPSocket
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
      */
-    // SCTPSocket();
     SCTPSocket(bool type = true);
 
     /**
@@ -101,7 +99,7 @@ class INET_API SCTPSocket
      * The assocId will be picked up from the message: it should have arrived
      * from SCTPMain and contain SCTPCommmand control info.
      */
-    SCTPSocket(cPacket *msg);
+    SCTPSocket(cMessage *msg);
 
     /**
      * Destructor
@@ -178,24 +176,40 @@ class INET_API SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-    void listen(bool fork = false, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
+    void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
+    /**
+     * Active OPEN to the given remote socket.
+     * The current implementation just calls connect() with the first address
+     * of the given list. This behaviour may be improved in the future.
+     */
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     /**
-     * Sends data packet.
+     * Send data message.
      */
-    void send(cMessage *msg, bool last = true, bool primary = true);
-    void send(cMessage *msg, int prMethod, double prValue, bool last);
-    void send(cMessage *msg, int prMethod, double prValue, bool last, int32 streamId);
+    void send(SCTPSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
 
+    /**
+     * Send data message (provided within control message).
+     */
+    void sendMsg(cMessage *cmsg);
+
+    /**
+     * Send notification.
+     */
     void sendNotification(cMessage *msg);
+
+    /**
+     * Send request.
+     */
     void sendRequest(cMessage *msg);
+
     /**
      * Closes the local end of the connection. With SCTP, a CLOSE operation
      * means "I have no more data to send", and thus results in a one-way

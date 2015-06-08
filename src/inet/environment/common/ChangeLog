@@ -1,5 +1,30 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-09  Levente Mészáros
+
+    Added tags to axes to allow hiding them in the user interface.
+
+2015-03-26  Levente Mészáros
+
+    Fixed drawing sphere shape for all view angles.
+
+2015-03-24  Levente Mészáros
+
+    Added support for isometric view angles, it supports 48 different axes
+    configurations. Added viewTranslation and axisLength parameters. Changed
+    various line widths to unscaled.
+
+2015-03-18  Levente Mészáros
+
+    Fixed computeCanvasPoint nullptr dereference.
+
+2015-03-17  Levente Mészáros
+
+    Moved files under the common directory to prepare for adding the contract
+    directory.
+
 2015-03-02  Levente Mészáros & Zoltan Bojthe
 
 	Fixed memory leaks detected by valgrind memcheck.

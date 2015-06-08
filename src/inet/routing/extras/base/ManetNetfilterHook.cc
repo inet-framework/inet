@@ -36,6 +36,7 @@ namespace inetmanet {
 
 void ManetNetfilterHook::initHook(cModule* _module)
 {
+    (void)confvals_def; // NOP to avoid unused variable warning
     module = _module;
     ipLayer = check_and_cast<IPv4 *>(getContainingNode(module)->getModuleByPath(".networkLayer.ip"));
     cProperties *props = module->getProperties();

@@ -30,8 +30,8 @@ class INET_API Ieee80211PhySerializer
         void writeToBitVector(unsigned char *buf, unsigned int bufSize, BitVector *bitVector) const;
 
     public:
-        bool serialize(const Ieee80211PLCPFrame *plcpHeader, BitVector *serializedPacket) const;
-        Ieee80211PLCPFrame *deserialize(BitVector *serializedPacket) const;
+        bool serialize(const inet::physicallayer::Ieee80211PLCPFrame *plcpHeader, BitVector *serializedPacket) const;
+        inet::physicallayer::Ieee80211PLCPFrame *deserialize(BitVector *serializedPacket) const;
 };
 
 } /* namespace serializer */

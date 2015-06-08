@@ -348,7 +348,7 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
     else if (category==CT_IMAGE)
         size = (int) rdImageResourceSize->draw();
     else
-        error("Invalid resource category");
+        throw cRuntimeError("Invalid resource category");
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
@@ -412,7 +412,7 @@ void HttpServerBase::registerWithController()
     HttpController *controller = check_and_cast_nullable<HttpController *>(getSimulation()->getSystemModule()->getSubmodule("controller"));
     if (controller == nullptr)
         throw cRuntimeError("Controller module not found");
-    controller->registerServer(host->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

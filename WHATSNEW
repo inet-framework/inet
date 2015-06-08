@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.99.1 (March, 2015)
+INET-2.99.1 (May, 2015)
 --------------------------
 
 This release is the next development snapshot of the upcoming INET-3.0 version.
@@ -38,6 +38,22 @@ All components:
    present conditionally.
  - Moved interface classes under contract subdirectories. Moved base classes
    under base subdirectories.
+ - Introduced a new script called 'inet_featuretool' in the root folder of the
+   project that allows listing/enabling/disabling specific features from the
+   command line. Use 'inet_featuretool -h' for further info.
+   The 'make makefiles' command now uses this tool to extract the required
+   command line options to generate the makefile. This means that after
+   enabling/disabling a feature you always have to invoke 'make makefiles'
+   to regenerate the makefile based on the new feature enablement state.
+
+Nodes:
+ - All "node type" modules implement the INode module interface so it is now 
+   possible to create networks (using the <"actualNodeType"> like INode construct) 
+   where the actual node type can be configured from an ini file.
+
+Emulation:
+ - Network Emulation feature no longer depends on OMNeT++ to detect the presence
+   of PCAP. Instead the feature can be turned on/off by the user.
 
 Common:
  - Added create-module and delete-module commands to ScenarioManager.
@@ -47,10 +63,20 @@ Common:
  - On Linux, specifying --valgrind as the first argument for the opp_run script
    (or a run script in the examples folder) will start the simulation using the
    'valgrind' memory profiler.
+ - Added a reusable HeatMapFigure and a GaugeFigure.
+ - Added a reusable DelayedInitializer to support static member initialization
+   without having to worry about the initialization order.
+ - Renamed ByteArrayMessage to RawPacket.
+
+Environment:
+ - Added isometric view angles to physical environment visualization.
+ - Added class and module interfaces to physical environment.
 
 Mobility:
  - Added a new StaticConcentricMobility similar to StaticGridMobility that places
    nodes on concentric circles.
+ - Removed TracCI and TraCIScenarioManager because these modules are maintained
+   in the Veins framework.
 
 Serializer:
  - Refactored packet serializer classes to use a safe buffer class to read and
@@ -68,13 +94,19 @@ PCAP:
  - Allow flushing the pcapFile after each write to ensure that all packets are
    captured in case of a crash.
 
+Transport Layer:
+ - Added ITransportPacket interface to TCPSegment, UDPPacket, and SCTPMessage.
+   It allows generic handling of transport packets.
+
 SCTP:
  - Added fragPoint parameter to limit the size of fragments.
  - After the handshake only send heartbeats on unconfirmed paths.
  - Fixed close command handling, i.e. stop reading when the command is sent.
  - Handle SACK and NR_SACK separately and use getByteLength instead of getBitLength.
+ - Fixed several bugs.
 
 TCP:
+ - Refactored and cleaned up TCP header options.
  - Fixed scaling window bug (Martin Becke).
 
 Network Layer:
@@ -82,6 +114,26 @@ Network Layer:
    into a base class.
  - Added support to IPv4NetworkConfigurator for computing wireless shortest path
    based on a simple packet error rate estimation.
+ - Added netmaskRoutes parameter to IPv4RoutingTable to control whether netmask
+   routes are maintained or not.
+ - Added useAdminDist parameter to IPv4RoutingTable to enable/disable the use
+   of Cisco specific routing entry extension (disabled by default).
+ - Added IGMPv3 implementation (the orinal code came from the ANSA project).
+   It has been almost fully rewritten and extended by Tamas Borbely.
+
+Routing:
+ - Added PIM-DM and PIM-SM implementation. The original codebase (from the ANSA project
+   http://nes.fit.vutbr.cz/ansa) has been extensively reviewed, refactored and 
+   extended by Tamas Borbely.
+
+Configurator:
+ - Refactored supported metrics (hopCount, delay, dataRate, errorRate) and related
+   parameters in IPv4NetworkConfigurator.
+ - Added autoroute XML configuration element to IPv4NetworkConfigurator. It provides
+   parameters for the automatic route discovery. The autoroute element determines
+   the set of routing tables that will be modified, the set of destinations for
+   which the shortest path will be computed, the used metric and the cost for nodes
+   and links.
 
 Link layer:
  - Added TUN/TAP virtual network interfaces thanks to Irene Ruengeler. This kind
@@ -100,6 +152,9 @@ Link layer:
    using immediate mode to reduce the CPU usage while still maintaining a fast
    sub millisec response time (Artur Scussel). On Windows and MAC OS X the polling 
    interval was reduced to improve the response time.
+ - Added support for sending NF_LINK_BREAK signal from BMAC and CSMA. This is 
+   required for certain routing protocols (i.e. AODV) to function properly.
+ - Extended Ethernet macs accept raw packet
 
 Physical layer:
  - Extended the physical layer contract interfaces for layered implementations.
@@ -114,10 +169,15 @@ Physical layer:
    supports both the flat and the layered physical layer models and provide PHY
    characteristics. The implemented 802.11 modes are: DSSS, HR-DSSS, FHSS, IR,
    OFDM, ERP-OFDM.
- - Also implemented 802.11 High Throughput mode that makes available Wifi n modes.
+ - Added IEEE 802.11 High Throughput mode descriptor. This mode is defined in
+   Clause 20. High Throughput (HT) PHY specification in the IEEE 802.11-2012
+   specification. The new HT mode makes available the Wifi n modes in the
+   Ieee80211ModeSet.
  - Added a simple hypothetical APSK physical layer implementation that supports
    packet-level, bit-level, and symbol-level simulations with widely configurable
    bit-domain and symbol-domain parameters.
+ - Consistently moved packet level and bit level implementations into separate
+   subdirectories throughout the physical layer.
  - Added a generic convolutional encoder/decoder, a generic additive
    scrambler/descrambler, and a 802.11 specific interleaver/deinterleaver.
  - Added a separate modulations folder that contains descriptor classes for
@@ -140,8 +200,19 @@ Physical layer:
  - Added a new detailed 802.11 error model that computes erroneous packet
    domain, bit domain or symbol domain signal representations.
  - Added 802.11 OFDM PHY frame serializer.
- - Extracted separate communication cache classes from radio medium.
+ - Extracted separate CommunicationCache classes from RadioMedium.
+ - Extracted separate CommunicationLog class from RadioMedium.
+ - Extracted a separate MediumLimitCache module from RadioMedium.
+ - Extracted a separate MediumVisualizer module from RadioMedium.
+ - Added optional recent communication heat map to MediumVisualizer.
  - Renamed radio control info classes to TransmissionRequest and ReceptionIndication.
+ - Added Ieee80211TransmissionRequest with an optional IIeee80211Mode parameter
+   to allow the mac module to determine the exact physical layer operational mode.
+ - Added CosineAntenna and ParabolicAntenna.
+ - Added basic antenna array support to be used with 802.11 HT modes.
+ - Added arrival parameter to computeReceptionPower. Added snir parameter to
+   computeIsReceptionSuccessful. Added snir parameter to computeReceptionDecision.
+ - Added level parameter to printToStream function to better support logging.
  - Fixed the indefinite heap growth bug in the RadioMedium.
 
 Tests:
@@ -154,6 +225,7 @@ Examples:
    packet-level, bit-level, and symbol-level simulations for model verification.
  - Also added a simple hypothetical APSK radio example that supports configurable
    packet-level, bit-level, and symbol-level simulations for model verification.
+ - Added a work in progress Wireless tutorial in the tutorials/wireless folder.
 
 INET-2.99.0 (November 2014)
 ---------------------------

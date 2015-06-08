@@ -31,7 +31,7 @@ class INET_API LayeredScalarAnalogModel : public ScalarAnalogModelBase
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
 };
 
 } // namespace physicallayer

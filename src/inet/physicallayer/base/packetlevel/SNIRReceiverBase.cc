@@ -50,24 +50,16 @@ const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const IS
     return indication;
 }
 
-bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
-    const ITransmission *transmission = reception->getTransmission();
-    const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     return snir->getMin() > snirThreshold;
 }
 
-const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
-    const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
-    const ITransmission *transmission = reception->getTransmission();
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
-    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference);
+    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference, snir);
     const ReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : nullptr;
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }

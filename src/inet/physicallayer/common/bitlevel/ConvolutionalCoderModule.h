@@ -30,17 +30,17 @@ class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFECCoder
     ConvolutionalCoder *convolutionalCoder;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
     ~ConvolutionalCoderModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual BitVector encode(const BitVector& informationBits) const { return convolutionalCoder->encode(informationBits); }
-    virtual std::pair<BitVector, bool> decode(const BitVector& encodedBits) const { return convolutionalCoder->decode(encodedBits); }
-    virtual const ConvolutionalCode *getForwardErrorCorrection() const { return convolutionalCoder->getForwardErrorCorrection(); }
+    virtual BitVector encode(const BitVector& informationBits) const override { return convolutionalCoder->encode(informationBits); }
+    virtual std::pair<BitVector, bool> decode(const BitVector& encodedBits) const override { return convolutionalCoder->decode(encodedBits); }
+    virtual const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCoder->getForwardErrorCorrection(); }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

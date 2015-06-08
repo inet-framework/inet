@@ -65,7 +65,7 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     const IModulation *dataModulation = transmission->getSymbolModel()->getPayloadModulation();
     const BitVector *bits = transmissionBitModel->getBits();
     BitVector *corruptedBits = new BitVector(*bits);
-    const ScalarTransmissionSignalAnalogModel *analogModel = dynamic_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     if (dynamic_cast<const IAPSKModulation *>(signalModulation)) {
         const IAPSKModulation *apskSignalModulation = (const IAPSKModulation *)signalModulation;
         double signalFieldBer = isNaN(signalBitErrorRate) ? apskSignalModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
@@ -93,7 +93,7 @@ const IReceptionSymbolModel *Ieee80211OFDMErrorModel::computeSymbolModel(const L
     unsigned int signalFieldConstellationSize = BPSKModulation::singleton.getConstellationSize();
     const std::vector<APSKSymbol> *constellationForDataField = dataModulation->getConstellation();
     const std::vector<APSKSymbol> *constellationForSignalField = BPSKModulation::singleton.getConstellation();
-    const ScalarTransmissionSignalAnalogModel *analogModel = dynamic_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     double signalSER = isNaN(signalSymbolErrorRate) ? BPSKModulation::singleton.calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
     double dataSER = isNaN(dataSymbolErrorRate) ? dataModulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getPayloadBitRate()) : dataSymbolErrorRate;
     const std::vector<const ISymbol *> *symbols = transmissionSymbolModel->getSymbols();

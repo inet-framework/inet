@@ -18,25 +18,22 @@
 #ifndef __INET_IEEE80211SCALARRECEIVER_H
 #define __INET_IEEE80211SCALARRECEIVER_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/BerParseFile.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ScalarReceiver : public FlatReceiverBase
+class INET_API Ieee80211ScalarReceiver : public Ieee80211ReceiverBase
 {
   protected:
-    const Ieee80211ModeSet *modeSet;
-
-  protected:
-    virtual void initialize(int stage) override;
     virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
 
   public:
     Ieee80211ScalarReceiver();
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
 } // namespace physicallayer

@@ -30,6 +30,7 @@ bool isNetworkNode(cModule *mod)
     return (mod != nullptr) ? _isNetworkNode(mod) : false;
 }
 
+/*
 static cModule *findSubmodRecursive(cModule *curmod, const char *name)
 {
     for (cModule::SubmoduleIterator i(curmod); !i.end(); i++) {
@@ -42,6 +43,7 @@ static cModule *findSubmodRecursive(cModule *curmod, const char *name)
     }
     return nullptr;
 }
+*/
 
 cModule *findModuleSomewhereUp(const char *name, cModule *from)
 {

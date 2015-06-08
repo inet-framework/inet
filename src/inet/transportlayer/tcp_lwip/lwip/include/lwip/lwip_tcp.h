@@ -80,8 +80,6 @@ class LwipTcpLayer
     LwipTcpLayer(LwipTcpStackIf &stackIfP);
 
   public:
-    struct tcp_pcb;
-
     /** interface for ip layer */
     /**
      * Simple interface to ip_output_if. It finds the outgoing network

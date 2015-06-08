@@ -36,9 +36,9 @@ class INET_API SignalSampleModel : public virtual ISignalSampleModel
     virtual ~SignalSampleModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual int getSampleLength() const { return sampleLength; }
-    virtual double getSampleRate() const { return sampleRate; }
-    virtual const std::vector<W> *getSamples() const { return samples; }
+    virtual int getSampleLength() const override { return sampleLength; }
+    virtual double getSampleRate() const override { return sampleRate; }
+    virtual const std::vector<W> *getSamples() const override { return samples; }
 };
 
 class INET_API TransmissionSampleModel : public SignalSampleModel, public virtual ITransmissionSampleModel

@@ -1,0 +1,11 @@
+====== inet-3.x ======
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-17  Levente Mészáros
+
+    Added initial implementation:
+    IMaterial, IMaterialRegistry, IObjectCache,
+    IPhysicalObject, IPhysicalEnvironment.
+
+====== inet-2.x ======

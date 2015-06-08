@@ -233,7 +233,7 @@ static struct maint_entry *maint_entry_create(struct dsr_pkt *dp,
             int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
             options = (dsr_opt_hdr *)MALLOC (dsr_opts_len, GFP_ATOMIC);
             memcpy((char*)options,(char*)opth,dsr_pkt_opts_len(dp));
-            dsrPkt->setOptions(options);
+            dsrPkt->setDsrOptions(options);
             dsrPkt->setBitLength (dsrPkt->getBitLength()+((DSR_OPT_HDR_LEN+options->p_len)*8));
             dsrPkt->setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
         }

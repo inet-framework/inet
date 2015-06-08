@@ -504,15 +504,9 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_RADIO
-    const ITransmission *transmission = packet->getTransmission();
-    const ScalarTransmission *scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission);
-    os << "RADIO from " << transmission->getStartPosition();
-    if (scalarTransmission)
-        os << " on " << scalarTransmission->getCarrierFrequency().get() / 1e6 << "MHz, ";
-    // TODO: revive
-    // const Ieee80211Transmission *ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(transmission);
-    // if (ieee80211Transmission)
-    //     os << "ch=" << ieee80211Transmission->getChannelNumber() << ", ";
+    // Note: Do NOT try to print transmission's properties here! getTransmission() will likely
+    // return an invalid pointer here, because the transmission is no longer kept in the Medium.
+    // const ITransmission *transmission = packet->getTransmission();
     os << "duration=" << SIMTIME_DBL(packet->getDuration()) * 1000 << "ms";
 #endif // ifdef WITH_RADIO
     return os.str();

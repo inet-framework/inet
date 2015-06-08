@@ -269,7 +269,7 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
 
-    ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
+    Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
     configureCommand->setChannelNumber(channelNum);
     cMessage *msg = new cMessage("changeChannel", RADIO_C_CONFIGURE);
     msg->setControlInfo(configureCommand);

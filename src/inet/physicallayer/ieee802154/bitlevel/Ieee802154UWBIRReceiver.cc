@@ -66,7 +66,7 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionAttempted(const IListening *list
     return true;
 }
 
-bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     std::vector<bool> *bits = decode(reception, interference->getInterferingReceptions(), interference->getBackgroundNoise());
     int bitLength = bits->size() - 48 - 8;
@@ -85,10 +85,10 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *lis
     return isReceptionSuccessful;
 }
 
-const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     ReceptionIndication *indication = new ReceptionIndication();
-    bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference);
+    bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference, snir);
     return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }
 

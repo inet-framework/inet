@@ -442,12 +442,12 @@ void IPv6InterfaceData::removeAdvPrefix(int i)
 simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
         double MAX_RANDOM_FACTOR, uint baseReachableTime)
 {
-    return uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
+    return RNGCONTEXT uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
 
 simtime_t IPv6InterfaceData::generateReachableTime()
 {
-    return uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
+    return RNGCONTEXT uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
 bool IPv6InterfaceData::isMemberOfMulticastGroup(const IPv6Address& multicastAddress) const

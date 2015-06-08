@@ -317,9 +317,6 @@
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            c2d8-f63b
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            7a07-ce84
 
-#/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
-#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
-
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            7fdd-ac68
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            c92b-eaf1
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            8bd0-5e35

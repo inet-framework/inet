@@ -128,7 +128,7 @@ void NS_CLASS timer_timeout(struct timeval *now)
         struct timer * t = dymoTimerList->begin()->second;
         dymoTimerList->erase(dymoTimerList->begin());
         if (t==nullptr)
-            opp_error ("timer ower is bad");
+            throw cRuntimeError("timer ower is bad");
         else
         {
             if (t->handler)
@@ -148,7 +148,7 @@ struct timeval *NS_CLASS timer_age_queue()
     {
         t = dymoTimerList->begin()->second;
         if (t==nullptr)
-            opp_error ("timer ower is bad");
+            throw cRuntimeError("timer ower is bad");
         if (timeval_diff(&(t->timeout), &now)>0)
             break;
         dymoTimerList->erase(dymoTimerList->begin());

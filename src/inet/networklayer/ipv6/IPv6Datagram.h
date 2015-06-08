@@ -83,7 +83,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      * Returns the kth extension header in this datagram
      */
     virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
-    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const {return const_cast<IPv6Datagram*>(this)->getExtensionHeader(k);}
+    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const override {return const_cast<IPv6Datagram*>(this)->getExtensionHeader(k);}
 
     /**
      * Returns the extension header of the specified type,

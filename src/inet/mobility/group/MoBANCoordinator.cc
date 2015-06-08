@@ -371,7 +371,7 @@ bool MoBANCoordinator::readPostureSpecificationFile()
     for (posture = postures.begin(); posture != postures.end(); posture++) {
         str = (*posture)->getAttribute("postureID");
         postureID = strtol(str, nullptr, 0);
-        if (postureID < 0 || postureID >= numPostures)
+        if (postureID >= numPostures)
             throw cRuntimeError("Posture ID in input posture specification file is out of the range");
 
         postureList.push_back(new Posture(postureID, localModules.size()));

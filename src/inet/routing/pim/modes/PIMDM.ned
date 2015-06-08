@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-
+// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+//          Tamas Borbely (tomi@omnetpp.org)
 
 package inet.routing.pim.modes;
 
@@ -42,7 +42,7 @@ package inet.routing.pim.modes;
 simple PIMDM
 {
     parameters:
-    	@display("i=block/network2");
+        @display("i=block/network2");
         string interfaceTableModule;
         string routingTableModule;
         string pimInterfaceTableModule;

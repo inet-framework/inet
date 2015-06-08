@@ -24,7 +24,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/mobility/base/MobilityBase.h"
-#include "inet/common/TrailFigure.h"
+#include "inet/common/figures/TrailFigure.h"
 
 namespace inet {
 

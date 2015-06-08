@@ -21,22 +21,21 @@
 #include "inet/physicallayer/base/packetlevel/DimensionalTransmitterBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211DimensionalTransmitter : public DimensionalTransmitterBase
+class INET_API Ieee80211DimensionalTransmitter : public Ieee80211TransmitterBase, public DimensionalTransmitterBase
 {
-  protected:
-    const Ieee80211ModeSet *modeSet;
-    const IIeee80211Mode *mode;
-
   protected:
     virtual void initialize(int stage) override;
 
   public:
     Ieee80211DimensionalTransmitter();
+
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const override;
 };

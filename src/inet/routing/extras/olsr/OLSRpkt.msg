@@ -198,7 +198,7 @@ typedef struct OLSR_hello_msg {
 
 /// %OLSR HELLO message.
 
-typedef struct OLSR_hello :cObject {
+typedef struct OLSR_hello {
 
     /// Reserved.
     uint16_t    reserved_;
@@ -226,7 +226,7 @@ typedef struct OLSR_hello :cObject {
 
 
 /// %OLSR TC message.
-typedef struct OLSR_tc :cObject{
+typedef struct OLSR_tc {
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
@@ -247,7 +247,7 @@ typedef struct OLSR_tc :cObject{
 
 #if 0
 /// %OLSR TC message.
-typedef struct OLSR_tc :cObject{
+typedef struct OLSR_tc {
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
@@ -268,7 +268,7 @@ typedef struct OLSR_tc :cObject{
 #endif
 
 /// %OLSR MID message.
-typedef struct OLSR_mid :cObject{
+typedef struct OLSR_mid {
 
     /// List of interface addresses.
     nsaddr_t    iface_addrs_[OLSR_MAX_ADDRS];

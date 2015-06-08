@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+//          Tamas Borbely (tomi@omnetpp.org)
 
 package inet.routing.pim.tables;
 
@@ -23,8 +24,8 @@ package inet.routing.pim.tables;
 //
 simple PIMNeighborTable
 {
-  	@display("i=block/table");
-  	@signal[NF_PIM_NEIGHBOR_ADDED](type=PIMNeighbor);
+      @display("i=block/table");
+      @signal[NF_PIM_NEIGHBOR_ADDED](type=PIMNeighbor);
     @signal[NF_PIM_NEIGHBOR_DELETED](type=PIMNeighbor);
     @signal[NF_PIM_NEIGHBOR_CHANGED](type=PIMNeighbor);
 }

@@ -224,7 +224,7 @@ const ITransmissionSymbolModel *Ieee80211LayeredOFDMTransmitter::createSymbolMod
         std::vector<const ISymbol *> *mergedSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OFDMSymbol *ofdmSymbol = nullptr;
         for (unsigned int i = 0; i < signalSymbols->size(); i++) {
-            ofdmSymbol = dynamic_cast<const Ieee80211OFDMSymbol *>(signalSymbols->at(i));
+            ofdmSymbol = check_and_cast<const Ieee80211OFDMSymbol *>(signalSymbols->at(i));
             mergedSymbols->push_back(new Ieee80211OFDMSymbol(*ofdmSymbol));
         }
         const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getSymbols();

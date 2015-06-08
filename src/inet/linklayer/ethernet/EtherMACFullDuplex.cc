@@ -198,7 +198,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(cPacket *pk)
         RawPacket *rp = static_cast<RawPacket *>(pk);
         Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
         Context c;
-        cPacket *deserializedPk = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET, 0);
+        cPacket *deserializedPk = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET);
         if (deserializedPk) {
             delete rp;
             pk = deserializedPk;

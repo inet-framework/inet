@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
 2015-02-05  Zoltan Bojthe
 
 	Replaced getParentModule calls with module parameters.

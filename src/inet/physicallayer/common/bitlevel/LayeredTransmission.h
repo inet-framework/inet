@@ -48,10 +48,10 @@ class INET_API LayeredTransmission : public TransmissionBase
     virtual const ITransmissionBitModel *getBitModel()    const { return bitModel; }
     virtual const ITransmissionSymbolModel *getSymbolModel() const { return symbolModel; }
     virtual const ITransmissionSampleModel *getSampleModel() const { return sampleModel; }
-    virtual const ITransmissionAnalogModel *getAnalogModel() const { return analogModel; }
+    virtual const ITransmissionAnalogModel *getAnalogModel() const override { return analogModel; }
 
-    virtual const cPacket *getPhyFrame() const { return packetModel->getPacket(); }
-    virtual const cPacket *getMacFrame() const { return getPhyFrame()->getEncapsulatedPacket(); }
+    virtual const cPacket *getPhyFrame() const override { return packetModel->getPacket(); }
+    virtual const cPacket *getMacFrame() const override { return getPhyFrame()->getEncapsulatedPacket(); }
 };
 
 } // namespace physicallayer

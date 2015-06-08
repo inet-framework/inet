@@ -187,9 +187,8 @@ void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
 
 void GenericRoutingTable::configureLoopback()
 {
-    InterfaceEntry *ie = ift->getFirstLoopbackInterface();
-
 //TODO needed???
+//    InterfaceEntry *ie = ift->getFirstLoopbackInterface()
 //    // add IPv4 info. Set 127.0.0.1/8 as address by default --
 //    // we may reconfigure later it to be the routerId
 //    IPv4InterfaceData *d = new IPv4InterfaceData();
@@ -275,7 +274,7 @@ GenericRoute *GenericRoutingTable::findBestMatchingRoute(const L3Address& dest) 
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     GenericRoute *bestRoute = nullptr;
     for (auto e : routes) {
-        
+
         if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength())) {
             bestRoute = const_cast<GenericRoute *>(e);
             break;

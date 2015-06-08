@@ -116,12 +116,12 @@ typedef struct OLSR_iface_assoc_tuple : public cObject
 
     inline double&      time()      { return time_; }
     OLSR_iface_assoc_tuple() {asocTimer = nullptr;}
-    OLSR_iface_assoc_tuple(const OLSR_iface_assoc_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_iface_assoc_tuple));
-        asocTimer = nullptr;
+
+    virtual OLSR_iface_assoc_tuple *dup() const {
+        auto ret = new OLSR_iface_assoc_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
     }
-    virtual OLSR_iface_assoc_tuple *dup() const {return new OLSR_iface_assoc_tuple(this);}
 
 } OLSR_iface_assoc_tuple;
 
@@ -158,12 +158,12 @@ typedef struct OLSR_link_tuple : public cObject
     inline double&      time()          { return time_; }
 
     OLSR_link_tuple() {asocTimer = nullptr;}
-    OLSR_link_tuple(const OLSR_link_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_link_tuple));
-        asocTimer = nullptr;
+
+    virtual OLSR_link_tuple *dup() const {
+        auto ret = new OLSR_link_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
     }
-    virtual OLSR_link_tuple *dup() const {return new OLSR_link_tuple(this);}
 
 } OLSR_link_tuple;
 
@@ -186,12 +186,13 @@ typedef struct OLSR_nb_tuple : public cObject
     inline uint8_t& willingness()   { return willingness_; }
 
     OLSR_nb_tuple() {asocTimer = nullptr;}
-    OLSR_nb_tuple(const OLSR_nb_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_nb_tuple));
-        asocTimer = nullptr;
+
+    virtual OLSR_nb_tuple *dup() const {
+        auto ret = new OLSR_nb_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
     }
-    virtual OLSR_nb_tuple *dup() const {return new OLSR_nb_tuple(this);}
+
     ~OLSR_nb_tuple()
     {
         status_ = 0;
@@ -218,12 +219,12 @@ typedef struct OLSR_nb2hop_tuple : public cObject
     inline double&      time()      { return time_; }
 
     OLSR_nb2hop_tuple() {asocTimer = nullptr;}
-    OLSR_nb2hop_tuple(const OLSR_nb2hop_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_nb2hop_tuple));
-        asocTimer = nullptr;
+
+    virtual OLSR_nb2hop_tuple *dup() const {
+        auto ret = new OLSR_nb2hop_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
     }
-    virtual OLSR_nb2hop_tuple *dup() const {return new OLSR_nb2hop_tuple(this);}
 
 } OLSR_nb2hop_tuple;
 
@@ -242,13 +243,12 @@ typedef struct OLSR_mprsel_tuple : public cObject
     inline double&      time()      { return time_; }
 
     OLSR_mprsel_tuple() {asocTimer = nullptr;}
-    OLSR_mprsel_tuple(const OLSR_mprsel_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_mprsel_tuple));
-        asocTimer = nullptr;
-    }
-    virtual OLSR_mprsel_tuple *dup() const {return new OLSR_mprsel_tuple(this);}
 
+    virtual OLSR_mprsel_tuple *dup() const {
+        auto ret = new OLSR_mprsel_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
+    }
 
 } OLSR_mprsel_tuple;
 
@@ -280,12 +280,12 @@ typedef struct OLSR_dup_tuple : public cObject
     inline double&      time()      { return time_; }
 
     OLSR_dup_tuple() {asocTimer = nullptr;}
-    OLSR_dup_tuple(const OLSR_dup_tuple * e)
-    {
-        memcpy(this, e, sizeof(OLSR_dup_tuple));
-        asocTimer = nullptr;
+
+    virtual OLSR_dup_tuple *dup() const {
+        auto ret = new OLSR_dup_tuple(*this);
+        ret->asocTimer = nullptr;
+        return ret;
     }
-    virtual OLSR_dup_tuple *dup() const {return new OLSR_dup_tuple(this);}
 
 } OLSR_dup_tuple;
 

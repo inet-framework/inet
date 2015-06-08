@@ -17,8 +17,6 @@
 
 package inet.physicallayer.apskradio.packetlevel;
 
-import inet.physicallayer.base.packetlevel.FlatRadioBase;
-
 //
 // This radio model provides a hypothetical radio that simply uses one of the
 // well-known modulations without utilizing other techiques such as forward
@@ -28,10 +26,9 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 // See also ~APSKScalarRadioMedium, ~ScalarAnalogModel, ~APSKScalarTransmitter,
 // and ~APSKScalarReceiver.
 //
-module APSKScalarRadio extends FlatRadioBase
+module APSKScalarRadio extends APSKRadio
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
         transmitterType = default("APSKScalarTransmitter");
         receiverType = default("APSKScalarReceiver");
 }

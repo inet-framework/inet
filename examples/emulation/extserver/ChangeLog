@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-30  Rudolf Hornig
+
+    Network Emulation feature no longer depends on OMNeT++ to detect the
+    presence of PCAP. Instead the feature can be turned on/off by the user.
+
 2014-11-07  ------ inet-2.99.0 released ------
 
 2015-03-04  ------ inet-2.6 released ------

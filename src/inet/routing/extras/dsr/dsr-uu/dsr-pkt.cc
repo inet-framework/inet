@@ -311,7 +311,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
             {
                 DSRPkt *dsrpkt = static_cast<DSRPkt*>(p);
 
-                opth =  dsrpkt->getOptions();
+                opth = dsrpkt->getDsrOptions();
                 dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
                 if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
                 {
@@ -419,7 +419,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
             {
                 DSRPkt *dsrpkt = static_cast<DSRPkt*>(p);
 
-                opth =  dsrpkt->getOptions();
+                opth = dsrpkt->getDsrOptions();
                 dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
                 if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
                 {

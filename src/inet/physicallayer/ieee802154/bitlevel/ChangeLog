@@ -1,0 +1,15 @@
+====== inet-3.x ======
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-18  Levente Mészáros
+
+    802.15.4 UWBIR: Moved under bitlevel, because it actually simulates the
+    bits.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed ieee802154 to ieee802154/packetlevel.
+
+====== inet-2.x ======

@@ -18,14 +18,14 @@
 #ifndef __INET_DIMENSIONALTRANSMITTERBASE_H
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/common/mapping/MappingBase.h"
+#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API DimensionalTransmitterBase : public FlatTransmitterBase
+class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 {
   protected:
     class TimeGainEntry {
@@ -63,9 +63,9 @@ class INET_API DimensionalTransmitterBase : public FlatTransmitterBase
     std::vector<FrequencyGainEntry> frequencyGains;
 
   protected:
-    virtual void initialize(int stage) override;
+    virtual void initialize(int stage);
 
-    ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
+    virtual ConstMapping *createPowerMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power) const;
 
   public:
     DimensionalTransmitterBase();

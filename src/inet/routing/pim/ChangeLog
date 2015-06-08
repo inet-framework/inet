@@ -1,0 +1,12 @@
+====== inet-3.x ======
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2014-03-06  Tamas Borbely
+
+	Added PIM-DM and PIM-SM implementation based on the ANSA project 
+	(http://nes.fit.vutbr.cz/ansa). The original code has be extensively 
+	reviewed, refactored and extended.
+
+====== inet-2.x ======
+

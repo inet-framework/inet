@@ -1,5 +1,38 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-02  Zoltan Bojthe
+
+    Fixed 802.11 beacon packet length.
+
+2015-03-18  Zoltan Bojthe
+
+    Renamed LENGTH_DATAHDR to DATAFRAME_HEADER_MINLENGTH.
+
+2015-03-19  Levente Mészáros
+
+    Renamed the old Radio80211aControlInfo to Ieee80211ReceptionIndication.
+
+2015-03-18  Levente Mészáros
+
+    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+    SCTPMessage. This change allows generic handling of transport packets. For
+    example, see TunLoopbackApp.
+
+2015-02-11  Zoltan Bojthe
+
+    Fixed packet length of 802.11 data frames.
+
+2015-02-11  Zoltan Bojthe
+
+    Added ST_DATA_WITH_QOS to 802.11 data frames.
+
+2015-03-10  Levente Mészáros
+
+    802.11 MAC: Fixed control frame mode. The specification requires the control
+    frames to be sent with the slowest mandatory mode.
+
 2015-02-25  Levente Meszaros
 
 	Refactored the MAC class to work with the new 802.11 mode descriptor classes.
@@ -35,6 +68,17 @@
 	Fixed memory management problems found by valgrind memcheck.
 
 2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
 
 2014-07-30  Andras Varga
 

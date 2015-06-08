@@ -1,5 +1,24 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-23  Levente Mészáros
+
+    Refactored supported metrics (hopCount, delay, dataRate, errorRate) and
+    related parameters.
+
+2015-04-23  Levente Mészáros
+
+    Fixed bridge node handling.
+
+2015-04-22  Levente Mészáros
+
+    Changed logging to be more user friendly.
+
+2015-04-22  Levente Mészáros
+
+    Added autoroute element to IPv4NetworkConfigurator, see documentation.
+
 2015-01-06  Zoltan Bojthe
 
 	Replaced getParentModule calls in HostAutoConfigurator with getContainingModule.
@@ -24,6 +43,17 @@
 	Fixed memory leaks detected by valgrind memcheck.
 
 2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
 
 2014-07-30  Andras Varga
 

@@ -27,6 +27,18 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
+#ifdef WITH_CSMA
+#include "inet/linklayer/csma/CSMAFrame_m.h"
+#endif // ifdef WITH_CSMA
+
+#ifdef WITH_LMAC
+#include "inet/linklayer/lmac/LMacFrame_m.h"
+#endif // ifdef WITH_LMAC
+
+#ifdef WITH_BMAC
+#include "inet/linklayer/bmac/BMacFrame_m.h"
+#endif // ifdef WITH_BMAC
+
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/common/ModuleAccess.h"
@@ -987,7 +999,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
         EV_DETAIL << "Received link break signal" << endl;
-        // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
+        // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac. etc
         cPacket *frame = check_and_cast<cPacket *>(obj);
         INetworkDatagram *datagram = nullptr;
         if (false
@@ -997,6 +1009,15 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 #ifdef WITH_IDEALWIRELESS
             || dynamic_cast<IdealMacFrame *>(frame)
 #endif // ifdef WITH_IDEALWIRELESS
+#ifdef WITH_CSMA
+            || dynamic_cast<CSMAFrame *>(frame)
+#endif // ifdef WITH_CSMA
+#ifdef WITH_LMAC
+            || dynamic_cast<LMacFrame *>(frame)
+#endif // ifdef WITH_LMAC
+#ifdef WITH_BMAC
+            || dynamic_cast<BMacFrame *>(frame)
+#endif // ifdef WITH_BMAC
             )
             datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
         else

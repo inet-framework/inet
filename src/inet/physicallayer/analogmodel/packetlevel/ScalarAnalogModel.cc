@@ -27,8 +27,7 @@ Define_Module(ScalarAnalogModel);
 
 std::ostream& ScalarAnalogModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarAnalogModel";
-    return ScalarAnalogModelBase::printToStream(stream, level);
+    return stream << "ScalarAnalogModel";
 }
 
 const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
@@ -40,7 +39,7 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
-    W receptionPower = computeReceptionPower(receiverRadio, transmission);
+    W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     return new ScalarReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, narrowbandSignalAnalogModel->getCarrierFrequency(), narrowbandSignalAnalogModel->getBandwidth(), receptionPower);
 }
 

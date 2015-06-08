@@ -220,7 +220,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createSignalFieldSymb
     else if (levelOfDetail == SYMBOL_DOMAIN) { // Create from symbol model (made by the error model)
         const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getSymbols();
         std::vector<const ISymbol *> *signalSymbols = new std::vector<const ISymbol *>();
-        const Ieee80211OFDMSymbol *signalSymbol = dynamic_cast<const Ieee80211OFDMSymbol *>(symbols->at(0));
+        const Ieee80211OFDMSymbol *signalSymbol = check_and_cast<const Ieee80211OFDMSymbol *>(symbols->at(0));
         signalSymbols->push_back(new Ieee80211OFDMSymbol(*signalSymbol)); // The first symbol is the signal field symbol
         signalFieldSymbolModel = new Ieee80211OFDMReceptionSymbolModel(1, receptionSymbolModel->getHeaderSymbolRate(), -1, NaN, signalSymbols);
     }
@@ -237,7 +237,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createDataFieldSymbol
         std::vector<const ISymbol *> *dataSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OFDMSymbol *ofdmSymbol = nullptr;
         for (unsigned int i = 1; i < symbols->size(); i++) {
-            ofdmSymbol = dynamic_cast<const Ieee80211OFDMSymbol *>(symbols->at(i));
+            ofdmSymbol = check_and_cast<const Ieee80211OFDMSymbol *>(symbols->at(i));
             dataSymbols->push_back(new Ieee80211OFDMSymbol(*ofdmSymbol));
         }
         dataFieldSymbolModel = new Ieee80211OFDMReceptionSymbolModel(-1, NaN, symbols->size() - 1, receptionSymbolModel->getPayloadSymbolRate(), dataSymbols);
@@ -330,7 +330,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
         symbols = dataFieldSymbolModel->getSymbols();
         for (unsigned int i = 0; i < symbols->size(); i++)
-            completeSymbols->push_back(new Ieee80211OFDMSymbol(*dynamic_cast<const Ieee80211OFDMSymbol *>(symbols->at(i))));
+            completeSymbols->push_back(new Ieee80211OFDMSymbol(*static_cast<const Ieee80211OFDMSymbol *>(symbols->at(i))));
         return new Ieee80211OFDMReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getPayloadSymbolLength(), dataFieldSymbolModel->getPayloadSymbolRate(), completeSymbols);
     }
     return nullptr;
@@ -365,12 +365,9 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth)
     return new Ieee80211OFDMMode(new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const IReceptionDecision *Ieee80211LayeredOFDMReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const
+const IReceptionDecision *Ieee80211LayeredOFDMReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
-    const IRadio *receiver = reception->getReceiver();
-    const IRadioMedium *medium = receiver->getMedium();
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
-    const ISNIR *snir = medium->getSNIR(receiver, transmission);
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
@@ -441,7 +438,7 @@ bool Ieee80211LayeredOFDMReceiver::computeIsReceptionPossible(const IListening *
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
     // TODO: scalar
-    const ScalarReceptionSignalAnalogModel *analogModel = dynamic_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
+    const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
     if (bandListening->getCarrierFrequency() != analogModel->getCarrierFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
         EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;

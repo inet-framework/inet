@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+//          Tamas Borbely (tomi@omnetpp.org)
 
 package inet.routing.pim;
 
@@ -22,14 +23,14 @@ package inet.routing.pim;
 // PIMSplitter module dispatches PIM packets received from the network layer
 // according to the PIM mode of the incoming interface. Bu using a PIMSplitter
 // it is possible to build nodes that operates in Dense Mode on some interfaces,
-// and in Sparse Mode on others. 
+// and in Sparse Mode on others.
 //
 // See ~PIMRouting module for example usage.
 //
 simple PIMSplitter
 {
     parameters:
-    	@display("i=block/dispatch");
+        @display("i=block/dispatch");
         string interfaceTableModule;
         string pimInterfaceTableModule;
 

@@ -324,7 +324,7 @@ void NS_CLASS log_pkt_fields(AODV_msg * msg)
     case AODV_RERR:
         rerr = (RERR *) msg;
         DEBUG(LOG_DEBUG, 0, "rerr->dest_count:%d rerr->flags=%s",
-              rerr->dest_count, rerr->n ? "N" : "-");
+              rerr->dest_count, rerr->n ? "N" : "-"); (void)rerr; // avoid unused variable
         break;
     }
 }

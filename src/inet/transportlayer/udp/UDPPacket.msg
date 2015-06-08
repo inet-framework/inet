@@ -24,7 +24,7 @@ cplusplus {{
 namespace inet;
 
 enum UdpConstants{
-    UDP_HDR_LEN = 8;
+    UDP_HEADER_BYTES = 8;
 };
 //
 // Represents an UDP packet, to be used with the ~UDP module.
@@ -32,9 +32,11 @@ enum UdpConstants{
 packet UDPPacket
 {
     @customize(true);
+    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
 
     unsigned short srcPort;
     unsigned short destPort;
-    byteLength = UDP_HDR_LEN;
+    byteLength = UDP_HEADER_BYTES;
+    int totalLengthField = -1;   // -1 means: getTotalLengthField() uses getByteLength()
 }
 

@@ -34,8 +34,8 @@ class INET_API APSKDecoder : public cSimpleModule, public IDecoder
     const IInterleaver *deinterleaver;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
   public:
     APSKDecoder();
@@ -43,7 +43,7 @@ class INET_API APSKDecoder : public cSimpleModule, public IDecoder
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const APSKCode *getCode() const { return code; }
-    virtual const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const;
+    virtual const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;
 };
 
 } // namespace physicallayer

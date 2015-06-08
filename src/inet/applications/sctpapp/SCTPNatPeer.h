@@ -74,7 +74,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     HistEndToEndDelay histEndToEndDelay;
     typedef std::map<int32, cOutVector *> EndToEndDelay;
     EndToEndDelay endToEndDelay;
-    void sendOrSchedule(cPacket *msg);
+    void sendOrSchedule(cMessage *msg);
     void sendRequest(bool last = true);
 
   public:

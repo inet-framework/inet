@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -142,7 +142,7 @@ void SCTPClient::handleMessage(cMessage *msg)
         handleTimer(msg);
     }
     else {
-        socket.processMessage(PK(msg));
+        socket.processMessage(msg);
     }
 }
 
@@ -284,7 +284,7 @@ void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
 
 void SCTPClient::sendQueueRequest()
 {
-    cPacket *cmsg = new cPacket("Queue");
+    cMessage *cmsg = new cMessage("SCTP_C_QUEUE_MSGS_LIMIT");
     SCTPInfo *qinfo = new SCTPInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
@@ -329,16 +329,14 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        // FIXME why do it: msg->dup(); delete msg;
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
-        delete msg;
-        cPacket *cmsg = new cPacket("SVData");
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
+        cPacket *cmsg = new cPacket("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        socket.send(cmsg, 1);
+        socket.sendMsg(cmsg);
     }
 
     if (par("numPacketsToReceive").longValue() > 0) {
@@ -378,7 +376,7 @@ void SCTPClient::sendRequest(bool last)
     if (sendBytes < 1)
         sendBytes = 1;
 
-    cPacket *cmsg = new cPacket("AppData");
+    cPacket *cmsg = new cPacket("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
@@ -399,9 +397,15 @@ void SCTPClient::sendRequest(bool last)
 
     if (bufferSize < 0)
         last = true;
+    
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    sendCommand->setLast(last);
+    sendCommand->setPrMethod(par("prMethod"));
+    sendCommand->setPrValue(par("prValue"));
+    cmsg->setControlInfo(sendCommand);
 
     emit(sentPkSignal, msg);
-    socket.send(cmsg, par("prMethod"), par("prValue"), last);
+    socket.sendMsg(cmsg);
     bytesSent += sendBytes;
 }
 
@@ -483,8 +487,8 @@ void SCTPClient::handleTimer(cMessage *msg)
 void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-    cPacket *cmsg = new cPacket("CMSG-DataArr");
-    SCTPSendCommand *cmd = new SCTPSendCommand();
+    cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
+    SCTPSendInfo *cmd = new SCTPSendInfo();
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -497,7 +501,7 @@ void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *m
 void SCTPClient::shutdownReceivedArrived(int connId)
 {
     if (numRequestsToSend == 0) {
-        cPacket *cmsg = new cPacket("Request");
+        cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
         SCTPInfo *qinfo = new SCTPInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setAssocId(connId);
@@ -554,11 +558,12 @@ void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo 
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
+    delete status;
 }
 
 void SCTPClient::setPrimaryPath(const char *str)
 {
-    cPacket *cmsg = new cPacket("CMSG-SetPrimary");
+    cMessage *cmsg = new cMessage("SCTP_C_PRIMARY");
     SCTPPathInfo *pinfo = new SCTPPathInfo();
 
     if (strcmp(str, "") != 0) {
@@ -584,7 +589,7 @@ void SCTPClient::sendStreamResetNotification()
 {
     unsigned int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
-        cPacket *cmsg = new cPacket("CMSG-SR");
+        cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
         SCTPResetInfo *rinfo = new SCTPResetInfo();
         rinfo->setAssocId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());

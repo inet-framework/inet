@@ -82,7 +82,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
 
     cmtCCGroup = 0;
     lastTransmission = simTime();
-    sendAllRandomizer = uniform(0, (1 << 31));
+    sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
     pseudoCumAck = 0;
     newPseudoCumAck = false;
     findPseudoCumAck = true;    // Set findPseudoCumAck to TRUE for new destination.
@@ -354,6 +354,7 @@ SCTPStateVariables::SCTPStateVariables()
     resetChunk = nullptr;
     asconfChunk = nullptr;
     shutdownChunk = nullptr;
+    shutdownAckChunk = nullptr;
     initChunk = nullptr;
     cookieChunk = nullptr;
     sctpmsg = nullptr;
@@ -415,6 +416,31 @@ SCTPStateVariables::SCTPStateVariables()
     queueLimit = 0;
     probingTimeout = 1;
     numRequests = 0;
+    sendQueueLimit = 0;
+    swsLimit = 0;
+    authAdded = false;
+    nrSack = false;
+    gapReportLimit = 0;
+    gapListOptimizationVariant = 0;
+    smartOverfullSACKHandling = false;
+    disableReneging = false;
+    rtxMethod = 0;
+    maxBurst = 0;
+    maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseIt;
+    initialWindow = 0;
+    allowCMT = false;
+    cmtSendAllComparisonFunction = nullptr;
+    cmtRetransmissionVariant = 0;
+    cmtCUCVariant = SCTPStateVariables::CUCV_Normal;
+    cmtBufferSplitVariant = SCTPStateVariables::CBSV_None;
+    cmtBufferSplittingUsesOSB = false;
+    cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_None;
+    cmtChunkReschedulingThreshold = 0.5;
+    cmtSmartT3Reset = true;
+    cmtSmartFastRTX = true;
+    cmtSmartReneging = false;
+    cmtSlowPathRTTUpdate = false;
+    cmtUseSFR = true;
     numMsgsReq.resize(65536);
 
     for (unsigned int i = 0; i < 65536; i++) {
@@ -537,6 +563,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     snprintf(timerName, sizeof(timerName), "SACK_TIMER of Association %d", assocId);
     SackTimer = new cMessage(timerName);
 
+    StartTesting = nullptr;
     if (sctpMain->testTimeout > 0) {
         StartTesting = new cMessage("StartTesting");
         StartTesting->setContextPointer(this);
@@ -776,7 +803,10 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (msg == T5_ShutdownGuardTimer) {
         stopTimer(T5_ShutdownGuardTimer);
-        delete state->shutdownChunk;
+        if (state->shutdownChunk) {
+            delete state->shutdownChunk;
+            state->shutdownChunk = nullptr;
+        }
         sendIndicationToApp(SCTP_I_CONN_LOST);
         sendAbort();
         sctpMain->removeAssociation(this);
@@ -969,8 +999,8 @@ bool SCTPAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SCTPSendCommand *)sctpCommand)->getSid()] =
-                ((SCTPSendCommand *)sctpCommand)->getPpid();
+            state->ssPriorityMap[((SCTPSendInfo *)sctpCommand)->getSid()] =
+                ((SCTPSendInfo *)sctpCommand)->getPpid();
             break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT:

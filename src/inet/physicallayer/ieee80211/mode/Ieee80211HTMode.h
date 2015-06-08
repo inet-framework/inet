@@ -144,7 +144,7 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
 
     public:
         Ieee80211HTPreambleMode(const Ieee80211HTSignalMode* highThroughputSignalMode, const Ieee80211OFDMSignalMode *legacySignalMode, HighTroughputPreambleFormat preambleFormat, unsigned int numberOfSpatialStream);
-        virtual ~Ieee80211HTPreambleMode() {}
+        virtual ~Ieee80211HTPreambleMode() { delete highThroughputSignalMode; }
 
         HighTroughputPreambleFormat getPreambleFormat() const { return preambleFormat; }
         virtual const Ieee80211HTSignalMode *getSignalMode() const { return highThroughputSignalMode; }
@@ -239,7 +239,7 @@ class INET_API Ieee80211HTMode : public IIeee80211Mode
 
     public:
         Ieee80211HTMode(const Ieee80211HTPreambleMode *preambleMode, const Ieee80211HTDataMode *dataMode, const BandMode carrierFrequencyMode);
-        virtual ~Ieee80211HTMode() {}
+        virtual ~Ieee80211HTMode() { delete preambleMode; delete dataMode; }
 
         virtual const Ieee80211HTDataMode* getDataMode() const override { return dataMode; }
         virtual const Ieee80211HTPreambleMode* getPreambleMode() const override { return preambleMode; }
@@ -458,9 +458,14 @@ class INET_API Ieee80211HTMCSTable
 class INET_API Ieee80211HTCompliantModes
 {
     protected:
-        static std::map<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *> modeCache;
+        static Ieee80211HTCompliantModes singleton;
+
+        std::map<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *> modeCache;
 
     public:
+        Ieee80211HTCompliantModes();
+        virtual ~Ieee80211HTCompliantModes();
+
         static const Ieee80211HTMode *getCompliantMode(const Ieee80211HTMCS *mcsMode, Ieee80211HTMode::BandMode carrierFrequencyMode, Ieee80211HTPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HTModeBase::GuardIntervalType guardIntervalType);
 
 };

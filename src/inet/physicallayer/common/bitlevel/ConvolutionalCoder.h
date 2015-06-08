@@ -125,15 +125,15 @@ class INET_API ConvolutionalCoder : public IFECCoder
     void convertToShortBitVectorMatrix(std::vector<std::vector<int> >& matrix, std::vector<ShortBitVector>& boolMatrix) const;
     ShortBitVector octalToBinary(int octalNum, int fixedSize) const;
     int octalToDec(int octalNum) const;
-    BitVector traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **bestPaths) const;
+    std::pair<BitVector, bool> traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **bestPaths, bool isTruncatedMode) const;
 
   public:
     ConvolutionalCoder(const ConvolutionalCode *convolutionalCode);
     ~ConvolutionalCoder();
 
-    BitVector encode(const BitVector& informationBits) const;
-    std::pair<BitVector, bool> decode(const BitVector& encodedBits) const;
-    const ConvolutionalCode *getForwardErrorCorrection() const { return convolutionalCode; }
+    BitVector encode(const BitVector& informationBits) const override;
+    std::pair<BitVector, bool> decode(const BitVector& encodedBits) const override;
+    const ConvolutionalCode *getForwardErrorCorrection() const override { return convolutionalCode; }
 
     /*
      * Getters for the encoder's/decoder's parameters

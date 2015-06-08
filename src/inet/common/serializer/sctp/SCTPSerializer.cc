@@ -60,15 +60,15 @@ unsigned char SCTPSerializer::sharedKey[512];
 
 void SCTPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
 {
-    int32 len = serialize(check_and_cast<const SCTPMessage *>(pkt), static_cast<unsigned char *>(b.accessNBytes(0)), b.getRemainder());
+    int32 len = serialize(check_and_cast<const SCTPMessage *>(pkt), static_cast<unsigned char *>(b.accessNBytes(0)), b.getRemainingSize());
     b.accessNBytes(len);
 }
 
-cPacket* SCTPSerializer::deserialize(Buffer &b, Context& context)
+cPacket* SCTPSerializer::deserialize(const Buffer &b, Context& context)
 {
     SCTPMessage *dest = new SCTPMessage("parsed-sctp");
-    parse(static_cast<uint8 *>(b.accessNBytes(0)), b.getRemainder(), dest);
-    b.accessNBytes(b.getRemainder());
+    parse(static_cast<const uint8 *>(b.accessNBytes(0)), b.getRemainingSize(), dest);
+    b.accessNBytes(b.getRemainingSize());
     return dest;
 }
 
@@ -220,7 +220,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     parPtr += ADD_PADDING(sizeof(struct random_parameter) + randomsize);
                     random->length = htons(sizeof(struct random_parameter) + randomsize);
                     rp->length = htons(sizeof(struct random_parameter) + randomsize);
-                    sizeKeyVector = ntohs(rp->length);
+                    sizeKeyVector = sizeof(struct random_parameter) + randomsize;
                     struct tlv *chunks = (struct tlv *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                     struct tlv *cp = (struct tlv *)(((unsigned char *)vector) + sizeKeyVector);
 
@@ -235,7 +235,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     chunks->length = htons(sizeof(struct tlv) + chunksize);
                     cp->length = htons(sizeof(struct tlv) + chunksize);
-                    sizeKeyVector += ntohs(cp->length);
+                    sizeKeyVector += sizeof(struct tlv) + chunksize;
                     parPtr += ADD_PADDING(sizeof(struct tlv) + chunksize);
                     struct hmac_algo *hmac = (struct hmac_algo *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                     struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)vector) + sizeKeyVector);
@@ -243,8 +243,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     hp->type = htons(HMAC_ALGO);
                     hmac->length = htons(4 + 2 * initChunk->getHmacTypesArraySize());
                     hp->length = htons(4 + 2 * initChunk->getHmacTypesArraySize());
-                    sizeKeyVector += ntohs(hp->length);
-                    ;
+                    sizeKeyVector += (4 + 2 * initChunk->getHmacTypesArraySize());
                     for (unsigned int i = 0; i < initChunk->getHmacTypesArraySize(); i++) {
                         hmac->ident[i] = htons(initChunk->getHmacTypes(i));
                         hp->ident[i] = htons(initChunk->getHmacTypes(i));
@@ -254,6 +253,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     for (unsigned int k = 0; k < sizeKeyVector; k++) {
                         keyVector[k] = vector[k];
                     }
+                    free(vector);
                 }
                 ic->length = htons(SCTP_INIT_CHUNK_LENGTH + parPtr);
                 writtenbytes += SCTP_INIT_CHUNK_LENGTH + parPtr;
@@ -377,7 +377,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     chunks->length = htons(sizeof(struct tlv) + chunksize);
                     cp->length = htons(sizeof(struct tlv) + chunksize);
-                    sizeVector += ntohs(cp->length);
+                    sizeVector += sizeof(struct tlv) + chunksize;
                     parPtr += ADD_PADDING(sizeof(struct tlv) + chunksize);
                     struct hmac_algo *hmac = (struct hmac_algo *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)(vector)) + 36 + sizeof(struct tlv) + chunksize);
@@ -385,12 +385,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     hp->type = htons(HMAC_ALGO);
                     hmac->length = htons(4 + 2 * initAckChunk->getHmacTypesArraySize());
                     hp->length = htons(4 + 2 * initAckChunk->getHmacTypesArraySize());
-                    sizeVector += ntohs(hp->length);
-                    ;
-                    for (unsigned int i = 0; i < initAckChunk->getHmacTypesArraySize(); i++)
-                        hp->length = htons(4 + 2 * initAckChunk->getHmacTypesArraySize());
-                    sizeVector += ntohs(hp->length);
-                    ;
+                    sizeVector += (4 + 2 * initAckChunk->getHmacTypesArraySize());
                     for (unsigned int i = 0; i < initAckChunk->getHmacTypesArraySize(); i++) {
                         hmac->ident[i] = htons(initAckChunk->getHmacTypes(i));
                         hp->ident[i] = htons(initAckChunk->getHmacTypes(i));
@@ -1398,6 +1393,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         peerKeyVector[sizePeerKeyVector + k] = vector[k];
                     }
                     sizePeerKeyVector += hplen;
+                    free(vector);
                 }
                 chunk->setBitLength(chunklen * 8);
                 dest->addChunk(chunk);
@@ -1478,8 +1474,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 rand = (struct random_parameter *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int rlen = ntohs(rand->length) - 4;
                                 chunk->setRandomArraySize(rlen);
-                                unsigned char *rv = (unsigned char *)malloc(64);
-                                rp = (struct random_parameter *)((unsigned char *)rv);
+                                rp = (struct random_parameter *)((unsigned char *)malloc(64));
                                 rp->type = rand->type;
                                 rplen = ntohs(rand->length);
                                 rp->length = rand->length;
@@ -1497,8 +1492,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 hmac = (struct hmac_algo *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int num = (ntohs(hmac->length) - 4) / 2;
                                 chunk->setHmacTypesArraySize(num);
-                                unsigned char *hv = (unsigned char *)malloc(64);
-                                hp = (struct hmac_algo *)((unsigned char *)hv);
+                                hp = (struct hmac_algo *)((unsigned char *)malloc(64));
                                 hp->type = hmac->type;
                                 hplen = ntohs(hmac->length);
                                 hp->length = hmac->length;
@@ -1515,8 +1509,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 chunks = (struct tlv *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int num = ntohs(chunks->length) - 4;
                                 chunk->setChunkTypesArraySize(num);
-                                unsigned char *cv = (unsigned char *)malloc(64);
-                                cp = (struct tlv *)((unsigned char *)cv);
+                                cp = (struct tlv *)((unsigned char *)malloc(64));
                                 cp->type = chunks->type;
                                 cplen = ntohs(chunks->length);
                                 cp->length = chunks->length;
@@ -1706,7 +1699,9 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         // we supppose type 1 here, the same provided in heartbeat chunks
                         const struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbac) + size_heartbeat_ack_chunk + parptr);
                         if (ntohs(hbi->type) == 1) {    // sender specific hb info
-                            int32 infoLen = ntohs(hbi->length) - 4;
+                            uint16 ilen = ntohs(hbi->length);
+                            ASSERT(ilen >= 4 && ilen == cLen - size_heartbeat_ack_chunk);
+                            uint16 infoLen = ilen - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
                             chunk->setRemoteAddr(L3Address(IPv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));

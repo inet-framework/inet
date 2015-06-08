@@ -40,11 +40,11 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     virtual ~SignalBitModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual int getHeaderBitLength() const { return headerBitLength; }
-    virtual bps getHeaderBitRate() const { return headerBitRate; }
-    virtual int getPayloadBitLength() const { return payloadBitLength; }
-    virtual bps getPayloadBitRate() const { return payloadBitRate; }
-    virtual const BitVector *getBits() const { return bits; }
+    virtual int getHeaderBitLength() const override { return headerBitLength; }
+    virtual bps getHeaderBitRate() const override { return headerBitRate; }
+    virtual int getPayloadBitLength() const override { return payloadBitLength; }
+    virtual bps getPayloadBitRate() const override { return payloadBitRate; }
+    virtual const BitVector *getBits() const override { return bits; }
 };
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel

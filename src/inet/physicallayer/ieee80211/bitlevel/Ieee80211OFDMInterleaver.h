@@ -45,12 +45,13 @@ class INET_API Ieee80211OFDMInterleaver : public IInterleaver
     Ieee80211OFDMInterleaver(const Ieee80211OFDMInterleaving *interleaving);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    BitVector interleave(const BitVector& bits) const;
-    BitVector deinterleave(const BitVector& bits) const;
+    BitVector interleave(const BitVector& bits) const override;
+    BitVector deinterleave(const BitVector& bits) const override;
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-    const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaving; }
+    const Ieee80211OFDMInterleaving *getInterleaving() const override { return interleaving; }
 };
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

@@ -468,7 +468,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         // add control info with MAC address
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setDest(nextHopMAC);
-        controlInfo->setEtherType(ETHERTYPE_IPv4);    // TODO:
+        controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->setControlInfo(controlInfo);
 
         // send out

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2012 Thomas Dreibholz
+// Copyright (C) 2009-2015 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -391,10 +391,10 @@ void SCTPAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cMessage *msg = new cMessage(indicationName(SCTP_I_ESTABLISHED));
+    cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
-    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("CI");
+    SCTPConnectInfo *establishIndication = new SCTPConnectInfo("ConnectInfo");
     establishIndication->setAssocId(assocId);
     establishIndication->setLocalAddr(localAddr);
     establishIndication->setRemoteAddr(remoteAddr);
@@ -482,7 +482,7 @@ void SCTPAssociation::sendInit()
     sctpmsg->setByteLength(SCTP_COMMON_HEADER);
     SCTPInitChunk *initChunk = new SCTPInitChunk("INIT");
     initChunk->setChunkType(INIT);
-    initChunk->setInitTag((uint32)(fmod(intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
+    initChunk->setInitTag((uint32)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL);
 
     peerVTag = initChunk->getInitTag();
     EV_INFO << "INIT from " << localAddr << ":InitTag=" << peerVTag << "\n";
@@ -588,7 +588,7 @@ void SCTPAssociation::sendInit()
         state->keyVector[2] = 36;
         for (int32 k = 0; k < 32; k++) {
             initChunk->setRandomArraySize(k + 1);
-            initChunk->setRandom(k, (uint8)(intrand(256)));
+            initChunk->setRandom(k, (uint8)(RNGCONTEXT intrand(256)));
             state->keyVector[k + 2] = initChunk->getRandom(k);
         }
         state->sizeKeyVector = 36;
@@ -703,7 +703,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
     cookie->setPeerTieTagArraySize(32);
     if (fsm->getState() == SCTP_S_CLOSED) {
         while (peerVTag == 0) {
-            peerVTag = (uint32)intrand(INT32_MAX);
+            peerVTag = (uint32)RNGCONTEXT intrand(INT32_MAX);
         }
         initAckChunk->setInitTag(peerVTag);
         initAckChunk->setInitTSN(2000);
@@ -729,10 +729,10 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         cookie->setLocalTag(initChunk->getInitTag());
         cookie->setPeerTag(peerVTag);
         for (int32 i = 0; i < 32; i++) {
-            cookie->setPeerTieTag(i, (uint8)(intrand(256)));
+            cookie->setPeerTieTag(i, (uint8)(RNGCONTEXT intrand(256)));
             state->peerTieTag[i] = cookie->getPeerTieTag(i);
             if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
-                cookie->setLocalTieTag(i, (uint8)(intrand(256)));
+                cookie->setLocalTieTag(i, (uint8)(RNGCONTEXT intrand(256)));
                 state->localTieTag[i] = cookie->getLocalTieTag(i);
             }
             else
@@ -745,7 +745,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         EV_INFO << "other state\n";
         uint32 tag = 0;
         while (tag == 0) {
-            tag = (uint32)(fmod(intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
+            tag = (uint32)(fmod(RNGCONTEXT intrand(INT32_MAX), 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
         }
         initAckChunk->setInitTag(tag);
         initAckChunk->setInitTSN(state->nextTSN);
@@ -801,7 +801,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         initAckChunk->setSepChunks(count - 1, AUTH);
         for (int32 k = 0; k < 32; k++) {
             initAckChunk->setRandomArraySize(k + 1);
-            initAckChunk->setRandom(k, (uint8)(intrand(256)));
+            initAckChunk->setRandom(k, (uint8)(RNGCONTEXT intrand(256)));
         }
         initAckChunk->setChunkTypesArraySize(state->chunkList.size());
         int32 k = 0;
@@ -1749,7 +1749,7 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    cMessage *cmsg = new cMessage("DataArrivedNotification");
+    cPacket *cmsg = new cPacket("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SCTPCommand *cmd = new SCTPCommand("notification");
     cmd->setAssocId(assocId);
@@ -1893,7 +1893,7 @@ void SCTPAssociation::pushUlp()
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
             cMessage *msg = (cMessage *)chunk->userData;
             msg->setKind(SCTP_I_DATA);
-            SCTPRcvCommand *cmd = new SCTPRcvCommand("push");
+            SCTPRcvInfo *cmd = new SCTPRcvInfo("push");
             cmd->setAssocId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);

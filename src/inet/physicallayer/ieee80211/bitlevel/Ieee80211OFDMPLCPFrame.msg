@@ -19,9 +19,9 @@ cplusplus {{
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211PLCPFrame_m.h"
 }};
 
-class noncobject Ieee80211PLCPFrame;
-
 namespace inet::physicallayer;
+
+class noncobject Ieee80211PLCPFrame;
 
 // The length field is a 12-bit integer indicates the number of
 // octets in the PSDU that the MAC is currently requesting the PHY to

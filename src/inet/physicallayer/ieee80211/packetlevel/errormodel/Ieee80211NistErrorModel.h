@@ -51,10 +51,10 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
 
     virtual double getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const;
     virtual double getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const;
+    virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const override;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211NistErrorModel"; }
-    virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const override;
 };
 
 } // namespace physicallayer

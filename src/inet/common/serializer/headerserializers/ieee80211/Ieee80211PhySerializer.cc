@@ -47,7 +47,7 @@ bool Ieee80211PhySerializer::serialize(const Ieee80211PLCPFrame* plcpHeader, Bit
         Ieee80211Frame *encapsulatedPacket = check_and_cast<Ieee80211Frame*>(ofdmPhyFrame->getEncapsulatedPacket());
         Ieee80211Serializer ieee80211Serializer;
         // Here we just write the header which is exactly 5 bytes in length.
-        Buffer subBuffer(b, 0);
+        Buffer subBuffer(b, b.getRemainingSize());
         Context c;
         ieee80211Serializer.serializePacket(encapsulatedPacket, subBuffer, c);
         b.accessNBytes(subBuffer.getPos());
@@ -72,7 +72,7 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     // FIXME: We only have OFDM deserializer
     unsigned char *hdrBuf = new unsigned char[OFDM_PLCP_HEADER_LENGTH];
     const std::vector<uint8>& bitFields = serializedPacket->getBytes();
-    for (unsigned int i = 0; i < OFDM_PLCP_HEADER_LENGTH; i++)
+    for (int i = 0; i < OFDM_PLCP_HEADER_LENGTH; i++)
         hdrBuf[i] = bitFields[i];
     Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) hdrBuf;
     Ieee80211OFDMPLCPFrame *plcpFrame = new Ieee80211OFDMPLCPFrame();
@@ -80,7 +80,7 @@ Ieee80211PLCPFrame* Ieee80211PhySerializer::deserialize(BitVector* serializedPac
     plcpFrame->setLength(hdr->length);
     plcpFrame->setType(OFDM);
     unsigned char *buf = new unsigned char[hdr->length + OFDM_PLCP_HEADER_LENGTH];
-    for (unsigned int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
+    for (int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
         buf[i] = bitFields[i];
     Ieee80211Serializer serializer;
     Buffer subBuffer(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);

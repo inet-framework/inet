@@ -1,5 +1,25 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-15  Levente Mészáros
+
+    Added arrival parameter to computeReceptionPower.
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-19  Levente Mészáros
+
+    Added LayeredDimensionalAnalogModel and factored out common parts.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed analogmodel/layered to analogmodel/bitlevel.
+    Moved remaining analogmodel contents to analogmodel/packetlevel.
+
 2015-02-25  Benjamin Seregi & Levente Meszaros
 
 	Added a completely new layered radio (physical layer) implementation.

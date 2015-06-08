@@ -32,7 +32,7 @@ class IGMPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket* deserialize(Buffer &b, Context& context) override;
+    virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
   public:
     IGMPSerializer(const char *name = nullptr) : SerializerBase(name) {}

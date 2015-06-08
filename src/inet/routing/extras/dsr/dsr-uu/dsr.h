@@ -151,6 +151,7 @@ static struct
 #endif
 };
 
+
 struct dsr_node
 {
     struct in_addr ifaddr;
@@ -210,6 +211,7 @@ static inline int set_confval(enum confval cv, unsigned int val)
 
     return val;
 }
+
 
 static inline void dsr_node_init(struct dsr_node *dn, char *ifname)
 {

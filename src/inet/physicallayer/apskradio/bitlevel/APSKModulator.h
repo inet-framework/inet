@@ -34,15 +34,15 @@ class INET_API APSKModulator : public IModulator, public cSimpleModule
     const APSKModulationBase *modulation;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
   public:
     APSKModulator();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const IModulation *getModulation() const { return modulation; }
-    virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
+    virtual const IModulation *getModulation() const override { return modulation; }
+    virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
 };
 
 } // namespace physicallayer

@@ -92,7 +92,6 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
     u_int32_t rerr_dest_seqno;
     struct in_addr udest_addr, rerr_unicast_dest;
     int i;
-    int numInterfaces;
 
     rerr_unicast_dest.s_addr = L3Address();
 

@@ -30,12 +30,22 @@ namespace inet {
  */
 class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
 {
+  private:
+    void copy(const IPv4Datagram& other);
+    void clean();
+
   public:
     IPv4Datagram(const char *name = nullptr, int kind = 0) : IPv4Datagram_Base(name, kind) {}
     IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other) {}
     IPv4Datagram& operator=(const IPv4Datagram& other) { IPv4Datagram_Base::operator=(other); return *this; }
 
     virtual IPv4Datagram *dup() const override { return new IPv4Datagram(*this); }
+
+    /**
+     * getter/setter for totalLength field in datagram
+     * if set to -1, then getter returns getByteLength()
+     */
+    int getTotalLengthField() const override;
 
     /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
@@ -56,6 +66,37 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
      * Sets bits 6-7 of the Type of Service; expects a value in the 0..3 range
      */
     virtual void setExplicitCongestionNotification(int ecn) override { setTypeOfService((getTypeOfService() & 0x3f) | ((ecn & 0x3) << 6)); }
+
+    /**
+     * Returns the number of extension headers in this datagram
+     */
+    virtual unsigned int getOptionArraySize() const { return options_var.size(); }
+
+    /**
+     * Returns the kth extension header in this datagram
+     */
+    virtual TLVOptionBase& getOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options_var.at(k))); }
+    virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<IPv4Datagram*>(this)->getOption(k); }
+
+    /**
+     * Returns the TLVOptionBase of the specified type,
+     * or nullptr. If index is 0, then the first, if 1 then the
+     * second option is returned.
+     */
+    virtual TLVOptionBase *findOptionByType(short int optionType, int index = 0);
+
+    /**
+     * Adds an TLVOptionBase to the datagram.
+     * default atPos means add to the end.
+     */
+    virtual void addOption(TLVOptionBase *opt, int atPos = -1);
+
+    /**
+     * Calculates the length of the IPv6 header plus the extension
+     * headers.
+     */
+    virtual int calculateHeaderByteLength() const;
+
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv4()); }

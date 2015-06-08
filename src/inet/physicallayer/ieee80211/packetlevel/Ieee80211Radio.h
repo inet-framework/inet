@@ -19,6 +19,12 @@
 #define __INET_IEEE80211RADIO_H
 
 #include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
 
 namespace inet {
 
@@ -34,16 +40,17 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     static simsignal_t radioChannelChangedSignal;
 
   protected:
-    int channelNumber;
+    virtual void initialize(int stage) override;
 
-  protected:
-    void initialize(int stage) override;
-
-    void handleUpperCommand(cMessage *message) override;
+    virtual void handleUpperCommand(cMessage *message) override;
 
   public:
     Ieee80211Radio();
 
+    virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    virtual void setMode(const IIeee80211Mode *mode);
+    virtual void setBand(const IIeee80211Band *band);
+    virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int newChannelNumber);
 };
 

@@ -20,7 +20,6 @@
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
@@ -32,31 +31,23 @@ namespace physicallayer {
 Define_Module(Ieee80211ScalarTransmitter);
 
 Ieee80211ScalarTransmitter::Ieee80211ScalarTransmitter() :
-    FlatTransmitterBase(),
-    modeSet(nullptr),
-    mode(nullptr)
+    Ieee80211TransmitterBase()
 {
 }
 
-void Ieee80211ScalarTransmitter::initialize(int stage)
+std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    FlatTransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        carrierFrequency = Hz(CENTER_FREQUENCIES[par("channelNumber")]);
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
-        mode = modeSet->getMode(bitrate);
-    }
+    stream << "Ieee80211ScalarTransmitter";
+    return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
 const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
-    TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<Ieee80211TransmissionRequest *>(transmissionRequest);
-    W transmissionPower = transmissionRequest && !isNaN(transmissionRequest->getPower().get()) ? transmissionRequest->getPower() : power;
-    bps transmissionBitrate = transmissionRequest && !isNaN(transmissionRequest->getBitrate().get()) ? transmissionRequest->getBitrate() : bitrate;
-    const IIeee80211Mode *transmissionMode = ieee80211TransmissionRequest != nullptr ? ieee80211TransmissionRequest->getMode() : transmissionBitrate != bitrate ? modeSet->getMode(transmissionBitrate) : mode;
-    if (!modeSet->containsMode(transmissionMode))
-        throw cRuntimeError("Unsupported mode requested");
+    const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
+    const IIeee80211Mode *transmissionMode = computeTransmissionMode(transmissionRequest);
+    const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(transmissionRequest);
+    W transmissionPower = computeTransmissionPower(transmissionRequest);
+    bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
     const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
@@ -68,7 +59,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     int headerBitLength = transmissionMode->getHeaderMode()->getBitLength();
     int64_t payloadBitLength = macFrame->getBitLength();
-    return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode);
+    return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

@@ -93,7 +93,7 @@ void VectorCommunicationCache::addRadio(const IRadio *radio)
 void VectorCommunicationCache::removeRadio(const IRadio *radio)
 {
     int radioCount = 0;
-    while (radioCache[radioCount].receptionIntervals == nullptr && radioCount < (int)radioCache.size())
+    while (radioCount < (int)radioCache.size() && radioCache[radioCount].receptionIntervals == nullptr)
         radioCount++;
     if (radioCount != 0) {
         baseRadioId += radioCount;

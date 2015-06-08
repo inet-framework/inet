@@ -1,5 +1,45 @@
 ====== inet-3.x ======
 
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-22  Andras Varga
+
+    Fixed PacketPrinter, do not access stale Transmission pointer in packet.
+
+2015-04-14  Andras Varga
+
+    Moved ResultRecorders to the INET namespace.
+
+2015-04-09  Levente Mészáros
+
+    Added reusable HeatMapFigure.
+
+2015-03-25  Benjamin Seregi
+
+    Added DelayedInitializer that supports static initalization without having
+    worry about the order.
+
+2015-03-31  Rudolf Hornig
+
+    Added patch level to the version information + a macro in NETDefs.h.
+
+2015-03-24  Levente Mészáros
+
+    Added fade out support to TrailFigure.
+
+2015-03-12  Zoltan Bojthe
+
+    Renamed ByteArrayMessage to RawPacket.
+
+2015-03-11  Zoltan Bojthe
+
+    Fixed NULL pointer error in PacketDump when IPv4Datagram doesn't have
+    encapsulated packet (typically DSRPkt)
+
+2015-03-16  Levente Mészáros
+
+    Moved generic dimensional data structures to common.
+
 2015-03-31  Rudolf Hornig
 
 	New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB.
@@ -58,6 +98,17 @@
 	Added a Complex number implementation.
 
 2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
 
 2014-07-30  Andras Varga
 

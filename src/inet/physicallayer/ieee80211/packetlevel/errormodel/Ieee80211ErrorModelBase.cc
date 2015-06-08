@@ -32,6 +32,7 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
 {
+    Enter_Method_Silent();
     const ITransmission *transmission = snir->getReception()->getTransmission();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);

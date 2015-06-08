@@ -44,7 +44,7 @@ const IReception *DimensionalAnalogModel::computeReception(const IRadio *receive
     const Coord receptionEndPosition = arrival->getEndPosition();
     const EulerAngles receptionStartOrientation = arrival->getStartOrientation();
     const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
-    const ConstMapping *receptionPower = computeReceptionPower(receiverRadio, transmission);
+    const ConstMapping *receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
     return new DimensionalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, dimensionalTransmission->getCarrierFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
 }
 

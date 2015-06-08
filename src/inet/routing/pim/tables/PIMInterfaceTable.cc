@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
+// Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
+//          Tamas Borbely (tomi@omnetpp.org)
 
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -52,7 +53,7 @@ PIMInterfaceTable::~PIMInterfaceTable()
 
 void PIMInterfaceTable::handleMessage(cMessage *msg)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void PIMInterfaceTable::initialize(int stage)

@@ -18,8 +18,8 @@
 #ifndef __INET_MEDIUMVISUALIZER_H
 #define __INET_MEDIUMVISUALIZER_H
 
-#include "inet/common/TrailFigure.h"
-#include "inet/common/HeatMapFigure.h"
+#include "inet/common/figures/TrailFigure.h"
+#include "inet/common/figures/HeatMapFigure.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"

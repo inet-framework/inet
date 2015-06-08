@@ -45,7 +45,7 @@ Define_Module(NetPerfMeter);
 //
 // Based on rpareto from GNU R's VGAM package
 // (http://cran.r-project.org/web/packages/VGAM/index.html):
-// rpareto <- function (n, location, shape) 
+// rpareto <- function (n, location, shape)
 // {
 //     ans <- location/runif(n)^(1/shape)
 //     ans[location <= 0] <- NaN
@@ -65,7 +65,7 @@ static cNEDValue pareto(cComponent *context, cNEDValue argv[], int argc)
     const double location = argv[0].doubleValueInUnit(argv[0].getUnit());
     const double shape    = argv[1].doubleValueInUnit(argv[1].getUnit());
 
-    const double r      = uniform(0.0, 1.0, rng);
+    const double r      = RNGCONTEXT uniform(0.0, 1.0, rng);
     const double result = location / pow(r, 1.0 / shape);
 
     // printf("%1.6f  => %1.6f   (location=%1.6f shape=%1.6f)\n", r, result, location, shape);
@@ -80,10 +80,6 @@ NetPerfMeter::NetPerfMeter()
 {
    SendingAllowed = false;
    ConnectionID   = 0;
-   ConnectTimer   = NULL;
-   StartTimer     = NULL;
-   StopTimer      = NULL;
-   ResetTimer     = NULL;
    resetStatistics();
 }
 
@@ -137,7 +133,7 @@ void NetPerfMeter::initialize()
       TransportProtocol = UDP;
    }
    else {
-      opp_error("Bad protocol setting!");
+      throw cRuntimeError("Bad protocol setting!");
    }
 
    RequestedOutboundStreams = 1;
@@ -150,19 +146,19 @@ void NetPerfMeter::initialize()
    DecoupleSaturatedStreams = par("decoupleSaturatedStreams");
    RequestedOutboundStreams = par("outboundStreams");
    if((RequestedOutboundStreams < 1) || (RequestedOutboundStreams > 65535)) {
-      opp_error("Invalid number of outbound streams; use range from [1, 65535]");
+      throw cRuntimeError("Invalid number of outbound streams; use range from [1, 65535]");
    }
    MaxInboundStreams = par("maxInboundStreams");
    if((MaxInboundStreams < 1) || (MaxInboundStreams > 65535)) {
-      opp_error("Invalid number of inbound streams; use range from [1, 65535]");
+      throw cRuntimeError("Invalid number of inbound streams; use range from [1, 65535]");
    }
    UnorderedMode = par("unordered");
    if((UnorderedMode < 0.0) || (UnorderedMode > 1.0)) {
-      opp_error("Bad value for unordered probability; use range from [0.0, 1.0]");
+      throw cRuntimeError("Bad value for unordered probability; use range from [0.0, 1.0]");
    }
    UnreliableMode = par("unreliable");
    if((UnreliableMode < 0.0) || (UnreliableMode > 1.0)) {
-      opp_error("Bad value for unreliable probability; use range from [0.0, 1.0]");
+      throw cRuntimeError("Bad value for unreliable probability; use range from [0.0, 1.0]");
    }
    parseExpressionVector(FrameRateExpressionVector, par("frameRateString"), ";");
    parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
@@ -171,7 +167,7 @@ void NetPerfMeter::initialize()
    if(strcmp((const char*)par("traceFile"), "") != 0) {
       std::fstream traceFile((const char*)par("traceFile"));
       if(!traceFile.good()) {
-         opp_error("Unable to load trace file");
+         throw cRuntimeError("Unable to load trace file");
       }
       while(!traceFile.eof()) {
         TraceEntry traceEntry;
@@ -398,7 +394,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             // Data has arrived -> request it from the SCTP module.
             const SCTPCommand* dataIndication =
                check_and_cast<const SCTPCommand*>(msg->getControlInfo());
-            SCTPSendCommand* command = new SCTPSendCommand("SendCommand");
+            SCTPSendInfo* command = new SCTPSendInfo("SendCommand");
             command->setAssocId(dataIndication->getAssocId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
@@ -618,7 +614,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
       StartTimer->setKind(TIMER_START);
       TransmissionStartTime = ConnectTime + StartTime;
       if(TransmissionStartTime < simTime()) {
-         opp_error("Connection establishment has been too late. Check startTime parameter!");
+         throw cRuntimeError("Connection establishment has been too late. Check startTime parameter!");
       }
       scheduleAt(TransmissionStartTime, StartTimer);
 
@@ -689,7 +685,7 @@ void NetPerfMeter::createAndBindSocket()
    const char* localAddress = par("localAddress");
    const int   localPort    = par("localPort");
    if( (ActiveMode == false) && (localPort == 0) ) {
-      opp_error("No local port number given in active mode!");
+      throw cRuntimeError("No local port number given in active mode!");
    }
    L3Address localAddr;
    if (*localAddress)
@@ -940,7 +936,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             */
             dataMessage->setDataLen(msgSize);
 
-            SCTPSendCommand* command = new SCTPSendCommand("SendRequest");
+            SCTPSendInfo* command = new SCTPSendInfo("SendRequest");
             command->setAssocId(ConnectionID);
             command->setSid(streamID);
             command->setSendUnordered( (sendUnordered == true) ?
@@ -951,7 +947,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             command->setPrValue(1);
             command->setPrMethod( (sendUnreliable == true) ? 2 : 0 );   // PR-SCTP policy: RTX
 
-            SCTPSendCommand* cmsg = new SCTPSendCommand("ControlInfo");
+            SCTPSendInfo* cmsg = new SCTPSendInfo("ControlInfo");
             cmsg->encapsulate(dataMessage);
             cmsg->setKind(SCTP_C_SEND);
             cmsg->setControlInfo(command);
@@ -1011,12 +1007,9 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
       frameSize = par("frameSize");
    }
    else {
-      frameSize =
-         FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].
-            doubleValue(this, "B");
-      if(frameSize < 0) {
-         frameSize = par("frameSize");
-      }
+      double doubleSize =
+         FrameSizeExpressionVector[streamID % FrameSizeExpressionVector.size()].doubleValue(this, "B");
+      frameSize = (doubleSize >= 0.0) ? (long)doubleSize : par("frameSize");
    }
    return(frameSize);
 }
@@ -1105,7 +1098,7 @@ void NetPerfMeter::sendDataOfNonSaturatedStreams(const unsigned long long bytesA
       }
       if( (frameRate <= 0.0) &&
          ((TransportProtocol == TCP) || (TransportProtocol == UDP)) ) {
-         opp_error("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
+         throw cRuntimeError("TCP and UDP do not support \"send as much as possible\" mode (frameRate=0)!");
       }
 
       // ====== Transmit frame ==============================================
@@ -1142,7 +1135,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
       unsigned int streamID        = TraceVector[TraceIndex].StreamID;
       if(streamID >= ActualOutboundStreams) {
         if(TransportProtocol == SCTP) {
-           opp_error("Invalid streamID in trace");
+           throw cRuntimeError("Invalid streamID in trace");
         }
         streamID = 0;
       }
@@ -1155,7 +1148,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
    }
 
    // ====== Schedule next frame transmission ===============================
-   if(TraceIndex < TraceVector.size()) {    
+   if(TraceIndex < TraceVector.size()) {
       const double nextFrameTime = TraceVector[TraceIndex].InterFrameDelay;
       assert(TransmitTimerVector[0] == NULL);
       TransmitTimerVector[0] = new NetPerfMeterTransmitTimer("TransmitTimer");
@@ -1180,8 +1173,8 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
       const simtime_t delay    = simTime() - dataMessage->getCreationTime();
 
       if(TransportProtocol == SCTP) {
-         const SCTPRcvCommand* receiveCommand =
-            check_and_cast<const SCTPRcvCommand*>(dataMessage->getControlInfo());
+         const SCTPRcvInfo* receiveCommand =
+            check_and_cast<const SCTPRcvInfo*>(dataMessage->getControlInfo());
          streamID = receiveCommand->getSid();
       }
 
@@ -1251,6 +1244,7 @@ opp_string NetPerfMeter::format(const char* formatString, ...)
    va_list args;
    va_start(args, formatString);
    vsnprintf((char*)&str, sizeof(str), formatString, args);
+   va_end(args);
    return(opp_string(str));
 }
 
