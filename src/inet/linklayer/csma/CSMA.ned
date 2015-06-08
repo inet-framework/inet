@@ -2,9 +2,9 @@
 //* file:        CSMA.ned
 //*
 //* author:      Jerome Rousselot, Marc Loebbers
-//* 
+//*
 //* copyright:   (C) 2007-2009 CSEM SA, Neuchatel, Switzerland.
-//*		 		 (C) 2004 Telecommunication Networks Group (TKN) at
+//*                  (C) 2004 Telecommunication Networks Group (TKN) at
 //*              Technische Universitaet Berlin, Germany.
 //*
 //*              This program is free software; you can redistribute it
@@ -15,8 +15,8 @@
 //*              For further information see file COPYING
 //*              in the top level directory
 //*
-//* Funding: This work was partially financed by the European Commission under the  
-//* Framework 6 IST Project "Wirelessly Accessible Sensor Populations"  
+//* Funding: This work was partially financed by the European Commission under the
+//* Framework 6 IST Project "Wirelessly Accessible Sensor Populations"
 //* (WASP) under contract IST-034963.
 //***************************************************************************
 //* part of:    Modifications to the MF-2 framework by CSEM
@@ -43,13 +43,13 @@ simple CSMA extends MACProtocolBase like IMACProtocol
         int mtu @unit("B") = default(0B);
         // size of the MAC queue (maximum number of packets in Tx buffer)
         int queueLength = default(100);
-        // bit rate 
+        // bit rate
         double bitrate @unit(bps) = default(250000 bps);
 
         // Clear Channel Assessment detection time
         double ccaDetectionTime @unit(s) = default(0.000128 s); // 8 symbols
         // Time to setup radio to reception state
-        double rxSetupTime @unit(s);
+        double rxSetupTime @unit(s) = default(0 s);
         // Time to switch radio from Rx to Tx state
         double aTurnaroundTime @unit(s) = default(0.000192 s);    // 12 symbols
 
@@ -61,13 +61,13 @@ simple CSMA extends MACProtocolBase like IMACProtocol
         // Time to wait for an acknowledgement after transmitting a unicast frame.
         // Only used when usage of MAC acks is enabled.
         // Value is calculated from 1+12+10+12 symbols, which is defined for nonbeacon-enabled PAN.
-        // In the non-beacon-enabled case, the receiver responds at aTurnaroundTime 
-        // (i.e. the time for the sender and receiver to both be guaranteed to have 
-        // switched from Tx to Rx and vice verse).  This gives the value 192us + 
-        // 352us = 544us (there's been some discussion about the "extra" 1 symbol == 16us) 
+        // In the non-beacon-enabled case, the receiver responds at aTurnaroundTime
+        // (i.e. the time for the sender and receiver to both be guaranteed to have
+        // switched from Tx to Rx and vice verse).  This gives the value 192us +
+        // 352us = 544us (there's been some discussion about the "extra" 1 symbol == 16us)
         // [section 7.5.6.4.2 of the specification].
         double macAckWaitDuration @unit(s) = default(0.00056 s);
-        // Complete MAC ack message length (in bits) 
+        // Complete MAC ack message length (in bits)
         // (! headerLength is not added to this),
         // only used when usage of MAC acks is enabled.
         double ackLength @unit(bit) = default(40 bit);
