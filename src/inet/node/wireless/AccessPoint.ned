@@ -42,7 +42,7 @@ import inet.networklayer.common.InterfaceTable;
 module AccessPoint
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility

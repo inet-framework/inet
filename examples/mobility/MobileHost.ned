@@ -28,7 +28,7 @@ module MobileHost
 {
     parameters:
         string mobilityType = default("StationaryMobility");
-        @node();
+        @networkNode();
         @display("i=device/pocketpc_s");
         @statistic[coordX](title="coord X"; source="xCoord(mobilityPos(mobilityStateChanged))"; record=vector; interpolationmode=linear);
         @statistic[coordY](title="coord Y"; source="yCoord(mobilityPos(mobilityStateChanged))"; record=vector; interpolationmode=linear);

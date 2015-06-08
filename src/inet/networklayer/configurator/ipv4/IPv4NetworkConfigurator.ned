@@ -52,7 +52,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 // can be configured in a single XML file for the whole network.
 //
 // Modules that represent network nodes (host, hub, bus, switch, access point,
-// router, etc.) are expected to have the @node property, becaue that's how the
+// router, etc.) are expected to have the @networkNode property, becaue that's how the
 // configurator recognizes them in the model. All nodes must have their
 // interface table (~InterfaceTable module) as their "interfaceTable" submodule.
 // All routers must have their routing table (~IPv4RoutingTable module) as their
@@ -71,7 +71,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 // The configurator goes through the following configuration steps:
 //
 //  -# Builds a graph representing the network topology. The graph
-//     will have a vertex for every module that has a @node property (this
+//     will have a vertex for every module that has a @networkNode property (this
 //     includes hosts, routers, and L2 devices like switches, access points,
 //     Ethernet hubs, etc.) It also assigns weights to vertices and edges that
 //     will be used by the shortest path algorithm when setting up routes.

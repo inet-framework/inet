@@ -36,7 +36,7 @@ import inet.applications.httptools.common.IHttpDirectApp;
 module DirectHost
 {
     parameters:
-        @node;
+        @networkNode;
         double numTcpApps = default(0);     // The number of tcpApps in the array
     submodules:
         tcpApp[numTcpApps]: <> like IHttpDirectApp {

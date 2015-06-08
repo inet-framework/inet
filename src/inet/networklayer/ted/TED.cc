@@ -95,7 +95,7 @@ void TED::initializeTED()
             g = g->getNextGate();
             cModule *mod = g->getOwnerModule();
             cProperties *props = mod->getProperties();
-            if (props && props->getAsBool("node")) {
+            if (props && props->getAsBool("networkNode")) {
                 destNode = mod;
                 break;
             }

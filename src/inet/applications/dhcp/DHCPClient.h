@@ -53,7 +53,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     UDPSocket socket;    // UDP socket for client-server communication
     simtime_t startTime;    // application start time
     MACAddress macAddress;    // client's MAC address
-    cModule *host = nullptr;    // containing host module (@node)
+    cModule *host = nullptr;    // containing host module (@networkNode)
     InterfaceEntry *ie = nullptr;    // interface to configure
     IIPv4RoutingTable *irt = nullptr;    // routing table to update
 

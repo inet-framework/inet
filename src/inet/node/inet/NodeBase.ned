@@ -44,7 +44,7 @@ module NodeBase like INode
 {
     parameters:
         @display("bgb=,448");
-        @node;
+        @networkNode;
         @labels(node,ethernet-node,wireless-node);
         bool hasStatus = default(false);
         int numExtInterfaces = default(0);

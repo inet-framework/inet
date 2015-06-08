@@ -27,7 +27,7 @@ module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
-        @node();
+        @networkNode();
         *.interfaceTableModule = "";
     gates:
         input radioIn @directIn;

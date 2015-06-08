@@ -59,7 +59,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // extract topology
-    topo.extractByProperty("node");
+    topo.extractByProperty("networkNode");
     EV_DEBUG << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]

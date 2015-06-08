@@ -25,7 +25,7 @@ namespace inet {
 
 /**
  * Returns true if the given module is a network node, i.e. a module
- * with the @node property set.
+ * with the @networkNode property set.
  */
 INET_API bool isNetworkNode(cModule *mod);
 

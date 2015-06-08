@@ -1,5 +1,10 @@
 ====== inet-3.x ======
 
+2015-06-08  Rudolf Hornig
+
+    Nodes in the network should be tagged with the @networkNode property
+    because the previous @node property name was too generic.
+
 2015-05-13  ------ inet-2.99.1 released ------
 
 2015-04-16  Rudolf Hornig

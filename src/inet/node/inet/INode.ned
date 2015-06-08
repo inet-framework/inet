@@ -24,7 +24,7 @@ moduleinterface INode
 {
     parameters:
         @display("bgb=,448");
-        @node;
+        @networkNode;
         @labels(node,ethernet-node,wireless-node);
     gates:
         input radioIn[numRadios] @directIn;

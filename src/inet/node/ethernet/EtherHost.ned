@@ -39,7 +39,7 @@ module EtherHost
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
-        @node();
+        @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
         *.interfaceTableModule = default("");

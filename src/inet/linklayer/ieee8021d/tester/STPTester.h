@@ -29,7 +29,7 @@ namespace inet {
 
 /**
  * Utility class for testing the STP protocol. First, it extracts the network
- * topology (network nodes marked with the @node NED property), regarding the
+ * topology (network nodes marked with the @networkNode NED property), regarding the
  * enabled (state=FORWARDING) links only. Then it analyzes the resulting graph
  * for connectedness and loop free-ness, using a modified depth-first search
  * with cycle detection. The results can be obtained with getter methods.

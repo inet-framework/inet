@@ -500,7 +500,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
         return nullptr;
 
     cTopology topo("topo");
-    topo.extractByProperty("node");
+    topo.extractByProperty("networkNode");
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
 

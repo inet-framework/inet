@@ -49,7 +49,7 @@ import inet.networklayer.ipv4.IPv4RoutingTable;
 module InternetCloud
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node,ethernet-node);
         @display("i=misc/cloud");
         int numPcapRecorders = default(0); // no of PcapRecorders.

@@ -35,7 +35,7 @@ import inet.networklayer.ted.TED;
 module RSVP_LSR
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node,mpls-node);
         @display("i=abstract/router");
         bool hasStatus = default(false);

@@ -22,7 +22,7 @@ namespace inet {
 inline bool _isNetworkNode(cModule *mod)
 {
     cProperties *props = mod->getProperties();
-    return props && props->getAsBool("node");
+    return props && props->getAsBool("networkNode");
 }
 
 bool isNetworkNode(cModule *mod)

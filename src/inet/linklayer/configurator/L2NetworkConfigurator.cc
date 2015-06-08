@@ -59,7 +59,7 @@ L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, Node *childNode,
 
 void L2NetworkConfigurator::extractTopology(L2Topology& topology)
 {
-    topology.extractByProperty("node");
+    topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     if (topology.getNumNodes() == 0)
