@@ -177,7 +177,7 @@ void IPv6::endService(cPacket *msg)
         IPv6Address nextHop = ctrl->getNextHop();
         int interfaceId = ctrl->getInterfaceId();
         delete ctrl;
-        routePacketStep2(datagram, interfaceId, nextHop, fromHL);
+        resolveMACAddressAndSendPacket(datagram, interfaceId, nextHop, fromHL);
     }
     else {
         // datagram from network or from ND: localDeliver and/or route
@@ -189,7 +189,7 @@ void IPv6::endService(cPacket *msg)
             IPv6Address nextHop = ctrl->getNextHop();
             int interfaceId = ctrl->getInterfaceId();
             delete ctrl;
-            routePacketStep2(datagram, interfaceId, nextHop, fromHL);
+            resolveMACAddressAndSendPacket(datagram, interfaceId, nextHop, fromHL);
         }
 
         // Do not handle header biterrors, because
@@ -384,10 +384,10 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv
             return;
     // don't raise error if sent to ND or ICMP!
 
-    routePacketStep2(datagram, interfaceId, nextHop, fromHL);
+    resolveMACAddressAndSendPacket(datagram, interfaceId, nextHop, fromHL);
 }
 
-void IPv6::routePacketStep2(IPv6Datagram *datagram, int interfaceId, IPv6Address nextHop, bool fromHL)
+void IPv6::resolveMACAddressAndSendPacket(IPv6Datagram *datagram, int interfaceId, IPv6Address nextHop, bool fromHL)
 {
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie != nullptr);
