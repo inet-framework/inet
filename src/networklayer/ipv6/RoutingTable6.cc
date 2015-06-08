@@ -160,6 +160,9 @@ void RoutingTable6::initialize(int stage)
     }
     else if (stage==4)
     {
+        if (ishome_agent || ismobile_router)
+           pt = PrefixTableAccess().get();
+
         // configurator adds routes only in stage==3
         updateDisplayString();
     }

@@ -66,10 +66,11 @@ IPv6Address PrefixTable::getPrefix(const IPv6Address& HoA) const
 
 IPv6Address PrefixTable::getLastPrefix() const
 {
+
+    if (prefixTable.empty())
+            return IPv6Address::UNSPECIFIED_ADDRESS;
+
     PrefixTable6::const_iterator pos = prefixTable.end();
     --pos;
-    if (prefixTable.empty())
-        return IPv6Address::UNSPECIFIED_ADDRESS;
-    else
-        return pos->second.mobileNetworkPrefix;
+    return pos->second.mobileNetworkPrefix;
 }

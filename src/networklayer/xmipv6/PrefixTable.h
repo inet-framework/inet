@@ -7,6 +7,8 @@
 
 #include "IPv6Address.h"
 
+#include "ModuleAccess.h"
+
 class INET_API PrefixTable : public cSimpleModule
 {
 private:
@@ -70,6 +72,16 @@ public:
      * Returns the last prefix on the table
      */
     IPv6Address getLastPrefix() const;
+};
+
+/**
+ * Gives access to the PrefixTable instance within the Home Agent / Mobile Router.
+ */
+
+class INET_API PrefixTableAccess : public ModuleAccess<PrefixTable>
+{
+  public:
+    PrefixTableAccess() : ModuleAccess<PrefixTable>("prefixTable") {}
 };
 
 #endif

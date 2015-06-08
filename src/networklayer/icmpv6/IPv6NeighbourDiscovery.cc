@@ -85,6 +85,8 @@ void IPv6NeighbourDiscovery::initialize(int stage)
 #ifdef WITH_xMIPv6
         if (rt6->isMobileNode())
             mipv6 = xMIPv6Access().get();
+        if (rt6->isMobileRouter() || rt6->isHomeAgent())
+            pt = PrefixTableAccess().get();
 #endif /* WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");
@@ -1558,6 +1560,8 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     type specific document (e.g., [IPv6-ETHER]).*/
     //TODO: not done yet
 
+    pt->addOrUpdatePT(raSrcAddr, ra->getPrefixInformation(0).getPrefix());
+
     processRAPrefixInfo(ra, ie);
 }
 
@@ -1617,18 +1621,36 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                 {
                     for (int i = 0; i < ift->getNumInterfaces(); i++)
                             {
+                        // xxx:: sebelum di-assign ke interface, kudu dibuat subprefixnya dulu ga sih? yes.
+                        IPv6NDPrefixInformation newPrefixInfo = rt6->createSubPrefix(prefixInfo); // prefixInfo null???
                                 InterfaceEntry *ie = ift->getInterface(i);
 
-                                if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
+                                if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified()) //ini apa maksutnya? ku sudah lupa
                                     ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
 
-                                EV<<"\ninterface " << ie->getFullName() <<" got prefix " << prefix <<"\n";
+                                IPv6InterfaceData::AdvPrefix newAdvPrefix;
+                                newAdvPrefix.advAutonomousFlag = prefixInfo.getAutoAddressConfFlag();
+                                newAdvPrefix.advOnLinkFlag = prefixInfo.getOnlinkFlag();
+                                newAdvPrefix.advPreferredLifetime = prefixInfo.getPreferredLifetime();
+                                newAdvPrefix.advRtrAddr = prefixInfo.getRouterAddressFlag();
+                                newAdvPrefix.advValidLifetime = prefixInfo.getValidLifetime();
+                                newAdvPrefix.prefix = prefixInfo.getPrefix();
+                                newAdvPrefix.prefixLength = prefixInfo.getPrefixLength();
+                                newAdvPrefix.rtrAddress = prefixInfo.getPrefix(); //xxx: not sure
+
+                                ie->ipv6Data()->addAdvPrefix(newAdvPrefix); // assign sub prefix di interface
+
+                                processRAPrefixInfoForAddrAutoConf(newPrefixInfo, ie, 1);  //agar interface otomatis dapet alamat setelah dapet prefix
+
+                                EV<<"interface " << ie->getFullName() <<" got prefix " << newPrefixInfo.getPrefix() <<"\n";
 
                                 if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
                                 {
-                                    EV << "Create RA timer for interface" << ie->getName() << "\n";
+                                    EV << "Create RA timer for interface " << ie->getName() << "\n";
                                     createRATimer(ie);
                                 }
+
+                                pt->addOrUpdatePT(ie->ipv6Data()->getAddress(0), newAdvPrefix.prefix);
                             }
                 }
             }

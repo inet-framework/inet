@@ -20,4 +20,5 @@ package inet.networklayer.xmipv6;
 //
 simple PrefixTable
 {
+    @display("i=block/table");
 }
