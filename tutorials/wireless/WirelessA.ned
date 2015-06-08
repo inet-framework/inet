@@ -16,7 +16,7 @@
 package inet.tutorials.wireless;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.INode;
+import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 
@@ -38,10 +38,10 @@ network WirelessA
         radioMedium: <mediumType> like IRadioMedium {
             @display("p=309,24");
         }
-        hostA: <hostType> like INode {
+        hostA: <hostType> like INetworkNode {
             @display("p=50,250");
         }
-        hostB: <hostType> like INode {
+        hostB: <hostType> like INetworkNode {
             @display("p=450,250");
         }
 }

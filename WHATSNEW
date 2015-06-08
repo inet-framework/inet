@@ -7,7 +7,7 @@ INET-3.0.0 (Jun, 2015)
 Nodes:
  - Modules that represent a "node" at network level should be tagged with
    @networkNode property instead of @node. (The @node property name was
-   too generic.)
+   too generic.) The INode module interface was renamed to INetworkNode, too.
 
 INET-2.99.1 (May, 2015)
 --------------------------

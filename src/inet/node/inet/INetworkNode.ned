@@ -20,7 +20,7 @@ package inet.node.inet;
 //
 // Contains the common interface for all node types in a network.
 //
-moduleinterface INode
+moduleinterface INetworkNode
 {
     parameters:
         @display("bgb=,448");
