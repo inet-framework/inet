@@ -123,8 +123,12 @@ void IPv6::updateDisplayString()
 void IPv6::handleMessage(cMessage *msg)
 {
     if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
-        RegisterTransportProtocolCommand *command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
-        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        RegisterTransportProtocolCommand *command = static_cast<RegisterTransportProtocolCommand *>(msg);
+        if (msg->getArrivalGate()->isName("transportIn")) {
+            mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        }
+//        else
+//            throw cRuntimeError("RegisterTransportProtocolCommand %d arrived invalid gate '%s'", command->getProtocol(), msg->getArrivalGate()->getFullName());
         delete msg;
     }
     else
