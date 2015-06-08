@@ -67,10 +67,9 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
     struct SockDesc
     {
-        SockDesc(int sockId, int appGateIndex);
+        SockDesc(int sockId);
         ~SockDesc();
         int sockId = -1;
-        int appGateIndex = -1;
         bool isBound = false;
         bool onlyLocalPortIsSet = false;
         bool reuseAddr = false;
@@ -126,8 +125,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
     // socket handling
     virtual SockDesc *getSocketById(int sockId);
-    virtual SockDesc *getOrCreateSocket(int sockId, int gateIndex);
-    virtual SockDesc *createSocket(int sockId, int gateIndex, const L3Address& localAddr, int localPort);
+    virtual SockDesc *getOrCreateSocket(int sockId);
+    virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
     virtual void bind(int sockId, int gateIndex, const L3Address& localAddr, int localPort);
     virtual void connect(int sockId, int gateIndex, const L3Address& remoteAddr, int remotePort);
     virtual void close(int sockId);

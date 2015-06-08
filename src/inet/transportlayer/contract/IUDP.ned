@@ -53,8 +53,8 @@ moduleinterface IUDP
         @display("i=block/transport");
 
     gates:
-        input appIn[] @labels(UDPControlInfo/down);
+        input appIn @labels(UDPControlInfo/down);
         input ipIn @labels(UDPPacket,IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output appOut[] @labels(UDPControlInfo/up);
+        output appOut @labels(UDPControlInfo/up);
         output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }
