@@ -943,7 +943,7 @@ IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation s
 {
     IPv6Address prefix(0,0,0,0);
 
-    prefix = pt->getLastPrefix();
+    prefix = pt->getLastSubPrefix();
 
     int prefixLength = superPrefixInfo.getPrefixLength() + 4;
 

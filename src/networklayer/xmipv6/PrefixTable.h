@@ -72,6 +72,11 @@ public:
      * Returns the last prefix on the table
      */
     IPv6Address getLastPrefix() const;
+
+    /*
+     * Returns the last subprefix on the table
+     */
+    IPv6Address getLastSubPrefix() const;
 };
 
 /**

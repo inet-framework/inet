@@ -38,7 +38,19 @@ void PrefixTable::handleMessage(cMessage *msg)
 void PrefixTable::addOrUpdatePT(const IPv6Address& HoA, const IPv6Address& prefix)
 {
     EV << "\n+++++++++++++++++ Prefix Table Being Updated in Routing Table6 +++++++++++++++++\n";
-    prefixTable[HoA].mobileNetworkPrefix = prefix;
+    if (prefixTable.find(HoA) != prefixTable.end())
+    {
+        EV << "A record in Prefix Table is being updated...\n";
+        prefixTable[HoA].mobileNetworkPrefix = prefix;
+    }
+    else
+    {
+        EV << "A new data is being recorded in Prefix Table...\n";
+        PrefixTableEntry &entry = prefixTable[HoA];
+        entry.mobileNetworkPrefix = prefix;
+    }
+    EV << "key (HoA) = " << HoA << ", with prefix = " << prefix << endl;
+
 }
 
 bool PrefixTable::isInPrefixTable(const IPv6Address& HoA) const
@@ -73,4 +85,24 @@ IPv6Address PrefixTable::getLastPrefix() const
     PrefixTable6::const_iterator pos = prefixTable.end();
     --pos;
     return pos->second.mobileNetworkPrefix;
+}
+
+IPv6Address PrefixTable::getLastSubPrefix() const
+{
+    IPv6Address lastSubPrefix(0,0,0,0);
+    IPv6Address tempPrefix;
+    uint32 oldSegment1, newSegment1;
+
+    PrefixTable6::const_iterator pos;
+    for (pos = prefixTable.begin(); pos!=prefixTable.end(); pos++)
+    {
+        tempPrefix = pos->second.mobileNetworkPrefix;
+
+        oldSegment1 = lastSubPrefix.getSegment1();
+        newSegment1 = tempPrefix.getSegment1();
+        if( newSegment1 > oldSegment1 )
+            lastSubPrefix = pos->second.mobileNetworkPrefix;
+    }
+
+    return lastSubPrefix;
 }
