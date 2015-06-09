@@ -22,6 +22,8 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacMacsorts);
 
+simsignal_t intraMacRemoteVariablesChanged = cComponent::registerSignal("intraMacRemoteVariablesChanged");
+
 int Ieee80211MacNamedStaticIntDataValues::sMaxMsduLng = 2304;
 int Ieee80211MacNamedStaticIntDataValues::sMacHdrLng = 24;
 int Ieee80211MacNamedStaticIntDataValues::sWepHdrLng = 28;
@@ -44,10 +46,15 @@ void Ieee80211MacMacsorts::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        intraMacRemoteVariables = new Ieee80211MacMacsortsIntraMacRemoteVariables();
+        intraMacRemoteVariables = new Ieee80211MacMacsortsIntraMacRemoteVariables(this);
     }
 }
 
+void Ieee80211MacMacsorts::emitIntraMacRemoteVariablesChangedSignal()
+{
+    emit(intraMacRemoteVariablesChanged, true);
+}
 
 } /* namespace inet */
 } /* namespace ieee80211 */
+

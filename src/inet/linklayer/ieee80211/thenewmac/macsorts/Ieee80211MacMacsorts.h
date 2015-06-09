@@ -30,11 +30,31 @@ using namespace inet::units::values;
 namespace inet {
 namespace ieee80211 {
 
+class Ieee80211MacMacsortsIntraMacRemoteVariables;
+
+class INET_API Ieee80211MacMacsorts : public cSimpleModule
+{
+    protected:
+        Ieee80211MacMacsortsIntraMacRemoteVariables *intraMacRemoteVariables;
+
+    protected:
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        void handleMessage(cMessage *msg) override;
+        void initialize(int stage) override;
+
+    public:
+        void emitIntraMacRemoteVariablesChangedSignal();
+        Ieee80211MacMacsortsIntraMacRemoteVariables* getIntraMacRemoteVariables() const { return intraMacRemoteVariables; }
+};
+
 /*
  * Intra-MAC remote variables (names of form mXYZ)
  */
 class Ieee80211MacMacsortsIntraMacRemoteVariables
 {
+    protected:
+        Ieee80211MacMacsorts *macsortsModule = nullptr;
+
     protected:
         bool mActingAsAp; /* =true if STA started BSS */
         int mAId; /* AID assigned to STA by AP */
@@ -65,8 +85,11 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         // TIDI? remote procedure TSF; /* read & update 64-bit TSF timer */
 
     public:
+        Ieee80211MacMacsortsIntraMacRemoteVariables(Ieee80211MacMacsorts *macsortsModule) :
+            macsortsModule(macsortsModule) {}
+
         bool isActingAsAp() const { return mActingAsAp; }
-        void setActingAsAp(bool actingAsAp) { mActingAsAp = actingAsAp; }
+        void setActingAsAp(bool actingAsAp) { mActingAsAp = actingAsAp; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         int getAId() const { return mAId; }
         void setAId(int aId) { mAId = aId; }
         bool isAssoc() const { return mAssoc; }
@@ -163,20 +186,6 @@ class Ieee80211MacFragmentationSupport
             CfPriority cf; /* requested priority (from LLC) */
             FragArray pdus; /* array of Frame to hold fragments */
         };
-};
-
-class INET_API Ieee80211MacMacsorts : public cSimpleModule
-{
-    protected:
-        Ieee80211MacMacsortsIntraMacRemoteVariables *intraMacRemoteVariables;
-
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        void handleMessage(cMessage *msg) override;
-        void initialize(int stage) override;
-
-    public:
-        Ieee80211MacMacsortsIntraMacRemoteVariables* getIntraMacRemoteVariables() const { return intraMacRemoteVariables; }
 };
 
 } /* namespace inet */
