@@ -18,18 +18,93 @@
 #ifndef __INET_IEEE80211MACPMFILTERSTA_H
 #define __INET_IEEE80211MACPMFILTERSTA_H
 
-#include "inet/common/INETDefs.h"
+#include <deque>
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
+#include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacPmFilterSta : public cSimpleModule
+class INET_API IIeee80211MacPmFilterSta
 {
+    public:
+        typedef Ieee80211MacFragmentationSupport::FragSdu FragSdu;
+
+    protected:
+        virtual void handleResetMac() = 0;
+        virtual void handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest) = 0;
+        virtual void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm) = 0;
+        virtual void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) = 0;
+        virtual void handleAtimW(Ieee80211MacSignalAtimW *awtimW) = 0;
+        virtual void handlePsChange(Ieee80211MacSignalPsChange *psChange) = 0;
+
+        virtual void emitPduRequest(FragSdu *fsdu) = 0;
+        virtual void emitFragConfirm(FragSdu *fsdu, TxResult txResult) = 0;
+        virtual void emitPsInquiry(MACAddress dst) = 0;
 };
 
-
-class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta
+class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public Ieee80211MacMacProcessBase, public cListener
 {
+    protected:
+        enum PmFilterStaStates
+        {
+            PM_FILTER_STA_STATE_PM_IDLE,
+            PM_FILTER_STA_STATE_PM_BSS,
+            PM_FILTER_STA_STATE_PM_IBSS_DATA,
+            PM_FILTER_STA_STATE_BSS_CFP,
+            PM_FILTER_STA_WAIT_PS_RESPONSE
+        };
+
+    protected:
+        PmFilterStaStates state = PM_FILTER_STA_STATE_PM_IDLE;
+        Ieee80211MacMacmibPackage *macmib = nullptr;
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
+        bool atPend = false;
+        bool fsPend = false;
+        bool sentBcn = false;
+
+        std::deque<FragSdu *> cfQ, txQ, anQ, psQ;
+        PsMode dpsm;
+        FragSdu *fsdu = nullptr;
+        FragSdu *rsdu = nullptr;
+        int k;
+        int n;
+        TxResult resl;
+        MACAddress sta;
+
+        cGate *mpdu;
+        cGate *pwrMgt;
+        cGate *fragMsdu;
+
+    protected:
+        void handleMessage(cMessage *msg) override;
+        void initialize(int stage) override;
+        void receiveSignal(cComponent *source, int signalID, cObject *obj);
+
+
+    protected:
+        void continousSignalPmIdle1();
+        void continousSignalPmIdle2();
+
+        void continuousSignalPmBss2();
+
+        void continuousSignalBssCfp();
+
+    protected:
+        void handleResetMac() override;
+        void handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest) override;
+        void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm) override;
+        void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) override;
+        void handleAtimW(Ieee80211MacSignalAtimW *awtimW) override;
+        void handlePsChange(Ieee80211MacSignalPsChange *psChange) override;
+
+        void emitPduRequest(FragSdu *fsdu) override;
+        void emitFragConfirm(FragSdu *fsdu, TxResult txResult) override;
+        void emitPsInquiry(MACAddress dst) override;
 };
 
 } /* namespace inet */
