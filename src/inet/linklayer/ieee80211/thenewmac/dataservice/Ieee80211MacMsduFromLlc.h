@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -30,19 +31,42 @@ namespace ieee80211 {
 class INET_API IIeee80211MacMsduFromLlc
 {
     protected:
-        virtual void handleMaUnitDataRequest() = 0;
-        virtual void handleMsduConfirm() = 0;
+        virtual void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal) = 0;
+        virtual void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal) = 0;
+        virtual void emitMsduRequest(cPacket *sdu, CfPriority priority) = 0;
+        virtual void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv) = 0;
 };
 
 class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public Ieee80211MacMacProcessBase
 {
     protected:
+        enum MsduFromLlcState {
+            MSDU_FROM_LCC_STATE_FROM_LLC
+        };
+
+    protected:
+        MsduFromLlcState state = MSDU_FROM_LCC_STATE_FROM_LLC;
+
         Ieee80211MacMacsorts *macsorts = nullptr;
         Ieee80211MacMacmibPackage *macmib = nullptr;
 
+        CfPriority cf;
+        cPacket llcData;
+        Routing rt;
+        MACAddress da;
+        MACAddress sa;
+        TxStatus stat;
+        ServiceClass srv;
+
     protected:
-        void handleMaUnitDataRequest();
-        void handleMsduConfirm();
+        void handleMessage(cMessage *msg) override;
+        void initialize(int stage) override;
+
+        void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal);
+        void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv);
+        void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal);
+        void makeMsdu();
+        void emitMsduRequest(cPacket *sdu, CfPriority priority);
 };
 
 } /* namespace inet */
