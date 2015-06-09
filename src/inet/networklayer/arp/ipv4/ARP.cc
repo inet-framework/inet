@@ -180,8 +180,8 @@ void ARP::updateDisplayString()
 {
     std::stringstream os;
 
-    os << arpCache.size() << " cache entries\nsent req:" << numRequestsSent
-       << " repl:" << numRepliesSent << " fail:" << numFailedResolutions;
+    os << "size:" << arpCache.size() << " sent:" << numRequestsSent << "\n"
+       << "repl:" << numRepliesSent << " fail:" << numFailedResolutions;
 
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
