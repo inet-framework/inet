@@ -32,6 +32,7 @@ class noncobject ServiceClass;
 class noncobject TxStatus;
 class noncobject cPacket;
 class noncobject MACAddress;
+class noncobject PsMode;
 
 enum Ieee80211MacSignalType
 {
@@ -42,6 +43,14 @@ enum Ieee80211MacSignalType
     CHANGE_NAV = 4;
     BKDONE = 5;
     MA_UNIT_DATA_REQUEST = 6;
+    MSDU_CONFIRM = 7;
+    FRAG_REQUEST = 8;
+    PDU_REQUEST = 9;
+    FRAG_CONFIRM = 10;
+    CF_POLLED = 11;
+    PS_INQUIRY = 12;
+    ATIM_W = 13;
+    PS_CHANGE = 14;
 }
 
 packet Ieee80211MacSignal
@@ -90,6 +99,7 @@ packet Ieee80211MacSignalBkDone extends Ieee80211MacSignal
 
 packet Ieee80211MacSignalMaUnitDataRequest extends Ieee80211MacSignal
 {
+    signalType = 6;
     MACAddress senderAddres; // sa?
     MACAddress destinationAddress; // da
     Routing routing;
@@ -100,7 +110,50 @@ packet Ieee80211MacSignalMaUnitDataRequest extends Ieee80211MacSignal
 
 packet Ieee80211MacSignalMsduConfirm extends Ieee80211MacSignal
 {
+    signalType = 7;
     cPacket sdu;
     ServiceClass serviceClass;
     TxStatus txStatus;
+}
+
+packet Ieee80211MacSignalFragRequest extends Ieee80211MacSignal
+{
+    signalType = 8;
+    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+}
+
+packet Ieee80211MacSignalPduRequest extends Ieee80211MacSignal
+{
+    signalType = 9;
+    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+}
+
+packet Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
+{
+    signalType = 10;
+    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+    TxResult txResult;
+}
+
+packet Ieee80211MacSignalCfPolled extends Ieee80211MacSignal
+{
+    signalType = 11;
+}
+
+packet Ieee80211MacSignalPsInquiry extends Ieee80211MacSignal
+{
+    signalType = 12;
+    MACAddress macAddress;
+}
+
+packet Ieee80211MacSignalAtimW extends Ieee80211MacSignal
+{
+    signalType = 13;
+}
+
+packet Ieee80211MacSignalPsChange extends Ieee80211MacSignal
+{
+    signalType = 14;
+    MACAddress addr;
+    PsMode psMode;
 }
