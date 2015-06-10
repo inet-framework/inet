@@ -246,6 +246,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     if (nextHopIfID == -1) {
         //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
         //draft-ietf-v6ops-onlinkassumption-03 explains why.
+        delete msg->removeControlInfo();
         icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
         return;
     }
@@ -277,6 +278,11 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         }
     }
 
+    /*
+     * A host is capable of sending packets to a destination in all states except INCOMPLETE
+     * or when there is no corresponding NC entry. In INCOMPLETE state the data packets are
+     * queued pending completion of address resolution.
+     */
     switch (nce->reachabilityState) {
     case IPv6NeighbourCache::INCOMPLETE:
         EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
@@ -292,14 +298,16 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         break;
     case IPv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-        //sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
         send(msg, "ipv6Out");
         break;
     case IPv6NeighbourCache::DELAY:
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
+        send(msg, "ipv6Out");
         break;
     case IPv6NeighbourCache::PROBE:
+        EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+        send(msg, "ipv6Out");
+        break;
     default:
         throw cRuntimeError("Unknown Neighbour cache entry state.");
         break;
@@ -1828,7 +1836,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const I
     if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
             !dgSrcAddr.isUnspecified()) {
         ns->setSourceLinkLayerAddress(myMacAddr);
-        ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);      // FIXME make constant...
+        ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
 
     sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
