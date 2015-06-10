@@ -1828,13 +1828,14 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const I
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
-    ns->setByteLength(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE);      // RFC 2461, Section 4.3.
+    ns->setByteLength(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE);      // RFC 4861, Section 4.3.
 
-    /*If the solicitation is being sent to a solicited-node multicast
-       address, the sender MUST include its link-layer address (if it has
-       one) as a Source Link-Layer Address option.*/
-    if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
-            !dgSrcAddr.isUnspecified()) {
+    // RFC 4861 Section 4.3:
+    // The link-layer address for the sender:
+    // MUST NOT be included when the source IP address is the unspecified address.
+    // Otherwise, on link layers that have addresses this option MUST be included in multicast
+    // solicitations and SHOULD be included in unicast solicitations.
+    if (!dgSrcAddr.isUnspecified()) {
         ns->setSourceLinkLayerAddress(myMacAddr);
         ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
