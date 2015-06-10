@@ -113,7 +113,7 @@ void Ieee80211MacTxCoordinationSta::txcReq()
         seqnum = seqnum == 4095 ? 0 : seqnum + 1;
         fsdu->eol = simTime() /* TODO: + import(dot11MaxTransmitMsduLifetime) */;
     }
-    // TODO: tpdu = setSeq(tpdu, fsdu->sqf);
+    tpdu->setSeq(fsdu->sqf);
     txcReq2();
 }
 
@@ -125,9 +125,9 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
     // TODO: TxTime(length(fsdu->pdus[fsdu->fCur+1]), txrate, frametime);
     // With FH PHY, if next fragment will be after a dwell boundary, Duration/ID may be set to
     // one ACK time plus SIFS time.
-    // TODO: tpdu = setDurId(tpdu, aSifsTime + ackctstime +
-    //               fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * aSifsTime + ackctstime + frametime);
-    // TODO: tpdu = setPwrMgt(tpdu, import(dot11PowerManagement_Mode))
+    simtime_t aSifsTime; // TODO
+//   INTEGER???   tpdu->setDurId(aSifsTime + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * aSifsTime + ackctstime + frametime);
+    tpdu->setPwrMgt(macmib->getStationConfigTable()->getDot11PowerMangementMode());
     emitBackoff(0,0);
     chkRtsCts();
 }
@@ -180,8 +180,10 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu)
             }
             else
             {
-                Ieee80211NewManagementFrame *atimFrame = new Ieee80211NewManagementFrame("ATIM frame");
-//                tpdu:= mkFrame(atim,sdu!dst,dot11MacAddress, )
+                tpdu = new Ieee80211NewFrame();
+                tpdu->setFtype(TypeSubtype_atim);
+                tpdu->setAddr1(fsdu->dst);
+//                tpdu->setAddr2() dot11MacAddress
                 emitBackoff(ccw, -1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_ATIM;
                 ibssAtimWBullshit();
@@ -204,7 +206,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu)
             fsdu->eol = simTime() + macmib->getOperationTable()->getDot11MaxTransmitMsduLifetime();
         }
         //TODO:
-        // tpdu:= setSeq(tpdu,fsdu!sqf)
+        tpdu->setSeq(fsdu->sqf);
         // TODO: Change data to data+cfAck if appropriate.
         // tpdu:= setFtype(tpdu,type(tpdu) or pack);
         // TODO: See 9.6 for rules about selecting transmit data rate.
@@ -355,7 +357,11 @@ void Ieee80211MacTxCoordinationSta::handleCfPoll(simtime_t endRx)
     }
     else if (state == TX_COORDINATION_STATE_TXC_CFP)
     {
-//        tpdu:=mkframe(null_frame,mBssId,mBssId)
+        //todo: rxPoll
+        tpdu = new Ieee80211NewFrame();
+        tpdu->setFtype(TypeSubtype_null_frame);
+        tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+        tpdu->setAddr2(macsorts->getIntraMacRemoteVariables()->getBssId());
         scheduleAt(endRx + dSifsDelay, trsp);
         emitCfPolled();
         state = TX_COORDINATION_STATE_CF_RESPONSE;
@@ -366,18 +372,22 @@ void Ieee80211MacTxCoordinationSta::handleTxCfAck(simtime_t endTx)
 {
     if (state == TX_COORDINATION_STATE_CF_RESPONSE)
     {
-        // TODO: tpdu = mkFrame(Cfack, import(mBssId), import(mBssId));
+        tpdu = new Ieee80211NewFrame();
+        tpdu->setFtype(TypeSubtype_cfack);
+        tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+        tpdu->setAddr2(macsorts->getIntraMacRemoteVariables()->getBssId());
     }
     else if (state == TX_COORDINATION_STATE_TXC_CFP)
     {
         TypeSubtype rtpye = TypeSubtype::TypeSubtype_cfack;
-        //tpdu:= mkFrame(rtype,import(mBssId),import(mBssId) )
+        tpdu = new Ieee80211NewFrame();
+        tpdu->setFtype(rtpye);
+        tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+        tpdu->setAddr2(macsorts->getIntraMacRemoteVariables()->getBssId());
         txSifs();
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CFP_SIFS)
-    {
-        //tpdu:=setFtype(tpdu,data_ack);
-    }
+        tpdu->setFtype(TypeSubtype::TypeSubtype_data_ack);
 }
 
 void Ieee80211MacTxCoordinationSta::txSifs()
@@ -386,7 +396,7 @@ void Ieee80211MacTxCoordinationSta::txSifs()
     state = TX_COORDINATION_STATE_WAIT_SIFS;
     scheduleAt(endRx + dSifsDelay, tifs);
     emitTxRequest(tpdu, txrate);
-    // TODO: pdu:= setPwrMgt(tpdu,curPm)
+    tpdu->setPwrMgt(curPm);
 }
 
 void Ieee80211MacTxCoordinationSta::handleTifs()
@@ -403,7 +413,7 @@ void Ieee80211MacTxCoordinationSta::txWait()
 
 void Ieee80211MacTxCoordinationSta::sendFrag()
 {
-    // tpdu = fsdu->pdus[fsdu->fCur];
+    tpdu = fsdu->pdus[fsdu->fCur];
     txcReq2();
 }
 
@@ -583,8 +593,8 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
     else if (state == TX_COORDINATION_STATE_WAIT_CF_ACK)
     {
         macmib->getCountersTable()->incDot11AckFailureCount();
-        // tpdu:=setRetry(tpdu,1);
-        // fsdu!pdus(fsdu!fCur):=setRetry(fsdu!pdus(fsdu!fCur),1)
+        tpdu->setRetryBit(true);
+        fsdu->pdus[fsdu->fCur]->setRetryBit(1);
         fsdu->src++;
         if (fsdu->src == macmib->getOperationTable()->getDot11LongRetryLimit())
         {
@@ -611,7 +621,8 @@ void Ieee80211MacTxCoordinationSta::ackFail()
     macsorts->getIntraMacRemoteVariables()->setFxIp(false);
     // TODO:    ccw = ccw == aCWmax ? aCWmax : 2*ccw + 1;
     emitBackoff(ccw, -1);
-// TODO:    tpdu:= setRetry(tpdu,1),fsdu!pdus (fsdu!fCur):= setRetry (fsdu!pdus(fsdu!fCur),1);
+    tpdu->setRetryBit(true);
+    fsdu->pdus[fsdu->fCur]->setRetryBit(true);
     if (/*length(tpdu) + sCrcLng > macmib->getOperationTable()->getDot11RtsThreshold()*/1)
     {
         ctsFail2();

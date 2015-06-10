@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedMacStaTypes.h"
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacFrameTypes.h"
+#include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -122,7 +123,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         int slrc = 0;
         int n = 0;
 
-        cPacket *tpdu = nullptr;
+        Ieee80211NewFrame *tpdu = nullptr;
         FragSdu *fsdu = nullptr;
         bps txrate = bps(NaN); // type Rate
 
