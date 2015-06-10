@@ -51,6 +51,7 @@ enum Ieee80211MacSignalType
     PS_INQUIRY = 12;
     ATIM_W = 13;
     PS_CHANGE = 14;
+    PS_RESPONSE = 15;
 }
 
 packet Ieee80211MacSignal
@@ -155,5 +156,12 @@ packet Ieee80211MacSignalPsChange extends Ieee80211MacSignal
 {
     signalType = 14;
     MACAddress addr;
+    PsMode psMode;
+}
+
+packet Ieee80211MacSignalPsResponse extends Ieee80211MacSignal
+{
+    signalType = 15;
+    MACAddress adr;
     PsMode psMode;
 }
