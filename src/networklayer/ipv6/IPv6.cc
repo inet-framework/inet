@@ -296,7 +296,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
     // check if destination is covered by tunnel lists
     if ((datagram->getTransportProtocol() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
          (datagram->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME: check for RH2 existence
-          ((rt->isMobileNode() && rt->isHomeAddress( datagram->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
+          (((rt->isMobileNode() || rt->isMobileRouter()) && rt->isHomeAddress( datagram->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
              rt->isHomeAgent() || // but always check for tunnel if node is a HA
              !rt->isMobileNode() // or if it is a correspondent or non-MIP node
           )
@@ -325,7 +325,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
         return;
     }
 
-    if(rt->isMobileRouter()) // MR langsung forward ke parent aja (harusnya). di sini baru ke HA doang. kalo ke MR parent-> cek RA packet?
+    if(rt->isMobileRouter()) // MR langsung forward ke parent aja (harusnya, kalo paket dari anaknya). di sini baru ke HA doang. kalo ke MR parent-> cek RA packet?
     {
         InterfaceEntry *ientry = ift->getInterfaceByName("wlan0");
         IPv6Address HAaddr;
@@ -334,6 +334,11 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
             interfaceId = ientry->getInterfaceId();
             nextHop = HAaddr;
         }
+    }
+
+    if (rt->isHomeAgent())
+    {
+
     }
 
     if (interfaceId == -1)
@@ -845,25 +850,31 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
 //
 //            else
 //            {
-                if (rt->isRouter())
-                {
-                    EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
-                    numUnroutable++;
-                    icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
-                 }
-                 else // host
-                 {
-                     EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                     datagram->addPar("IPv6-fromHL") = fromHL;
-                     send(datagram, "ndOut");
-                  }
-                  return false;
-            }
+            if (rt->isRouter())
+            {
+                EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
+                numUnroutable++;
+                icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
+             }
+             else // host
+             {
+                 EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+                 datagram->addPar("IPv6-fromHL") = fromHL;
+                 send(datagram, "ndOut");
+              }
+              return false;
+        }
 
-            interfaceId = route->getInterfaceId();
-            nextHop = route->getNextHop();
-            if (nextHop.isUnspecified())
-                nextHop = destAddress;  // next hop is the host itself
+        //mungkin ada di prefix table
+        if (rt->isHomeAgent() || rt->isMobileRouter())
+        {
+// tapi isi prefix table nya juga belum bener -___-
+        }
+
+        interfaceId = route->getInterfaceId();
+        nextHop = route->getNextHop();
+        if (nextHop.isUnspecified())
+            nextHop = destAddress;  // next hop is the host itself
 
         // add result into destination cache
         rt->updateDestCache(destAddress, nextHop, interfaceId, route->getExpiryTime());

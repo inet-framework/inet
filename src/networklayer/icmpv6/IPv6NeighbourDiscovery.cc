@@ -102,18 +102,19 @@ void IPv6NeighbourDiscovery::initialize(int stage)
             WATCH(maxRAInterval);    // (Zarrar 15.07.07)
         }*/
 #endif /* WITH_xMIPv6 */
-        if(!(rt6->isMobileRouter() || rt6->isHomeAgent()))
-        {
-            for (int i = 0; i < ift->getNumInterfaces(); i++)
-            {
-                InterfaceEntry *ie = ift->getInterface(i);
-
-                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
-                {
-                    createRATimer(ie);
-                }
-            }
-        }
+        // xxx: Home Agent & Mobile Router tidak kirim RA secara periodis. agar prefix table bisa lebih rapih(?)
+//        if(!(rt6->isMobileRouter() || rt6->isHomeAgent()))
+//        {
+//            for (int i = 0; i < ift->getNumInterfaces(); i++)
+//            {
+//                InterfaceEntry *ie = ift->getInterface(i);
+//
+//                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
+//                {
+//                    createRATimer(ie);
+//                }
+//            }
+//        }
 
         //This simulates random node bootup time. Link local address assignment
         //takes place during this time.
@@ -218,6 +219,11 @@ void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInf
     {
         IPv6Redirect *redirect = (IPv6Redirect *)msg;
         processRedirectPacket(redirect, ctrlInfo);
+    }
+    else if (dynamic_cast<IPv6PrefixAck *>(msg))
+    {
+        IPv6PrefixAck *pa = (IPv6PrefixAck *)msg;
+        processPrefixAckPacket(pa, ctrlInfo);
     }
     else
     {
@@ -932,7 +938,7 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
 
         // if we have MIPv6 protocols on this node we will eventually have to
         // call some appropriate methods
-        if (rt6->isMobileNode())
+        if (rt6->isMobileNode() || rt6->isMobileRouter())
         {
             if (entry.hFlag == false) // if we are not in the home network, send BUs
                   mipv6->initiateMIPv6Protocol(ie, tentativeAddr);
@@ -953,7 +959,7 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     // =================================Start: Zarrar Yousaf 08.07.07 ===============================================
     /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the FlatNetworkConfigurator6 assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
     */
-    if (rt6->isRouter() && !(ie->isLoopback()))
+    if ((rt6->isRouter() && !(ie->isLoopback())) && !(rt6->isMobileRouter()))
     {
         for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
         {
@@ -974,13 +980,14 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     //TODO: Placing these operations here means fast router solicitation is
     //not adopted. Will relocate.
     // Only host will send RS and MR via wlan0
-    if (ie->ipv6Data()->getAdvSendAdvertisements() == false || (rt6->isMobileRouter() && strcmp(ie->getFullName(),"wlan0")==0))
+    if (ie->ipv6Data()->getAdvSendAdvertisements() == false || (rt6->isMobileRouter() && strcmp(ie->getFullName(),"eth1")==0)) //yg terhubung dgn wireless card adalah eth1
     {
         EV << "creating router discovery message timer\n";
         cMessage *rtrDisMsg = new cMessage("initiateRTRDIS", MK_INITIATE_RTRDIS);
         rtrDisMsg->setContextPointer(ie);
         simtime_t interval = uniform(0, ie->ipv6Data()->_getMaxRtrSolicitationDelay()); // random delay
         scheduleAt(simTime()+interval, rtrDisMsg);
+        EV << "RS will be sent at " << simTime()+interval << endl;
     }
 }
 
@@ -1010,6 +1017,11 @@ IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceE
     //address, if the IP source address is not the unspecified address.
     if (!myIPv6Address.isUnspecified())
         rs->setSourceLinkLayerAddress(ie->getMacAddress());
+
+    if (rt6->isRouter())
+        rs->setIsRouter(true);
+    else
+        rs->setIsRouter(false);
 
     //Construct a Router Solicitation message
     sendPacketToIPv6Module(rs, destAddr, myIPv6Address, ie->getInterfaceId());
@@ -1124,6 +1136,12 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
         //First we extract RS specific information from the received message
         MACAddress macAddr = rs->getSourceLinkLayerAddress();
         EV << "MAC Address extracted\n";
+        bool isRouter = rs->getIsRouter();
+
+        IPv6Address destAddr = IPv6Address("FF02::1");
+
+        createAndSendRAPacket(destAddr, ie, isRouter);
+
         delete rs;
 
         /*A router MAY choose to unicast the response directly to the soliciting
@@ -1147,18 +1165,21 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
         value corresponds to a time later than the time the next multicast
         Router Advertisement is scheduled to be sent, ignore the random
         delay and send the advertisement at the already-scheduled time.*/
-        cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
-        msg->setContextPointer(ie);
-        simtime_t interval = uniform(0, ie->ipv6Data()->_getMaxRADelayTime());
 
-        if (interval < advIfEntry->nextScheduledRATime)
-        {
-            simtime_t nextScheduledTime;
-            nextScheduledTime = simTime()+interval;
-            scheduleAt(nextScheduledTime, msg);
-            advIfEntry->nextScheduledRATime = nextScheduledTime;
-            EV << "RS will be sent at " << nextScheduledTime << endl;
-        }
+        // fayruz commented this part since RS packet langsung dikirim ga pake penjadwalan
+//        cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
+//        msg->setContextPointer(ie);
+//        simtime_t interval = uniform(0, ie->ipv6Data()->_getMaxRADelayTime());
+//
+//        //xxx: dikomen krn periodik RA dihilangkan utk HA & MR (router biasa ikut terimbas!)
+//        if (interval < advIfEntry->nextScheduledRATime)
+//        {
+//            simtime_t nextScheduledTime;
+//            nextScheduledTime = simTime()+interval;
+//            scheduleAt(nextScheduledTime, msg);
+//            advIfEntry->nextScheduledRATime = nextScheduledTime;
+//            EV << "RA will be sent at " << nextScheduledTime << endl;
+//        }
         //else we ignore the generate interval and send it at the next scheduled time.
 
         //We need to keep a log here each time an RA is sent. Not implemented yet.
@@ -1219,10 +1240,10 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
 }
 
 IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
-        const IPv6Address& destAddr, InterfaceEntry *ie)
+        const IPv6Address& destAddr, InterfaceEntry *ie, bool isSenderARouter)
 {
-    if (rt6->isMobileRouter() && (strcmp(ie->getFullName(), "wlan0")==0))
-        return NULL; // wlan 0 di mobile router khusus untuk receive RA dari parent, yg terus jadi prefiks utama
+    if (rt6->isMobileRouter() && (strcmp(ie->getFullName(), "eth1")==0))
+        return NULL; // eth1 di mobile router khusus untuk receive RA dari parent, yg terus jadi prefiks utama
 
     EV << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
@@ -1319,9 +1340,8 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
             //- In the Preferred Lifetime field: the entry's AdvPreferredLifetime.
             prefixInfo.setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
 
-            if ((rt6->isHomeAgent() || rt6->isMobileRouter())) //&& advPrefix.advRtrAddr == true)
-                //cara bodoh dulu, semua interface dikasih subprefix
-                //xxx::ini jadinya makin lama prefixnya nambah terus nilainya!!!
+            if (((rt6->isHomeAgent() || rt6->isMobileRouter())) && isSenderARouter) //&& advPrefix.advRtrAddr == true)
+                //xxx::cara bodoh dulu, semua interface dikasih subprefix --> ngefek di LFN --> solusi: RS kasih flag itu router ato host
             {
                 prefixInfo = rt6->createSubPrefix(prefixInfo);
                 //TODO::prefixnya di-input ke Prefix Table
@@ -1568,7 +1588,27 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     if(rt6->isMobileRouter() || rt6->isHomeAgent())
         pt->addOrUpdatePT(raSrcAddr, ra->getPrefixInformation(0).getPrefix());
 
+    // fayruz tadinya mau nambahin ini, tapi ternyata pake NA ditolak sama HA, karena target address belum terdaftar di neighbour cache
+//    if(rt6->isMobileRouter())
+//        sendUnsolicitedNA(ie);
+
+    createAndSendPrefixAck(ra->getPrefixInformation(0), raSrcAddr, ie);
+
     processRAPrefixInfo(ra, ie);
+}
+
+IPv6PrefixAck *IPv6NeighbourDiscovery::createAndSendPrefixAck(IPv6NDPrefixInformation& prefixInfo, const IPv6Address& destAddr, InterfaceEntry *ie)
+{
+    IPv6PrefixAck *pa = new IPv6PrefixAck("PApacket");
+    IPv6Address myIPv6Address = ie->ipv6Data()->getPreferredAddress();
+
+    pa->setPrefix(prefixInfo.getPrefix());
+    sendPacketToIPv6Module(pa, destAddr, myIPv6Address, ie->getInterfaceId());
+}
+
+void IPv6NeighbourDiscovery::processPrefixAckPacket(IPv6PrefixAck *pa, IPv6ControlInfo *paCtrlInfo)
+{
+    //TODO::lalalalalalalalilaa. ini buat apdet prefix table AND routing table
 }
 
 void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
@@ -1852,7 +1892,7 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
     InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);
     IPv6Address destAddr = IPv6Address("FF02::1");
-    createAndSendRAPacket(destAddr, ie);
+    createAndSendRAPacket(destAddr, ie, rt6->isRouter());
     advIfEntry->numRASent++;
     simtime_t nextScheduledTime;
 
@@ -1902,12 +1942,14 @@ void IPv6NeighbourDiscovery::sendPeriodicRA(cMessage *msg)
 
 void IPv6NeighbourDiscovery::sendSolicitedRA(cMessage *msg)
 {
-    EV << "Send Solicited RA invoked!\n";
-    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
-    IPv6Address destAddr = IPv6Address("FF02::1");
-    EV << "Testing condition!\n";
-    createAndSendRAPacket(destAddr, ie);
-    delete msg;
+    //fayruz commented this part since pesan RS langsung diproses, kirim RA ga usah pake jadwal lah
+//    EV << "Send Solicited RA invoked!\n";
+//    InterfaceEntry *ie = (InterfaceEntry *)msg->getContextPointer();
+//    IPv6Address destAddr = IPv6Address("FF02::1");
+//    EV << "Testing condition!\n";
+//    createAndSendRAPacket(destAddr, ie);
+//    delete msg;
+    return;
 }
 
 bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra,
@@ -2350,6 +2392,8 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
 
     if (neighbourEntry == NULL)
     {
+        //di RFC, tulisannya SHOULD. jadi boleh2 aja dong kalo aku ganti di sini buat apdet Neighbour Cache
+//        neighbourEntry = neighbourCache.addNeighbour(naTargetAddr, ie->getInterfaceId()); //ini cara ilegal
         EV << "NA received. Target Address not found in Neighbour Cache\n";
         EV << "Dropping NA packet.\n";
         delete naCtrlInfo;
