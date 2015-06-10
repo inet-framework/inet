@@ -40,6 +40,7 @@ class INET_API IIeee80211MacPmFilterSta
         virtual void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) = 0;
         virtual void handleAtimW(Ieee80211MacSignalAtimW *awtimW) = 0;
         virtual void handlePsChange(Ieee80211MacSignalPsChange *psChange) = 0;
+        virtual void handlePsResponse(Ieee80211MacSignalPsResponse *psResponse) = 0;
 
         virtual void emitPduRequest(FragSdu *fsdu) = 0;
         virtual void emitFragConfirm(FragSdu *fsdu, TxResult txResult) = 0;
@@ -55,7 +56,10 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
             PM_FILTER_STA_STATE_PM_BSS,
             PM_FILTER_STA_STATE_PM_IBSS_DATA,
             PM_FILTER_STA_STATE_BSS_CFP,
-            PM_FILTER_STA_WAIT_PS_RESPONSE
+            PM_FILTER_STA_WAIT_PS_RESPONSE, // save all incoming signal
+            PM_FILTER_STA_PRE_ATIM,
+            PM_FILTER_STA_ATIM_W,
+            PM_FILTER_STA_IBSS_ATIM_W // save pschange signal
         };
 
     protected:
@@ -101,6 +105,7 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) override;
         void handleAtimW(Ieee80211MacSignalAtimW *awtimW) override;
         void handlePsChange(Ieee80211MacSignalPsChange *psChange) override;
+        void handlePsResponse(Ieee80211MacSignalPsResponse *psResponse) override;
 
         void emitPduRequest(FragSdu *fsdu) override;
         void emitFragConfirm(FragSdu *fsdu, TxResult txResult) override;

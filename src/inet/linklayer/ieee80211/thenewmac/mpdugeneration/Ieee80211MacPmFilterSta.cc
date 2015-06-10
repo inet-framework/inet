@@ -62,7 +62,27 @@ void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *f
         emitPsInquiry(fsdu->dst);
         state = PM_FILTER_STA_WAIT_PS_RESPONSE;
     }
-
+    else if (state == PM_FILTER_STA_IBSS_ATIM_W)
+    {
+        if (sentBcn)
+        {
+            emitPsInquiry(fsdu->dst);
+            state = PM_FILTER_STA_WAIT_PS_RESPONSE;
+        }
+        else
+        {
+            if (fsdu->pdus[1]) // TODO: ftype
+            {
+                // beacon
+                emitPduRequest(fsdu);
+                sentBcn = true;
+            }
+            else
+            {
+                // todo: fragrequest to self
+            }
+        }
+    }
 }
 
 void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pduConfirm)
@@ -103,7 +123,7 @@ void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pdu
         else
             emitFragConfirm(fsdu, resl);
     }
-    else if (state = PM_FILTER_STA_STATE_PM_IBSS_DATA)
+    else if (state == PM_FILTER_STA_STATE_PM_IBSS_DATA)
     {
         fsPend = false;
         if (resl == TxResult::TxResult_partial)
@@ -116,6 +136,14 @@ void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pdu
         }
         else
             emitFragConfirm(fsdu, resl);
+    }
+    else if (state == PM_FILTER_STA_IBSS_ATIM_W)
+    {
+        atPend = false;
+        if (resl == TxResult::TxResult_atimAck)
+            anQ.push_back(fsdu);
+        else
+            psQ.push_back(fsdu);
     }
 }
 
@@ -229,6 +257,17 @@ void Ieee80211MacPmFilterSta::handleAtimW(Ieee80211MacSignalAtimW* awtimW)
     {
         // TODO: save signal
     }
+    else if (state == PM_FILTER_STA_PRE_ATIM)
+    {
+        n = anQ.size();
+        while (n > 0)
+        {
+            psQ.push_back(anQ.front());
+//            anQ:=tail(anQ);
+            n--;
+        }
+        state = PM_FILTER_STA_IBSS_ATIM_W;
+    }
 }
 
 void Ieee80211MacPmFilterSta::handlePsChange(Ieee80211MacSignalPsChange* psChange)
@@ -242,7 +281,22 @@ void Ieee80211MacPmFilterSta::handlePsChange(Ieee80211MacSignalPsChange* psChang
             // n:=qsearch(psQ, sta)
             //psQ:=subQ(psQ,0,n)//subQ(psQ,n+1,length(psQ)-n-1)
         }
+    }
+}
 
+void Ieee80211MacPmFilterSta::handlePsResponse(Ieee80211MacSignalPsResponse *psResponse)
+{
+    if (state == PM_FILTER_STA_WAIT_PS_RESPONSE)
+    {
+        dpsm = psResponse->getPsMode();
+        if (dpsm == PsMode::PsMode_sta_active)
+            txQ.push_back(fsdu);
+        else
+        {
+            fsdu->psm = true;
+            psQ.push_back(fsdu);
+        }
+        state = PM_FILTER_STA_IBSS_ATIM_W;
     }
 }
 
