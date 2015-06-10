@@ -52,6 +52,11 @@ enum Ieee80211MacSignalType
     ATIM_W = 13;
     PS_CHANGE = 14;
     PS_RESPONSE = 15;
+    CF_POLL = 16;
+    TBTT = 17;
+    CF_END = 18;
+    TX_CONFIRM = 19;
+    TX_CF_ACK = 20;
 }
 
 packet Ieee80211MacSignal
@@ -164,4 +169,33 @@ packet Ieee80211MacSignalPsResponse extends Ieee80211MacSignal
     signalType = 15;
     MACAddress adr;
     PsMode psMode;
+}
+
+packet Ieee80211MacSignalCfPoll extends Ieee80211MacSignal
+{
+    signalType = 16;
+    simtime_t time;
+    double rate;
+}
+
+packet Ieee80211MacSignalTbtt extends Ieee80211MacSignal
+{
+    signalType = 17;
+}
+
+packet Ieee80211MacSignalCfEnd extends Ieee80211MacSignal
+{
+    signalType = 18;
+}
+
+packet Ieee80211MacSignalTxConfirm extends Ieee80211MacSignal
+{
+    signalType = 19;
+}
+
+packet Ieee80211MacSignalTxCfAck extends Ieee80211MacSignal
+{
+    signalType = 20;
+    simtime_t time;
+    double rate;
 }
