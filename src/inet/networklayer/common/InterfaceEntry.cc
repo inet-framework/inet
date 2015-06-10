@@ -337,8 +337,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            // TODO
-            // ipv6Data()->joinMulticastGroup(address.toIPv6());
+            ipv6Data()->joinMulticastGroup(address.toIPv6());
             break;
 
 #endif // ifdef WITH_IPv6
@@ -381,6 +380,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 #ifdef WITH_IPv6
         case L3Address::IPv6:
             // TODO
+            throw cRuntimeError("changeMulticastGroupMembership() not implemented for type %s", L3Address::getTypeName(multicastAddress.getType()));
             break;
 
 #endif // ifdef WITH_IPv6
@@ -388,6 +388,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
             // TODO
+            throw cRuntimeError("changeMulticastGroupMembership() not implemented for type %s", L3Address::getTypeName(multicastAddress.getType()));
             break;
 
         default:
