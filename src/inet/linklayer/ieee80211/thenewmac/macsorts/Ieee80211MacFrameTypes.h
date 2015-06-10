@@ -66,6 +66,32 @@ enum BasicType
     BasicType_reserved
 };
 
+// TODO: move
+enum StatusCode
+{
+    StatusCode_successful,
+    StatusCode_unspec_fail,
+    StatusCode_unsup_cap,
+    StatusCode_reasoc_no_asoc,
+    StatusCode_fail_other,
+    StatusCode_unsupt_alg,
+    StatusCode_auth_seq_fail,
+};
+
+enum Capability
+{
+    Capability_cEss,
+    Capability_cIbss,
+    Capability_cPollable,
+    Capability_cPollReq,
+    Capability_cPrivacy,
+    Capability_cShortPreamble,
+    Capability_cPBCC,
+    Capability_cChannelAgility,
+    Capability_cShortSlot,
+    Capability_cDsssOfdm
+};
+
 } /* namespace inet */
 } /* namespace ieee80211 */
 
