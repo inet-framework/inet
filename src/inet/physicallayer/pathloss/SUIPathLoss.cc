@@ -36,7 +36,7 @@ SUIPathLoss::SUIPathLoss() :
 void SUIPathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        ht = m(par("transmiterAntennaHeight"));
+        ht = m(par("transmitterAntennaHeight"));
         hr = m(par("receiverAntennaHeight"));
         /**
          * Terrain A - Highest path loss. Dense populated urban area.

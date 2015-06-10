@@ -33,7 +33,7 @@ void TwoRayGroundReflection::initialize(int stage)
 {
     FreeSpacePathLoss::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        ht = m(par("transmiterAntennaHeight"));
+        ht = m(par("transmitterAntennaHeight"));
         hr = m(par("receiverAntennaHeight"));
     }
 }
