@@ -32,7 +32,7 @@ network ExtClient
                 forwarding = false;
                 routingTable.routingFile = "cli1d.mrt";
                 numExtInterfaces = 1;
-                @display("p=29,90;i=laptop3");
+                @display("p=29,90;i=old/laptop3");
         }
     connections allowunconnected:
 }

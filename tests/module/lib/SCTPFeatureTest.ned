@@ -26,7 +26,7 @@ network SCTPFeatureTest
                 forwarding = false;
                 routingTable.routingFile = "../../lib/sctp_client.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
-                @display("i=laptop3;p=128,317");
+                @display("i=old/laptop3;p=128,317");
             gates:
                 pppg[1];
         }
@@ -35,7 +35,7 @@ network SCTPFeatureTest
                 forwarding = false;
                 routingTable.routingFile = "../../lib/sctp_server.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
-                @display("i=laptop3");
+                @display("i=old/laptop3");
             gates:
                 pppg[1];
         }
