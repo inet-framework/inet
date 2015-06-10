@@ -24,6 +24,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacFrameTypes.h"
 #include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,13 +36,13 @@ class INET_API IIeee80211MacTxCoordinationSta
 
     protected:
         virtual void handleResetMac() = 0;
-        virtual void handlePduRequest(FragSdu *fsdu) = 0;
-        virtual void handleBkDone(int par) = 0;
-        virtual void handleCfPoll(simtime_t endRx) = 0;
+        virtual void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest) = 0;
+        virtual void handleBkDone(Ieee80211MacSignalBkDone *bkDone) = 0;
+        virtual void handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll) = 0;
         virtual void handleCfEnd() = 0;
         virtual void handleTbtt() = 0;
         virtual void handleTxConfirm() = 0;
-        virtual void handleTxCfAck(simtime_t endTx) = 0;
+        virtual void handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck) = 0;
         virtual void handleTifs() = 0;
         virtual void handleAck(simtime_t endRx, bps txrate) = 0;
         virtual void handleTrsp() = 0;
@@ -176,11 +177,11 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
 
         void handleWake() override;
         void handleTbtt() override;
-        void handleBkDone(int par) override;
+        void handleBkDone(Ieee80211MacSignalBkDone *bkDone) override;
         void handleResetMac() override;
-        void handlePduRequest(FragSdu *fsdu) override;
-        void handleCfPoll(simtime_t endRx) override;
-        void handleTxCfAck(simtime_t endTx) override;
+        void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest) override;
+        void handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll) override;
+        void handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck) override;
         void handleTifs() override;
         void handleTxConfirm() override;
         void handleAck(simtime_t endRx, bps txrate) override;

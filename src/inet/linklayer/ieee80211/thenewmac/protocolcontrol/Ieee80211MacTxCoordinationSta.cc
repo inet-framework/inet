@@ -40,27 +40,22 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
     }
     else
     {
-        if (strcmp("PduRequest", msg->getName()) == 0)
-        {
-            handlePduRequest(check_and_cast<FragSdu *>(msg->par("fsdu")));
-        }
-        else if (strcmp("CfPoll", msg->getName()) == 0)
-        {
-//            handleCfPoll();
-        }
-        else if (strcmp("TBTT", msg->getName()) == 0)
-        {
+        if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg))
+            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg))
+            handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg))
             handleTbtt();
-        }
         else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg))
-        {
-            Ieee80211MacSignalBkDone *bkDone = dynamic_cast<Ieee80211MacSignalBkDone *>(msg);
-            handleBkDone(bkDone->getSlotCount());
-        }
+            handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg))
+            handleCfEnd();
         else if (strcmp("TxCfAck", msg->getName()) == 0)
         {
 //            handleTxCfAck();
         }
+        else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg))
+            handleTxConfirm();
     }
 }
 
@@ -160,9 +155,9 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handlePduRequest(FragSdu *fsdu)
+void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest)
 {
-    this->fsdu = fsdu;
+    this->fsdu = new FragSdu(pduRequest->getFsdu());
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
         if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
@@ -251,12 +246,12 @@ void Ieee80211MacTxCoordinationSta::handleTbtt()
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handleBkDone(int par)
+void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDone)
 {
-    bstat = par;
+    bstat = bkDone->getSlotCount();
     if (state == TX_COORDINATION_STATE_ATW_START)
     {
-        dcfcnt = par;
+        dcfcnt = bkDone->getSlotCount();
         function1();
     }
     else if (state == TX_COORDINATION_STATE_WAIT_RTS_BACKOFF)
@@ -321,7 +316,7 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(int par)
     }
     else if (state == TX_COORDINATION_STATE_WAIT_BEACON_CANCEL)
     {
-        n = par;
+        n = bkDone->getSlotCount();
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
     }
     else if (state == TX_COORDINATION_STATE_TXC_BACKOFF)
@@ -349,11 +344,12 @@ void Ieee80211MacTxCoordinationSta::function1()
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handleCfPoll(simtime_t endRx)
+void Ieee80211MacTxCoordinationSta::handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll)
 {
+    endRx = cfPoll->getTime();
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
-
+        rxPoll();
     }
     else if (state == TX_COORDINATION_STATE_TXC_CFP)
     {
@@ -368,10 +364,12 @@ void Ieee80211MacTxCoordinationSta::handleCfPoll(simtime_t endRx)
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handleTxCfAck(simtime_t endTx)
+void Ieee80211MacTxCoordinationSta::handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck)
 {
+
     if (state == TX_COORDINATION_STATE_CF_RESPONSE)
     {
+        endRx = txCfAck->getTime();
         tpdu = new Ieee80211NewFrame();
         tpdu->setFtype(TypeSubtype_cfack);
         tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
@@ -379,6 +377,7 @@ void Ieee80211MacTxCoordinationSta::handleTxCfAck(simtime_t endTx)
     }
     else if (state == TX_COORDINATION_STATE_TXC_CFP)
     {
+        endRx = txCfAck->getTime();
         TypeSubtype rtpye = TypeSubtype::TypeSubtype_cfack;
         tpdu = new Ieee80211NewFrame();
         tpdu->setFtype(rtpye);
