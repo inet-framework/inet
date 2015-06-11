@@ -140,6 +140,7 @@ void BGPRouting::listenConnectionFromPeer(SessionID sessionID)
         _BGPSessions[sessionID]->getSocketListen()->readDataTransferModePar(*this);
         _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
+        _socketMap.addSocket(_BGPSessions[sessionID]->getSocketListen());
     }
 }
 
