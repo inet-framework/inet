@@ -40,6 +40,11 @@
 
 namespace inet {
 
+#if OMNETPP_BUILDNUM <= 1003
+#define getFES() msgQueue
+inline cMessageHeap *operator-> (cMessageHeap& msgHeap) { return &msgHeap; }
+#endif
+
 std::vector<cModule *> cSocketRTScheduler::modules;
 std::vector<pcap_t *> cSocketRTScheduler::pds;
 std::vector<int32> cSocketRTScheduler::datalinks;
@@ -208,7 +213,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // TBD assert that it's somehow not smaller than previous event's time
     notificationMsg->setArrival(module, -1, t);
 
-    getSimulation()->msgQueue.insert(notificationMsg);
+    getSimulation()->getFES()->insert(notificationMsg);
 }
 
 bool cSocketRTScheduler::receiveWithTimeout(long usec)
@@ -281,7 +286,7 @@ int cSocketRTScheduler::receiveUntil(const timeval& targetTime)
 #if OMNETPP_VERSION >= 0x0500
 cEvent *cSocketRTScheduler::guessNextEvent()
 {
-    return sim->msgQueue.peekFirst();
+    return sim->getFES()->peekFirst();
 }
 
 cEvent *cSocketRTScheduler::takeNextEvent()
@@ -293,7 +298,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
     timeval targetTime;
 
     // calculate target time
-    cEvent *event = sim->msgQueue.peekFirst();
+    cEvent *event = sim->getFES()->peekFirst();
     if (!event) {
         targetTime.tv_sec = LONG_MAX;
         targetTime.tv_usec = 0;
@@ -313,7 +318,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
         if (status == -1)
             return nullptr; // interrupted by user
         if (status == 1)
-            event = sim->msgQueue.peekFirst(); // received something
+            event = sim->getFES()->peekFirst(); // received something
     }
     else {
         // we're behind -- customized versions of this class may
@@ -322,7 +327,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
 #if OMNETPP_VERSION >= 0x0500
-    cEvent *tmp = sim->msgQueue.removeFirst();
+    cEvent *tmp = sim->getFES()->removeFirst();
     ASSERT(tmp == event);
 #endif // if OMNETPP_VERSION >= 0x0500
     return event;
@@ -332,7 +337,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
 #if OMNETPP_VERSION >= 0x0500
 void cSocketRTScheduler::putBackEvent(cEvent *event)
 {
-    sim->msgQueue.putBackFirst(event);
+    sim->getFES()->putBackFirst(event);
 }
 
 #endif // if OMNETPP_VERSION >= 0x0500
