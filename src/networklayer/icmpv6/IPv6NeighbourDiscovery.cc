@@ -1344,8 +1344,6 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(
                 //xxx::cara bodoh dulu, semua interface dikasih subprefix --> ngefek di LFN --> solusi: RS kasih flag itu router ato host
             {
                 prefixInfo = rt6->createSubPrefix(prefixInfo);
-                //TODO::prefixnya di-input ke Prefix Table
-                pt->addOrUpdatePT(destAddr, prefixInfo.getPrefix());
             }
 
             //Now we pop the prefix info into the RA.
@@ -1588,13 +1586,10 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     if(rt6->isMobileRouter() || rt6->isHomeAgent())
         pt->addOrUpdatePT(raSrcAddr, ra->getPrefixInformation(0).getPrefix());
 
-    // fayruz tadinya mau nambahin ini, tapi ternyata pake NA ditolak sama HA, karena target address belum terdaftar di neighbour cache
-//    if(rt6->isMobileRouter())
-//        sendUnsolicitedNA(ie);
+    if(rt6->isMobileRouter())
+        createAndSendPrefixAck(ra->getPrefixInformation(0), raSrcAddr, ie);
 
-    createAndSendPrefixAck(ra->getPrefixInformation(0), raSrcAddr, ie);
-
-    processRAPrefixInfo(ra, ie);
+    processRAPrefixInfo(ra, ie, raSrcAddr);
 }
 
 IPv6PrefixAck *IPv6NeighbourDiscovery::createAndSendPrefixAck(IPv6NDPrefixInformation& prefixInfo, const IPv6Address& destAddr, InterfaceEntry *ie)
@@ -1603,16 +1598,25 @@ IPv6PrefixAck *IPv6NeighbourDiscovery::createAndSendPrefixAck(IPv6NDPrefixInform
     IPv6Address myIPv6Address = ie->ipv6Data()->getPreferredAddress();
 
     pa->setPrefix(prefixInfo.getPrefix());
+    pa->setPrefixLength(prefixInfo.getPrefixLength());
     sendPacketToIPv6Module(pa, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
 void IPv6NeighbourDiscovery::processPrefixAckPacket(IPv6PrefixAck *pa, IPv6ControlInfo *paCtrlInfo)
 {
-    //TODO::lalalalalalalalilaa. ini buat apdet prefix table AND routing table
+    // buat apdet prefix table AND routing table
+    IPv6Address prefix = pa->getPrefix();
+    IPv6Address HoA = paCtrlInfo->getSrcAddr();
+    int prefixLength = pa->getPrefixLength();
+    int interfaceId = paCtrlInfo->getInterfaceId();
+
+    pt->addOrUpdatePT(HoA, prefix);
+
+    rt6->addStaticRoute(prefix, prefixLength, interfaceId, HoA);
 }
 
 void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
-        InterfaceEntry *ie)
+        InterfaceEntry *ie, IPv6Address raSrcAddr)
 {
     //Continued from section 6.3.4
     /*Prefix Information options that have the "on-link" (L) flag set indicate a
@@ -1667,15 +1671,15 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                 {
                     for (int i = 0; i < ift->getNumInterfaces(); i++)
                     {
-                        InterfaceEntry *ie = ift->getInterface(i);
+                        InterfaceEntry *ieConf = ift->getInterface(i);
 
-                        if(!ie->isLoopback())
+                        if(!ieConf->isLoopback())
                         {
                             // xxx:: sebelum di-assign ke interface, kudu dibuat subprefixnya dulu ga sih? yes.
                             IPv6NDPrefixInformation newPrefixInfo = rt6->createSubPrefix(prefixInfo); // prefixInfo null???
 
-                            if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified()) //ini apa maksutnya? ku sudah lupa
-                                ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+                            if (ieConf->ipv6Data()->getLinkLocalAddress().isUnspecified()) //ini apa maksutnya? ku sudah lupa
+                                ieConf->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ieConf->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
 
                             IPv6InterfaceData::AdvPrefix newAdvPrefix;
                             newAdvPrefix.advAutonomousFlag = newPrefixInfo.getAutoAddressConfFlag();
@@ -1687,11 +1691,11 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                             newAdvPrefix.prefixLength = newPrefixInfo.getPrefixLength();
                             newAdvPrefix.rtrAddress = newPrefixInfo.getPrefix(); //xxx: not sure
 
-                            ie->ipv6Data()->addAdvPrefix(newAdvPrefix); // assign sub prefix di interface
+                            ieConf->ipv6Data()->addAdvPrefix(newAdvPrefix); // assign sub prefix di interface
 
-                            processRAPrefixInfoForAddrAutoConf(newPrefixInfo, ie, 1);  //agar interface otomatis dapet alamat setelah dapet prefix
+                            processRAPrefixInfoForAddrAutoConf(newPrefixInfo, ieConf, 1);  //agar interface otomatis dapet alamat setelah dapet prefix
 
-                            EV<<"interface " << ie->getFullName() <<" got prefix " << newPrefixInfo.getPrefix() <<"\n";
+                            EV<<"interface " << ieConf->getFullName() <<" got prefix " << newPrefixInfo.getPrefix() <<"\n";
 
                             // xxx:: perlukah?
 //                            if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
@@ -1700,7 +1704,13 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
 //                                createRATimer(ie);
 //                            }
 
-                            pt->addOrUpdatePT(ie->ipv6Data()->getAddress(0), newAdvPrefix.prefix);
+                            pt->addOrUpdatePT(ieConf->ipv6Data()->getAddress(0), newAdvPrefix.prefix);
+
+                            rt6->addOrUpdateOwnAdvPrefix(newAdvPrefix.prefix, newAdvPrefix.prefixLength,
+                                    ieConf->getInterfaceId(), SIMTIME_ZERO);
+
+                            //baris bawah ini ga jadi. HA ga perlu simpen subsubprefix
+//                            createAndSendPrefixAck(newPrefixInfo, raSrcAddr, ie);
                         }
                     }
                 }

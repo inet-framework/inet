@@ -697,6 +697,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
 
         // then add it
         addRoute(route);
+        EV << "Route for prefix " << destPrefix << " has been added in Routing Table" << endl;
     }
     else
     {
@@ -740,6 +741,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
 
     // then add it
     addRoute(route);
+    EV << "Route for prefix " << destPrefix << " has been added in Routing Table" << endl;
 }
 
 void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,

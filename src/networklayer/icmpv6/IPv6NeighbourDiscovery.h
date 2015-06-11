@@ -311,7 +311,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
         prefixes by, e.g., passing a copy of each valid Router Advertisement message
         to both an "on-link" and an "addrconf" function. Each function can then
         operate independently on the prefixes that have the appropriate flag set.*/
-        virtual void processRAPrefixInfo(IPv6RouterAdvertisement *ra, InterfaceEntry *ie);
+        virtual void processRAPrefixInfo(IPv6RouterAdvertisement *ra, InterfaceEntry *ie, IPv6Address raSrcAddr);
 
         virtual IPv6PrefixAck *createAndSendPrefixAck(IPv6NDPrefixInformation& prefixInfo, const IPv6Address& destAddr, InterfaceEntry *ie);
         virtual void processPrefixAckPacket(IPv6PrefixAck *pa, IPv6ControlInfo *paCtrlInfo);
