@@ -815,16 +815,12 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
 
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
-    // if link layer uses MAC addresses (basically, not PPP), add control info
-    if (!macAddr.isUnspecified()) {
-        Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-        controlInfo->setDest(macAddr);
-        controlInfo->setEtherType(ETHERTYPE_IPv6);
-        datagram->setControlInfo(controlInfo);
-    }
-
-    // send datagram to link layer
-    send(datagram, "queueOut", destIE->getNetworkLayerGateIndex());
+    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
+    controlInfo->setDest(macAddr);
+    controlInfo->setEtherType(ETHERTYPE_IPv6);
+    controlInfo->setInterfaceId(destIE->getInterfaceId());
+    datagram->setControlInfo(controlInfo);
+    send(datagram, "queueOut");
 }
 
 bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
