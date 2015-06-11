@@ -1,0 +1,22 @@
+- replace RegisterProtocolCommand and RegisterInterfaceCommand with C++ function
+  calls to avoid having thousands of initialization messages
+- move manet routing protocols up to the application layer and change them to
+  use a standard UDP socket by default bound to their predefined ports
+- add a manet protocol component to the transport layer which sends and receives
+  IP datagrams with IP protocol number 138 and on the UDP port 269 as specified
+  in RFC 5498
+- the manet protocol component does multiplexing/demultiplexing as specified in
+  rfc 5444 among multiple manet routing protocols
+- what should we do with the sequence chart regarding the extra axes introduced
+  by the packet dispatcher modules: application to transport, transport to
+  network, network to link, and the one within network layer?
+- implement TCP accept (by application) mechanism to allow the new incoming
+  connections to be registered with packet dispatchers based on their new socket
+- eliminate gate vectors from modules which do dispatching
+- replace various control info interfaces with tags
+
+
+
+ - add a real tunnel example with app/tunsocket 
+ - rename StandardHost -> Host?, keep Router, AccessPoint, WirelessHost, AdhocHost
+ - rename EtherSwitch to Ether(net)????????Switch?

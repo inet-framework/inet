@@ -1,0 +1,72 @@
+Modeling FAQ
+============
+
+1   Connecting to another module
+--------------------------------
+
+1.1   When should I connect to another module using a gate?
+
+2   Finding another module in C++
+---------------------------------
+
+There are two suggested ways to find another module in C++ depending on whether
+your module is connected to the other or not.
+
+2.1   How should I find another module in C++ that is connected to my module?
+
+You should follow the connection on the gate and cast the gate owner of the
+other end to the expected C++ class.
+
+2.2   How should I find another module in C++ that isn't connected to my module?
+
+You should add a module path parameter to your module that specifies where the
+other module is. Then you can lookup the other module using the value of this
+parameter, and cast the received pointer to the expected C++ class.
+
+3   Communicating with another module
+-------------------------------------
+
+3.1   When should I make a C++ function call to another module?
+
+Making a C++ function call is very cheap compared to sending and processing a
+cMessage through the future event queue. In general, the best way to communicate
+with another module is to make a C++ function call unless something prevents it.
+Obviously you can't make a function call into the future.
+
+3.2   When should I emit and/or subscribe to an OMNeT++ signal?
+
+You should use OMNeT++ signals when your module is sending data to multiple
+recipients but not all potential receivers are connected via gates, and the
+communication is more like a publish-subscribe mechanism.
+
+3.3   When should I send a cPacket subclass instance to another module?
+ 
+You should send a cPacket subclass instance when the data you are sending is
+representing the whole or some part of a network packet.
+
+3.4   When should I send an instance of a cMessage subclass without an attached
+      control info to another module?
+
+TODO:
+
+3.5   When should I send a direct cMessage instance with an attached control
+      info to another module?
+
+TODO:
+
+3.6   When should I set the message kind on a cMessage instance?
+
+In general, you shouldn't set the message kind to communicate with peers that
+are part of separate physical entities.
+
+3.7   When should I set a context pointer on a cMessage instance?
+
+TODO:
+
+3.8   When should I set a parameter on a cMessage instance?
+
+TODO:
+
+TODO:
+When network packet data goes from one module to another (with ownership transfer)
+then a connection should exist! between them and a message should be animated.
