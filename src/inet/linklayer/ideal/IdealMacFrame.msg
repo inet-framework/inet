@@ -35,5 +35,6 @@ packet IdealMacFrame
     MACAddress src;     // source address
     MACAddress dest;    // destination address
     int srcModuleId;    // technical data, uses instead of sending back an ACK packet
+    int networkProtocol = -1;
 }
 

@@ -254,6 +254,7 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
     frame->setDest(ctrl->getDest());
     frame->encapsulate(msg);
     frame->setSrcModuleId(getId());
+    frame->setNetworkProtocol(ctrl->getNetworkProtocol());
     delete ctrl;
     return frame;
 }
@@ -289,6 +290,7 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
+    etherctrl->setEtherType(frame->getNetworkProtocol());
     packet->setControlInfo(etherctrl);
 
     delete frame;
