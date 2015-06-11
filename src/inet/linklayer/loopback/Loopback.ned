@@ -40,7 +40,7 @@ simple Loopback
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input netwIn;
-        output netwOut;
+        input upperLayerIn;
+        output upperLayerOut;
 }
 

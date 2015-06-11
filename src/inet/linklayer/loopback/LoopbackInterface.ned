@@ -51,16 +51,16 @@ module LoopbackInterface like INic
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> lo.netwIn if numOutputHooks == 0;
+        upperLayerIn --> { @display("m=n"); } --> lo.upperLayerIn if numOutputHooks == 0;
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
-        outputHook[numOutputHooks-1].out --> lo.netwIn if numOutputHooks > 0;
+        outputHook[numOutputHooks-1].out --> lo.upperLayerIn if numOutputHooks > 0;
 
-        lo.netwOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+        lo.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
 
-        lo.netwOut --> inputHook[0].in if numInputHooks > 0;
+        lo.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;

@@ -88,7 +88,7 @@ void Loopback::handleMessage(cMessage *msg)
     numRcvdOK++;
     emit(packetSentToUpperSignal, msg);
     numSent++;
-    send(msg, "netwOut");
+    send(msg, "upperLayerOut");
 
     if (hasGUI())
         updateDisplayString();
