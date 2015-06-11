@@ -291,6 +291,7 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
     etherctrl->setEtherType(frame->getNetworkProtocol());
+    etherctrl->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->setControlInfo(etherctrl);
 
     delete frame;

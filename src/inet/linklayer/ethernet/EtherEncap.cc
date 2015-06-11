@@ -17,6 +17,8 @@
 
 #include <stdio.h>
 
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 
 #include "inet/linklayer/ethernet/EtherFrame.h"
@@ -138,6 +140,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
+    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    InterfaceEntry *myIface = interfaceTable != nullptr ? interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str()) : nullptr;
+    etherctrl->setInterfaceId(myIface ? myIface->getInterfaceId() : -1);
     if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
     else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
