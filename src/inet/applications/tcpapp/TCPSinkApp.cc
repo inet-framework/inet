@@ -20,7 +20,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 
@@ -45,7 +44,6 @@ void TCPSinkApp::initialize(int stage)
 
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
-        TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.readDataTransferModePar(*this);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
@@ -74,6 +72,8 @@ void TCPSinkApp::handleMessage(cMessage *msg)
             getDisplayString().setTagArg("t", 0, buf);
         }
     }
+    else if (msg->getKind() == TCP_I_AVAILABLE)
+        socket.processMessage(msg);
     else {
         // must be data or some kind of indication -- can be dropped
         delete msg;

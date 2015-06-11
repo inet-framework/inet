@@ -18,9 +18,9 @@
 #ifndef __INET_TCPSINKAPP_H
 #define __INET_TCPSINKAPP_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 
@@ -31,6 +31,7 @@ namespace inet {
 class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
 {
   protected:
+    TCPSocket socket;
     long bytesRcvd;
 
     //statistics:

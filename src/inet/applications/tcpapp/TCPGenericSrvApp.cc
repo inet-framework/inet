@@ -20,7 +20,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
 
@@ -50,7 +49,6 @@ void TCPGenericSrvApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
-        TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
@@ -148,6 +146,8 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             sendOrSchedule(msg, delay + maxMsgDelay);
         }
     }
+    else if (msg->getKind() == TCP_I_AVAILABLE)
+        socket.processMessage(msg);
     else {
         // some indication -- ignore
         EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
