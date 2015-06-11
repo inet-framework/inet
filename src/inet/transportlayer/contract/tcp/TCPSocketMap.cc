@@ -27,7 +27,7 @@ TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
     if (!ind)
         throw cRuntimeError("TCPSocketMap: findSocketFor(): no TCPCommand control info in message (not from TCP?)");
 
-    int connId = ind->getConnId();
+    int connId = ind->getSocketId();
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
     return (i == socketMap.end()) ? nullptr : i->second;

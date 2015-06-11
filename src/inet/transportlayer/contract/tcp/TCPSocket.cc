@@ -41,7 +41,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     if (!ind)
         throw cRuntimeError("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
 
-    connId = ind->getConnId();
+    connId = ind->getSocketId();
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
@@ -135,7 +135,7 @@ void TCPSocket::listen(bool fork)
     TCPOpenCommand *openCmd = new TCPOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
-    openCmd->setConnId(connId);
+    openCmd->setSocketId(connId);
     openCmd->setFork(fork);
     openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
@@ -159,7 +159,7 @@ void TCPSocket::connect(L3Address remoteAddress, int remotePort)
     remotePrt = remotePort;
 
     TCPOpenCommand *openCmd = new TCPOpenCommand();
-    openCmd->setConnId(connId);
+    openCmd->setSocketId(connId);
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
@@ -179,7 +179,7 @@ void TCPSocket::send(cMessage *msg)
 
     msg->setKind(TCP_C_SEND);
     TCPSendCommand *cmd = new TCPSendCommand();
-    cmd->setConnId(connId);
+    cmd->setSocketId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
 }
@@ -196,7 +196,7 @@ void TCPSocket::close()
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TCPCommand *cmd = new TCPCommand();
-    cmd->setConnId(connId);
+    cmd->setSocketId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
@@ -207,7 +207,7 @@ void TCPSocket::abort()
     if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
         cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
         TCPCommand *cmd = new TCPCommand();
-        cmd->setConnId(connId);
+        cmd->setSocketId(connId);
         msg->setControlInfo(cmd);
         sendToTCP(msg);
     }
@@ -218,7 +218,7 @@ void TCPSocket::requestStatus()
 {
     cMessage *msg = new cMessage("STATUS", TCP_C_STATUS);
     TCPCommand *cmd = new TCPCommand();
-    cmd->setConnId(connId);
+    cmd->setSocketId(connId);
     msg->setControlInfo(cmd);
     sendToTCP(msg);
 }
@@ -234,7 +234,7 @@ void TCPSocket::renewSocket()
 bool TCPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<TCPCommand *>(msg->getControlInfo()) &&
-           ((TCPCommand *)(msg->getControlInfo()))->getConnId() == connId;
+           ((TCPCommand *)(msg->getControlInfo()))->getSocketId() == connId;
 }
 
 bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)

@@ -294,7 +294,7 @@ void TCPConnection::sendIndicationToApp(int code, const int id)
     cMessage *msg = new cMessage(indicationName(code));
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
-    ind->setConnId(connId);
+    ind->setSocketId(connId);
     ind->setUserId(id);
     msg->setControlInfo(ind);
     sendToApp(msg);
@@ -307,7 +307,7 @@ void TCPConnection::sendEstabIndicationToApp()
     msg->setKind(TCP_I_ESTABLISHED);
 
     TCPConnectInfo *ind = new TCPConnectInfo();
-    ind->setConnId(connId);
+    ind->setSocketId(connId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);

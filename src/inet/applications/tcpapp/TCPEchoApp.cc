@@ -111,7 +111,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             pkt->setKind(TCP_C_SEND);
             TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
             TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setConnId(ind->getConnId());
+            cmd->setSocketId(ind->getSocketId());
             pkt->setControlInfo(cmd);
             delete ind;
 

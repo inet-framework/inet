@@ -65,7 +65,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
             EV_DEBUG << "No control info for the message" << endl;
         }
         else {
-            int connId = ind->getConnId();
+            int connId = ind->getSocketId();
             EV_DEBUG << "Connection ID: " << connId << endl;
         }
 

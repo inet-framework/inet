@@ -545,14 +545,14 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                         msg = new cMessage("Data Notification");
                         msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
                         TCPCommand *cmd = new TCPCommand();
-                        cmd->setConnId(connId);
+                        cmd->setSocketId(connId);
                         msg->setControlInfo(cmd);
                         sendToApp(msg);
                     } else {
                         while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
                             msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                             TCPCommand *cmd = new TCPCommand();
-                            cmd->setConnId(connId);
+                            cmd->setSocketId(connId);
                             msg->setControlInfo(cmd);
                             sendToApp(msg);
                         }

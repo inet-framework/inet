@@ -172,7 +172,7 @@ void TCP::handleMessage(cMessage *msg)
     else {    // must be from app
         TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
         int appGateIndex = msg->getArrivalGate()->getIndex();
-        int connId = controlInfo->getConnId();
+        int connId = controlInfo->getSocketId();
 
         TCPConnection *conn = findConnForApp(appGateIndex, connId);
 

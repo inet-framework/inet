@@ -331,7 +331,7 @@ err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t er
 
     while (cPacket *dataMsg = conn.receiveQueueM->extractBytesUpTo()) {
         TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setConnId(conn.connIdM);
+        tcpConnectInfo->setSocketId(conn.connIdM);
         tcpConnectInfo->setLocalAddr(conn.pcbM->local_ip.addr);
         tcpConnectInfo->setRemoteAddr(conn.pcbM->remote_ip.addr);
         tcpConnectInfo->setLocalPort(conn.pcbM->local_port);
@@ -396,7 +396,7 @@ struct netif *TCP_lwIP::ip_route(L3Address const& ipAddr)
 void TCP_lwIP::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
-    int connId = controlInfo->getConnId();
+    int connId = controlInfo->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
 
