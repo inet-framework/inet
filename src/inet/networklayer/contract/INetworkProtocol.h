@@ -20,7 +20,6 @@
 #define __INET_INETWORKPROTOCOL_H
 
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 
 namespace inet {
 
