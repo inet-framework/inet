@@ -71,28 +71,28 @@ module PPPInterface like IWiredNic
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
         upperLayerIn --> { @display("m=n"); } --> egressTC.in if numOutputHooks == 0 && egressTCType != "";
         upperLayerIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && egressTCType == "" && queueType != "";
-        upperLayerIn --> { @display("m=n"); } --> ppp.netwIn if numOutputHooks == 0 && egressTCType == "" && queueType == "";
+        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if numOutputHooks == 0 && egressTCType == "" && queueType == "";
 
         egressTC.out --> queue.in if egressTCType != "" && queueType != "";
-        egressTC.out --> ppp.netwIn if egressTCType != "" && queueType == "";
+        egressTC.out --> ppp.upperLayerIn if egressTCType != "" && queueType == "";
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
         outputHook[numOutputHooks-1].out --> egressTC.in if numOutputHooks > 0 && egressTCType != "";
         outputHook[numOutputHooks-1].out --> queue.in if numOutputHooks > 0 && egressTCType == "" && queueType != "";
-        outputHook[numOutputHooks-1].out --> ppp.netwIn if numOutputHooks > 0 && egressTCType == "" && queueType == "";
+        outputHook[numOutputHooks-1].out --> ppp.upperLayerIn if numOutputHooks > 0 && egressTCType == "" && queueType == "";
 
-        queue.out --> ppp.netwIn if queueType != "";
+        queue.out --> ppp.upperLayerIn if queueType != "";
 
         phys <--> { @display("m=s"); } <--> ppp.phys;
 
-        ppp.netwOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
+        ppp.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
 
-        ppp.netwOut --> ingressTC.in if ingressTCType != "";
+        ppp.upperLayerOut --> ingressTC.in if ingressTCType != "";
         ingressTC.out --> { @display("m=n"); } --> upperLayerOut if ingressTCType != "" && numInputHooks == 0;
 
-        ppp.netwOut --> inputHook[0].in if numInputHooks > 0 && ingressTCType == "";
+        ppp.upperLayerOut --> inputHook[0].in if numInputHooks > 0 && ingressTCType == "";
         ingressTC.out --> inputHook[0].in if numInputHooks > 0 && ingressTCType != "";
 
         for i=0..numInputHooks-2 {

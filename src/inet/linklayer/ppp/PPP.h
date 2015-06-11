@@ -78,7 +78,7 @@ class INET_API PPP : public MACBase
 
     // MACBase functions
     virtual InterfaceEntry *createInterfaceEntry() override;
-    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("netwIn"); }
+    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
     virtual void flushQueue() override;
     virtual void clearQueue() override;
 
