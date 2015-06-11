@@ -154,8 +154,8 @@ void IPv4::endService(cPacket *packet)
 
 const InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *packet)
 {
-    cGate *g = packet->getArrivalGate();
-    return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : nullptr;
+    IMACProtocolControlInfo *controlInfo = dynamic_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
+    return controlInfo != nullptr ? ift->getInterfaceById(controlInfo->getInterfaceId()) : nullptr;
 }
 
 void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
@@ -190,9 +190,6 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
 void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
 {
     IPv4Address& destAddr = datagram->getDestAddress();
-
-    // remove control info
-    delete datagram->removeControlInfo();
 
     // route packet
 
