@@ -445,6 +445,11 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
 
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
+        Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
+        controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        controlInfo->setInterfaceId(ie->getInterfaceId());
+        datagram->setControlInfo(controlInfo);
+        send(datagram, "queueOut");
         return;
     }
 
@@ -464,6 +469,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setDest(nextHopMAC);
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        controlInfo->setInterfaceId(ie->getInterfaceId());
         datagram->setControlInfo(controlInfo);
 
         // send out
