@@ -71,6 +71,7 @@ namespace inet::httptools;
 packet HttpBaseMessage
 {
     @omitGetVerb(true);
+    @fieldNameSuffix("_var");
     string targetUrl;               // The target URL - request set for browsers, echoed by servers.
     string originatorUrl = "";      // The originator URL. Only applicable for servers.
     int protocol = 11;              // 10 for http/1.0, 11 for http/1.1.
@@ -86,6 +87,7 @@ packet HttpBaseMessage
 packet HttpRequestMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);         // Dont append get to generated getter methods.
+    @fieldNameSuffix("_var");
     bool badRequest = false;    // Set to true to simulate a bad request. Server answers w. 404.
 }
 
@@ -108,6 +110,7 @@ enum HttpContentType
 packet HttpReplyMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);
+    @fieldNameSuffix("_var");
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
     int contentType @enum(HttpContentType) = CT_UNKNOWN;
 }

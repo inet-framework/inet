@@ -61,6 +61,11 @@ using namespace omnetpp;
 #define PARSIMPACK_CONST
 #endif
 
+#if OMNETPP_BUILDNUM <= 1002
+#define doParsimPacking doPacking
+#define doParsimUnpacking doUnpacking
+#endif
+
 // main namespace of INET framework
 namespace inet {
 

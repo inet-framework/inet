@@ -72,11 +72,11 @@ void PIMHello::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
     b->pack(options_arraysize);
     for (unsigned int i = 0; i < options_arraysize; i++) {
         if (options_var[i]) {
-            doPacking(b, options_var[i]->getType());
-            doPacking(b, options_var[i]);
+            doParsimPacking(b, options_var[i]->getType());
+            doParsimPacking(b, options_var[i]);
         }
         else
-            doPacking(b, (short int)0);
+            doParsimPacking(b, (short int)0);
     }
 }
 
@@ -94,7 +94,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
         this->options_var = new HelloOptionPtr[options_arraysize];
         for (unsigned int i = 0; i < options_arraysize; i++) {
             short int type;
-            doUnpacking(b, type);
+            doParsimUnpacking(b, type);
             switch (type) {
                 case 0:
                     options_var[i] = nullptr;
@@ -122,7 +122,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
                     throw cRuntimeError("PIMHello::parsimUnpack(): unknown option type: %sd.", type);
             }
             if (options_var[i])
-                doUnpacking(b, *options_var[i]);
+                doParsimUnpacking(b, *options_var[i]);
         }
     }
 }

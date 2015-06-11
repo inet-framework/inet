@@ -28,7 +28,7 @@ namespace inet {
 
 namespace sctp {
 
-class INET_API SCTPNatEntry : public cPolymorphic
+class INET_API SCTPNatEntry : public cObject
 {
   protected:
     uint32 entryNumber;

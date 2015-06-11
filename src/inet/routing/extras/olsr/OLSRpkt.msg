@@ -406,6 +406,7 @@ struct OLSR_msg;
 packet OLSR_pkt
 {
     @omitGetVerb(true);
+    @fieldNameSuffix("_var");
     bool reduceFuncionality=false;
     short pkt_seq_num;          ///< Packet sequence number.
     long sn;                    /// CapProbe packet sequence number
