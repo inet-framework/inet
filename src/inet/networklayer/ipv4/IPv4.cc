@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/ipv4/IPv4.h"
 
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -789,6 +790,11 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
     {
         bool isIeee802Lan = ie->isBroadcast() && !ie->getMacAddress().isUnspecified();    // we only need/can do ARP on IEEE 802 LANs
         if (!isIeee802Lan) {
+            delete datagram->removeControlInfo();
+            SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
+            controlInfo->setProtocol(ETHERTYPE_IPv4);
+            controlInfo->setInterfaceId(ie->getInterfaceId());
+            datagram->setControlInfo(controlInfo);
             sendPacketToNIC(datagram, ie);
         }
         else {
@@ -878,6 +884,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
+    controlInfo->setInterfaceId(ie->getInterfaceId());
     packet->setControlInfo(controlInfo);
 
     sendPacketToNIC(packet, ie);
