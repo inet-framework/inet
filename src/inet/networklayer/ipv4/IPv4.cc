@@ -149,6 +149,7 @@ void IPv4::handleMessage(cMessage *msg)
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
+        delete msg;
     }
     else
         QueueBase::handleMessage(msg);
