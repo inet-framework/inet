@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-05-13  Zoltan Bojthe
+
+    Refactored IPv4Options to use TLVOptions.
+
 2015-05-13  ------ inet-2.99.1 released ------
 
 2015-04-22  Levente Mészáros
