@@ -5,24 +5,22 @@
 package inet.node.gpsr;
 
 import inet.node.inet.WirelessHost;
-import inet.routing.gpsr.IGPSR;
+import inet.routing.gpsr.GPSR;
 
-
-//
-// TODO
-//
 module GPSRRouter extends WirelessHost
 {
     parameters:
         @display("i=device/cellphone");
         forwarding = true;
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
-        string gpsrType = default("GPSR");
+
     submodules:
-        gpsr: <gpsrType> like IGPSR {
-            @display("p=527,287");
+        gpsr: GPSR {
+            parameters:
+                @display("p=700,300");
         }
+
     connections:
-        gpsr.ipOut --> networkLayer.transportIn++;
-        gpsr.ipIn <-- networkLayer.transportOut++;
+        gpsr.ipOut --> tn.upperLayerIn++;
+        gpsr.ipIn <-- tn.upperLayerOut++;
 }
