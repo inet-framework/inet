@@ -66,7 +66,7 @@ enum UDPStatusInd
 //
 class UDPControlInfo
 {
-    int sockId = -1;  // must uniquely identify the socket in the ~UDP module
+    int socketId = -1;  // must uniquely identify the socket in the ~UDP module
 }
 
 //

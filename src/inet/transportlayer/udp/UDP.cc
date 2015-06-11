@@ -184,25 +184,25 @@ void UDP::processCommandFromApp(cMessage *msg)
     switch (msg->getKind()) {
         case UDP_C_BIND: {
             UDPBindCommand *ctrl = check_and_cast<UDPBindCommand *>(msg->getControlInfo());
-            bind(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
+            bind(ctrl->getSocketId(), msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
             break;
         }
 
         case UDP_C_CONNECT: {
             UDPConnectCommand *ctrl = check_and_cast<UDPConnectCommand *>(msg->getControlInfo());
-            connect(ctrl->getSockId(), msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
+            connect(ctrl->getSocketId(), msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
             break;
         }
 
         case UDP_C_CLOSE: {
             UDPCloseCommand *ctrl = check_and_cast<UDPCloseCommand *>(msg->getControlInfo());
-            close(ctrl->getSockId());
+            close(ctrl->getSocketId());
             break;
         }
 
         case UDP_C_SETOPTION: {
             UDPSetOptionCommand *ctrl = check_and_cast<UDPSetOptionCommand *>(msg->getControlInfo());
-            SockDesc *sd = getOrCreateSocket(ctrl->getSockId(), msg->getArrivalGate()->getIndex());
+            SockDesc *sd = getOrCreateSocket(ctrl->getSocketId(), msg->getArrivalGate()->getIndex());
 
             if (dynamic_cast<UDPSetTimeToLiveCommand *>(ctrl))
                 setTimeToLive(sd, ((UDPSetTimeToLiveCommand *)ctrl)->getTtl());
@@ -290,7 +290,7 @@ void UDP::processPacketFromApp(cPacket *appData)
 {
     UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
 
-    SockDesc *sd = getOrCreateSocket(ctrl->getSockId(), appData->getArrivalGate()->getIndex());
+    SockDesc *sd = getOrCreateSocket(ctrl->getSocketId(), appData->getArrivalGate()->getIndex());
     const L3Address& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
     int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
@@ -708,7 +708,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
 
     // send payload with UDPControlInfo up to the application
     UDPDataIndication *udpCtrl = new UDPDataIndication();
-    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setSocketId(sd->sockId);
     udpCtrl->setSrcAddr(srcAddr);
     udpCtrl->setDestAddr(destAddr);
     udpCtrl->setSrcPort(srcPort);
@@ -728,7 +728,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-    udpCtrl->setSockId(sd->sockId);
+    udpCtrl->setSocketId(sd->sockId);
     udpCtrl->setSrcAddr(localAddr);
     udpCtrl->setDestAddr(remoteAddr);
     udpCtrl->setSrcPort(sd->localPort);

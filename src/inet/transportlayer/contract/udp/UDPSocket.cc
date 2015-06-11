@@ -61,7 +61,7 @@ void UDPSocket::bind(L3Address localAddr, int localPort)
         throw cRuntimeError("UDPSocket::bind(): invalid port number %d", localPort);
 
     UDPBindCommand *ctrl = new UDPBindCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setLocalAddr(localAddr);
     ctrl->setLocalPort(localPort);
     cMessage *msg = new cMessage("BIND", UDP_C_BIND);
@@ -77,7 +77,7 @@ void UDPSocket::connect(L3Address addr, int port)
         throw cRuntimeError("UDPSocket::connect(): invalid remote port number %d", port);
 
     UDPConnectCommand *ctrl = new UDPConnectCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setRemoteAddr(addr);
     ctrl->setRemotePort(port);
     cMessage *msg = new cMessage("CONNECT", UDP_C_CONNECT);
@@ -89,7 +89,7 @@ void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort, const Send
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setDestAddr(destAddr);
     ctrl->setDestPort(destPort);
     if (options) {
@@ -104,7 +104,7 @@ void UDPSocket::send(cPacket *pk)
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
@@ -113,7 +113,7 @@ void UDPSocket::close()
 {
     cMessage *msg = new cMessage("CLOSE", UDP_C_CLOSE);
     UDPCloseCommand *ctrl = new UDPCloseCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
 }
@@ -122,7 +122,7 @@ void UDPSocket::setBroadcast(bool broadcast)
 {
     cMessage *msg = new cMessage("SetBroadcast", UDP_C_SETOPTION);
     UDPSetBroadcastCommand *ctrl = new UDPSetBroadcastCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setBroadcast(broadcast);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -132,7 +132,7 @@ void UDPSocket::setTimeToLive(int ttl)
 {
     cMessage *msg = new cMessage("SetTTL", UDP_C_SETOPTION);
     UDPSetTimeToLiveCommand *ctrl = new UDPSetTimeToLiveCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setTtl(ttl);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -142,7 +142,7 @@ void UDPSocket::setTypeOfService(unsigned char tos)
 {
     cMessage *msg = new cMessage("SetTOS", UDP_C_SETOPTION);
     UDPSetTypeOfServiceCommand *ctrl = new UDPSetTypeOfServiceCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setTos(tos);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -152,7 +152,7 @@ void UDPSocket::setMulticastOutputInterface(int interfaceId)
 {
     cMessage *msg = new cMessage("SetMulticastOutputIf", UDP_C_SETOPTION);
     UDPSetMulticastInterfaceCommand *ctrl = new UDPSetMulticastInterfaceCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -162,7 +162,7 @@ void UDPSocket::setMulticastLoop(bool value)
 {
     cMessage *msg = new cMessage("SetMulticastLoop", UDP_C_SETOPTION);
     UDPSetMulticastLoopCommand *ctrl = new UDPSetMulticastLoopCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setLoop(value);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -172,7 +172,7 @@ void UDPSocket::setReuseAddress(bool value)
 {
     cMessage *msg = new cMessage("SetReuseAddress", UDP_C_SETOPTION);
     UDPSetReuseAddressCommand *ctrl = new UDPSetReuseAddressCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setReuseAddress(value);
     msg->setControlInfo(ctrl);
     sendToUDP(msg);
@@ -182,7 +182,7 @@ void UDPSocket::joinMulticastGroup(const L3Address& multicastAddr, int interface
 {
     cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);
     UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setMulticastAddrArraySize(1);
     ctrl->setMulticastAddr(0, multicastAddr);
     ctrl->setInterfaceIdArraySize(1);
@@ -195,7 +195,7 @@ void UDPSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 {
     if (mgl.size() > 0) {
         UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
-        ctrl->setSockId(sockId);
+        ctrl->setSocketId(sockId);
         ctrl->setMulticastAddrArraySize(mgl.size());
         ctrl->setInterfaceIdArraySize(mgl.size());
 
@@ -214,7 +214,7 @@ void UDPSocket::leaveMulticastGroup(const L3Address& multicastAddr)
 {
     cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);
     UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setMulticastAddrArraySize(1);
     ctrl->setMulticastAddr(0, multicastAddr);
     msg->setControlInfo(ctrl);
@@ -225,7 +225,7 @@ void UDPSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
 {
     if (mgl.size() > 0) {
         UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
-        ctrl->setSockId(sockId);
+        ctrl->setSocketId(sockId);
         ctrl->setMulticastAddrArraySize(mgl.size());
 
         for (unsigned int j = 0; j < mgl.size(); ++j) {
@@ -242,7 +242,7 @@ void UDPSocket::blockMulticastSources(int interfaceId, const L3Address& multicas
 {
     cMessage *msg = new cMessage("BlockMulticastSources", UDP_C_SETOPTION);
     UDPBlockMulticastSourcesCommand *ctrl = new UDPBlockMulticastSourcesCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -256,7 +256,7 @@ void UDPSocket::unblockMulticastSources(int interfaceId, const L3Address& multic
 {
     cMessage *msg = new cMessage("UnblockMulticastSources", UDP_C_SETOPTION);
     UDPUnblockMulticastSourcesCommand *ctrl = new UDPUnblockMulticastSourcesCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -270,7 +270,7 @@ void UDPSocket::joinMulticastSources(int interfaceId, const L3Address& multicast
 {
     cMessage *msg = new cMessage("JoinMulticastSources", UDP_C_SETOPTION);
     UDPJoinMulticastSourcesCommand *ctrl = new UDPJoinMulticastSourcesCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -284,7 +284,7 @@ void UDPSocket::leaveMulticastSources(int interfaceId, const L3Address& multicas
 {
     cMessage *msg = new cMessage("LeaveMulticastSources", UDP_C_SETOPTION);
     UDPLeaveMulticastSourcesCommand *ctrl = new UDPLeaveMulticastSourcesCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
@@ -299,7 +299,7 @@ void UDPSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
 {
     cMessage *msg = new cMessage("SetMulticastSourceFilter", UDP_C_SETOPTION);
     UDPSetMulticastSourceFilterCommand *ctrl = new UDPSetMulticastSourceFilterCommand();
-    ctrl->setSockId(sockId);
+    ctrl->setSocketId(sockId);
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setFilterMode(filterMode);
@@ -313,7 +313,7 @@ void UDPSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<UDPControlInfo *>(msg->getControlInfo()) &&
-           ((UDPControlInfo *)(msg->getControlInfo()))->getSockId() == sockId;
+           ((UDPControlInfo *)(msg->getControlInfo()))->getSocketId() == sockId;
 }
 
 bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
