@@ -20,6 +20,8 @@
 #include "TestRadio.h"
 #include "TestOperation.h"
 
+namespace inet {
+
 Define_Module(TestRadio);
 
 bool TestRadio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -91,4 +93,6 @@ void TestRadio::handleMessage(cMessage * message)
     }
     else
         throw cRuntimeError("Unknown message");
+}
+
 }
