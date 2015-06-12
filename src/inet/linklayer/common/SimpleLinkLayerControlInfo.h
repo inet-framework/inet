@@ -23,6 +23,7 @@
 #include "inet/common/IPacketControlInfo.h"
 #include "inet/common/ISocketControlInfo.h"
 #include "inet/common/IProtocolControlInfo.h"
+#include "inet/common/IInterfaceControlInfo.h"
 #include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo_m.h"
 
@@ -32,7 +33,7 @@ namespace inet {
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo, public IInterfaceControlInfo
 {
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}
