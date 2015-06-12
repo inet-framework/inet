@@ -302,7 +302,7 @@ void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA)
 {
     Enter_Method_Silent(); // can be called by NeighborDiscovery module
 
-    if (!(ie->isLoopback()) && rt6->isMobileNode())
+    if (!(ie->isLoopback()) && (rt6->isMobileNode() || rt6->isMobileRouter()))
     {
         EV << "Initiating Mobile IPv6 protocol..." << endl;
 
@@ -311,23 +311,26 @@ void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA)
 
         createBUTimer(haDest, ie);
 
-        // RO with CNs is triggered after receiving a valid BA from the HA
     }
 
     // a movement occured -> BUL entries for CNs not valid anymore
     IPv6Address HoA = ie->ipv6Data()->getMNHomeAddress();
 
-    for (itCNList = cnList.begin(); itCNList != cnList.end(); itCNList++) // run an iterator through the CN map
+    if(rt6->isMobileNode())
     {
-        IPv6Address cn = *(itCNList);
-        BindingUpdateList::BindingUpdateListEntry* bulEntry = bul->fetch(cn); // CB, 10.10.08
-        ASSERT(bulEntry != NULL); // CB, 10.10.08
-        //bul->resetBindingCacheEntry(*bulEntry, HoA);
-        bul->removeBinding(cn);
-        // care-of token becomes invalid with new CoA
-        bul->resetCareOfToken(cn, HoA);
-        tunneling->destroyTunnelForExitAndTrigger(HoA, cn);
+        for (itCNList = cnList.begin(); itCNList != cnList.end(); itCNList++) // run an iterator through the CN map
+        {
+            IPv6Address cn = *(itCNList);
+            BindingUpdateList::BindingUpdateListEntry* bulEntry = bul->fetch(cn); // CB, 10.10.08
+            ASSERT(bulEntry != NULL); // CB, 10.10.08
+            //bul->resetBindingCacheEntry(*bulEntry, HoA);
+            bul->removeBinding(cn);
+            // care-of token becomes invalid with new CoA
+            bul->resetCareOfToken(cn, HoA);
+            tunneling->destroyTunnelForExitAndTrigger(HoA, cn);
+        }
     }
+
 }
 
 /**
@@ -390,7 +393,7 @@ void xMIPv6::returningHome(const IPv6Address& CoA, InterfaceEntry* ie)
 void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie)
 {
     // update 12.06.08 - CB
-    // if we send a new BU we can delete any potential existing BUL expiry timer for this destination
+    // if we send a new BU, we can delete any potential existing BUL expiry timer for this destination
     cancelTimerIfEntry(buDest, ie->getInterfaceId(), KEY_BUL_EXP);
 
     if (rt6->isMobileNode())

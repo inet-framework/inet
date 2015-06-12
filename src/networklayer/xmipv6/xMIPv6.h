@@ -130,6 +130,7 @@ class INET_API xMIPv6 : public cSimpleModule
             dest = _dest; interfaceID = _interfaceID; type = _type;
         }
 
+        //ini apa sih?
         bool operator<(const Key& b) const
         {
             if (type == b.type)

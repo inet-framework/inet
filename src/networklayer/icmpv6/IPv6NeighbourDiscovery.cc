@@ -103,18 +103,18 @@ void IPv6NeighbourDiscovery::initialize(int stage)
         }*/
 #endif /* WITH_xMIPv6 */
         // xxx: Home Agent & Mobile Router tidak kirim RA secara periodis. agar prefix table bisa lebih rapih(?)
-//        if(!(rt6->isMobileRouter() || rt6->isHomeAgent()))
-//        {
-//            for (int i = 0; i < ift->getNumInterfaces(); i++)
-//            {
-//                InterfaceEntry *ie = ift->getInterface(i);
-//
-//                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
-//                {
-//                    createRATimer(ie);
-//                }
-//            }
-//        }
+        if(!(rt6->isMobileRouter() || rt6->isHomeAgent()))
+        {
+            for (int i = 0; i < ift->getNumInterfaces(); i++)
+            {
+                InterfaceEntry *ie = ift->getInterface(i);
+
+                if (ie->ipv6Data()->getAdvSendAdvertisements() && !(ie->isLoopback()))
+                {
+                    createRATimer(ie);
+                }
+            }
+        }
 
         //This simulates random node bootup time. Link local address assignment
         //takes place during this time.
@@ -222,8 +222,11 @@ void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInf
     }
     else if (dynamic_cast<IPv6PrefixAck *>(msg))
     {
-        IPv6PrefixAck *pa = (IPv6PrefixAck *)msg;
-        processPrefixAckPacket(pa, ctrlInfo);
+        if(rt6->isMobileRouter()||rt6->isHomeAgent())
+        {
+            IPv6PrefixAck *pa = (IPv6PrefixAck *)msg;
+            processPrefixAckPacket(pa, ctrlInfo);
+        }
     }
     else
     {
@@ -1667,7 +1670,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
                 rt6->addOrUpdateOnLinkPrefix(prefix, prefixLength, ie->getInterfaceId(),
                     simTime()+validLifetime);
 
-                if (rt6->isMobileRouter())
+                if (rt6->isMobileRouter() && ra->getHomeAgentFlag()) //sub prefix di-assign ke anak2nya jika pengirim RA adalah HA
                 {
                     for (int i = 0; i < ift->getNumInterfaces(); i++)
                     {
