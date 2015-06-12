@@ -74,8 +74,8 @@ cmdenv-express-mode = false
 *.hostSource.pingApp[0].printPing = true
 
 %contains: stdout
-ping hostDestination (10.0.0.2):
 sent: 81   received: 30   loss rate (%): 62.963
+round-trip min/avg/max (ms): 0.462262/0.500237/1.60152
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

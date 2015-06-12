@@ -21,7 +21,7 @@ module EthTestHost
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
-        @node();
+        @networkNode();
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:

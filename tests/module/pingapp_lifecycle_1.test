@@ -51,7 +51,7 @@ Test.host starting up
 .*
 Test.host started
 .*Event #\d+  T=6   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
-Starting up with destination = 192\.168\.0\.42, source = <none>\.
+Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
 Sending ping request #0 to lower layer\.
 .*
 .*Event #\d+  T=9   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
