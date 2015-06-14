@@ -143,6 +143,18 @@ class INET_API xMIPv6 : public cSimpleModule
     typedef std::map<Key,TimerIfEntry*> TransmitIfList;
     TransmitIfList transmitIfList;
 
+    //fayruz add this 2 operator functions
+    friend std::ostream& operator<<(std::ostream& os, const Key& key)
+    {
+        os << "  dest=" << key.dest << "  intID=" << key.interfaceID << "  type=" << key.type; // no endl!
+        return os;
+    }
+    friend std::ostream& operator<<(std::ostream& os, const TimerIfEntry& tie)
+    {
+        os << "  dest=" << tie.dest << "  ackTimeout=" << tie.ackTimeout << "  nextScheduledTime=" << tie.nextScheduledTime << "  msg=" << tie.timer->getFullName(); // no endl!
+        return os;
+    }
+
     /** holds the tuples of currently available {InterfaceID, CoA} pairs */
     typedef std::map<int,IPv6Address> InterfaceCoAList;
     InterfaceCoAList interfaceCoAList;

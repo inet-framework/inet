@@ -157,6 +157,7 @@ void xMIPv6::initialize(int stage)
             bc = NULL;
             nbc = NULL;
         }
+        else //isHomeAgent
         {
             bc = BindingCacheAccess().get(); // Zarrar Yousaf 31.07.07
             nbc = NemoBindingCacheAccess().get();
@@ -166,6 +167,9 @@ void xMIPv6::initialize(int stage)
 
         WATCH_VECTOR(cnList);
         WATCH_MAP(interfaceCoAList);
+        WATCH_PTRMAP(transmitIfList); // fay added this
+
+        snapshot(this); //backup strategi for debugging
     }
 }
 
@@ -2831,6 +2835,11 @@ void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beS
 bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
+
+    if(transmitIfList.empty())
+    {
+       return false;
+    }
     TransmitIfList::iterator pos = transmitIfList.find(key);
 
     if (pos == transmitIfList.end())
@@ -2985,11 +2994,17 @@ void xMIPv6::removeTimerEntries(const IPv6Address& dest, int interfaceId)
         cancelTimerIfEntry(dest, interfaceId, KEY_BR);
         // BUL expiry
         cancelTimerIfEntry(dest, interfaceId, KEY_BUL_EXP);
-        // BC expiry
-        //cancelTimerIfEntry(dest, interfaceId, KEY_BC_EXP);
         // token expiry
         cancelTimerIfEntry(dest, interfaceId, KEY_HTOKEN_EXP);
         cancelTimerIfEntry(dest, interfaceId, KEY_CTOKEN_EXP);
+    }
+    else if (rt6->isMobileRouter())
+    {
+        // BU
+        cancelTimerIfEntry(dest, interfaceId, KEY_BU);
+        // BUL expiry
+        cancelTimerIfEntry(dest, interfaceId, KEY_BUL_EXP);
+
     }
     else if (rt6->isHomeAgent())
     {
