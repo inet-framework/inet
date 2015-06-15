@@ -304,15 +304,9 @@ void IPv4::handlePacketFromHL(cPacket *packet)
         return;
     }
 
-    // encapsulate and send
-    IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *>(packet);
-    IPv4ControlInfo *controlInfo = nullptr;
-    //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
-    if (!datagram) {    // if HL sends an IPv4Datagram, route the packet
-        // encapsulate
-        controlInfo = check_and_cast<IPv4ControlInfo *>(packet->removeControlInfo());
-        datagram = encapsulate(packet, controlInfo);
-    }
+    // encapsulate
+    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->removeControlInfo());
+    IPv4Datagram *datagram = encapsulate(packet, controlInfo);
 
     // extract requested interface and next hop
     const InterfaceEntry *destIE = controlInfo ? const_cast<const InterfaceEntry *>(ift->getInterfaceById(controlInfo->getInterfaceId())) : nullptr;
