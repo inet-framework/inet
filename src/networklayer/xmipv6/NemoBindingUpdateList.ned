@@ -22,19 +22,12 @@
 
 package inet.networklayer.xmipv6;
 
-
 //
-// Implements xMIPv6 (where x = F, H, F-H).
+// xMIPv6 Data structure for the Mobile Node
 //
-simple xMIPv6
+// @see  xMIPv6.
+//
+simple NemoBindingUpdateList
 {
-    parameters:
-        bool isHomeAgent;
-        bool isMobileNode;
-        bool isMobileRouter;
-        @display("i=block/classifier2");
-    gates:
-        input fromIPv6;
-        output toIPv6;
 }
 

@@ -86,6 +86,7 @@ packet IPv6RouterSolicitation extends IPv6NDMessage
 {
     //Possible Options
     MACAddress sourceLinkLayerAddress;
+    bool isRouter;
 }
 
 //
@@ -154,4 +155,10 @@ packet IPv6Redirect extends IPv6NDMessage
     //Possible Options
     MACAddress targetLinkLayerAddress;
         //Redirected Header Encapsulated Msg
+}
+
+packet IPv6PrefixAck extends IPv6NDMessage
+{
+    IPv6Address prefix;
+    int prefixLength;
 }

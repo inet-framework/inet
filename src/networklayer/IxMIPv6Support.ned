@@ -30,6 +30,7 @@ moduleinterface IxMIPv6Support
     parameters:
         bool isHomeAgent;
         bool isMobileNode;
+        bool isMobileRouter;
         @display("i=block/classifier2");
     gates:
         input fromIPv6;
@@ -41,6 +42,7 @@ simple xMIPv6Support_None like IxMIPv6Support
     parameters:
         bool isHomeAgent = default(false);
         bool isMobileNode = default(false);
+        bool isMobileRouter = default(false);
         @display("i=old/x_noentry");
         @class("UnimplementedModule");
         gates:

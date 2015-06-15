@@ -32,5 +32,6 @@ module CorrespondentNode6 extends StandardHost6
     networkLayer.xMIPv6Support = true;
     networkLayer.mipv6support.isMobileNode = false; //is Mobile Node
     networkLayer.mipv6support.isHomeAgent = false; //is Home Agent
+    networkLayer.mipv6support.isMobileRouter = false;
 }
 

@@ -124,6 +124,9 @@ void RoutingTable6::initialize(int stage)
         ismobile_node = false;
         WATCH(ismobile_node);
 
+        ismobile_router = false;
+        WATCH(ismobile_router);
+
         mipv6Support = false; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
@@ -157,6 +160,9 @@ void RoutingTable6::initialize(int stage)
     }
     else if (stage==4)
     {
+        if (ishome_agent || ismobile_router)
+           pt = PrefixTableAccess().get();
+
         // configurator adds routes only in stage==3
         updateDisplayString();
     }
@@ -691,6 +697,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
 
         // then add it
         addRoute(route);
+        EV << "Route for prefix " << destPrefix << " has been added in Routing Table" << endl;
     }
     else
     {
@@ -734,6 +741,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
 
     // then add it
     addRoute(route);
+    EV << "Route for prefix " << destPrefix << " has been added in Routing Table" << endl;
 }
 
 void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,
@@ -931,4 +939,39 @@ bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stag
                 removeRoute(routeList[0]);
     }
     return true;
+}
+
+IPv6NDPrefixInformation RoutingTable6::createSubPrefix(IPv6NDPrefixInformation superPrefixInfo)
+{
+    IPv6Address prefix(0,0,0,0);
+
+    prefix = pt->getLastSubPrefix();
+
+    int prefixLength = superPrefixInfo.getPrefixLength() + 4;
+
+    // TODO~~~
+    // Ambil prefix dari prefixInfo
+    // bikin subnet prefix. caranya nyonto di FlagNetworkConfig6
+    if (prefix == IPv6Address::UNSPECIFIED_ADDRESS)
+    {
+//        IPv6Address newPrefix(segment0, segment1+(ie->getNetworkLayerGateIndex()<<(64-prefixLength)), 0, 0)
+        prefix = superPrefixInfo.getPrefix();
+    }
+    else
+    {
+          uint32 segment0 = prefix.getSegment0();
+          uint32 segment1 = prefix.getSegment1();
+          segment1 = segment1+(1<<64-prefixLength);
+          prefix = IPv6Address(segment0, segment1, 0,0);
+    }
+
+    IPv6NDPrefixInformation p;
+    p.setPrefix(prefix);
+    p.setPrefixLength(prefixLength);
+    p.setValidLifetime(superPrefixInfo.getValidLifetime());
+    p.setOnlinkFlag(superPrefixInfo.getOnlinkFlag());
+    p.setPreferredLifetime(superPrefixInfo.getPreferredLifetime());
+    p.setAutoAddressConfFlag(superPrefixInfo.getAutoAddressConfFlag());
+
+    return p;
 }

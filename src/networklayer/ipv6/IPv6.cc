@@ -296,7 +296,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
     // check if destination is covered by tunnel lists
     if ((datagram->getTransportProtocol() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
          (datagram->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME: check for RH2 existence
-          ((rt->isMobileNode() && rt->isHomeAddress( datagram->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
+          (((rt->isMobileNode() || rt->isMobileRouter()) && rt->isHomeAddress( datagram->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
              rt->isHomeAgent() || // but always check for tunnel if node is a HA
              !rt->isMobileNode() // or if it is a correspondent or non-MIP node
           )
@@ -323,6 +323,22 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, boo
         EV << "tunneling: src addr=" << datagram->getSrcAddress() << ", dest addr=" << destAddress << std::endl;
         send(datagram, "lowerTunnelingOut");
         return;
+    }
+
+    if(rt->isMobileRouter()) // MR langsung forward ke parent aja (harusnya, kalo paket dari anaknya). di sini baru ke HA doang. kalo ke MR parent-> cek RA packet?
+    {
+        InterfaceEntry *ientry = ift->getInterfaceByName("wlan0");
+        IPv6Address HAaddr;
+        if (datagram->getSrcAddress() == HAaddr) // paket diforward ke HA jika di home network aja
+        {
+            interfaceId = ientry->getInterfaceId();
+            nextHop = HAaddr;
+        }
+    }
+
+    if (rt->isHomeAgent())
+    {
+
     }
 
     if (interfaceId == -1)
@@ -809,28 +825,52 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
     //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
     nextHop = rt->lookupDestCache(destAddress, interfaceId);
 
-    if (interfaceId == -1)
+    if (interfaceId == -1) // address not in destination cache: do longest prefix match in routing table
     {
-        // address not in destination cache: do longest prefix match in routing table
         EV << "do longest prefix match in routing table" << endl;
         const IPv6Route *route = rt->doLongestPrefixMatch(destAddress);
         EV << "finished longest prefix match in routing table" << endl;
+
         if (!route)
         {
+//            if(rt->isMobileRouter()) // terjadi kebodohan di sini
+//                // TODO harusnya pakai interface entry, bukan bul!
+//            {
+//                // forward packet to its Home Agent - really? fayruz
+//                NemoBindingUpdateList::NemoBindingUpdateListEntry* nbulEntry = nbul->fetch(destAddress);
+//                ASSERT(nbulEntry != NULL);
+//                nextHop = nbulEntry->homeAddress;
+//                interfaceId = nbulEntry->interfaceID;
+//
+//                InterfaceEntry ientry = ift->getInterfaceByName("wlan0");
+//                nextHop = ientry->
+//
+//                // ya pasti gagal lah! kan belum punya apdet apa apa, binding update list masih kosong!
+//            }
+//
+//            else
+//            {
             if (rt->isRouter())
             {
                 EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
                 icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
-            }
-            else // host
-            {
-                EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                datagram->addPar("IPv6-fromHL") = fromHL;
-                send(datagram, "ndOut");
-            }
-            return false;
+             }
+             else // host
+             {
+                 EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+                 datagram->addPar("IPv6-fromHL") = fromHL;
+                 send(datagram, "ndOut");
+              }
+              return false;
         }
+
+        //mungkin ada di prefix table
+        if (rt->isHomeAgent() || rt->isMobileRouter())
+        {
+// tapi isi prefix table nya juga belum bener -___-
+        }
+
         interfaceId = route->getInterfaceId();
         nextHop = route->getNextHop();
         if (nextHop.isUnspecified())

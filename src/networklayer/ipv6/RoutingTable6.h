@@ -26,9 +26,15 @@
 #include "NotificationBoard.h"
 #include "ILifecycle.h"
 
+#include "IPv6NDMessage_m.h"
+
+#include "PrefixTable.h"
+
+
 class IInterfaceTable;
 class InterfaceEntry;
 class RoutingTable6;
+class PrefixTable;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
@@ -149,6 +155,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
   protected:
     IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
+    PrefixTable *pt;
 
     bool isrouter;
     bool multicastForward;  //If node is forwarding multicast info
@@ -156,6 +163,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
 #ifdef WITH_xMIPv6
     bool ishome_agent; //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
     bool ismobile_node; //added by Zarrar Yousaf @ CNI, UniDortmund on 25.02.07
+    bool ismobile_router;
     bool mipv6Support; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
@@ -268,6 +276,9 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
      * MN if TRUE or else a CN
      */
     void setIsMobileNode(bool value) {ismobile_node = value;}
+
+    bool isMobileRouter() const {return ismobile_router;}
+    void setIsMobileRouter(bool value) {ismobile_router = value;}
 #endif /* WITH_xMIPv6 */
 
     /** @name Routing functions */
@@ -452,6 +463,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
      * ILifecycle method
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    /*
+     * Creating subnet for MR
+     */
+    IPv6NDPrefixInformation createSubPrefix(IPv6NDPrefixInformation superPrefixInfo);
 };
 
 #endif

@@ -46,6 +46,8 @@ enum MobilityHeaderType
     BINDING_UPDATE = 5;
     BINDING_ACKNOWLEDGEMENT = 6;
     BINDING_ERROR = 7;
+    NEMO_BINDING_UPDATE = 8;
+    NEMO_BINDING_ACKNOWLEDGEMENT = 9;
 }
 
 packet MobilityHeader // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
@@ -69,6 +71,14 @@ packet BindingUpdate extends MobilityHeader
     int bindingAuthorizationData = 0; // 28.08.07 - CB
 }
 
+packet NemoBindingUpdate extends BindingUpdate
+{
+        //fayruz 27.01.2015	- RFC 3963 section 4.1
+    bool mobilityOptions; // M-Flag.........?
+    bool mobileRouter; // R-Flag
+    IPv6Address prefixAddress;
+}
+
 
 //Defining the status fields for the Binding Acknowledgement Message
 
@@ -89,6 +99,12 @@ enum BAStatus
     EXPIRED_CARE_OF_NONCE_INDEX = 137;
     EXPIRED_NONCES = 138;
     REGISTRATION_TYPE_CHANGE_DISALLOWED = 139;
+    
+    //fayruz 27.01.2015	 - RFC 3963 section 4.2
+    MOBILE_ROUTER_OPERATION_NOT_PERMITTED = 140;
+    INVALID_PREFIX = 142;
+    NOT_AUTHORIZED_FOR_PREFIX = 142;
+    FORWARDING_SETUP_FAILED = 143; // prefixes missing
 }
 
 //==================Defining Binding Acknowledgement Message===================
@@ -103,6 +119,13 @@ packet BindingAcknowledgement extends MobilityHeader
 
     // for CN communication; value different from 0 shows that it is used
     int bindingAuthorizationData = 0; // 28.08.07 - CB
+}
+
+packet NemoBindingAcknowledgement extends BindingAcknowledgement
+{
+        //fayruz 27.01.2015	- RFC 3963 section 4.2
+    bool mobileRouter; // R-Flag
+    IPv6Address prefixAddress;
 }
 
 //==================Defining Binding Error Status====================
@@ -172,4 +195,15 @@ packet HomeAddressOption extends IPv6DestinationOptionsHeader
 {
     @customize(true);
     IPv6Address homeAddress;
+}
+
+//fayruz 13.03.2015. based on RFC3963 sub 4.3
+//if implicit mode is used, this field is not included in the BU
+packet NemoMobileNetworkPrefixOption
+{
+    short type = 6;
+    short length;
+    short prefixLength;
+    @customize(true);
+    IPv6Address prefixAddress;
 }

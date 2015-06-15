@@ -150,7 +150,3 @@ class INET_API NotificationBoardAccess : public ModuleAccess<NotificationBoard>
 };
 
 #endif
-
-
-
-

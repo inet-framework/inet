@@ -43,11 +43,11 @@ void FlatNetworkConfigurator6::initialize(int stage)
     topo.extractByProperty("node");
     EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
-    if (stage==2)
+    if (stage==3) // edit from 2 to 3, since xmipv6 parameters are set in stage 2
     {
         configureAdvPrefixes(topo);
     }
-    else if (stage==3)
+    else if (stage==4)
     {
         addOwnAdvPrefixRoutes(topo);
         addStaticRoutes(topo);
@@ -105,6 +105,8 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
                 continue;
             if (ie->ipv6Data()->getNumAdvPrefixes()>0)
                 continue;  // already has one
+            if (rt->isMobileRouter()) // MR does NOT configure its own prefix. Its prefix is derived from its parent's
+                continue;
 
             // add a prefix
             IPv6Address prefix(0xaaaa0000+nodeIndex, ie->getNetworkLayerGateIndex()<<16, 0, 0);
@@ -112,7 +114,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 
             IPv6InterfaceData::AdvPrefix p;
             p.prefix = prefix;
-            p.prefixLength = 64;
+            p.prefixLength = 48; //changed from 64 to 48. so that the prefix can be subnetted
             // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
             // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in
             // consecutive advertisements).
@@ -129,6 +131,8 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
             // add a link-local address (tentative) if it doesn't have one
             if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
                 ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+
+            EV<<"\nNode " << topo.getNode(i) << " -interface " << ie->getFullName() <<" got prefix " << p.prefix <<"\n";
         }
     }
 }
@@ -153,6 +157,10 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
+            continue;
+
+        // skip Mobile Router
+        if (rt->isMobileRouter())
             continue;
 
         // add globally routable prefixes to routing table

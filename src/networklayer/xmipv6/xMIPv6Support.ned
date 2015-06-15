@@ -33,7 +33,8 @@ module xMIPv6Support like IxMIPv6Support
     parameters:
         bool isHomeAgent;
         bool isMobileNode;
-        @display("i=block/classifier2;bgb=163,154");
+        bool isMobileRouter;
+        @display("i=block/classifier2;bgb=298,222");
     gates:
         input fromIPv6;
         output toIPv6;
@@ -41,7 +42,8 @@ module xMIPv6Support like IxMIPv6Support
         xMobileIPv6: xMIPv6 {
             isHomeAgent = isHomeAgent;
             isMobileNode = isMobileNode;
-            @display("p=104,79");
+            isMobileRouter = isMobileRouter;
+            @display("p=124,79");
         }
         buList: BindingUpdateList {
             parameters:
@@ -50,6 +52,15 @@ module xMIPv6Support like IxMIPv6Support
         bindingCache: BindingCache {
             parameters:
                 @display("p=46,110;i=old/harddisk");
+        }
+        nemoBindingCache: NemoBindingCache {
+            @display("p=209,110;i=old/harddisk");
+        }
+        nemoBUList: NemoBindingUpdateList {
+            @display("p=209,35;i=old/harddisk");
+        }
+        prefixTable: PrefixTable {
+            @display("p=124,161;i=old/harddisk");
         }
     connections:
         fromIPv6 --> xMobileIPv6.fromIPv6;
