@@ -71,8 +71,8 @@ int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //
     sid = -1;
 
     if ((state->ssLastDataChunkSizeSet == false || state->ssNextStream == false) &&
-        (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0))
+        (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0))
     {
         sid = state->lastStreamScheduled;
         EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
@@ -84,8 +84,8 @@ int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //
         do {
             testsid = (testsid + 1) % outboundStreams;
 
-            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0 ||
-                sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
+            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
+                sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)
             {
                 sid = testsid;
                 EV_DETAIL << "Stream Scheduler: chose sid " << sid << ".\n";
@@ -109,7 +109,7 @@ int32 SCTPAssociation::numUsableStreams(void)
     int32 count = 0;
 
     for (auto iter = sendStreams.begin(); iter != sendStreams.end(); iter++)
-        if (iter->second->getStreamQ()->length() > 0 || iter->second->getUnorderedStreamQ()->length() > 0) {
+        if (iter->second->getStreamQ()->getLength() > 0 || iter->second->getUnorderedStreamQ()->getLength() > 0) {
             count++;
         }
     return count;
@@ -129,8 +129,8 @@ int32 SCTPAssociation::streamSchedulerRoundRobinPacket(SCTPPathVariables *path, 
         do {
             testsid = (testsid + 1) % outboundStreams;
 
-            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0 ||
-                sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
+            if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
+                sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)
             {
                 sid = testsid;
                 EV_DETAIL << "Stream Scheduler: chose sid " << sid << ".\n";
@@ -141,8 +141,8 @@ int32 SCTPAssociation::streamSchedulerRoundRobinPacket(SCTPPathVariables *path, 
         } while (sid == -1 && testsid != (int32)state->lastStreamScheduled);
     }
     else {
-        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0)
+        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0)
         {
             sid = state->lastStreamScheduled;
             EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
@@ -174,8 +174,8 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
 
     if (state->ssNextStream) {
         for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
-            if (iter->second->getUnorderedStreamQ()->length() > 0 ||
-                iter->second->getStreamQ()->length() > 0)
+            if (iter->second->getUnorderedStreamQ()->getLength() > 0 ||
+                iter->second->getStreamQ()->getLength() > 0)
             {
                 SCTPWaitingSendStreamsList.push_back(iter->first);
                 EV_DETAIL << "Stream Scheduler: add sid " << iter->first << " to list of waiting streams.\n";
@@ -191,8 +191,8 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
         }
     }
     else {
-        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0)
+        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0)
         {
             sid = state->lastStreamScheduled;
             EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
@@ -218,8 +218,8 @@ int32 SCTPAssociation::streamSchedulerPriority(SCTPPathVariables *path, bool pee
     sid = -1;
 
     if ((state->ssLastDataChunkSizeSet == false && state->ssNextStream == true) &&
-        (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0))
+        (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0))
     {
         sid = state->lastStreamScheduled;
         EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
@@ -237,8 +237,8 @@ int32 SCTPAssociation::streamSchedulerPriority(SCTPPathVariables *path, bool pee
     do {
         testsid = (testsid + 1) % outboundStreams;
 
-        if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0 ||
-            sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
+        if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
+            sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)
         {
             if (sid < 0 || state->ssPriorityMap[testsid] < state->ssPriorityMap[sid]) {
                 sid = testsid;
@@ -290,12 +290,12 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
 
     for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
         /* There is data in this stream */
-        if (iter->second->getUnorderedStreamQ()->length() > 0 || iter->second->getStreamQ()->length() > 0) {
+        if (iter->second->getUnorderedStreamQ()->getLength() > 0 || iter->second->getStreamQ()->getLength() > 0) {
             /* Get size of the first packet in stream */
-            if (iter->second->getUnorderedStreamQ()->length() > 0) {
+            if (iter->second->getUnorderedStreamQ()->getLength() > 0) {
                 packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)iter->second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
-            else if (iter->second->getStreamQ()->length() > 0) {
+            else if (iter->second->getStreamQ()->getLength() > 0) {
                 packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)iter->second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
 
@@ -348,8 +348,8 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
         }
     }
     else {
-        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0)
+        if (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
+            sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0)
         {
             sid = state->lastStreamScheduled;
             if (!peek)
@@ -384,7 +384,7 @@ int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)  
     do {
         testsid = (testsid + 1) % outboundStreams;
 
-        if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0) {
+        if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0) {
             testTime = ((SCTPDataMsg *)sendStreams.find(testsid)->second->getUnorderedStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
@@ -393,7 +393,7 @@ int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)  
             }
         }
 
-        if (sendStreams.find(testsid)->second->getStreamQ()->length() > 0) {
+        if (sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0) {
             testTime = ((SCTPDataMsg *)sendStreams.find(testsid)->second->getStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
@@ -483,8 +483,8 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, boo
     {
         SCTPSendStream *stream = iterator->second;
         if ((stream->getStreamId() % workingPaths) == thisPath) {    // Maps to "path" ...
-            if ((stream->getUnorderedStreamQ()->length() > 0) ||    // Stream has something to send ...
-                (stream->getStreamQ()->length() > 0))
+            if ((stream->getUnorderedStreamQ()->getLength() > 0) ||    // Stream has something to send ...
+                (stream->getStreamQ()->getLength() > 0))
             {
                 assert(sid == -1);
                 sid = stream->getStreamId();

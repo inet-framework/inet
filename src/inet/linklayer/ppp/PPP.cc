@@ -189,7 +189,7 @@ void PPP::refreshOutGateConnection(bool connected)
         }
         else {
             //Clear inner queue
-            while (!txQueue.empty()) {
+            while (!txQueue.isEmpty()) {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
                 EV_ERROR << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedIfaceDown++;
@@ -277,7 +277,7 @@ void PPP::handleMessage(cMessage *msg)
         notifDetails.setPacket(nullptr);
         emit(NF_PP_TX_END, &notifDetails);
 
-        if (!txQueue.empty()) {
+        if (!txQueue.isEmpty()) {
             cPacket *pk = (cPacket *)txQueue.pop();
             startTransmitting(pk);
         }
@@ -332,10 +332,10 @@ void PPP::handleMessage(cMessage *msg)
                 // We are currently busy, so just queue up the packet.
                 EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
-                if (hasGUI() && txQueue.length() >= 3)
+                if (hasGUI() && txQueue.getLength() >= 3)
                     getDisplayString().setTagArg("i", 1, "red");
 
-                if (txQueueLimit && txQueue.length() > txQueueLimit)
+                if (txQueueLimit && txQueue.getLength() > txQueueLimit)
                     throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
                                         "a bogus app model generating excessive traffic "
                                         "(or if this is normal, increase txQueueLimit!)",
@@ -356,7 +356,7 @@ void PPP::handleMessage(cMessage *msg)
 
 void PPP::displayBusy()
 {
-    getDisplayString().setTagArg("i", 1, txQueue.length() >= 3 ? "red" : "yellow");
+    getDisplayString().setTagArg("i", 1, txQueue.getLength() >= 3 ? "red" : "yellow");
     datarateChannel->getDisplayString().setTagArg("ls", 0, "yellow");
     datarateChannel->getDisplayString().setTagArg("ls", 1, "3");
 }
@@ -438,7 +438,7 @@ void PPP::flushQueue()
         queueModule->requestPacket();
     }
     else {
-        while (!txQueue.empty()) {
+        while (!txQueue.isEmpty()) {
             cMessage *msg = (cMessage *)txQueue.pop();
             emit(dropPkIfaceDownSignal, msg);    //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;

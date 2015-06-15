@@ -838,7 +838,7 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
         EV << "ARP resolution completed for " << entry->l3Address << ". Sending " << packetQueue.getLength()
            << " waiting packets from the queue\n";
 
-        while (!packetQueue.empty()) {
+        while (!packetQueue.isEmpty()) {
             cPacket *msg = packetQueue.pop();
             EV << "Sending out queued packet " << msg << "\n";
             sendPacketToIeee802NIC(msg, entry->ie, entry->macAddress, ETHERTYPE_IPv4);

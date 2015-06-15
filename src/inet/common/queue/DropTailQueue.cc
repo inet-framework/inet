@@ -32,7 +32,7 @@ void DropTailQueue::initialize()
     queue.setName(par("queueName"));
 
     //statistics
-    emit(queueLengthSignal, queue.length());
+    emit(queueLengthSignal, queue.getLength());
 
     outGate = gate("out");
 
@@ -42,26 +42,26 @@ void DropTailQueue::initialize()
 
 cMessage *DropTailQueue::enqueue(cMessage *msg)
 {
-    if (frameCapacity && queue.length() >= frameCapacity) {
+    if (frameCapacity && queue.getLength() >= frameCapacity) {
         EV << "Queue full, dropping packet.\n";
         return msg;
     }
     else {
         queue.insert(msg);
-        emit(queueLengthSignal, queue.length());
+        emit(queueLengthSignal, queue.getLength());
         return nullptr;
     }
 }
 
 cMessage *DropTailQueue::dequeue()
 {
-    if (queue.empty())
+    if (queue.isEmpty())
         return nullptr;
 
     cMessage *msg = (cMessage *)queue.pop();
 
     // statistics
-    emit(queueLengthSignal, queue.length());
+    emit(queueLengthSignal, queue.getLength());
 
     return msg;
 }
@@ -73,7 +73,7 @@ void DropTailQueue::sendOut(cMessage *msg)
 
 bool DropTailQueue::isEmpty()
 {
-    return queue.empty();
+    return queue.isEmpty();
 }
 
 } // namespace inet
