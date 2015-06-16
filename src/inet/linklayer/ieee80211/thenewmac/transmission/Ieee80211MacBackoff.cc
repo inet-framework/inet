@@ -34,19 +34,15 @@ void Ieee80211MacBackoff::handleMessage(cMessage* msg)
     }
     else
     {
-        if (strcmp("Backoff", msg->getName()) == 0)
-        {
-            cw = msg->par("cw");
-            cnt = msg->par("cnt");
-            handleBackoff(msg->getArrivalGate());
-        }
-        else if (strcmp("Idle", msg->getName()) == 0)
+        if (dynamic_cast<Ieee80211MacSignalBackoff *>(msg))
+            handleBackoff(dynamic_cast<Ieee80211MacSignalBackoff *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg))
             handleIdle();
-        else if (strcmp("Slot", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg))
             handleSlot();
-        else if (strcmp("Busy", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg))
             handleBusy();
-        else if (strcmp("Cancel", msg->getName()) == 0) // sender must use scheduling priority
+        else if (dynamic_cast<Ieee80211MacSignalCancel *>(msg)) // sender must use scheduling priority
             handleCancel();
         else
             throw cRuntimeError("Unknown input signal");
@@ -70,12 +66,14 @@ void Ieee80211MacBackoff::handleResetMac()
     done();
 }
 
-void Ieee80211MacBackoff::handleBackoff(cGate* sender)
+void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff)
 {
     // cw is contention window, cnt is slot count from
     // previous BkDone. If cnt<0, a new random count
     // is generated.
-    source = sender; // Save PId from request to use as addr of Done.
+    cw = backoff->getCw();
+    cnt = backoff->getCnt();
+    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
     macsorts->getIntraMacRemoteVariables()->setBkIp(true);
     // Choose random backoff count if cnt = -1.
     // Resume with count from cancelled backoff if cnt>=0.

@@ -22,6 +22,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/reception/Ieee80211MacChannelState.h"
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -30,7 +31,7 @@ class INET_API IIeee80211MacBackoff
 {
     protected:
         virtual void handleResetMac() = 0;
-        virtual void handleBackoff(cGate *sender) = 0;
+        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff) = 0;
         virtual void handleIdle() = 0;
         virtual void handleBusy() = 0;
         virtual void handleSlot() = 0;
@@ -73,7 +74,7 @@ class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff, public Ieee802
 
     protected:
         virtual void handleResetMac() override;
-        virtual void handleBackoff(cGate *sender);
+        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff);
         virtual void handleIdle() override;
         virtual void handleBusy() override;
         virtual void handleSlot() override;
