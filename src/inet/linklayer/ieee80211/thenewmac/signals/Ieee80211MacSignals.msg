@@ -72,6 +72,8 @@ enum Ieee80211MacSignalType
     WAKE = 33;
     TPDLY = 34;
     SW_CHNL = 35;
+    MSDU_REQUEST = 36;
+    MM_REQUEST = 37;
 }
 
 packet Ieee80211MacSignal
@@ -154,6 +156,7 @@ packet Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
     signalType = 10;
     Ieee80211MacFragmentationSupport::FragSdu fsdu;
     TxResult txResult;
+    CfPriority priority;
 }
 
 packet Ieee80211MacSignalCfPolled extends Ieee80211MacSignal
@@ -294,4 +297,18 @@ packet Ieee80211MacSignalSwChnl extends Ieee80211MacSignal
     signalType = 35;
     int chan;
     bool doBkoff;
+}
+
+packet Ieee80211MacSignalMsduRequest extends Ieee80211MacSignal
+{
+    signalType = 36;
+    cPacket sdu;
+    CfPriority priority;
+}
+
+packet Ieee80211MacSignalMmRequest extends Ieee80211MacSignal
+{
+    signalType = 37;
+    cPacket sdu;
+    CfPriority priority;
 }
