@@ -65,6 +65,13 @@ enum Ieee80211MacSignalType
     PHY_TX_START_CONFIRM = 26;
     PHY_DATA_CONFIRM = 27;
     PHY_TX_END_CONFIRM = 28;
+    ACK = 29;
+    CTS = 30;
+    MM_CANCEL = 31;
+    DOZE = 32;
+    WAKE = 33;
+    TPDLY = 34;
+    SW_CHNL = 35;
 }
 
 packet Ieee80211MacSignal
@@ -246,4 +253,45 @@ packet Ieee80211MacSignalPhyDataConfirm extends Ieee80211MacSignal
 packet Ieee80211MacSignalPhyTxEndConfirm extends Ieee80211MacSignal
 {
     signalType = 28;
+}
+
+packet Ieee80211MacSignalAck extends Ieee80211MacSignal
+{
+    signalType = 29;
+    simtime_t endRx;
+    double txRate;
+}
+
+packet Ieee80211MacSignalCts extends Ieee80211MacSignal
+{
+    signalType = 30;
+    simtime_t endRx;
+    double txRate;
+}
+
+packet Ieee80211MacSignalMmCancel extends Ieee80211MacSignal
+{
+    signalType = 31;
+}
+
+packet Ieee80211MacSignalDoze extends Ieee80211MacSignal
+{
+    signalType = 32;
+}
+
+packet Ieee80211MacSignalWake extends Ieee80211MacSignal
+{
+    signalType = 33;
+}
+
+packet Ieee80211MacSignalTpdly extends Ieee80211MacSignal
+{
+    signalType = 34;
+}
+
+packet Ieee80211MacSignalSwChnl extends Ieee80211MacSignal
+{
+    signalType = 35;
+    int chan;
+    bool doBkoff;
 }
