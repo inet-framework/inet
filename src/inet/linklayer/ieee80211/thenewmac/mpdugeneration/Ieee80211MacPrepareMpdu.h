@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,11 +32,12 @@ class INET_API IIeee80211MacPrepareMpdu
 {
     public:
         typedef Ieee80211MacFragmentationSupport::FragSdu FragSdu;
+
     protected:
-        virtual void handleMsduRequest(cPacket *sdu, CfPriority priorty) = 0;
+        virtual void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest) = 0;
         virtual void handleResetMac() = 0;
-        virtual void handleMmRequest(cPacket *sdu, CfPriority priority) = 0;
-        virtual void handleFragConfirm(FragSdu *fsdu, TxResult txResult) = 0;
+        virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest) = 0;
+        virtual void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm) = 0;
 
         virtual void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus) = 0;
         virtual void emitFragRequest(FragSdu *fsdu) = 0;
@@ -84,12 +86,12 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void fragment();
         void makePdus();
 
-        void handleMsduRequest(cPacket *sdu, CfPriority priorty);
+        void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest);
         void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
         void emitFragRequest(FragSdu *fsdu);
         void handleResetMac();
-        void handleMmRequest(cPacket *sdu, CfPriority priority);
-        void handleFragConfirm(FragSdu *fsdu, TxResult txResult);
+        void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest);
+        void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm);
         void emitMmConfirm(cPacket *rsdu, TxResult txResult);
 };
 

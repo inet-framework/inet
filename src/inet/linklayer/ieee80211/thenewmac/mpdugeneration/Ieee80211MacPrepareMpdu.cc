@@ -24,6 +24,15 @@ Define_Module(Ieee80211MacPrepareMpdu);
 
 void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
 {
+    if (msg->isSelfMessage())
+    {
+
+    }
+    else
+    {
+        if (dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg))
+            handleMsduRequest(dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg));
+    }
 }
 
 void Ieee80211MacPrepareMpdu::initialize(int stage)
@@ -38,9 +47,10 @@ void Ieee80211MacPrepareMpdu::initialize(int stage)
     }
 }
 
-void Ieee80211MacPrepareMpdu::handleMsduRequest(cPacket *sdu, CfPriority priority)
+void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest)
 {
-    pri = priority;
+    pri = msduRequest->getPriority();
+    sdu = new cPacket(msduRequest->getSdu());
     if (state == PREPARE_MPDU_STATE_NO_BSS)
     {
         // TODO: continuous signals
@@ -52,7 +62,7 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(cPacket *sdu, CfPriority priorit
             state = PREPARE_MPDU_STATE_PREPARE_AP;
         else
         {
-            emitMsduConfirm(sdu, priority, TxStatus::TxStatus_noBss);
+            emitMsduConfirm(sdu, pri, TxStatus::TxStatus_noBss);
             state = PREPARE_MPDU_STATE_NO_BSS;
         }
     }
@@ -197,8 +207,10 @@ void Ieee80211MacPrepareMpdu::handleResetMac()
     state = PREPARE_MPDU_STATE_NO_BSS;
 }
 
-void Ieee80211MacPrepareMpdu::handleMmRequest(cPacket* sdu, CfPriority priority)
+void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest)
 {
+    sdu = new cPacket(mmRequest->getSdu());
+    pri = mmRequest->getPriority();
     // Mmpdus sent even when not in Bss/Ibss.
 //    bcmc:=isGroup(addr1(sdu))
 //    useWep:=dot11Privacy_
@@ -211,8 +223,11 @@ void Ieee80211MacPrepareMpdu::handleMmRequest(cPacket* sdu, CfPriority priority)
     fragment();
 }
 
-void Ieee80211MacPrepareMpdu::handleFragConfirm(FragSdu* fsdu, TxResult txResult)
+void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm)
 {
+    fsdu = new FragSdu(fragConfirm->getFsdu());
+    pri = fragConfirm->getPriority();
+    rrsl = fragConfirm->getTxResult();
 //    rsdu:= substr(fsdu!pdus(0), 0,sMacHdrLng),
 //    pri = fsdu->cf;
 //    rrsl = txResult;
