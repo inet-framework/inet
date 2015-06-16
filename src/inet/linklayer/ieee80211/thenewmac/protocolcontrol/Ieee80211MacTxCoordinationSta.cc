@@ -50,12 +50,26 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
             handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg))
             handleCfEnd();
-        else if (strcmp("TxCfAck", msg->getName()) == 0)
-        {
-//            handleTxCfAck();
-        }
+        else if (dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg))
+            handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg))
             handleTxConfirm();
+        else if (dynamic_cast<Ieee80211MacSignalTifs *>(msg))
+            handleTifs();
+        else if (dynamic_cast<Ieee80211MacSignalAck *>(msg))
+            handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalCts *>(msg))
+            handleCts(dynamic_cast<Ieee80211MacSignalCts *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalMmCancel *>(msg))
+            handleMmCancel();
+        else if (dynamic_cast<Ieee80211MacSignalWake *>(msg))
+            handleWake();
+        else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg))
+            handleDoze();
+        else if (dynamic_cast<Ieee80211MacSignalTpdly *>(msg))
+            handleTpdly();
+        else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg))
+            handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg));
     }
 }
 
@@ -521,8 +535,10 @@ void Ieee80211MacTxCoordinationSta::confirmPdu()
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handleAck(simtime_t endRx, bps txrate)
+void Ieee80211MacTxCoordinationSta::handleAck(Ieee80211MacSignalAck *ack)
 {
+    endRx = ack->getEndRx();
+    txrate = bps(ack->getTxRate());
     if (state == TX_COORDINATION_STATE_WAIT_ACK)
         endFx();
     else if (state == TX_COORDINATION_STATE_WAIT_ATIM_ACK)
@@ -673,8 +689,10 @@ void Ieee80211MacTxCoordinationSta::ctsFail2() // rename
     state = TX_COORDINATION_STATE_TXC_BACKOFF;
 }
 
-void Ieee80211MacTxCoordinationSta::handleCts(simtime_t endRx, bps txrate)
+void Ieee80211MacTxCoordinationSta::handleCts(Ieee80211MacSignalCts *cts)
 {
+    endRx = cts->getEndRx();
+    txrate = bps(cts->getTxRate());
     cancelEvent(trsp);
     ssrc = 0;
     fsdu->src = 0;
@@ -798,8 +816,10 @@ void Ieee80211MacTxCoordinationSta::handleTpdly()
     txcReq();
 }
 
-void Ieee80211MacTxCoordinationSta::handleSwChnl(int chan, bool doBkoff)
+void Ieee80211MacTxCoordinationSta::handleSwChnl(Ieee80211MacSignalSwChnl *swChnl)
 {
+    chan = swChnl->getChan();
+    // todo: doBkoff
     emitChangeNav(0, NavSrc::NavSrc_cswitch);
     // 'channel change is Phy-specific'
     // PlmeSet.request(chan stuff)'

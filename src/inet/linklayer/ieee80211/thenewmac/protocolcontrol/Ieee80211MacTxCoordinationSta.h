@@ -44,14 +44,14 @@ class INET_API IIeee80211MacTxCoordinationSta
         virtual void handleTxConfirm() = 0;
         virtual void handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck) = 0;
         virtual void handleTifs() = 0;
-        virtual void handleAck(simtime_t endRx, bps txrate) = 0;
+        virtual void handleAck(Ieee80211MacSignalAck *ack) = 0;
         virtual void handleTrsp() = 0;
-        virtual void handleCts(simtime_t endRx, bps txrate) = 0;
+        virtual void handleCts(Ieee80211MacSignalCts *cts) = 0;
         virtual void handleMmCancel() = 0;
         virtual void handleDoze() = 0;
         virtual void handleWake() = 0;
         virtual void handleTpdly() = 0;
-        virtual void handleSwChnl(int chan, bool doBkoff) = 0;
+        virtual void handleSwChnl(Ieee80211MacSignalSwChnl *swChnl) = 0;
 
         virtual void emitBackoff(int ccw, int par2) = 0;
         virtual void emitAtimW() = 0;
@@ -184,13 +184,13 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck) override;
         void handleTifs() override;
         void handleTxConfirm() override;
-        void handleAck(simtime_t endRx, bps txrate) override;
+        void handleAck(Ieee80211MacSignalAck *ack) override;
         void handleTrsp() override;
-        void handleCts(simtime_t endRx, bps txrate) override;
+        void handleCts(Ieee80211MacSignalCts *cts) override;
         void handleMmCancel() override;
         void handleDoze() override;
         void handleTpdly() override;
-        void handleSwChnl(int chan, bool doBkoff) override;
+        void handleSwChnl(Ieee80211MacSignalSwChnl *swChnl) override;
         virtual void handleCfEnd() override;
 
         void emitTxRequest(cPacket *tpdu, bps txrate) override;
