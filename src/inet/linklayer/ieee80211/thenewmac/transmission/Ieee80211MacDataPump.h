@@ -25,6 +25,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/common/RawPacket.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 using namespace inet::physicallayer;
 
@@ -37,7 +38,7 @@ class INET_API IIeee80211MacDataPump
         virtual void handleBusy() = 0;
         virtual void handleIdle() = 0;
         virtual void handleSlot() = 0;
-        virtual void handleTxRequest(cGate *sender) = 0;
+        virtual void handleTxRequest(Ieee80211MacSignalTxRequest *txRequest) = 0;
         virtual void handleResetMac() = 0;
         virtual void handlePhyTxStartConfirm() = 0;
         virtual void handlePhyTxEndConfirm() = 0;
@@ -100,7 +101,7 @@ class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee8
         virtual void handleBusy() override;
         virtual void handleIdle() override;
         virtual void handleSlot() override;
-        virtual void handleTxRequest(cGate *sender) override;
+        virtual void handleTxRequest(Ieee80211MacSignalTxRequest *txRequest) override;
         virtual void handleResetMac() override;
         virtual void handlePhyTxStartConfirm() override;
         virtual void handlePhyDataConfirm() override;

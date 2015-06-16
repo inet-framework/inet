@@ -35,23 +35,19 @@ void Ieee80211MacDataPump::handleMessage(cMessage* msg)
     else
     {
         EV_DEBUG << msg->getName() << " signal was arrived" << endl;
-        if (strcmp("TxRequest", msg->getName()) == 0)
-        {
-            rate = *check_and_cast<bps *>(msg->getParList().get("rate"));
-            handlePdu(check_and_cast<cPacket *>(msg->par("pdu")));
-            handleTxRequest(msg->getArrivalGate());
-        }
-        else if (strcmp("Busy", msg->getName()) == 0)
+        if (dynamic_cast<Ieee80211MacSignalTxRequest *>(msg))
+            handleTxRequest(dynamic_cast<Ieee80211MacSignalTxRequest *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg))
             handleBusy();
-        else if (strcmp("Idle", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg))
             handleIdle();
-        else if (strcmp("Slot", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg))
             handleSlot();
-        else if (strcmp("PhyTxStart.confirm", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalPhyTxStartConfirm *>(msg))
             handlePhyTxStartConfirm();
-        else if (strcmp("PhyTxEnd.confirm", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalPhyTxEndConfirm *>(msg))
             handlePhyTxEndConfirm();
-        else if (strcmp("PhyData.confirm", msg->getName()) == 0)
+        else if (dynamic_cast<Ieee80211MacSignalPhyDataConfirm *>(msg))
             handlePhyDataConfirm();
         else
             throw cRuntimeError("Unknown signal", msg->getName());
@@ -88,9 +84,10 @@ void Ieee80211MacDataPump::handleSlot()
     emitSlot();
 }
 
-void Ieee80211MacDataPump::handleTxRequest(cGate *sender)
+void Ieee80211MacDataPump::handleTxRequest(Ieee80211MacSignalTxRequest *txRequest)
 {
-    source = sender;
+    handlePdu(check_and_cast<cPacket *>(txRequest->getEncapsulatedPacket()));
+    source = txRequest->getArrivalGate();
     k = 0;
     // TODO: fcs = initCrc
 //    Plcp length is Mpdu length + Fcs length
