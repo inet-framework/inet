@@ -57,6 +57,10 @@ enum Ieee80211MacSignalType
     CF_END = 18;
     TX_CONFIRM = 19;
     TX_CF_ACK = 20;
+    TIFS = 21;
+    IDLE = 22;
+    BUSY = 23;
+    SLOT = 24;
 }
 
 packet Ieee80211MacSignal
@@ -74,8 +78,8 @@ packet Ieee80211MacSignalTxRequest extends Ieee80211MacSignal
 packet Ieee80211MacSignalBackoff extends Ieee80211MacSignal
 {
     signalType = 1;
-    int par1;
-    int par2;
+    int cw;
+    int cnt;
 }
 
 packet Ieee80211MacSignalPduConfirm extends Ieee80211MacSignal
@@ -198,4 +202,24 @@ packet Ieee80211MacSignalTxCfAck extends Ieee80211MacSignal
     signalType = 20;
     simtime_t time;
     double rate;
+}
+
+packet Ieee80211MacSignalTifs extends Ieee80211MacSignal
+{
+    signalType = 21;
+}
+
+packet Ieee80211MacSignalIdle extends Ieee80211MacSignal
+{
+    signalType = 22;
+}
+
+packet Ieee80211MacSignalBusy extends Ieee80211MacSignal
+{
+    signalType = 23;
+}
+
+packet Ieee80211MacSignalSlot extends Ieee80211MacSignal
+{
+    signalType = 24;
 }
