@@ -61,6 +61,10 @@ enum Ieee80211MacSignalType
     IDLE = 22;
     BUSY = 23;
     SLOT = 24;
+    PHY_TX_START_REQUEST = 25;
+    PHY_TX_START_CONFIRM = 26;
+    PHY_DATA_CONFIRM = 27;
+    PHY_TX_END_CONFIRM = 28;
 }
 
 packet Ieee80211MacSignal
@@ -222,4 +226,24 @@ packet Ieee80211MacSignalBusy extends Ieee80211MacSignal
 packet Ieee80211MacSignalSlot extends Ieee80211MacSignal
 {
     signalType = 24;
+}
+
+packet Ieee80211MacSignalPhyTxStartRequest extends Ieee80211MacSignal
+{
+    signalType = 25;
+}
+
+packet Ieee80211MacSignalPhyTxStartConfirm extends Ieee80211MacSignal
+{
+    signalType = 26;
+}
+
+packet Ieee80211MacSignalPhyDataConfirm extends Ieee80211MacSignal
+{
+    signalType = 27;
+}
+
+packet Ieee80211MacSignalPhyTxEndConfirm extends Ieee80211MacSignal
+{
+    signalType = 28;
 }
