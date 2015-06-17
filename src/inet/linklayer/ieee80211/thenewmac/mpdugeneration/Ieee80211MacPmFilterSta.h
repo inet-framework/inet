@@ -80,9 +80,9 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         TxResult resl;
         MACAddress sta;
 
-        cGate *mpdu;
-        cGate *pwrMgt;
-        cGate *fragMsdu;
+        cGate *mpdu = nullptr;
+        cGate *pwrMgt = nullptr;
+        cGate *fragMsdu = nullptr;
 
     protected:
         void handleMessage(cMessage *msg) override;

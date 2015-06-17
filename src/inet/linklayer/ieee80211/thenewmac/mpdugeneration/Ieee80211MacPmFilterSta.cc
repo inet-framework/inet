@@ -24,6 +24,25 @@ Define_Module(Ieee80211MacPmFilterSta);
 
 void Ieee80211MacPmFilterSta::handleMessage(cMessage* msg)
 {
+    if (msg->isSelfMessage())
+    {
+
+    }
+    else
+    {
+        if (dynamic_cast<Ieee80211MacSignalFragRequest *>(msg))
+            handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg))
+            handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalCfPolled *>(msg))
+            handleCfPolled(dynamic_cast<Ieee80211MacSignalCfPolled *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalAtimW *>(msg))
+            handleAtimW(dynamic_cast<Ieee80211MacSignalAtimW *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalPsChange *>(msg))
+            handlePsChange(dynamic_cast<Ieee80211MacSignalPsChange *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalPsResponse *>(msg))
+            handlePsResponse(dynamic_cast<Ieee80211MacSignalPsResponse *>(msg));
+    }
 }
 
 void Ieee80211MacPmFilterSta::initialize(int stage)
@@ -237,15 +256,16 @@ void Ieee80211MacPmFilterSta::receiveSignal(cComponent *source, int signalID, cO
                     continousSignalPmIdle1();
                 else if (macsorts->getIntraMacRemoteVariables()->isIbss())
                     continousSignalPmIdle2();
-            break;
+                break;
             case PM_FILTER_STA_STATE_PM_BSS:
                 if (macsorts->getIntraMacRemoteVariables()->isCfp())
                     continuousSignalPmBss2();
                 // TODO: continuousSignal1
-            break;
+                break;
             case PM_FILTER_STA_STATE_BSS_CFP:
                 if (macsorts->getIntraMacRemoteVariables()->isCfp())
                     continuousSignalBssCfp();
+                break;
         }
 
     }
