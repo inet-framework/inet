@@ -212,8 +212,11 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     curTime = timeval_substract(curTime, cSocketRTScheduler::baseTime);
     simtime_t t = curTime.tv_sec + curTime.tv_usec * 1e-6;
     // TBD assert that it's somehow not smaller than previous event's time
+#if OMNETPP_BUILDNUM <= 1003
     notificationMsg->setArrival(module, -1, t);
-
+#else
+    notificationMsg->setArrival(module->getId(), -1, t);
+#endif
     FES(getSimulation())->insert(notificationMsg);
 }
 
