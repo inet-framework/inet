@@ -134,10 +134,10 @@ void Ieee80211MacBackoff::done()
     state = BACKOFF_STATE_NO_BACKOFF;
 }
 
-void Ieee80211MacBackoff::emitBkDone(int signalPar)
+void Ieee80211MacBackoff::emitBkDone(int slotCount)
 {
-    cMessage *bkDone = new cMessage("BkDone");
-    bkDone->addPar("signalPar") = signalPar; // TODO: find a better name
+    Ieee80211MacSignalBkDone *bkDone = new Ieee80211MacSignalBkDone();
+    bkDone->setSlotCount(slotCount);
     send(bkDone, source);
 }
 

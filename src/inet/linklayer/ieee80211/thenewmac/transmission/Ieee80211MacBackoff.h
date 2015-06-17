@@ -37,7 +37,7 @@ class INET_API IIeee80211MacBackoff
         virtual void handleSlot() = 0;
         virtual void handleCancel() = 0;
 
-        virtual void emitBkDone(int signalPar) = 0; // TODO: revise variable name
+        virtual void emitBkDone(int slotCount) = 0;
 
     public:
         virtual void emitResetMac() = 0;
