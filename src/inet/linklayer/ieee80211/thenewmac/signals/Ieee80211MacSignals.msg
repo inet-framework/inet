@@ -36,6 +36,7 @@ class noncobject PsMode;
 class noncobject StationState;
 class noncobject StateErr;
 class noncobject Imed;
+class noncobject MibStatus;
 
 enum Ieee80211MacSignalType
 {
@@ -82,6 +83,11 @@ enum Ieee80211MacSignalType
     SEND = 40;
     MM_CONFIRM = 41;
     MM_INDICATE = 42;
+    MLME_GET_REQUEST = 43;
+    MLME_SET_REQUEST = 44;
+    MLME_GET_CONFIRM = 45;
+    MLME_SET_CONFIRM = 46;
+    MLME_RESET_REQUEST = 47;
 }
 
 packet Ieee80211MacSignal
@@ -356,4 +362,39 @@ packet Ieee80211MacSignalMmIndicate extends Ieee80211MacSignal
     simtime_t time1;
     simtime_t time2;
     StateErr stateErr;
+}
+
+packet Ieee80211MacSignalMlmeGetRequest extends Ieee80211MacSignal
+{
+    signalType = 43;
+    string mibAtrib;
+}
+
+packet Ieee80211MacSignalMlmeSetRequest extends Ieee80211MacSignal
+{
+    signalType = 44;
+    string mibAtrib;
+    int mibValue;
+}
+
+packet Ieee80211MacSignalMlmeGetConfirm extends Ieee80211MacSignal
+{
+    signalType = 45;
+    MibStatus mibStatus;
+    string mibAtrib;
+    int mibValue;
+}
+
+packet Ieee80211MacSignalMlmeSetConfirm extends Ieee80211MacSignal
+{
+    signalType = 46;
+    MibStatus mibStatus;
+    string mibAtrib;
+}
+
+packet Ieee80211MacSignalMlmeResetRequest extends Ieee80211MacSignal
+{
+    signalType = 47;
+    MACAddress addr;
+    bool dflt;
 }
