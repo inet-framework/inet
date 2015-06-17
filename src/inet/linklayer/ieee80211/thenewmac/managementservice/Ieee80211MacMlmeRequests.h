@@ -19,18 +19,58 @@
 #define __INET_IEEE80211MACMLMEREQUESTS_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacMlmeRequests : public cSimpleModule
+class INET_API IIeee80211MacMlmeRequests
 {
+
 };
 
-class INET_API Ieee80211MacMlmeRequests : public IIeee80211MacMlmeRequests
+class INET_API Ieee80211MacMlmeRequests : public IIeee80211MacMlmeRequests, public Ieee80211MacMacProcessBase
 {
-};
+    protected:
+        enum MlmeRequestsState
+        {
+            MLME_REQUESTS_STATE_IDLE,
+        };
 
+    protected:
+        MlmeRequestsState state = MLME_REQUESTS_STATE_IDLE;
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
+        AuthType alg;
+
+        std::string bRate, oRate, ss;
+        BssDscr bss;
+//        dcl bssSet BssDscrSet ;
+        Capability cap;
+        CfParms cfpm;
+//        dcl chlist Intstring ;
+        int dtp, li;
+        simtime_t dly;
+//        dcl ibpm IbssParms ;
+//        PhyParms phpm;
+        PwrSave ps;
+//        ReasonCode rs;
+        ScanType scan;
+        MACAddress sta, bid;
+        MlmeStatus sts;
+        simtime_t tBcn, tmax, tmin, tmot;
+//        BssTypeSet typeSet;
+        bool wake, rdtm;
+
+
+    protected:
+        void handleMessage(cMessage *msg) override;
+        void initialize(int stage) override;
+
+        void restart();
+};
+;
 } /* namespace inet */
 } /* namespace ieee80211 */
 

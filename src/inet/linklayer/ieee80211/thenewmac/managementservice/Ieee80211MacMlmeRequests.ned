@@ -15,6 +15,18 @@
 
 package inet.linklayer.ieee80211.thenewmac.managementservice;
 
+//
+// This process tracks the synchronization state
+// of the station as Idle (not part of any Bss),
+// Ibss (started or joined an independent Bss), Bss
+// (joined an infrastructure Bss), or Ap (started an
+// infrastructure Bss). Mlme operation requests
+// invalid in the current state are rejected here,
+// while valid requests are passed to the Mlme block
+// for processing. This simplifies process flow
+// and signal saving in the Mlme block, because only
+//meaningful Mlme requests arrive for handling.
+//
 simple Ieee80211MacMlmeRequests
 {
     gates:

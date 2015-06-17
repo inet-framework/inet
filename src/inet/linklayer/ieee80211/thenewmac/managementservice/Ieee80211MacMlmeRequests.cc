@@ -22,5 +22,23 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacMlmeRequests);
 
+void Ieee80211MacMlmeRequests::handleMessage(cMessage* msg)
+{
+}
+
+void Ieee80211MacMlmeRequests::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+    }
+}
+
+void Ieee80211MacMlmeRequests::restart()
+{
+    macsorts->getIntraMacRemoteVariables()->setActingAsAp(false);
+    state = MLME_REQUESTS_STATE_IDLE;
+}
+
 } /* namespace inet */
 } /* namespace ieee80211 */
+
