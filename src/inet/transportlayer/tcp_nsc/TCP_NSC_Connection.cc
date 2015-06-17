@@ -83,28 +83,6 @@ TCP_NSC_Connection::~TCP_NSC_Connection()
     delete sendQueueM;
 }
 
-// create a TCP_I_ESTABLISHED msg
-cMessage *TCP_NSC_Connection::createEstablishedMsg()
-{
-    if (sentEstablishedM)
-        return nullptr;
-
-    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
-    msg->setKind(TCP_I_ESTABLISHED);
-
-    TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-
-    tcpConnectInfo->setConnId(connIdM);
-    tcpConnectInfo->setLocalAddr(inetSockPairM.localM.ipAddrM);
-    tcpConnectInfo->setRemoteAddr(inetSockPairM.remoteM.ipAddrM);
-    tcpConnectInfo->setLocalPort(inetSockPairM.localM.portM);
-    tcpConnectInfo->setRemotePort(inetSockPairM.remoteM.portM);
-
-    msg->setControlInfo(tcpConnectInfo);
-    //tcpMain->send(estmsg, "appOut", appGateIndex);
-    return msg;
-}
-
 void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(!pNscSocketM);

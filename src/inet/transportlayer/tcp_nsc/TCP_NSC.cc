@@ -268,12 +268,20 @@ TCP_NSC::~TCP_NSC()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
 {
-    cMessage *msg = connP.createEstablishedMsg();
+    if (connP.sentEstablishedM)
+        return;
 
-    if (msg) {
-        send(msg, "appOut", connP.appGateIndexM);
-        connP.sentEstablishedM = true;
-    }
+    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
+    msg->setKind(TCP_I_ESTABLISHED);
+    TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+    tcpConnectInfo->setConnId(connP.connIdM);
+    tcpConnectInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
+    tcpConnectInfo->setRemoteAddr(connP.inetSockPairM.remoteM.ipAddrM);
+    tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
+    tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
+    msg->setControlInfo(tcpConnectInfo);
+    send(msg, "appOut", connP.appGateIndexM);
+    connP.sentEstablishedM = true;
 }
 
 void TCP_NSC::changeAddresses(TCP_NSC_Connection& connP,
