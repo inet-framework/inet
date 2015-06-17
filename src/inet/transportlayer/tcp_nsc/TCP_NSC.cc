@@ -384,12 +384,14 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     if (!conn)
         conn = findConnByInetSockPair(inetSockPairAny);
 
-    Buffer b(tcph, totalTcpLen);
-    Context c;
-    c.l3AddressesPtr = &ih->saddr;
-    c.l3AddressesLength = 8;
-    TCPSerializer().serializePacket(tcpsegP, b, c);
-    totalTcpLen = b.getPos();
+    {
+        Buffer b(tcph, totalTcpLen);
+        Context c;
+        c.l3AddressesPtr = &ih->saddr;
+        c.l3AddressesLength = 8;
+        TCPSerializer().serializePacket(tcpsegP, b, c);
+        totalTcpLen = b.getPos();
+    }
 
     if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(tcpsegP);
