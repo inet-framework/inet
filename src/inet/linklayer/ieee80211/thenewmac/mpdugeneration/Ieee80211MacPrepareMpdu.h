@@ -39,9 +39,9 @@ class INET_API IIeee80211MacPrepareMpdu
         virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest) = 0;
         virtual void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm) = 0;
 
-        virtual void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus) = 0;
-        virtual void emitFragRequest(FragSdu *fsdu) = 0;
-        virtual void emitMmConfirm(cPacket *rsdu, TxResult txResult) = 0;
+        virtual void emitMsduConfirm(cPacket &sdu, CfPriority priority, TxStatus txStatus) = 0;
+        virtual void emitFragRequest(FragSdu &fsdu) = 0;
+        virtual void emitMmConfirm(cPacket &rsdu, TxResult txResult) = 0;
 };
 
 
@@ -65,14 +65,14 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         bool keyOk;
         bool useWep = false;
         int f;
-        FragSdu *fsdu = nullptr;
+        FragSdu fsdu;
         int mpduOvhd;
         int pduSize;
         int thld;
         CfPriority pri;
         TxResult rrsl;
-        cPacket *sdu;
-        cPacket *rsdu;
+        cPacket sdu;
+        cPacket rsdu;
 
         Ieee80211MacMacsorts *macsorts = nullptr;
 
@@ -87,12 +87,12 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void makePdus();
 
         void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest);
-        void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
-        void emitFragRequest(FragSdu *fsdu);
+        void emitMsduConfirm(cPacket &sdu, CfPriority priority, TxStatus txStatus);
+        void emitFragRequest(FragSdu &fsdu);
         void handleResetMac();
         void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest);
         void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm);
-        void emitMmConfirm(cPacket *rsdu, TxResult txResult);
+        void emitMmConfirm(cPacket &rsdu, TxResult txResult);
 };
 
 } /* namespace inet */
