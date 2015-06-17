@@ -28,12 +28,33 @@ namespace ieee80211 {
 
 class INET_API IIeee80211MacMib : public Ieee80211MacMacProcessBase
 {
+    protected:
+        virtual void handleMlmeResetRequest(Ieee80211MacSignalMlmeResetRequest *resetRequest) = 0;
+        virtual void handleMlmeGetRequest(Ieee80211MacSignalMlmeGetRequest *getRequest) = 0;
+        virtual void handleMlmeSetRequest(Ieee80211MacSignalMlmeSetRequest *setRequest) = 0;
+
+        virtual void emitResetMac() = 0;
+        virtual void emitMlmeGetConfirm() = 0;
+        virtual void emitMlmeSetConfirm() = 0;
+        virtual void emitMlmeResetConfirm() = 0;
 
 };
 
 class INET_API Ieee80211MacMib : public IIeee80211MacMib
 {
     protected:
+        enum MacMibState
+        {
+            MAC_MIB_STATE_MIB_IDLE
+        };
+    protected:
+        MacMibState state = MAC_MIB_STATE_MIB_IDLE;
+
+        bool dflt; // dcl dflt Boolean ;
+        std::string x; // dcl x MibAtrib ;
+        int v; // dcl v MibValue ;
+        MACAddress adr;
+
         /* Declarations of MIB attributes exported from
         this process */
 

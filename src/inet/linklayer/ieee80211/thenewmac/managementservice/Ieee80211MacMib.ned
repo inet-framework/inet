@@ -44,6 +44,14 @@ simple Ieee80211MacMib
         int currentPattern;
         int currentIndex;
         
+        bool cfPollable;
+        string macAddress;
+        string manufacturerId;
+        bool privacyOptionImplemented;
+        string productId;
+        string aStationId;
+        int wepKayMappingLength;
+        
     gates:
         output mres;
 }
