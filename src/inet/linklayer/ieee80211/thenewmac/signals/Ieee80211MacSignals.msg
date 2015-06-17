@@ -33,6 +33,9 @@ class noncobject TxStatus;
 class noncobject cPacket;
 class noncobject MACAddress;
 class noncobject PsMode;
+class noncobject StationState;
+class noncobject StateErr;
+class noncobject Imed;
 
 enum Ieee80211MacSignalType
 {
@@ -74,6 +77,11 @@ enum Ieee80211MacSignalType
     SW_CHNL = 35;
     MSDU_REQUEST = 36;
     MM_REQUEST = 37;
+    XPORT = 38;
+    SST = 39;
+    SEND = 40;
+    MM_CONFIRM = 41;
+    MM_INDICATE = 42;
 }
 
 packet Ieee80211MacSignal
@@ -310,5 +318,42 @@ packet Ieee80211MacSignalMmRequest extends Ieee80211MacSignal
 {
     signalType = 37;
     cPacket sdu;
-    CfPriority priority;
+    Imed imed;
+    CfPriority priority; // TODO??
+    double rate;
+}
+
+packet Ieee80211MacSignalXport extends Ieee80211MacSignal
+{
+    signalType = 38;
+}
+
+packet Ieee80211MacSignalSst extends Ieee80211MacSignal
+{
+    signalType = 39;
+    MACAddress addr;
+    StationState stationState;
+}
+
+packet Ieee80211MacSignalSend extends Ieee80211MacSignal
+{
+    signalType = 40;
+    cPacket frame;
+    Imed priority; // ???
+}
+
+packet Ieee80211MacSignalMmConfirm extends Ieee80211MacSignal
+{
+    signalType = 41;
+    cPacket frame;
+    TxStatus status;
+}
+
+packet Ieee80211MacSignalMmIndicate extends Ieee80211MacSignal
+{
+    signalType = 42;
+    cPacket frame;
+    simtime_t time1;
+    simtime_t time2;
+    StateErr stateErr;
 }
