@@ -143,7 +143,7 @@ packet Ieee80211MacSignalMsduConfirm extends Ieee80211MacSignal
 {
     signalType = 7;
     cPacket sdu;
-    ServiceClass serviceClass;
+    CfPriority priority;
     TxStatus txStatus;
 }
 
