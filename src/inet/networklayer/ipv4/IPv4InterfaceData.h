@@ -32,7 +32,7 @@
 
 namespace inet {
 
-struct IPv4MulticastSourceList
+struct INET_API IPv4MulticastSourceList
 {
     typedef std::vector<IPv4Address> IPv4AddressVector;
     McastSourceFilterMode filterMode;
@@ -96,7 +96,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
   protected:
 
-    struct HostMulticastGroupData
+    struct INET_API HostMulticastGroupData
     {
         IPv4Address multicastGroup;
         std::map<IPv4Address, int> includeCounts;
@@ -113,7 +113,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
     typedef std::vector<HostMulticastGroupData *> HostMulticastGroupVector;
 
-    struct HostMulticastData
+    struct INET_API HostMulticastData
     {
         HostMulticastGroupVector joinedMulticastGroups;    // multicast groups this interface joined
 
@@ -122,7 +122,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
         std::string detailedInfo();
     };
 
-    struct RouterMulticastGroupData
+    struct INET_API RouterMulticastGroupData
     {
         IPv4Address multicastGroup;
         IPv4MulticastSourceList sourceList;
@@ -133,7 +133,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
 
     typedef std::vector<RouterMulticastGroupData *> RouterMulticastGroupVector;
 
-    struct RouterMulticastData
+    struct INET_API RouterMulticastData
     {
         RouterMulticastGroupVector reportedMulticastGroups;    ///< multicast groups that have listeners on the link connected to this interface
         int multicastTtlThreshold;    ///< multicast ttl threshold, used by multicast routers to limit multicast scope

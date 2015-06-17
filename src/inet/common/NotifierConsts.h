@@ -26,7 +26,7 @@ namespace inet {
  * signals for NotificationBoard
  */
 // TODO document associated notification detail structs
-extern simsignal_t    // admin
+extern INET_API simsignal_t    // admin
     NF_SUBSCRIBERLIST_CHANGED,
 
 // - host
