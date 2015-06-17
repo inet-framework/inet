@@ -70,6 +70,8 @@ const L3Address TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 const char *TCP_NSC::stackNameParamNameS = "stackName";
 const char *TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 
+static const unsigned short PORT_UNDEF = -1;
+
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -965,7 +967,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     inetSockPair.localM.portM = openCmd->getLocalPort();
     inetSockPair.remoteM.portM = openCmd->getRemotePort();
 
-    if (inetSockPair.remoteM.ipAddrM.isUnspecified() || inetSockPair.remoteM.portM == -1)
+    if (inetSockPair.remoteM.ipAddrM.isUnspecified() || inetSockPair.remoteM.portM == PORT_UNDEF)
         throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
     EV_INFO << this << ": OPEN: "
@@ -978,7 +980,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     ASSERT(pStackM);
 
     nscSockPair.localM.portM = inetSockPair.localM.portM;
-    if (nscSockPair.localM.portM == -1)
+    if (nscSockPair.localM.portM == PORT_UNDEF)
         nscSockPair.localM.portM = 0; // NSC uses 0 to mean "not specified"
     nscSockPair.remoteM.ipAddrM.set(IPv4Address(nscRemoteAddr));
     nscSockPair.remoteM.portM = inetSockPair.remoteM.portM;
@@ -1019,7 +1021,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
 
     (void)nscRemoteAddr;    // Eliminate "unused variable" warning.
 
-    if (inetSockPair.localM.portM == -1)
+    if (inetSockPair.localM.portM == PORT_UNDEF)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
 
     EV_INFO << this << "Starting to listen on: " << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << "\n";
