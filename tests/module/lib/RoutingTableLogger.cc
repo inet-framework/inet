@@ -17,7 +17,6 @@
 
 #include <fstream>
 
-#include "cstringtokenizer.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"

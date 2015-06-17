@@ -26,7 +26,7 @@ void AntennaTest::initialize(int stage)
 {
     if (stage == INITSTAGE_LAST)
     {
-        IAntenna *antenna = check_and_cast<IAntenna *>(simulation.getModuleByPath("host.wlan[0].radio.antenna"));
+        IAntenna *antenna = check_and_cast<IAntenna *>(getSimulation()->getModuleByPath("host.wlan[0].radio.antenna"));
         EV_INFO << antenna->computeGain(EulerAngles(0, 0, 0)) << " "
                 << antenna->computeGain(EulerAngles(M_PI / 2, 0, 0)) << " "
                 << antenna->computeGain(EulerAngles(M_PI, 0, 0)) << " "
