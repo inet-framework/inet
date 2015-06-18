@@ -1393,15 +1393,15 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                             pkt->setIBit(sctpMain->sackNow);
                             sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }
+
                         // Set I-bit when this is the final packet for this path!
-                        if (state->strictCwndBooking) {
-                            const int32 a = (int32)path->cwnd - (int32)path->outstandingBytes;
-                            if (((a > 0) && (nextChunkFitsIntoPacket(path, a) == false)) || (!firstPass)) {
-                                SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunks(sctpMsg->getChunksArraySize() - 1));
-                                pkt->setIBit(sctpMain->sackNow);
-                                sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
-                            }
+                        const int32 a = (int32)path->cwnd - (int32)path->outstandingBytes;
+                        if (((a > 0) && (nextChunkFitsIntoPacket(path, a) == false)) || (!firstPass)) {
+                           SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunks(sctpMsg->getChunksArraySize() - 1));
+                           pkt->setIBit(sctpMain->sackNow);
+                           sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }
+
                         if (dataChunksAdded > 0) {
                             state->ssNextStream = true;
                         }

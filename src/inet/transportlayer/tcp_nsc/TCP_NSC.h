@@ -99,6 +99,9 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     void handleAppMessage(cMessage *msgP);
     void handleIpInputMessage(TCPSegment *tcpsegP);
 
+    void sendDataToApp(TCP_NSC_Connection& c);
+    void sendErrorNotificationToApp(TCP_NSC_Connection& c, int err);
+
     // function to be called back from the NSC stack:
 
     void sendToIP(const void *dataP, int lenP);

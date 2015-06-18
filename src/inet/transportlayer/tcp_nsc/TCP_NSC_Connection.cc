@@ -36,6 +36,8 @@ namespace inet {
 
 namespace tcp {
 
+static const unsigned short PORT_UNDEF = -1;
+
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -81,28 +83,6 @@ TCP_NSC_Connection::~TCP_NSC_Connection()
     delete sendQueueM;
 }
 
-// create a TCP_I_ESTABLISHED msg
-cMessage *TCP_NSC_Connection::createEstablishedMsg()
-{
-    if (sentEstablishedM)
-        return nullptr;
-
-    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
-    msg->setKind(TCP_I_ESTABLISHED);
-
-    TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-
-    tcpConnectInfo->setConnId(connIdM);
-    tcpConnectInfo->setLocalAddr(inetSockPairM.localM.ipAddrM);
-    tcpConnectInfo->setRemoteAddr(inetSockPairM.remoteM.ipAddrM);
-    tcpConnectInfo->setLocalPort(inetSockPairM.localM.portM);
-    tcpConnectInfo->setRemotePort(inetSockPairM.remoteM.portM);
-
-    msg->setControlInfo(tcpConnectInfo);
-    //tcpMain->send(estmsg, "appOut", appGateIndex);
-    return msg;
-}
-
 void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(!pNscSocketM);
@@ -136,7 +116,7 @@ void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, Soc
 
 void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
-    ASSERT(nscSockPairP.localM.portM != -1);
+    ASSERT(nscSockPairP.localM.portM != PORT_UNDEF);
     ASSERT(!pNscSocketM);
     ASSERT(sendQueueM);
     ASSERT(receiveQueueM);
@@ -161,7 +141,7 @@ void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, Sock
     nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
     nscSockPairP.remoteM.ipAddrM = L3Address();
-    nscSockPairP.remoteM.portM = -1;
+    nscSockPairP.remoteM.portM = PORT_UNDEF;
 }
 
 void TCP_NSC_Connection::send(cPacket *msgP)
