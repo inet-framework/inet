@@ -482,12 +482,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
 
                     hasData = true;
                     c.receiveQueueM->enqueueNscData(buf, buflen);
-/*
-                    struct sockaddr_in peerAddr,sockAddr;
-                    size_t peerAddrLen=sizeof(peerAddr),sockAddrLen=sizeof(sockAddr);
-                    c.pNscSocketM->getpeername((sockaddr*)&peerAddr, &peerAddrLen);
-                    c.pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
- */
                     err = NSC_EAGAIN;
                 }
                 else
