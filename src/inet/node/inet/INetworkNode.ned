@@ -20,11 +20,11 @@ package inet.node.inet;
 //
 // Contains the common interface for all node types in a network.
 //
-moduleinterface INode
+moduleinterface INetworkNode
 {
     parameters:
         @display("bgb=,448");
-        @node;
+        @networkNode;
         @labels(node,ethernet-node,wireless-node);
     gates:
         input radioIn[numRadios] @directIn;

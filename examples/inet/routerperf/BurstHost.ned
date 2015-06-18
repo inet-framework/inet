@@ -29,7 +29,7 @@ import inet.node.inet.NodeBase;
 module BurstHost extends NodeBase
 {
     parameters:
-        @node();
+        @networkNode();
         @display("i=device/pc3");
         string trafGenType;
     submodules:

@@ -96,37 +96,37 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             8ed7-faea
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             a6f0-46eb
 
-/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             2852-a9ad
-/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             7668-a4c4
-/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             2865-adff
-/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             3144-998d
-/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        5ecc-79a0
+/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             cd16-9d0b
+/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             932c-9062
+/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             1cc3-48bb
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             18fd-c880
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        7775-28ad
 /examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            ed1c-bafb
 
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            b4fd-7612
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            b4fd-7612
 
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          5b09-6ccc
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          c134-031a
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          6b02-c089
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          74f7-bed1
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             8c6e-2af3
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              2951-250b
 # /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          624d-033d
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          5664-3c49
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          abcd-ff18
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          12a0-5ee9
-/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          68f4-531b
-/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          31c6-389d
-/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          1830-6c34
-/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          fae8-e3f8
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          6382-0694
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          2f85-e7ba
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836
+/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          4ac0-a5d5
+/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          0530-f6bf
+/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          b069-7ede
+/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          bdeb-2171
 
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            fbd3-73ef
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            4afd-cad0
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572
 
-/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             59c8-576b
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             dcef-f53e
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           3782-6503
 
@@ -240,17 +240,17 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            e13f-59be
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            fef1-a7a4
 
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          e5a9-a5c9
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             b222-def0
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             4ad5-d57e
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             4d85-4b10
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           a073-799c
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           3d51-a49c
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            0cef-c286
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          9f58-a5cc
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             de62-def5
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             0ee7-d57f
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             7b85-4bc6
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b0bb-7999
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0b51-a44a
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            d93f-c286
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             7a50-afea
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             9950-ac65
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
@@ -338,8 +338,8 @@
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,         0f21-f5f4
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,         6a16-f94a
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            19a4-cae6
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         7a8b-9f31
-/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         09da-299d
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         7a37-2331
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         dc4e-8f34
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51    # unstable fingerprint

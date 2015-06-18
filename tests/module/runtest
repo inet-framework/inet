@@ -9,7 +9,8 @@ MAKE=make
 TESTFILES=$*
 if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
 if [ ! -d work ];  then mkdir work; fi
-cp -ru -t work lib
+
+cp -pPR lib work/       # OSX does not support cp -a
 
 opp_test gen $OPT -v $TESTFILES || exit 1
 

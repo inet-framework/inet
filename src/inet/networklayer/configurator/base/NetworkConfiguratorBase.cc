@@ -63,7 +63,7 @@ void NetworkConfiguratorBase::initialize(int stage)
 void NetworkConfiguratorBase::extractTopology(Topology& topology)
 {
     // extract topology
-    topology.extractByProperty("node");
+    topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node

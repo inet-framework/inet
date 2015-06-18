@@ -12,7 +12,7 @@ network TestIGMPNetwork
         module TestIGMPNode
         {
             parameters:
-                @node;
+                @networkNode;
                 string igmpType = default("IGMPv3");
                 *.interfaceTableModule = absPath(".interfaceTable");
                 *.routingTableModule = absPath(".routingTable");

@@ -21,4 +21,7 @@ module TwoRayGroundReflection extends FreeSpacePathLoss
 {
     parameters:
         @class(TwoRayGroundReflection);
+        double transmitterAntennaHeight @unit(m);
+        double receiverAntennaHeight @unit(m);
 }
+

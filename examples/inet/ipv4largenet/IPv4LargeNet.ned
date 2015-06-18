@@ -45,7 +45,7 @@ module IPv4SmallLAN
 {
     parameters:
         int h; // number of hosts on the router
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -71,7 +71,7 @@ module IPv4MediumLAN
     parameters:
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -117,7 +117,7 @@ module IPv4LargeLAN
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
         int b; // number of hosts on the bus
-        @display("i=cloud");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     types:

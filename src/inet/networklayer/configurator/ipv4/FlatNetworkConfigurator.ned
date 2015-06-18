@@ -41,7 +41,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //
 // How does it know which modules are routers, hosts, et.c that need to
 // be configured, and what is the network topology? The configurator
-// picks all modules which have a @node property and their connections,
+// picks all modules which have a @networkNode property and their connections,
 // and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
 // IPv4 nodes.

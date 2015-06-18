@@ -82,7 +82,7 @@ void IPv6Datagram::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
 {
     if (atPos != -1)
         throw cRuntimeError(this, "addExtensionHeader() does not support atPos parameter.");
-
+    ASSERT((eh->getByteLength() >= 1) && (eh->getByteLength() % 8 == 0));
     int thisOrder = getExtensionHeaderOrder(eh);
     unsigned int i;
     for (i = 0; i < extensionHeaders.size(); i++) {

@@ -20,8 +20,11 @@
 #ifndef __INET_TESTRADIO_H_
 #define __INET_TESTRADIO_H_
 
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+
+namespace inet {
 
 class INET_API TestRadio : public cSimpleModule, public ILifecycle {
   private:
@@ -41,5 +44,7 @@ class INET_API TestRadio : public cSimpleModule, public ILifecycle {
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage * message);
 };
+
+}
 
 #endif

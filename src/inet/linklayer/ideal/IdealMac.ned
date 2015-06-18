@@ -26,7 +26,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // Implements a trivial MAC layer for use in ~IdealWirelessNic.
 //
-// This module only provides encapsulation/decapsulation (into IdealMacFrame), 
+// This module only provides encapsulation/decapsulation (into IdealMacFrame),
 // but no real medium access protocol.
 //
 // Higher layer packets should have Ieee802Ctrl attached to them as
@@ -42,7 +42,7 @@ simple IdealMac extends MACProtocolBase like ILinkLayer
                                             // a generated MAC address in init stage 0.
         double bitrate @unit("bps");
         int mtu @unit("B") = default(4470B);
-        int headerLength @unit("B");        // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
+        int headerLength @unit("B") = default(0B);       // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
         bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
         double ackTimeout @unit("s") = default(100ms);

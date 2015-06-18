@@ -17,6 +17,8 @@
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
+#include "inet/common/INETUtils.h"
+
 namespace inet {
 
 Register_Class(IPv4Datagram);
@@ -26,6 +28,24 @@ int IPv4Datagram::getTotalLengthField() const
     return totalLengthField_var == -1 ? getByteLength() : totalLengthField_var;
 }
 
+TLVOptionBase *IPv4Datagram::findOptionByType(short int optionType, int index)
+{
+    int i = options_var.findByType(optionType, index);
+    return i >= 0 ? &getOption(i) : nullptr;
+}
+
+void IPv4Datagram::addOption(TLVOptionBase *opt, int atPos)
+{
+    options_var.add(opt, atPos);
+}
+
+int IPv4Datagram::calculateHeaderByteLength() const
+{
+    int length = utils::roundUp(20 + options_var.getLength(), 4);
+    ASSERT(length >= 20 && length <= 60 && (length % 4 == 0));
+
+    return length;
+}
 
 } // namespace inet
 

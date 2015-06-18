@@ -23,13 +23,15 @@
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
 class PingPayload;
 
-#define PING_HISTORY_SIZE    10 // how many ping request's send time is stored
+// how many ping request's send time is stored
+#define PING_HISTORY_SIZE    100
 
 /**
  * Generates ping requests and calculates the packet loss and round trip
@@ -43,13 +45,17 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     // parameters: for more details, see the corresponding NED parameters' documentation
     L3Address destAddr;
     L3Address srcAddr;
+    std::vector<L3Address> destAddresses;
     int packetSize = 0;
     cPar *sendIntervalPar = nullptr;
+    cPar *sleepDurationPar = nullptr;
     int hopLimit = 0;
     int count = 0;
+    int destAddrIdx = -1;
     simtime_t startTime;
     simtime_t stopTime;
     bool printPing = false;
+    bool continuous = false;
 
     // state
     int pid = 0;    // to determine which hosts are associated with the responses
@@ -78,16 +84,18 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
 
+    virtual void parseDestAddressesPar();
     virtual void startSendingPingRequests();
     virtual void stopSendingPingRequests();
-    virtual void scheduleNextPingRequest(simtime_t previous);
+    virtual void scheduleNextPingRequest(simtime_t previous, bool withSleep);
     virtual void cancelNextPingRequest();
     virtual bool isNodeUp();
     virtual bool isEnabled();
-    virtual void sendPingRequest();
-    virtual void sendToICMP(PingPayload *payload, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit);
+    virtual std::vector<L3Address> getAllAddresses();
+    virtual void sendPing();
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
+
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:

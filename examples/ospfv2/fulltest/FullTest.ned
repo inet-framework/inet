@@ -21,7 +21,7 @@ module OspfLan
 {
     parameters:
         int h; // number of hosts on the hub
-        @display("i=cloud");
+        @display("i=old/cloud");
     gates:
         inout ethg[];
     submodules:

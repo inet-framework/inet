@@ -66,7 +66,7 @@ void STPTester::depthFirstSearch()
 {
     loop = false;
     numOfVisitedNodes = 0;
-    graph.extractByProperty("node");
+    graph.extractByProperty("networkNode");
     numOfNodes = graph.getNumNodes();
 
     for (int i = 0; i < graph.getNumNodes(); i++) {

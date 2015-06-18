@@ -751,7 +751,7 @@
         name="IEEE 802.15.4"
         description = "Provides IEEE 802.15.4 Narrowband and Ultra-Wideband NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio"
+        requires = "mobility radio CSMA"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee802154
@@ -795,15 +795,16 @@
         />
     <feature
         id="wireless_examples"
-        name="wireless examples"
+        name="Wireless examples"
         description = "Provides various wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio idealwireless physicalenvironment AODV"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio idealwireless physicalenvironment AODV CSMA"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
                        inet.examples.neighborcache
                        inet.examples.wireless
+                       inet.tutorials.wireless
                       "
         extraSourceFolders = ""
         compileFlags = ""

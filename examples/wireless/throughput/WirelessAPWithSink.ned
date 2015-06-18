@@ -29,7 +29,7 @@ import inet.mobility.static.StationaryMobility;
 module WirelessAPWithSink
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node);
         @display("i=device/accesspoint");
         *.interfaceTableModule = default("");

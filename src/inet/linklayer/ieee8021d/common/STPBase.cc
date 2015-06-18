@@ -45,7 +45,7 @@ void STPBase::initialize(int stage)
         ifTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
         switchModule = findContainingNode(this);
         if (!switchModule)
-            throw cRuntimeError("Containing @node module not found");
+            throw cRuntimeError("Containing @networkNode module not found");
         numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
     }
 

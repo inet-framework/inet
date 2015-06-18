@@ -23,6 +23,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
+namespace inet {
+
 class INET_API TestNodeStartOperation : public NodeStartOperation {
   public:
     virtual int getNumStages() const { return 4; }
@@ -33,4 +35,5 @@ class INET_API TestNodeShutdownOperation : public NodeShutdownOperation {
     virtual int getNumStages() const { return 4; }
 };
 
+}
 #endif

@@ -39,7 +39,7 @@ import inet.networklayer.common.InterfaceTable;
 module EtherSwitch
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
         bool hasStatus = default(false);

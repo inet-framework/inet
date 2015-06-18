@@ -18,8 +18,9 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/TLVOption.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 
@@ -31,6 +32,8 @@ class noncobject Coord;
 
 class noncobject GPSRForwardingMode;
 
+class noncobject TLVOptionBase;
+
 //
 // The GPSR beacon packet is sent periodically by all GPSR routers to notify
 // the neighbors about the router's address and position.
@@ -41,15 +44,12 @@ packet GPSRBeacon {
 }
 
 //
-// The GPSR packet is used to add extra routing information for network datagrams.
-//
-// KLUDGE: this packet is now used to wrap the content of  network datagram
-// KLUDGE: we should rather add these fields as header extensions
+// The GPSROption is used to add extra routing information for network datagrams.
 //
 // For more information, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
-packet GPSRPacket {
+class GPSROption extends TLVOptionBase {
     GPSRForwardingMode routingMode = (GPSRForwardingMode)-1;
     Coord destinationPosition;               // D
     Coord perimeterRoutingStartPosition;     // Lp
@@ -58,3 +58,4 @@ packet GPSRPacket {
     L3Address currentFaceFirstReceiverAddress; // e0
     L3Address senderAddress; // TODO: this field is not strictly needed by GPSR (should be eliminated)
 }
+

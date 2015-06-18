@@ -271,20 +271,10 @@ int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
     return 0;
 }
 
-cModule *HttpController::getTcpApp(std::string node)
+cModule *HttpController::getTcpApp(const char *node)
 {
-    int pos = node.find("[");
-    int rpos = node.rfind("]");
-    cModule *receiverModule = nullptr;
-    if (pos > -1 && rpos > -1) {
-        std::string id = node.substr(pos + 1, pos - rpos - 1);
-        std::string name = node.substr(0, pos);
-        int numid = atoi(id.c_str());
-        receiverModule = getSimulation()->getSystemModule()->getSubmodule(name.c_str(), numid);
-    }
-    else {
-        receiverModule = getSimulation()->getSystemModule()->getSubmodule(node.c_str());
-    }
+    cModule *receiverModule = getSimulation()->getModuleByPath(node);
+    ASSERT(receiverModule != nullptr);
 
     cModule* module = receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
     if (module == nullptr) {

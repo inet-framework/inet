@@ -116,7 +116,7 @@ class L2NetworkConfigurator : public cSimpleModule
 
     /**
      * Extracts network topology by walking through the module hierarchy.
-     * Creates vertices from modules having @node property.
+     * Creates vertices from modules having @networkNode property.
      * Creates edges from connections (wired and wireless) between network interfaces.
      */
     virtual void extractTopology(L2Topology& topology);

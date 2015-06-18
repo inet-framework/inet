@@ -97,11 +97,15 @@ packet IPv6NDMessage extends ICMPv6Message
 
 //
 // Router Solicitation Message Format
-// RFC 2461 Section 4.1
+// RFC 4861 Section 4.1
 //
 packet IPv6RouterSolicitation extends IPv6NDMessage
 {
     //Possible Options
+
+    // The link-layer address of the sender, if known.
+    // MUST NOT be included if the Source Address is the unspecified address.
+    // Otherwise, it SHOULD be included on link layers that have addresses.
     MACAddress sourceLinkLayerAddress;
 }
 
@@ -131,7 +135,7 @@ packet IPv6RouterAdvertisement extends IPv6NDMessage
 
 //
 // Neighbour Solicitation Message Format
-// RFC 2461 Section 4.3
+// RFC 4861 Section 4.3
 //
 packet IPv6NeighbourSolicitation extends IPv6NDMessage
 {
@@ -139,6 +143,11 @@ packet IPv6NeighbourSolicitation extends IPv6NDMessage
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
     //Possible Options
+
+    // The link-layer address for the sender.
+    // MUST NOT be included when the source IP address is the unspecified address.
+    // Otherwise, on link layers that have addresses this option MUST be included in multicast
+    // solicitations and SHOULD be included in unicast solicitations.
     MACAddress sourceLinkLayerAddress;
 }
 
@@ -172,3 +181,11 @@ packet IPv6Redirect extends IPv6NDMessage
     MACAddress targetLinkLayerAddress;
         //Redirected Header Encapsulated Msg
 }
+
+class IPv6NDControlInfo
+{
+    IPv6Address nextHop;   // next hop address
+    int interfaceId = -1; // interface on which the datagram should be sent
+    bool fromHL = false;    // packet came from higher layer
+}
+

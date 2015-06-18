@@ -26,7 +26,7 @@ import inet.common.IHook;
 simple ThruputMeter like IHook
 {
     parameters:
-        @node();
+        @networkNode();
         double startTime @unit("s") = default(0s);
         int batchSize = default(50);
         double maxInterval @unit("s") = default(1s);

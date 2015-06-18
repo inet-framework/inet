@@ -376,7 +376,7 @@ void EtherMACBase::processConnectDisconnect()
         }
         else {
             // Clear inner queue
-            while (!txQueue.innerQueue->empty()) {
+            while (!txQueue.innerQueue->isEmpty()) {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
                 EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedPkFromHLIfaceDown++;
@@ -394,7 +394,7 @@ void EtherMACBase::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue.innerQueue) {
-        while (!txQueue.innerQueue->empty()) {
+        while (!txQueue.innerQueue->isEmpty()) {
             cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
             emit(dropPkFromHLIfaceDownSignal, msg);
             delete msg;
@@ -556,7 +556,7 @@ void EtherMACBase::getNextFrameFromQueue()
             txQueue.extQueue->requestPacket();
     }
     else {
-        if (!txQueue.innerQueue->empty())
+        if (!txQueue.innerQueue->isEmpty())
             curTxFrame = (EtherFrame *)txQueue.innerQueue->pop();
     }
 }

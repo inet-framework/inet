@@ -22,12 +22,12 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,     100s,            122b-1da4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,             100s,            99e0-3f1a
 
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             008b-0f97
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             168f-e23b
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             bcad-61f3
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             1181-6d4e
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             cb2c-f824
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             9af7-2dbf
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             0089-b9b7
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             168f-c959
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             bc00-e9f3
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             0181-6c15
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             7a2c-f831
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             9841-0dbf
 
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,             200s,            4f79-32a2
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,             200s,            162c-e615

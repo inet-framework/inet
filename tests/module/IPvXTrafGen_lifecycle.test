@@ -53,7 +53,7 @@ import inet.common.scenario.ScenarioManager;
 module TrafGenHost extends NodeBase
 {
     parameters:
-        @node();
+        @networkNode();
         @display("i=device/pc3");
         string trafGenType;
     submodules:

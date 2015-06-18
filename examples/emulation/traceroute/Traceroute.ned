@@ -46,7 +46,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli1.mrt";
-                @display("p=37,62;i=laptop3");
+                @display("p=37,62;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -54,7 +54,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli2.mrt";
-                @display("p=35,131;i=laptop3");
+                @display("p=35,131;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -62,7 +62,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli3.mrt";
-                @display("p=40,223;i=laptop3");
+                @display("p=40,223;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -70,7 +70,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli4.mrt";
-                @display("p=40,295;i=laptop3");
+                @display("p=40,295;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -78,7 +78,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli5.mrt";
-                @display("p=40,383;i=laptop3");
+                @display("p=40,383;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -86,7 +86,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli6.mrt";
-                @display("p=40,439;i=laptop3");
+                @display("p=40,439;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -94,7 +94,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli7.mrt";
-                @display("p=40,511;i=laptop3");
+                @display("p=40,511;i=old/laptop3");
             gates:
                 ethg[1];
         }
@@ -102,7 +102,7 @@ network Traceroute
             parameters:
                 forwarding = false;
                 routingTable.routingFile = "cli8.mrt";
-                @display("p=40,575;i=laptop3");
+                @display("p=40,575;i=old/laptop3");
             gates:
                 ethg[1];
         }

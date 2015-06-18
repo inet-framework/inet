@@ -22,8 +22,13 @@
 #define WANT_WINSOCK2
 
 #include <platdep/sockets.h>
-#include <platdep/timeutil.h>
 #include "inet/common/INETDefs.h"
+
+#if OMNETPP_VERSION < 0x500
+#include <platdep/timeutil.h>
+#else // OMNETPP_VERSION < 0x500
+#include <omnetpp/platdep/timeutil.h>
+#endif // OMNETPP_VERSION < 0x500
 
 // prevent pcap.h to redefine int8_t,... types on Windows
 #include "inet/common/serializer/headers/bsdint.h"

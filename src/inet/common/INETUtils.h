@@ -64,6 +64,11 @@ std::string stringf(const char *fmt, ...);
 std::string vstringf(const char *fmt, va_list& args);
 
 /**
+ * Rounding up to the nearest multiple of a number.
+ */
+inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple -1) / multiple) * multiple; }
+
+/**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
  */
 cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());

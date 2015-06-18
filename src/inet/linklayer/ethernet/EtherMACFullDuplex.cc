@@ -183,7 +183,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
         EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
         txQueue.innerQueue->insertFrame(frame);
 
-        if (!curTxFrame && !txQueue.innerQueue->empty())
+        if (!curTxFrame && !txQueue.innerQueue->isEmpty())
             curTxFrame = (EtherFrame *)txQueue.innerQueue->pop();
     }
 

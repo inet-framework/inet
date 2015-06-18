@@ -552,7 +552,7 @@ void NS_CLASS handleMessage (cMessage *msg)
             else
             {
                 ipDgram = (IPv4Datagram*) control->decapsulate();
-                cPolymorphic * ctrl = ipDgram->removeControlInfo();
+                cObject * ctrl = ipDgram->removeControlInfo();
                 unsigned int ifindex = NS_IFINDEX;  /* Always use ns interface */
                 if (ctrl)
                 {
@@ -1175,18 +1175,18 @@ int NS_CLASS ifindex2devindex(unsigned int ifindex)
 }
 
 
-void NS_CLASS processLinkBreak(const cPolymorphic *details)
+void NS_CLASS processLinkBreak(const cObject *details)
 {
     if (llfeedback)
     {
-        if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
+        if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*> (details)))
         {
-            IPv4Datagram  *dgram = static_cast<IPv4Datagram *>(const_cast<cPolymorphic*>(details));
+            IPv4Datagram  *dgram = static_cast<IPv4Datagram *>(const_cast<cObject*>(details));
             packetFailed(dgram);
         }
-        else if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*> (details)))
+        else if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*> (details)))
         {
-            Ieee80211DataFrame *frame = static_cast<Ieee80211DataFrame *>(const_cast<cPolymorphic*>(details));
+            Ieee80211DataFrame *frame = static_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details));
             packetFailedMac(frame);
         }
     }

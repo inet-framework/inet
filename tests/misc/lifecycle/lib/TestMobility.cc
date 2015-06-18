@@ -20,6 +20,8 @@
 #include "TestMobility.h"
 #include "TestOperation.h"
 
+namespace inet {
+
 Define_Module(TestMobility);
 
 bool TestMobility::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -76,4 +78,6 @@ void TestMobility::handleMessage(cMessage * message)
         EV << getFullPath() << " moving stopped" << endl;
         doneCallback->invoke();
     }
+}
+
 }

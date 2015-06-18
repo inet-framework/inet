@@ -53,6 +53,8 @@ class INET_API PositionTable
     void clear();
 
     simtime_t getOldestPosition() const;
+
+    friend std::ostream& operator << (std::ostream& o, const PositionTable& t);
 };
 
 } // namespace inet

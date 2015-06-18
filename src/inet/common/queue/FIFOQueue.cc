@@ -38,18 +38,18 @@ cMessage *FIFOQueue::enqueue(cMessage *msg)
     cPacket *packet = check_and_cast<cPacket *>(msg);
     queue.insert(packet);
     byteLength += packet->getByteLength();
-    emit(queueLengthSignal, queue.length());
+    emit(queueLengthSignal, queue.getLength());
     return nullptr;
 }
 
 cMessage *FIFOQueue::dequeue()
 {
-    if (queue.empty())
+    if (queue.isEmpty())
         return nullptr;
 
     cPacket *packet = check_and_cast<cPacket *>(queue.pop());
     byteLength -= packet->getByteLength();
-    emit(queueLengthSignal, queue.length());
+    emit(queueLengthSignal, queue.getLength());
     return packet;
 }
 
@@ -60,7 +60,7 @@ void FIFOQueue::sendOut(cMessage *msg)
 
 bool FIFOQueue::isEmpty()
 {
-    return queue.empty();
+    return queue.isEmpty();
 }
 
 } // namespace inet

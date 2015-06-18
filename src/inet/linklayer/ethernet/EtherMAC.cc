@@ -260,7 +260,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
         EV_DETAIL << "Frame " << frame << " arrived from higher layer, enqueueing\n";
         txQueue.innerQueue->insertFrame(frame);
 
-        if (!curTxFrame && !txQueue.innerQueue->empty())
+        if (!curTxFrame && !txQueue.innerQueue->isEmpty())
             curTxFrame = (EtherFrame *)txQueue.innerQueue->pop();
     }
 
@@ -719,7 +719,7 @@ void EtherMAC::printState()
     EV_DETAIL << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
 
     if (txQueue.innerQueue)
-        EV_DETAIL << ",  queueLength: " << txQueue.innerQueue->length();
+        EV_DETAIL << ",  queueLength: " << txQueue.innerQueue->getLength();
 
     EV_DETAIL << endl;
 

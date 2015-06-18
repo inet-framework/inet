@@ -100,10 +100,10 @@ class INET_API EtherMACBase : public MACBase
         InnerQueue(const char *name = nullptr, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
         void insertFrame(cObject *obj) { queue.insert(obj); }
         cObject *pop() { return queue.pop(); }
-        bool empty() const { return queue.empty(); }
+        bool isEmpty() const { return queue.isEmpty(); }
         int getQueueLimit() const { return queueLimit; }
-        bool isFull() const { return queueLimit != 0 && queue.length() > queueLimit; }
-        int length() const { return queue.length(); }
+        bool isFull() const { return queueLimit != 0 && queue.getLength() > queueLimit; }
+        int getLength() const { return queue.getLength(); }
         void clear() { queue.clear(); }
     };
 
@@ -115,7 +115,7 @@ class INET_API EtherMACBase : public MACBase
 
       public:
         ~MacQueue() { delete innerQueue; };
-        bool isEmpty() { return innerQueue ? innerQueue->empty() : extQueue->isEmpty(); }
+        bool isEmpty() { return innerQueue ? innerQueue->isEmpty() : extQueue->isEmpty(); }
         void setExternalQueue(IPassiveQueue *_extQueue)
         { delete innerQueue; innerQueue = nullptr; extQueue = _extQueue; };
         void setInternalQueue(const char *name = nullptr, int limit = 0)

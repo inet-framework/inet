@@ -1,11 +1,19 @@
 ====== inet-3.x ======
 
+2015-05-23  Zoltan Bojthe
+
+	Use incoming registerProtocol to detect icmpv6 module, removed icmpin/icmpOut gates
+
+2015-06-13  Zoltan Bojthe
+
+	Refactored IPv6 options to use TLVOptions structure.
+
 2015-05-13  ------ inet-2.99.1 released ------
 
 2015-04-13  Zoltan Bojthe
 
-    Added useAdminDist parameter to IPv6RoutingTable enable/disable the use of
-    Cisco specific routing entry extension (disabled by default).
+	Added useAdminDist parameter to IPv6RoutingTable enable/disable the use of
+	Cisco specific routing entry extension (disabled by default).
 
 2015-02-02  Till Steinbach
 

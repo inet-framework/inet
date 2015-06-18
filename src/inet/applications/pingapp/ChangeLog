@@ -1,14 +1,18 @@
 ====== inet-3.x ======
 
+2015-06-05  Zoltan Bojthe
+
+	PingTestApp functionality merged into PingApp and PingTestApp is removed.
+
 2015-05-13  ------ inet-2.99.1 released ------
 
 2015-03-04  Zoltan Bojthe
 
-    Fixed packet length according to standard ping behavior.
+	Fixed packet length according to standard ping behavior.
 
 2015-03-13  Andras Varga
 
-    Added missing header guards.
+	Added missing header guards.
 
 2015-03-04  Levente Mészáros
 

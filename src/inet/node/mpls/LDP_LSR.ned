@@ -34,7 +34,7 @@ import inet.transportlayer.contract.IUDP;
 module LDP_LSR
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node);
         @display("i=abstract/router");
         bool hasStatus = default(false);

@@ -24,4 +24,6 @@ module SUIPathLoss like IPathLoss
     parameters:
         @class(SUIPathLoss);
         @display("i=block/control");
+        double transmitterAntennaHeight @unit(m);
+        double receiverAntennaHeight @unit(m);
 }

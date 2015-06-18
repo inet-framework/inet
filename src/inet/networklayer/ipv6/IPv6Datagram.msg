@@ -70,6 +70,6 @@ packet IPv6Datagram
 class IPv6ExtensionHeader
 {
     short extensionType;
-    short byteLength = 8;
+    short byteLength = 0;   // byteLength = n * 8;
 }
 

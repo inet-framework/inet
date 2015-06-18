@@ -6,7 +6,7 @@
  *
  * copyright:   (C) 2007-2009 CSEM SA
  *              (C) 2009 T.U. Eindhoven
- *				(C) 2004,2005,2006
+ *                (C) 2004,2005,2006
  *              Telecommunication Networks Group (TKN) at Technische
  *              Universitaet Berlin, Germany.
  *
@@ -114,7 +114,7 @@ void CSMA::initialize(int stage)
         if (radioModule->hasPar("timeRXToTX")) {
             simtime_t rxToTx = radioModule->par("timeRXToTX").doubleValue();
             if (rxToTx > aTurnaroundTime) {
-                opp_warning("Parameter \"aTurnaroundTime\" (%f) does not match"
+                throw cRuntimeError("Parameter \"aTurnaroundTime\" (%f) does not match"
                             " the radios RX to TX switching time (%f)! It"
                             " should be equal or bigger",
                         SIMTIME_DBL(aTurnaroundTime), SIMTIME_DBL(rxToTx));
@@ -521,17 +521,19 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     assert(useMACAcks);
 
     switch (event) {
-        case EV_ACK_RECEIVED:
+        case EV_ACK_RECEIVED: {
             EV_DETAIL << "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: "
                       << " ProcessAck, manageQueue..." << endl;
             if (rxAckTimer->isScheduled())
                 cancelEvent(rxAckTimer);
+            cMessage *mac = macQueue.front();
             macQueue.pop_front();
             txAttempts = 0;
+            delete mac;
             delete msg;
             manageQueue();
             break;
-
+        }
         case EV_ACK_TIMEOUT:
             EV_DETAIL << "(12) FSM State WAITACK_5, EV_ACK_TIMEOUT:"
                       << " incrementCounter/dropPacket, manageQueue..." << endl;
@@ -589,7 +591,7 @@ void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
             attachSignal(ackMessage, simTime());
             sendDown(ackMessage);
             nbTxAcks++;
-            //		sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
+            //        sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
             ackMessage = nullptr;
             break;
 
@@ -622,7 +624,7 @@ void CSMA::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
         EV_DETAIL << "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:"
                   << " ->manageQueue." << endl;
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        //		delete msg;
+        delete msg;
         manageQueue();
     }
     else {
@@ -844,7 +846,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
     if (dest == address) {
         if (!useMACAcks) {
             EV_DETAIL << "Received a data packet addressed to me." << endl;
-//			nbRxFrames++;
+//            nbRxFrames++;
             executeMac(EV_FRAME_RECEIVED, macPkt);
         }
         else {
@@ -858,7 +860,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
                 EV_DETAIL << "Received a data packet addressed to me,"
                           << " preparing an ack..." << endl;
 
-//				nbRxFrames++;
+//                nbRxFrames++;
 
                 if (ackMessage != nullptr)
                     delete ackMessage;

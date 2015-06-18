@@ -41,8 +41,8 @@ using namespace omnetpp;
 #  endif
 #endif
 
-#define INET_VERSION  0x0263
-#define INET_PATCH_LEVEL 0x01
+#define INET_VERSION  0x0300
+#define INET_PATCH_LEVEL 0x00
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT
@@ -59,6 +59,11 @@ using namespace omnetpp;
 #define PARSIMPACK_CONST const
 #else
 #define PARSIMPACK_CONST
+#endif
+
+#if OMNETPP_BUILDNUM <= 1002
+#define doParsimPacking doPacking
+#define doParsimUnpacking doUnpacking
 #endif
 
 // main namespace of INET framework

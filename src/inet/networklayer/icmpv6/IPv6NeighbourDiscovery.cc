@@ -184,7 +184,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         processNDMessage(ndMsg, ctrlInfo);
     }
     else if (dynamic_cast<IPv6Datagram *>(msg)) {    // not ND message
-        IPv6Datagram *datagram = (IPv6Datagram *)msg;
+        IPv6Datagram *datagram = static_cast<IPv6Datagram *>(msg);
         processIPv6Datagram(datagram);
     }
     else
@@ -231,13 +231,22 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 {
     EV_INFO << "Packet " << msg << " arrived from IPv6 module.\n";
 
-    int nextHopIfID;
-    EV_INFO << "Determining Next Hop" << endl;
-    IPv6Address nextHopAddr = determineNextHop(msg->getDestAddress(), nextHopIfID);
+    IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->getControlInfo());
+    int nextHopIfID = ctrl->getInterfaceId();
+    IPv6Address nextHopAddr = ctrl->getNextHop();
+    //bool fromHL = ctrl->getFromHL();
+
+    if (nextHopIfID == -1 || nextHopAddr.isUnspecified()) {
+        EV_INFO << "Determining Next Hop" << endl;
+        nextHopAddr = determineNextHop(msg->getDestAddress(), nextHopIfID);
+        ctrl->setInterfaceId(nextHopIfID);
+        ctrl->setNextHop(nextHopAddr);
+    }
 
     if (nextHopIfID == -1) {
         //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
         //draft-ietf-v6ops-onlinkassumption-03 explains why.
+        delete msg->removeControlInfo();
         icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
         return;
     }
@@ -269,34 +278,45 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         }
     }
 
-    if (nce->reachabilityState == IPv6NeighbourCache::INCOMPLETE) {
+    /*
+     * A host is capable of sending packets to a destination in all states except INCOMPLETE
+     * or when there is no corresponding NC entry. In INCOMPLETE state the data packets are
+     * queued pending completion of address resolution.
+     */
+    switch (nce->reachabilityState) {
+    case IPv6NeighbourCache::INCOMPLETE:
         EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
         EV_INFO << "Add packet to entry's queue until Address Resolution is complete.\n";
         bubble("Packet added to queue until Address Resolution is complete.");
         nce->pendingPackets.push_back(msg);
         pendingQueue.insert(msg);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::STALE) {
+        break;
+    case IPv6NeighbourCache::STALE:
         EV_INFO << "Reachability State is STALE.\n";
         send(msg, "ipv6Out");
         initiateNeighbourUnreachabilityDetection(nce);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::REACHABLE) {
+        break;
+    case IPv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
-    }
-    else if (nce->reachabilityState == IPv6NeighbourCache::DELAY) {    //TODO: What if NCE is in PROBE state?
+        send(msg, "ipv6Out");
+        break;
+    case IPv6NeighbourCache::DELAY:
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-        sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
-    }
-    else
+        send(msg, "ipv6Out");
+        break;
+    case IPv6NeighbourCache::PROBE:
+        EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
+        send(msg, "ipv6Out");
+        break;
+    default:
         throw cRuntimeError("Unknown Neighbour cache entry state.");
+        break;
+    }
 }
 
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
 {
     for (auto advIfEntry : advIfList) {
-        
         if (advIfEntry->interfaceId == ie->getInterfaceId()) {
             return advIfEntry;
         }
@@ -465,6 +485,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(const IPv6Address& destAddr
 void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(Neighbour *nce)
 {
     ASSERT(nce->reachabilityState == IPv6NeighbourCache::STALE);
+    ASSERT(nce->nudTimeoutEvent == nullptr);
     const Key *nceKey = nce->nceKey;
     EV_INFO << "Initiating Neighbour Unreachability Detection";
     InterfaceEntry *ie = ift->getInterfaceById(nceKey->interfaceID);
@@ -509,8 +530,7 @@ void IPv6NeighbourDiscovery::processNUDTimeout(cMessage *timeoutMsg)
     if (nce->numProbesSent == (int)ie->ipv6Data()->_getMaxUnicastSolicit()) {
         EV_DETAIL << "Max number of probes have been sent." << endl;
         EV_DETAIL << "Neighbour is Unreachable, removing NCE." << endl;
-        neighbourCache.remove(nceKey->address, nceKey->interfaceID);
-        delete timeoutMsg;
+        neighbourCache.remove(nceKey->address, nceKey->interfaceID); // remove nce from cache, cancel and delete timeoutMsg;
         return;
     }
 
@@ -707,13 +727,13 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
        solicitations, address resolution has failed. The sender MUST return ICMP
        destination unreachable indications with code 3 (Address Unreachable) for
        each packet queued awaiting address resolution.*/
-    MsgPtrVector pendingPackets = nce->pendingPackets;
+    MsgPtrVector& pendingPackets = nce->pendingPackets;
     EV_INFO << "Pending Packets empty:" << pendingPackets.empty() << endl;
 
     while (!pendingPackets.empty()) {
         auto i = pendingPackets.begin();
         cMessage *msg = (*i);
-        IPv6Datagram *ipv6Msg = (IPv6Datagram *)msg;
+        IPv6Datagram *ipv6Msg = check_and_cast<IPv6Datagram *>(msg);
         //Assume msg is the packet itself. I need the datagram's source addr.
         //The datagram's src addr will be the destination of the unreachable msg.
         EV_INFO << "Sending ICMP unreachable destination." << endl;
@@ -749,7 +769,7 @@ void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
 {
     MsgPtrVector& pendingPackets = nce->pendingPackets;
 
-    while (!pendingPackets.empty()) {    //FIXME: pendingPackets are always empty!!!!
+    while (!pendingPackets.empty()) {
         auto i = pendingPackets.begin();
         cMessage *msg = (*i);
         pendingPackets.erase(i);
@@ -1816,7 +1836,7 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const I
     if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
             !dgSrcAddr.isUnspecified()) {
         ns->setSourceLinkLayerAddress(myMacAddr);
-        ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);      // FIXME make constant...
+        ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
     }
 
     sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, ie->getInterfaceId());

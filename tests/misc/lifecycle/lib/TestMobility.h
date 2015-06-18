@@ -23,6 +23,8 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
+namespace inet {
+
 class INET_API TestMobility : public cSimpleModule, public ILifecycle {
   private:
     bool moving;
@@ -37,5 +39,6 @@ class INET_API TestMobility : public cSimpleModule, public ILifecycle {
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage * message);
 };
+}
 
 #endif

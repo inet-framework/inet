@@ -447,13 +447,13 @@ class INET_API Topology : public cOwnedObject
      * value). If value is nullptr, the property's value may be anything except
      * "false" (i.e. the first value of the default key may not be "false").
      *
-     * For example, <tt>topo.extractByProperty("node");</tt> would extract
-     * all modules that contain the <tt>\@node</tt> property, like the following
+     * For example, <tt>topo.extractByProperty("networkNode");</tt> would extract
+     * all modules that contain the <tt>\@networkNode</tt> property, like the following
      * one:
      *
      * <pre>
      * module X {
-     *     \@node;
+     *     \@networkNode;
      * }
      * </pre>
      *

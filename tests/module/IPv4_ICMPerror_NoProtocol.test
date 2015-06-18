@@ -10,7 +10,7 @@ The server generates an Destination Unreachable ICMP error
 that should be received by the client application in the
 form of an error indication.
 
-%inifile: {}.ini
+%inifile: test.ini
 [General]
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.inet.nclients.NClients
@@ -40,7 +40,7 @@ cmdenv-express-mode=false
 
 %contains: stdout
 ERROR: Transport protocol ID=17 not connected, discarding packet
-DETAIL: sending ICMP error ICMP-error-#1-type13-code2
+DETAIL: sending ICMP error ICMP-error-#1-type3-code2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
