@@ -381,10 +381,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     TCP_NSC_Connection *conn;
     conn = findConnByInetSockPair(inetSockPair);
 
-    if (!conn)
+    if (!conn) {
         conn = findConnByInetSockPair(inetSockPairAny);
+    }
 
-    {
+    { // local scope for 'b' and 'c'
         Buffer b(tcph, totalTcpLen);
         Context c;
         c.l3AddressesPtr = &ih->saddr;
@@ -429,10 +430,9 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 ASSERT(c.inetSockPairM.localM.portM == inetSockPair.localM.portM);
                 ++changes;
 
-                TCP_NSC_Connection *conn;
                 int newConnId = getEnvir()->getUniqueNumber();
                 // add into appConnMap
-                conn = &tcpAppConnMapM[newConnId];
+                TCP_NSC_Connection *conn = &tcpAppConnMapM[newConnId];
                 conn->tcpNscM = this;
                 conn->connIdM = newConnId;
                 conn->appGateIndexM = c.appGateIndexM;
