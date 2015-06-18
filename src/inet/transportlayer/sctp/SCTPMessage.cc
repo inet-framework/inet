@@ -274,7 +274,8 @@ SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)
 {
     SCTPAsconfChunk_Base::operator=(other);
 
-    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
+    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH + 8);
+    this->setAddressParam(other.getAddressParam());
     for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
         addAsconfParam((cPacket *)(*i)->dup());
 

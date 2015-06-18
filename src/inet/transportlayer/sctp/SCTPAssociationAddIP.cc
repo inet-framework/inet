@@ -24,7 +24,7 @@ namespace inet {
 namespace sctp {
 void SCTPAssociation::sendAsconf(const char *type, const bool remote)
 {
-    SCTPAuthenticationChunk *authChunk;
+    SCTPAuthenticationChunk *authChunk = nullptr;
     bool nat = false;
     L3Address targetAddr = remoteAddr;
     uint16 chunkLength = 0;

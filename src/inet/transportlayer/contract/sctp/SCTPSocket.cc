@@ -253,6 +253,24 @@ void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, in
 
 void SCTPSocket::sendMsg(cMessage *cmsg)
 {
+    SCTPSendInfo *sendCommand;
+
+    if (cmsg->getControlInfo()) {
+        sendCommand = check_and_cast<SCTPSendInfo *>(cmsg->removeControlInfo());
+        if (sendCommand->getSid() == -1) {
+            lastStream = (lastStream + 1) % outboundStreams;
+            sendCommand->setSid(lastStream);
+        }
+        sendCommand->setAssocId(assocId);
+        cmsg->setControlInfo(sendCommand);
+    } else {
+        sendCommand = new SCTPSendInfo();
+        sendCommand->setAssocId(assocId);
+        lastStream = (lastStream + 1) % outboundStreams;
+        sendCommand->setSid(lastStream);
+        cmsg->setControlInfo(sendCommand);
+    }
+    cmsg->setKind(SCTP_C_SEND);
     sendToSCTP(cmsg);
 }
 

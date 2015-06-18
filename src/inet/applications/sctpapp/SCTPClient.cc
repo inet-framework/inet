@@ -397,11 +397,12 @@ void SCTPClient::sendRequest(bool last)
 
     if (bufferSize < 0)
         last = true;
-    
+
     SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(last);
     sendCommand->setPrMethod(par("prMethod"));
     sendCommand->setPrValue(par("prValue"));
+    sendCommand->setSid(nextStream);
     cmsg->setControlInfo(sendCommand);
 
     emit(sentPkSignal, msg);

@@ -521,14 +521,14 @@ void SCTPNatPeer::handleTimer(cMessage *msg)
             id = atoi(msg->getName());
             cmd->setAssocId(id);
             cmsg->setControlInfo(cmd);
-            sendOrSchedule(PK(cmsg));
+            sendOrSchedule(cmsg);
             break;
 
         case SCTP_C_RECEIVE:
 
             EV << "SCTPNatPeer:SCTP_C_RECEIVE\n";
             schedule = true;
-            sendOrSchedule(PK(msg));
+            sendOrSchedule(msg);
             break;
 
         default:
@@ -679,6 +679,9 @@ void SCTPNatPeer::sendRequest(bool last)
         cmsg->setKind(SCTP_C_SEND_ORDERED);
     else
         cmsg->setKind(SCTP_C_SEND_UNORDERED);
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    sendCommand->setLast(true);
+    cmsg->setControlInfo(sendCommand);
     // send SCTPMessage with SCTPSimpleMessage enclosed
     clientSocket.sendMsg(cmsg);
     bytesSent += numBytes;
@@ -822,6 +825,7 @@ void SCTPNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     }
     if ((int64)(long)par("numPacketsToReceive") > 0) {
         numPacketsToReceive--;
+        delete msg;
         if (numPacketsToReceive == 0) {
             EV << "Peer: all packets received\n";
         }
@@ -877,11 +881,12 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
         smsg->setByteLength(16);
         smsg->setDataLen(16);
         cmsg->encapsulate(smsg);
-        
+
         SCTPSendInfo* sendCommand = new SCTPSendInfo;
-        sendCommand->setLast(false);
+        sendCommand->setLast(true);
+        sendCommand->setAssocId(assocId);
         cmsg->setControlInfo(sendCommand);
-        
+
         clientSocket.sendMsg(cmsg);
     }
 }

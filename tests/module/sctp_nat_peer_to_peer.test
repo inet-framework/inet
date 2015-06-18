@@ -1,5 +1,5 @@
 %description:
-Testing SCTP_NAT: Two peers send their requests to connect to a peer to a server. The 
+Testing SCTP_NAT: Two peers send their requests to connect to a peer to a server. The
 server collects the information and sends it to the peers. Afterwards the peers connect to
 each other.
 %#--------------------------------------------------------------------------------------------------------------
@@ -56,8 +56,8 @@ ned-path = .;../../../../src;../../lib
 **.Server.sctpApp[*].queueSize = 0
 **.Server.sctpApp[*].lifetime=0s
 **.Server.sctpApp[*].address=""
-**.Server.sctpApp[0].localPort=6666 
-**.Server.sctpApp[1].localPort=7777 
+**.Server.sctpApp[0].localPort=6666
+**.Server.sctpApp[1].localPort=7777
 **.Server.sctpApp[*].replyDelay=0
 **.Server.sctpApp[*].echoFactor=0
 **.Server.sctpApp[*].echoDelay=0
@@ -93,12 +93,10 @@ ned-path = .;../../../../src;../../lib
 **.Router_2.routingTable.routingFile="../../lib/nat_router_2.mrt"
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
-scalar multiRendezvous.Peer_1.sctp[ \t]*"Number of Heartbeats Received 1:100.1.2.254"[ \t]*1
-%contains-regex: results/General-0.sca
-scalar multiRendezvous.Peer_2.sctp[ \t]*"Number of Heartbeats Received 3:100.1.1.254"[ \t]*1
-%contains-regex: results/General-0.sca
-scalar multiRendezvous.Peer_1.sctp[ \t]*"Number of Heartbeats Sent 1:100.2.2.254"[ \t]*1
-%contains-regex: results/General-0.sca
-scalar multiRendezvous.Peer_2.sctp[ \t]*"Number of Heartbeats Sent 3:100.2.1.254"[ \t]*1
+%contains-regex: stdout
+Association 1: sent bytes=14520, acked bytes=14520
+%contains-regex: stdout
+Association 9: sent bytes=16, acked bytes=16
+%contains-regex: stdout
+Association 10: sent bytes=16, acked bytes=16
 %#--------------------------------------------------------------------------------------------------------------

@@ -31,14 +31,14 @@ network multihomed
       {
         parameters:
           datarate = 1Mbps;
-	      per = 0.005;
+          per = 0.01;
       }
 
-	channel NormalPath extends DatarateChannel
-	{
-		parameters:
-			datarate = 1Gbps;
-	}
+    channel NormalPath extends DatarateChannel
+    {
+        parameters:
+            datarate = 1Gbps;
+    }
     submodules:
         sctp_client: StandardHost {
             parameters:

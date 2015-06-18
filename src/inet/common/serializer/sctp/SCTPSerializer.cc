@@ -842,7 +842,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
             case ASCONF_ACK: {
                 SCTPAsconfAckChunk *asconfAckChunk = check_and_cast<SCTPAsconfAckChunk *>(chunk);
                 struct asconf_ack_chunk *asconfack = (struct asconf_ack_chunk *)(buf + writtenbytes);
-                writtenbytes += (asconfAckChunk->getByteLength());
+                writtenbytes += SCTP_ADD_IP_CHUNK_LENGTH;
                 asconfack->type = asconfAckChunk->getChunkType();
                 asconfack->length = htons(asconfAckChunk->getByteLength());
                 asconfack->serial = htonl(asconfAckChunk->getSerialNumber());
@@ -923,6 +923,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
                     }
                 }
+                writtenbytes += parPtr;
                 break;
             }
 

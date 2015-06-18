@@ -41,8 +41,8 @@ SCTPNatTable::SCTPNatTable()
 
 SCTPNatTable::~SCTPNatTable()
 {
-    for (uint32 i = 0; i < natEntries.size(); i++)
-        delete natEntries[i];
+    for (auto i = natEntries.begin(); i != natEntries.end(); ++i)
+        natEntries.erase(i);
 }
 
 SCTPNatEntry *SCTPNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag)
