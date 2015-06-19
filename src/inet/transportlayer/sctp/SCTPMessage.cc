@@ -35,15 +35,19 @@ SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
     return *this;
 }
 
+
 void SCTPMessage::copy(const SCTPMessage& other)
 {
-    this->setTag(other.getTag());
-    this->setSrcPort(other.getSrcPort());
-    this->setDestPort(other.getDestPort());
-    this->setChecksumOk(other.getChecksumOk());
-    this->setByteLength(SCTP_COMMON_HEADER);
-    for (std::vector<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i)
-        addChunk((cPacket *)(*i)->dup());
+    setTag(other.getTag());
+    setSrcPort(other.getSrcPort());
+    setDestPort(other.getDestPort());
+    setChecksumOk(other.getChecksumOk());
+    for (std::vector<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i) {
+        cPacket *chunk = (*i)->dup();
+        take(chunk);
+        chunkList.push_back(chunk);
+    }
+    ASSERT(getByteLength() == other.getByteLength());
 }
 
 SCTPMessage::~SCTPMessage()
@@ -154,8 +158,11 @@ SCTPErrorChunk& SCTPErrorChunk::operator=(const SCTPErrorChunk& other)
 
 void SCTPErrorChunk::copy(const SCTPErrorChunk& other)
 {
-    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
-        addParameters((cPacket *)(*i)->dup());
+    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i) {
+        cPacket *param = (*i)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
 }
 
 void SCTPErrorChunk::setParametersArraySize(uint32 size)
