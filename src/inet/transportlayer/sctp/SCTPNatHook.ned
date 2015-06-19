@@ -12,6 +12,7 @@ simple SCTPNatHook like IHook
         string interfaceTableModule;
         string networkProtocolModule;
         string routingTableModule;
+        string natTableModule;
     gates:
         input in;
         output out;

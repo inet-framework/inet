@@ -33,7 +33,7 @@ void SCTPNatHook::initialize()
     rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
     ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
-    natTable = new SCTPNatTable();
+    natTable = getModuleFromPar<SCTPNatTable>(par("natTableModule"), this);
 
     ipLayer->registerHook(0, this);
 }
@@ -302,7 +302,6 @@ void SCTPNatHook::finish()
     if (ipLayer)
         ipLayer->unregisterHook(0, this);
     ipLayer = nullptr;
-    delete natTable;
     std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }
 
