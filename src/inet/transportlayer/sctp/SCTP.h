@@ -215,6 +215,8 @@ class INET_API SCTP : public cSimpleModule
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void send_to_ip(SCTPMessage *msg);
+
 
     inline AssocStat *getAssocStat(uint32 assocId)
     {

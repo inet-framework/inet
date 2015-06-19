@@ -349,7 +349,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
         //controlInfo->setSourceAddress();
         controlInfo->setDestinationAddress(dest);
         sctpmsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-        sctpMain->send(sctpmsg, "to_ip");
+        sctpMain->send_to_ip(sctpmsg);
 
         if (chunkType == HEARTBEAT) {
             SCTPPathVariables *path = getPath(dest);

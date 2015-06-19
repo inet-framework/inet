@@ -23,6 +23,7 @@
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPSocket.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/serializer/sctp/SCTPSerializer.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -324,7 +325,7 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
         controlInfo->setSourceAddress(fromAddr);
         controlInfo->setDestinationAddress(toAddr);
         msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-        send(msg, "to_ip");
+        send_to_ip(msg);
     }
 }
 
@@ -352,6 +353,19 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
     controlInfo->setSourceAddress(fromAddr);
     controlInfo->setDestinationAddress(toAddr);
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    send_to_ip(msg);
+}
+
+void SCTP::send_to_ip(SCTPMessage *msg)
+{
+// enable this and run all SCTP tests tp see if SCTP serializer correctly handles all SCTP packets
+#if 0
+    char buff[4096];
+    serializer::Buffer b(buff, 4096);
+    serializer::Context ctx;
+    serializer::SCTPSerializer().serializePacket(msg, b, ctx);
+    ASSERT(b.getPos() == msg->getByteLength());
+#endif
     send(msg, "to_ip");
 }
 
