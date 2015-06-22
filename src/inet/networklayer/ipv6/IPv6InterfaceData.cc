@@ -402,7 +402,7 @@ void IPv6InterfaceData::choosePreferredAddress()
     // FIXME TBD throw out expired addresses! 0 should be treated as infinity
 
     // sort addresses by scope and expiry time, then pick the first one
-    std::sort(addresses.begin(), addresses.end(), addrLess);
+    std::stable_sort(addresses.begin(), addresses.end(), addrLess);
     // choose first unicast address
     for (auto & elem : addresses) {
         if (elem.address.isUnicast()) {

@@ -147,7 +147,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             // typically routing tables are sorted by netmask prefix length (descending)
             // sorting by reversed natural order looks weired, but allows easy comparison
             // with `route -n | sort -r` output by means of `diff` command...
-            std::sort(lines.begin(), lines.end());
+            std::stable_sort(lines.begin(), lines.end());
             for (std::vector<std::string>::reverse_iterator it = lines.rbegin(); it != lines.rend(); it++)
                 s << *it;
         }

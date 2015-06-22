@@ -334,7 +334,7 @@ void BerParseFile::parseFile(const char *filename)
         snrdata.snr = snr;
         snrdata.ber = ber;
         l->snrlist.push_back(snrdata);
-        std::sort(l->snrlist.begin(), l->snrlist.end(), std::less<SnrBer>());
+        std::stable_sort(l->snrlist.begin(), l->snrlist.end(), std::less<SnrBer>());
     }
     in.close();
 

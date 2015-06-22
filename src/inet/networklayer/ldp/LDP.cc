@@ -403,7 +403,7 @@ void LDP::rebuildFecList()
 
     // we must keep this list sorted for matching to work correctly
     // this is probably slower than it must be
-    std::sort(fecList.begin(), fecList.end(), fecPrefixCompare);
+    std::stable_sort(fecList.begin(), fecList.end(), fecPrefixCompare);
 }
 
 void LDP::updateFecList(IPv4Address nextHop)

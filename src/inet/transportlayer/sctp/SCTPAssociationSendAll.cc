@@ -125,7 +125,7 @@ std::vector<SCTPPathVariables *> SCTPAssociation::getSortedPathMap()
         sortedPaths.insert(sortedPaths.end(), path);
     }
     if (state->cmtSendAllComparisonFunction != nullptr) {
-        std::sort(sortedPaths.begin(), sortedPaths.end(), state->cmtSendAllComparisonFunction);
+        std::stable_sort(sortedPaths.begin(), sortedPaths.end(), state->cmtSendAllComparisonFunction);
     }
 
     EV << "SORTED PATH MAP:" << endl;

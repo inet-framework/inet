@@ -484,7 +484,7 @@ void PhysicalEnvironment::updateCanvas()
         delete objectsLayer->removeFigure(0);
     // KLUDGE: TODO: sorting objects with their rotated position's z coordinate to draw them in a "better" order
     std::vector<const PhysicalObject *> objectsCopy = objects;
-    std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
+    std::stable_sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
     for (auto object : objectsCopy)
     {
         const ShapeBase *shape = object->getShape();

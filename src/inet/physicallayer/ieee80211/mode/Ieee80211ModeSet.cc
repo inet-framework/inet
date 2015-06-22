@@ -141,7 +141,7 @@ Ieee80211ModeSet::Ieee80211ModeSet(char name, const std::vector<Entry> entries) 
     entries(entries)
 {
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
-    std::sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
+    std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
 }
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
