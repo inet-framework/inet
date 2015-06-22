@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-06-22  ------ inet-3.0.0 released ------
+
 2015-05-23  Zoltan Bojthe
 
 	Use incoming registerProtocol to detect icmpv6 module, removed icmpin/icmpOut gates

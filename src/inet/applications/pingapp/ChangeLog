@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-06-22  ------ inet-3.0.0 released ------
+
 2015-06-05  Zoltan Bojthe
 
 	PingTestApp functionality merged into PingApp and PingTestApp is removed.
