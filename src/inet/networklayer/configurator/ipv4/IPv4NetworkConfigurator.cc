@@ -380,7 +380,8 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
         EV_TRACE << "Merged netmask specification: " << IPv4Address(mergedNetmask) << " / " << IPv4Address(mergedNetmaskSpecifiedBits) << " / " << IPv4Address(mergedNetmaskIncompatibleBits) << endl;
     }
     // sort compatibleInterfaces moving the most constrained interfaces first
-    std::sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
+    // (stable sort tp garantee identical order if the interfaces are similarly constrained)
+    std::stable_sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
     EV_TRACE << "Found " << compatibleInterfaces.size() << " compatible interfaces" << endl;
 }
 

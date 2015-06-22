@@ -7,8 +7,8 @@
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,           89ac-d2c0
-/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,           dbcf-57cb
-/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,           dea0-a431
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,           2966-5017
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,           6db4-0845
 /examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,           4c29-95ef
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,           8915-f239
 /examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0,              100s,           582c-45df
