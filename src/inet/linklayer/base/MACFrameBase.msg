@@ -27,4 +27,5 @@ packet MACFrameBase
 {
     MACAddress srcAddr;
     MACAddress destAddr;
+    int networkProtocol = -1;
 }

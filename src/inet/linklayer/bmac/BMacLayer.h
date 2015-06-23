@@ -254,7 +254,6 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     cPacket *decapsMsg(BMacFrame *msg);
     BMacFrame *encapsMsg(cPacket *netwPkt);
-    cObject *setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr);
 };
 
 } // namespace inet

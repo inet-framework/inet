@@ -719,12 +719,15 @@ void BMacLayer::changeDisplayColor(BMAC_COLORS color)
 
 cPacket *BMacLayer::decapsMsg(BMacFrame *msg)
 {
-    cPacket *m = msg->decapsulate();
-    setUpControlInfo(m, msg->getSrcAddr());
-    // delete the macPkt
-    delete msg;
+    cPacket *packet = msg->decapsulate();
+    SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
+    controlInfo->setSrc(msg->getSrcAddr());
+    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
+    packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;
-    return m;
+    delete msg;
+    return packet;
 }
 
 BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
@@ -736,6 +739,7 @@ BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
     // message by the network layer
     IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
     EV_DETAIL << "CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
+    pkt->setNetworkProtocol(cInfo->getNetworkProtocol());
     pkt->setDestAddr(cInfo->getDestinationAddress());
 
     //delete the control info
@@ -749,18 +753,6 @@ BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
     EV_DETAIL << "pkt encapsulated\n";
 
     return pkt;
-}
-
-/**
- * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
- */
-cObject *BMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr)
-{
-    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
-    cCtrlInfo->setSrc(pSrcAddr);
-    cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
 }
 
 } // namespace inet

@@ -631,12 +631,15 @@ void LMacLayer::findNewSlot()
 
 cPacket *LMacLayer::decapsMsg(LMacFrame *msg)
 {
-    cPacket *m = msg->decapsulate();
-    setUpControlInfo(m, msg->getSrcAddr());
-    // delete the macPkt
-    delete msg;
+    cPacket *packet = msg->decapsulate();
+    SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
+    controlInfo->setSrc(msg->getSrcAddr());
+    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
+    packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;
-    return m;
+    delete msg;
+    return packet;
 }
 
 /**
@@ -654,6 +657,7 @@ LMacFrame *LMacLayer::encapsMsg(cPacket *netwPkt)
     IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
     EV_DETAIL << "CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
     pkt->setDestAddr(cInfo->getDestinationAddress());
+    pkt->setNetworkProtocol(cInfo->getNetworkProtocol());
 
     //delete the control info
     delete cInfo;
@@ -685,18 +689,6 @@ void LMacLayer::attachSignal(LMacFrame *macPkt)
     simtime_t duration = macPkt->getBitLength() / bitrate;
     //create and initialize control info with new signal
     macPkt->setDuration(duration);
-}
-
-/**
- * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
- */
-cObject *LMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr)
-{
-    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
-    cCtrlInfo->setSrc(pSrcAddr);
-    cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
 }
 
 } // namespace inet
