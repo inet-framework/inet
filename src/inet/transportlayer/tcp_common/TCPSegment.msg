@@ -125,7 +125,7 @@ class Sack extends SackItem
 }
 
 // Header Options (optional):
-class TCPOptionPtr;
+class noncobject TCPOptionPtr;
 class TCPOption
 {
     unsigned short kind @enum(TCPOptionNumbers) = -1;  // option kind
