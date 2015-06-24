@@ -71,10 +71,6 @@ class ExtInterface : public MACBase
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
-  private:
-    const char *tag_color;
-    const char *tag_width;
-
   public:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
