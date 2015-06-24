@@ -623,7 +623,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
         int gateindex = mapping.findOutputGateForProtocol(protocol);
         // check if the transportOut port are connected, otherwise discard the packet
         if (gateindex >= 0) {
-            cGate *outGate = gate("transportOut", gateindex);
+            cGate *outGate = gate("transportOut");
             if (outGate->isPathOK()) {
                 EV_INFO << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
                 //TODO: Indication of forward progress
@@ -651,7 +651,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
         int protocol = bogusPacket->getTransportProtocol();
         int gateindex = mapping.getOutputGateForProtocol(protocol);
-        send(msg, "transportOut", gateindex);
+        send(msg, "transportOut");
     }
     else {
         // all others are delivered to ICMP:
@@ -660,7 +660,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
         int gateindex = mapping.getOutputGateForProtocol(IP_PROT_IPv6_ICMP);
-        send(msg, "transportOut", gateindex);
+        send(msg, "transportOut");
     }
 }
 
