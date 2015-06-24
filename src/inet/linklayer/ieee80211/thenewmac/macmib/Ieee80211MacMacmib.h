@@ -181,6 +181,123 @@ class INET_API Ieee80211MacMacmibOperationTable
 };
 
 /*
+ * TODO: 2385p.
+ */
+class INET_API Ieee80211MacMacmibPhyOperationTable
+{
+    protected:
+        simtime_t aSlotTime = (aCcaTime + aRxTxTurnaroundTime + aAirPropagationTime + aMacProcessingTime);
+        simtime_t aCcaTime;
+        simtime_t aRxTxTurnaroundTime = aTxPlcpDelay + aRxTxSwitchTime + aTxRampOnTime + aTxRfDelay;
+        simtime_t aTxPlcpDelay;
+        simtime_t aRxTxSwitchTime;
+        simtime_t aTxRampOnTime;
+        simtime_t aTxRfDelay;
+        simtime_t aSifsTime = (aRxRfDelay + aRxPlcpDelay + aMacProcessingTime + aRxTxTurnaroundTime);
+        simtime_t aRxRfDelay;
+        simtime_t aRxPlcpDelay = 2;
+        simtime_t aMacProcessingTime = 2;
+        simtime_t aTxRampOffTime = 8;
+        simtime_t aPreambleLength = 96;
+        simtime_t aPlcpHeaderLength = 32;
+        int aMpduMaxLength = 4095;
+        simtime_t aAirPropagationTime = 1;
+        int aCWmax = 1023;
+        int aCWmin = 15;
+
+    public:
+           const simtime_t& getAirPropagationTime() const
+           {
+               return aAirPropagationTime;
+           }
+
+           const simtime_t& getCcaTime() const
+           {
+               return aCcaTime;
+           }
+
+           int getCWmax() const
+           {
+               return aCWmax;
+           }
+
+           int getCWmin() const
+           {
+               return aCWmin;
+           }
+
+           const simtime_t& getMacProcessingTime() const
+           {
+               return aMacProcessingTime;
+           }
+
+           int getMpduMaxLength() const
+           {
+               return aMpduMaxLength;
+           }
+
+           const simtime_t& getPlcpHeaderLength() const
+           {
+               return aPlcpHeaderLength;
+           }
+
+           const simtime_t& getPreambleLength() const
+           {
+               return aPreambleLength;
+           }
+
+           const simtime_t& getRxPlcpDelay() const
+           {
+               return aRxPlcpDelay;
+           }
+
+           const simtime_t& getRxRfDelay() const
+           {
+               return aRxRfDelay;
+           }
+
+           const simtime_t& getRxTxSwitchTime() const
+           {
+               return aRxTxSwitchTime;
+           }
+
+           const simtime_t& getRxTxTurnaroundTime() const
+           {
+               return aRxTxTurnaroundTime;
+           }
+
+           const simtime_t& getSifsTime() const
+           {
+               return aSifsTime;
+           }
+
+           const simtime_t& getSlotTime() const
+           {
+               return aSlotTime;
+           }
+
+           const simtime_t& getTxPlcpDelay() const
+           {
+               return aTxPlcpDelay;
+           }
+
+           const simtime_t& getTxRampOffTime() const
+           {
+               return aTxRampOffTime;
+           }
+
+           const simtime_t& getTxRampOnTime() const
+           {
+               return aTxRampOnTime;
+           }
+
+           const simtime_t& getTxRfDelay() const
+           {
+               return aTxRfDelay;
+           }
+};
+
+/*
  * This Package contains definitions of the MAC MIB attributes
  * and the subset of the PHY MIB attributes used by the MAC state
  * machines. p. 2382
@@ -192,6 +309,7 @@ class INET_API Ieee80211MacMacmibPackage: public cSimpleModule
         Ieee80211MacMacmibCountersTable *countersTable = nullptr;
         Ieee80211MacMacmibOperationTable *operationTable = nullptr;
         Ieee80211MacMacmibStationConfigTable *stationConfigTable = nullptr;
+        Ieee80211MacMacmibPhyOperationTable *phyOperationTable = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -204,6 +322,8 @@ class INET_API Ieee80211MacMacmibPackage: public cSimpleModule
         Ieee80211MacMacmibCountersTable* getCountersTable() const { return countersTable; }
         Ieee80211MacMacmibOperationTable* getOperationTable() const { return operationTable; }
         Ieee80211MacMacmibStationConfigTable *getStationConfigTable() const { return stationConfigTable; }
+        Ieee80211MacMacmibPhyOperationTable *getPhyOperationTable() const { return phyOperationTable; }
+
 };
 
 } /* namespace inet */

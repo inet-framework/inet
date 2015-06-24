@@ -33,6 +33,8 @@ void Ieee80211MacMacmibPackage::initialize(int stage)
     {
         countersTable = new Ieee80211MacMacmibCountersTable();
         operationTable = new Ieee80211MacMacmibOperationTable();
+        stationConfigTable = new Ieee80211MacMacmibStationConfigTable();
+        phyOperationTable = new Ieee80211MacMacmibPhyOperationTable();
     }
 }
 
@@ -40,6 +42,8 @@ Ieee80211MacMacmibPackage::~Ieee80211MacMacmibPackage()
 {
     delete countersTable;
     delete operationTable;
+    delete stationConfigTable;
+    delete phyOperationTable;
 }
 
 } /* namespace inet */
