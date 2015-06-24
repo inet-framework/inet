@@ -24,9 +24,7 @@ cplusplus {{
 #include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
 }}
 
-namespace inet;
-
-class noncobject IPv4Address;
+class noncobject inet::IPv4Address;
 
 namespace inet::rtp;
 
