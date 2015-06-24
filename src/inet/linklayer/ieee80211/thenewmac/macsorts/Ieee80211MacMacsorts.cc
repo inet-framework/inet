@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacMacsorts);
 
-simsignal_t intraMacRemoteVariablesChanged = cComponent::registerSignal("intraMacRemoteVariablesChanged");
+simsignal_t Ieee80211MacMacsorts::intraMacRemoteVariablesChanged = cComponent::registerSignal("intraMacRemoteVariablesChanged");
 
 int Ieee80211MacNamedStaticIntDataValues::sMaxMsduLng = 2304;
 int Ieee80211MacNamedStaticIntDataValues::sMacHdrLng = 24;

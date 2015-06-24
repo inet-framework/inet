@@ -23,6 +23,7 @@
 #include "inet/common/Units.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedMacStaTypes.h"
+#include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 #include <vector>
 
 using namespace inet::units::values;
@@ -34,6 +35,9 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables;
 
 class INET_API Ieee80211MacMacsorts : public cSimpleModule
 {
+    public:
+        static simsignal_t intraMacRemoteVariablesChanged;
+
     protected:
         Ieee80211MacMacsortsIntraMacRemoteVariables *intraMacRemoteVariables;
 
@@ -163,7 +167,7 @@ class Ieee80211MacFragmentationSupport
 {
     public:
         /* Array to hold up to FragNum fragments of an Msdu/Mmpdu */
-        typedef std::vector<cPacket *> FragArray;
+        typedef std::vector<Ieee80211NewFrame *> FragArray;
         /* FragSdu structure is for OUTGOING MSDUs/MMPDUs (called SDUs) */
         /* Each SDU, even if not fragmented, is held in an instance of */
         /* this structure awaiting its (re)transmission attempt(s). */
@@ -186,6 +190,49 @@ class Ieee80211MacFragmentationSupport
             CfPriority cf; /* requested priority (from LLC) */
             FragArray pdus; /* array of Frame to hold fragments */
         };
+};
+
+//newtype CfParms inherits Octetstring operators all;
+//adding operators
+//cfpCount : CfParms -> Integer; /* CfpCount field (1) */
+//setCfpCount : CfParms, Integer -> CfParms;
+//cfpPeriod : CfParms -> Integer; /* CfpPeriod field (1) */
+//setCfpPeriod : CfParms, Integer -> CfParms;
+//cfpMaxDur : CfParms -> TU; /* CfpMaxDuration field (2) */
+//setCfpMaxDur : CfParms, TU -> CfParms;
+//cfpDurRem : CfParms -> TU; /* CfpDurRemaining field (2) */
+//setCfpDurRem : CfParms, TU -> CfParms;
+//axioms for all cf in CfParms( for all i in Integer( for all u in TU(
+//cfpCount(cf) == octetVal(cf(0));
+//setCfpCount(cf, i) == mkOS(i, 1) // Tail(cf);
+//cfpPeriod(cf) == octetVal(cf(1));
+//setCfpPeriod(cf, i) == cf(0) // mkOS(i, 1) // SubStr(cf,2,4);
+//cfpMaxDur(cf) == octetVal(cf(2)) + (octetVal(cf(3)) * 256);
+//setCfpMaxDur(cf, u) == SubStr(cf, 0, 2) // mkOS(u mod 256, 1)
+//// mkOS(u / 256, 1) // SubStr(cf, 4, 2);
+//cfpDurRem(cf) == octetVal(cf(4)) + (octetVal(cf(5)) * 256);
+//setCfpDurRem(cf, u) == SubStr(cf, 0, 4) // mkOS(u mod 256, 1)
+//// mkOS(u / 256, 1); )));
+//endnewtype CfParms;
+struct CfParms
+{
+
+};
+
+struct BssDscr
+{
+    MACAddress bdBssId;
+    std::string bdSsId; /* 1 <= length <= 32 */
+    BssType bdType;
+    simtime_t bdBcnPer; /* beacon period in Time Units */
+    int bdDtimPer; /* DTIM period in beacon periods */
+    std::string bdTstamp; /* 8 Octets from ProbeRsp/Beacon */
+    std::string bdStartTs; /* 8 Octets TSF when rx Tstamp */
+    std::string bdPhyParms; /* empty if not needed by PHY */
+    CfParms bdCfParms; /* empty if not CfPollable/no PCF */
+//    IbssParms bdIbssParms; /* empty if infrastructure BSS */
+    Capability bdCap; /* capability information */
+//    Ratestring bdBrates; /* BSS basic rate set */
 };
 
 } /* namespace inet */
