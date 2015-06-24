@@ -98,8 +98,6 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
 
     protected:
         TxCoordinationState state = TX_COORDINATION_STATE_START;
-        Ieee80211MacMacsorts *macsorts = nullptr;
-        Ieee80211MacMacmibPackage *macmib = nullptr;
 
         int ackctstime = -1;
         int atimcw = -1;
@@ -124,6 +122,8 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         int slrc = 0;
         int n = 0;
 
+        Ieee80211MacMacmibPackage *macmib = nullptr;
+        Ieee80211MacMacsorts *macsorts = nullptr;
         Ieee80211NewFrame *tpdu = nullptr;
         FragSdu *fsdu = nullptr;
         bps txrate = bps(NaN); // type Rate
@@ -151,7 +151,10 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
 
-        void init();
+        void receiveSignal(cComponent *source, int signalID, cObject *obj);
+
+        void continousSignalTxCIdle();
+
         void txcReq();
         void txcReq2();
         void rxPoll();
@@ -173,7 +176,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void ibssAtimWBullshit();
         void atimLimit();
         void atimFail();
-        TypeSubtype ftype(cPacket *packet);
+        TypeSubtype ftype(Ieee80211NewFrame *packet);
 
         void handleWake() override;
         void handleTbtt() override;

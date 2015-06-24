@@ -89,27 +89,22 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
         dataPumpProcedureGate = this->gate("txODataPump");
         tmgtGate = this->gate("tmgt");
         tdatGate = this->gate("tdat");
-        // TODO: ccw = aCwMin;
+        ccw = macmib->getPhyOperationTable()->getCWmin();
     }
-}
-
-void Ieee80211MacTxCoordinationSta::init()
-{
-//        dSifsDelay = aSifsTime - aRxTxTurnaroundTime;
-    // Mmrate must be selected from mBrates.
-    // Other selection criteria are not specified.
-//        'mmrate:= rate to send mmpdus'
-    ssrc = 0;
-    slrc = 0;
-    // TODO: ccw = import(aCWmin);
-    atimcw = dcfcw = ccw;
-    emitBackoff(ccw, -1);
-    state = TX_COORDINATION_STATE_TXC_IDLE;
 }
 
 void Ieee80211MacTxCoordinationSta::handleResetMac()
 {
-    init();
+    dSifsDelay = macmib->getPhyOperationTable()->getSifsTime() - macmib->getPhyOperationTable()->getRxTxTurnaroundTime();
+   // Mmrate must be selected from mBrates.
+   // Other selection criteria are not specified.
+   // TODO: 'mmrate:= rate to send mmpdus'
+   ssrc = 0;
+   slrc = 0;
+   ccw = macmib->getPhyOperationTable()->getCWmin();
+   atimcw = dcfcw = ccw;
+   emitBackoff(ccw, -1);
+   state = TX_COORDINATION_STATE_TXC_IDLE;
 }
 
 void Ieee80211MacTxCoordinationSta::txcReq()
@@ -120,7 +115,7 @@ void Ieee80211MacTxCoordinationSta::txcReq()
     {
         fsdu->sqf = seqnum;
         seqnum = seqnum == 4095 ? 0 : seqnum + 1;
-        fsdu->eol = simTime() /* TODO: + import(dot11MaxTransmitMsduLifetime) */;
+        fsdu->eol = simTime() + macmib->getOperationTable()->getDot11MaxTransmitMsduLifetime();
     }
     tpdu->setSeq(fsdu->sqf);
     txcReq2();
@@ -135,7 +130,7 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
     // With FH PHY, if next fragment will be after a dwell boundary, Duration/ID may be set to
     // one ACK time plus SIFS time.
     simtime_t aSifsTime; // TODO
-//   INTEGER???   tpdu->setDurId(aSifsTime + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * aSifsTime + ackctstime + frametime);
+//    tpdu->setDurId(aSifsTime + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * macmib->getPhyOperationTable()->getSifsTime() + ackctstime + frametime);
     tpdu->setPwrMgt(macmib->getStationConfigTable()->getDot11PowerMangementMode());
     emitBackoff(0,0);
     chkRtsCts();
@@ -171,7 +166,7 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
 
 void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest)
 {
-    this->fsdu = new FragSdu(pduRequest->getFsdu());
+    fsdu = new FragSdu(pduRequest->getFsdu());
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
         if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
@@ -226,6 +221,13 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
 
 void Ieee80211MacTxCoordinationSta::rxPoll()
 {
+    tpdu = new Ieee80211NewFrame();
+    tpdu->setFtype(TypeSubtype_null_frame);
+    tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+    tpdu->setAddr2(macsorts->getIntraMacRemoteVariables()->getBssId());
+    scheduleAt(endRx + dSifsDelay, trsp);
+    emitCfPolled();
+    state = TX_COORDINATION_STATE_CF_RESPONSE;
 }
 
 void Ieee80211MacTxCoordinationSta::handleTbtt()
@@ -362,9 +364,7 @@ void Ieee80211MacTxCoordinationSta::handleCfPoll(Ieee80211MacSignalCfPoll *cfPol
 {
     endRx = cfPoll->getTime();
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
-    {
         rxPoll();
-    }
     else if (state == TX_COORDINATION_STATE_TXC_CFP)
     {
         //todo: rxPoll
@@ -380,7 +380,7 @@ void Ieee80211MacTxCoordinationSta::handleCfPoll(Ieee80211MacSignalCfPoll *cfPol
 
 void Ieee80211MacTxCoordinationSta::handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck)
 {
-
+    // TODO: saved signals
     if (state == TX_COORDINATION_STATE_CF_RESPONSE)
     {
         endRx = txCfAck->getTime();
@@ -724,10 +724,9 @@ void Ieee80211MacTxCoordinationSta::sendTxReq()
 
 }
 
-TypeSubtype Ieee80211MacTxCoordinationSta::ftype(cPacket *packet)
+TypeSubtype Ieee80211MacTxCoordinationSta::ftype(Ieee80211NewFrame *packet)
 {
-    // TODO
-    return TypeSubtype::TypeSubtype_beacon;
+    return packet->getFtype();
 }
 
 void Ieee80211MacTxCoordinationSta::atimWBullshit()
@@ -834,8 +833,29 @@ void Ieee80211MacTxCoordinationSta::handleCfEnd()
 {
 }
 
+void Ieee80211MacTxCoordinationSta::continousSignalTxCIdle()
+{
+    state = TX_COORDINATION_STATE_TXC_CFP;
+}
+
 void Ieee80211MacTxCoordinationSta::emitCfPolled()
 {
+}
+
+void Ieee80211MacTxCoordinationSta::receiveSignal(cComponent* source, int signalID, cObject* obj)
+{
+    Enter_Method_Silent();
+    printNotificationBanner(signalID, obj);
+    if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
+    {
+        switch (state)
+        {
+            case TX_COORDINATION_STATE_TXC_IDLE:
+                if (macsorts->getIntraMacRemoteVariables()->isCfp())
+                    continousSignalTxCIdle();
+                break;
+        }
+    }
 }
 
 } /* namespace inet */
