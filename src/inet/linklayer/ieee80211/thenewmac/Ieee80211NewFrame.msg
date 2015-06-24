@@ -42,7 +42,7 @@ packet Ieee80211NewFrame
     bool frDs; // From DS bit (1 bit)
     bool moreFrag; // More Fragments bit (1 bit)
     bool retryBit; // Retry bit (1 bit)
-    bool pwrMgt; // Power Management bit (1 bit)
+    int pwrMgt; // Power Management bit (1 bit)
     bool moreData; // More Data bit (1 bit)
     bool wepBit; // WEP bit (1 bit)
     bool orderBit; // {strictly}Order{ed} (1 bit)
