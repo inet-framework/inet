@@ -794,7 +794,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
             chunksAdded = 0;
         }
 
-        if (sackWithData || sackOnly) {
+        if (!sackAdded && (sackWithData || sackOnly)) {
             // SACK can be sent
             assert(headerCreated == true);
             sackChunk = createSack();
@@ -820,9 +820,6 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                 path->packetsInBurst++;
                 state->lastTransmission = simTime();
                 state->packetsInTotalBurst++;
-                if (dataChunksAdded > 0) {
-                    state->ssNextStream = true;
-                }
                 state->ackState = 0;
                 // Stop SACK timer if it is running...
                 stopTimer(SackTimer);
