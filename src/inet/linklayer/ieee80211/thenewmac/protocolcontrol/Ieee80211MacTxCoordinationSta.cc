@@ -31,10 +31,12 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
     {
         if (strcmp("ResetMAC", msg->getName()) == 0)
             handleResetMac();
-        if (strcmp("Tifs", msg->getName()) == 0)
-        {
+        if (strcmp("Tifs timer", msg->getName()) == 0)
             handleTifs();
-        }
+        else if (strcmp("Trsp timer", msg->getName()) == 0)
+            handleTrsp();
+        else if (strcmp("Tpdly timer", msg->getName()) == 0)
+            handleTpdly();
         else
             throw cRuntimeError("Unknown self message", msg->getName());
     }
@@ -54,8 +56,6 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
             handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg))
             handleTxConfirm();
-        else if (dynamic_cast<Ieee80211MacSignalTifs *>(msg))
-            handleTifs();
         else if (dynamic_cast<Ieee80211MacSignalAck *>(msg))
             handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalCts *>(msg))
@@ -66,8 +66,6 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
             handleWake();
         else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg))
             handleDoze();
-        else if (dynamic_cast<Ieee80211MacSignalTpdly *>(msg))
-            handleTpdly();
         else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg))
             handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg));
     }
@@ -129,7 +127,7 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
     // TODO: TxTime(length(fsdu->pdus[fsdu->fCur+1]), txrate, frametime);
     // With FH PHY, if next fragment will be after a dwell boundary, Duration/ID may be set to
     // one ACK time plus SIFS time.
-//    tpdu->setDurId(aSifsTime + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * macmib->getPhyOperationTable()->getSifsTime() + ackctstime + frametime);
+    tpdu->setDurId(macmib->getPhyOperationTable()->getSifsTime() + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * macmib->getPhyOperationTable()->getSifsTime() + ackctstime + frametime);
     tpdu->setPwrMgt(macmib->getStationConfigTable()->getDot11PowerMangementMode());
     emitBackoff(0,0);
     chkRtsCts();
@@ -141,7 +139,7 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
     if (useCtsToSelf())
     {
         // TxTime(length(tpdu,frametime2))
-        // rtsdu = mkctl(cts, frametime2 + 2 * aSifstime + ackctstime);
+//         rtsdu = mkctl(cts, frametime2 + 2 * aSifstime + ackctstime);
         state = TX_COORDINATION_STATE_WAIT_CTS_BACKOFF;
     }
     else
@@ -195,7 +193,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
     }
     else if (state == TX_COORDINATION_STATE_ASLEEP)
     {
-        scheduleAt(simTime() + macsorts->getIntraMacRemoteVariables()->getPdly(), tpdly);
+        scheduleAt(simTime() + usecToSimtime(macsorts->getIntraMacRemoteVariables()->getPdly()), tpdly);
         state = TX_COORDINATION_STATE_WAKE_WAIT_PROBE_DELAY;
     }
     else if (state == TX_COORDINATION_STATE_CF_RESPONSE)
@@ -261,7 +259,7 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
     {
         if (bstat == -2)
         {
-            psmChg = curPm == 0 /*import(dot11PowerManagementMode)*/ ? false : true;
+            psmChg = curPm == macmib->getStationConfigTable()->getDot11PowerMangementMode() ? false : true;
         }
     }
     else if (state == TX_COORDINATION_STATE_WAIT_MPDU_BACKOFF)
@@ -270,13 +268,9 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
         {
             emitTxRequest(tpdu, txrate);
             if (fsdu->grpa) // group addr
-            {
                 endFx();
-            }
             else
-            {
                 state = TX_COORDINATION_STATE_WAIT_PDU_SENT;
-            }
         }
         else
         {
@@ -293,7 +287,7 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
         }
         else
         {
-//            if curPsm = import(dot11PowerManagementMode) then false else true fi
+            psmChg = curPm == macmib->getStationConfigTable()->getDot11PowerMangementMode() ? false : true; // curPsm -- curPm
             macsorts->getIntraMacRemoteVariables()->setFxIp(true);
             macmib->getCountersTable()->incDot11TransmittedFragmentCount();
 //            emitTxRequest(rtsdu, txrate);
@@ -400,9 +394,7 @@ void Ieee80211MacTxCoordinationSta::txSifs()
 void Ieee80211MacTxCoordinationSta::handleTifs()
 {
     if (state == TX_COORDINATION_STATE_WAIT_CTS_SIFS)
-    {
         sendTxReq();
-    }
 }
 
 void Ieee80211MacTxCoordinationSta::txWait()
@@ -457,20 +449,19 @@ void Ieee80211MacTxCoordinationSta::handleTxConfirm()
 {
     if (state == TX_COORDINATION_STATE_WAIT_PDU_SENT)
     {
-        // TODO: set(now+dUsec(aSifsTime + calcDur(txrate,stuff(aMpduDurationFactor, sAckCtsLng))+ aPlcpHeaderLength+aPreambleLength+aSlotTime), Trsp);
-        // scheduleAt();
+//        scheduleAt(simTime()+usecToSimtime((macmib->getPhyOperationTable()->getSifsTime() + calcDur(txrate,stuff(aMpduDurationFactor, sAckCtsLng))+ aPlcpHeaderLength+aPreambleLength+aSlotTime)), trsp);
         state = TX_COORDINATION_STATE_WAIT_ACK;
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CTS_SENT)
     {
-        scheduleAt(simTime() + macmib->getPhyOperationTable()->getSifsTime(), tifs); // Tsifs??
+        scheduleAt(simTime() + usecToSimtime(macmib->getPhyOperationTable()->getSifsTime()), tifs); // Tsifs??
         state = TX_COORDINATION_STATE_WAIT_CTS_SIFS;
     }
     else if (state == TX_COORDINATION_STATE_WAIT_BEACON_TRANSMIT)
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
     else if (state == TX_COORDINATION_STATE_WAIT_CFP_TX_DONE)
     {
-        scheduleAt(simTime() + macmib->getPhyOperationTable()->getSifsTime(), trsp);
+        scheduleAt(simTime() + usecToSimtime(macmib->getPhyOperationTable()->getSifsTime()), trsp);
         state = TX_COORDINATION_STATE_WAIT_CF_ACK;
     }
 }
