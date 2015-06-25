@@ -60,10 +60,10 @@ enum TypeSubtype
  */
 enum BasicType
 {
-    BasicType_control,
-    BasicType_data,
-    BasicType_management,
-    BasicType_reserved
+    BasicType_control    = 0b00100000,
+    BasicType_data       = 0b00010000,
+    BasicType_management = 0b00000000,
+    BasicType_reserved   = 0b00110000
 };
 
 // TODO: move
