@@ -463,16 +463,14 @@ void Ieee80211MacTxCoordinationSta::handleTxConfirm()
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CTS_SENT)
     {
-        //set(now+dUsec(aSifsTime),Tsifs)
+        scheduleAt(simTime() + macmib->getPhyOperationTable()->getSifsTime(), tifs); // Tsifs??
         state = TX_COORDINATION_STATE_WAIT_CTS_SIFS;
     }
     else if (state == TX_COORDINATION_STATE_WAIT_BEACON_TRANSMIT)
-    {
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
-    }
     else if (state == TX_COORDINATION_STATE_WAIT_CFP_TX_DONE)
     {
-        //scheduleAt(simTime() + aSifsTime, trsp);
+        scheduleAt(simTime() + macmib->getPhyOperationTable()->getSifsTime(), trsp);
         state = TX_COORDINATION_STATE_WAIT_CF_ACK;
     }
 }
@@ -494,10 +492,8 @@ void Ieee80211MacTxCoordinationSta::confirmPdu()
     fsdu->lrc = 0;
     fsdu->src = 0;
     macmib->getCountersTable()->incDot11MulticastTransmittedFrameCount();
-// TODO:    If (fsdu!grpa or ((toDs(tpdu) = 1) and (isGrp(addr3(tpdu))) and (fsdu!fTot=fsdu!fCur+1)))
-//        then inc(cTmcfrm)
-//    else
-//        cTmcfrm fi
+    if (fsdu->grpa || (tpdu->getToDs() && tpdu->getAddr3().isMulticast() && fsdu->fTot == fsdu->fCur + 1))
+        macmib->getCountersTable()->incDot11MulticastTransmittedFrameCount();
     if (fsdu->fTot == fsdu->fCur + 1)
     {
         macmib->getCountersTable()->incDot11TransmittedFragmentCount();
