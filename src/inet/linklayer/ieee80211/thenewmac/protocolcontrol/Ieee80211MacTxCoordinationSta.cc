@@ -343,12 +343,13 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
         else
             state = TX_COORDINATION_STATE_TXC_IDLE;
     }
+    else if (state == TX_COORDINATION_STATE_SW_CHNL_BACKOFF)
+        state = macsorts->getIntraMacRemoteVariables()->isAtimW() ? TX_COORDINATION_STATE_ATIM_WINDOW : TX_COORDINATION_STATE_TXC_IDLE;
 }
 
 void Ieee80211MacTxCoordinationSta::function1()
 {
-    // TODO:
-    if (/*import(mIbss)*/true)
+    if (macsorts->getIntraMacRemoteVariables()->isIbss())
     {
         dcfcw = ccw;
         ccw = atimcw;
@@ -814,10 +815,10 @@ void Ieee80211MacTxCoordinationSta::handleTpdly()
 void Ieee80211MacTxCoordinationSta::handleSwChnl(Ieee80211MacSignalSwChnl *swChnl)
 {
     chan = swChnl->getChan();
-    // todo: doBkoff
+    doBkoff = swChnl->getDoBkoff();
     emitChangeNav(0, NavSrc::NavSrc_cswitch);
     // 'channel change is Phy-specific'
-    // PlmeSet.request(chan stuff)'
+    // TODO: PlmeSet.request(chan stuff)'
     state = TX_COORDINATION_STATE_WAIT_CHANNEL;
 }
 
@@ -862,6 +863,28 @@ void Ieee80211MacTxCoordinationSta::receiveSignal(cComponent* source, int signal
                 break;
         }
     }
+}
+
+void Ieee80211MacTxCoordinationSta::handlePlmeSetConfirm(Ieee80211MacSignalPlmeSetConfirm* plmeSetConfirm)
+{
+    if (state == TX_COORDINATION_STATE_WAIT_CHANNEL)
+    {
+        emitSwDone();
+        if (doBkoff)
+        {
+            emitBackoff(ccw, -1);
+            state = TX_COORDINATION_STATE_SW_CHNL_BACKOFF;
+        }
+        else {
+            state = macsorts->getIntraMacRemoteVariables()->isAtimW() ? TX_COORDINATION_STATE_ATIM_WINDOW : TX_COORDINATION_STATE_TXC_IDLE;
+        }
+    }
+}
+
+void Ieee80211MacTxCoordinationSta::emitSwDone()
+{
+    Ieee80211MacSignalSwDone *swDone = new Ieee80211MacSignalSwDone();
+    send(swDone, tmgtGate);
 }
 
 } /* namespace inet */

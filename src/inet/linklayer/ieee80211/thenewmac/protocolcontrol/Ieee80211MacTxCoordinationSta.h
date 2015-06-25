@@ -52,6 +52,7 @@ class INET_API IIeee80211MacTxCoordinationSta
         virtual void handleWake() = 0;
         virtual void handleTpdly() = 0;
         virtual void handleSwChnl(Ieee80211MacSignalSwChnl *swChnl) = 0;
+        virtual void handlePlmeSetConfirm(Ieee80211MacSignalPlmeSetConfirm *plmeSetConfirm) = 0;
 
         virtual void emitBackoff(int ccw, int par2) = 0;
         virtual void emitAtimW() = 0;
@@ -61,6 +62,7 @@ class INET_API IIeee80211MacTxCoordinationSta
         virtual void emitPsmDone() = 0;
         virtual void emitChangeNav(int par1, NavSrc navSrc) = 0;
         virtual void emitCfPolled() = 0;
+        virtual void emitSwDone() = 0;
 };
 
 class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinationSta, public Ieee80211MacMacProcessBase
@@ -93,7 +95,8 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
             TX_COORDINATION_STATE_CF_RESPONSE,
             TX_COORDINATION_STATE_WAIT_CFP_SIFS,
             TX_COORDINATION_STATE_WAIT_CFP_TX_DONE,
-            TX_COORDINATION_STATE_WAIT_CF_ACK
+            TX_COORDINATION_STATE_WAIT_CF_ACK,
+            TX_COORDINATION_STATE_SW_CHNL_BACKOFF
         };
 
     protected:
@@ -141,10 +144,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         cMessage *trsp = nullptr;
         cMessage *tpdly = nullptr;
 
-        /*
-         * temporary definitions
-         */
-        int aCWMax;
+        bool doBkoff = false;
 
     protected:
         void handleMessage(cMessage *msg) override;
@@ -196,6 +196,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleTpdly() override;
         void handleSwChnl(Ieee80211MacSignalSwChnl *swChnl) override;
         void handleCfEnd() override;
+        void handlePlmeSetConfirm(Ieee80211MacSignalPlmeSetConfirm *plmeSetConfirm) override;
 
         void emitTxRequest(cPacket *tpdu, bps txrate) override;
         void emitBackoff(int ccw, int par2) override;
@@ -205,6 +206,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void emitPsmDone() override;
         void emitChangeNav(int par1, NavSrc navSrc) override;
         void emitCfPolled() override;
+        void emitSwDone() override;
 
     public:
         virtual void emitResetMac() override { Ieee80211MacMacProcessBase::emitResetMac(); }
