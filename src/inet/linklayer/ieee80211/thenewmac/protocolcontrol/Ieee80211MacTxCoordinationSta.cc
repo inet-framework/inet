@@ -208,7 +208,6 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
             seqnum = seqnum + 1;
             fsdu->eol = simTime() + macmib->getOperationTable()->getDot11MaxTransmitMsduLifetime();
         }
-        //TODO:
         tpdu->setSeq(fsdu->sqf);
         // Change data to data+cfAck if appropriate.
         tpdu->setFtype(TypeSubtype(tpdu->getFtype() | pack));
@@ -578,7 +577,7 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
     }
     else if (state == TX_COORDINATION_STATE_WAIT_ATIM_ACK)
     {
-        ccw = ccw == aCWMax ? aCWMax : 2*ccw + 1;
+        ccw = ccw == macmib->getPhyOperationTable()->getCWmax() ? macmib->getPhyOperationTable()->getCWmax(): 2*ccw + 1;
         ssrc++;
         fsdu->src++;
         if (ssrc == macmib->getOperationTable()->getDot11ShortRetryLimit())
@@ -633,7 +632,7 @@ void Ieee80211MacTxCoordinationSta::emitCancel()
 void Ieee80211MacTxCoordinationSta::ackFail()
 {
     macsorts->getIntraMacRemoteVariables()->setFxIp(false);
-    // TODO:    ccw = ccw == aCWmax ? aCWmax : 2*ccw + 1;
+    ccw = ccw == macmib->getPhyOperationTable()->getCWmax() ? macmib->getPhyOperationTable()->getCWmax() : 2*ccw + 1;
     emitBackoff(ccw, -1);
     tpdu->setRetryBit(true);
     fsdu->pdus[fsdu->fCur]->setRetryBit(true);
@@ -665,7 +664,7 @@ void Ieee80211MacTxCoordinationSta::ackFail()
 void Ieee80211MacTxCoordinationSta::ctsFail()
 {
     macsorts->getIntraMacRemoteVariables()->setFxIp(false);
-// TODO:    ccw = ccw == aCWmax ? aCWmax : 2*ccw + 1;
+    ccw = ccw == macmib->getPhyOperationTable()->getCWmax() ? macmib->getPhyOperationTable()->getCWmax() : 2*ccw + 1;
     emitBackoff(ccw, -1);
 }
 

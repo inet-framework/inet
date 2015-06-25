@@ -102,7 +102,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         int ackctstime = -1;
         int atimcw = -1;
         int bstat = -1;
-        int chan = -1;
+        int chan = -1; // channel
         int dcfcnt = -1;
         int dcfcw = -1;
         int frametime = -1;
