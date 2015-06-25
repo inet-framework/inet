@@ -63,7 +63,10 @@ INET_API cModule *findModuleUnderContainingNode(cModule *from);
  * or type mismatch.
  */
 template<typename T>
-INET_API T *findModuleFromPar(cPar& par, cModule *from)
+INET_API T *findModuleFromPar(cPar& par, cModule *from);
+
+template<typename T>
+T *findModuleFromPar(cPar& par, cModule *from)
 {
     const char *path = par.stringValue();
     if (path && *path) {
@@ -85,7 +88,10 @@ INET_API T *findModuleFromPar(cPar& par, cModule *from)
  * or type mismatch.
  */
 template<typename T>
-INET_API T *getModuleFromPar(cPar& par, cModule *from)
+INET_API T *getModuleFromPar(cPar& par, cModule *from);
+
+template<typename T>
+T *getModuleFromPar(cPar& par, cModule *from)
 {
     const char *path = par.stringValue();
     cModule *mod = from->getModuleByPath(path);
