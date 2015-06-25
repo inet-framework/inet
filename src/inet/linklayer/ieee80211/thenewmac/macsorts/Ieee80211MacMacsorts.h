@@ -36,6 +36,8 @@ namespace ieee80211 {
  */
 typedef int Usec;
 typedef int Tu; // Time Unit -- 1*TU = 1024*Usec
+simtime_t usecToSimtime(Usec usec);
+simtime_t tuToSimtime(Tu tu);
 
 class Ieee80211MacMacsortsIntraMacRemoteVariables;
 
@@ -87,7 +89,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         bool mPcAvail; /* =true if point coord in BSS */
         bool mPcDlvr; /* =true if CF delivery only */
         bool mPcPoll; /* =true if CF delivery & polling */
-        simtime_t mPdly; /* probe delay from start or join */
+        Usec mPdly; /* probe delay from start or join */
         // TODO: remote mPss PsState; /* power save state of STA */
         bool mReceiveDTIMs; /* =true if DTIMs received */
         bool mRxA; /* =true if RX indicated by PHY */
@@ -136,8 +138,8 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         void setPcDlvr(bool pcDlvr) { mPcDlvr = pcDlvr; }
         bool isPcPoll() const { return mPcPoll; }
         void setPcPoll(bool pcPoll) { mPcPoll = pcPoll; }
-        const simtime_t& getPdly() const { return mPdly; }
-        void setPdly(const simtime_t& pdly) { mPdly = pdly; }
+        Usec getPdly() const { return mPdly; }
+        void setPdly(const Usec pdly) { mPdly = pdly; }
         bool isReceiveDtiMs() const { return mReceiveDTIMs; }
         void setReceiveDtiMs(bool receiveDtiMs) { mReceiveDTIMs = receiveDtiMs; }
         bool isRxA() const { return mRxA; }
