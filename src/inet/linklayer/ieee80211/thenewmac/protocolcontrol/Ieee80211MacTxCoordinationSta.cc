@@ -129,7 +129,6 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
     // TODO: TxTime(length(fsdu->pdus[fsdu->fCur+1]), txrate, frametime);
     // With FH PHY, if next fragment will be after a dwell boundary, Duration/ID may be set to
     // one ACK time plus SIFS time.
-    simtime_t aSifsTime; // TODO
 //    tpdu->setDurId(aSifsTime + ackctstime + fsdu->fTot == fsdu->fCur + 1 ? 0 : 2 * macmib->getPhyOperationTable()->getSifsTime() + ackctstime + frametime);
     tpdu->setPwrMgt(macmib->getStationConfigTable()->getDot11PowerMangementMode());
     emitBackoff(0,0);
@@ -139,7 +138,7 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
 
 void Ieee80211MacTxCoordinationSta::chkRtsCts()
 {
-    if (true/*use CTS to self?*/)
+    if (useCtsToSelf())
     {
         // TxTime(length(tpdu,frametime2))
         // rtsdu = mkctl(cts, frametime2 + 2 * aSifstime + ackctstime);
@@ -147,7 +146,7 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
     }
     else
     {
-        if (true/* use rts/cts protection*/)
+        if (useCtsRtsProtection())
         {
         }
         else
@@ -178,7 +177,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
         {
             if (ftype(fsdu->pdus[0]) == TypeSubtype::TypeSubtype_beacon)
             {
-//                n = intuniform(2*aCWmin);
+                n = intuniform(0,2*macmib->getPhyOperationTable()->getCWmin());
                 emitBackoff(n,-1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_BEACON;
             }
@@ -187,7 +186,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
                 tpdu = new Ieee80211NewFrame();
                 tpdu->setFtype(TypeSubtype_atim);
                 tpdu->setAddr1(fsdu->dst);
-//                tpdu->setAddr2() dot11MacAddress
+                tpdu->setAddr2(macmib->getOperationTable()->getDot11MacAddress());
                 emitBackoff(ccw, -1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_ATIM;
                 ibssAtimWBullshit();
@@ -211,8 +210,8 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
         }
         //TODO:
         tpdu->setSeq(fsdu->sqf);
-        // TODO: Change data to data+cfAck if appropriate.
-        // tpdu:= setFtype(tpdu,type(tpdu) or pack);
+        // Change data to data+cfAck if appropriate.
+        tpdu->setFtype(TypeSubtype(tpdu->getFtype() | pack));
         // TODO: See 9.6 for rules about selecting transmit data rate.
         // 'txrate:= selected tx data rate'
         state = TX_COORDINATION_STATE_WAIT_CFP_SIFS;
@@ -498,7 +497,7 @@ void Ieee80211MacTxCoordinationSta::endFx()
         emitPsmDone();
     macsorts->getIntraMacRemoteVariables()->setFxIp(false);
     psmChg = false;
-// TODO:    ccw = aCWmin;
+    ccw = macmib->getPhyOperationTable()->getCWmin();
     confirmPdu();
 }
 
@@ -543,7 +542,7 @@ void Ieee80211MacTxCoordinationSta::handleAck(Ieee80211MacSignalAck *ack)
         endFx();
     else if (state == TX_COORDINATION_STATE_WAIT_ATIM_ACK)
     {
-        ccw = aCWMin;
+        ccw = macmib->getPhyOperationTable()->getCWmin();
         atimAck();
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CF_ACK)
@@ -583,7 +582,7 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
         ssrc++;
         fsdu->src++;
         if (ssrc == macmib->getOperationTable()->getDot11ShortRetryLimit())
-            ccw = aCWMin;
+            ccw = macmib->getPhyOperationTable()->getCWmin();
         if (fsdu->src == macmib->getOperationTable()->getDot11ShortRetryLimit())
         {
             atimLimit();
@@ -648,7 +647,7 @@ void Ieee80211MacTxCoordinationSta::ackFail()
         fsdu->src++;
         if (ssrc == macmib->getOperationTable()->getDot11ShortRetryLimit())
         {
-            // TODO: ccw = aCwMin;
+            ccw = macmib->getPhyOperationTable()->getCWmin();
         }
         if (fsdu->src == macmib->getOperationTable()->getDot11ShortRetryLimit())
         {
@@ -675,9 +674,7 @@ void Ieee80211MacTxCoordinationSta::ctsFail2() // rename
     slrc++;
     fsdu->lrc++;
     if (slrc == macmib->getOperationTable()->getDot11LongRetryLimit())
-    {
-        // ccw = aCwMin;
-    }
+        ccw = macmib->getPhyOperationTable()->getCWmin();
     if (fsdu->lrc == macmib->getOperationTable()->getDot11LongRetryLimit())
     {
         emitPduConfirm(fsdu, TxResult::TxResult_retryLimit);
@@ -836,6 +833,16 @@ void Ieee80211MacTxCoordinationSta::handleCfEnd()
 void Ieee80211MacTxCoordinationSta::continousSignalTxCIdle()
 {
     state = TX_COORDINATION_STATE_TXC_CFP;
+}
+
+bool Ieee80211MacTxCoordinationSta::useCtsRtsProtection()
+{
+    return false;
+}
+
+bool Ieee80211MacTxCoordinationSta::useCtsToSelf()
+{
+    return false;
 }
 
 void Ieee80211MacTxCoordinationSta::emitCfPolled()

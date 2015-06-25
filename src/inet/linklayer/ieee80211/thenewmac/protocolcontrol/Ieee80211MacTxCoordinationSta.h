@@ -144,7 +144,6 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         /*
          * temporary definitions
          */
-        int aCWMin;
         int aCWMax;
 
     protected:
@@ -177,6 +176,8 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void atimLimit();
         void atimFail();
         TypeSubtype ftype(Ieee80211NewFrame *packet);
+        bool useCtsRtsProtection();
+        bool useCtsToSelf();
 
         void handleWake() override;
         void handleTbtt() override;
@@ -194,7 +195,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleDoze() override;
         void handleTpdly() override;
         void handleSwChnl(Ieee80211MacSignalSwChnl *swChnl) override;
-        virtual void handleCfEnd() override;
+        void handleCfEnd() override;
 
         void emitTxRequest(cPacket *tpdu, bps txrate) override;
         void emitBackoff(int ccw, int par2) override;
