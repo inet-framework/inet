@@ -19,6 +19,7 @@
 #define __INET_IEEE80211MACMACMIB_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedMacStaTypes.h"
 #include "inet/linklayer/common/MACAddress.h"
 
@@ -31,19 +32,19 @@ namespace ieee80211 {
 class INET_API Ieee80211MacMacmibStationConfigTable
 {
     protected:
-        simtime_t dot11MediumOccupancyLimit;
+        Tu dot11MediumOccupancyLimit;
         bool dot11CfPollable;
         int dot11CfpPeriod;
         int dot11CfpMaxDuration;
-        simtime_t dot11AuthenticationResponseTimeout;
+        Tu dot11AuthenticationResponseTimeout;
         bool dot11PrivacyOptionImplemented = true;
         PsMode dot11PowerMangementMode = PsMode::PsMode_sta_active;
         std::string dot11DesiredSSID;
         BssType dot11DesiredBSSType;
         std::string dot11OperationalRateSet;
-        simtime_t dot11BeaconPeriod;
+        Tu dot11BeaconPeriod;
         int dot11DtimPeriod;
-        simtime_t dot11AssociationResponseTimeout;
+        Tu dot11AssociationResponseTimeout;
         std::string dot11DisassociateReason;
         MACAddress dot11DisassociateStation;
         std::string dot11DeauthenticateReason;
@@ -53,16 +54,16 @@ class INET_API Ieee80211MacMacmibStationConfigTable
         bool dot11MultiDomainCapabilityImplemented = false;
 
     public:
-       const simtime_t& getDot11AssociationResponseTimeout() const { return dot11AssociationResponseTimeout; }
-       void setDot11AssociationResponseTimeout(const simtime_t& dot11AssociationResponseTimeout) { this->dot11AssociationResponseTimeout = dot11AssociationResponseTimeout; }
+       Tu getDot11AssociationResponseTimeout() const { return dot11AssociationResponseTimeout; }
+       void setDot11AssociationResponseTimeout(Tu dot11AssociationResponseTimeout) { this->dot11AssociationResponseTimeout = dot11AssociationResponseTimeout; }
        const MACAddress& getDot11AuthenticateFailStation() const { return dot11AuthenticateFailStation; }
        void setDot11AuthenticateFailStation(const MACAddress& dot11AuthenticateFailStation) { this->dot11AuthenticateFailStation = dot11AuthenticateFailStation; }
        int getDot11AuthenticateFailStatus() const { return dot11AuthenticateFailStatus; }
        void setDot11AuthenticateFailStatus(int dot11AuthenticateFailStatus) { this->dot11AuthenticateFailStatus = dot11AuthenticateFailStatus; }
-       const simtime_t& getDot11AuthenticationResponseTimeout() const { return dot11AuthenticationResponseTimeout; }
-       void setDot11AuthenticationResponseTimeout(const simtime_t& dot11AuthenticationResponseTimeout) { this->dot11AuthenticationResponseTimeout = dot11AuthenticationResponseTimeout; }
-       const simtime_t& getDot11BeaconPeriod() const { return dot11BeaconPeriod; }
-       void setDot11BeaconPeriod(const simtime_t& dot11BeaconPeriod) { this->dot11BeaconPeriod = dot11BeaconPeriod; }
+       const Tu getDot11AuthenticationResponseTimeout() const { return dot11AuthenticationResponseTimeout; }
+       void setDot11AuthenticationResponseTimeout(Tu dot11AuthenticationResponseTimeout) { this->dot11AuthenticationResponseTimeout = dot11AuthenticationResponseTimeout; }
+       Tu getDot11BeaconPeriod() const { return dot11BeaconPeriod; }
+       void setDot11BeaconPeriod(const Tu dot11BeaconPeriod) { this->dot11BeaconPeriod = dot11BeaconPeriod; }
        int getDot11CfpMaxDuration() const { return dot11CfpMaxDuration; }
        void setDot11CfpMaxDuration(int dot11CfpMaxDuration) { this->dot11CfpMaxDuration = dot11CfpMaxDuration; }
        bool isDot11CfPollable() const { return dot11CfPollable; }
@@ -83,8 +84,8 @@ class INET_API Ieee80211MacMacmibStationConfigTable
        void setDot11DisassociateStation(const MACAddress& dot11DisassociateStation) { this->dot11DisassociateStation = dot11DisassociateStation; }
        int getDot11DtimPeriod() const { return dot11DtimPeriod; }
        void setDot11DtimPeriod(int dot11DtimPeriod) { this->dot11DtimPeriod = dot11DtimPeriod; }
-       const simtime_t& getDot11MediumOccupancyLimit() const { return dot11MediumOccupancyLimit; }
-       void setDot11MediumOccupancyLimit(const simtime_t& dot11MediumOccupancyLimit) { this->dot11MediumOccupancyLimit = dot11MediumOccupancyLimit; }
+       Tu getDot11MediumOccupancyLimit() const { return dot11MediumOccupancyLimit; }
+       void setDot11MediumOccupancyLimit(Tu dot11MediumOccupancyLimit) { this->dot11MediumOccupancyLimit = dot11MediumOccupancyLimit; }
        bool isDot11MultiDomainCapabilityImplemented() const { return dot11MultiDomainCapabilityImplemented; }
        void setDot11MultiDomainCapabilityImplemented(bool dot11MultiDomainCapabilityImplemented = false) { this->dot11MultiDomainCapabilityImplemented = dot11MultiDomainCapabilityImplemented; }
        const std::string& getDot11OperationalRateSet() const { return dot11OperationalRateSet; }
@@ -158,143 +159,236 @@ class INET_API Ieee80211MacMacmibCountersTable
 class INET_API Ieee80211MacMacmibOperationTable
 {
     protected:
+        MACAddress dot11MacAddress;
         int dot11RtsThreshold;
         int dot11ShortRetryLimit;
         int dot11LongRetryLimit;
         int dot11FragmentationThreshold;
-        simtime_t dot11MaxTransmitMsduLifetime;
-        simtime_t dot11MaxReceiveLifetime; // todo: TU??
+        Tu dot11MaxTransmitMsduLifetime;
+        Tu dot11MaxReceiveLifetime;
 
     public:
         int getDot11FragmentationThreshold() const { return dot11FragmentationThreshold; }
         void setDot11FragmentationThreshold(int dot11FragmentationThreshold) { this->dot11FragmentationThreshold = dot11FragmentationThreshold; }
         int getDot11LongRetryLimit() const { return dot11LongRetryLimit; }
         void setDot11LongRetryLimit(int dot11LongRetryLimit) { this->dot11LongRetryLimit = dot11LongRetryLimit; }
-        const simtime_t& getDot11MaxReceiveLifetime() const { return dot11MaxReceiveLifetime; }
-        void setDot11MaxReceiveLifetime(const simtime_t& dot11MaxReceiveLifetime) { this->dot11MaxReceiveLifetime = dot11MaxReceiveLifetime; }
-        const simtime_t& getDot11MaxTransmitMsduLifetime() const { return dot11MaxTransmitMsduLifetime; }
-        void setDot11MaxTransmitMsduLifetime(const simtime_t& dot11MaxTransmitMsduLifetime) { this->dot11MaxTransmitMsduLifetime = dot11MaxTransmitMsduLifetime; }
+        const Tu getDot11MaxReceiveLifetime() const { return dot11MaxReceiveLifetime; }
+        void setDot11MaxReceiveLifetime(const Tu dot11MaxReceiveLifetime) { this->dot11MaxReceiveLifetime = dot11MaxReceiveLifetime; }
+        const Tu getDot11MaxTransmitMsduLifetime() const { return dot11MaxTransmitMsduLifetime; }
+        void setDot11MaxTransmitMsduLifetime(const Tu dot11MaxTransmitMsduLifetime) { this->dot11MaxTransmitMsduLifetime = dot11MaxTransmitMsduLifetime; }
         int getDot11RtsThreshold() const { return dot11RtsThreshold; }
         void setDot11RtsThreshold(int dot11RtsThreshold) { this->dot11RtsThreshold = dot11RtsThreshold; }
         int getDot11ShortRetryLimit() const { return dot11ShortRetryLimit; }
         void setDot11ShortRetryLimit(int dot11ShortRetryLimit) { this->dot11ShortRetryLimit = dot11ShortRetryLimit; }
+        const MACAddress& getDot11MacAddress() const { return dot11MacAddress; }
+        void setDot11MacAddress(const MACAddress& dot11MacAddress) { this->dot11MacAddress = dot11MacAddress; }
 };
 
 /*
- * TODO: 2385p.
+ * PhyCharacteristic Parameters, with default FH values (TODO)
  */
 class INET_API Ieee80211MacMacmibPhyOperationTable
 {
     protected:
-        simtime_t aSlotTime = (aCcaTime + aRxTxTurnaroundTime + aAirPropagationTime + aMacProcessingTime);
-        simtime_t aCcaTime;
-        simtime_t aRxTxTurnaroundTime = aTxPlcpDelay + aRxTxSwitchTime + aTxRampOnTime + aTxRfDelay;
-        simtime_t aTxPlcpDelay;
-        simtime_t aRxTxSwitchTime;
-        simtime_t aTxRampOnTime;
-        simtime_t aTxRfDelay;
-        simtime_t aSifsTime = (aRxRfDelay + aRxPlcpDelay + aMacProcessingTime + aRxTxTurnaroundTime);
-        simtime_t aRxRfDelay;
-        simtime_t aRxPlcpDelay = 2;
-        simtime_t aMacProcessingTime = 2;
-        simtime_t aTxRampOffTime = 8;
-        simtime_t aPreambleLength = 96;
-        simtime_t aPlcpHeaderLength = 32;
+        Usec aSlotTime = (aCcaTime + aRxTxTurnaroundTime + aAirPropagationTime + aMacProcessingTime);
+        Usec aCcaTime;
+        Usec aRxTxTurnaroundTime = aTxPlcpDelay + aRxTxSwitchTime + aTxRampOnTime + aTxRfDelay;
+        Usec aTxPlcpDelay;
+        Usec aRxTxSwitchTime;
+        Usec aTxRampOnTime;
+        Usec aTxRfDelay;
+        Usec aSifsTime = (aRxRfDelay + aRxPlcpDelay + aMacProcessingTime + aRxTxTurnaroundTime);
+        Usec aRxRfDelay;
+        Usec aRxPlcpDelay = 2;
+        Usec aMacProcessingTime = 2;
+        Usec aTxRampOffTime = 8;
+        Usec aPreambleLength = 96;
+        Usec aPlcpHeaderLength = 32;
         int aMpduMaxLength = 4095;
-        simtime_t aAirPropagationTime = 1;
+        Usec aAirPropagationTime = 1;
         int aCWmax = 1023;
         int aCWmin = 15;
 
     public:
-           const simtime_t& getAirPropagationTime() const
-           {
-               return aAirPropagationTime;
-           }
+        Usec getAirPropagationTime() const
+        {
+            return aAirPropagationTime;
+        }
 
-           const simtime_t& getCcaTime() const
-           {
-               return aCcaTime;
-           }
+        void setAirPropagationTime(Usec airPropagationTime )
+        {
+            aAirPropagationTime = airPropagationTime;
+        }
 
-           int getCWmax() const
-           {
-               return aCWmax;
-           }
+        Usec getCcaTime() const
+        {
+            return aCcaTime;
+        }
 
-           int getCWmin() const
-           {
-               return aCWmin;
-           }
+        void setCcaTime(Usec ccaTime)
+        {
+            aCcaTime = ccaTime;
+        }
 
-           const simtime_t& getMacProcessingTime() const
-           {
-               return aMacProcessingTime;
-           }
+        int getCWmax() const
+        {
+            return aCWmax;
+        }
 
-           int getMpduMaxLength() const
-           {
-               return aMpduMaxLength;
-           }
+        void setCWmax(int cWmax)
+        {
+            aCWmax = cWmax;
+        }
 
-           const simtime_t& getPlcpHeaderLength() const
-           {
-               return aPlcpHeaderLength;
-           }
+        int getCWmin() const
+        {
+            return aCWmin;
+        }
 
-           const simtime_t& getPreambleLength() const
-           {
-               return aPreambleLength;
-           }
+        void setCWmin(int cWmin)
+        {
+            aCWmin = cWmin;
+        }
 
-           const simtime_t& getRxPlcpDelay() const
-           {
-               return aRxPlcpDelay;
-           }
+        Usec getMacProcessingTime() const
+        {
+            return aMacProcessingTime;
+        }
 
-           const simtime_t& getRxRfDelay() const
-           {
-               return aRxRfDelay;
-           }
+        void setMacProcessingTime(Usec macProcessingTime)
+        {
+            aMacProcessingTime = macProcessingTime;
+        }
 
-           const simtime_t& getRxTxSwitchTime() const
-           {
-               return aRxTxSwitchTime;
-           }
+        int getMpduMaxLength() const
+        {
+            return aMpduMaxLength;
+        }
 
-           const simtime_t& getRxTxTurnaroundTime() const
-           {
-               return aRxTxTurnaroundTime;
-           }
+        void setMpduMaxLength(int mpduMaxLength)
+        {
+            aMpduMaxLength = mpduMaxLength;
+        }
 
-           const simtime_t& getSifsTime() const
-           {
-               return aSifsTime;
-           }
+        Usec getPlcpHeaderLength() const
+        {
+            return aPlcpHeaderLength;
+        }
 
-           const simtime_t& getSlotTime() const
-           {
-               return aSlotTime;
-           }
+        void setPlcpHeaderLength(Usec plcpHeaderLength)
+        {
+            aPlcpHeaderLength = plcpHeaderLength;
+        }
 
-           const simtime_t& getTxPlcpDelay() const
-           {
-               return aTxPlcpDelay;
-           }
+        Usec getPreambleLength() const
+        {
+            return aPreambleLength;
+        }
 
-           const simtime_t& getTxRampOffTime() const
-           {
-               return aTxRampOffTime;
-           }
+        void setPreambleLength(Usec preambleLength)
+        {
+            aPreambleLength = preambleLength;
+        }
 
-           const simtime_t& getTxRampOnTime() const
-           {
-               return aTxRampOnTime;
-           }
+        Usec getRxPlcpDelay() const
+        {
+            return aRxPlcpDelay;
+        }
 
-           const simtime_t& getTxRfDelay() const
-           {
-               return aTxRfDelay;
-           }
+        void setRxPlcpDelay(Usec rxPlcpDelay)
+        {
+            aRxPlcpDelay = rxPlcpDelay;
+        }
+
+        Usec getRxRfDelay() const
+        {
+            return aRxRfDelay;
+        }
+
+        void setRxRfDelay(Usec rxRfDelay)
+        {
+            aRxRfDelay = rxRfDelay;
+        }
+
+        Usec getRxTxSwitchTime() const
+        {
+            return aRxTxSwitchTime;
+        }
+
+        void setRxTxSwitchTime(Usec rxTxSwitchTime)
+        {
+            aRxTxSwitchTime = rxTxSwitchTime;
+        }
+
+        Usec getRxTxTurnaroundTime() const
+        {
+            return aRxTxTurnaroundTime;
+        }
+
+        void setRxTxTurnaroundTime(Usec rxTxTurnaroundTime)
+        {
+            aRxTxTurnaroundTime = rxTxTurnaroundTime;
+        }
+
+        Usec getSifsTime() const
+        {
+            return aSifsTime;
+        }
+
+        void setSifsTime(Usec sifsTime)
+        {
+            aSifsTime = sifsTime;
+        }
+
+        Usec getSlotTime() const
+        {
+            return aSlotTime;
+        }
+
+        void setSlotTime(Usec slotTime)
+        {
+            aSlotTime = slotTime;
+        }
+
+        Usec getTxPlcpDelay() const
+        {
+            return aTxPlcpDelay;
+        }
+
+        void setTxPlcpDelay(Usec txPlcpDelay)
+        {
+            aTxPlcpDelay = txPlcpDelay;
+        }
+
+        Usec getTxRampOffTime() const
+        {
+            return aTxRampOffTime;
+        }
+
+        void setTxRampOffTime(Usec txRampOffTime)
+        {
+            aTxRampOffTime = txRampOffTime;
+        }
+
+        Usec getTxRampOnTime() const
+        {
+            return aTxRampOnTime;
+        }
+
+        void setTxRampOnTime(Usec txRampOnTime)
+        {
+            aTxRampOnTime = txRampOnTime;
+        }
+
+        Usec getTxRfDelay() const
+        {
+            return aTxRfDelay;
+        }
+
+        void setTxRfDelay(Usec txRfDelay)
+        {
+            aTxRfDelay = txRfDelay;
+        }
 };
 
 /*
