@@ -88,6 +88,9 @@ enum Ieee80211MacSignalType
     MLME_GET_CONFIRM = 45;
     MLME_SET_CONFIRM = 46;
     MLME_RESET_REQUEST = 47;
+    SW_DONE = 48;
+    PLME_SET_CONFIRM = 49;
+    PLME_SET_REQUEST = 50;
 }
 
 packet Ieee80211MacSignal
@@ -397,4 +400,24 @@ packet Ieee80211MacSignalMlmeResetRequest extends Ieee80211MacSignal
     signalType = 47;
     MACAddress addr;
     bool dflt;
+}
+
+packet Ieee80211MacSignalSwDone extends Ieee80211MacSignal
+{
+    signalType = 48;
+}
+
+packet Ieee80211MacSignalPlmeSetConfirm extends Ieee80211MacSignal
+{
+    signalType = 49;
+    MibStatus status;
+    string attrib; // MibAtrib
+}
+
+
+packet Ieee80211MacSignalPlmeSetRequest extends Ieee80211MacSignal
+{
+    signalType = 50;
+    string atrrib; // MibAtrib
+    int mibValue; // MibValue
 }
