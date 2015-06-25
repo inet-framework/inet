@@ -31,6 +31,12 @@ using namespace inet::units::values;
 namespace inet {
 namespace ieee80211 {
 
+/*
+ * Discrete microsecond and Time Unit sorts
+ */
+typedef int Usec;
+typedef int Tu; // Time Unit -- 1*TU = 1024*Usec
+
 class Ieee80211MacMacsortsIntraMacRemoteVariables;
 
 class INET_API Ieee80211MacMacsorts : public cSimpleModule
