@@ -210,10 +210,10 @@ void IPv6::endService(cPacket *msg)
         updateDisplayString();
 }
 
-InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
+InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 {
-    cGate *g = msg->getArrivalGate();
-    return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : nullptr;
+    IMACProtocolControlInfo *controlInfo = dynamic_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
+    return controlInfo != nullptr ? ift->getInterfaceById(controlInfo->getInterfaceId()) : nullptr;
 }
 
 void IPv6::preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
@@ -224,7 +224,7 @@ void IPv6::preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE
 
     // routepacket
     if (!destAddr.isMulticast())
-        routePacket(datagram, destIE, nextHopAddr, false);
+        routePacket(datagram, destIE, fromIE, nextHopAddr, false);
     else
         routeMulticastPacket(datagram, destIE, fromIE, false);
 }
@@ -280,12 +280,12 @@ void IPv6::datagramLocalOut(IPv6Datagram *datagram, const InterfaceEntry *destIE
     if (destIE != nullptr)
         fragmentAndSend(datagram, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
     else if (!datagram->getDestAddress().isMulticast())
-        routePacket(datagram, destIE, requestedNextHopAddress, true);
+        routePacket(datagram, destIE, nullptr, requestedNextHopAddress, true);
     else
         routeMulticastPacket(datagram, destIE, nullptr, true);
 }
 
-void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress, bool fromHL)
+void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL)
 {
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
@@ -299,7 +299,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv
         EV_INFO << "local delivery\n";
 
         numLocalDeliver++;
-        localDeliver(datagram);
+        localDeliver(datagram, fromIE);
         return;
     }
 
@@ -438,7 +438,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
         if (rt->isLocalAddress(destAddr)) {
             EV_INFO << "local delivery of multicast packet\n";
             numLocalDeliver++;
-            localDeliver(datagram->dup());
+            localDeliver(datagram->dup(), fromIE);
         }
 
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
@@ -501,7 +501,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
         // FIXME code from the MPLS model: set packet dest address to routerId (???)
         datagramCopy->setDestAddress(rt->getRouterId());
 
-        localDeliver(datagramCopy);
+        localDeliver(datagramCopy, fromIE);
     }
 
     // forward datagram only if IP forward is enabled, or sent locally
@@ -545,7 +545,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
  */
 }
 
-void IPv6::localDeliver(IPv6Datagram *datagram)
+void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 {
     // Defragmentation. skip defragmentation if datagram is not fragmented
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
@@ -581,7 +581,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
     // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
-    cPacket *packet = decapsulate(datagram);
+    cPacket *packet = decapsulate(datagram, fromIE);
 
 
     if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage *>(packet)) {
@@ -664,10 +664,9 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
     }
 }
 
-cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
+cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 {
     // decapsulate transport packet
-    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info

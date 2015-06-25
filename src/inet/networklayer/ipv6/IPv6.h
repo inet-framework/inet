@@ -141,7 +141,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress, bool fromHL);
+    virtual void routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL);
     virtual void resolveMACAddressAndSendPacket(IPv6Datagram *datagram, int interfaceID, IPv6Address nextHop, bool fromHL);
 
     /**
@@ -158,12 +158,12 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void localDeliver(IPv6Datagram *datagram);
+    virtual void localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
      */
-    virtual cPacket *decapsulate(IPv6Datagram *datagram);
+    virtual cPacket *decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE);
 
     /**
      * Last hoplimit check, then send datagram on the given interface.
