@@ -217,17 +217,6 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
     }
 }
 
-void Ieee80211MacTxCoordinationSta::rxPoll()
-{
-    tpdu = new Ieee80211NewFrame();
-    tpdu->setFtype(TypeSubtype_null_frame);
-    tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
-    tpdu->setAddr2(macsorts->getIntraMacRemoteVariables()->getBssId());
-    scheduleAt(endRx + dSifsDelay, trsp);
-    emitCfPolled();
-    state = TX_COORDINATION_STATE_CF_RESPONSE;
-}
-
 void Ieee80211MacTxCoordinationSta::handleTbtt()
 {
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
@@ -362,11 +351,8 @@ void Ieee80211MacTxCoordinationSta::function1()
 void Ieee80211MacTxCoordinationSta::handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll)
 {
     endRx = cfPoll->getTime();
-    if (state == TX_COORDINATION_STATE_TXC_IDLE)
-        rxPoll();
-    else if (state == TX_COORDINATION_STATE_TXC_CFP)
+    if (state == TX_COORDINATION_STATE_TXC_IDLE || state == TX_COORDINATION_STATE_TXC_CFP)
     {
-        //todo: rxPoll
         tpdu = new Ieee80211NewFrame();
         tpdu->setFtype(TypeSubtype_null_frame);
         tpdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());

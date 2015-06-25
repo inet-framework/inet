@@ -156,7 +156,6 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
 
         void txcReq();
         void txcReq2();
-        void rxPoll();
         void chkRtsCts();
         void function1();
         void txSifs(); // Send frame at Sifs
