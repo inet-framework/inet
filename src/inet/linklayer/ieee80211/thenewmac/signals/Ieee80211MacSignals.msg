@@ -19,6 +19,7 @@ cplusplus {{
     #include "inet/common/INETDefs.h"
     #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
     #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedMacStaTypes.h"
+    #include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 }}
 
 namespace inet::ieee80211;
@@ -37,6 +38,7 @@ class noncobject StationState;
 class noncobject StateErr;
 class noncobject Imed;
 class noncobject MibStatus;
+class noncobject Ieee80211NewFrame;
 
 enum Ieee80211MacSignalType
 {
@@ -319,14 +321,14 @@ packet Ieee80211MacSignalSwChnl extends Ieee80211MacSignal
 packet Ieee80211MacSignalMsduRequest extends Ieee80211MacSignal
 {
     signalType = 36;
-    cPacket sdu;
+    Ieee80211NewFrame sdu;
     CfPriority priority;
 }
 
 packet Ieee80211MacSignalMmRequest extends Ieee80211MacSignal
 {
     signalType = 37;
-    cPacket sdu;
+    Ieee80211NewFrame sdu;
     Imed imed;
     CfPriority priority; // TODO??
     double rate;
