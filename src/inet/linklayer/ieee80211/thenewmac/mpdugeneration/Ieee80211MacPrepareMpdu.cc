@@ -57,18 +57,8 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
     sdu = msduRequest->getSdu();
     if (state == PREPARE_MPDU_STATE_NO_BSS)
     {
-        // TODO: continuous signals
-        if (macsorts->getIntraMacRemoteVariables()->isAssoc() && !macsorts->getIntraMacRemoteVariables()->isActingAsAp())
-            state = PREPARE_MPDU_STATE_PREPARE_BSS;
-        else if (macsorts->getIntraMacRemoteVariables()->isIbss())
-            state = PREPARE_MDPU_STATE_PREPARE_IBSS;
-        else if (macsorts->getIntraMacRemoteVariables()->isActingAsAp())
-            state = PREPARE_MPDU_STATE_PREPARE_AP;
-        else
-        {
-            emitMsduConfirm(sdu, pri, TxStatus::TxStatus_noBss);
-            state = PREPARE_MPDU_STATE_NO_BSS;
-        }
+        emitMsduConfirm(sdu, pri, TxStatus::TxStatus_noBss);
+        state = PREPARE_MPDU_STATE_NO_BSS;
     }
     else if (state == PREPARE_MPDU_STATE_PREPARE_BSS)
     {
@@ -77,9 +67,9 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
             state = PREPARE_MPDU_STATE_NO_BSS;
         else
         {
-//            sdu:=setAddr3(sdu,addr1(sdu));
-//            sdu:=setAddr1(sdu,import(mBssId)),
-//            sdu:=setToDs(sdu,1)
+            sdu.setAddr3(sdu.getAddr1());
+            sdu.setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+            sdu.setToDs(true);
             useWep = macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
             fragment();
         }
@@ -115,7 +105,7 @@ void Ieee80211MacPrepareMpdu::fragment()
     fsdu.lrc = 0;
     fsdu.psm = false;
     fsdu.rate = bps(0);
-    fsdu.grpa; // todo
+    fsdu.grpa = sdu.getAddr1().isMulticast();
     fsdu.cf = pri;
 //    fsdu.cnfTo = sender;
     fsdu.resume = false;
@@ -228,6 +218,28 @@ void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *f
 //    }
 //    else
 //        emitMsduConfirm(rsdu, pri, rrsl);
+}
+
+void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, cObject* obj)
+{
+    Enter_Method_Silent();
+    printNotificationBanner(signalID, obj);
+    if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
+    {
+        switch (state)
+        {
+            case PREPARE_MPDU_STATE_NO_BSS:
+                if (macsorts->getIntraMacRemoteVariables()->isAssoc() && !macsorts->getIntraMacRemoteVariables()->isActingAsAp())
+                    state = PREPARE_MPDU_STATE_PREPARE_BSS;
+                break;
+                if (macsorts->getIntraMacRemoteVariables()->isIbss())
+                    state = PREPARE_MDPU_STATE_PREPARE_IBSS;
+                break;
+                if (macsorts->getIntraMacRemoteVariables()->isActingAsAp())
+                    state = PREPARE_MPDU_STATE_PREPARE_AP;
+                break;
+        }
+    }
 }
 
 void Ieee80211MacPrepareMpdu::emitMmConfirm(cPacket &rsdu, TxResult txResult)

@@ -24,6 +24,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 #include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -71,8 +72,8 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         int thld;
         CfPriority pri;
         TxResult rrsl;
-        cPacket sdu;
-        cPacket rsdu;
+        Ieee80211NewFrame sdu;
+        Ieee80211NewFrame rsdu;
 
         Ieee80211MacMacsorts *macsorts = nullptr;
 
@@ -82,6 +83,8 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
     protected:
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
+
+        void receiveSignal(cComponent *source, int signalID, cObject *obj);
 
         void fragment();
         void makePdus();
