@@ -38,14 +38,14 @@ void Ieee80211MacMsduFromLlc::handleMessage(cMessage* msg)
         handleMaUnitDataRequest(dynamic_cast<Ieee80211MacSignalMaUnitDataRequest *>(msg->getControlInfo()), dynamic_cast<cPacket *>(msg));
 }
 
-void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData)
+void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *frame)
 {
     if (state == MSDU_FROM_LCC_STATE_FROM_LLC)
     {
         da = signal->getDestinationAddress();
         sa = signal->getSenderAddres();
         rt = signal->getRouting();
-        llcData = llcData;
+        llcData = frame;
         srv = signal->getServiceClass();
         cf = signal->getPriority();
 
@@ -139,25 +139,27 @@ void Ieee80211MacMsduFromLlc::makeMsdu()
 //    (sa parameter not used)
 //    addr3:= mBssId
 //    <other header fields> := 0
-//    sdu:=mkFrame(data, da,dot11MacAddress,
-//            import(mBssId),
-//            LLCdata)
+    Ieee80211NewFrame *sdu = new Ieee80211NewFrame();
+    sdu->setFtype(TypeSubtype_data);
+    sdu->setAddr1(da);
+    sdu->setAddr2(macmib->getOperationTable()->getDot11MacAddress());
+    sdu->setAddr3(macsorts->getIntraMacRemoteVariables()->getBssId());
+    sdu->setByteLength(24);
     if (srv == ServiceClass_strictlyOrdered)
-    {
-//        sdu:=
-//        setOrderBit
-//        (sdu, 1)
-    }
+        sdu->setOrderBit(true);
 //    Send Msdu to Mpdu preparation
 //    (to distribution service at AP)
 //    with basic header. Other fields are
 //    filled in prior to transmission
-//    emitMsduRequest(sdu, cf);
+    emitMsduRequest(sdu, cf);
 }
 
-void Ieee80211MacMsduFromLlc::emitMsduRequest(cPacket* sdu, CfPriority priority)
+void Ieee80211MacMsduFromLlc::emitMsduRequest(Ieee80211NewFrame* sdu, CfPriority priority)
 {
-
+    Ieee80211MacSignalMsduRequest *signal = new Ieee80211MacSignalMsduRequest();
+    signal->setPriority(priority);
+    sdu->setControlInfo(signal);
+    send(sdu, "txMsdu$o");
 }
 
 } /* namespace inet */

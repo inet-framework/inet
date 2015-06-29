@@ -33,7 +33,7 @@ class INET_API IIeee80211MacMsduFromLlc
     protected:
         virtual void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData) = 0;
         virtual void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal) = 0;
-        virtual void emitMsduRequest(cPacket *sdu, CfPriority priority) = 0;
+        virtual void emitMsduRequest(Ieee80211NewFrame *sdu, CfPriority priority) = 0;
         virtual void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv) = 0;
 };
 
@@ -51,7 +51,7 @@ class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public
         Ieee80211MacMacmibPackage *macmib = nullptr;
 
         CfPriority cf;
-        cPacket llcData;
+        cPacket *llcData;
         Routing rt;
         MACAddress da;
         MACAddress sa;
@@ -66,7 +66,7 @@ class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public
         void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv);
         void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal);
         void makeMsdu();
-        void emitMsduRequest(cPacket *sdu, CfPriority priority);
+        void emitMsduRequest(Ieee80211NewFrame *sdu, CfPriority priority);
 };
 
 } /* namespace inet */
