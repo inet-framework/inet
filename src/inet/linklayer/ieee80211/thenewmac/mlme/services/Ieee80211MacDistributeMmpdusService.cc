@@ -37,14 +37,14 @@ void Ieee80211MacDistributeMmpdusService::handleMessage(cMessage* msg)
     }
     else
     {
-        if (dynamic_cast<Ieee80211MacSignalXport *>(msg))
+        if (dynamic_cast<Ieee80211MacSignalXport *>(msg->getControlInfo()))
             handleXport();
-        else if (dynamic_cast<Ieee80211MacSignalSst *>(msg))
-            handleSst(dynamic_cast<Ieee80211MacSignalSst *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalMmConfirm *>(msg))
-            handleMmConfirm(dynamic_cast<Ieee80211MacSignalMmConfirm *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalMmIndicate *>(msg))
-            handleMmIndicate(dynamic_cast<Ieee80211MacSignalMmIndicate *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalSst *>(msg->getControlInfo()))
+            handleSst(dynamic_cast<Ieee80211MacSignalSst *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalMmConfirm *>(msg->getControlInfo()))
+            handleMmConfirm(dynamic_cast<Ieee80211MacSignalMmConfirm *>(msg->getControlInfo()), dynamic_cast<cPacket *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalMmIndicate *>(msg->getControlInfo()))
+            handleMmIndicate(dynamic_cast<Ieee80211MacSignalMmIndicate *>(msg->getControlInfo()));
     }
 }
 
@@ -60,9 +60,9 @@ void Ieee80211MacDistributeMmpdusService::handleSst(Ieee80211MacSignalSst* sst)
 //    emitStaState();
 }
 
-void Ieee80211MacDistributeMmpdusService::handleSend(Ieee80211MacSignalSend* send)
+void Ieee80211MacDistributeMmpdusService::handleSend(Ieee80211MacSignalSend* send, cPacket *frame)
 {
-    mSpdu = send->getFrame();
+    mSpdu = frame;
     mIm = send->getPriority();
 //    The selection criteria for Mmpdu Tx data rate are
 //    not specified. Frames to group addresses must
@@ -73,9 +73,9 @@ void Ieee80211MacDistributeMmpdusService::handleSend(Ieee80211MacSignalSend* sen
     //emitMmRequest();
 }
 
-void Ieee80211MacDistributeMmpdusService::handleMmConfirm(Ieee80211MacSignalMmConfirm* mmConfirm)
+void Ieee80211MacDistributeMmpdusService::handleMmConfirm(Ieee80211MacSignalMmConfirm* mmConfirm, cPacket *frame)
 {
-    mSpdu = mmConfirm->getFrame();
+    mSpdu = frame;
 //    if (ftype(mSpdu) == beacon || ftype(mSpdu) == probe_rsp)
 //    {
 //        emitSent();

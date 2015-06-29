@@ -30,8 +30,8 @@ class INET_API IIeee80211MacDistributeMmpdusService
     protected:
         virtual void handleXport() = 0;
         virtual void handleSst(Ieee80211MacSignalSst *sst) = 0;
-        virtual void handleSend(Ieee80211MacSignalSend *send) = 0;
-        virtual void handleMmConfirm(Ieee80211MacSignalMmConfirm *mmConfirm) = 0;
+        virtual void handleSend(Ieee80211MacSignalSend *send, cPacket *frame) = 0;
+        virtual void handleMmConfirm(Ieee80211MacSignalMmConfirm *mmConfirm, cPacket *frame) = 0;
         virtual void handleMmIndicate(Ieee80211MacSignalMmIndicate *mmIndicate) = 0;
 
         virtual void emitStaState(MACAddress addr, StationState stationState) = 0;
@@ -40,10 +40,10 @@ class INET_API IIeee80211MacDistributeMmpdusService
         virtual void emitCls2Err(MACAddress addr) = 0;
         virtual void emitCls3Err(MACAddress addr) = 0;
         virtual void emitCfend() = 0;
-        virtual void emitAsocReq(cPacket mrpdu) = 0;
-        virtual void emitAsocRsp(cPacket mrpdu) = 0;
-        virtual void emitReasocReq(cPacket mrpdu) = 0;
-        virtual void emitReasocRsp(cPacket mrpdu) = 0;
+        virtual void emitAsocReq(cPacket *mrpdu) = 0;
+        virtual void emitAsocRsp(cPacket *mrpdu) = 0;
+        virtual void emitReasocReq(cPacket *mrpdu) = 0;
+        virtual void emitReasocRsp(cPacket *mrpdu) = 0;
 };
 
 class INET_API Ieee80211MacDistributeMmpdusService : public IIeee80211MacDistributeMmpdusService, public cSimpleModule
@@ -61,8 +61,8 @@ class INET_API Ieee80211MacDistributeMmpdusService : public IIeee80211MacDistrib
         Imed mIm;
         CfPriority pri;
         bps mRate;
-        cPacket mRpdu;
-        cPacket mSpdu;
+        cPacket *mRpdu = nullptr;
+        cPacket *mSpdu = nullptr;
         StateErr mSerr;
         StationState mSst;
         simtime_t mtE, mtT;
@@ -75,8 +75,8 @@ class INET_API Ieee80211MacDistributeMmpdusService : public IIeee80211MacDistrib
     protected:
         virtual void handleXport() override;
         virtual void handleSst(Ieee80211MacSignalSst *sst) override;
-        virtual void handleSend(Ieee80211MacSignalSend *send) override;
-        virtual void handleMmConfirm(Ieee80211MacSignalMmConfirm *mmConfirm) override;
+        virtual void handleSend(Ieee80211MacSignalSend *send, cPacket *frame) override;
+        virtual void handleMmConfirm(Ieee80211MacSignalMmConfirm *mmConfirm, cPacket *frame) override;
         virtual void handleMmIndicate(Ieee80211MacSignalMmIndicate *mmIndicate) override;
 
         virtual void emitStaState(MACAddress addr, StationState stationState);
