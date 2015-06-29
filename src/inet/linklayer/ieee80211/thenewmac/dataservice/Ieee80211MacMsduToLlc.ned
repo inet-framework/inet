@@ -19,4 +19,5 @@ simple Ieee80211MacMsduToLlc
 {
     gates:
         input rxMsdu;
+        output toLlc;
 }
