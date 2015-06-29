@@ -28,29 +28,31 @@ void Ieee80211MacMsduFromLlc::initialize(int stage)
     {
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
     }
 }
 
 void Ieee80211MacMsduFromLlc::handleMessage(cMessage* msg)
 {
-
+    if (dynamic_cast<Ieee80211MacSignalMaUnitDataRequest *>(msg->getControlInfo()))
+        handleMaUnitDataRequest(dynamic_cast<Ieee80211MacSignalMaUnitDataRequest *>(msg->getControlInfo()), dynamic_cast<cPacket *>(msg));
 }
 
-void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal)
+void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData)
 {
     if (state == MSDU_FROM_LCC_STATE_FROM_LLC)
     {
         da = signal->getDestinationAddress();
         sa = signal->getSenderAddres();
         rt = signal->getRouting();
-        llcData = signal->getLlcData();
+        llcData = llcData;
         srv = signal->getServiceClass();
         cf = signal->getPriority();
 
         // TODO: validate parameters??
         if (rt != Routing_null_rt)
             stat = TxStatus_nonNullSourceRouting;
-        else if (llcData.getByteLength() > Ieee80211MacNamedStaticIntDataValues::sMaxMsduLng || llcData.getByteLength() < 0)
+        else if (llcData->getByteLength() > Ieee80211MacNamedStaticIntDataValues::sMaxMsduLng || llcData->getByteLength() < 0)
             stat = TxStatus_excessiveDataLength;
         else
             stat = TxStatus_successful;
