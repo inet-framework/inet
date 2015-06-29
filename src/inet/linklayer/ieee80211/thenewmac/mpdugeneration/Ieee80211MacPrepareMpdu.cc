@@ -30,12 +30,12 @@ void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
     }
     else
     {
-        if (dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg))
-            handleMsduRequest(dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalMmRequest *>(msg))
-            handleMmRequest(dynamic_cast<Ieee80211MacSignalMmRequest *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg))
-            handleFragConfirm(dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg));
+        if (dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg->getControlInfo()))
+            handleMsduRequest(dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg->getControlInfo()), dynamic_cast<Ieee80211NewFrame *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalMmRequest *>(msg->getControlInfo()))
+            handleMmRequest(dynamic_cast<Ieee80211MacSignalMmRequest *>(msg->getControlInfo()), dynamic_cast<Ieee80211NewFrame *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()))
+            handleFragConfirm(dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()));
     }
 }
 
@@ -46,15 +46,15 @@ void Ieee80211MacPrepareMpdu::initialize(int stage)
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
 
-        msdu = gate("mgmt");
-        fragMsdu = gate("fragMsdu");
+//        msdu = gate("msdu");
+//        fragMsdu = gate("fragMsdu");
     }
 }
 
-void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest)
+void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame)
 {
     pri = msduRequest->getPriority();
-    sdu = msduRequest->getSdu();
+    sdu = frame;
     if (state == PREPARE_MPDU_STATE_NO_BSS)
     {
         emitMsduConfirm(sdu, pri, TxStatus::TxStatus_noBss);
@@ -67,9 +67,9 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
             state = PREPARE_MPDU_STATE_NO_BSS;
         else
         {
-            sdu.setAddr3(sdu.getAddr1());
-            sdu.setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
-            sdu.setToDs(true);
+            sdu->setAddr3(sdu->getAddr1());
+            sdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
+            sdu->setToDs(true);
             useWep = macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
             fragment();
         }
@@ -96,35 +96,35 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
 
 void Ieee80211MacPrepareMpdu::fragment()
 {
-    fsdu.fTot = 1;
-    fsdu.fCur = 0;
-    fsdu.fAnc = 0;
-    fsdu.eol = 0;
-    fsdu.sqf = 0;
-    fsdu.src = 0;
-    fsdu.lrc = 0;
-    fsdu.psm = false;
-    fsdu.rate = bps(0);
-    fsdu.grpa = sdu.getAddr1().isMulticast();
-    fsdu.cf = pri;
+    fsdu->fTot = 1;
+    fsdu->fCur = 0;
+    fsdu->fAnc = 0;
+    fsdu->eol = 0;
+    fsdu->sqf = 0;
+    fsdu->src = 0;
+    fsdu->lrc = 0;
+    fsdu->psm = false;
+    fsdu->rate = bps(0);
+    fsdu->grpa = sdu->getAddr1().isMulticast();
+    fsdu->cf = pri;
 //    fsdu.cnfTo = sender;
-    fsdu.resume = false;
+    fsdu->resume = false;
 //    mpduOvhd = sMacHdrLng + sCrcLng
     pduSize = macmib->getOperationTable()->getDot11FragmentationThreshold();
     //TODO
     int sduLength; // = length(sdu);
-    if (!fsdu.grpa && sduLength > pduSize)
+    if (!fsdu->grpa && sduLength > pduSize)
     {
 //        This is the typical case, with the length of all but the last fragment
 //        equal to dot11FragmentationThreshold (plus sWepAddLng if useWep=true). The
 //        value selected for pduSize must be >=256, even, and <=aMpduMaxLength.
         pduSize -= mpduOvhd;
-        fsdu.fTot = (sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng) / pduSize + ((sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng % pduSize) ? 1 : 0);
+        fsdu->fTot = (sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng) / pduSize + ((sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng % pduSize) ? 1 : 0);
     }
     else
         pduSize = sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng;
-    if (fsdu.fTot == 0)
-        fsdu.fTot = 1;
+    if (fsdu->fTot == 0)
+        fsdu->fTot = 1;
     makePdus();
 }
 
@@ -133,10 +133,10 @@ void Ieee80211MacPrepareMpdu::makePdus()
     int sduLength;
     f = 0;
     int p = Ieee80211MacNamedStaticIntDataValues::sMacHdrLng;
-    fsdu.pdus[f] = nullptr;
+    fsdu->pdus[f] = nullptr;
     keyOk = false;
 
-    while (f != fsdu.fTot)
+    while (f != fsdu->fTot)
     {
     //    fsdu!pdus(f):=
     //    fsdu!pdus(f) //
@@ -147,7 +147,7 @@ void Ieee80211MacPrepareMpdu::makePdus()
     //    fsdu!pdus(f):=
     //    setFrag(
     //    fsdu!pdus(f),f)
-        if (f+1 < fsdu.fTot)
+        if (f+1 < fsdu->fTot)
         {
 //            fsdu!pdus(f):=
 //            setMoreFrag(
@@ -172,7 +172,7 @@ void Ieee80211MacPrepareMpdu::makePdus()
             p += pduSize;
             if (p + pduSize > sduLength)
                 pduSize = sduLength - p + 1;
-            if (f == fsdu.fTot)
+            if (f == fsdu->fTot)
                 emitFragRequest(fsdu);
         }
         else
@@ -188,9 +188,9 @@ void Ieee80211MacPrepareMpdu::handleResetMac()
     state = PREPARE_MPDU_STATE_NO_BSS;
 }
 
-void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest)
+void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame)
 {
-    sdu = mmRequest->getSdu();
+    sdu = frame;
     pri = mmRequest->getPriority();
     // Mmpdus sent even when not in Bss/Ibss.
 //    bcmc:=isGroup(addr1(sdu))
@@ -206,7 +206,7 @@ void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmReq
 
 void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm)
 {
-    fsdu = fragConfirm->getFsdu();
+//    fsdu = fragConfirm->getFsdu();
     pri = fragConfirm->getPriority();
     rrsl = fragConfirm->getTxResult();
 //    rsdu:= substr(fsdu!pdus(0), 0,sMacHdrLng),
@@ -242,25 +242,27 @@ void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, cO
     }
 }
 
-void Ieee80211MacPrepareMpdu::emitMmConfirm(cPacket &rsdu, TxResult txResult)
+void Ieee80211MacPrepareMpdu::emitMmConfirm(cPacket *rsdu, TxStatus txStatus)
 {
     Ieee80211MacSignalMmConfirm *mmConfirm = new Ieee80211MacSignalMmConfirm();
-    mmConfirm->setFrame(rsdu);
+    mmConfirm->setStatus(txStatus);
+    rsdu->setControlInfo(mmConfirm);
 }
 
-void Ieee80211MacPrepareMpdu::emitMsduConfirm(cPacket &sdu, CfPriority priority, TxStatus txStatus)
+void Ieee80211MacPrepareMpdu::emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus)
 {
     Ieee80211MacSignalMsduConfirm *msduConfirm = new Ieee80211MacSignalMsduConfirm();
-    msduConfirm->setSdu(sdu);
     msduConfirm->setPriority(priority);
-    send(msduConfirm, msdu);
+    msduConfirm->setTxStatus(txStatus);
+    sdu->setControlInfo(msduConfirm);
+    send(sdu, msdu);
 }
 
-void Ieee80211MacPrepareMpdu::emitFragRequest(FragSdu &sdu)
+void Ieee80211MacPrepareMpdu::emitFragRequest(FragSdu *sdu)
 {
-    Ieee80211MacSignalFragRequest *fragRequest = new Ieee80211MacSignalFragRequest();
-    fragRequest->setFsdu(sdu);
-    send(fragRequest, fragMsdu);
+//    Ieee80211MacSignalFragRequest *fragRequest = new Ieee80211MacSignalFragRequest();
+//    fragRequest->setFsdu(sdu);
+//    send(fragRequest, fragMsdu);
 }
 
 } /* namespace inet */

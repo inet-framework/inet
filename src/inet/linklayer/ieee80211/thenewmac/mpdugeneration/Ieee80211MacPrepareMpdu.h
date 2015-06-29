@@ -35,14 +35,14 @@ class INET_API IIeee80211MacPrepareMpdu
         typedef Ieee80211MacFragmentationSupport::FragSdu FragSdu;
 
     protected:
-        virtual void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest) = 0;
+        virtual void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame) = 0;
         virtual void handleResetMac() = 0;
-        virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest) = 0;
+        virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame) = 0;
         virtual void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm) = 0;
 
-        virtual void emitMsduConfirm(cPacket &sdu, CfPriority priority, TxStatus txStatus) = 0;
-        virtual void emitFragRequest(FragSdu &fsdu) = 0;
-        virtual void emitMmConfirm(cPacket &rsdu, TxResult txResult) = 0;
+        virtual void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus) = 0;
+        virtual void emitFragRequest(FragSdu *fsdu) = 0;
+        virtual void emitMmConfirm(cPacket *rsdu, TxStatus txStatus) = 0;
 };
 
 
@@ -66,14 +66,14 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         bool keyOk;
         bool useWep = false;
         int f;
-        FragSdu fsdu;
+        FragSdu *fsdu;
         int mpduOvhd;
         int pduSize;
         int thld;
         CfPriority pri;
         TxResult rrsl;
-        Ieee80211NewFrame sdu;
-        Ieee80211NewFrame rsdu;
+        Ieee80211NewFrame *sdu;
+        Ieee80211NewFrame *rsdu;
 
         Ieee80211MacMacsorts *macsorts = nullptr;
 
@@ -89,13 +89,13 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void fragment();
         void makePdus();
 
-        void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest);
-        void emitMsduConfirm(cPacket &sdu, CfPriority priority, TxStatus txStatus);
-        void emitFragRequest(FragSdu &fsdu);
+        void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame);
+        void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
+        void emitFragRequest(FragSdu *fsdu);
         void handleResetMac();
-        void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest);
+        void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame);
         void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm);
-        void emitMmConfirm(cPacket &rsdu, TxResult txResult);
+        void emitMmConfirm(cPacket *rsdu, TxStatus txStatus);
 };
 
 } /* namespace inet */
