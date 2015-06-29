@@ -18,7 +18,7 @@
 package inet.linklayer.ieee80211.thenewmac;
 
 import inet.linklayer.ieee80211.thenewmac.dataservice.Ieee80211MacDataService;
-import inet.linklayer.ieee80211.thenewmac.macmib.Ieee80211MacMacmib;
+import inet.linklayer.ieee80211.thenewmac.macmib.Ieee80211MacMacmibPackage;
 import inet.linklayer.ieee80211.thenewmac.macsorts.Ieee80211MacMacsorts;
 import inet.linklayer.ieee80211.thenewmac.managementservice.Ieee80211MacManagementService;
 import inet.linklayer.ieee80211.thenewmac.mlme.Ieee80211MacMlme;
@@ -31,6 +31,9 @@ import inet.linklayer.ieee80211.thenewmac.transmission.Ieee80211MacTransmission;
 module Ieee80211NewMac
 {
     @display("bgb=450,417");
+    gates:
+        inout macSap;
+
     submodules:
         dataService: Ieee80211MacDataService {
             @display("p=64,58");
@@ -56,10 +59,11 @@ module Ieee80211NewMac
         macsorts: Ieee80211MacMacsorts {
             @display("p=410,58");
         }
-        macmib: Ieee80211MacMacmib {
+        macmib: Ieee80211MacMacmibPackage {
             @display("p=410,140");
         }
-    connections:
+
+    connections allowunconnected:
         transmission.csFromCs <-- reception.csToTx;
         transmission.txTxrq[0] <--> protocolControl.txTxO[0]; // DataPump <-->  Tx_Coordination_sta
         transmission.txBkof <--> protocolControl.txTxO[1]; // Backoff_Procedur <--> Tx_Coordination_sta
@@ -79,4 +83,6 @@ module Ieee80211NewMac
         mlme.mctlToMct <--> protocolControl.mctlTmgt;
         mlme.mctlSst <--> protocolControl.mctlBcMgt;
         mlme.mctlToMctRxCoordination <-- protocolControl.mctlBcmgtMlme;
+
+        macSap <--> dataService.macSapMsduFromLlc;
 }
