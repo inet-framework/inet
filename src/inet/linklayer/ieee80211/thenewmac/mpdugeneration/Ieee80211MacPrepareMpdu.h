@@ -59,21 +59,21 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         };
 
     protected:
-        PrepareMpduState state = PREPARE_MPDU_STATE_START;
+        PrepareMpduState state = PREPARE_MPDU_STATE_NO_BSS;
         Ieee80211MacMacmibPackage *macmib = nullptr;
 
         bool bcmc;
         bool keyOk;
         bool useWep = false;
         int f;
-        FragSdu *fsdu;
+        FragSdu *fsdu = nullptr;
         int mpduOvhd;
         int pduSize;
         int thld;
         CfPriority pri;
         TxResult rrsl;
-        Ieee80211NewFrame *sdu;
-        Ieee80211NewFrame *rsdu;
+        Ieee80211NewFrame *sdu = nullptr;
+        Ieee80211NewFrame *rsdu = nullptr;
 
         Ieee80211MacMacsorts *macsorts = nullptr;
 

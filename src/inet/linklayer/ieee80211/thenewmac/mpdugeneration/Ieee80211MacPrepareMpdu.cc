@@ -26,7 +26,7 @@ void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
 {
     if (msg->isSelfMessage())
     {
-
+        throw cRuntimeError("This module doesn't handle self messages.")
     }
     else
     {
@@ -62,7 +62,6 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
     }
     else if (state == PREPARE_MPDU_STATE_PREPARE_BSS)
     {
-        // TODO: cs
         if (!macsorts->getIntraMacRemoteVariables()->isAssoc())
             state = PREPARE_MPDU_STATE_NO_BSS;
         else
@@ -76,10 +75,9 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
     }
     else if (state == PREPARE_MDPU_STATE_PREPARE_IBSS)
     {
-        // TODO: cs
         if (!macsorts->getIntraMacRemoteVariables()->isIbss())
             state = PREPARE_MPDU_STATE_NO_BSS;
-        useWep = macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
+        useWep = false; // macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
         fragment();
     }
     else if (state == PREPARE_MPDU_STATE_PREPARE_AP)
@@ -109,10 +107,10 @@ void Ieee80211MacPrepareMpdu::fragment()
     fsdu->cf = pri;
 //    fsdu.cnfTo = sender;
     fsdu->resume = false;
-//    mpduOvhd = sMacHdrLng + sCrcLng
+    mpduOvhd = Ieee80211MacNamedStaticIntDataValues::sMacHdrLng + Ieee80211MacNamedStaticIntDataValues::sCrcLng;
     pduSize = macmib->getOperationTable()->getDot11FragmentationThreshold();
     //TODO
-    int sduLength; // = length(sdu);
+    int sduLength = sdu->getByteLength();
     if (!fsdu->grpa && sduLength > pduSize)
     {
 //        This is the typical case, with the length of all but the last fragment
@@ -155,6 +153,7 @@ void Ieee80211MacPrepareMpdu::makePdus()
         }
         if (useWep)
         {
+            // TODO
     //        Encrypt
     //        (fsdu!pdus(f),
     //        keyOk,import(dot11WepKey_
@@ -193,14 +192,9 @@ void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmReq
     sdu = frame;
     pri = mmRequest->getPriority();
     // Mmpdus sent even when not in Bss/Ibss.
-//    bcmc:=isGroup(addr1(sdu))
-//    useWep:=dot11Privacy_
-//    Option_
-//    Implemented
-//    and if
-//    wepBit(sdu)=1
-//    then true
-//    else false fi
+    bcmc = sdu->getAddr1().isMulticast();
+// TODO    useWep:=dot11PrivacyOptionImplemented and if wepBit(sdu)=1 then true else false fi
+    useWep = false;
     fragment();
 }
 
