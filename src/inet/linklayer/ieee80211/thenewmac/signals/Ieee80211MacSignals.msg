@@ -95,82 +95,82 @@ enum Ieee80211MacSignalType
     PLME_SET_REQUEST = 50;
 }
 
-packet Ieee80211MacSignal
+class Ieee80211MacSignal
 {
     short signalType @enum(Ieee80211MacSignalType);
 }
 
-packet Ieee80211MacSignalTxRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalTxRequest extends Ieee80211MacSignal
 {
-    // tpdu as encapsulated packet
+    // tpdu as encapsulated class
     signalType = 0;
     double txrate;
 }
 
-packet Ieee80211MacSignalBackoff extends Ieee80211MacSignal
+class Ieee80211MacSignalBackoff extends Ieee80211MacSignal
 {
     signalType = 1;
     int cw;
     int cnt;
 }
 
-packet Ieee80211MacSignalPduConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalPduConfirm extends Ieee80211MacSignal
 {
     signalType = 2;
     Ieee80211MacFragmentationSupport::FragSdu fsdu;
     TxResult txResult;
 }
 
-packet Ieee80211MacSignalCancel extends Ieee80211MacSignal
+class Ieee80211MacSignalCancel extends Ieee80211MacSignal
 {
     signalType = 3;
 }
 
-packet Ieee80211MacSignalChangeNav extends Ieee80211MacSignal
+class Ieee80211MacSignalChangeNav extends Ieee80211MacSignal
 {
     signalType = 4;
     int par1;
     NavSrc navSrc;
 }
 
-packet Ieee80211MacSignalBkDone extends Ieee80211MacSignal
+class Ieee80211MacSignalBkDone extends Ieee80211MacSignal
 {
     signalType = 5;
     int slotCount;
 }
 
-packet Ieee80211MacSignalMaUnitDataRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalMaUnitDataRequest extends Ieee80211MacSignal
 {
     signalType = 6;
     MACAddress senderAddres; // sa?
     MACAddress destinationAddress; // da
     Routing routing;
-    cPacket llcData;
+//    cPacket llcData;
     CfPriority priority;
     ServiceClass serviceClass;
 }
 
-packet Ieee80211MacSignalMsduConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalMsduConfirm extends Ieee80211MacSignal
 {
     signalType = 7;
-    cPacket sdu;
+//    cPacket sdu;
     CfPriority priority;
     TxStatus txStatus;
 }
 
-packet Ieee80211MacSignalFragRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalFragRequest extends Ieee80211MacSignal
 {
     signalType = 8;
     Ieee80211MacFragmentationSupport::FragSdu fsdu;
 }
 
-packet Ieee80211MacSignalPduRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalPduRequest extends Ieee80211MacSignal
 {
     signalType = 9;
     Ieee80211MacFragmentationSupport::FragSdu fsdu;
 }
 
-packet Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
 {
     signalType = 10;
     Ieee80211MacFragmentationSupport::FragSdu fsdu;
@@ -178,211 +178,212 @@ packet Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
     CfPriority priority;
 }
 
-packet Ieee80211MacSignalCfPolled extends Ieee80211MacSignal
+class Ieee80211MacSignalCfPolled extends Ieee80211MacSignal
 {
     signalType = 11;
 }
 
-packet Ieee80211MacSignalPsInquiry extends Ieee80211MacSignal
+class Ieee80211MacSignalPsInquiry extends Ieee80211MacSignal
 {
     signalType = 12;
     MACAddress macAddress;
 }
 
-packet Ieee80211MacSignalAtimW extends Ieee80211MacSignal
+class Ieee80211MacSignalAtimW extends Ieee80211MacSignal
 {
     signalType = 13;
 }
 
-packet Ieee80211MacSignalPsChange extends Ieee80211MacSignal
+class Ieee80211MacSignalPsChange extends Ieee80211MacSignal
 {
     signalType = 14;
     MACAddress addr;
     PsMode psMode;
 }
 
-packet Ieee80211MacSignalPsResponse extends Ieee80211MacSignal
+class Ieee80211MacSignalPsResponse extends Ieee80211MacSignal
 {
     signalType = 15;
     MACAddress adr;
     PsMode psMode;
 }
 
-packet Ieee80211MacSignalCfPoll extends Ieee80211MacSignal
+class Ieee80211MacSignalCfPoll extends Ieee80211MacSignal
 {
     signalType = 16;
     simtime_t time;
     double rate;
 }
 
-packet Ieee80211MacSignalTbtt extends Ieee80211MacSignal
+class Ieee80211MacSignalTbtt extends Ieee80211MacSignal
 {
     signalType = 17;
 }
 
-packet Ieee80211MacSignalCfEnd extends Ieee80211MacSignal
+class Ieee80211MacSignalCfEnd extends Ieee80211MacSignal
 {
     signalType = 18;
 }
 
-packet Ieee80211MacSignalTxConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalTxConfirm extends Ieee80211MacSignal
 {
     signalType = 19;
 }
 
-packet Ieee80211MacSignalTxCfAck extends Ieee80211MacSignal
+class Ieee80211MacSignalTxCfAck extends Ieee80211MacSignal
 {
     signalType = 20;
     simtime_t time;
     double rate;
 }
 
-packet Ieee80211MacSignalTifs extends Ieee80211MacSignal
+class Ieee80211MacSignalTifs extends Ieee80211MacSignal
 {
     signalType = 21;
 }
 
-packet Ieee80211MacSignalIdle extends Ieee80211MacSignal
+class Ieee80211MacSignalIdle extends Ieee80211MacSignal
 {
     signalType = 22;
 }
 
-packet Ieee80211MacSignalBusy extends Ieee80211MacSignal
+class Ieee80211MacSignalBusy extends Ieee80211MacSignal
 {
     signalType = 23;
 }
 
-packet Ieee80211MacSignalSlot extends Ieee80211MacSignal
+class Ieee80211MacSignalSlot extends Ieee80211MacSignal
 {
     signalType = 24;
 }
 
-packet Ieee80211MacSignalPhyTxStartRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalPhyTxStartRequest extends Ieee80211MacSignal
 {
     signalType = 25;
 }
 
-packet Ieee80211MacSignalPhyTxStartConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalPhyTxStartConfirm extends Ieee80211MacSignal
 {
     signalType = 26;
 }
 
-packet Ieee80211MacSignalPhyDataConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalPhyDataConfirm extends Ieee80211MacSignal
 {
     signalType = 27;
 }
 
-packet Ieee80211MacSignalPhyTxEndConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalPhyTxEndConfirm extends Ieee80211MacSignal
 {
     signalType = 28;
 }
 
-packet Ieee80211MacSignalAck extends Ieee80211MacSignal
+class Ieee80211MacSignalAck extends Ieee80211MacSignal
 {
     signalType = 29;
     simtime_t endRx;
     double txRate;
 }
 
-packet Ieee80211MacSignalCts extends Ieee80211MacSignal
+class Ieee80211MacSignalCts extends Ieee80211MacSignal
 {
     signalType = 30;
     simtime_t endRx;
     double txRate;
 }
 
-packet Ieee80211MacSignalMmCancel extends Ieee80211MacSignal
+class Ieee80211MacSignalMmCancel extends Ieee80211MacSignal
 {
     signalType = 31;
 }
 
-packet Ieee80211MacSignalDoze extends Ieee80211MacSignal
+class Ieee80211MacSignalDoze extends Ieee80211MacSignal
 {
     signalType = 32;
 }
 
-packet Ieee80211MacSignalWake extends Ieee80211MacSignal
+class Ieee80211MacSignalWake extends Ieee80211MacSignal
 {
     signalType = 33;
 }
 
-packet Ieee80211MacSignalTpdly extends Ieee80211MacSignal
+class Ieee80211MacSignalTpdly extends Ieee80211MacSignal
 {
     signalType = 34;
 }
 
-packet Ieee80211MacSignalSwChnl extends Ieee80211MacSignal
+class Ieee80211MacSignalSwChnl extends Ieee80211MacSignal
 {
     signalType = 35;
     int chan;
     bool doBkoff;
 }
 
-packet Ieee80211MacSignalMsduRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalMsduRequest extends Ieee80211MacSignal
 {
     signalType = 36;
-    Ieee80211NewFrame sdu;
+//    Ieee80211NewFrame sdu;
     CfPriority priority;
 }
 
-packet Ieee80211MacSignalMmRequest extends Ieee80211MacSignal
+
+class Ieee80211MacSignalMmRequest extends Ieee80211MacSignal
 {
     signalType = 37;
-    Ieee80211NewFrame sdu;
+//    Ieee80211NewFrame sdu;
     Imed imed;
     CfPriority priority; // TODO??
     double rate;
 }
 
-packet Ieee80211MacSignalXport extends Ieee80211MacSignal
+class Ieee80211MacSignalXport extends Ieee80211MacSignal
 {
     signalType = 38;
 }
 
-packet Ieee80211MacSignalSst extends Ieee80211MacSignal
+class Ieee80211MacSignalSst extends Ieee80211MacSignal
 {
     signalType = 39;
     MACAddress addr;
     StationState stationState;
 }
 
-packet Ieee80211MacSignalSend extends Ieee80211MacSignal
+class Ieee80211MacSignalSend extends Ieee80211MacSignal
 {
     signalType = 40;
-    cPacket frame;
+//    cPacket frame;
     Imed priority; // ???
 }
 
-packet Ieee80211MacSignalMmConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalMmConfirm extends Ieee80211MacSignal
 {
     signalType = 41;
-    cPacket frame;
+//    cPacket frame;
     TxStatus status;
 }
 
-packet Ieee80211MacSignalMmIndicate extends Ieee80211MacSignal
+class Ieee80211MacSignalMmIndicate extends Ieee80211MacSignal
 {
     signalType = 42;
-    cPacket frame;
+//    cPacket frame;
     simtime_t time1;
     simtime_t time2;
     StateErr stateErr;
 }
 
-packet Ieee80211MacSignalMlmeGetRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalMlmeGetRequest extends Ieee80211MacSignal
 {
     signalType = 43;
     string mibAtrib;
 }
 
-packet Ieee80211MacSignalMlmeSetRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalMlmeSetRequest extends Ieee80211MacSignal
 {
     signalType = 44;
     string mibAtrib;
     int mibValue;
 }
 
-packet Ieee80211MacSignalMlmeGetConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalMlmeGetConfirm extends Ieee80211MacSignal
 {
     signalType = 45;
     MibStatus mibStatus;
@@ -390,26 +391,26 @@ packet Ieee80211MacSignalMlmeGetConfirm extends Ieee80211MacSignal
     int mibValue;
 }
 
-packet Ieee80211MacSignalMlmeSetConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalMlmeSetConfirm extends Ieee80211MacSignal
 {
     signalType = 46;
     MibStatus mibStatus;
     string mibAtrib;
 }
 
-packet Ieee80211MacSignalMlmeResetRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalMlmeResetRequest extends Ieee80211MacSignal
 {
     signalType = 47;
     MACAddress addr;
     bool dflt;
 }
 
-packet Ieee80211MacSignalSwDone extends Ieee80211MacSignal
+class Ieee80211MacSignalSwDone extends Ieee80211MacSignal
 {
     signalType = 48;
 }
 
-packet Ieee80211MacSignalPlmeSetConfirm extends Ieee80211MacSignal
+class Ieee80211MacSignalPlmeSetConfirm extends Ieee80211MacSignal
 {
     signalType = 49;
     MibStatus status;
@@ -417,7 +418,7 @@ packet Ieee80211MacSignalPlmeSetConfirm extends Ieee80211MacSignal
 }
 
 
-packet Ieee80211MacSignalPlmeSetRequest extends Ieee80211MacSignal
+class Ieee80211MacSignalPlmeSetRequest extends Ieee80211MacSignal
 {
     signalType = 50;
     string atrrib; // MibAtrib
