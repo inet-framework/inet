@@ -66,41 +66,15 @@ void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDa
             if (srv == ServiceClass_strictlyOrdered)
             {
                 if (macmib->getStationConfigTable()->getDot11PowerMangementMode() == PsMode_sta_active)
-                {
-                    if (macsorts->getIntraMacRemoteVariables()->isDisable())
-                    {
-                        stat = TxStatus_noBss;
-                        emitMaUnitDataStatusIndication(sa, da, stat, cf, srv);
-                    }
-                    else
-                    {
-                        if (cf == CfPriority_contention)
-                            makeMsdu();
-                        else if (cf == CfPriority_contentionFree)
-                        {
-                            if (macsorts->getIntraMacRemoteVariables()->isPcAvail())
-                                makeMsdu();
-                            else
-                            {
-                                emitMaUnitDataStatusIndication(sa, da, TxStatus_unavailablePriority, cf, srv);
-                                cf = CfPriority_contention;
-                                makeMsdu();
-                            }
-
-                        }
-                        else
-                        {
-                            stat = TxStatus_unsupportedPriority;
-                            emitMaUnitDataStatusIndication(sa, da, stat, cf, srv);
-                        }
-                    }
-                }
+                    function1();
                 else
                 {
                     stat = TxStatus_unavailableServiceClass;
                     emitMaUnitDataStatusIndication(sa, da, stat, cf, srv);
                 }
             }
+            else if (srv == ServiceClass_reordable)
+                function1();
             else
             {
                 stat = TxStatus_unsupportedServiceClass;
@@ -149,6 +123,7 @@ void Ieee80211MacMsduFromLlc::makeMsdu()
     sdu->setAddr3(macsorts->getIntraMacRemoteVariables()->getBssId());
     sdu->setToDs(false);
     sdu->setByteLength(24);
+    sdu->encapsulate(llcData);
     if (srv == ServiceClass_strictlyOrdered)
         sdu->setOrderBit(true);
 //    Send Msdu to Mpdu preparation
@@ -156,6 +131,36 @@ void Ieee80211MacMsduFromLlc::makeMsdu()
 //    with basic header. Other fields are
 //    filled in prior to transmission
     emitMsduRequest(sdu, cf);
+}
+
+void Ieee80211MacMsduFromLlc::function1()
+{
+   if (false) // macsorts->getIntraMacRemoteVariables()->isDisable()
+   {
+       stat = TxStatus_noBss;
+       emitMaUnitDataStatusIndication(sa, da, stat, cf, srv);
+   }
+   else
+   {
+       if (cf == CfPriority_contention)
+           makeMsdu();
+       else if (cf == CfPriority_contentionFree)
+       {
+           if (macsorts->getIntraMacRemoteVariables()->isPcAvail())
+               makeMsdu();
+           else
+           {
+               emitMaUnitDataStatusIndication(sa, da, TxStatus_unavailablePriority, cf, srv);
+               cf = CfPriority_contention;
+               makeMsdu();
+          }
+       }
+       else
+       {
+           stat = TxStatus_unsupportedPriority;
+           emitMaUnitDataStatusIndication(sa, da, stat, cf, srv);
+       }
+   }
 }
 
 void Ieee80211MacMsduFromLlc::emitMsduRequest(Ieee80211NewFrame* sdu, CfPriority priority)

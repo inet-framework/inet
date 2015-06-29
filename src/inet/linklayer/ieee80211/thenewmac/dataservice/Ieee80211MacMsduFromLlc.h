@@ -64,6 +64,7 @@ class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public
         void initialize(int stage) override;
 
         void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData);
+        void function1();
         void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority priority, ServiceClass srv);
         void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal, Ieee80211NewFrame *frame);
         void makeMsdu();
