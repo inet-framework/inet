@@ -32,9 +32,9 @@ class INET_API IIeee80211MacMsduFromLlc
 {
     protected:
         virtual void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData) = 0;
-        virtual void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal) = 0;
+        virtual void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal, Ieee80211NewFrame *sdu) = 0;
         virtual void emitMsduRequest(Ieee80211NewFrame *sdu, CfPriority priority) = 0;
-        virtual void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv) = 0;
+        virtual void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority priority, ServiceClass srv) = 0;
 };
 
 class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public Ieee80211MacMacProcessBase, public cListener
@@ -50,8 +50,9 @@ class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public
         Ieee80211MacMacsorts *macsorts = nullptr;
         Ieee80211MacMacmibPackage *macmib = nullptr;
 
+        Ieee80211NewFrame *sdu = nullptr;
         CfPriority cf;
-        cPacket *llcData;
+        cPacket *llcData = nullptr;
         Routing rt;
         MACAddress da;
         MACAddress sa;
@@ -63,8 +64,8 @@ class INET_API Ieee80211MacMsduFromLlc : public IIeee80211MacMsduFromLlc, public
         void initialize(int stage) override;
 
         void handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *llcData);
-        void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf, ServiceClass srv);
-        void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal);
+        void emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority priority, ServiceClass srv);
+        void handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal, Ieee80211NewFrame *frame);
         void makeMsdu();
         void emitMsduRequest(Ieee80211NewFrame *sdu, CfPriority priority);
 };

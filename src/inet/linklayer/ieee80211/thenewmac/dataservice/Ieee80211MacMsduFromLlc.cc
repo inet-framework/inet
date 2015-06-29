@@ -36,6 +36,10 @@ void Ieee80211MacMsduFromLlc::handleMessage(cMessage* msg)
 {
     if (dynamic_cast<Ieee80211MacSignalMaUnitDataRequest *>(msg->getControlInfo()))
         handleMaUnitDataRequest(dynamic_cast<Ieee80211MacSignalMaUnitDataRequest *>(msg->getControlInfo()), dynamic_cast<cPacket *>(msg));
+    else if (dynamic_cast<Ieee80211MacSignalMsduConfirm *>(msg->getControlInfo()))
+        handleMsduConfirm(dynamic_cast<Ieee80211MacSignalMsduConfirm *>(msg->getControlInfo()), dynamic_cast<Ieee80211NewFrame *>(msg));
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDataRequest *signal, cPacket *frame)
@@ -108,24 +112,23 @@ void Ieee80211MacMsduFromLlc::handleMaUnitDataRequest(Ieee80211MacSignalMaUnitDa
     }
 }
 
-void Ieee80211MacMsduFromLlc::handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal)
+void Ieee80211MacMsduFromLlc::handleMsduConfirm(Ieee80211MacSignalMsduConfirm *signal, Ieee80211NewFrame *sdu)
 {
-//    srv:= if
-//    orderBit
-//    (sdu) = 1 then
-//    strictlyOrdered
-//    else reorderable fi
-//    da:= if
-//    toDs(sdu) = 1
-//    then addr3(sdu)
-//    else addr1(sdu)
-//    fi
-//    emitMaUnitDataStatusIndication(addr2(sdu),da,stat,cf,srv);
+    srv = sdu->getOrderBit() ? ServiceClass_reordable : ServiceClass_strictlyOrdered;
+    da = sdu->getToDs() ? sdu->getAddr3() : sdu->getAddr1();
+    emitMaUnitDataStatusIndication(sdu->getAddr2(), da, stat, cf, srv);
 }
 
-void Ieee80211MacMsduFromLlc::emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority cf,
-        ServiceClass srv)
+void Ieee80211MacMsduFromLlc::emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority priority, ServiceClass srv)
 {
+    cMessage *maUnitDataStatusIndication = new cMessage("maUnitDataStatusIndication");
+    Ieee80211MacSignalMaUnitDataStatusIndication *signal = new Ieee80211MacSignalMaUnitDataStatusIndication();
+    signal->setDa(da);
+    signal->setSa(sa);
+    signal->setStat(stat);
+    signal->setPriority(priority);
+    maUnitDataStatusIndication->setControlInfo(signal);
+    send(maUnitDataStatusIndication, "fromLlc$o");
 }
 
 void Ieee80211MacMsduFromLlc::makeMsdu()
@@ -144,6 +147,7 @@ void Ieee80211MacMsduFromLlc::makeMsdu()
     sdu->setAddr1(da);
     sdu->setAddr2(macmib->getOperationTable()->getDot11MacAddress());
     sdu->setAddr3(macsorts->getIntraMacRemoteVariables()->getBssId());
+    sdu->setToDs(false);
     sdu->setByteLength(24);
     if (srv == ServiceClass_strictlyOrdered)
         sdu->setOrderBit(true);
