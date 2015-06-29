@@ -34,15 +34,15 @@ void Ieee80211MacBackoff::handleMessage(cMessage* msg)
     }
     else
     {
-        if (dynamic_cast<Ieee80211MacSignalBackoff *>(msg))
-            handleBackoff(dynamic_cast<Ieee80211MacSignalBackoff *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg))
+        if (dynamic_cast<Ieee80211MacSignalBackoff *>(msg->getControlInfo()))
+            handleBackoff(dynamic_cast<Ieee80211MacSignalBackoff *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg->getControlInfo()))
             handleIdle();
-        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg->getControlInfo()))
             handleSlot();
-        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg->getControlInfo()))
             handleBusy();
-        else if (dynamic_cast<Ieee80211MacSignalCancel *>(msg)) // sender must use scheduling priority
+        else if (dynamic_cast<Ieee80211MacSignalCancel *>(msg->getControlInfo())) // sender must use scheduling priority
             handleCancel();
         else
             throw cRuntimeError("Unknown input signal");
@@ -73,7 +73,7 @@ void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff)
     // is generated.
     cw = backoff->getCw();
     cnt = backoff->getCnt();
-    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
+//    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
     macsorts->getIntraMacRemoteVariables()->setBkIp(true);
     // Choose random backoff count if cnt = -1.
     // Resume with count from cancelled backoff if cnt>=0.
@@ -136,8 +136,10 @@ void Ieee80211MacBackoff::done()
 
 void Ieee80211MacBackoff::emitBkDone(int slotCount)
 {
-    Ieee80211MacSignalBkDone *bkDone = new Ieee80211MacSignalBkDone();
-    bkDone->setSlotCount(slotCount);
+    cMessage *bkDone = new cMessage("bkDone");
+    Ieee80211MacSignalBkDone *signal = new Ieee80211MacSignalBkDone();
+    signal->setSlotCount(slotCount);
+    bkDone->setControlInfo(signal);
     send(bkDone, source);
 }
 
