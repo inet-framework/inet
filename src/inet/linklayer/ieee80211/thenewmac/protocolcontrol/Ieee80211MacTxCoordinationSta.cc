@@ -42,32 +42,32 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
     }
     else
     {
-        if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg))
-            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg))
-            handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg))
+        if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()))
+            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()))
+            handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg->getControlInfo()))
             handleTbtt();
-        else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg))
-            handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()))
+            handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg->getControlInfo()))
             handleCfEnd();
-        else if (dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg))
-            handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()))
+            handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg->getControlInfo()))
             handleTxConfirm();
-        else if (dynamic_cast<Ieee80211MacSignalAck *>(msg))
-            handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalCts *>(msg))
-            handleCts(dynamic_cast<Ieee80211MacSignalCts *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalMmCancel *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()))
+            handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()))
+            handleCts(dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalMmCancel *>(msg->getControlInfo()))
             handleMmCancel();
-        else if (dynamic_cast<Ieee80211MacSignalWake *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalWake *>(msg->getControlInfo()))
             handleWake();
-        else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg->getControlInfo()))
             handleDoze();
-        else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg))
-            handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()))
+            handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()));
     }
 }
 
@@ -83,10 +83,10 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
     }
     if (stage == INITSTAGE_LINK_LAYER)
     {
-        backoffProcedureGate = this->gate("txOBackoff");
-        dataPumpProcedureGate = this->gate("txODataPump");
-        tmgtGate = this->gate("tmgt");
-        tdatGate = this->gate("tdat");
+//        backoffProcedureGate = this->gate("txOBackoff");
+//        dataPumpProcedureGate = this->gate("txODataPump");
+//        tmgtGate = this->gate("tmgt");
+//        tdatGate = this->gate("tdat");
         ccw = macmib->getPhyOperationTable()->getCWmin();
     }
 }
@@ -412,34 +412,6 @@ void Ieee80211MacTxCoordinationSta::sendRts()
     state = TX_COORDINATION_STATE_WAIT_RTS_BACKOFF;
 }
 
-void Ieee80211MacTxCoordinationSta::emitAtimW()
-{
-}
-
-void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
-{
-    Ieee80211MacSignalTxRequest *txRequest = new Ieee80211MacSignalTxRequest("TxRequest");
-    txRequest->encapsulate(tpdu);
-    txRequest->setTxrate(txrate.get());
-    send(txRequest, dataPumpProcedureGate);
-}
-
-void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
-{
-    cMessage *backoffSignal = new cMessage("Backoff");
-    backoffSignal->addPar("ccw") = ccw;
-    backoffSignal->addPar("par2") = par2;
-    send(backoffSignal, backoffProcedureGate);
-}
-
-void Ieee80211MacTxCoordinationSta::emitPduConfirm(FragSdu* fsdu, TxResult txResult)
-{
-    Ieee80211MacSignalPduConfirm *pduConfirm = new Ieee80211MacSignalPduConfirm("PduConfirm");
-    pduConfirm->setFsdu(*fsdu);
-    pduConfirm->setTxResult(txResult);
-    send(pduConfirm, tdatGate);
-}
-
 void Ieee80211MacTxCoordinationSta::sendMpdu()
 {
     state = TX_COORDINATION_STATE_WAIT_MPDU_BACKOFF;
@@ -599,7 +571,9 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
 
 void Ieee80211MacTxCoordinationSta::emitCancel()
 {
-    Ieee80211MacSignalCancel *cancel = new Ieee80211MacSignalCancel("Cancel");
+    cMessage *cancel = new cMessage("Cancel");
+    Ieee80211MacSignalCancel *signal = new Ieee80211MacSignalCancel();
+    cancel->setControlInfo(cancel);
     send(cancel, backoffProcedureGate);
 }
 
@@ -856,8 +830,39 @@ void Ieee80211MacTxCoordinationSta::handlePlmeSetConfirm(Ieee80211MacSignalPlmeS
 
 void Ieee80211MacTxCoordinationSta::emitSwDone()
 {
-    Ieee80211MacSignalSwDone *swDone = new Ieee80211MacSignalSwDone();
+    cMessage *swDone = new cMessage("swDone");
+    Ieee80211MacSignalSwDone *signal = new Ieee80211MacSignalSwDone();
+    swDone->setControlInfo(signal);
     send(swDone, tmgtGate);
+}
+
+
+void Ieee80211MacTxCoordinationSta::emitAtimW()
+{
+}
+
+void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
+{
+    Ieee80211MacSignalTxRequest *signal = new Ieee80211MacSignalTxRequest();
+    signal->setTxrate(txrate.get());
+    tpdu->setControlInfo(signal);
+    send(tpdu, dataPumpProcedureGate);
+}
+
+void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
+{
+    cMessage *backoffSignal = new cMessage("Backoff");
+    backoffSignal->addPar("ccw") = ccw;
+    backoffSignal->addPar("par2") = par2;
+    send(backoffSignal, backoffProcedureGate);
+}
+
+void Ieee80211MacTxCoordinationSta::emitPduConfirm(FragSdu* fsdu, TxResult txResult)
+{
+//    Ieee80211MacSignalPduConfirm *pduConfirm = new Ieee80211MacSignalPduConfirm("PduConfirm");
+//    pduConfirm->setFsdu(*fsdu);
+//    pduConfirm->setTxResult(txResult);
+//    send(pduConfirm, tdatGate);
 }
 
 } /* namespace inet */
