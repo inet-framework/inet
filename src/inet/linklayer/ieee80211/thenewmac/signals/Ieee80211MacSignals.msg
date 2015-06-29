@@ -93,6 +93,7 @@ enum Ieee80211MacSignalType
     SW_DONE = 48;
     PLME_SET_CONFIRM = 49;
     PLME_SET_REQUEST = 50;
+    MA_UNIT_DATA_STATUS_INDICATION = 51;
 }
 
 class Ieee80211MacSignal
@@ -423,4 +424,14 @@ class Ieee80211MacSignalPlmeSetRequest extends Ieee80211MacSignal
     signalType = 50;
     string atrrib; // MibAtrib
     int mibValue; // MibValue
+}
+
+class Ieee80211MacSignalMaUnitDataStatusIndication extends Ieee80211MacSignal
+{
+    signalType = 51;
+    MACAddress sa;
+    MACAddress da;
+    TxStatus stat; 
+    CfPriority priority; 
+    ServiceClass srv;
 }
