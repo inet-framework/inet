@@ -25,9 +25,7 @@ Define_Module(Ieee80211MacPrepareMpdu);
 void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
 {
     if (msg->isSelfMessage())
-    {
-        throw cRuntimeError("This module doesn't handle self messages.")
-    }
+        throw cRuntimeError("This module doesn't handle self messages.");
     else
     {
         if (dynamic_cast<Ieee80211MacSignalMsduRequest *>(msg->getControlInfo()))
@@ -123,12 +121,11 @@ void Ieee80211MacPrepareMpdu::fragment()
         pduSize = sduLength - Ieee80211MacNamedStaticIntDataValues::sMacHdrLng;
     if (fsdu->fTot == 0)
         fsdu->fTot = 1;
-    makePdus();
+    makePdus(sduLength);
 }
 
-void Ieee80211MacPrepareMpdu::makePdus()
+void Ieee80211MacPrepareMpdu::makePdus(int sduLength)
 {
-    int sduLength;
     f = 0;
     int p = Ieee80211MacNamedStaticIntDataValues::sMacHdrLng;
     fsdu->pdus[f] = nullptr;

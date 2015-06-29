@@ -87,7 +87,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void receiveSignal(cComponent *source, int signalID, cObject *obj);
 
         void fragment();
-        void makePdus();
+        void makePdus(int sduLength);
 
         void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame);
         void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
