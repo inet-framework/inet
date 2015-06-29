@@ -36,8 +36,6 @@ int Ieee80211MacNamedStaticIntDataValues::sMinFragLng  = 256;
 int Ieee80211MacNamedStaticIntDataValues::sMaxFragNum  = (sMaxMsduLng / (sMinFragLng - sMacHdrLng - sCrcLng)); /* maximum fragment number */
 int Ieee80211MacNamedStaticIntDataValues::sAckCtsLng  = 112; /* bits in ACK and CTS frames */
 
-simtime_t UsecToSimtime(Usec usec) { return simtime_t(usec * 1E-6); }
-simtime_t TuToSimtime(Tu tu) { return simtime_t(1024 * tu * 1E-6); }
 
 void Ieee80211MacMacsorts::handleMessage(cMessage* msg)
 {

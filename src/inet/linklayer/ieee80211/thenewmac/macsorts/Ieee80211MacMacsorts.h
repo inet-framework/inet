@@ -36,8 +36,8 @@ namespace ieee80211 {
  */
 typedef int Usec;
 typedef int Tu; // Time Unit -- 1*TU = 1024*Usec
-simtime_t usecToSimtime(Usec usec);
-simtime_t tuToSimtime(Tu tu);
+static simtime_t usecToSimtime(Usec usec) { return simtime_t(usec * 1E-6); }
+static simtime_t tuToSimtime(Tu tu)  { return simtime_t(1024 * tu * 1E-6); }
 
 class Ieee80211MacMacsortsIntraMacRemoteVariables;
 
@@ -232,7 +232,7 @@ struct BssDscr
     MACAddress bdBssId;
     std::string bdSsId; /* 1 <= length <= 32 */
     BssType bdType;
-    simtime_t bdBcnPer; /* beacon period in Time Units */
+    Tu bdBcnPer; /* beacon period in Time Units */
     int bdDtimPer; /* DTIM period in beacon periods */
     std::string bdTstamp; /* 8 Octets from ProbeRsp/Beacon */
     std::string bdStartTs; /* 8 Octets TSF when rx Tstamp */
