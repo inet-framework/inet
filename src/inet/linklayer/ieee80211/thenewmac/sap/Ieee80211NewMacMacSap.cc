@@ -64,9 +64,11 @@ InterfaceEntry *Ieee80211NewMacMacSap::createInterfaceEntry()
 void Ieee80211NewMacMacSap::handleMessage(cMessage* msg)
 {
     Ieee802Ctrl *controlInfo =  check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
-    Ieee80211MacSignalMaUnitDataRequest *maUnitDataReq = new Ieee80211MacSignalMaUnitDataRequest();
-    maUnitDataReq->setDestinationAddress(controlInfo->getDest());
-    send(maUnitDataReq, "macSap$o");
+    Ieee80211MacSignalMaUnitDataRequest *signal = new Ieee80211MacSignalMaUnitDataRequest();
+    cMessage *maUnitDataRequest = new cMessage("maUnitDataRequest");
+    signal->setDestinationAddress(controlInfo->getDest());
+    maUnitDataRequest->setControlInfo(signal);
+    send(maUnitDataRequest, "macSap$o");
 }
 
 } /* namespace inet */
