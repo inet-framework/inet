@@ -33,4 +33,5 @@ simple Ieee80211MacMsduFromLlc
 
     gates:
         inout txMsdu;
+        inout fromLlc;
 }
