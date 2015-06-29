@@ -24,6 +24,8 @@ module Ieee80211MacDataService
     gates:
         inout tsdu;
         input rsdu;
+        inout macSapMsduFromLlc;
+        output macSapMsduToLlc;
 
     submodules:
         msduToLlc: Ieee80211MacMsduToLlc;
@@ -31,5 +33,8 @@ module Ieee80211MacDataService
 
     connections:
         msduFromLlc.txMsdu <--> tsdu;
+        msduFromLlc.fromLlc <--> macSapMsduFromLlc;
+        msduToLlc.toLlc --> macSapMsduToLlc;
         msduToLlc.rxMsdu <-- rsdu;
+
 }
