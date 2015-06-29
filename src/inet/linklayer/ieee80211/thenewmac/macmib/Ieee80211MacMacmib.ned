@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.thenewmac.macmib;
 
-simple Ieee80211MacMacmib
+simple Ieee80211MacMacmibPackage
 {
 
 }
