@@ -34,24 +34,23 @@ void Ieee80211MacDataPump::handleMessage(cMessage* msg)
     }
     else
     {
-        EV_DEBUG << msg->getName() << " signal was arrived" << endl;
-        if (dynamic_cast<Ieee80211MacSignalTxRequest *>(msg))
-            handleTxRequest(dynamic_cast<Ieee80211MacSignalTxRequest *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg))
+        EV_DEBUG << msg->getControlInfo()->getName() << " signal was arrived" << endl;
+        if (dynamic_cast<Ieee80211MacSignalTxRequest *>(msg->getControlInfo()))
+            handleTxRequest(dynamic_cast<Ieee80211MacSignalTxRequest *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg->getControlInfo()))
             handleBusy();
-        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg->getControlInfo()))
             handleIdle();
-        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg->getControlInfo()))
             handleSlot();
-        else if (dynamic_cast<Ieee80211MacSignalPhyTxStartConfirm *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalPhyTxStartConfirm *>(msg->getControlInfo()))
             handlePhyTxStartConfirm();
-        else if (dynamic_cast<Ieee80211MacSignalPhyTxEndConfirm *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalPhyTxEndConfirm *>(msg->getControlInfo()))
             handlePhyTxEndConfirm();
-        else if (dynamic_cast<Ieee80211MacSignalPhyDataConfirm *>(msg))
+        else if (dynamic_cast<Ieee80211MacSignalPhyDataConfirm *>(msg->getControlInfo()))
             handlePhyDataConfirm();
         else
-            throw cRuntimeError("Unknown signal", msg->getName());
-        delete msg;
+            throw cRuntimeError("Unknown signal", msg->getControlInfo()->getName());
     }
 }
 
@@ -63,7 +62,7 @@ void Ieee80211MacDataPump::initialize(int stage)
     }
     if (stage == INITSTAGE_LINK_LAYER)
     {
-        backoffProcedureGate = this->gate("fwdCs");
+//        backoffProcedureGate = this->gate("fwdCs");
         state = DATA_PUMP_STATE_TX_IDLE;
         source = nullptr;
     }
@@ -86,8 +85,8 @@ void Ieee80211MacDataPump::handleSlot()
 
 void Ieee80211MacDataPump::handleTxRequest(Ieee80211MacSignalTxRequest *txRequest)
 {
-    handlePdu(check_and_cast<cPacket *>(txRequest->getEncapsulatedPacket()));
-    source = txRequest->getArrivalGate();
+//    handlePdu(check_and_cast<cPacket *>(txRequest->getEncapsulatedPacket()));
+//    source = txRequest->getArrivalGate();
     k = 0;
     // TODO: fcs = initCrc
 //    Plcp length is Mpdu length + Fcs length
@@ -100,13 +99,17 @@ void Ieee80211MacDataPump::handleTxRequest(Ieee80211MacSignalTxRequest *txReques
 
 void Ieee80211MacDataPump::emitBusy()
 {
-    Ieee80211MacSignalBusy *busy = new Ieee80211MacSignalBusy();
+    cMessage *busy = new cMessage("Busy");
+    Ieee80211MacSignalBusy *signal = new Ieee80211MacSignalBusy();
+    busy->setControlInfo(signal);
     send(busy, backoffProcedureGate);
 }
 
 void Ieee80211MacDataPump::emitIdle()
 {
-    Ieee80211MacSignalIdle *idle = new Ieee80211MacSignalIdle();
+    cMessage *idle = new cMessage("Idle");
+    Ieee80211MacSignalIdle *signal = new Ieee80211MacSignalIdle();
+    idle->setControlInfo(signal);
     send(idle, backoffProcedureGate);
 }
 
@@ -212,7 +215,9 @@ void Ieee80211MacDataPump::handlePhyTxEndConfirm()
 
 void Ieee80211MacDataPump::emitSlot()
 {
-    Ieee80211MacSignalSlot *slot = new Ieee80211MacSignalSlot();
+    cMessage *slot = new cMessage("Slot");
+    Ieee80211MacSignalSlot *signal = new Ieee80211MacSignalSlot();
+    slot->setControlInfo(signal);
     send(slot, backoffProcedureGate);
 }
 
