@@ -65,10 +65,14 @@ void Ieee80211NewMacMacSap::handleMessage(cMessage* msg)
 {
     Ieee802Ctrl *controlInfo =  check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
     Ieee80211MacSignalMaUnitDataRequest *signal = new Ieee80211MacSignalMaUnitDataRequest();
-    cMessage *maUnitDataRequest = new cMessage("maUnitDataRequest");
     signal->setDestinationAddress(controlInfo->getDest());
-    maUnitDataRequest->setControlInfo(signal);
-    send(maUnitDataRequest, "macSap$o");
+    signal->setSenderAddres(controlInfo->getSourceAddress());
+    signal->setRouting(Routing_null_rt);
+    signal->setServiceClass(ServiceClass_reordable); // TODO
+    signal->setPriority(CfPriority_contention); // TODO
+    delete msg->removeControlInfo();
+    msg->setControlInfo(signal);
+    send(msg, "macSap$o");
 }
 
 } /* namespace inet */
