@@ -47,7 +47,7 @@ class INET_API Ieee80211MacMacsorts : public cSimpleModule
         static simsignal_t intraMacRemoteVariablesChanged;
 
     protected:
-        Ieee80211MacMacsortsIntraMacRemoteVariables *intraMacRemoteVariables;
+        Ieee80211MacMacsortsIntraMacRemoteVariables *intraMacRemoteVariables = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -70,7 +70,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
     protected:
         bool mActingAsAp; /* =true if STA started BSS */
         int mAId; /* AID assigned to STA by AP */
-        bool mAssoc; /* =true if STA associated w/BSS */
+        bool mAssoc = true; /* =true if STA associated w/BSS */ // TODO: hack
         bool mAtimW; /* =true if ATIM window in prog */
         bool mBkIP; /* =true if backoff in prog */
         // TODO: mBrates; /* basic rate set for this sta */
@@ -81,7 +81,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         /* TX only sends probe_req; RX only accepts beacon, probe_rsp */
         int mDtimCount; /* =0 at Tbtt of Beacon with DTIM */
         bool mFxIP; /* =true during frame exchange seq */
-        bool mIbss; /* =true if STA is member of IBSS */
+        bool mIbss = true; /* =true if STA is member of IBSS */ // TODO: hack
         int mListenInt; /* beacons between wake up @TBTT */
         simtime_t mNavEnd; /* NAV end Time, <=now when idle */
         simtime_t mNextBdry; /* next boundary Time; =0 if none */
@@ -123,7 +123,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         bool isFxIp() const { return mFxIP; }
         void setFxIp(bool fxIp) { mFxIP = fxIp; }
         bool isIbss() const { return mIbss; }
-        void setIbss(bool ibss) { mIbss = ibss; }
+        void setIbss(bool ibss) { mIbss = ibss; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         int getListenInt() const { return mListenInt; }
         void setListenInt(int listenInt) { mListenInt = listenInt; }
         const simtime_t& getNavEnd() const { return mNavEnd; }
@@ -180,23 +180,24 @@ class Ieee80211MacFragmentationSupport
         /* Each SDU, even if not fragmented, is held in an instance of */
         /* this structure awaiting its (re)transmission attempt(s). */
         /* Transmit queue(s) are ordered lists of FragSdu instances. */
-        struct FragSdu
+        class FragSdu : public cPacket
         {
-            int fTot; /* number of fragments in pdus FragArray */
-            int fCur; /* next fragment number to send */
-            int fAnc; /* next fragment to announce in ATIM or TIM when fAnc > fCur, pdus(fCur)+ may be sent */
-            simtime_t eol; /* set to (now + dUsec(aMaxTxMsduLifetime)) when the entry is created */
-            int sqf; /* SDU sequence number, set at 1st Tx attempt */
-            int src; /* short retry counter for this SDU */
-            int lrc; /* long retry counter for this SDU */
-            MACAddress dst; /* destinaton address */
-            bool grpa; /* =true if RA (not DA) is a group address */
-            bool psm; /* =true if RA (not DA) may be in pwr_save */
-            bool resume; /* =true if fragment burst being resumed */
-            cGate *cnfTo; /* address to which confirmation is sent */
-            bps rate; /* data rate used for initial fragment */
-            CfPriority cf; /* requested priority (from LLC) */
-            FragArray pdus; /* array of Frame to hold fragments */
+            public:
+                int fTot; /* number of fragments in pdus FragArray */
+                int fCur; /* next fragment number to send */
+                int fAnc; /* next fragment to announce in ATIM or TIM when fAnc > fCur, pdus(fCur)+ may be sent */
+                simtime_t eol; /* set to (now + dUsec(aMaxTxMsduLifetime)) when the entry is created */
+                int sqf; /* SDU sequence number, set at 1st Tx attempt */
+                int src; /* short retry counter for this SDU */
+                int lrc; /* long retry counter for this SDU */
+                MACAddress dst; /* destinaton address */
+                bool grpa; /* =true if RA (not DA) is a group address */
+                bool psm; /* =true if RA (not DA) may be in pwr_save */
+                bool resume; /* =true if fragment burst being resumed */
+                cGate *cnfTo; /* address to which confirmation is sent */
+                bps rate; /* data rate used for initial fragment */
+                CfPriority cf; /* requested priority (from LLC) */
+                FragArray pdus; /* array of Frame to hold fragments */
         };
 };
 
