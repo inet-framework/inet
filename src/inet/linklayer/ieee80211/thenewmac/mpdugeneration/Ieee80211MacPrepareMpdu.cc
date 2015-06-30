@@ -33,7 +33,7 @@ void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
         else if (dynamic_cast<Ieee80211MacSignalMmRequest *>(msg->getControlInfo()))
             handleMmRequest(dynamic_cast<Ieee80211MacSignalMmRequest *>(msg->getControlInfo()), dynamic_cast<Ieee80211NewFrame *>(msg), msg->getArrivalGate());
         else if (dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()))
-            handleFragConfirm(dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()));
+            handleFragConfirm(dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
     }
 }
 
@@ -192,18 +192,16 @@ void Ieee80211MacPrepareMpdu::handleMmRequest(Ieee80211MacSignalMmRequest *mmReq
     fragment(sender);
 }
 
-void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm)
+void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm, FragSdu *fsdu)
 {
-//    fsdu = fragConfirm->getFsdu();
+    this->fsdu = fsdu;
     pri = fragConfirm->getPriority();
     rrsl = fragConfirm->getTxResult();
-//    rsdu:= substr(fsdu!pdus(0), 0,sMacHdrLng),
-//    pri = fsdu->cf;
-//    rrsl = txResult;
-//    if (basetype(fsdu->pdus[0]))
-//    {
-////        emitMmConfirm()
-//    }
+    Ieee80211NewFrame *rsdu = fsdu->pdus[0]; // TODO: rsdu:= substr(fsdu!pdus(0), 0,sMacHdrLng),
+    pri = fsdu->cf;
+    // TODO: p. 2395 (62)
+//    if (fsdu->pdus[0]->getBasetype() == BasicType_management)
+//        emitMmConfirm(rsdu, pri, rrsl);
 //    else
 //        emitMsduConfirm(rsdu, pri, rrsl);
 }
@@ -248,9 +246,9 @@ void Ieee80211MacPrepareMpdu::emitMsduConfirm(cPacket *sdu, CfPriority priority,
 
 void Ieee80211MacPrepareMpdu::emitFragRequest(FragSdu *sdu)
 {
-//    Ieee80211MacSignalFragRequest *fragRequest = new Ieee80211MacSignalFragRequest();
-//    fragRequest->setFsdu(sdu);
-//    send(fragRequest, fragMsdu);
+    Ieee80211MacSignalFragRequest *signal = new Ieee80211MacSignalFragRequest();
+    sdu->setControlInfo(signal);
+    send(sdu, "fragMsdu$o");
 }
 
 } /* namespace inet */
