@@ -94,6 +94,7 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
 
 void Ieee80211MacPrepareMpdu::fragment(cGate *sender)
 {
+    FragSdu *fsdu = new FragSdu();
     fsdu->fTot = 1;
     fsdu->fCur = 0;
     fsdu->fAnc = 0;
