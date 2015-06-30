@@ -174,7 +174,7 @@ class Ieee80211MacSignalPduRequest extends Ieee80211MacSignal
 class Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
 {
     signalType = 10;
-    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+//    Ieee80211MacFragmentationSupport::FragSdu fsdu;
     TxResult txResult;
     CfPriority priority;
 }
