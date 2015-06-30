@@ -46,7 +46,7 @@ class INET_API IIeee80211MacPrepareMpdu
 };
 
 
-class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public Ieee80211MacMacProcessBase
+class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public Ieee80211MacMacProcessBase, public cListener
 {
     protected:
         enum PrepareMpduState
@@ -81,7 +81,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
 
-        void receiveSignal(cComponent *source, int signalID, cObject *obj);
+        void receiveSignal(cComponent *source, int signalID, bool b) override;
 
         void fragment(cGate *sender);
         void makePdus(int sduLength);

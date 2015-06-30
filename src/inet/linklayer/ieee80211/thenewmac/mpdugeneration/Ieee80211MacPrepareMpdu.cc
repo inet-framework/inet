@@ -43,6 +43,11 @@ void Ieee80211MacPrepareMpdu::initialize(int stage)
     {
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER_2)
+    {
+        emit(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, true); // TODO: hack
     }
 }
 
@@ -64,7 +69,7 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
             sdu->setAddr3(sdu->getAddr1());
             sdu->setAddr1(macsorts->getIntraMacRemoteVariables()->getBssId());
             sdu->setToDs(true);
-            useWep = macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
+            useWep = false; // macmib->getStationConfigTable()->isDot11PrivacyOptionImplemented(); // TODO: dot11PrivacyInvoked
             fragment(sender);
         }
     }
@@ -206,10 +211,10 @@ void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *f
 //        emitMsduConfirm(rsdu, pri, rrsl);
 }
 
-void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, cObject* obj)
+void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bool b)
 {
+    std::cout << "Valami" << endl;
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
         switch (state)
