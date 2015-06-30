@@ -158,14 +158,15 @@ class INET_API Ieee80211MacMacmibCountersTable
  */
 class INET_API Ieee80211MacMacmibOperationTable
 {
+        // TODO: Mib process should set these values.
     protected:
         MACAddress dot11MacAddress;
-        int dot11RtsThreshold;
-        int dot11ShortRetryLimit;
-        int dot11LongRetryLimit;
-        int dot11FragmentationThreshold;
-        Tu dot11MaxTransmitMsduLifetime;
-        Tu dot11MaxReceiveLifetime;
+        int dot11RtsThreshold = 3000;
+        int dot11ShortRetryLimit = 7;
+        int dot11LongRetryLimit = 4;
+        int dot11FragmentationThreshold = 2346;
+        Tu dot11MaxTransmitMsduLifetime = 512;
+        Tu dot11MaxReceiveLifetime = 512;
 
     public:
         int getDot11FragmentationThreshold() const { return dot11FragmentationThreshold; }
