@@ -30,6 +30,10 @@ void Ieee80211MacMsduFromLlc::initialize(int stage)
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
         subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
     }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        macsorts->getIntraMacRemoteVariables()->setIbss(true); // HACK
+    }
 }
 
 void Ieee80211MacMsduFromLlc::handleMessage(cMessage* msg)
