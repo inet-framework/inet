@@ -35,9 +35,9 @@ class INET_API IIeee80211MacPrepareMpdu
         typedef Ieee80211MacFragmentationSupport::FragSdu FragSdu;
 
     protected:
-        virtual void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame) = 0;
+        virtual void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame, cGate *sender) = 0;
         virtual void handleResetMac() = 0;
-        virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame) = 0;
+        virtual void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame, cGate *sender) = 0;
         virtual void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm) = 0;
 
         virtual void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus) = 0;
@@ -77,23 +77,20 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
 
         Ieee80211MacMacsorts *macsorts = nullptr;
 
-        cGate *msdu = nullptr;
-        cGate *fragMsdu = nullptr;
-
     protected:
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
 
         void receiveSignal(cComponent *source, int signalID, cObject *obj);
 
-        void fragment();
+        void fragment(cGate *sender);
         void makePdus(int sduLength);
 
-        void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame);
+        void handleMsduRequest(Ieee80211MacSignalMsduRequest *msduRequest, Ieee80211NewFrame *frame, cGate *sender);
         void emitMsduConfirm(cPacket *sdu, CfPriority priority, TxStatus txStatus);
         void emitFragRequest(FragSdu *fsdu);
         void handleResetMac();
-        void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame);
+        void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame, cGate *sender);
         void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm);
         void emitMmConfirm(cPacket *rsdu, TxStatus txStatus);
 };
