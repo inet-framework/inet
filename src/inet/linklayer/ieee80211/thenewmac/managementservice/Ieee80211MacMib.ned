@@ -22,6 +22,7 @@ simple Ieee80211MacMib
 {
     parameters:
         string macmibPackage = default("^.^.macmib");
+        string macsortsPackage = default("^.^.macsorts");
         
         string authenticationAlgorithms @enum("open_system", "shared_key");
         bool excludeUnencrypted = default(false);

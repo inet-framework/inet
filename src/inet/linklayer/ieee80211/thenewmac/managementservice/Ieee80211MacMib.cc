@@ -43,6 +43,9 @@ void Ieee80211MacMib::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
+
         dot11ExcludeUnencrypted = par("excludeUnencrypted");
         dot11FragmentationThreshold = par("fragmentationThreshold");
 //        std::vector<MACAddress> dot11GroupAddresses;
@@ -62,11 +65,7 @@ void Ieee80211MacMib::initialize(int stage)
         dot11CurrentSet = par("currentSet");
         dot11CurrentPattern = par("currentPattern");
         dot11CurrentIndex = par("currentIndex");
-
-        // TODO:
-//        'export values
-//        of attributes
-//        declared here'
+        exportValuesOfAttributesDeclaredHere();
     }
 }
 
@@ -94,6 +93,7 @@ void Ieee80211MacMib::handleMlmeResetRequest(Ieee80211MacSignalMlmeResetRequest*
 
     }
     emitMlmeResetConfirm(MlmeStatus_succes);
+    exportValuesOfAttributesDeclaredHere();
 }
 
 void Ieee80211MacMib::handleMlmeGetRequest(Ieee80211MacSignalMlmeGetRequest* getRequest)
@@ -212,6 +212,23 @@ void Ieee80211MacMib::exportMibValue(std::string mibAttrib) const
 void Ieee80211MacMib::setMibValue(std::string mibAttrib, int mibValue)
 {
     // TODO
+}
+
+void Ieee80211MacMib::exportValuesOfAttributesDeclaredHere()
+{
+    // TODO: incomplete
+    macmib->getOperationTable()->setDot11RtsThreshold(dot11RtsThreshold);
+    macmib->getOperationTable()->setDot11ShortRetryLimit(dot11ShortRetryLimit);
+    macmib->getOperationTable()->setDot11FragmentationThreshold(dot11FragmentationThreshold);
+    macmib->getOperationTable()->setDot11LongRetryLimit(dot11LongRetryLimit);
+    macmib->getOperationTable()->setDot11MaxReceiveLifetime(dot11MaxReceiveLifetime);
+    macmib->getOperationTable()->setDot11MaxTransmitMsduLifetime(dot11MaxTransmitMsduLifetime);
+
+    macmib->getStationConfigTable()->setDot11CfpPeriod(dot11CfpPeriod);
+    macmib->getStationConfigTable()->setDot11CfpMaxDuration(dot11CfpMaxDuration);
+    macmib->getStationConfigTable()->setDot11AuthenticationResponseTimeout(dot11AuthenticationResponseTimeout);
+
+    macsorts->getIntraMacRemoteVariables()->setReceiveDtiMs(mReceiveDTIMs);
 }
 
 } /* namespace inet */

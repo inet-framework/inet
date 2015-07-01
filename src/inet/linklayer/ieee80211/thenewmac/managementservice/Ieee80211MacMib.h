@@ -64,6 +64,9 @@ class INET_API Ieee80211MacMib : public IIeee80211MacMib
         int v; // dcl v MibValue ;
         MACAddress adr;
 
+        Ieee80211MacMacmibPackage *macmib = nullptr;
+        Ieee80211MacMacsorts *macsorts = nullptr;
+
         // Read-Write attributes
 //        dot11AuthenticationAlgorithms AuthTypeSet:=incl(open_system, shared_key),
         bool dot11ExcludeUnencrypted;
@@ -105,6 +108,7 @@ class INET_API Ieee80211MacMib : public IIeee80211MacMib
         void exportMibValue(std::string mibAttrib) const;
         int getMibValue(std::string mibAttrib) const;
         void setMibValue(std::string mibAttrib, int mibValue);
+        void exportValuesOfAttributesDeclaredHere();
 };
 
 } /* namespace inet */
