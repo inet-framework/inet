@@ -266,6 +266,15 @@ void TCPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer
 
 void TCPSocket::processMessage(cMessage *msg)
 {
+    {   // ASSERT(belongsToSocket(msg)):
+        cObject *c = msg->getControlInfo();
+        if (TCPCommand *cc = dynamic_cast<TCPCommand*>(c)) {
+            if (cc->getSocketId() != connId)
+                throw cRuntimeError("socket id %d is not mine (%d)", cc->getSocketId(), connId);
+        }
+        else
+            throw cRuntimeError("Bad ControlInfo type: %s", c ? c->getClassName() : "<nullptr>");
+    }
     ASSERT(belongsToSocket(msg));
 
     TCPStatusInfo *status;
