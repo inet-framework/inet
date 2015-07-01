@@ -33,6 +33,7 @@ module Ieee80211NewMac
     @display("bgb=450,417");
     gates:
         inout macSap;
+        inout mlmeSap;
 
     submodules:
         dataService: Ieee80211MacDataService {
@@ -85,4 +86,5 @@ module Ieee80211NewMac
         mlme.mctlToMctRxCoordination <-- protocolControl.mctlBcmgtMlme;
 
         macSap <--> dataService.macSapMsduFromLlc;
+        mlmeSap <--> managementService.getSet;
 }
