@@ -39,6 +39,7 @@ class noncobject StateErr;
 class noncobject Imed;
 class noncobject MibStatus;
 class noncobject Ieee80211NewFrame;
+class noncobject MlmeStatus;
 
 enum Ieee80211MacSignalType
 {
@@ -94,6 +95,7 @@ enum Ieee80211MacSignalType
     PLME_SET_CONFIRM = 49;
     PLME_SET_REQUEST = 50;
     MA_UNIT_DATA_STATUS_INDICATION = 51;
+    MLME_RESET_CONFIRM = 52;
 }
 
 class Ieee80211MacSignal
@@ -162,13 +164,13 @@ class Ieee80211MacSignalMsduConfirm extends Ieee80211MacSignal
 class Ieee80211MacSignalFragRequest extends Ieee80211MacSignal
 {
     signalType = 8;
-    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+//    Ieee80211MacFragmentationSupport::FragSdu fsdu;
 }
 
 class Ieee80211MacSignalPduRequest extends Ieee80211MacSignal
 {
     signalType = 9;
-    Ieee80211MacFragmentationSupport::FragSdu fsdu;
+//    Ieee80211MacFragmentationSupport::FragSdu fsdu;
 }
 
 class Ieee80211MacSignalFragConfirm extends Ieee80211MacSignal
@@ -435,3 +437,10 @@ class Ieee80211MacSignalMaUnitDataStatusIndication extends Ieee80211MacSignal
     CfPriority priority; 
     ServiceClass srv;
 }
+
+class Ieee80211MacSignalMlmeResetConfirm extends Ieee80211MacSignal
+{
+    signalType = 52;
+    MlmeStatus mlmeStatus;
+}
+
