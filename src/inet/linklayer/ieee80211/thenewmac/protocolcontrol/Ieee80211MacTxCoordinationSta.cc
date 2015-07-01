@@ -43,7 +43,7 @@ void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
     else
     {
         if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()))
-            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()));
+            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(fsdu));
         else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()))
             handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()));
         else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg->getControlInfo()))
@@ -88,6 +88,7 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
 //        tmgtGate = this->gate("tmgt");
 //        tdatGate = this->gate("tdat");
         ccw = macmib->getPhyOperationTable()->getCWmin();
+        handleResetMac(); // TODO
     }
 }
 
@@ -133,7 +134,6 @@ void Ieee80211MacTxCoordinationSta::txcReq2()
     chkRtsCts();
 }
 
-
 void Ieee80211MacTxCoordinationSta::chkRtsCts()
 {
     if (useCtsToSelf())
@@ -149,21 +149,17 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
         }
         else
         {
-            //            ((length
-            //            (tpdu) +sCrcLng) > import(
-            //                    dot11RtsThreshold)) and
-            //                    (not fsdu!grpa) and ((fsdu!fCur=0)
-            //                    or retry(tpdu) or (fsdu!resume))
-            //sendMpdu();
-
+            if ((tpdu->getByteLength() + Ieee80211MacNamedStaticIntDataValues::sCrcLng) > macmib->getOperationTable()->getDot11RtsThreshold() &&
+                !fsdu->grpa && (fsdu->fCur == 0 || tpdu->getRetryBit() || fsdu->resume))
+                    sendMpdu();
              // TODO: 4. oldal
         }
     }
 }
 
-void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest)
+void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest, FragSdu *fsdu)
 {
-    fsdu = new FragSdu(pduRequest->getFsdu());
+    this->fsdu = fsdu;
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
         if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
@@ -851,10 +847,12 @@ void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
 
 void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
 {
-    cMessage *backoffSignal = new cMessage("Backoff");
-    backoffSignal->addPar("ccw") = ccw;
-    backoffSignal->addPar("par2") = par2;
-    send(backoffSignal, backoffProcedureGate);
+    cMessage *backoff = new cMessage("Backoff");
+    Ieee80211MacSignalBackoff *signal = new Ieee80211MacSignalBackoff();
+    signal->setCw(ccw);
+    signal->setCnt(par2);
+    backoff->setControlInfo(signal);
+    send(backoff, "txOBackoff$o");
 }
 
 void Ieee80211MacTxCoordinationSta::emitPduConfirm(FragSdu* fsdu, TxResult txResult)

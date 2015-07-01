@@ -36,7 +36,7 @@ class INET_API IIeee80211MacTxCoordinationSta
 
     protected:
         virtual void handleResetMac() = 0;
-        virtual void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest) = 0;
+        virtual void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest, FragSdu *fsdu) = 0;
         virtual void handleBkDone(Ieee80211MacSignalBkDone *bkDone) = 0;
         virtual void handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll) = 0;
         virtual void handleCfEnd() = 0;
@@ -182,7 +182,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleTbtt() override;
         void handleBkDone(Ieee80211MacSignalBkDone *bkDone) override;
         void handleResetMac() override;
-        void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest) override;
+        void handlePduRequest(Ieee80211MacSignalPduRequest *pduRequest, FragSdu *fsdu) override;
         void handleCfPoll(Ieee80211MacSignalCfPoll *cfPoll) override;
         void handleTxCfAck(Ieee80211MacSignalTxCfAck *txCfAck) override;
         void handleTifs() override;
