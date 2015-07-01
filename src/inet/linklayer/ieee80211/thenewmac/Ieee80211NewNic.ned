@@ -16,6 +16,7 @@
 package inet.linklayer.ieee80211.thenewmac;
 
 import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211MacSmMlmeSap;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211NewMacMacSap;
 
 
@@ -25,16 +26,26 @@ module Ieee80211NewNic like IWirelessNic
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
 
+        @display("bgb=276,143");
     gates:
         input radioIn @labels(IRadioFrame); // to receive radio frames
         input upperLayerIn;    // from upper layers
         output upperLayerOut;  // to upper layers
 
     submodules:
-        mac: Ieee80211NewMac;
-        sap: Ieee80211NewMacMacSap;
+        mac: Ieee80211NewMac {
+            @display("p=119,65");
+        }
+        sap: Ieee80211NewMacMacSap {
+            @display("p=194,65");
+        }
+        mlmeSap: Ieee80211MacSmMlmeSap {
+
+            @display("p=49,65");
+        }
 
     connections allowunconnected:
+        mac.mlmeSap <--> mlmeSap.smMlmeSap;
         mac.macSap <--> sap.macSap;
         upperLayerIn --> sap.upperLayerIn;
         upperLayerOut <-- sap.upperLayerOut;
