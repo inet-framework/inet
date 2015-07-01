@@ -23,6 +23,7 @@ package inet.linklayer.contract;
 moduleinterface IWiredNic extends INic
 {
     parameters:
+        @nic;
         @display("i=block/ifcard");
     gates:
         inout phys;

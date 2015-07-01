@@ -33,6 +33,7 @@ import inet.linklayer.contract.IWiredNic;
 module EthernetInterface like IWiredNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex

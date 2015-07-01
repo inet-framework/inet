@@ -32,6 +32,7 @@ import inet.linklayer.contract.IWiredNic;
 module PPPInterface like IWiredNic
 {
     parameters:
+        @nic;
         @display("i=block/ifcard;bgb=214,249;bgl=53");
         string interfaceTableModule;
         string queueType = default("DropTailQueue"); // DropTailQueue, a Diffserv queue, or empty for use internal queue

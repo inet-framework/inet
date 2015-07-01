@@ -25,6 +25,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module Ieee802154UWBIRNic like IWirelessNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
         string radioType = default("Ieee802154UWBIRRadio");

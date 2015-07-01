@@ -29,6 +29,7 @@ import inet.linklayer.contract.IExternalNic;
 simple ExtInterface like IExternalNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;   // The path to the InterfaceTable module
         string filterString;
         string device;

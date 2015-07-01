@@ -18,6 +18,7 @@ package inet.linklayer.contract;
 moduleinterface IWirelessNic extends INic
 {
     parameters:
+        @nic;
         @display("i=block/ifcard");
     gates:
         input radioIn @labels(IRadioFrame); // to receive radio frames

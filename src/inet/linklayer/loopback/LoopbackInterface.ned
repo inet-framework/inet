@@ -30,6 +30,7 @@ import inet.linklayer.contract.INic;
 module LoopbackInterface like INic
 {
     parameters:
+        @nic;
         @display("i=block/ifcard;bgb=214,249;bgl=53");
         string interfaceTableModule;
         int numOutputHooks = default(0);

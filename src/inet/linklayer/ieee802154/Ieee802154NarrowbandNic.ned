@@ -24,6 +24,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module Ieee802154NarrowbandNic like IWirelessNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;
         string radioType = default("Ieee802154NarrowbandScalarRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

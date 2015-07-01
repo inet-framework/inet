@@ -24,6 +24,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module WirelessNic like IWirelessNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;
         string energySourceModule;
         string macType;

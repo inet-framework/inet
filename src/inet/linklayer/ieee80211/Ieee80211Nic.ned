@@ -37,6 +37,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
+        @nic;
         string interfaceTableModule;
         string energySourceModule = default("");
         string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID
