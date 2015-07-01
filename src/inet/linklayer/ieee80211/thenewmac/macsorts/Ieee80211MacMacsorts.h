@@ -72,7 +72,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         int mAId; /* AID assigned to STA by AP */
         bool mAssoc = true; /* =true if STA associated w/BSS */ // TODO: hack
         bool mAtimW; /* =true if ATIM window in prog */
-        bool mBkIP; /* =true if backoff in prog */
+        bool mBkIP = false; /* =true if backoff in prog */
         // TODO: mBrates; /* basic rate set for this sta */
         MACAddress mBssId; /* identifier of current (I)BSS */
         std::string mCap; /* capability info from MlmeJoin */
@@ -103,49 +103,49 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         bool isActingAsAp() const { return mActingAsAp; }
         void setActingAsAp(bool actingAsAp) { mActingAsAp = actingAsAp; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         int getAId() const { return mAId; }
-        void setAId(int aId) { mAId = aId; }
+        void setAId(int aId) { mAId = aId; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isAssoc() const { return mAssoc; }
-        void setAssoc(bool assoc) { mAssoc = assoc; }
+        void setAssoc(bool assoc) { mAssoc = assoc; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isAtimW() const { return mAtimW; }
-        void setAtimW(bool atimW) { mAtimW = atimW; }
+        void setAtimW(bool atimW) { mAtimW = atimW; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isBkIp() const { return mBkIP; }
-        void setBkIp(bool bkIp) { mBkIP = bkIp; }
+        void setBkIp(bool bkIp) { mBkIP = bkIp; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const MACAddress& getBssId() const { return mBssId; }
-        void setBssId(const MACAddress& bssId) { mBssId = bssId; }
+        void setBssId(const MACAddress& bssId) { mBssId = bssId; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const std::string& getCap() const { return mCap; }
-        void setCap(const std::string& cap) { mCap = cap; }
+        void setCap(const std::string& cap) { mCap = cap; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isCfp() const { return mCfp; }
-        void setCfp(bool cfp) { mCfp = cfp; }
+        void setCfp(bool cfp) { mCfp = cfp; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isDisable() const { return mDisable; }
-        void setDisable(bool disable) { mDisable = disable; }
+        void setDisable(bool disable) { mDisable = disable; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         int getDtimCount() const { return mDtimCount; }
-        void setDtimCount(int dtimCount) { mDtimCount = dtimCount; }
+        void setDtimCount(int dtimCount) { mDtimCount = dtimCount; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isFxIp() const { return mFxIP; }
-        void setFxIp(bool fxIp) { mFxIP = fxIp; }
+        void setFxIp(bool fxIp) { mFxIP = fxIp; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isIbss() const { return mIbss; }
-        void setIbss(bool ibss) { mIbss = ibss; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
+        void setIbss(bool ibss) { mIbss = ibss; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         int getListenInt() const { return mListenInt; }
-        void setListenInt(int listenInt) { mListenInt = listenInt; }
+        void setListenInt(int listenInt) { mListenInt = listenInt; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const simtime_t& getNavEnd() const { return mNavEnd; }
-        void setNavEnd(const simtime_t& navEnd) { mNavEnd = navEnd; }
+        void setNavEnd(const simtime_t& navEnd) { mNavEnd = navEnd; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const simtime_t& getNextBdry() const { return mNextBdry; }
-        void setNextBdry(const simtime_t& nextBdry) { mNextBdry = nextBdry; }
+        void setNextBdry(const simtime_t& nextBdry) { mNextBdry = nextBdry; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const simtime_t& getNextTbtt() const { return mNextTbtt; }
-        void setNextTbtt(const simtime_t& nextTbtt) { mNextTbtt = nextTbtt; }
-        bool isPcAvail() const { return mPcAvail; }
+        void setNextTbtt(const simtime_t& nextTbtt) { mNextTbtt = nextTbtt; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
+        bool isPcAvail() const { return mPcAvail; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         void setPcAvail(bool pcAvail) { mPcAvail = pcAvail; }
-        bool isPcDlvr() const { return mPcDlvr; }
-        void setPcDlvr(bool pcDlvr) { mPcDlvr = pcDlvr; }
+        bool isPcDlvr() const { return mPcDlvr; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
+        void setPcDlvr(bool pcDlvr) { mPcDlvr = pcDlvr; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isPcPoll() const { return mPcPoll; }
-        void setPcPoll(bool pcPoll) { mPcPoll = pcPoll; }
+        void setPcPoll(bool pcPoll) { mPcPoll = pcPoll; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         Usec getPdly() const { return mPdly; }
-        void setPdly(const Usec pdly) { mPdly = pdly; }
+        void setPdly(const Usec pdly) { mPdly = pdly; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isReceiveDtiMs() const { return mReceiveDTIMs; }
-        void setReceiveDtiMs(bool receiveDtiMs) { mReceiveDTIMs = receiveDtiMs; }
+        void setReceiveDtiMs(bool receiveDtiMs) { mReceiveDTIMs = receiveDtiMs; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         bool isRxA() const { return mRxA; }
-        void setRxA(bool rxA) { mRxA = rxA; }
+        void setRxA(bool rxA) { mRxA = rxA; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
         const std::string& getSsId() const { return mSsId; }
-        void setSsId(const std::string& ssId) { mSsId = ssId; }
+        void setSsId(const std::string& ssId) { mSsId = ssId; macsortsModule->emitIntraMacRemoteVariablesChangedSignal(); }
 };
 
 /*
