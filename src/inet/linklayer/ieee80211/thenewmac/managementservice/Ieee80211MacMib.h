@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macmib/Ieee80211MacMacmib.h"
 
@@ -34,9 +35,9 @@ class INET_API IIeee80211MacMib : public Ieee80211MacMacProcessBase
         virtual void handleMlmeSetRequest(Ieee80211MacSignalMlmeSetRequest *setRequest) = 0;
 
         virtual void emitResetMac() = 0;
-        virtual void emitMlmeGetConfirm() = 0;
-        virtual void emitMlmeSetConfirm() = 0;
-        virtual void emitMlmeResetConfirm() = 0;
+        virtual void emitMlmeGetConfirm(MibStatus status, std::string mibAttrib, int mibValue) = 0;
+        virtual void emitMlmeSetConfirm(MibStatus status, std::string mibAttrib) = 0;
+        virtual void emitMlmeResetConfirm(MlmeStatus status) = 0;
 
 };
 
@@ -47,6 +48,14 @@ class INET_API Ieee80211MacMib : public IIeee80211MacMib
         {
             MAC_MIB_STATE_MIB_IDLE
         };
+        enum MibAttribType
+        {
+            MIB_ATTRIB_TYPE_INVALID,
+            MIB_ATTRIB_TYPE_VALID,
+            MIB_ATTRIB_TYPE_READ_ONLY,
+            MIB_ATTRIB_TYPE_WRITE_ONLY
+        };
+
     protected:
         MacMibState state = MAC_MIB_STATE_MIB_IDLE;
 
@@ -55,23 +64,20 @@ class INET_API Ieee80211MacMib : public IIeee80211MacMib
         int v; // dcl v MibValue ;
         MACAddress adr;
 
-        /* Declarations of MIB attributes exported from
-        this process */
-
-        /* Read-Write attributes */
+        // Read-Write attributes
 //        dot11AuthenticationAlgorithms AuthTypeSet:=incl(open_system, shared_key),
         bool dot11ExcludeUnencrypted;
         int dot11FragmentationThreshold;
         std::vector<MACAddress> dot11GroupAddresses;
         int dot11LongRetryLimit;
-        simtime_t dot11MaxReceiveLifetime;
+        Tu dot11MaxReceiveLifetime;
         int dot11MaxTransmitMsduLifetime;
-        simtime_t dot11MediumOccupancyLimit;
+        Tu dot11MediumOccupancyLimit;
         bool dot11PrivacyInvoked;
         bool mReceiveDTIMs;
         int dot11CfpPeriod;
-        simtime_t dot11CfpMaxDuration;
-        simtime_t dot11AuthenticationResponseTimeout;
+        Tu dot11CfpMaxDuration;
+        Tu dot11AuthenticationResponseTimeout;
         int dot11RtsThreshold;
         int dot11ShortRetryLimit;
         int dot11WepDefaultKeyId;
@@ -80,11 +86,25 @@ class INET_API Ieee80211MacMib : public IIeee80211MacMib
         int dot11CurrentPattern;
         int dot11CurrentIndex;
 
-        /* Write-Only attributes */
-
     protected:
         void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
+
+        virtual void handleMlmeResetRequest(Ieee80211MacSignalMlmeResetRequest *resetRequest);
+        virtual void handleMlmeGetRequest(Ieee80211MacSignalMlmeGetRequest *getRequest);
+        virtual void handleMlmeSetRequest(Ieee80211MacSignalMlmeSetRequest *setRequest);
+
+        virtual void emitResetMac();
+        virtual void emitMlmeGetConfirm(MibStatus status, std::string mibAttrib, int mibValue);
+        virtual void emitMlmeSetConfirm(MibStatus status, std::string mibAttrib);
+        virtual void emitMlmeResetConfirm(MlmeStatus status);
+
+        MibAttribType getMibAttribType(std::string mibAttrib) const;
+        bool isDeclaredHere(std::string mibAttrib) const;
+        int importMibValue(std::string mibAttrib) const;
+        void exportMibValue(std::string mibAttrib) const;
+        int getMibValue(std::string mibAttrib) const;
+        void setMibValue(std::string mibAttrib, int mibValue);
 };
 
 } /* namespace inet */

@@ -24,34 +24,35 @@ simple Ieee80211MacMib
         string macmibPackage = default("^.^.macmib");
         
         string authenticationAlgorithms @enum("open_system", "shared_key");
-        bool excludeUnencrypted;
-        int fragmentationThreshold;
-        string groupAddresses;
-        int longRetryLimit;
-        double maxReceiveLifetime;
-        double maxTransmitMsduLifetime;
-        double mediumOccupancyLimit;
-        bool privacyInvoked;
-        bool mReceiveDTIMs;
-        int cfpPeriod;
-        double cfpMaxDuration;
-        double authenticationResponseTimeout;
-        int rtsThreshold;
-        int shortRetryLimit;
-        int wepDefaultKeyId;
-        int currentChannelNumber;
-        int currentSet;
-        int currentPattern;
-        int currentIndex;
-        
-        bool cfPollable;
-        string macAddress;
-        string manufacturerId;
-        bool privacyOptionImplemented;
-        string productId;
-        string aStationId;
-        int wepKayMappingLength;
+        bool excludeUnencrypted = default(false);
+        int fragmentationThreshold = default(2346);
+        string groupAddresses = default("");
+        int longRetryLimit = default(4);
+        int maxReceiveLifetime = default(512); // Kusec
+        int maxTransmitMsduLifetime = default(512); // Kusec
+        int mediumOccupancyLimit = default(100); // Kusec
+        bool privacyInvoked = default(false);
+        bool mReceiveDTIMs = default(true);
+        int cfpPeriod = default(1);
+        int cfpMaxDuration = default(200); // Kusec
+        int authenticationResponseTimeout = default(512); // Kusec
+        int rtsThreshold = default(3000);
+        int shortRetryLimit = default(7);
+        int wepDefaultKeyId = default(0);
+        int currentChannelNumber = default(0);
+        int currentSet = default(0);
+        int currentPattern = default(0);
+        int currentIndex = default(0);
+//        
+//        bool cfPollable;
+//        string macAddress;
+//        string manufacturerId;
+//        bool privacyOptionImplemented;
+//        string productId;
+//        string aStationId;
+//        int wepKayMappingLength;
         
     gates:
         output mres;
+        inout getSet;
 }
