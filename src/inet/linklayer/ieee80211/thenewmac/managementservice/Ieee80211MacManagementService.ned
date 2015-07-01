@@ -25,7 +25,8 @@ module Ieee80211MacManagementService
     gates:
         inout mmgtToMgt;
         input mmgtFromMgt;
-
+        inout getSet;
+        
     submodules:
         mib: Ieee80211MacMib;
         mlmeRequests: Ieee80211MacMlmeRequests {
@@ -40,4 +41,6 @@ module Ieee80211MacManagementService
         mib.mres --> mlmeRequests.mres;
         mlmeRequests.toMgt <--> mmgtToMgt;
         mlmeIndications.fromMgt <-- mmgtFromMgt;
+        
+        mib.getSet <--> getSet;
 }
