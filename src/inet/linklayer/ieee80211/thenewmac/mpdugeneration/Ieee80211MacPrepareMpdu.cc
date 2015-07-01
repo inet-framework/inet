@@ -43,11 +43,7 @@ void Ieee80211MacPrepareMpdu::initialize(int stage)
     {
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
-        subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER_2)
-    {
-        emit(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, true); // TODO: hack
+        macsorts->subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
     }
 }
 
@@ -94,7 +90,7 @@ void Ieee80211MacPrepareMpdu::handleMsduRequest(Ieee80211MacSignalMsduRequest *m
 
 void Ieee80211MacPrepareMpdu::fragment(cGate *sender)
 {
-    FragSdu *fsdu = new FragSdu();
+    fsdu = new FragSdu();
     fsdu->fTot = 1;
     fsdu->fCur = 0;
     fsdu->fAnc = 0;
@@ -131,7 +127,7 @@ void Ieee80211MacPrepareMpdu::makePdus(int sduLength)
 {
     f = 0;
     int p = Ieee80211MacNamedStaticIntDataValues::sMacHdrLng;
-    fsdu->pdus[f] = nullptr;
+    fsdu->pdus.push_back(nullptr);
     keyOk = false;
 
     while (f != fsdu->fTot)
@@ -145,6 +141,11 @@ void Ieee80211MacPrepareMpdu::makePdus(int sduLength)
     //    fsdu!pdus(f):=
     //    setFrag(
     //    fsdu!pdus(f),f)
+        // TODO: hack
+
+        fsdu->pdus.at(f) = sdu;
+
+
         if (f+1 < fsdu->fTot)
         {
 //            fsdu!pdus(f):=
