@@ -31,7 +31,7 @@ void Ieee80211MacPmFilterSta::handleMessage(cMessage* msg)
     else
     {
         if (dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()))
-            handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()));
+            handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()))
             handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()));
         else if (dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()))
@@ -62,9 +62,9 @@ void Ieee80211MacPmFilterSta::handleResetMac()
     state = PM_FILTER_STA_STATE_PM_IDLE;
 }
 
-void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest)
+void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest, FragSdu *fsdu)
 {
-    fsdu = new FragSdu(fragRequest->getFsdu());
+    this->fsdu = fsdu;
     if (state == PM_FILTER_STA_STATE_PM_IDLE)
         emitPduRequest(fsdu);
     else if (state == PM_FILTER_STA_STATE_PM_BSS || state == PM_FILTER_STA_STATE_BSS_CFP)
@@ -168,9 +168,10 @@ void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pdu
 
 void Ieee80211MacPmFilterSta::emitPduRequest(FragSdu *fsdu)
 {
-//    Ieee80211MacSignalPduRequest *pduRrequest = new Ieee80211MacSignalPduRequest();
-//    pduRrequest->setFsdu(*fsdu);
-//    send(pduRrequest, mpdu);
+    Ieee80211MacSignalPduRequest *signal = new Ieee80211MacSignalPduRequest();
+    delete fsdu->removeControlInfo(); // TODO
+    fsdu->setControlInfo(signal);
+    send(fsdu, "mpdu$o");
 }
 
 void Ieee80211MacPmFilterSta::continousSignalPmIdle1()
