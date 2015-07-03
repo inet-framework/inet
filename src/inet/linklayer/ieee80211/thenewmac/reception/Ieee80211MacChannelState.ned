@@ -17,8 +17,18 @@
 
 package inet.linklayer.ieee80211.thenewmac.reception;
 
+//
+// This process maintains channel state based on
+// both physical and virtual carrier sense, generates
+// slot time reference, and provides Busy, Idle & Slot
+// signals to Transmission.
+//
 simple Ieee80211MacChannelState
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+        
     gates:
 		input updNav; // [SetNav, ClearNav]
         output toTx; // [Busy, Idle, Slot] signals to Reception/DataPump process
