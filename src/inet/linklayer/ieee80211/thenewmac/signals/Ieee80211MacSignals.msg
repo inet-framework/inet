@@ -19,6 +19,7 @@ cplusplus {{
     #include "inet/common/INETDefs.h"
     #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
     #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedMacStaTypes.h"
+    #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacEnumeratedPhyTypes.h"
     #include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 }}
 
@@ -40,6 +41,8 @@ class noncobject Imed;
 class noncobject MibStatus;
 class noncobject Ieee80211NewFrame;
 class noncobject MlmeStatus;
+class noncobject CcaStatus;
+class noncobject NavSrc;
 
 enum Ieee80211MacSignalType
 {
@@ -96,6 +99,12 @@ enum Ieee80211MacSignalType
     PLME_SET_REQUEST = 50;
     MA_UNIT_DATA_STATUS_INDICATION = 51;
     MLME_RESET_CONFIRM = 52;
+    PHY_CCA_INDICATION = 53;
+    SET_NAV = 54;
+    USE_EIFS = 55;
+    USE_DIFS = 56;
+    RTS_TIMEOUT = 57;
+    CLEAR_NAV = 58;
 }
 
 class Ieee80211MacSignal
@@ -132,7 +141,8 @@ class Ieee80211MacSignalCancel extends Ieee80211MacSignal
 class Ieee80211MacSignalChangeNav extends Ieee80211MacSignal
 {
     signalType = 4;
-    int par1;
+    simtime_t time;
+    simtime_t duration;
     NavSrc navSrc;
 }
 
@@ -444,3 +454,39 @@ class Ieee80211MacSignalMlmeResetConfirm extends Ieee80211MacSignal
     MlmeStatus mlmeStatus;
 }
 
+class Ieee80211MacSignalPhyCcaIndication extends Ieee80211MacSignal
+{
+    signalType = 53;
+    CcaStatus status;
+}
+
+class Ieee80211MacSignalSetNav extends Ieee80211MacSignal
+{
+    signalType = 54;
+    simtime_t time;
+    simtime_t duration;
+    NavSrc navSrc;
+}
+
+class Ieee80211MacSignalUseEifs extends Ieee80211MacSignal
+{
+    signalType = 55;
+    simtime_t time;
+}
+
+class Ieee80211MacSignalUseDifs extends Ieee80211MacSignal
+{
+    signalType = 56;
+    simtime_t time;
+}
+
+class Ieee80211MacSignalRtsTimeout extends Ieee80211MacSignal
+{
+    signalType = 57;
+}
+
+class Ieee80211MacSignalClearNav extends Ieee80211MacSignal
+{
+    signalType = 58;
+    NavSrc navSrc;
+}
