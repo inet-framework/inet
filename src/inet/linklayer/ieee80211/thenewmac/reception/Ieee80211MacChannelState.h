@@ -50,6 +50,9 @@ class INET_API IIeee80211MacChannelState
         virtual void emitPhyCcarstRequest() = 0;
 };
 
+/*
+ * TODO: not(active(tifs)) ???
+ */
 class INET_API Ieee80211MacChannelState : public IIeee80211MacChannelState, public Ieee80211MacMacProcessBase
 {
     protected:
@@ -111,8 +114,8 @@ class INET_API Ieee80211MacChannelState : public IIeee80211MacChannelState, publ
         virtual void handleChangeNav(Ieee80211MacSignalChangeNav *changeNav);
         virtual void handleRtsTimeout();
         virtual void handleClearNav(Ieee80211MacSignalClearNav *clearNav);
-
         virtual void handleResetMac();
+
         virtual void emitIdle();
         virtual void emitSlot();
         virtual void emitBusy();

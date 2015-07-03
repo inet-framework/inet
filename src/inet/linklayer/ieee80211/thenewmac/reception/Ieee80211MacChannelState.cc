@@ -35,10 +35,6 @@ void Ieee80211MacChannelState::initialize(int stage)
 //        Eifs based on the lowest basic rate.
 //        dEifs =  TODO
     }
-    else if (stage == INITSTAGE_LAST)
-    {
-
-    }
 }
 
 void Ieee80211MacChannelState::handleMessage(cMessage* msg)
@@ -46,15 +42,11 @@ void Ieee80211MacChannelState::handleMessage(cMessage* msg)
     if (msg->isSelfMessage())
     {
         if (msg == tNav)
-        {
-
-        }
+            handleTnav();
         else if (msg == tIfs)
             handleTifs();
         else if (msg == tSlot)
-        {
-
-        }
+            handleTslot();
         else
             throw cRuntimeError("Unknown self message");
     }
@@ -62,6 +54,20 @@ void Ieee80211MacChannelState::handleMessage(cMessage* msg)
     {
         if (dynamic_cast<Ieee80211MacSignalPhyCcaIndication*>(msg->getControlInfo()))
             handlePhyCcaIndication(dynamic_cast<Ieee80211MacSignalPhyCcaIndication*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalSetNav*>(msg->getControlInfo()))
+            handleSetNav(dynamic_cast<Ieee80211MacSignalSetNav*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalChangeNav*>(msg->getControlInfo()))
+            handleChangeNav(dynamic_cast<Ieee80211MacSignalChangeNav*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalUseEifs*>(msg->getControlInfo()))
+            handleUseEifs(dynamic_cast<Ieee80211MacSignalUseEifs*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalUseDifs*>(msg->getControlInfo()))
+            handleUseDifs(dynamic_cast<Ieee80211MacSignalUseDifs*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalClearNav*>(msg->getControlInfo()))
+            handleClearNav(dynamic_cast<Ieee80211MacSignalClearNav*>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalRtsTimeout*>(msg->getControlInfo()))
+            handleRtsTimeout();
+        else
+            throw cRuntimeError("Unknown signal");
     }
 }
 
@@ -83,14 +89,26 @@ void Ieee80211MacChannelState::handleResetMac()
 
 void Ieee80211MacChannelState::emitIdle()
 {
+    cMessage *idle = new cMessage("Idle");
+    Ieee80211MacSignalIdle *signal = new Ieee80211MacSignalIdle();
+    idle->setControlInfo(signal);
+    send(idle, "toTx$o");
 }
 
 void Ieee80211MacChannelState::emitSlot()
 {
+    cMessage *slot = new cMessage("Slot");
+    Ieee80211MacSignalSlot *signal = new Ieee80211MacSignalSlot();
+    slot->setControlInfo(signal);
+    send(slot, "toTx$o");
 }
 
 void Ieee80211MacChannelState::emitBusy()
 {
+    cMessage *busy = new cMessage("Busy");
+    Ieee80211MacSignalBusy *signal = new Ieee80211MacSignalBusy();
+    busy->setControlInfo(signal);
+    send(busy, "toTx$o");
 }
 
 void Ieee80211MacChannelState::handleTifs()
@@ -280,6 +298,10 @@ void Ieee80211MacChannelState::handleClearNav(Ieee80211MacSignalClearNav *clearN
 
 void Ieee80211MacChannelState::emitPhyCcarstRequest()
 {
+//    cMessage *phyCcarstRequest = new cMessage("PhyCcarstRequest");
+//    Ieee80211MacSignalPhyCcarstRequest *signal = new Ieee80211MacSignalPhyCcarstRequest();
+//    phyCcarstRequest->setControlInfo(signal);
+    // TODO
 }
 
 } /* namespace ieee80211 */
