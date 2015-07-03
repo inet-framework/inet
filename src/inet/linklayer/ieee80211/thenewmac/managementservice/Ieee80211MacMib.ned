@@ -24,7 +24,7 @@ simple Ieee80211MacMib
         string macmibPackage = default("^.^.macmib");
         string macsortsPackage = default("^.^.macsorts");
         
-        string authenticationAlgorithms @enum("open_system", "shared_key");
+        string authenticationAlgorithms @enum("open_system", "shared_key") = default("open_system");
         bool excludeUnencrypted = default(false);
         int fragmentationThreshold = default(2346);
         string groupAddresses = default("");
@@ -33,7 +33,7 @@ simple Ieee80211MacMib
         int maxTransmitMsduLifetime = default(512); // Kusec
         int mediumOccupancyLimit = default(100); // Kusec
         bool privacyInvoked = default(false);
-        bool mReceiveDTIMs = default(true);
+        bool receiveDTIMs = default(true);
         int cfpPeriod = default(1);
         int cfpMaxDuration = default(200); // Kusec
         int authenticationResponseTimeout = default(512); // Kusec
