@@ -57,6 +57,7 @@ void Ieee80211MacBackoff::initialize(int stage)
     }
     if (stage == INITSTAGE_LINK_LAYER)
     {
+        done();
     }
 }
 
@@ -68,19 +69,22 @@ void Ieee80211MacBackoff::handleResetMac()
 
 void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff)
 {
-    // cw is contention window, cnt is slot count from
-    // previous BkDone. If cnt<0, a new random count
-    // is generated.
-    cw = backoff->getCw();
-    cnt = backoff->getCnt();
-//    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
-    macsorts->getIntraMacRemoteVariables()->setBkIp(true);
-    // Choose random backoff count if cnt = -1.
-    // Resume with count from cancelled backoff if cnt>=0.
-    slotCnt = cnt < 0 ? intuniform(0, cw) : cnt;
-    // At start assume that the WM is busy until receiving a signal
-    // which indicates the WM is idle.
-    state = BACKOFF_STATE_CHANNEL_BUSY;
+    if (state == BACKOFF_STATE_NO_BACKOFF)
+    {
+        // cw is contention window, cnt is slot count from
+        // previous BkDone. If cnt<0, a new random count
+        // is generated.
+        cw = backoff->getCw();
+        cnt = backoff->getCnt();
+    //    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
+        macsorts->getIntraMacRemoteVariables()->setBkIp(true);
+        // Choose random backoff count if cnt = -1.
+        // Resume with count from cancelled backoff if cnt>=0.
+        slotCnt = cnt < 0 ? intuniform(0, cw) : cnt;
+        // At start assume that the WM is busy until receiving a signal
+        // which indicates the WM is idle.
+        state = BACKOFF_STATE_CHANNEL_BUSY;
+    }
 }
 
 void Ieee80211MacBackoff::handleIdle()
@@ -113,8 +117,16 @@ void Ieee80211MacBackoff::handleSlot()
 {
     // Slot only sent when WM idle. This is for the case where WM idle at arrival of Backoff signal.
     if (state == BACKOFF_STATE_CHANNEL_IDLE)
+    {
         // Decrement count for each slot when WM idle.
         slotCnt--;
+
+        if (slotCnt == 0)
+        {
+            cnt == 0 ? emitBkDone(-2) : emitBkDone(-1);
+            done();
+        }
+    }
     // else ignore
 }
 
