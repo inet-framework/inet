@@ -337,7 +337,7 @@ void IGMPv2::initialize(int stage)
         host->subscribe(NF_IPv4_MCAST_LEAVE, this);
 
         enabled = par("enabled");
-        externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();
+        externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();         //FIXME it's wrong now, connection always exists to dispatcher
         robustness = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");

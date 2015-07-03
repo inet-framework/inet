@@ -36,6 +36,8 @@ using namespace std;
 
 Define_Module(IGMPv3);
 
+//FIXME routerIn and routerOut gates unused!!!
+
 static bool isSorted(const IPv4AddressVector& v)
 {
     int n = (int)v.size();
