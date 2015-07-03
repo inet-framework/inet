@@ -65,6 +65,9 @@ void Ieee80211MacMib::initialize(int stage)
         dot11CurrentSet = par("currentSet");
         dot11CurrentPattern = par("currentPattern");
         dot11CurrentIndex = par("currentIndex");
+    }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
         exportValuesOfAttributesDeclaredHere();
     }
 }
