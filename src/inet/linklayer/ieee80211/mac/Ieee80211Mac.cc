@@ -36,7 +36,7 @@ namespace ieee80211 {
 Define_Module(Ieee80211Mac);
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(inet::Ieee80211Mac,
+Register_Enum(inet::ieee80211::Ieee80211Mac::State,
         (Ieee80211Mac::IDLE,
          Ieee80211Mac::DEFER,
          Ieee80211Mac::WAITAIFS,
@@ -297,7 +297,7 @@ void Ieee80211Mac::initialize(int stage)
         timeStampLastMessageReceived = SIMTIME_ZERO;
 
         stateVector.setName("State");
-        stateVector.setEnum("inet::Ieee80211Mac");
+        stateVector.setEnum(opp_typename(typeid(Ieee80211Mac::State)));
         for (int i = 0; i < numCategories(); i++) {
             EdcaOutVector outVectors;
             std::stringstream os;
