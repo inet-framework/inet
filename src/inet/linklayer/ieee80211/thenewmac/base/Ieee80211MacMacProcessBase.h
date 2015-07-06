@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/SdlProcess.h"
 //#include "inet/common/INETMath.h"
 //#include "inet/common/Units.h"
 
@@ -30,9 +31,11 @@ class INET_API Ieee80211MacMacProcessBase : public cSimpleModule
 {
     protected:
         cMessage *resetMac = nullptr;
+        SdlProcess *sdlProcess = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        void handleMessage(cMessage *msg) override;
 
     public:
         virtual ~Ieee80211MacMacProcessBase();

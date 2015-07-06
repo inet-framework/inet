@@ -20,6 +20,11 @@
 namespace inet {
 namespace ieee80211 {
 
+void Ieee80211MacMacProcessBase::handleMessage(cMessage* msg)
+{
+    sdlProcess->insertSignal(msg);
+    sdlProcess->runTransition();
+}
 
 void Ieee80211MacMacProcessBase::emitResetMac()
 {
@@ -30,6 +35,7 @@ Ieee80211MacMacProcessBase::~Ieee80211MacMacProcessBase()
 {
     cancelAndDelete(resetMac);
 }
+
 
 } /* namespace inet */
 } /* namespace ieee80211 */
