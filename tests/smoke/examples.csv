@@ -219,11 +219,6 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0
-/examples/manetrouting/aodvuu/,      -f omnetpp.ini -c AODVUU -r 0
-# /examples/manetrouting/aodvuu/,      -f omnetpp.ini -c IPv4SlowMobility -r 0   # IPv4SlowMobility extended
-/examples/manetrouting/aodvuu/,      -f omnetpp.ini -c IPv4ModerateFastMobility -r 0
-/examples/manetrouting/aodvuu/,      -f omnetpp.ini -c IPv4FastMobility -r 0
-/examples/manetrouting/aodvuu/,      -f omnetpp.ini -c Dynamic -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0
@@ -235,15 +230,6 @@
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0
-/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOFau -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c AODVUU -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSRUU -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR_ETX -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSDV_2 -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c Batman -r 0
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Random -r 0   # Random extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0
@@ -255,41 +241,8 @@
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Dynamic -r 0   # Dynamic extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOFau -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR_ETX -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0
-/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0
-/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0
-/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0
-# /examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0       # segmentation fault in OLSR_ETX
-/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c SingleRadio -r 0
-/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c MultiRadio -r 0
-/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c SingleRadio -r 0
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOFau -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR_ETX -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSDV_2 -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c Batman -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c AODVUU -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSRUU -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR_ETX -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSDV_2 -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMOFau -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c Batman -r 0
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0

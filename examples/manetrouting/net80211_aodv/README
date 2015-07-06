@@ -1,4 +1,0 @@
-Network for testing the 802.11g model in ad-hoc mode using the AODV routing protocol.
-The network contains a single fixed node inthe corner of the playground. Host0 from 
-the other corner is trying to communicate with the fixed node through the rest of the
-randomly scattered nodes.

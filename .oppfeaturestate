@@ -40,8 +40,6 @@
     <feature enabled="true" id="GPSR"/>
     <feature enabled="true" id="RIP"/>
     <feature enabled="true" id="RIP_examples"/>
-    <feature enabled="true" id="MANET"/>
-    <feature enabled="true" id="MANET_examples"/>
     <feature enabled="true" id="mobility"/>
     <feature enabled="true" id="mobility_examples"/>
     <feature enabled="true" id="physicalenvironment"/>
