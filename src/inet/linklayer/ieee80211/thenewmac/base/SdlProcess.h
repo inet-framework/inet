@@ -22,6 +22,7 @@
 #include <queue>
 #include <tuple>
 #include <functional>
+#include <set>
 
 namespace inet {
 namespace ieee80211 {
@@ -36,6 +37,7 @@ class INET_API SdlProcess
             SdlTransition(int signalId, std::function<void(cMessage *)> processSignal, bool priority = false, bool (*enablingCondition)() = nullptr, bool (*continuousSignal)() = nullptr) :
                 signalId(signalId),
                 processSignal(processSignal),
+                priority(priority),
                 enablingCondition(enablingCondition),
                 continuousSignal(continuousSignal) {}
 
@@ -48,8 +50,14 @@ class INET_API SdlProcess
 
         struct SdlState
         {
-//            const char *name;
             std::vector<SdlTransition> transitions;
+            std::set<int> saveSignalSet;
+
+            SdlState(std::vector<SdlTransition> transitions, std::set<int> saveSignalSet) :
+                transitions(transitions),
+                saveSignalSet(saveSignalSet) {}
+
+            bool isSaved(cMessage *signal) const { return saveSignalSet.count(signal->getKind()) == 1; }
         };
 
         SdlProcess(std::vector<SdlState> states) : states(states) { currentState = &this->states[0]; }
