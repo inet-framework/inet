@@ -100,7 +100,7 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
         processEchoReply((ICMPv6EchoReplyMsg *)icmpv6msg);
     }
     else
-        throw cRuntimeError("Unknown message type received.\n");
+        throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(),icmpv6msg->getName());
 }
 
 /*
