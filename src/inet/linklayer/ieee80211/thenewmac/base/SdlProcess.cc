@@ -30,18 +30,31 @@ void SdlProcess::runTransition()
     // a) if the input port contains a signal matching a priority input of the current state, the first such
     // signal is consumed (see 11.4); otherwise
     for (auto & transition : currentState->transitions)
+    {
         if (transition.priority)
-            for (auto & signal : signals)
+        {
+            for (auto it = signals.begin(); it != signals.end(); )
+            {
+                auto cur = it++;
+                cMessage *signal = *cur;
                 if (transition.signalId == signal->getKind())
+                {
+                    signals.erase(cur);
                     return transition.processSignal(signal);
+                }
+            }
+        }
+    }
 
     // b) in the order of the signals on the input port:
     //  1) the Provided-expressions of the Input-node corresponding to the current signal are
     //     interpreted in arbitrary order, if any;
     //  2) if the current signal is enabled, this signal is consumed (see 11.6); otherwise
     //  3) the next signal on the input port is selected.
-    for (auto & signal : signals)
+    for (auto it = signals.begin(); it != signals.end(); )
     {
+        auto cur = it++;
+        cMessage *signal = *cur;
         bool hasMatchingInputNode = false;
         // i) A signal in a Save-signalset is not enabled.
         if (!currentState->isSaved(signal))
@@ -54,11 +67,17 @@ void SdlProcess::runTransition()
                 hasMatchingInputNode = transition.signalId == signal->getKind() ? true : hasMatchingInputNode;
                 if (transition.signalId == signal->getKind() &&
                    (transition.enablingCondition == nullptr || transition.enablingCondition()))
+                {
+                    signals.erase(cur);
                     return transition.processSignal(signal);
+                }
             }
             // Implicit transition
             if (!hasMatchingInputNode)
+            {
+                signals.erase(cur);
                 return;
+            }
         }
     }
 

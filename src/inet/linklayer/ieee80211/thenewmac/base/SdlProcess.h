@@ -19,10 +19,9 @@
 #define __INET_SDLPROCESS_H
 
 #include "inet/common/INETDefs.h"
-#include <queue>
-#include <tuple>
 #include <functional>
 #include <set>
+#include <list>
 
 namespace inet {
 namespace ieee80211 {
@@ -63,7 +62,7 @@ class INET_API SdlProcess
         SdlProcess(std::vector<SdlState> states) : states(states) { currentState = &this->states[0]; }
 
     protected:
-        std::vector<cMessage *> signals;
+        std::list<cMessage *> signals;
         std::vector<SdlState> states;
         SdlState *currentState;
 
