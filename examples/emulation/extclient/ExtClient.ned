@@ -30,7 +30,7 @@ network ExtClient
         peer: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli1d.mrt";
+                ipv4.routingTable.routingFile = "cli1d.mrt";
                 numExtInterfaces = 1;
                 @display("p=29,90;i=old/laptop3");
         }
