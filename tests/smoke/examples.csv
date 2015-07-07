@@ -225,10 +225,10 @@
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0
-# /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0   # TCP_APP extended
-# /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # SCTP_APP extended
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_TCP -r 0
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_PING -r 0
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH_TCP -r 0
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH_PING -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0
