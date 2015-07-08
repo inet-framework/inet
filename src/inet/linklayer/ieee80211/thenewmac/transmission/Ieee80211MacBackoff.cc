@@ -25,6 +25,7 @@ Define_Module(Ieee80211MacBackoff);
 
 void Ieee80211MacBackoff::handleMessage(cMessage* msg)
 {
+    EV_DEBUG << "state = " << state << endl;
     if (msg->isSelfMessage())
     {
         if (strcmp("ResetMac",msg->getName()) == 0)
@@ -35,7 +36,7 @@ void Ieee80211MacBackoff::handleMessage(cMessage* msg)
     else
     {
         if (dynamic_cast<Ieee80211MacSignalBackoff *>(msg->getControlInfo()))
-            handleBackoff(dynamic_cast<Ieee80211MacSignalBackoff *>(msg->getControlInfo()));
+            handleBackoff(dynamic_cast<Ieee80211MacSignalBackoff *>(msg->getControlInfo()), msg->getArrivalGate());
         else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg->getControlInfo()))
             handleIdle();
         else if (dynamic_cast<Ieee80211MacSignalSlot *>(msg->getControlInfo()))
@@ -67,7 +68,7 @@ void Ieee80211MacBackoff::handleResetMac()
     done();
 }
 
-void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff)
+void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff, cGate *source)
 {
     if (state == BACKOFF_STATE_NO_BACKOFF)
     {
@@ -76,7 +77,7 @@ void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff)
         // is generated.
         cw = backoff->getCw();
         cnt = backoff->getCnt();
-    //    source = backoff->getArrivalGate(); // Save PId from request to use as addr of Done.
+        this->source = source; // Save PId from request to use as addr of Done.
         macsorts->getIntraMacRemoteVariables()->setBkIp(true);
         // Choose random backoff count if cnt = -1.
         // Resume with count from cancelled backoff if cnt>=0.
@@ -148,11 +149,10 @@ void Ieee80211MacBackoff::done()
 
 void Ieee80211MacBackoff::emitBkDone(int slotCount)
 {
-    cMessage *bkDone = new cMessage("bkDone");
     Ieee80211MacSignalBkDone *signal = new Ieee80211MacSignalBkDone();
     signal->setSlotCount(slotCount);
-    bkDone->setControlInfo(signal);
-    send(bkDone, source);
+    cMessage *bkDone = createSignal("bkDone", signal);
+    send(bkDone, "bkof$o"); // TODO: source
 }
 
 } /* namespace inet */

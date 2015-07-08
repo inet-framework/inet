@@ -31,7 +31,7 @@ class INET_API IIeee80211MacBackoff
 {
     protected:
         virtual void handleResetMac() = 0;
-        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff) = 0;
+        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff, cGate *source) = 0;
         virtual void handleIdle() = 0;
         virtual void handleBusy() = 0;
         virtual void handleSlot() = 0;
@@ -74,7 +74,7 @@ class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff, public Ieee802
 
     protected:
         virtual void handleResetMac() override;
-        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff);
+        virtual void handleBackoff(Ieee80211MacSignalBackoff *backoff, cGate *source);
         virtual void handleIdle() override;
         virtual void handleBusy() override;
         virtual void handleSlot() override;
