@@ -33,7 +33,7 @@ class INET_API SdlProcess
         {
             SdlTransition() {}
 
-            SdlTransition(int signalId, std::function<void(cMessage *)> processSignal, bool priority = false, bool (*enablingCondition)() = nullptr, bool (*continuousSignal)() = nullptr) :
+            SdlTransition(int signalId, std::function<void(cMessage *)> processSignal = nullptr, bool priority = false, std::function<bool()> enablingCondition = nullptr, std::function<bool()> continuousSignal = nullptr) :
                 signalId(signalId),
                 processSignal(processSignal),
                 priority(priority),
@@ -43,32 +43,39 @@ class INET_API SdlProcess
             int signalId = -1;
             std::function<void(cMessage *)> processSignal = nullptr;
             bool priority = false;
-            bool (*enablingCondition)() = nullptr;
-            bool (*continuousSignal)() = nullptr;
+            std::function<bool()> enablingCondition = nullptr;
+            std::function<bool()> continuousSignal = nullptr;
         };
 
         struct SdlState
         {
+            int stateId;
             std::vector<SdlTransition> transitions;
             std::set<int> saveSignalSet;
 
-            SdlState(std::vector<SdlTransition> transitions, std::set<int> saveSignalSet) :
+            SdlState(int stateId, std::vector<SdlTransition> transitions, std::set<int> saveSignalSet) :
+                stateId(stateId),
                 transitions(transitions),
                 saveSignalSet(saveSignalSet) {}
 
-            bool isSaved(cMessage *signal) const { return saveSignalSet.count(signal->getKind()) == 1; }
+            bool isSaved(cMessage *signal) const { return saveSignalSet.count(signal->getKind()) == 1 || saveSignalSet.count(-1) == 1; }
         };
 
-        SdlProcess(std::vector<SdlState> states) : states(states) { currentState = &this->states[0]; }
-
+        SdlProcess(std::function<void(cMessage *)> defaultHandler, std::vector<SdlState> states) :
+            defaultHandler(defaultHandler),
+            states(states)
+        {}
     protected:
         std::list<cMessage *> signals;
+        std::function<void(cMessage *)> defaultHandler = nullptr;
         std::vector<SdlState> states;
-        SdlState *currentState;
+        SdlState *currentState = nullptr;
 
     public:
         void insertSignal(cMessage *signal);
-        void runTransition();
+        void run();
+
+        void setCurrentState(int stateId);
 };
 
 } /* namespace inet */

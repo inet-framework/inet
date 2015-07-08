@@ -25,8 +25,9 @@ void SdlProcess::insertSignal(cMessage* signal)
     signals.push_back(signal);
 }
 
-void SdlProcess::runTransition()
+void SdlProcess::run()
 {
+    nextSignal:
     // a) if the input port contains a signal matching a priority input of the current state, the first such
     // signal is consumed (see 11.4); otherwise
     for (auto & transition : currentState->transitions)
@@ -40,7 +41,11 @@ void SdlProcess::runTransition()
                 if (transition.signalId == signal->getKind())
                 {
                     signals.erase(cur);
-                    return transition.processSignal(signal);
+                    if (transition.processSignal)
+                        transition.processSignal(signal);
+                    else
+                        defaultHandler(signal);
+                    goto nextSignal;
                 }
             }
         }
@@ -64,19 +69,23 @@ void SdlProcess::runTransition()
                 // ii) A signal in the input port is enabled, if all the Provided-expressions of an
                 //     Input-node return the predefined Boolean value true, or if the Input-node does not
                 //     have a Provided-expression.
-                hasMatchingInputNode = transition.signalId == signal->getKind() ? true : hasMatchingInputNode;
+                hasMatchingInputNode |= transition.signalId == signal->getKind();
                 if (transition.signalId == signal->getKind() &&
                    (transition.enablingCondition == nullptr || transition.enablingCondition()))
                 {
                     signals.erase(cur);
-                    return transition.processSignal(signal);
+                    if (transition.processSignal)
+                        transition.processSignal(signal);
+                    else
+                        defaultHandler(signal);
+                    goto nextSignal;
                 }
             }
             // Implicit transition
             if (!hasMatchingInputNode)
             {
                 signals.erase(cur);
-                return;
+                goto nextSignal;
             }
         }
     }
@@ -88,15 +97,25 @@ void SdlProcess::runTransition()
     //  2) if the current continuous signal is enabled, this signal is consumed (see 11.5); otherwise
     //  3) the next continuous signal is selected.
     for (auto & transition : currentState->transitions)
+    {
         // iii) If the Continuous-expression returns the predefined Boolean value true, the
         //      continuous signal is enabled.
         if (transition.continuousSignal != nullptr && transition.continuousSignal())
-            return transition.processSignal(nullptr);
-
+        {
+            transition.processSignal(nullptr);
+            goto nextSignal;
+        }
+    }
     // d) if no enabled signal was found, the state machine waits in the state until another signal
     // instance is received. If the state has enabling conditions or continuous signals, these steps
     // are repeated even if no signal is received.
+}
 
+void SdlProcess::setCurrentState(int stateId)
+{
+    if (stateId != this->states[stateId].stateId)
+        throw cRuntimeError("State id mismatch");
+    this->currentState = &this->states[stateId];
 }
 
 } /* namespace inet */
