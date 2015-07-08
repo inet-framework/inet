@@ -170,7 +170,7 @@ void Ieee80211MacPmFilterSta::emitPduRequest(FragSdu *fsdu)
 {
     Ieee80211MacSignalPduRequest *signal = new Ieee80211MacSignalPduRequest();
     delete fsdu->removeControlInfo(); // TODO
-    fsdu->setControlInfo(signal);
+    createSignal(fsdu, signal);
     send(fsdu, "mpdu$o");
 }
 
@@ -323,10 +323,9 @@ void Ieee80211MacPmFilterSta::handlePsResponse(Ieee80211MacSignalPsResponse *psR
 
 void Ieee80211MacPmFilterSta::emitPsInquiry(MACAddress dst)
 {
-    cMessage *psInquiry = new cMessage("psInquiry");
     Ieee80211MacSignalPsInquiry *signal = new Ieee80211MacSignalPsInquiry();
     signal->setMacAddress(dst);
-    psInquiry->setControlInfo(signal);
+    cMessage *psInquiry = createSignal("psInquiry", signal);
     send(psInquiry, pwrMgt);
 }
 
