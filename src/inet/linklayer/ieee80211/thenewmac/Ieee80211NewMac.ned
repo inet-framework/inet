@@ -34,7 +34,8 @@ module Ieee80211NewMac
     gates:
         inout macSap;
         inout mlmeSap;
-
+        inout phySapRx;
+        
     submodules:
         dataService: Ieee80211MacDataService {
             @display("p=64,58");
@@ -87,4 +88,5 @@ module Ieee80211NewMac
 
         macSap <--> dataService.macSapMsduFromLlc;
         mlmeSap <--> managementService.getSet;
+        phySapRx <--> reception.phyCca;
 }
