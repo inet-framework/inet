@@ -191,22 +191,22 @@ class INET_API Ieee80211MacMacmibOperationTable
 class INET_API Ieee80211MacMacmibPhyOperationTable
 {
     protected:
-        Usec aSlotTime = (aCcaTime + aRxTxTurnaroundTime + aAirPropagationTime + aMacProcessingTime);
-        Usec aCcaTime;
-        Usec aRxTxTurnaroundTime = aTxPlcpDelay + aRxTxSwitchTime + aTxRampOnTime + aTxRfDelay;
-        Usec aTxPlcpDelay;
-        Usec aRxTxSwitchTime;
-        Usec aTxRampOnTime;
-        Usec aTxRfDelay;
-        Usec aSifsTime = (aRxRfDelay + aRxPlcpDelay + aMacProcessingTime + aRxTxTurnaroundTime);
-        Usec aRxRfDelay;
+        Usec aAirPropagationTime = 1;
+        Usec aCcaTime = 27;
+        Usec aTxPlcpDelay = 1;
+        Usec aRxTxSwitchTime = 10;
+        Usec aTxRampOnTime = 8;
+        Usec aTxRfDelay = 1;
+        Usec aRxRfDelay = 4;
         Usec aRxPlcpDelay = 2;
         Usec aMacProcessingTime = 2;
         Usec aTxRampOffTime = 8;
         Usec aPreambleLength = 96;
         Usec aPlcpHeaderLength = 32;
+        Usec aRxTxTurnaroundTime = aTxPlcpDelay + aRxTxSwitchTime + aTxRampOnTime + aTxRfDelay;
+        Usec aSifsTime = (aRxRfDelay + aRxPlcpDelay + aMacProcessingTime + aRxTxTurnaroundTime);
+        Usec aSlotTime = (aCcaTime + aRxTxTurnaroundTime + aAirPropagationTime + aMacProcessingTime);
         int aMpduMaxLength = 4095;
-        Usec aAirPropagationTime = 1;
         int aCWmax = 1023;
         int aCWmin = 15;
 
