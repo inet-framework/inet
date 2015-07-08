@@ -23,11 +23,12 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Ieee80211NewMacMacSap : public cSimpleModule
+class INET_API Ieee80211NewMacMacSap : public Ieee80211MacMacProcessBase
 {
     protected:
         MACAddress address;

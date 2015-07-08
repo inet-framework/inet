@@ -72,6 +72,7 @@ void Ieee80211NewMacMacSap::handleMessage(cMessage* msg)
     signal->setPriority(CfPriority_contention); // TODO
     delete msg->removeControlInfo();
     msg->setControlInfo(signal);
+    msg->setKind(signal->getSignalType());
     send(msg, "macSap$o");
 }
 
