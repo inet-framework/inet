@@ -16,6 +16,7 @@
 package inet.linklayer.ieee80211.thenewmac;
 
 import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211MacPhySap;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211MacSmMlmeSap;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211NewMacMacSap;
 
@@ -43,10 +44,13 @@ module Ieee80211NewNic like IWirelessNic
 
             @display("p=49,65");
         }
-
+        phySapRx: Ieee80211MacPhySap;
+        
     connections allowunconnected:
         mac.mlmeSap <--> mlmeSap.smMlmeSap;
         mac.macSap <--> sap.macSap;
+        mac.phySapRx <--> phySapRx.phyCca;
+ 
         upperLayerIn --> sap.upperLayerIn;
         upperLayerOut <-- sap.upperLayerOut;
 }
