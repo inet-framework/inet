@@ -36,8 +36,19 @@ namespace ieee80211 {
  */
 typedef int Usec;
 typedef int Tu; // Time Unit -- 1*TU = 1024*Usec
+typedef int Rate;
 static simtime_t usecToSimtime(Usec usec) { return simtime_t(usec * 1E-6); }
 static simtime_t tuToSimtime(Tu tu)  { return simtime_t(1024 * tu * 1E-6); }
+static Usec calcDur(Rate rate, int bitCount)
+{
+    return ((((10000000 + ((rate & 0x7F) - 1)) / (500 * (rate & 0x7F))) * bitCount) + 9999) / 10000;
+}
+// stuff(durFactor, MpduBits) returns the number of PlcpBits which result from MpduBits at the specified durFactor.
+static int stuff(int durationFactor, int mpduBits)
+{
+    return ((mpduBits * durationFactor) + (mpduBits - 1)) / 1000000000;
+}
+
 
 class Ieee80211MacMacsortsIntraMacRemoteVariables;
 
@@ -76,7 +87,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         // TODO: mBrates; /* basic rate set for this sta */
         MACAddress mBssId; /* identifier of current (I)BSS */
         std::string mCap; /* capability info from MlmeJoin */
-        bool mCfp; /* =true if CF period in progress */
+        bool mCfp = false; /* =true if CF period in progress */
         bool mDisable; /* =true if not in any BSS; then */
         /* TX only sends probe_req; RX only accepts beacon, probe_rsp */
         int mDtimCount; /* =0 at Tbtt of Beacon with DTIM */
