@@ -24,6 +24,7 @@ Define_Module(Ieee80211MacPrepareMpdu);
 
 void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
 {
+    EV_DEBUG << "state = " << state << endl;
     if (msg->isSelfMessage())
         throw cRuntimeError("This module doesn't handle self messages.");
     else
@@ -215,7 +216,6 @@ void Ieee80211MacPrepareMpdu::handleFragConfirm(Ieee80211MacSignalFragConfirm *f
 
 void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bool b)
 {
-    std::cout << "Valami" << endl;
     Enter_Method_Silent();
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
@@ -247,14 +247,14 @@ void Ieee80211MacPrepareMpdu::emitMsduConfirm(cPacket *sdu, CfPriority priority,
     Ieee80211MacSignalMsduConfirm *msduConfirm = new Ieee80211MacSignalMsduConfirm();
     msduConfirm->setPriority(priority);
     msduConfirm->setTxStatus(txStatus);
-    sdu->setControlInfo(msduConfirm);
+    createSignal(sdu, msduConfirm);
     send(sdu, "msdu$o");
 }
 
 void Ieee80211MacPrepareMpdu::emitFragRequest(FragSdu *sdu)
 {
     Ieee80211MacSignalFragRequest *signal = new Ieee80211MacSignalFragRequest();
-    sdu->setControlInfo(signal);
+    createSignal(sdu, signal);
     send(sdu, "fragMsdu$o");
 }
 
