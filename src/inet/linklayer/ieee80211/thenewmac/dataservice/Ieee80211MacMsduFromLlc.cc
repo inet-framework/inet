@@ -99,13 +99,12 @@ void Ieee80211MacMsduFromLlc::handleMsduConfirm(Ieee80211MacSignalMsduConfirm *s
 
 void Ieee80211MacMsduFromLlc::emitMaUnitDataStatusIndication(MACAddress sa, MACAddress da, TxStatus stat, CfPriority priority, ServiceClass srv)
 {
-    cMessage *maUnitDataStatusIndication = new cMessage("maUnitDataStatusIndication");
     Ieee80211MacSignalMaUnitDataStatusIndication *signal = new Ieee80211MacSignalMaUnitDataStatusIndication();
     signal->setDa(da);
     signal->setSa(sa);
     signal->setStat(stat);
     signal->setPriority(priority);
-    maUnitDataStatusIndication->setControlInfo(signal);
+    cMessage *maUnitDataStatusIndication = createSignal("maUnitDataStatusIndication", signal);
     send(maUnitDataStatusIndication, "fromLlc$o");
 }
 
@@ -171,7 +170,7 @@ void Ieee80211MacMsduFromLlc::emitMsduRequest(Ieee80211NewFrame* sdu, CfPriority
 {
     Ieee80211MacSignalMsduRequest *signal = new Ieee80211MacSignalMsduRequest();
     signal->setPriority(priority);
-    sdu->setControlInfo(signal);
+    createSignal(sdu, signal);
     send(sdu, "txMsdu$o");
 }
 
