@@ -30,15 +30,27 @@ void Ieee80211MacChannelState::initialize(int stage)
     {
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        tNav = new cMessage("tNav");
+        tIfs = new cMessage("tIfs");
+        tSlot = new cMessage("tSlot");
+    }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
         dSifs = usecToSimtime(macmib->getPhyOperationTable()->getSifsTime());
         dSlot = usecToSimtime(macmib->getPhyOperationTable()->getSlotTime());
+        dDifs = dSifs + 2 * dSlot;
+        std::cout << macmib->getPhyOperationTable()->getSlotTime() << endl;
+        std::cout << dSlot << endl;
 //        Eifs based on the lowest basic rate.
-//        dEifs =  TODO
+// TODO: aMpduDurationFactor??????
+//        dEifs = usecToSimtime(macmib->getPhyOperationTable()->getSifsTime() + calcDur(1 /*import(mBrates))*/, stuff()))
+        handleResetMac();
     }
 }
 
 void Ieee80211MacChannelState::handleMessage(cMessage* msg)
 {
+    EV_DEBUG << "state = " << state << endl;
     if (msg->isSelfMessage())
     {
         if (msg == tNav)
@@ -89,26 +101,23 @@ void Ieee80211MacChannelState::handleResetMac()
 
 void Ieee80211MacChannelState::emitIdle()
 {
-    cMessage *idle = new cMessage("Idle");
     Ieee80211MacSignalIdle *signal = new Ieee80211MacSignalIdle();
-    idle->setControlInfo(signal);
-    send(idle, "toTx$o");
+    cMessage *idle = createSignal("Idle", signal);
+    send(idle, "toTx");
 }
 
 void Ieee80211MacChannelState::emitSlot()
 {
-    cMessage *slot = new cMessage("Slot");
     Ieee80211MacSignalSlot *signal = new Ieee80211MacSignalSlot();
-    slot->setControlInfo(signal);
-    send(slot, "toTx$o");
+    cMessage *slot = createSignal("Slot", signal);
+    send(slot, "toTx");
 }
 
 void Ieee80211MacChannelState::emitBusy()
 {
-    cMessage *busy = new cMessage("Busy");
     Ieee80211MacSignalBusy *signal = new Ieee80211MacSignalBusy();
-    busy->setControlInfo(signal);
-    send(busy, "toTx$o");
+    cMessage *busy = createSignal("Busy", signal);
+    send(busy, "toTx");
 }
 
 void Ieee80211MacChannelState::handleTifs()

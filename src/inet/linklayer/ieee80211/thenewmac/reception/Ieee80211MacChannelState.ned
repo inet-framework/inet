@@ -35,5 +35,5 @@ simple Ieee80211MacChannelState
         input ifsCtl; // [RtsTimeout, UseDifs, UseEifs]
         input fromSync; // [ChangeNav]
         input fromCtl; // [ChangeNav]
-//        inout phy;
+        inout phyCca;
 }
