@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+#include <functional>
 
 #include "Ieee80211MacTxCoordinationSta.h"
 #include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
@@ -25,56 +26,113 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacTxCoordinationSta);
 
-void Ieee80211MacTxCoordinationSta::handleMessage(cMessage* msg)
-{
-    if (msg->isSelfMessage())
-    {
-        if (strcmp("ResetMAC", msg->getName()) == 0)
-            handleResetMac();
-        if (strcmp("Tifs timer", msg->getName()) == 0)
-            handleTifs();
-        else if (strcmp("Trsp timer", msg->getName()) == 0)
-            handleTrsp();
-        else if (strcmp("Tpdly timer", msg->getName()) == 0)
-            handleTpdly();
-        else
-            throw cRuntimeError("Unknown self message", msg->getName());
-    }
-    else
-    {
-        if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()))
-            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(fsdu));
-        else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()))
-            handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg->getControlInfo()))
-            handleTbtt();
-        else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()))
-            handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg->getControlInfo()))
-            handleCfEnd();
-        else if (dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()))
-            handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg->getControlInfo()))
-            handleTxConfirm();
-        else if (dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()))
-            handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()))
-            handleCts(dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalMmCancel *>(msg->getControlInfo()))
-            handleMmCancel();
-        else if (dynamic_cast<Ieee80211MacSignalWake *>(msg->getControlInfo()))
-            handleWake();
-        else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg->getControlInfo()))
-            handleDoze();
-        else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()))
-            handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()));
-    }
-}
-
 void Ieee80211MacTxCoordinationSta::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        auto continousSignalTxCIdle = [=] () { return macsorts->getIntraMacRemoteVariables()->isCfp(); };
+        auto processContinousSignal1 = [=] (cMessage *m) { continousSignalTxCIdle_(m); };
+        auto enablingConditionTxCIdlePduReq = [=] () { return !macsorts->getIntraMacRemoteVariables()->isBkIp(); };
+        sdlProcess = new SdlProcess(processSignalFunction, // Default signal handler
+                                    {{TX_COORDINATION_STATE_START,
+                                      {},
+                                     {}},
+                                     {TX_COORDINATION_STATE_TXC_IDLE, // State
+                                      {{PDU_REQUEST, nullptr, false, enablingConditionTxCIdlePduReq, nullptr},
+                                       {CF_POLL},
+                                       {TX_CF_ACK},
+                                       {TBTT}, // Signals
+                                       {-1, processContinousSignal1, false, nullptr, continousSignalTxCIdle}},
+                                     {}}, // Saved signals
+                                     {TX_COORDINATION_STATE_TXC_BACKOFF,
+                                      {{TBTT},
+                                      {BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_ATW_START,
+                                      {{BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_ATIM_WINDOW,
+                                      {{PDU_REQUEST}}, // TODO: continuous signal
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_SIFS,
+                                      {{TIFS}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_RTS_BACKOFF,
+                                      {{TBTT},
+                                      {BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_MPDU_BACKOFF,
+                                      {{TBTT},
+                                      {BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_PDU_SENT,
+                                      {{TX_CONFIRM}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_ACK,
+                                      {{ACK}}, // TODO: trsp
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CTS,
+                                      {{CTS}}, // TODO: trsp
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CTS_BACKOFF,
+                                      {{TBTT},
+                                      {BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CTS_SIFS,
+                                      {{TIFS}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CTS_SENT,
+                                      {{TX_CONFIRM}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_IBSS_WAIT_ATIM,
+                                      {{BKDONE}}, // TODO: continuous
+                                     {}},
+                                     {TX_COORDINATION_STATE_IBSS_WAIT_BEACON,
+                                      {{BKDONE},
+                                      {MM_CANCEL}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_BEACON_TRANSMIT,
+                                      {{TX_CONFIRM}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_BEACON_CANCEL,
+                                      {{BKDONE}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_ATIM_ACK,
+                                      {{ACK}}, // trsp
+                                     {}},
+                                     {TX_COORDINATION_STATE_ASLEEP,
+                                      {{PDU_REQUEST},
+                                      {WAKE}},
+                                     {}},
+                                     {TX_COORDINATION_STATE_WAKE_WAIT_PROBE_DELAY,
+                                      {{TPDLY}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CHANNEL,
+                                      {}, // PLME valami
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_TXC_CFP,
+                                      {{CF_POLL, nullptr, true}, // Priority
+                                      {CF_END},
+                                      {TX_CF_ACK}}, // TODO: cont.
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_CF_RESPONSE,
+                                      {{TX_CF_ACK, nullptr, true},
+                                      {PDU_REQUEST}}, // trsp
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CFP_SIFS,
+                                      {{TX_CF_ACK, nullptr, true}}, // trsp
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CFP_TX_DONE,
+                                      {{TX_CONFIRM}},
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_WAIT_CF_ACK,
+                                      {{ACK, nullptr, true}}, // trsp
+                                     {-1}},
+                                     {TX_COORDINATION_STATE_SW_CHNL_BACKOFF,
+                                      {{BKDONE}},
+                                     {-1}}
+                                   });
         tifs = new cMessage("Tifs timer");
         trsp = new cMessage("Trsp timer");
         tpdly = new cMessage("Tpdly timer");
@@ -83,6 +141,7 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
     }
     if (stage == INITSTAGE_LINK_LAYER)
     {
+        macsorts->subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
 //        backoffProcedureGate = this->gate("txOBackoff");
 //        dataPumpProcedureGate = this->gate("txODataPump");
 //        tmgtGate = this->gate("tmgt");
@@ -104,6 +163,7 @@ void Ieee80211MacTxCoordinationSta::handleResetMac()
    atimcw = dcfcw = ccw;
    emitBackoff(ccw, -1);
    state = TX_COORDINATION_STATE_TXC_IDLE;
+   sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::txcReq()
@@ -141,6 +201,7 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
         // TxTime(length(tpdu,frametime2))
 //         rtsdu = mkctl(cts, frametime2 + 2 * aSifstime + ackctstime);
         state = TX_COORDINATION_STATE_WAIT_CTS_BACKOFF;
+        sdlProcess->setCurrentState(state);
     }
     else
     {
@@ -151,8 +212,19 @@ void Ieee80211MacTxCoordinationSta::chkRtsCts()
         {
             if ((tpdu->getByteLength() + Ieee80211MacNamedStaticIntDataValues::sCrcLng) > macmib->getOperationTable()->getDot11RtsThreshold() &&
                 !fsdu->grpa && (fsdu->fCur == 0 || tpdu->getRetryBit() || fsdu->resume))
-                    sendMpdu();
-             // TODO: 4. oldal
+            {
+                // TODO:
+//                TxTime(length(
+//                tpdu),txrate,
+//                frametime2)
+//        rtsdu:=
+//        mkctl(rts,frametime2 +
+//                (3*aSifstime) +
+//                (2*ackctstime))
+//                sendRts();
+            }
+            else
+                sendMpdu();
         }
     }
 }
@@ -162,7 +234,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
     this->fsdu = fsdu;
     if (state == TX_COORDINATION_STATE_TXC_IDLE)
     {
-        if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
+//        if (!macsorts->getIntraMacRemoteVariables()->isBkIp())
             txcReq();
     }
     else if (state == TX_COORDINATION_STATE_ATIM_WINDOW)
@@ -174,6 +246,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
                 n = intuniform(0,2*macmib->getPhyOperationTable()->getCWmin());
                 emitBackoff(n,-1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_BEACON;
+                sdlProcess->setCurrentState(state);
             }
             else
             {
@@ -183,6 +256,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
                 tpdu->setAddr2(macmib->getOperationTable()->getDot11MacAddress());
                 emitBackoff(ccw, -1);
                 state = TX_COORDINATION_STATE_IBSS_WAIT_ATIM;
+                sdlProcess->setCurrentState(state);
                 ibssAtimWBullshit();
             }
         }
@@ -191,6 +265,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
     {
         scheduleAt(simTime() + usecToSimtime(macsorts->getIntraMacRemoteVariables()->getPdly()), tpdly);
         state = TX_COORDINATION_STATE_WAKE_WAIT_PROBE_DELAY;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_CF_RESPONSE)
     {
@@ -208,6 +283,7 @@ void Ieee80211MacTxCoordinationSta::handlePduRequest(Ieee80211MacSignalPduReques
         // TODO: See 9.6 for rules about selecting transmit data rate.
         // 'txrate:= selected tx data rate'
         state = TX_COORDINATION_STATE_WAIT_CFP_SIFS;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -223,12 +299,14 @@ void Ieee80211MacTxCoordinationSta::handleTbtt()
         emitPduConfirm(fsdu, TxResult::TxResult_partial);
         emitCancel();
         state = TX_COORDINATION_STATE_ATW_START;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CTS_BACKOFF)
     {
         emitPduConfirm(fsdu, TxResult::TxResult_partial);
         emitCancel();
         state = TX_COORDINATION_STATE_ATW_START;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_TXC_BACKOFF)
     {
@@ -239,6 +317,7 @@ void Ieee80211MacTxCoordinationSta::handleTbtt()
             ccw = atimcw;
             emitAtimW();
             state = TX_COORDINATION_STATE_ATIM_WINDOW;
+            sdlProcess->setCurrentState(state);
         }
     }
 }
@@ -266,12 +345,16 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
             if (fsdu->grpa) // group addr
                 endFx();
             else
+            {
                 state = TX_COORDINATION_STATE_WAIT_PDU_SENT;
+                sdlProcess->setCurrentState(state);
+            }
         }
         else
         {
             emitBackoff(ccw,-1);
             state = TX_COORDINATION_STATE_TXC_BACKOFF;
+            sdlProcess->setCurrentState(state);
         }
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CTS_BACKOFF)
@@ -280,6 +363,7 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
         {
             emitBackoff(ccw, -1);
             state = TX_COORDINATION_STATE_TXC_BACKOFF;
+            sdlProcess->setCurrentState(state);
         }
         else
         {
@@ -288,6 +372,7 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
             macmib->getCountersTable()->incDot11TransmittedFragmentCount();
 //            emitTxRequest(rtsdu, txrate);
             state = TX_COORDINATION_STATE_WAIT_CTS_SENT;
+            sdlProcess->setCurrentState(state);
         }
     }
     else if (state == TX_COORDINATION_STATE_IBSS_WAIT_ATIM)
@@ -300,17 +385,20 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
 //            dRsp:=dUsec(aSifsTime +calcDur(txrate, ackctstime))
 //            set(now+dRsp,Trsp)
             state = TX_COORDINATION_STATE_WAIT_ATIM_ACK;
+            sdlProcess->setCurrentState(state);
         }
     }
     else if (state == TX_COORDINATION_STATE_IBSS_WAIT_BEACON)
     {
         emitTxRequest(fsdu->pdus[0], mmrate);
         state = TX_COORDINATION_STATE_WAIT_BEACON_TRANSMIT;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_WAIT_BEACON_CANCEL)
     {
         n = bkDone->getSlotCount();
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_TXC_BACKOFF)
     {
@@ -320,10 +408,16 @@ void Ieee80211MacTxCoordinationSta::handleBkDone(Ieee80211MacSignalBkDone *bkDon
             sendFrag();
         }
         else
+        {
             state = TX_COORDINATION_STATE_TXC_IDLE;
+            sdlProcess->setCurrentState(state);
+        }
     }
     else if (state == TX_COORDINATION_STATE_SW_CHNL_BACKOFF)
+    {
         state = macsorts->getIntraMacRemoteVariables()->isAtimW() ? TX_COORDINATION_STATE_ATIM_WINDOW : TX_COORDINATION_STATE_TXC_IDLE;
+        sdlProcess->setCurrentState(state);
+    }
 }
 
 void Ieee80211MacTxCoordinationSta::function1()
@@ -334,6 +428,7 @@ void Ieee80211MacTxCoordinationSta::function1()
         ccw = atimcw;
         emitAtimW();
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
+        sdlProcess->setCurrentState(state);
         atimWBullshit();
     }
 }
@@ -350,6 +445,7 @@ void Ieee80211MacTxCoordinationSta::handleCfPoll(Ieee80211MacSignalCfPoll *cfPol
         scheduleAt(endRx + dSifsDelay, trsp);
         emitCfPolled();
         state = TX_COORDINATION_STATE_CF_RESPONSE;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -382,6 +478,7 @@ void Ieee80211MacTxCoordinationSta::txSifs()
 {
     cMessage *tifs = new cMessage("Tifs");
     state = TX_COORDINATION_STATE_WAIT_SIFS;
+    sdlProcess->setCurrentState(state);
     scheduleAt(endRx + dSifsDelay, tifs);
     emitTxRequest(tpdu, txrate);
     tpdu->setPwrMgt(curPm);
@@ -406,11 +503,13 @@ void Ieee80211MacTxCoordinationSta::sendFrag()
 void Ieee80211MacTxCoordinationSta::sendRts()
 {
     state = TX_COORDINATION_STATE_WAIT_RTS_BACKOFF;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::sendMpdu()
 {
     state = TX_COORDINATION_STATE_WAIT_MPDU_BACKOFF;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::handleTxConfirm()
@@ -419,18 +518,24 @@ void Ieee80211MacTxCoordinationSta::handleTxConfirm()
     {
 //        scheduleAt(simTime()+usecToSimtime((macmib->getPhyOperationTable()->getSifsTime() + calcDur(txrate,stuff(aMpduDurationFactor, sAckCtsLng))+ aPlcpHeaderLength+aPreambleLength+aSlotTime)), trsp);
         state = TX_COORDINATION_STATE_WAIT_ACK;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CTS_SENT)
     {
         scheduleAt(simTime() + usecToSimtime(macmib->getPhyOperationTable()->getSifsTime()), tifs); // Tsifs??
         state = TX_COORDINATION_STATE_WAIT_CTS_SIFS;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_WAIT_BEACON_TRANSMIT)
+    {
         state = TX_COORDINATION_STATE_ATIM_WINDOW;
+        sdlProcess->setCurrentState(state);
+    }
     else if (state == TX_COORDINATION_STATE_WAIT_CFP_TX_DONE)
     {
         scheduleAt(simTime() + usecToSimtime(macmib->getPhyOperationTable()->getSifsTime()), trsp);
         state = TX_COORDINATION_STATE_WAIT_CF_ACK;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -459,6 +564,7 @@ void Ieee80211MacTxCoordinationSta::confirmPdu()
         emitPduConfirm(fsdu, TxResult::TxResult_successful);
         emitBackoff(ccw, -1);
         state = TX_COORDINATION_STATE_TXC_BACKOFF;
+        sdlProcess->setCurrentState(state);
     }
     else
     {
@@ -466,6 +572,7 @@ void Ieee80211MacTxCoordinationSta::confirmPdu()
         {
             emitPduConfirm(fsdu, TxResult::TxResult_txLifetime);
             state = TX_COORDINATION_STATE_TXC_IDLE;
+            sdlProcess->setCurrentState(state);
         }
         else
         {
@@ -502,6 +609,7 @@ void Ieee80211MacTxCoordinationSta::handleAck(Ieee80211MacSignalAck *ack)
                 fsdu->fCur++;
         }
         state = TX_COORDINATION_STATE_TXC_CFP;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -544,6 +652,7 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
 //        else cTmcfrm f
 //        macmib->getCountersTable()->setDot11MulticastTransmittedFrameCount();
         state = TX_COORDINATION_STATE_WAIT_CFP_TX_DONE;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == TX_COORDINATION_STATE_WAIT_CF_ACK)
     {
@@ -562,14 +671,14 @@ void Ieee80211MacTxCoordinationSta::handleTrsp()
             macmib->getCountersTable()->incDot11RetryCount();
         }
         state = TX_COORDINATION_STATE_TXC_CFP;
+        sdlProcess->setCurrentState(state);
     }
 }
 
 void Ieee80211MacTxCoordinationSta::emitCancel()
 {
-    cMessage *cancel = new cMessage("Cancel");
     Ieee80211MacSignalCancel *signal = new Ieee80211MacSignalCancel();
-    cancel->setControlInfo(cancel);
+    cMessage *cancel = createSignal("Cancel", signal);
     send(cancel, backoffProcedureGate);
 }
 
@@ -601,6 +710,7 @@ void Ieee80211MacTxCoordinationSta::ackFail()
         else
             cont = true;
         state = TX_COORDINATION_STATE_TXC_BACKOFF;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -627,6 +737,7 @@ void Ieee80211MacTxCoordinationSta::ctsFail2() // rename
     else
         cont = true;
     state = TX_COORDINATION_STATE_TXC_BACKOFF;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::handleCts(Ieee80211MacSignalCts *cts)
@@ -657,6 +768,7 @@ void Ieee80211MacTxCoordinationSta::handleCts(Ieee80211MacSignalCts *cts)
 //            *8)) + aPlcpHeaderLength
 //            + aPreambleLength) )))
     state = TX_COORDINATION_STATE_WAIT_CTS_SIFS;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::sendTxReq()
@@ -680,11 +792,13 @@ void Ieee80211MacTxCoordinationSta::atimWBullshit()
             emitBackoff(ccw, dcfcnt);
             cont = true;
             state = TX_COORDINATION_STATE_TXC_BACKOFF;
+            sdlProcess->setCurrentState(state);
         }
         else
         {
             cont = false;
             state = TX_COORDINATION_STATE_TXC_IDLE;
+            sdlProcess->setCurrentState(state);
         }
     }
 }
@@ -694,6 +808,7 @@ void Ieee80211MacTxCoordinationSta::ibssAtimWBullshit()
     atimcw = ccw;
     ccw = dcfcw;
     state = TX_COORDINATION_STATE_TXC_IDLE;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::atimAck()
@@ -701,6 +816,7 @@ void Ieee80211MacTxCoordinationSta::atimAck()
     emitPduConfirm(fsdu, TxResult::TxResult_atimAck);
     fsdu->fAnc = fsdu->fCur + 1;
     state = TX_COORDINATION_STATE_ATIM_WINDOW;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::handleMmCancel()
@@ -709,6 +825,7 @@ void Ieee80211MacTxCoordinationSta::handleMmCancel()
     {
         emitCancel();
         state = TX_COORDINATION_STATE_WAIT_BEACON_CANCEL;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -716,12 +833,14 @@ void Ieee80211MacTxCoordinationSta::atimLimit()
 {
     emitPduConfirm(fsdu, TxResult::TxResult_retryLimit);
     state = TX_COORDINATION_STATE_ATIM_WINDOW;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::atimFail()
 {
     emitPduConfirm(fsdu, TxResult::TxResult_atimNak);
     state = TX_COORDINATION_STATE_ATIM_WINDOW;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::handleDoze()
@@ -730,6 +849,7 @@ void Ieee80211MacTxCoordinationSta::handleDoze()
     // TODO: 'turn off stuff to save power'
     // 'PlmeSet.request (doze stuff)'
     state = TX_COORDINATION_STATE_ASLEEP;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::handleWake()
@@ -740,13 +860,14 @@ void Ieee80211MacTxCoordinationSta::handleWake()
         // 'PlmeSet.request(wake stuff)'
         emitChangeNav(0, NavSrc::NavSrc_cswitch);
         state = TX_COORDINATION_STATE_TXC_IDLE;
+        sdlProcess->setCurrentState(state);
     }
 }
 
 void Ieee80211MacTxCoordinationSta::emitPsmDone()
 {
-    cMessage *psmDone = new cMessage("PsmDone");
-    send(psmDone, tmgtGate);
+//    cMessage *psmDone = createSignal("swDone", signal);
+//    send(psmDone, tmgtGate);
 }
 
 void Ieee80211MacTxCoordinationSta::handleTpdly()
@@ -763,6 +884,7 @@ void Ieee80211MacTxCoordinationSta::handleSwChnl(Ieee80211MacSignalSwChnl *swChn
     // 'channel change is Phy-specific'
     // TODO: PlmeSet.request(chan stuff)'
     state = TX_COORDINATION_STATE_WAIT_CHANNEL;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacTxCoordinationSta::emitChangeNav(int par1, NavSrc navSrc)
@@ -773,9 +895,10 @@ void Ieee80211MacTxCoordinationSta::handleCfEnd()
 {
 }
 
-void Ieee80211MacTxCoordinationSta::continousSignalTxCIdle()
+void Ieee80211MacTxCoordinationSta::continousSignalTxCIdle_(cMessage *signal)
 {
     state = TX_COORDINATION_STATE_TXC_CFP;
+    sdlProcess->setCurrentState(state);
 }
 
 bool Ieee80211MacTxCoordinationSta::useCtsRtsProtection()
@@ -792,19 +915,13 @@ void Ieee80211MacTxCoordinationSta::emitCfPolled()
 {
 }
 
-void Ieee80211MacTxCoordinationSta::receiveSignal(cComponent* source, int signalID, cObject* obj)
+void Ieee80211MacTxCoordinationSta::receiveSignal(cComponent* source, int signalID, bool b)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
-        switch (state)
-        {
-            case TX_COORDINATION_STATE_TXC_IDLE:
-                if (macsorts->getIntraMacRemoteVariables()->isCfp())
-                    continousSignalTxCIdle();
-                break;
-        }
+        std::cout << "bkof" << macsorts->getIntraMacRemoteVariables()->isBkIp() << endl;
+        sdlProcess->run();
     }
 }
 
@@ -817,18 +934,66 @@ void Ieee80211MacTxCoordinationSta::handlePlmeSetConfirm(Ieee80211MacSignalPlmeS
         {
             emitBackoff(ccw, -1);
             state = TX_COORDINATION_STATE_SW_CHNL_BACKOFF;
+            sdlProcess->setCurrentState(state);
         }
         else {
             state = macsorts->getIntraMacRemoteVariables()->isAtimW() ? TX_COORDINATION_STATE_ATIM_WINDOW : TX_COORDINATION_STATE_TXC_IDLE;
+            sdlProcess->setCurrentState(state);
         }
+    }
+}
+
+void Ieee80211MacTxCoordinationSta::processSignal(cMessage* msg)
+{
+    if (msg->isSelfMessage())
+    {
+        if (strcmp("ResetMAC", msg->getName()) == 0)
+            handleResetMac();
+        if (strcmp("Tifs timer", msg->getName()) == 0)
+            handleTifs();
+        else if (strcmp("Trsp timer", msg->getName()) == 0)
+            handleTrsp();
+        else if (strcmp("Tpdly timer", msg->getName()) == 0)
+            handleTpdly();
+        else
+            throw cRuntimeError("Unknown self message", msg->getName());
+    }
+    else
+    {
+        if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()))
+            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()),
+                    dynamic_cast<FragSdu *>(msg));
+        else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()))
+            handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg->getControlInfo()))
+            handleTbtt();
+        else if (dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()))
+            handleBkDone(dynamic_cast<Ieee80211MacSignalBkDone *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalCfEnd *>(msg->getControlInfo()))
+            handleCfEnd();
+        else if (dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()))
+            handleTxCfAck(dynamic_cast<Ieee80211MacSignalTxCfAck *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalTxConfirm *>(msg->getControlInfo()))
+            handleTxConfirm();
+        else if (dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()))
+            handleAck(dynamic_cast<Ieee80211MacSignalAck *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()))
+            handleCts(dynamic_cast<Ieee80211MacSignalCts *>(msg->getControlInfo()));
+        else if (dynamic_cast<Ieee80211MacSignalMmCancel *>(msg->getControlInfo()))
+            handleMmCancel();
+        else if (dynamic_cast<Ieee80211MacSignalWake *>(msg->getControlInfo()))
+            handleWake();
+        else if (dynamic_cast<Ieee80211MacSignalDoze *>(msg->getControlInfo()))
+            handleDoze();
+        else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()))
+            handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()));
     }
 }
 
 void Ieee80211MacTxCoordinationSta::emitSwDone()
 {
-    cMessage *swDone = new cMessage("swDone");
     Ieee80211MacSignalSwDone *signal = new Ieee80211MacSignalSwDone();
-    swDone->setControlInfo(signal);
+    cMessage *swDone = createSignal("swDone", signal);
     send(swDone, tmgtGate);
 }
 
@@ -841,17 +1006,16 @@ void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
 {
     Ieee80211MacSignalTxRequest *signal = new Ieee80211MacSignalTxRequest();
     signal->setTxrate(txrate.get());
-    tpdu->setControlInfo(signal);
+    createSignal(tpdu, signal);
     send(tpdu, dataPumpProcedureGate);
 }
 
 void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
 {
-    cMessage *backoff = new cMessage("Backoff");
     Ieee80211MacSignalBackoff *signal = new Ieee80211MacSignalBackoff();
     signal->setCw(ccw);
     signal->setCnt(par2);
-    backoff->setControlInfo(signal);
+    cMessage *backoff = createSignal("Backoff", signal);
     send(backoff, "txOBackoff$o");
 }
 

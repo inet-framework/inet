@@ -65,7 +65,7 @@ class INET_API IIeee80211MacTxCoordinationSta
         virtual void emitSwDone() = 0;
 };
 
-class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinationSta, public Ieee80211MacMacProcessBase
+class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinationSta, public Ieee80211MacMacProcessBase, public cListener
 {
     protected:
         enum TxCoordinationState {
@@ -147,12 +147,12 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         bool doBkoff = false;
 
     protected:
-        void handleMessage(cMessage *msg) override;
         void initialize(int stage) override;
+        void processSignal(cMessage *msg);
 
-        void receiveSignal(cComponent *source, int signalID, cObject *obj);
+        void receiveSignal(cComponent *source, int signalID, bool b);
 
-        void continousSignalTxCIdle();
+        void continousSignalTxCIdle_(cMessage *signal);
 
         void txcReq();
         void txcReq2();
