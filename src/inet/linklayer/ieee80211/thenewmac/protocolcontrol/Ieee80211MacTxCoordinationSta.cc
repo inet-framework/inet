@@ -133,6 +133,7 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
                                       {{BKDONE}},
                                      {-1}}
                                    });
+        sdlProcess->setCurrentState(state);
         tifs = new cMessage("Tifs timer");
         trsp = new cMessage("Trsp timer");
         tpdly = new cMessage("Tpdly timer");
@@ -142,10 +143,6 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
     if (stage == INITSTAGE_LINK_LAYER)
     {
         macsorts->subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
-//        backoffProcedureGate = this->gate("txOBackoff");
-//        dataPumpProcedureGate = this->gate("txODataPump");
-//        tmgtGate = this->gate("tmgt");
-//        tdatGate = this->gate("tdat");
         ccw = macmib->getPhyOperationTable()->getCWmin();
         handleResetMac(); // TODO
     }
@@ -949,11 +946,11 @@ void Ieee80211MacTxCoordinationSta::processSignal(cMessage* msg)
     {
         if (strcmp("ResetMAC", msg->getName()) == 0)
             handleResetMac();
-        if (strcmp("Tifs timer", msg->getName()) == 0)
+        if (msg == tifs)
             handleTifs();
-        else if (strcmp("Trsp timer", msg->getName()) == 0)
+        else if (msg == trsp)
             handleTrsp();
-        else if (strcmp("Tpdly timer", msg->getName()) == 0)
+        else if (msg == tpdly)
             handleTpdly();
         else
             throw cRuntimeError("Unknown self message", msg->getName());
