@@ -20,21 +20,21 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/mpls/MPLSPacket.h"
+#include "inet/common/IInterfaceRegistrationListener.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/mpls/ConstType.h"
-
-#include "inet/networklayer/mpls/LIBTable.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-
 #include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/mpls/MPLSPacket.h"
 
 namespace inet {
 
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API MPLS : public cSimpleModule
+class INET_API MPLS : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
     simtime_t delay1;
@@ -59,8 +59,16 @@ class INET_API MPLS : public cSimpleModule
     virtual bool tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
     virtual void labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
 
-    virtual void sendToL2(cMessage *msg, int gateIndex);
+    virtual void sendToL2(cMessage *msg) { ASSERT(msg->getControlInfo()); send(msg, "ifOut"); }
+    virtual void sendToL3(cMessage *msg) { ASSERT(msg->getControlInfo()); send(msg, "netwOut"); }
+
     virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
+
+    //IInterfaceRegistrationListener:
+    virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *gate) override;
+
+    //IProtocolRegistrationListener:
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate) override;
 };
 
 } // namespace inet

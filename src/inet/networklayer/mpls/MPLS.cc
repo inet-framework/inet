@@ -18,10 +18,11 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/mpls/MPLS.h"
-#include "inet/networklayer/rsvp_te/Utils.h"
 
-#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/common/IInterfaceControlInfo.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/rsvp_te/Utils.h"
 
 // FIXME temporary fix
 #include "inet/networklayer/ldp/LDP.h"
@@ -61,11 +62,6 @@ void MPLS::handleMessage(cMessage *msg)
     }
 }
 
-void MPLS::sendToL2(cMessage *msg, int gateIndex)
-{
-    send(msg, "ifOut", gateIndex);
-}
-
 void MPLS::processPacketFromL3(cMessage *msg)
 {
     using namespace tcp;
@@ -94,17 +90,16 @@ void MPLS::processPacketFromL3(cMessage *msg)
 bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
 {
     LabelOpVector outLabel;
-    std::string outInterface;
+    std::string outInterface;   //FIXME set based on interfaceID
     int color;
 
     if (!pct->lookupLabel(ipdatagram, outLabel, outInterface, color)) {
         EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
+    int outInterfaceId = ift->getInterfaceByName(outInterface.c_str())->getInterfaceId();
 
     ASSERT(outLabel.size() > 0);
-
-    int outgoingPort = ift->getInterfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
 
     MPLSPacket *mplsPacket = new MPLSPacket(ipdatagram->getName());
     mplsPacket->encapsulate(ipdatagram);
@@ -118,10 +113,17 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         // yes, this may happen - if we'are both ingress and egress
         ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
-        sendToL2(ipdatagram, outgoingPort);
+        IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(ipdatagram->getControlInfo());
+        controlInfo->setInterfaceId(outInterfaceId);
+        sendToL2(ipdatagram);
     }
-    else
-        sendToL2(mplsPacket, outgoingPort);
+    else {
+        cObject *ctrl = ipdatagram->removeControlInfo();
+        mplsPacket->setControlInfo(ctrl);
+        IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(ctrl);
+        controlInfo->setInterfaceId(outInterfaceId);
+        sendToL2(mplsPacket);
+    }
 
     return true;
 }
@@ -136,9 +138,7 @@ void MPLS::labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
 
     EV_INFO << "FEC not resolved, doing regular L3 routing" << endl;
 
-    int gateIndex = ipdatagram->getArrivalGate()->getIndex();
-
-    sendToL2(ipdatagram, gateIndex);
+    sendToL2(ipdatagram);
 }
 
 void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
@@ -172,19 +172,15 @@ void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
 
 void MPLS::processPacketFromL2(cMessage *msg)
 {
-    IPv4Datagram *ipdatagram = dynamic_cast<IPv4Datagram *>(msg);
-    MPLSPacket *mplsPacket = dynamic_cast<MPLSPacket *>(msg);
-
-    if (mplsPacket) {
+    if (MPLSPacket *mplsPacket = dynamic_cast<MPLSPacket *>(msg)) {
         processMPLSPacketFromL2(mplsPacket);
     }
-    else if (ipdatagram) {
+    else if (IPv4Datagram *ipdatagram = dynamic_cast<IPv4Datagram *>(msg)) {
         // IPv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
         if (!tryLabelAndForwardIPv4Datagram(ipdatagram)) {
-            int gateIndex = ipdatagram->getArrivalGate()->getIndex();
-            send(ipdatagram, "netwOut", gateIndex);
+            sendToL3(ipdatagram);
         }
     }
     else {
@@ -194,13 +190,14 @@ void MPLS::processPacketFromL2(cMessage *msg)
 
 void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
-    int gateIndex = mplsPacket->getArrivalGate()->getIndex();
-    InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(gateIndex);
-    std::string senderInterface = ie->getName();
+    IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(mplsPacket->getControlInfo());
+    int incomingInterfaceId = controlInfo->getInterfaceId();
+    InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
+    std::string incomingInterfaceName = ie->getName();
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->getTopLabel();
 
-    EV_INFO << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
+    EV_INFO << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << incomingInterfaceName << endl;
 
     if (oldLabel == -1) {
         // This is a IPv4 native packet (RSVP/TED traffic)
@@ -208,8 +205,10 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         EV_INFO << ": decapsulating and sending up\n";
 
         IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
+        cObject *ctrl = mplsPacket->removeControlInfo();
+        ipdatagram->setControlInfo(ctrl);
         delete mplsPacket;
-        send(ipdatagram, "netwOut", gateIndex);
+        sendToL3(ipdatagram);
         return;
     }
 
@@ -217,7 +216,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     std::string outInterface;
     int color;
 
-    bool found = lt->resolveLabel(senderInterface, oldLabel, outLabel, outInterface, color);
+    bool found = lt->resolveLabel(incomingInterfaceName, oldLabel, outLabel, outInterface, color);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
@@ -225,7 +224,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         return;
     }
 
-    int outgoingPort = ift->getInterfaceByName(outInterface.c_str())->getNetworkLayerGateIndex();
+    InterfaceEntry *outgoingInterface = ift->getInterfaceByName(outInterface.c_str());
 
     doStackOps(mplsPacket, outLabel);
 
@@ -242,8 +241,8 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-
-        sendToL2(mplsPacket, outgoingPort);
+        controlInfo->setInterfaceId(outgoingInterface->getInterfaceId());
+        sendToL2(mplsPacket);
     }
     else {
         // last label popped, decapsulate and send out IPv4 datagram
@@ -251,15 +250,36 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         EV_INFO << "decapsulating IPv4 datagram" << endl;
 
         IPv4Datagram *nativeIP = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
+        cObject *ctrl = mplsPacket->removeControlInfo();
+        nativeIP->setControlInfo(ctrl);
         delete mplsPacket;
 
-        if (outgoingPort != -1) {
-            sendToL2(nativeIP, outgoingPort);
+        if (outgoingInterface) {
+            IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(nativeIP->getControlInfo());
+            controlInfo->setInterfaceId(outgoingInterface->getInterfaceId());
+            sendToL2(nativeIP);
         }
         else {
-            send(nativeIP, "netwOut", gateIndex);
+            sendToL3(nativeIP);
         }
     }
+}
+
+void MPLS::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingate)
+{
+    registerInterface(interface, gate("netwOut"));
+}
+
+void MPLS::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
+{
+    if (!strcmp("ifIn", protocolGate->getName())) {
+        registerProtocol(protocol, gate("netwOut"));
+    }
+    else if (!strcmp("netwIn", protocolGate->getName())) {
+        registerProtocol(protocol, gate("ifOut"));
+    }
+    else
+        throw cRuntimeError("Unknown gate: %s", protocolGate->getName());
 }
 
 } // namespace inet
