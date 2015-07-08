@@ -21,8 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 #include "inet/linklayer/ieee80211/thenewmac/base/SdlProcess.h"
-//#include "inet/common/INETMath.h"
-//#include "inet/common/Units.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -36,6 +35,9 @@ class INET_API Ieee80211MacMacProcessBase : public cSimpleModule
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         void handleMessage(cMessage *msg) override;
+
+        cMessage *createSignal(const char *name, Ieee80211MacSignal *signal);
+        void createSignal(cPacket *packet, Ieee80211MacSignal *signal);
 
     public:
         virtual ~Ieee80211MacMacProcessBase();

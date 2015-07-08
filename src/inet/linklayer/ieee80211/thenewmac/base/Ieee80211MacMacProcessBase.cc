@@ -23,7 +23,21 @@ namespace ieee80211 {
 void Ieee80211MacMacProcessBase::handleMessage(cMessage* msg)
 {
     sdlProcess->insertSignal(msg);
-    sdlProcess->runTransition();
+    sdlProcess->run();
+}
+
+cMessage* Ieee80211MacMacProcessBase::createSignal(const char *name, Ieee80211MacSignal *signal)
+{
+    cMessage *msg = new cMessage(name);
+    msg->setKind(signal->getSignalType());
+    msg->setControlInfo(signal);
+    return msg;
+}
+
+void Ieee80211MacMacProcessBase::createSignal(cPacket* packet, Ieee80211MacSignal* signal)
+{
+    packet->setKind(signal->getSignalType());
+    packet->setControlInfo(signal);
 }
 
 void Ieee80211MacMacProcessBase::emitResetMac()
