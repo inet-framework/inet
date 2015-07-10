@@ -106,6 +106,7 @@ enum Ieee80211MacSignalType
     RTS_TIMEOUT = 57;
     CLEAR_NAV = 58;
     PHY_CCARST_REQUEST = 59;
+    TRSP = 60;
 }
 
 class Ieee80211MacSignal
@@ -494,4 +495,9 @@ class Ieee80211MacSignalClearNav extends Ieee80211MacSignal
 class Ieee80211MacSignalPhyCcarstRequest extends Ieee80211MacSignal
 {
     signalType = 59;
+}
+
+class Ieee80211MacSignalTrsp extends Ieee80211MacSignal
+{
+    signalType = 60;
 }
