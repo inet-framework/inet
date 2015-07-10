@@ -44,37 +44,39 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
                                        {TX_CF_ACK},
                                        {TBTT}, // Signals
                                        {-1, processContinousSignal1, false, nullptr, continousSignalTxCIdle}},
-                                     {}}, // Saved signals
+                                      {}}, // Saved signals
                                      {TX_COORDINATION_STATE_TXC_BACKOFF,
                                       {{TBTT},
                                       {BKDONE}},
-                                     {-1}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_ATW_START,
                                       {{BKDONE}},
-                                     {-1}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_ATIM_WINDOW,
                                       {{PDU_REQUEST}}, // TODO: continuous signal
-                                     {-1}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_SIFS,
                                       {{TIFS}},
-                                     {-1}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_RTS_BACKOFF,
                                       {{TBTT},
                                       {BKDONE}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_MPDU_BACKOFF,
                                       {{TBTT},
-                                      {BKDONE}},
-                                     {-1}},
+                                       {BKDONE}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_PDU_SENT,
                                       {{TX_CONFIRM}},
-                                     {-1}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_ACK,
-                                      {{ACK}}, // TODO: trsp
-                                     {-1}},
+                                      {{ACK},
+                                       {TRSP}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_CTS,
-                                      {{CTS}}, // TODO: trsp
-                                     {-1}},
+                                      {{CTS},
+                                       {TRSP}},
+                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_CTS_BACKOFF,
                                       {{TBTT},
                                       {BKDONE}},
@@ -99,7 +101,8 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
                                       {{BKDONE}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_ATIM_ACK,
-                                      {{ACK}}, // trsp
+                                      {{ACK},
+                                      {TRSP}},
                                      {}},
                                      {TX_COORDINATION_STATE_ASLEEP,
                                       {{PDU_REQUEST},
@@ -118,16 +121,19 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
                                      {-1}},
                                      {TX_COORDINATION_STATE_CF_RESPONSE,
                                       {{TX_CF_ACK, nullptr, true},
-                                      {PDU_REQUEST}}, // trsp
+                                      {PDU_REQUEST},
+                                      {TRSP}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_CFP_SIFS,
-                                      {{TX_CF_ACK, nullptr, true}}, // trsp
+                                      {{TX_CF_ACK, nullptr, true},
+                                      {TRSP}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_CFP_TX_DONE,
                                       {{TX_CONFIRM}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_WAIT_CF_ACK,
-                                      {{ACK, nullptr, true}}, // trsp
+                                      {{ACK, nullptr, true},
+                                      {TRSP}},
                                      {-1}},
                                      {TX_COORDINATION_STATE_SW_CHNL_BACKOFF,
                                       {{BKDONE}},
@@ -958,8 +964,7 @@ void Ieee80211MacTxCoordinationSta::processSignal(cMessage* msg)
     else
     {
         if (dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()))
-            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()),
-                    dynamic_cast<FragSdu *>(msg));
+            handlePduRequest(dynamic_cast<Ieee80211MacSignalPduRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()))
             handleCfPoll(dynamic_cast<Ieee80211MacSignalCfPoll *>(msg->getControlInfo()));
         else if (dynamic_cast<Ieee80211MacSignalTbtt *>(msg->getControlInfo()))
@@ -984,6 +989,8 @@ void Ieee80211MacTxCoordinationSta::processSignal(cMessage* msg)
             handleDoze();
         else if (dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()))
             handleSwChnl(dynamic_cast<Ieee80211MacSignalSwChnl *>(msg->getControlInfo()));
+        else
+            throw cRuntimeError("Unkown signal");
     }
 }
 
