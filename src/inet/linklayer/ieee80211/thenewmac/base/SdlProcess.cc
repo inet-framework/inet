@@ -27,6 +27,7 @@ void SdlProcess::insertSignal(cMessage* signal)
 
 void SdlProcess::run()
 {
+    EV_DEBUG << "Looking for signal in state " << currentState->stateId << endl;
     nextSignal:
     // a) if the input port contains a signal matching a priority input of the current state, the first such
     // signal is consumed (see 11.4); otherwise
@@ -41,6 +42,7 @@ void SdlProcess::run()
                 if (transition.signalId == signal->getKind())
                 {
                     signals.erase(cur);
+                    EV_DEBUG << "Priority signal= " << signal->getName() << " state = " << currentState->stateId << endl;
                     if (transition.processSignal)
                         transition.processSignal(signal);
                     else
@@ -61,32 +63,31 @@ void SdlProcess::run()
         auto cur = it++;
         cMessage *signal = *cur;
         bool hasMatchingInputNode = false;
-        // i) A signal in a Save-signalset is not enabled.
-        if (!currentState->isSaved(signal))
+        for (auto & transition : currentState->transitions)
         {
-            for (auto & transition : currentState->transitions)
+            // ii) A signal in the input port is enabled, if all the Provided-expressions of an
+            //     Input-node return the predefined Boolean value true, or if the Input-node does not
+            //     have a Provided-expression.
+            hasMatchingInputNode |= transition.signalId == signal->getKind();
+            if (transition.signalId == signal->getKind() &&
+               (transition.enablingCondition == nullptr || transition.enablingCondition()))
             {
-                // ii) A signal in the input port is enabled, if all the Provided-expressions of an
-                //     Input-node return the predefined Boolean value true, or if the Input-node does not
-                //     have a Provided-expression.
-                hasMatchingInputNode |= transition.signalId == signal->getKind();
-                if (transition.signalId == signal->getKind() &&
-                   (transition.enablingCondition == nullptr || transition.enablingCondition()))
-                {
-                    signals.erase(cur);
-                    if (transition.processSignal)
-                        transition.processSignal(signal);
-                    else
-                        defaultHandler(signal);
-                    goto nextSignal;
-                }
-            }
-            // Implicit transition
-            if (!hasMatchingInputNode)
-            {
+                EV_DEBUG << "Signal= " << signal->getName() << " state = " << currentState->stateId << endl;
                 signals.erase(cur);
+                if (transition.processSignal)
+                    transition.processSignal(signal);
+                else
+                    defaultHandler(signal);
                 goto nextSignal;
             }
+        }
+        // i) A signal in a Save-signalset is not enabled.
+        if (!hasMatchingInputNode && !currentState->isSaved(signal))
+        {
+            // Implicit transition
+            EV_DEBUG << "Implicit transition signal= " << signal->getName() << " state = " << currentState->stateId << endl;
+            signals.erase(cur);
+            goto nextSignal;
         }
     }
 
@@ -102,6 +103,7 @@ void SdlProcess::run()
         //      continuous signal is enabled.
         if (transition.continuousSignal != nullptr && transition.continuousSignal())
         {
+            EV_DEBUG << "Continuous transition state = " << currentState->stateId << endl;
             transition.processSignal(nullptr);
             goto nextSignal;
         }
