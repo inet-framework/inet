@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacBackoff);
 
-void Ieee80211MacBackoff::handleMessage(cMessage* msg)
+void Ieee80211MacBackoff::processSignal(cMessage* msg)
 {
     EV_DEBUG << "state = " << state << endl;
     if (msg->isSelfMessage())
@@ -54,6 +54,37 @@ void Ieee80211MacBackoff::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        auto continousSignalChannelIdle = [=] () { return slotCnt == 0; };
+        auto handleChannelIdleContinuousSignal = [=] (cMessage *m)
+        {
+            if (slotCnt == 0)
+            {
+                cnt == 0 ? emitBkDone(-2) : emitBkDone(-1);
+                done();
+            }
+        };
+        sdlProcess = new SdlProcess(processSignalFunction, // Default signal handler
+                                            {{BACKOFF_STATE_START,
+                                              {},
+                                             {}},
+                                            {BACKOFF_STATE_NO_BACKOFF,
+                                              {{BACKOFF}},
+                                             {}},
+                                              {BACKOFF_STATE_CHANNEL_BUSY,
+                                              {{IDLE},
+                                              {SLOT},
+                                              {BUSY},
+                                              {CANCEL, processSignalFunction, true}},
+                                             {}},
+                                             {BACKOFF_STATE_CHANNEL_IDLE,
+                                             {{IDLE},
+                                             {SLOT},
+                                             {BUSY},
+                                             {-1, handleChannelIdleContinuousSignal, false, nullptr, continousSignalChannelIdle}},
+                                            {}}
+                                            });
+        sdlProcess->setCurrentState(state);
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
     }
     if (stage == INITSTAGE_LINK_LAYER)
@@ -85,6 +116,7 @@ void Ieee80211MacBackoff::handleBackoff(Ieee80211MacSignalBackoff *backoff, cGat
         // At start assume that the WM is busy until receiving a signal
         // which indicates the WM is idle.
         state = BACKOFF_STATE_CHANNEL_BUSY;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -95,11 +127,9 @@ void Ieee80211MacBackoff::handleIdle()
     if (state  == BACKOFF_STATE_CHANNEL_BUSY)
     {
         state = BACKOFF_STATE_CHANNEL_IDLE;
-        if (slotCnt == 0)
-        {
-            cnt == 0 ? emitBkDone(-2) : emitBkDone(-1);
-            done();
-        }
+        sdlProcess->setCurrentState(state);
+        if (slotCnt == 0) // Channel_Idle continuous signal
+            sdlProcess->run();
     }
     // Idle signal not sent if WM free. This consumes any
     // Idles still on input queue.
@@ -110,8 +140,11 @@ void Ieee80211MacBackoff::handleBusy()
     if (state == BACKOFF_STATE_CHANNEL_BUSY)
         cnt = 1;
     else if (state == BACKOFF_STATE_CHANNEL_IDLE)
+    {
         // Go back and wait for WM to become idle.
         state = BACKOFF_STATE_CHANNEL_BUSY;
+        sdlProcess->setCurrentState(state);
+    }
 }
 
 void Ieee80211MacBackoff::handleSlot()
@@ -121,12 +154,15 @@ void Ieee80211MacBackoff::handleSlot()
     {
         // Decrement count for each slot when WM idle.
         slotCnt--;
-
-        if (slotCnt == 0)
-        {
-            cnt == 0 ? emitBkDone(-2) : emitBkDone(-1);
-            done();
-        }
+        if (slotCnt == 0) // Channel_Idle continuous signal
+            sdlProcess->run();
+    }
+    else if (state == BACKOFF_STATE_CHANNEL_BUSY)
+    {
+        state = BACKOFF_STATE_CHANNEL_IDLE;
+        sdlProcess->setCurrentState(state);
+        if (slotCnt == 0) // Channel_Idle continuous signal
+            sdlProcess->run();
     }
     // else ignore
 }
@@ -145,6 +181,7 @@ void Ieee80211MacBackoff::done()
 {
     macsorts->getIntraMacRemoteVariables()->setBkIp(false);
     state = BACKOFF_STATE_NO_BACKOFF;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacBackoff::emitBkDone(int slotCount)

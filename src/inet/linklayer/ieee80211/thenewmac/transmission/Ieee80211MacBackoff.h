@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 #include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/SdlProcess.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -53,13 +54,14 @@ class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff, public Ieee802
     public:
         enum BackoffState
         {
+            BACKOFF_STATE_START,
             BACKOFF_STATE_NO_BACKOFF,
             BACKOFF_STATE_CHANNEL_BUSY,
             BACKOFF_STATE_CHANNEL_IDLE
         };
 
     protected:
-        BackoffState state = BACKOFF_STATE_NO_BACKOFF;
+        BackoffState state = BACKOFF_STATE_START;
         Ieee80211MacMacsorts *macsorts = nullptr;
 
         int slotCnt = -1;
@@ -68,7 +70,7 @@ class INET_API Ieee80211MacBackoff : public IIeee80211MacBackoff, public Ieee802
         cGate *source = nullptr;
 
     protected:
-        void handleMessage(cMessage *msg) override;
+        void processSignal(cMessage *msg);
         void initialize(int stage) override;
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
