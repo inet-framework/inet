@@ -98,17 +98,15 @@ void Ieee80211MacDataPump::handleTxRequest(Ieee80211MacSignalTxRequest *txReques
 
 void Ieee80211MacDataPump::emitBusy()
 {
-    cMessage *busy = new cMessage("Busy");
     Ieee80211MacSignalBusy *signal = new Ieee80211MacSignalBusy();
-    busy->setControlInfo(signal);
+    cMessage *busy = createSignal("Busy", signal);
     send(busy, "fwdCs");
 }
 
 void Ieee80211MacDataPump::emitIdle()
 {
-    cMessage *idle = new cMessage("Idle");
     Ieee80211MacSignalIdle *signal = new Ieee80211MacSignalIdle();
-    idle->setControlInfo(signal);
+    cMessage *idle = createSignal("Idle", signal);
     send(idle, "fwdCs");
 }
 
@@ -214,9 +212,8 @@ void Ieee80211MacDataPump::handlePhyTxEndConfirm()
 
 void Ieee80211MacDataPump::emitSlot()
 {
-    cMessage *slot = new cMessage("Slot");
     Ieee80211MacSignalSlot *signal = new Ieee80211MacSignalSlot();
-    slot->setControlInfo(signal);
+    cMessage *slot = createSignal("Slot", signal);
     send(slot, "fwdCs");
 }
 
