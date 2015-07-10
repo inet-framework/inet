@@ -39,11 +39,15 @@ void Ieee80211MacChannelState::initialize(int stage)
         dSifs = usecToSimtime(macmib->getPhyOperationTable()->getSifsTime());
         dSlot = usecToSimtime(macmib->getPhyOperationTable()->getSlotTime());
         dDifs = dSifs + 2 * dSlot;
+//        dIfs = ;
         std::cout << macmib->getPhyOperationTable()->getSlotTime() << endl;
         std::cout << dSlot << endl;
 //        Eifs based on the lowest basic rate.
 // TODO: aMpduDurationFactor??????
 //        dEifs = usecToSimtime(macmib->getPhyOperationTable()->getSifsTime() + calcDur(1 /*import(mBrates))*/, stuff()))
+        dIfs = dEifs;
+        // TODO: hack
+        dIfs = simtime_t(50E-6);
         handleResetMac();
     }
 }
@@ -143,6 +147,7 @@ void Ieee80211MacChannelState::handlePhyCcaIndication(Ieee80211MacSignalPhyCcaIn
         cs = phyCcaIndication->getStatus();
         if (cs == CcaStatus_idle)
         {
+            std::cout << dIfs << endl;
             scheduleAt(simTime() + dIfs, tIfs);
             state = CHANNEL_STATE_STATE_WAIT_IFS;
         }
