@@ -34,7 +34,8 @@ module Ieee80211MacReception
         input rxFromCtl;
         output rxToRx;
         output rxIndAck;
-
+        inout phyCca;
+        
     submodules:
         channelState: Ieee80211MacChannelState {
             @display("p=84,75");
@@ -55,7 +56,8 @@ module Ieee80211MacReception
         channelState.ifsCtl <-- mpduValidator.ifsCtl;
         channelState.fromSync <-- psFromSync;
         channelState.fromCtl <-- rxFromCtl;
-
+        channelState.phyCca <--> phyCca;
+        
         defragment.toRx --> rxToRx;
         defragment.defrag <-- mpduFilter.defrag;
 
