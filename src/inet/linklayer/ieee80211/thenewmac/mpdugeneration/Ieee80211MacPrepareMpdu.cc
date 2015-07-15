@@ -22,9 +22,45 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacPrepareMpdu);
 
-void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
+void Ieee80211MacPrepareMpdu::initialize(int stage)
 {
-    EV_DEBUG << "state = " << state << endl;
+    if (stage == INITSTAGE_LOCAL)
+    {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        sdlProcess = new SdlProcess(processSignalFunction,
+                                  {{PREPARE_MPDU_STATE_START,
+                                    {},
+                                    {}},
+                                  {PREPARE_MPDU_STATE_NO_BSS,
+                                    {{-1, [=] (cMessage *m) { processNoBssContinuousSignal1(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processNoBssContinuousSignal2(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal2Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processNoBssContinuousSignal3(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal3Enabled(); }},
+                                    {MSDU_REQUEST}},
+                                    {}},
+                                  {PREPARE_MPDU_STATE_PREPARE_BSS,
+                                    {{-1, [=] (cMessage *m) { processPrepareBssContinuousSignal1(); }, false, nullptr, [=] () { return isPrepareBssContinousSignal1Enabled(); }},
+                                    {MSDU_REQUEST}},
+                                    {}},
+                                  {PREPARE_MDPU_STATE_PREPARE_IBSS,
+                                    {{-1, [=] (cMessage *m) { processPrepareIbssContinuousSignal1(); }, false, nullptr, [=] () { return isPrepareIbssContinousSignal1Enabled(); }},
+                                    {MSDU_REQUEST}},
+                                    {}},
+                                  {PREPARE_MPDU_STATE_PREPARE_AP,
+                                    {{-1, [=] (cMessage *m) { processPrepareApContinuousSignal1(); }, false, nullptr, [=] () { return isPrepareApContinousSignal1Enabled(); }},
+                                    {MSDU_REQUEST}},
+                                    {}}
+                                 });
+        state = PREPARE_MPDU_STATE_NO_BSS;
+        sdlProcess->setCurrentState(state);
+        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
+        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        macsorts->subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
+    }
+}
+
+
+void Ieee80211MacPrepareMpdu::processSignal(cMessage* msg)
+{
     if (msg->isSelfMessage())
         throw cRuntimeError("This module doesn't handle self messages.");
     else
@@ -35,16 +71,6 @@ void Ieee80211MacPrepareMpdu::handleMessage(cMessage* msg)
             handleMmRequest(dynamic_cast<Ieee80211MacSignalMmRequest *>(msg->getControlInfo()), dynamic_cast<Ieee80211NewFrame *>(msg), msg->getArrivalGate());
         else if (dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()))
             handleFragConfirm(dynamic_cast<Ieee80211MacSignalFragConfirm *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
-    }
-}
-
-void Ieee80211MacPrepareMpdu::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
-        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
-        macsorts->subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
     }
 }
 
@@ -219,17 +245,7 @@ void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bo
     Enter_Method_Silent();
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
-        switch (state)
-        {
-            case PREPARE_MPDU_STATE_NO_BSS:
-                if (macsorts->getIntraMacRemoteVariables()->isAssoc() && !macsorts->getIntraMacRemoteVariables()->isActingAsAp())
-                    state = PREPARE_MPDU_STATE_PREPARE_BSS;
-                else if (macsorts->getIntraMacRemoteVariables()->isIbss())
-                    state = PREPARE_MDPU_STATE_PREPARE_IBSS;
-                else if (macsorts->getIntraMacRemoteVariables()->isActingAsAp())
-                    state = PREPARE_MPDU_STATE_PREPARE_AP;
-                break;
-        }
+        emitDataChanged();
     }
 }
 
@@ -254,6 +270,72 @@ void Ieee80211MacPrepareMpdu::emitFragRequest(FragSdu *sdu)
     Ieee80211MacSignalFragRequest *signal = new Ieee80211MacSignalFragRequest();
     createSignal(sdu, signal);
     send(sdu, "fragMsdu$o");
+}
+
+void Ieee80211MacPrepareMpdu::processNoBssContinuousSignal1()
+{
+    state = PREPARE_MPDU_STATE_PREPARE_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isNoBssContinuoisSignal1Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isAssoc() && !macsorts->getIntraMacRemoteVariables()->isActingAsAp();
+}
+
+void Ieee80211MacPrepareMpdu::processNoBssContinuousSignal2()
+{
+    state = PREPARE_MDPU_STATE_PREPARE_IBSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isNoBssContinuoisSignal2Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isIbss();
+}
+
+void Ieee80211MacPrepareMpdu::processNoBssContinuousSignal3()
+{
+    state = PREPARE_MPDU_STATE_PREPARE_AP;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isNoBssContinuoisSignal3Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isActingAsAp();
+}
+
+void Ieee80211MacPrepareMpdu::processPrepareBssContinuousSignal1()
+{
+    state = PREPARE_MPDU_STATE_NO_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isPrepareBssContinousSignal1Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isAssoc();
+}
+
+void Ieee80211MacPrepareMpdu::processPrepareIbssContinuousSignal1()
+{
+    state = PREPARE_MPDU_STATE_NO_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isPrepareIbssContinousSignal1Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isIbss();
+}
+
+void Ieee80211MacPrepareMpdu::processPrepareApContinuousSignal1()
+{
+    state = PREPARE_MPDU_STATE_NO_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPrepareMpdu::isPrepareApContinousSignal1Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isActingAsAp();
 }
 
 } /* namespace inet */

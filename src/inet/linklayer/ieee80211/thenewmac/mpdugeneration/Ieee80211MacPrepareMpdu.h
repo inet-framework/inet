@@ -59,7 +59,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         };
 
     protected:
-        PrepareMpduState state = PREPARE_MPDU_STATE_NO_BSS;
+        PrepareMpduState state = PREPARE_MPDU_STATE_START;
         Ieee80211MacMacmibPackage *macmib = nullptr;
 
         bool bcmc;
@@ -78,7 +78,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         Ieee80211MacMacsorts *macsorts = nullptr;
 
     protected:
-        void handleMessage(cMessage *msg) override;
+        void processSignal(cMessage *msg);
         void initialize(int stage) override;
 
         void receiveSignal(cComponent *source, int signalID, bool b) override;
@@ -93,6 +93,19 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void handleMmRequest(Ieee80211MacSignalMmRequest *mmRequest, Ieee80211NewFrame *frame, cGate *sender);
         void handleFragConfirm(Ieee80211MacSignalFragConfirm *fragConfirm, FragSdu *fsdu);
         void emitMmConfirm(cPacket *rsdu, TxStatus txStatus);
+
+        void processNoBssContinuousSignal1();
+        bool isNoBssContinuoisSignal1Enabled();
+        void processNoBssContinuousSignal2();
+        bool isNoBssContinuoisSignal2Enabled();
+        void processNoBssContinuousSignal3();
+        bool isNoBssContinuoisSignal3Enabled();
+        void processPrepareBssContinuousSignal1();
+        bool isPrepareBssContinousSignal1Enabled();
+        void processPrepareIbssContinuousSignal1();
+        bool isPrepareIbssContinousSignal1Enabled();
+        void processPrepareApContinuousSignal1();
+        bool isPrepareApContinousSignal1Enabled();
 };
 
 } /* namespace inet */
