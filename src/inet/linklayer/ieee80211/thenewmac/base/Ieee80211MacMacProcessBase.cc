@@ -20,6 +20,12 @@
 namespace inet {
 namespace ieee80211 {
 
+Ieee80211MacMacProcessBase::Ieee80211MacMacProcessBase()
+{
+    dataChanged = new cMessage("Data Changed");
+    dataChanged->setKind(-2);
+}
+
 void Ieee80211MacMacProcessBase::handleMessage(cMessage* msg)
 {
     sdlProcess->insertSignal(msg);
@@ -41,6 +47,7 @@ void Ieee80211MacMacProcessBase::createSignal(cPacket* packet, Ieee80211MacSigna
     packet->setControlInfo(signal);
 }
 
+
 void Ieee80211MacMacProcessBase::emitResetMac()
 {
     scheduleAt(simTime(), resetMac);
@@ -53,9 +60,8 @@ Ieee80211MacMacProcessBase::~Ieee80211MacMacProcessBase()
 
 void Ieee80211MacMacProcessBase::emitDataChanged()
 {
-    dataChanged = new cMessage("Data Changed");
-    dataChanged->setKind(-2);
-    scheduleAt(simTime(), dataChanged);
+    if (!dataChanged->isScheduled())
+        scheduleAt(simTime(), dataChanged);
 }
 
 } /* namespace inet */

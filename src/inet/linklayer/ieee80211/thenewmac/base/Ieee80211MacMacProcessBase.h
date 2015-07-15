@@ -43,6 +43,7 @@ class INET_API Ieee80211MacMacProcessBase : public cSimpleModule
 
     public:
         virtual ~Ieee80211MacMacProcessBase();
+        Ieee80211MacMacProcessBase();
 
         virtual void emitResetMac();
 };
