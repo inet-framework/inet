@@ -19,38 +19,50 @@ import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211MacPhySap;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211MacSmMlmeSap;
 import inet.linklayer.ieee80211.thenewmac.sap.Ieee80211NewMacMacSap;
+import inet.physicallayer.contract.packetlevel.IRadio;
 
 
 module Ieee80211NewNic like IWirelessNic
 {
     parameters:
         string interfaceTableModule;
+        string radioType;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
 
-        @display("bgb=276,143");
+        @display("bgb=276,347");
     gates:
         input radioIn @labels(IRadioFrame); // to receive radio frames
         input upperLayerIn;    // from upper layers
         output upperLayerOut;  // to upper layers
 
     submodules:
+        radio: <radioType> like IRadio {
+            parameters:
+                @display("p=119,260");
+        }
         mac: Ieee80211NewMac {
-            @display("p=119,65");
+            @display("p=119,42");
         }
         sap: Ieee80211NewMacMacSap {
-            @display("p=194,65");
+            @display("p=194,142");
         }
         mlmeSap: Ieee80211MacSmMlmeSap {
 
-            @display("p=49,65");
+            @display("p=44,142");
         }
-        phySapRx: Ieee80211MacPhySap;
-        
+        phySap: Ieee80211MacPhySap {
+            @display("p=119,142");
+        }
     connections allowunconnected:
+        radioIn --> { @display("m=s"); } --> radio.radioIn;
+
         mac.mlmeSap <--> mlmeSap.smMlmeSap;
         mac.macSap <--> sap.macSap;
-        mac.phySapRx <--> phySapRx.phyCca;
- 
+        mac.phySapRx <--> phySap.phySapRx;
+        mac.phySapTx <--> phySap.phySapTx;
+
         upperLayerIn --> sap.upperLayerIn;
         upperLayerOut <-- sap.upperLayerOut;
+        radio.upperLayerIn <-- phySap.lowerLayerOut;
+        radio.upperLayerOut --> phySap.lowerLayerIn;
 }
