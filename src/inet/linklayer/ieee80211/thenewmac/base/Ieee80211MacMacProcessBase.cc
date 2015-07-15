@@ -51,6 +51,12 @@ Ieee80211MacMacProcessBase::~Ieee80211MacMacProcessBase()
     cancelAndDelete(resetMac);
 }
 
+void Ieee80211MacMacProcessBase::emitDataChanged()
+{
+    dataChanged = new cMessage("Data Changed");
+    dataChanged->setKind(-2);
+    scheduleAt(simTime(), dataChanged);
+}
 
 } /* namespace inet */
 } /* namespace ieee80211 */

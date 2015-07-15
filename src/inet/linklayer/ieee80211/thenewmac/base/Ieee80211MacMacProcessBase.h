@@ -31,6 +31,7 @@ class INET_API Ieee80211MacMacProcessBase : public cSimpleModule
     protected:
         cMessage *resetMac = nullptr;
         SdlProcess *sdlProcess = nullptr;
+        cMessage *dataChanged = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -38,6 +39,7 @@ class INET_API Ieee80211MacMacProcessBase : public cSimpleModule
 
         cMessage *createSignal(const char *name, Ieee80211MacSignal *signal);
         void createSignal(cPacket *packet, Ieee80211MacSignal *signal);
+        void emitDataChanged();
 
     public:
         virtual ~Ieee80211MacMacProcessBase();
