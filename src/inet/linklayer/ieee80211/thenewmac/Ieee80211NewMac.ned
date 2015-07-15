@@ -35,7 +35,8 @@ module Ieee80211NewMac
         inout macSap;
         inout mlmeSap;
         inout phySapRx;
-        
+        inout phySapTx;
+
     submodules:
         dataService: Ieee80211MacDataService {
             @display("p=64,58");
@@ -86,7 +87,10 @@ module Ieee80211NewMac
         mlme.mctlSst <--> protocolControl.mctlBcMgt;
         mlme.mctlToMctRxCoordination <-- protocolControl.mctlBcmgtMlme;
 
+        // SAP
         macSap <--> dataService.macSapMsduFromLlc;
         mlmeSap <--> managementService.getSet;
         phySapRx <--> reception.phyCca;
+        phySapTx <--> transmission.toPhy;
+        
 }
