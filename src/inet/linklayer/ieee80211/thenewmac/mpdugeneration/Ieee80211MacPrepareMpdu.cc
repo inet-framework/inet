@@ -244,12 +244,7 @@ void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bo
 {
     Enter_Method_Silent();
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
-    {
-        cMessage *dataChanged = new cMessage("dataChanged");
-        dataChanged->setKind(-2);
-        scheduleAt(simTime(), dataChanged);
-//        emitDataChanged();
-    }
+        emitDataChanged();
 }
 
 void Ieee80211MacPrepareMpdu::emitMmConfirm(cPacket *rsdu, TxStatus txStatus)
