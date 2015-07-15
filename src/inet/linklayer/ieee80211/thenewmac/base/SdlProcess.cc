@@ -42,7 +42,7 @@ void SdlProcess::run()
                 if (transition.signalId == signal->getKind())
                 {
                     signals.erase(cur);
-                    EV_DEBUG << "Priority signal= " << signal->getName() << " state = " << currentState->stateId << endl;
+                    EV_DEBUG << "Priority signal found, signal name is " << signal->getName() << endl;
                     if (transition.processSignal)
                         transition.processSignal(signal);
                     else
@@ -72,7 +72,10 @@ void SdlProcess::run()
             if (transition.signalId == signal->getKind() &&
                (transition.enablingCondition == nullptr || transition.enablingCondition()))
             {
-                EV_DEBUG << "Signal= " << signal->getName() << " state = " << currentState->stateId << endl;
+                if (transition.enablingCondition)
+                    EV_DEBUG << "Signal = " << signal->getName() << " with enabling condition" << endl;
+                else
+                    EV_DEBUG << "Signal = " << signal->getName() << endl;
                 signals.erase(cur);
                 if (transition.processSignal)
                     transition.processSignal(signal);
@@ -85,7 +88,7 @@ void SdlProcess::run()
         if (!hasMatchingInputNode && !currentState->isSaved(signal))
         {
             // Implicit transition
-            EV_DEBUG << "Implicit transition signal= " << signal->getName() << " state = " << currentState->stateId << endl;
+            EV_DEBUG << "Implicit transition signal = " << signal->getName() << endl;
             signals.erase(cur);
             goto nextSignal;
         }
@@ -97,13 +100,14 @@ void SdlProcess::run()
     //  1) the Continuous-expression contained in the current Continuous-signal is interpreted;
     //  2) if the current continuous signal is enabled, this signal is consumed (see 11.5); otherwise
     //  3) the next continuous signal is selected.
+
     for (auto & transition : currentState->transitions)
     {
         // iii) If the Continuous-expression returns the predefined Boolean value true, the
         //      continuous signal is enabled.
         if (transition.continuousSignal != nullptr && transition.continuousSignal())
         {
-            EV_DEBUG << "Continuous transition state = " << currentState->stateId << endl;
+            EV_DEBUG << "Continuous transition" << endl;
             transition.processSignal(nullptr);
             goto nextSignal;
         }
@@ -111,12 +115,15 @@ void SdlProcess::run()
     // d) if no enabled signal was found, the state machine waits in the state until another signal
     // instance is received. If the state has enabling conditions or continuous signals, these steps
     // are repeated even if no signal is received.
+    EV_DEBUG << "End" << endl;
 }
 
 void SdlProcess::setCurrentState(int stateId)
 {
     if (stateId != this->states[stateId].stateId)
         throw cRuntimeError("State id mismatch");
+    if (currentState)
+        EV_DEBUG << "State transition from " << currentState->stateId << " to " << stateId << endl;
     this->currentState = &this->states[stateId];
 }
 
