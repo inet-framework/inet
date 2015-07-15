@@ -56,7 +56,7 @@ class INET_API IIeee80211MacTxCoordinationSta
 
         virtual void emitBackoff(int ccw, int par2) = 0;
         virtual void emitAtimW() = 0;
-        virtual void emitTxRequest(cPacket *tpdu, bps txrate) = 0;
+        virtual void emitTxRequest(Ieee80211NewFrame *tpdu, bps txrate) = 0;
         virtual void emitPduConfirm(FragSdu *fsdu, TxResult txResult) = 0;
         virtual void emitCancel() = 0;
         virtual void emitPsmDone() = 0;
@@ -135,8 +135,6 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         // selection criteria are not specified.
         bps mmrate = bps(NaN);
 
-        cGate *backoffProcedureGate = nullptr;
-        cGate *dataPumpProcedureGate = nullptr;
         cGate *tdatGate = nullptr;
         cGate *tmgtGate = nullptr;
 
@@ -197,7 +195,7 @@ class INET_API Ieee80211MacTxCoordinationSta : public IIeee80211MacTxCoordinatio
         void handleCfEnd() override;
         void handlePlmeSetConfirm(Ieee80211MacSignalPlmeSetConfirm *plmeSetConfirm) override;
 
-        void emitTxRequest(cPacket *tpdu, bps txrate) override;
+        void emitTxRequest(Ieee80211NewFrame *tpdu, bps txrate) override;
         void emitBackoff(int ccw, int par2) override;
         void emitAtimW() override;
         void emitPduConfirm(FragSdu *fsdu, TxResult txResult) override;

@@ -40,6 +40,7 @@ void Ieee80211MacTxCoordinationSta::initialize(int stage)
                                      {}},
                                      {TX_COORDINATION_STATE_TXC_IDLE, // State
                                       {{PDU_REQUEST, nullptr, false, enablingConditionTxCIdlePduReq, nullptr},
+                                       {BKDONE, nullptr, true}, // TODO: HACK??
                                        {CF_POLL},
                                        {TX_CF_ACK},
                                        {TBTT}, // Signals
@@ -682,7 +683,7 @@ void Ieee80211MacTxCoordinationSta::emitCancel()
 {
     Ieee80211MacSignalCancel *signal = new Ieee80211MacSignalCancel();
     cMessage *cancel = createSignal("Cancel", signal);
-    send(cancel, backoffProcedureGate);
+    send(cancel, "txOBackoff$o");
 }
 
 void Ieee80211MacTxCoordinationSta::ackFail()
@@ -923,8 +924,10 @@ void Ieee80211MacTxCoordinationSta::receiveSignal(cComponent* source, int signal
     Enter_Method_Silent();
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
-        std::cout << "bkof" << macsorts->getIntraMacRemoteVariables()->isBkIp() << endl;
-        sdlProcess->run();
+        cMessage *dataChanged = new cMessage("dataChanged");
+        dataChanged->setKind(-2);
+        scheduleAt(simTime(), dataChanged);
+        //sdlProcess->run();
     }
 }
 
@@ -1001,17 +1004,17 @@ void Ieee80211MacTxCoordinationSta::emitSwDone()
     send(swDone, tmgtGate);
 }
 
-
 void Ieee80211MacTxCoordinationSta::emitAtimW()
 {
 }
 
-void Ieee80211MacTxCoordinationSta::emitTxRequest(cPacket* tpdu, bps txrate)
+void Ieee80211MacTxCoordinationSta::emitTxRequest(Ieee80211NewFrame* tpdu, bps txrate)
 {
     Ieee80211MacSignalTxRequest *signal = new Ieee80211MacSignalTxRequest();
     signal->setTxrate(txrate.get());
+    take(tpdu);
     createSignal(tpdu, signal);
-    send(tpdu, dataPumpProcedureGate);
+    send(tpdu, "txODataPump$o");
 }
 
 void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
