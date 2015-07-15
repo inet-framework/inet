@@ -23,7 +23,50 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacDataPump);
 
-void Ieee80211MacDataPump::handleMessage(cMessage* msg)
+void Ieee80211MacDataPump::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        // TODO: resetMac
+        sdlProcess = new SdlProcess(processSignalFunction,
+                                    {{DATA_PUMP_STATE_START,
+                                       {},
+                                       {}},
+                                    {DATA_PUMP_STATE_TX_IDLE,
+                                      {{TX_REQUEST},
+                                      {BUSY},
+                                      {IDLE},
+                                      {SLOT}},
+                                      {}},
+                                    {DATA_PUMP_STATE_SEND_CRC,
+                                      {{PHY_DATA_CONFIRM}},
+                                      {}},
+                                    {DATA_PUMP_STATE_SEND_FRAME,
+                                      {{PHY_DATA_CONFIRM}},
+                                      {}},
+                                    {DATA_PUMP_STATE_WAIT_TX_END,
+                                      {{PHY_TX_END_CONFIRM}},
+                                      {}},
+                                    {DATA_PUMP_STATE_WAIT_TX_START,
+                                      {{PHY_TX_START_CONFIRM}},
+                                      {}},
+                                    {DATA_PUMP_STATE_INSERT_TIMESTAMP,
+                                      {{PHY_DATA_CONFIRM}},
+                                      {}}
+                                   });
+        sdlProcess->setCurrentState(state);
+        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsModule"), this);
+    }
+    if (stage == INITSTAGE_LINK_LAYER)
+    {
+        state = DATA_PUMP_STATE_TX_IDLE;
+        sdlProcess->setCurrentState(state);
+        source = nullptr;
+    }
+}
+
+void Ieee80211MacDataPump::processSignal(cMessage* msg)
 {
     if (msg->isSelfMessage())
     {
@@ -51,19 +94,6 @@ void Ieee80211MacDataPump::handleMessage(cMessage* msg)
             handlePhyDataConfirm();
         else
             throw cRuntimeError("Unknown signal", msg->getControlInfo()->getName());
-    }
-}
-
-void Ieee80211MacDataPump::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsModule"), this);
-    }
-    if (stage == INITSTAGE_LINK_LAYER)
-    {
-        state = DATA_PUMP_STATE_TX_IDLE;
-        source = nullptr;
     }
 }
 
@@ -95,6 +125,7 @@ void Ieee80211MacDataPump::handleTxRequest(Ieee80211NewFrame *frame)
     emitBusy();
 //  TODO: emit PhyTxStart._request signal
     state = DATA_PUMP_STATE_WAIT_TX_START;
+    sdlProcess->setCurrentState(state);
     //sendOneByte(); TODO: serializer
     // TODO: hack
     take(pdu);
@@ -119,6 +150,7 @@ void Ieee80211MacDataPump::handleResetMac()
 {
     // TODO: emit PhyTxEnd._request signal
     state = DATA_PUMP_STATE_TX_IDLE;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacDataPump::handlePhyTxStartConfirm()
@@ -137,6 +169,7 @@ void Ieee80211MacDataPump::sendOneByte()
         // Send the 1's complement of calculated FCS value, MSb to LSb.
         // TODO: fcs = mirror(not(fcs));
         state = DATA_PUMP_STATE_SEND_CRC;
+        sdlProcess->setCurrentState(state);
     }
     else
     {
@@ -145,10 +178,12 @@ void Ieee80211MacDataPump::sendOneByte()
         {
             // Start of time stamp in beacon and probe_rsp.
             state = DATA_PUMP_STATE_INSERT_TIMESTAMP;
+            sdlProcess->setCurrentState(state);
         }
         else
         {
             state = DATA_PUMP_STATE_SEND_FRAME;
+            sdlProcess->setCurrentState(state);
             // TODO:
         }
     }
@@ -171,12 +206,14 @@ void Ieee80211MacDataPump::sendOneCrcByte()
     {
         // TODO: emit PhyTxEnd.request
         state = DATA_PUMP_STATE_WAIT_TX_END;
+        sdlProcess->setCurrentState(state);
     }
     else
     {
         // TODO: emit PhyData.request(fcs(k))
         k++;
         state = DATA_PUMP_STATE_SEND_CRC;
+        sdlProcess->setCurrentState(state);
     }
 
 }
@@ -213,6 +250,7 @@ void Ieee80211MacDataPump::handlePhyTxEndConfirm()
     // TxConfirm goes to process that sent TxRequest.
     // TODO: emit TxConfirm to source
     state = DATA_PUMP_STATE_TX_IDLE;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacDataPump::emitSlot()

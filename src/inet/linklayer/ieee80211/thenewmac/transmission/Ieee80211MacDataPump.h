@@ -90,7 +90,7 @@ class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee8
         virtual ~Ieee80211MacDataPump();
 
     protected:
-        void handleMessage(cMessage *msg) override;
+        void processSignal(cMessage *msg);
         void initialize(int stage) override;
 
         virtual void sendOneByte();
