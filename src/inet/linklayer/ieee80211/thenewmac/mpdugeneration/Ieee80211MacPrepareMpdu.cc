@@ -34,7 +34,7 @@ void Ieee80211MacPrepareMpdu::initialize(int stage)
                                   {PREPARE_MPDU_STATE_NO_BSS,
                                     {{-1, [=] (cMessage *m) { processNoBssContinuousSignal1(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal1Enabled(); }},
                                     {-1, [=] (cMessage *m) { processNoBssContinuousSignal2(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal2Enabled(); }},
-                                    {-1, [=] (cMessage *m) { processNoBssContinuousSignal3(); }, false, nullptr, [=] () { return isNoBssContinuoisSignal3Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processNoBssContinuousSignal3(); }, false, nullptr, [=] () { return isNoBssContinuosSignal3Enabled(); }},
                                     {MSDU_REQUEST}},
                                     {}},
                                   {PREPARE_MPDU_STATE_PREPARE_BSS,
@@ -245,7 +245,10 @@ void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bo
     Enter_Method_Silent();
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
     {
-        emitDataChanged();
+        cMessage *dataChanged = new cMessage("dataChanged");
+        dataChanged->setKind(-2);
+        scheduleAt(simTime(), dataChanged);
+//        emitDataChanged();
     }
 }
 
@@ -300,7 +303,7 @@ void Ieee80211MacPrepareMpdu::processNoBssContinuousSignal3()
     sdlProcess->setCurrentState(state);
 }
 
-bool Ieee80211MacPrepareMpdu::isNoBssContinuoisSignal3Enabled()
+bool Ieee80211MacPrepareMpdu::isNoBssContinuosSignal3Enabled()
 {
     return macsorts->getIntraMacRemoteVariables()->isActingAsAp();
 }
@@ -313,7 +316,7 @@ void Ieee80211MacPrepareMpdu::processPrepareBssContinuousSignal1()
 
 bool Ieee80211MacPrepareMpdu::isPrepareBssContinousSignal1Enabled()
 {
-    return macsorts->getIntraMacRemoteVariables()->isAssoc();
+    return !macsorts->getIntraMacRemoteVariables()->isAssoc();
 }
 
 void Ieee80211MacPrepareMpdu::processPrepareIbssContinuousSignal1()
@@ -324,7 +327,7 @@ void Ieee80211MacPrepareMpdu::processPrepareIbssContinuousSignal1()
 
 bool Ieee80211MacPrepareMpdu::isPrepareIbssContinousSignal1Enabled()
 {
-    return macsorts->getIntraMacRemoteVariables()->isIbss();
+    return !macsorts->getIntraMacRemoteVariables()->isIbss();
 }
 
 void Ieee80211MacPrepareMpdu::processPrepareApContinuousSignal1()
@@ -335,7 +338,7 @@ void Ieee80211MacPrepareMpdu::processPrepareApContinuousSignal1()
 
 bool Ieee80211MacPrepareMpdu::isPrepareApContinousSignal1Enabled()
 {
-    return macsorts->getIntraMacRemoteVariables()->isActingAsAp();
+    return !macsorts->getIntraMacRemoteVariables()->isActingAsAp();
 }
 
 } /* namespace inet */

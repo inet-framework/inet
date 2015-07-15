@@ -99,7 +99,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
         void processNoBssContinuousSignal2();
         bool isNoBssContinuoisSignal2Enabled();
         void processNoBssContinuousSignal3();
-        bool isNoBssContinuoisSignal3Enabled();
+        bool isNoBssContinuosSignal3Enabled();
         void processPrepareBssContinuousSignal1();
         bool isPrepareBssContinousSignal1Enabled();
         void processPrepareIbssContinuousSignal1();
