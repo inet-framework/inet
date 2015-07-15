@@ -46,6 +46,7 @@ module Ieee80211MacTransmission
         input csFromCs;
         inout txTxrq[2];
         inout txBkof;
+        inout toPhy;
 
     submodules:
         dataPump: Ieee80211MacDataPump {
@@ -61,4 +62,5 @@ module Ieee80211MacTransmission
         txTxrq[1] <--> dataPump.txRq[1];
         txBkof <--> backoff.bkof;
         dataPump.fwdCs --> backoff.fwdCs;
+        dataPump.toPhy <--> toPhy;
 }
