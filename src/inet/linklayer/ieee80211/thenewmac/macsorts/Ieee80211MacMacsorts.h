@@ -81,7 +81,7 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
     protected:
         bool mActingAsAp; /* =true if STA started BSS */
         int mAId; /* AID assigned to STA by AP */
-        bool mAssoc = true; /* =true if STA associated w/BSS */ // TODO: hack
+        bool mAssoc = false; /* =true if STA associated w/BSS */ // TODO: hack
         bool mAtimW; /* =true if ATIM window in prog */
         bool mBkIP = false; /* =true if backoff in prog */
         // TODO: mBrates; /* basic rate set for this sta */
