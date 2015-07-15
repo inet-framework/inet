@@ -36,6 +36,7 @@ cMessage* Ieee80211MacMacProcessBase::createSignal(const char *name, Ieee80211Ma
 
 void Ieee80211MacMacProcessBase::createSignal(cPacket* packet, Ieee80211MacSignal* signal)
 {
+    delete packet->removeControlInfo();
     packet->setKind(signal->getSignalType());
     packet->setControlInfo(signal);
 }
