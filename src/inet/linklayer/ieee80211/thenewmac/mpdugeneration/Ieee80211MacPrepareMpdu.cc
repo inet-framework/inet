@@ -224,11 +224,9 @@ void Ieee80211MacPrepareMpdu::receiveSignal(cComponent* source, int signalID, bo
             case PREPARE_MPDU_STATE_NO_BSS:
                 if (macsorts->getIntraMacRemoteVariables()->isAssoc() && !macsorts->getIntraMacRemoteVariables()->isActingAsAp())
                     state = PREPARE_MPDU_STATE_PREPARE_BSS;
-                break;
-                if (macsorts->getIntraMacRemoteVariables()->isIbss())
+                else if (macsorts->getIntraMacRemoteVariables()->isIbss())
                     state = PREPARE_MDPU_STATE_PREPARE_IBSS;
-                break;
-                if (macsorts->getIntraMacRemoteVariables()->isActingAsAp())
+                else if (macsorts->getIntraMacRemoteVariables()->isActingAsAp())
                     state = PREPARE_MPDU_STATE_PREPARE_AP;
                 break;
         }
