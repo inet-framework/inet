@@ -26,6 +26,7 @@
 #include "inet/common/RawPacket.h"
 #include "inet/linklayer/ieee80211/thenewmac/macsorts/Ieee80211MacMacsorts.h"
 #include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/Ieee80211NewFrame_m.h"
 
 using namespace inet::physicallayer;
 
@@ -38,7 +39,7 @@ class INET_API IIeee80211MacDataPump
         virtual void handleBusy() = 0;
         virtual void handleIdle() = 0;
         virtual void handleSlot() = 0;
-        virtual void handleTxRequest(Ieee80211MacSignalTxRequest *txRequest) = 0;
+        virtual void handleTxRequest(Ieee80211NewFrame *frame) = 0;
         virtual void handleResetMac() = 0;
         virtual void handlePhyTxStartConfirm() = 0;
         virtual void handlePhyTxEndConfirm() = 0;
@@ -47,6 +48,7 @@ class INET_API IIeee80211MacDataPump
         virtual void emitBusy() = 0;
         virtual void emitIdle() = 0;
         virtual void emitSlot() = 0;
+        virtual void emitPhyTxStartRequest(int length, bps rate) = 0;
 
     public:
         virtual void emitResetMac() = 0;
@@ -74,7 +76,7 @@ class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee8
 
         simtime_t dTx = SIMTIME_ZERO; // dcl dTx Duration
         const RawPacket *rawPdu = nullptr; // dcl pdu Frame
-        const Ieee80211Frame *pdu = nullptr;
+        Ieee80211NewFrame *pdu = nullptr;
         cGate *source = nullptr; // dcl source PId
         bps rate = bps(NaN); // dcl rate Octet
         int k = -1; // dcl k Integer
@@ -95,13 +97,13 @@ class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee8
         virtual void sendOneCrcByte();
         virtual void insertTimestamp();
         virtual int getFrameType() const;
-        virtual void handlePdu(const cPacket *pdu);
+        //virtual void handlePdu(const cPacket *pdu);
 
         // Incoming signals
         virtual void handleBusy() override;
         virtual void handleIdle() override;
         virtual void handleSlot() override;
-        virtual void handleTxRequest(Ieee80211MacSignalTxRequest *txRequest) override;
+        virtual void handleTxRequest(Ieee80211NewFrame *frame) override;
         virtual void handleResetMac() override;
         virtual void handlePhyTxStartConfirm() override;
         virtual void handlePhyDataConfirm() override;
@@ -111,6 +113,7 @@ class INET_API Ieee80211MacDataPump : public IIeee80211MacDataPump, public Ieee8
         virtual void emitBusy() override;
         virtual void emitIdle() override;
         virtual void emitSlot() override;
+        virtual void emitPhyTxStartRequest(int length, bps rate);
 
     public:
         virtual void emitResetMac() override { Ieee80211MacMacProcessBase::emitResetMac(); }

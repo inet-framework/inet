@@ -36,7 +36,7 @@ void Ieee80211MacDataPump::handleMessage(cMessage* msg)
     {
         EV_DEBUG << msg->getName() << " signal arrived" << endl;
         if (dynamic_cast<Ieee80211MacSignalTxRequest *>(msg->getControlInfo()))
-            handleTxRequest(dynamic_cast<Ieee80211MacSignalTxRequest *>(msg->getControlInfo()));
+            handleTxRequest(dynamic_cast<Ieee80211NewFrame *>(msg));
         else if (dynamic_cast<Ieee80211MacSignalBusy *>(msg->getControlInfo()))
             handleBusy();
         else if (dynamic_cast<Ieee80211MacSignalIdle *>(msg->getControlInfo()))
@@ -82,18 +82,23 @@ void Ieee80211MacDataPump::handleSlot()
     emitSlot();
 }
 
-void Ieee80211MacDataPump::handleTxRequest(Ieee80211MacSignalTxRequest *txRequest)
+void Ieee80211MacDataPump::handleTxRequest(Ieee80211NewFrame *frame)
 {
 //    handlePdu(check_and_cast<cPacket *>(txRequest->getEncapsulatedPacket()));
 //    source = txRequest->getArrivalGate();
+    pdu = frame;
     k = 0;
     // TODO: fcs = initCrc
 //    Plcp length is Mpdu length + Fcs length
-    txLength = rawPdu->getByteLength(); // TODO: + fcs
+    txLength = pdu->getByteLength(); // TODO: + fcs
 //    Indicate medium busy to freeze backoff count during transmit.
     emitBusy();
 //  TODO: emit PhyTxStart._request signal
     state = DATA_PUMP_STATE_WAIT_TX_START;
+    //sendOneByte(); TODO: serializer
+    // TODO: hack
+    take(pdu);
+    send(pdu, "toPhy$o");
 }
 
 void Ieee80211MacDataPump::emitBusy()
@@ -186,22 +191,22 @@ void Ieee80211MacDataPump::insertTimestamp()
 
 int Ieee80211MacDataPump::getFrameType() const
 {
-    return pdu->getType();
+    return pdu->getFtype();
 }
 
-void Ieee80211MacDataPump::handlePdu(const cPacket* pdu)
-{
-    if (dynamic_cast<const RawPacket *>(pdu))
-    {
-        rawPdu = static_cast<const RawPacket *>(pdu);
-        // TODO: this->pdu = deserialize(pdu)
-    }
-    else
-    {
-        this->pdu = check_and_cast<const Ieee80211Frame *>(pdu);
-        // TODO: rawPdu = serialize(pdu)
-    }
-}
+//void Ieee80211MacDataPump::handlePdu(const cPacket* pdu)
+//{
+//    if (dynamic_cast<const RawPacket *>(pdu))
+//    {
+//        rawPdu = static_cast<const RawPacket *>(pdu);
+//        // TODO: this->pdu = deserialize(pdu)
+//    }
+//    else
+//    {
+//        this->pdu = check_and_cast<const Ieee80211Frame *>(pdu);
+//        // TODO: rawPdu = serialize(pdu)
+//    }
+//}
 
 void Ieee80211MacDataPump::handlePhyTxEndConfirm()
 {
@@ -220,6 +225,10 @@ void Ieee80211MacDataPump::emitSlot()
 Ieee80211MacDataPump::~Ieee80211MacDataPump()
 {
     // TODO: pdu
+}
+
+void Ieee80211MacDataPump::emitPhyTxStartRequest(int length, bps rate)
+{
 }
 
 } /* namespace ieee80211 */

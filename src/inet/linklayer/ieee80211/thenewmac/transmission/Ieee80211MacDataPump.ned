@@ -31,5 +31,5 @@ simple Ieee80211MacDataPump
         input fromCs; // [Busy, Idle, Slot]
         output fwdCs; // [Busy, Idle, Slot]
         inout txRq[2]; // To TX : [TxConfirm], from TX: [TxRequest]
-//        inout toPhy; unimplemented
+        inout toPhy;
 }
