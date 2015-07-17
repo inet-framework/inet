@@ -55,7 +55,7 @@ class INET_API Ieee80211MacPrepareMpdu : public IIeee80211MacPrepareMpdu, public
             PREPARE_MPDU_STATE_NO_BSS,
             PREPARE_MPDU_STATE_PREPARE_BSS,
             PREPARE_MDPU_STATE_PREPARE_IBSS,
-            PREPARE_MPDU_STATE_PREPARE_AP
+            PREPARE_MPDU_STATE_PREPARE_AP,
         };
 
     protected:
