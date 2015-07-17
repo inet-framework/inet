@@ -34,12 +34,14 @@ void Ieee80211MacPmFilterSta::initialize(int stage)
                                   {PM_FILTER_STA_STATE_PM_IDLE,
                                     {{-1, [=] (cMessage *m) { processPmIdleContinuousSignal1(); }, false, nullptr, [=] () { return isPmIdleContinuoisSignal1Enabled(); }},
                                     {-1, [=] (cMessage *m) { processPmIdleContinuousSignal2(); }, false, nullptr, [=] () { return isPmIdleContinuoisSignal2Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
                                     {FRAG_REQUEST},
                                     {PDU_CONFIRM}},
                                     {}},
                                   {PM_FILTER_STA_STATE_PM_BSS,
                                     {{-1, [=] (cMessage *m) { processPmBssContinuousSignal1(); }, false, nullptr, [=] () { return isPmBssContinuousSignal1Enabled(); }},
                                     {-1, [=] (cMessage *m) { processPmBssContinuousSignal2(); }, false, nullptr, [=] () { return isPmBssContinuousSignal2Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
                                     {FRAG_REQUEST},
                                     {PDU_CONFIRM}},
                                     {}},
@@ -47,25 +49,30 @@ void Ieee80211MacPmFilterSta::initialize(int stage)
                                     {{-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal1(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal1Enabled(); }},
                                     {-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal2(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal2Enabled(); }},
                                     {-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal3(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal3Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
                                     {PDU_CONFIRM},
                                     {PS_CHANGE},
                                     {FRAG_REQUEST}},
                                     {ATIM_W}},
                                   {PM_FILTER_STA_STATE_BSS_CFP,
                                     {{-1, [=] (cMessage *m) { processBssCfpContinuousSignal1(); }, false, nullptr, [=] () { return isBssCfpContinuousSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
                                     {FRAG_REQUEST},
                                     {PDU_CONFIRM},
                                     {CF_POLLED}},
                                     {}},
                                   {PM_FILTER_STA_WAIT_PS_RESPONSE,
-                                    {{PS_RESPONSE}},
+                                    {{PS_RESPONSE},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }}},
                                     {-1}},
                                   {PM_FILTER_STA_PRE_ATIM,
-                                    {{ATIM_W}},
+                                    {{-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
+                                    {ATIM_W}},
                                     {-1}},
                                   {PM_FILTER_STA_IBSS_ATIM_W,
                                     {{-1, [=] (cMessage *m) { processPmIbssAtimWContinuousSignal1(); }, false, nullptr, [=] () { return isPmIbssAtimWContinuousSignal1Enabled(); }},
                                     {-1, [=] (cMessage *m) { processPmIbssAtimWContinuousSignal2(); }, false, nullptr, [=] () { return isPmIbssAtimWContinuousSignal2Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processAllStatesContinuousSignal1(); }, false, nullptr, [=] () { return isAllStatesContinuousSignal1Enabled(); }},
                                     {FRAG_REQUEST}},
                                     {PS_CHANGE}}
                                  });
@@ -95,7 +102,11 @@ void Ieee80211MacPmFilterSta::processSignal(cMessage* msg)
 
 void Ieee80211MacPmFilterSta::handleResetMac()
 {
-    // clear queue
+    // TODO: in all states: mDisable continuous signal
+    anQ.clear();
+    cfQ.clear();
+    psQ.clear();
+    txQ.clear();
     state = PM_FILTER_STA_STATE_PM_IDLE;
     sdlProcess->setCurrentState(state);
 }
@@ -130,9 +141,8 @@ void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *f
         }
         else
         {
-            if (fsdu->pdus[1]) // TODO: ftype
+            if (fsdu->pdus[1]->getFtype() == TypeSubtype_beacon)
             {
-                // beacon
                 emitPduRequest(fsdu);
                 sentBcn = true;
             }
@@ -222,9 +232,13 @@ void Ieee80211MacPmFilterSta::handleCfPolled(Ieee80211MacSignalCfPolled* cfPolle
         cfQ.pop_front();
         if (cfQ.size() + txQ.size() > 0)
         {
-//            'set moreData
-//            bit in each
-//            fsdu fragment'
+            // set moreData
+            // bit in each
+            // fsdu fragment
+
+            // TODO: Is it OK to set it true in the last fragment too?
+            for (int i = 0; i < fsdu->fTot; i++)
+                fsdu->pdus[i]->setMoreData(true);
         }
         emitPduRequest(fsdu);
     }
@@ -236,10 +250,12 @@ void Ieee80211MacPmFilterSta::handleCfPolled(Ieee80211MacSignalCfPolled* cfPolle
             txQ.pop_front();
             if (txQ.size() > 0)
             {
-//                set moreData
-//                bit in each
-//                fsdu fragment'
-            }
+                // set moreData
+                // bit in each
+                // fsdu fragment
+                for (int i = 0; i < fsdu->fTot; i++)
+                    fsdu->pdus[i]->setMoreData(true);
+                }
             else
             {
                 emitPduRequest(fsdu);
@@ -280,7 +296,7 @@ void Ieee80211MacPmFilterSta::handleAtimW(Ieee80211MacSignalAtimW* awtimW)
         while (n > 0)
         {
             psQ.push_back(anQ.front());
-//            anQ:=tail(anQ);
+            anQ.pop_front();
             n--;
         }
         state = PM_FILTER_STA_IBSS_ATIM_W;
@@ -351,8 +367,8 @@ bool Ieee80211MacPmFilterSta::isPmIdleContinuoisSignal2Enabled()
 
 void Ieee80211MacPmFilterSta::processPmBssContinuousSignal1()
 {
-//    fsdu:=first(txQ),
-//    txQ:=tail(txQ);
+    fsdu = txQ.front();
+    txQ.pop_front();
     emitPduRequest(fsdu);
     fsPend = true;
 }
@@ -397,9 +413,8 @@ bool Ieee80211MacPmFilterSta::isPmIbssDataContinuousSignal1Enabled()
 
 void Ieee80211MacPmFilterSta::processPmIbssDataContinuousSignal2()
 {
-//    fsdu:=
-//    first(anQ),
-//    anQ:=tail(anQ)
+    fsdu = anQ.front();
+    anQ.pop_front();
     emitPduRequest(fsdu);
     fsPend = true;
 }
@@ -411,9 +426,8 @@ bool Ieee80211MacPmFilterSta::isPmIbssDataContinuousSignal2Enabled()
 
 void Ieee80211MacPmFilterSta::processPmIbssDataContinuousSignal3()
 {
-//    fsdu:=
-//    first(txQ),
-//    txQ:=tail(txQ)
+    fsdu = txQ.front();
+    txQ.pop_front();
     emitPduRequest(fsdu);
     fsPend = true;
 }
@@ -437,9 +451,8 @@ bool Ieee80211MacPmFilterSta::isPmIbssAtimWContinuousSignal1Enabled()
 
 void Ieee80211MacPmFilterSta::processPmIbssAtimWContinuousSignal2()
 {
-//    fsdu:=
-//    first(psQ),
-//    psQ:=tail(psQ)
+    fsdu = psQ.front();
+    psQ.pop_front();
     emitPduRequest(fsdu);
     atPend = true;
 }
@@ -447,6 +460,18 @@ void Ieee80211MacPmFilterSta::processPmIbssAtimWContinuousSignal2()
 bool Ieee80211MacPmFilterSta::isPmIbssAtimWContinuousSignal2Enabled()
 {
     return !atPend && (psQ.size() != 0);
+}
+
+void Ieee80211MacPmFilterSta::processAllStatesContinuousSignal1()
+{
+    handleResetMac();
+}
+
+bool Ieee80211MacPmFilterSta::isAllStatesContinuousSignal1Enabled()
+{
+    // TODO: hack
+    return false;
+    return macsorts->getIntraMacRemoteVariables()->isDisable();
 }
 
 } /* namespace inet */

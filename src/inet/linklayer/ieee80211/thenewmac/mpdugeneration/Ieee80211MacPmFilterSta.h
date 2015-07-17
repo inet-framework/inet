@@ -114,11 +114,12 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         bool isPmIbssDataContinuousSignal2Enabled();
         void processPmIbssDataContinuousSignal3();
         bool isPmIbssDataContinuousSignal3Enabled();
-
         void processPmIbssAtimWContinuousSignal1();
         bool isPmIbssAtimWContinuousSignal1Enabled();
         void processPmIbssAtimWContinuousSignal2();
         bool isPmIbssAtimWContinuousSignal2Enabled();
+        void processAllStatesContinuousSignal1();
+        bool isAllStatesContinuousSignal1Enabled();
 };
 
 } /* namespace inet */
