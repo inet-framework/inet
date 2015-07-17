@@ -1028,10 +1028,10 @@ void Ieee80211MacTxCoordinationSta::emitBackoff(int ccw, int par2)
 
 void Ieee80211MacTxCoordinationSta::emitPduConfirm(FragSdu* fsdu, TxResult txResult)
 {
-//    Ieee80211MacSignalPduConfirm *pduConfirm = new Ieee80211MacSignalPduConfirm("PduConfirm");
-//    pduConfirm->setFsdu(*fsdu);
-//    pduConfirm->setTxResult(txResult);
-//    send(pduConfirm, tdatGate);
+    Ieee80211MacSignalPduConfirm *signal = new Ieee80211MacSignalPduConfirm();
+    signal->setTxResult(txResult);
+    createSignal(fsdu, signal);
+    send(fsdu, "tdat$o");
 }
 
 } /* namespace inet */
