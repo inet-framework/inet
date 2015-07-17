@@ -22,7 +22,57 @@ namespace ieee80211 {
 
 Define_Module(Ieee80211MacPmFilterSta);
 
-void Ieee80211MacPmFilterSta::handleMessage(cMessage* msg)
+void Ieee80211MacPmFilterSta::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        sdlProcess = new SdlProcess(processSignalFunction,
+                                  {{PM_FILTER_STA_STATE_START,
+                                    {},
+                                    {}},
+                                  {PM_FILTER_STA_STATE_PM_IDLE,
+                                    {{-1, [=] (cMessage *m) { processPmIdleContinuousSignal1(); }, false, nullptr, [=] () { return isPmIdleContinuoisSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processPmIdleContinuousSignal2(); }, false, nullptr, [=] () { return isPmIdleContinuoisSignal2Enabled(); }},
+                                    {FRAG_REQUEST},
+                                    {PDU_CONFIRM}},
+                                    {}},
+                                  {PM_FILTER_STA_STATE_PM_BSS,
+                                    {{-1, [=] (cMessage *m) { processPmBssContinuousSignal1(); }, false, nullptr, [=] () { return isPmBssContinuousSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processPmBssContinuousSignal2(); }, false, nullptr, [=] () { return isPmBssContinuousSignal2Enabled(); }},
+                                    {FRAG_REQUEST},
+                                    {PDU_CONFIRM}},
+                                    {}},
+                                  {PM_FILTER_STA_STATE_PM_IBSS_DATA,
+                                    {{-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal1(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal2(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal2Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processPmIbssDataContinuousSignal3(); }, false, nullptr, [=] () { return isPmIbssDataContinuousSignal3Enabled(); }},
+                                    {PDU_CONFIRM},
+                                    {PS_CHANGE},
+                                    {FRAG_REQUEST}},
+                                    {ATIM_W}},
+                                  {PM_FILTER_STA_STATE_BSS_CFP,
+                                    {{-1, [=] (cMessage *m) { processBssCfpContinuousSignal1(); }, false, nullptr, [=] () { return isBssCfpContinuousSignal1Enabled(); }},
+                                    {FRAG_REQUEST},
+                                    {PDU_CONFIRM}}, // TODO: CF_POLLED
+                                    {}},
+                                  {PM_FILTER_STA_WAIT_PS_RESPONSE,
+                                    {{PS_RESPONSE}},
+                                    {-1}},
+                                  {PM_FILTER_STA_PRE_ATIM,
+                                    {{ATIM_W}},
+                                    {-1}},
+                                  {PM_FILTER_STA_IBSS_ATIM_W,
+                                    {{-1, [=] (cMessage *m) { processPmIbssAtimWContinuousSignal1(); }, false, nullptr, [=] () { return isPmIbssAtimWContinuousSignal1Enabled(); }},
+                                    {-1, [=] (cMessage *m) { processPmIbssAtimWContinuousSignal2(); }, false, nullptr, [=] () { return isPmIbssAtimWContinuousSignal2Enabled(); }},
+                                    {FRAG_REQUEST}},
+                                    {PS_CHANGE}}
+                                 });
+        subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
+    }
+}
+
+void Ieee80211MacPmFilterSta::processSignal(cMessage* msg)
 {
     if (msg->isSelfMessage())
     {
@@ -45,21 +95,11 @@ void Ieee80211MacPmFilterSta::handleMessage(cMessage* msg)
     }
 }
 
-void Ieee80211MacPmFilterSta::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-    {
-//        fragMsdu = gate("fragMsdu");
-//        mpdu = gate("mpdu");
-//        pwrMgt = gate("pwrMgt");
-        subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
-    }
-}
-
 void Ieee80211MacPmFilterSta::handleResetMac()
 {
     // clear queue
     state = PM_FILTER_STA_STATE_PM_IDLE;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest, FragSdu *fsdu)
@@ -80,6 +120,7 @@ void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *f
     {
         emitPsInquiry(fsdu->dst);
         state = PM_FILTER_STA_WAIT_PS_RESPONSE;
+        sdlProcess->setCurrentState(state);
     }
     else if (state == PM_FILTER_STA_IBSS_ATIM_W)
     {
@@ -87,6 +128,7 @@ void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *f
         {
             emitPsInquiry(fsdu->dst);
             state = PM_FILTER_STA_WAIT_PS_RESPONSE;
+            sdlProcess->setCurrentState(state);
         }
         else
         {
@@ -174,26 +216,6 @@ void Ieee80211MacPmFilterSta::emitPduRequest(FragSdu *fsdu)
     send(fsdu, "mpdu$o");
 }
 
-void Ieee80211MacPmFilterSta::continousSignalPmIdle1()
-{
-    state = PM_FILTER_STA_STATE_PM_IBSS_DATA;
-}
-
-void Ieee80211MacPmFilterSta::continousSignalPmIdle2()
-{
-    state = PM_FILTER_STA_STATE_PM_BSS;
-}
-
-void Ieee80211MacPmFilterSta::continuousSignalPmBss2()
-{
-    state = PM_FILTER_STA_STATE_BSS_CFP;
-}
-
-void Ieee80211MacPmFilterSta::continuousSignalBssCfp()
-{
-    state = PM_FILTER_STA_STATE_PM_BSS;
-}
-
 void Ieee80211MacPmFilterSta::handleCfPolled(Ieee80211MacSignalCfPolled* cfPolled)
 {
     if (cfQ.size() > 0)
@@ -249,27 +271,7 @@ void Ieee80211MacPmFilterSta::receiveSignal(cComponent *source, int signalID, cO
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);
     if (signalID == Ieee80211MacMacsorts::intraMacRemoteVariablesChanged)
-    {
-        switch (state)
-        {
-            case PM_FILTER_STA_STATE_PM_IDLE:
-                if (macsorts->getIntraMacRemoteVariables()->isAssoc())
-                    continousSignalPmIdle1();
-                else if (macsorts->getIntraMacRemoteVariables()->isIbss())
-                    continousSignalPmIdle2();
-                break;
-            case PM_FILTER_STA_STATE_PM_BSS:
-                if (macsorts->getIntraMacRemoteVariables()->isCfp())
-                    continuousSignalPmBss2();
-                // TODO: continuousSignal1
-                break;
-            case PM_FILTER_STA_STATE_BSS_CFP:
-                if (macsorts->getIntraMacRemoteVariables()->isCfp())
-                    continuousSignalBssCfp();
-                break;
-        }
-
-    }
+        emitDataChanged();
 }
 
 void Ieee80211MacPmFilterSta::handleAtimW(Ieee80211MacSignalAtimW* awtimW)
@@ -288,6 +290,7 @@ void Ieee80211MacPmFilterSta::handleAtimW(Ieee80211MacSignalAtimW* awtimW)
             n--;
         }
         state = PM_FILTER_STA_IBSS_ATIM_W;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -318,6 +321,7 @@ void Ieee80211MacPmFilterSta::handlePsResponse(Ieee80211MacSignalPsResponse *psR
             psQ.push_back(fsdu);
         }
         state = PM_FILTER_STA_IBSS_ATIM_W;
+        sdlProcess->setCurrentState(state);
     }
 }
 
@@ -327,6 +331,128 @@ void Ieee80211MacPmFilterSta::emitPsInquiry(MACAddress dst)
     signal->setMacAddress(dst);
     cMessage *psInquiry = createSignal("psInquiry", signal);
     send(psInquiry, pwrMgt);
+}
+
+void Ieee80211MacPmFilterSta::processPmIdleContinuousSignal1()
+{
+    state = PM_FILTER_STA_STATE_PM_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isPmIdleContinuoisSignal1Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isAssoc();
+}
+
+void Ieee80211MacPmFilterSta::processPmIdleContinuousSignal2()
+{
+    state = PM_FILTER_STA_STATE_PM_IBSS_DATA;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isPmIdleContinuoisSignal2Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isIbss();
+}
+
+void Ieee80211MacPmFilterSta::processPmBssContinuousSignal1()
+{
+//    fsdu:=first(txQ),
+//    txQ:=tail(txQ);
+    emitPduRequest(fsdu);
+    fsPend = true;
+}
+
+bool Ieee80211MacPmFilterSta::isPmBssContinuousSignal1Enabled()
+{
+    return !fsPend && (txQ.size() != 0);
+}
+
+void Ieee80211MacPmFilterSta::processPmBssContinuousSignal2()
+{
+    state = PM_FILTER_STA_STATE_BSS_CFP;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isPmBssContinuousSignal2Enabled()
+{
+    return macsorts->getIntraMacRemoteVariables()->isCfp();
+}
+
+void Ieee80211MacPmFilterSta::processBssCfpContinuousSignal1()
+{
+    state = PM_FILTER_STA_STATE_PM_BSS;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isBssCfpContinuousSignal1Enabled()
+{
+    return !macsorts->getIntraMacRemoteVariables()->isCfp();
+}
+
+void Ieee80211MacPmFilterSta::processPmIbssDataContinuousSignal1()
+{
+    state = PM_FILTER_STA_PRE_ATIM;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isPmIbssDataContinuousSignal1Enabled()
+{
+    return !fsPend && macsorts->getIntraMacRemoteVariables()->isAtimW();
+}
+
+void Ieee80211MacPmFilterSta::processPmIbssDataContinuousSignal2()
+{
+//    fsdu:=
+//    first(anQ),
+//    anQ:=tail(anQ)
+    emitPduRequest(fsdu);
+    fsPend = true;
+}
+
+bool Ieee80211MacPmFilterSta::isPmIbssDataContinuousSignal2Enabled()
+{
+    return !fsPend && (anQ.size() != 0);
+}
+
+void Ieee80211MacPmFilterSta::processPmIbssDataContinuousSignal3()
+{
+//    fsdu:=
+//    first(txQ),
+//    txQ:=tail(txQ)
+    emitPduRequest(fsdu);
+    fsPend = true;
+}
+
+bool Ieee80211MacPmFilterSta::isPmIbssDataContinuousSignal3Enabled()
+{
+    return !fsPend && (anQ.size() == 0) && (txQ.size() != 0);
+}
+
+void Ieee80211MacPmFilterSta::processPmIbssAtimWContinuousSignal1()
+{
+    sentBcn = false;
+    state = PM_FILTER_STA_STATE_PM_IBSS_DATA;
+    sdlProcess->setCurrentState(state);
+}
+
+bool Ieee80211MacPmFilterSta::isPmIbssAtimWContinuousSignal1Enabled()
+{
+    return !atPend && !macsorts->getIntraMacRemoteVariables()->isAtimW();
+}
+
+void Ieee80211MacPmFilterSta::processPmIbssAtimWContinuousSignal2()
+{
+//    fsdu:=
+//    first(psQ),
+//    psQ:=tail(psQ)
+    emitPduRequest(fsdu);
+    atPend = true;
+}
+
+bool Ieee80211MacPmFilterSta::isPmIbssAtimWContinuousSignal2Enabled()
+{
+    return !atPend && (psQ.size() != 0);
 }
 
 } /* namespace inet */

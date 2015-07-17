@@ -52,18 +52,18 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
     protected:
         enum PmFilterStaStates
         {
+            PM_FILTER_STA_STATE_START,
             PM_FILTER_STA_STATE_PM_IDLE,
             PM_FILTER_STA_STATE_PM_BSS,
             PM_FILTER_STA_STATE_PM_IBSS_DATA,
             PM_FILTER_STA_STATE_BSS_CFP,
-            PM_FILTER_STA_WAIT_PS_RESPONSE, // save all incoming signal
+            PM_FILTER_STA_WAIT_PS_RESPONSE,
             PM_FILTER_STA_PRE_ATIM,
-            PM_FILTER_STA_ATIM_W,
-            PM_FILTER_STA_IBSS_ATIM_W // save pschange signal
+            PM_FILTER_STA_IBSS_ATIM_W
         };
 
     protected:
-        PmFilterStaStates state = PM_FILTER_STA_STATE_PM_IDLE;
+        PmFilterStaStates state = PM_FILTER_STA_STATE_START;
         Ieee80211MacMacmibPackage *macmib = nullptr;
         Ieee80211MacMacsorts *macsorts = nullptr;
 
@@ -85,18 +85,9 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         cGate *fragMsdu = nullptr;
 
     protected:
-        void handleMessage(cMessage *msg) override;
+        void processSignal(cMessage *msg);
         void initialize(int stage) override;
         void receiveSignal(cComponent *source, int signalID, cObject *obj);
-
-
-    protected:
-        void continousSignalPmIdle1();
-        void continousSignalPmIdle2();
-
-        void continuousSignalPmBss2();
-
-        void continuousSignalBssCfp();
 
     protected:
         void handleResetMac() override;
@@ -110,6 +101,28 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         void emitPduRequest(FragSdu *fsdu) override;
         void emitFragConfirm(FragSdu *fsdu, TxResult txResult) override;
         void emitPsInquiry(MACAddress dst) override;
+
+        void processPmIdleContinuousSignal1();
+        bool isPmIdleContinuoisSignal1Enabled();
+        void processPmIdleContinuousSignal2();
+        bool isPmIdleContinuoisSignal2Enabled();
+        void processPmBssContinuousSignal1();
+        bool isPmBssContinuousSignal1Enabled();
+        void processPmBssContinuousSignal2();
+        bool isPmBssContinuousSignal2Enabled();
+        void processBssCfpContinuousSignal1();
+        bool isBssCfpContinuousSignal1Enabled();
+        void processPmIbssDataContinuousSignal1();
+        bool isPmIbssDataContinuousSignal1Enabled();
+        void processPmIbssDataContinuousSignal2();
+        bool isPmIbssDataContinuousSignal2Enabled();
+        void processPmIbssDataContinuousSignal3();
+        bool isPmIbssDataContinuousSignal3Enabled();
+
+        void processPmIbssAtimWContinuousSignal1();
+        bool isPmIbssAtimWContinuousSignal1Enabled();
+        void processPmIbssAtimWContinuousSignal2();
+        bool isPmIbssAtimWContinuousSignal2Enabled();
 };
 
 } /* namespace inet */
