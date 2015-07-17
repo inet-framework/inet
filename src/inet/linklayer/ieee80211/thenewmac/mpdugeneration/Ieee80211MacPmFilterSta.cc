@@ -54,7 +54,8 @@ void Ieee80211MacPmFilterSta::initialize(int stage)
                                   {PM_FILTER_STA_STATE_BSS_CFP,
                                     {{-1, [=] (cMessage *m) { processBssCfpContinuousSignal1(); }, false, nullptr, [=] () { return isBssCfpContinuousSignal1Enabled(); }},
                                     {FRAG_REQUEST},
-                                    {PDU_CONFIRM}}, // TODO: CF_POLLED
+                                    {PDU_CONFIRM},
+                                    {CF_POLLED}},
                                     {}},
                                   {PM_FILTER_STA_WAIT_PS_RESPONSE,
                                     {{PS_RESPONSE}},
@@ -273,11 +274,7 @@ void Ieee80211MacPmFilterSta::receiveSignal(cComponent *source, int signalID, cO
 
 void Ieee80211MacPmFilterSta::handleAtimW(Ieee80211MacSignalAtimW* awtimW)
 {
-    if (state == PM_FILTER_STA_STATE_PM_IBSS_DATA)
-    {
-        // TODO: save signal
-    }
-    else if (state == PM_FILTER_STA_PRE_ATIM)
+    if (state == PM_FILTER_STA_PRE_ATIM)
     {
         n = anQ.size();
         while (n > 0)
