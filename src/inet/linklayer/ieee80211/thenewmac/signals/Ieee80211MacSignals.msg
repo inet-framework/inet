@@ -131,7 +131,6 @@ class Ieee80211MacSignalBackoff extends Ieee80211MacSignal
 class Ieee80211MacSignalPduConfirm extends Ieee80211MacSignal
 {
     signalType = 2;
-    Ieee80211MacFragmentationSupport::FragSdu fsdu;
     TxResult txResult;
 }
 
