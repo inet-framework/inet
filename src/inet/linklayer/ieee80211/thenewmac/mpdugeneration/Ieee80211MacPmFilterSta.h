@@ -75,14 +75,10 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
         PsMode dpsm;
         FragSdu *fsdu = nullptr;
         FragSdu *rsdu = nullptr;
-        int k;
-        int n;
+        int k = -1;
+        int n = -1;
         TxResult resl;
         MACAddress sta;
-
-        cGate *mpdu = nullptr;
-        cGate *pwrMgt = nullptr;
-        cGate *fragMsdu = nullptr;
 
     protected:
         void processSignal(cMessage *msg);

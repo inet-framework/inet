@@ -17,6 +17,10 @@ package inet.linklayer.ieee80211.thenewmac.mpdugeneration;
 
 simple Ieee80211MacPmFilterSta
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+
 	gates:
 	    inout fragMsdu; // To PrepareMpdu: [FragConfirm] from PrepareMpdu: [FraqRquest] 
 	    inout mpdu; // From Tx_Coordination_sta: [AtimW, PduConfirm, CfPolled] to RxCoordination: [PduRequest]

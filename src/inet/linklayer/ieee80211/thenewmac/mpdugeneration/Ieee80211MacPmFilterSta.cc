@@ -68,31 +68,28 @@ void Ieee80211MacPmFilterSta::initialize(int stage)
                                     {FRAG_REQUEST}},
                                     {PS_CHANGE}}
                                  });
+        state = PM_FILTER_STA_STATE_PM_IDLE;
+        sdlProcess->setCurrentState(state);
         subscribe(Ieee80211MacMacsorts::intraMacRemoteVariablesChanged, this);
+        macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
+        macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
     }
 }
 
 void Ieee80211MacPmFilterSta::processSignal(cMessage* msg)
 {
-    if (msg->isSelfMessage())
-    {
-
-    }
-    else
-    {
-        if (dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()))
-            handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
-        else if (dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()))
-            handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()))
-            handleCfPolled(dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalAtimW *>(msg->getControlInfo()))
-            handleAtimW(dynamic_cast<Ieee80211MacSignalAtimW *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalPsChange *>(msg->getControlInfo()))
-            handlePsChange(dynamic_cast<Ieee80211MacSignalPsChange *>(msg->getControlInfo()));
-        else if (dynamic_cast<Ieee80211MacSignalPsResponse *>(msg->getControlInfo()))
-            handlePsResponse(dynamic_cast<Ieee80211MacSignalPsResponse *>(msg->getControlInfo()));
-    }
+    if (dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()))
+        handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
+    else if (dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()))
+        handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()));
+    else if (dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()))
+        handleCfPolled(dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()));
+    else if (dynamic_cast<Ieee80211MacSignalAtimW *>(msg->getControlInfo()))
+        handleAtimW(dynamic_cast<Ieee80211MacSignalAtimW *>(msg->getControlInfo()));
+    else if (dynamic_cast<Ieee80211MacSignalPsChange *>(msg->getControlInfo()))
+        handlePsChange(dynamic_cast<Ieee80211MacSignalPsChange *>(msg->getControlInfo()));
+    else if (dynamic_cast<Ieee80211MacSignalPsResponse *>(msg->getControlInfo()))
+        handlePsResponse(dynamic_cast<Ieee80211MacSignalPsResponse *>(msg->getControlInfo()));
 }
 
 void Ieee80211MacPmFilterSta::handleResetMac()
@@ -260,10 +257,10 @@ void Ieee80211MacPmFilterSta::handleCfPolled(Ieee80211MacSignalCfPolled* cfPolle
 
 void Ieee80211MacPmFilterSta::emitFragConfirm(FragSdu *fsdu, TxResult txResult)
 {
-//    Ieee80211MacSignalFragConfirm *fragConfirm = new Ieee80211MacSignalFragConfirm();
-//    fragConfirm->setFsdu(*fsdu);
-//    fragConfirm->setTxResult(txResult);
-//    send(fragConfirm, fragMsdu);
+    Ieee80211MacSignalFragConfirm *signal = new Ieee80211MacSignalFragConfirm();
+    signal->setTxResult(txResult);
+    createSignal(fsdu, signal);
+    send(fsdu, "fragMsdu$o");
 }
 
 void Ieee80211MacPmFilterSta::receiveSignal(cComponent *source, int signalID, cObject *obj)
@@ -330,7 +327,7 @@ void Ieee80211MacPmFilterSta::emitPsInquiry(MACAddress dst)
     Ieee80211MacSignalPsInquiry *signal = new Ieee80211MacSignalPsInquiry();
     signal->setMacAddress(dst);
     cMessage *psInquiry = createSignal("psInquiry", signal);
-    send(psInquiry, pwrMgt);
+    send(psInquiry, "pwrMgt$o");
 }
 
 void Ieee80211MacPmFilterSta::processPmIdleContinuousSignal1()
