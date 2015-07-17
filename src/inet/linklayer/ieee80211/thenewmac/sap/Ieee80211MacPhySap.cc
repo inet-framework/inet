@@ -30,8 +30,8 @@ void Ieee80211MacPhySap::handleMessage(cMessage* msg)
         Ieee80211NewFrame *newFrame = check_and_cast<Ieee80211NewFrame *>(msg);
         cPacket *encapPacket = newFrame->decapsulate();
         Ieee80211DataFrame *oldFrame = new Ieee80211DataFrame();
-        oldFrame->encapsulate(encapPacket);
         oldFrame->setBitLength(newFrame->getBitLength());
+        oldFrame->encapsulate(encapPacket);
         oldFrame->setAddress3(newFrame->getAddr3());
         oldFrame->setAddress4(newFrame->getAddr4());
         oldFrame->setReceiverAddress(newFrame->getAddr1());
