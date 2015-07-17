@@ -79,10 +79,10 @@ class Ieee80211MacMacsortsIntraMacRemoteVariables
         Ieee80211MacMacsorts *macsortsModule = nullptr;
 
     protected:
-        bool mActingAsAp; /* =true if STA started BSS */
+        bool mActingAsAp = false; /* =true if STA started BSS */
         int mAId; /* AID assigned to STA by AP */
         bool mAssoc = false; /* =true if STA associated w/BSS */ // TODO: hack
-        bool mAtimW; /* =true if ATIM window in prog */
+        bool mAtimW = false; /* =true if ATIM window in prog */
         bool mBkIP = false; /* =true if backoff in prog */
         // TODO: mBrates; /* basic rate set for this sta */
         MACAddress mBssId; /* identifier of current (I)BSS */
