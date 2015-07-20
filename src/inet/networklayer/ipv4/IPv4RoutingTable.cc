@@ -371,8 +371,11 @@ bool IPv4RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
     if (localBroadcastAddresses.empty()) {
         // collect interface addresses if not yet done
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            IPv4Address interfaceAddr = ift->getInterface(i)->ipv4Data()->getIPAddress();
-            IPv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ift->getInterface(i)->ipv4Data()->getNetmask());
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (!ie->isBroadcast())
+                continue;
+            IPv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
+            IPv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
             if (!broadcastAddr.isUnspecified()) {
                 localBroadcastAddresses.insert(broadcastAddr);
             }
@@ -387,6 +390,8 @@ InterfaceEntry *IPv4RoutingTable::findInterfaceByLocalBroadcastAddress(const IPv
 {
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
+        if (!ie->isBroadcast())
+            continue;
         IPv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
         IPv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
         if (broadcastAddr == dest)
