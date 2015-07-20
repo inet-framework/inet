@@ -338,6 +338,7 @@ void IGMPv2::initialize(int stage)
 
         enabled = par("enabled");
         externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();         //FIXME it's wrong now, connection always exists to dispatcher
+        externalRouter = false;         //FIXME hack: do not send up unrecognized IGMP packets
         robustness = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
