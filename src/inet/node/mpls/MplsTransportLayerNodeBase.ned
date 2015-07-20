@@ -36,7 +36,7 @@ module MplsTransportLayerNodeBase extends MplsNetworkLayerNodeBase
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
-        *.routingTableModule = default(absPath("."+_firstNL+".routingTable"));
+        *.routingTableModule = default(hasIpv4 ? "^.ipv4.routingTable" : hasIpv6 ? "^.ipv6.routingTable" : hasGn ? "^.gn.routingTable" : "");
         @figure[transportLayer](type=rectangle; pos=250,200; size=600,200; fillColor=#ff0000; cornerRadius=12; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=740,210; text="transport layer");
         @figure[submodules];
