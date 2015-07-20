@@ -1,0 +1,29 @@
+%description:
+SUT is a server, i.e. it opens a socket and closes it.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = PacketDrillUdp
+debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../../src;../../lib
+
+**.scriptFile="../../udptests/udpOpenClose.pkt"
+**.pdhost.tunApp[0].typename = "PacketDrillApp"
+**.pdhost.numUdpTunApps = 1
+**.hasTun = true
+**.pdhost.numTunInterfaces = 1
+
+**.startTime = 2s
+
+**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: test.out
+Packetdrill error:
+%#--------------------------------------------------------------------------------------------------------------
