@@ -113,6 +113,9 @@ enum Ieee80211MacSignalType
     SS_INQUIRY = 63;
     SS_RESPONSE = 64;
     MSDU_INDICATE = 65;
+    MA_UNIT_DATA_INDICATION = 66;
+    TRTS = 67;
+    PHY_RX_START_INDICATION = 68;
 }
 
 class Ieee80211MacSignal
@@ -552,3 +555,21 @@ class Ieee80211MacSignalMaUnitDataIndication extends Ieee80211MacSignal
     ServiceClass srv;
 }
 
+class Ieee80211MacSignalTrts extends Ieee80211MacSignal
+{
+    signalType = 67;
+}
+
+class Ieee80211MacSignalPhyRxStartIndication extends Ieee80211MacSignal
+{
+    signalType = 68;
+    int rxLength;
+    double rxRate;
+}
+
+class Ieee80211MacSignalPhyRxDataIndication extends Ieee80211MacSignal
+{
+    signalType = 68;
+    int rxLength;
+    double rxRate;
+}
