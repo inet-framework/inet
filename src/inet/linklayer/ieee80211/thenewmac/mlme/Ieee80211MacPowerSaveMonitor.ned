@@ -15,8 +15,18 @@
 
 package inet.linklayer.ieee80211.thenewmac.mlme;
 
+//
+// This process records power save state as
+// indicated in the headers of all valid rx
+// frames; and auth/asoc state from all
+// management exchanges by this station.
+//
 simple Ieee80211MacPowerSaveMonitor
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+
     gates:
         input fromRx;
         inout psm;
