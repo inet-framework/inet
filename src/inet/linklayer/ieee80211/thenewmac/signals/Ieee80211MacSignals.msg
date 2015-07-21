@@ -107,6 +107,10 @@ enum Ieee80211MacSignalType
     CLEAR_NAV = 58;
     PHY_CCARST_REQUEST = 59;
     TRSP = 60;
+    PS_INDICATE = 61;
+    STA_STATE = 62;
+    SS_INQUIRY = 63;
+    SS_RESPONSE = 64;
 }
 
 class Ieee80211MacSignal
@@ -499,4 +503,32 @@ class Ieee80211MacSignalPhyCcarstRequest extends Ieee80211MacSignal
 class Ieee80211MacSignalTrsp extends Ieee80211MacSignal
 {
     signalType = 60;
+}
+
+class Ieee80211MacSignalPsIndicate extends Ieee80211MacSignal
+{
+    signalType = 61;
+    MACAddress sta;
+    PsMode psm;
+}
+
+class Ieee80211MacSignalStaState extends Ieee80211MacSignal
+{
+    signalType = 62;
+    MACAddress sta;
+    StationState sst;
+}
+
+class Ieee80211MacSignalSsInquiry extends Ieee80211MacSignal
+{
+    signalType = 63;
+    MACAddress sta;
+}
+
+class Ieee80211MacSignalSsResponse extends Ieee80211MacSignal
+{
+    signalType = 64;
+    MACAddress sta;
+    StationState sst;
+    StationState asst;
 }
