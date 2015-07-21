@@ -19,16 +19,41 @@
 #define __INET_IEEE80211MACMSDUTOLLC_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/thenewmac/signals/Ieee80211MacSignals_m.h"
+#include "inet/linklayer/ieee80211/thenewmac/base/Ieee80211MacMacProcessBase.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API IIeee80211MacMsduToLlc : public cSimpleModule
+class INET_API IIeee80211MacMsduToLlc
 {
+    protected:
+        virtual void handleMsduIndicate(Ieee80211MacSignalMsduIndicate *msduIndicate, Ieee80211NewFrame *frame) = 0;
+        virtual void emitMaUnitDataIndication(MACAddress sa, MACAddress da, Routing routing, cPacket *llcData, RxStatus rxStat, CfPriority cf, ServiceClass srv) = 0;
 };
 
-class INET_API Ieee80211MacMsduToLlc : public IIeee80211MacMsduToLlc
+class INET_API Ieee80211MacMsduToLlc : public IIeee80211MacMsduToLlc, public Ieee80211MacMacProcessBase
 {
+    protected:
+        enum MsduToLlcState
+        {
+            MSDU_TO_LLC_STATE_START,
+            MSDU_TO_LLC_STATE_TO_LLC,
+        };
+
+    protected:
+        MsduToLlcState state = MSDU_TO_LLC_STATE_START;
+        MACAddress da, sa;
+        Ieee80211NewFrame *sdu = nullptr;
+        cPacket *llcData = nullptr;
+        ServiceClass srv;
+        CfPriority cf;
+
+    protected:
+        void initialize(int stage) override;
+        void processSignal(cMessage *msg);
+        virtual void handleMsduIndicate(Ieee80211MacSignalMsduIndicate *msduIndicate, Ieee80211NewFrame *frame) override;
+        virtual void emitMaUnitDataIndication(MACAddress sa, MACAddress da, Routing routing, cPacket *llcData, RxStatus rxStat, CfPriority cf, ServiceClass srv) override;
 };
 
 } /* namespace inet */
