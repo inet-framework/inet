@@ -42,11 +42,11 @@ module RSVP_LSR extends MplsNetworkLayerNodeBase
         mpls.classifierModule = "^.classifier";
         @figure[submodules];
     submodules:
-        ted: TED {  // FIXME the TED module must be ahead of RSVP
+        ted: TED {
             parameters:
                 @display("p=820,281");
         }
-        rsvp: RSVP {  // FIXME the TED module must be ahead of RSVP
+        rsvp: RSVP {
             parameters:
                 peers = peers;
                 classifierModule = "^.classifier";

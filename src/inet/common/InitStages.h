@@ -101,14 +101,19 @@ enum InitStages {
     INITSTAGE_ROUTING_PROTOCOLS = 11,
 
     /**
+     * Initialization of routing protocols, 2nd stage. Exists because RSVP uses TED.
+     */
+    INITSTAGE_ROUTING_PROTOCOLS_2 = 12,
+
+    /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 12,
+    INITSTAGE_APPLICATION_LAYER = 13,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 13,
+    INITSTAGE_LAST = 14,
 
     /**
      * The number of initialization stages.

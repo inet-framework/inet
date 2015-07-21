@@ -55,7 +55,7 @@ void RSVP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS_2) {
         tedmod = getModuleFromPar<TED>(par("tedModule"), this);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
