@@ -62,6 +62,8 @@ void Ieee80211MacMsduToLlc::initialize(int stage)
                                       {MSDU_INDICATE},
                                       {}}
                                     });
+        state = MSDU_TO_LLC_STATE_TO_LLC;
+        sdlProcess->setCurrentState(state);
     }
 }
 
