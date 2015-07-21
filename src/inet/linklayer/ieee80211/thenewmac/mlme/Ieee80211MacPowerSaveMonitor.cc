@@ -39,9 +39,10 @@ void Ieee80211MacPowerSaveMonitor::initialize(int stage)
                                        {SS_INQUIRY}},
                                       {}}
                                     });
-        handleResetMac();
+        sdlProcess->setCurrentState(state);
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
+        handleResetMac();
     }
 }
 
@@ -63,6 +64,7 @@ void Ieee80211MacPowerSaveMonitor::handleResetMac()
     awake.clear();
     asleep.clear();
     state = POWER_SAVE_MONITOR_STATE_MONITOR_IDLE;
+    sdlProcess->setCurrentState(state);
 }
 
 void Ieee80211MacPowerSaveMonitor::handlePsIndicate(Ieee80211MacSignalPsIndicate* psIndicate)
