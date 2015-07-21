@@ -1658,16 +1658,18 @@ void AODVRouting::handleRREPACK(AODVRREPACK *rrepACK, const L3Address& neighborA
     // which RREP it is acknowledging.  The time at which the RREP-ACK is
     // received will likely come just after the time when the RREP was sent
     // with the 'A' bit.
-    ASSERT(rrepAckTimer->isScheduled());
-    EV_INFO << "RREP-ACK arrived from " << neighborAddr << endl;
+    if (rrepAckTimer->isScheduled()) {
+        EV_INFO << "RREP-ACK arrived from " << neighborAddr << endl;
 
-    IRoute *route = routingTable->findBestMatchingRoute(neighborAddr);
-    if (route && route->getSource() == this) {
-        EV_DETAIL << "Marking route " << route << " as active" << endl;
-        AODVRouteData *routeData = check_and_cast<AODVRouteData *>(route->getProtocolData());
-        routeData->setIsActive(true);
-        cancelEvent(rrepAckTimer);
+        IRoute *route = routingTable->findBestMatchingRoute(neighborAddr);
+        if (route && route->getSource() == this) {
+            EV_DETAIL << "Marking route " << route << " as active" << endl;
+            AODVRouteData *routeData = check_and_cast<AODVRouteData *>(route->getProtocolData());
+            routeData->setIsActive(true);
+            cancelEvent(rrepAckTimer);
+        }
     }
+    delete rrepACK;
 }
 
 void AODVRouting::handleRREPACKTimer()
