@@ -43,6 +43,7 @@ class noncobject Ieee80211NewFrame;
 class noncobject MlmeStatus;
 class noncobject CcaStatus;
 class noncobject NavSrc;
+class noncobject RxStatus;
 
 enum Ieee80211MacSignalType
 {
@@ -111,6 +112,7 @@ enum Ieee80211MacSignalType
     STA_STATE = 62;
     SS_INQUIRY = 63;
     SS_RESPONSE = 64;
+    MSDU_INDICATE = 65;
 }
 
 class Ieee80211MacSignal
@@ -532,3 +534,21 @@ class Ieee80211MacSignalSsResponse extends Ieee80211MacSignal
     StationState sst;
     StationState asst;
 }
+
+class Ieee80211MacSignalMsduIndicate extends Ieee80211MacSignal
+{
+    signalType = 65;
+    CfPriority cf;
+}
+
+class Ieee80211MacSignalMaUnitDataIndication extends Ieee80211MacSignal
+{
+    signalType = 66;
+    MACAddress sa;
+    MACAddress da;
+    Routing routing;
+    RxStatus rxStat;
+    CfPriority cf;
+    ServiceClass srv;
+}
+
