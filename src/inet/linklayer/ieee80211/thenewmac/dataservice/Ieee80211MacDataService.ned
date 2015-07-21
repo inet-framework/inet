@@ -17,7 +17,16 @@
 
 package inet.linklayer.ieee80211.thenewmac.dataservice;
 
-// Includes request validation and add/remove MAC headers.
+//
+// This block provides the MAC_SAP functions,
+// described in Clause 6, conveying MSDUs from
+// and to the LLC entity. This block operates
+// identically in STA and AP, but in STA
+// the TSDU signal route connects directly to
+// MPDU_Generation, and the RSDU signal route
+// connects directly from Protocol_Control,
+// whereas in AP both of these signal routes
+// connect to Distribution Service.
 //
 module Ieee80211MacDataService
 {

@@ -18,7 +18,13 @@
 package inet.linklayer.ieee80211.thenewmac.mpdugeneration;
 
 //
-// Includes encryption, fragmentation, and power save queuing.
+// This block converts outgoing Msdus and Mmpdus
+// into Mpdus, fragmenting and encrypting as necessary.
+// If the station is in a Bss, outgoing Msdus are directed
+// via distribution service at the AP. The PM_Filter
+// process queues frames needing announcement by Atim in
+// an Ibss; or frames to be sent in the CF-period at a
+// CF-pollable station in a Bss.
 //
 module Ieee80211MacMpduGeneration
 {

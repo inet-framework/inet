@@ -18,7 +18,14 @@
 package inet.linklayer.ieee80211.thenewmac.managementservice;
 
 //
-// Includes MAC MIB, MIB access, and filtering of Mlme request and confirm.
+// This process handles requests sequentially.
+// Start, join, powermgt, scan, re/dis/associate
+// and deauthenticate must be sequential.
+// It is possible to have multiple authentication
+// sequences in progress concurrently. To allow
+// this, AuthReq_Service in the MLME block
+// would have to cache challenge text and
+// match responses to cached request info.
 //
 module Ieee80211MacManagementService
 {

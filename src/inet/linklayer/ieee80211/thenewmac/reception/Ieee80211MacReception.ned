@@ -17,10 +17,14 @@
 
 package inet.linklayer.ieee80211.thenewmac.reception;
 
-
-// Includes validate, decrypt, address & duplicate filter,
-// defragment, channel state (physical and virtual carrier
-// sense), and IFS & slot timing.
+//
+// This block handles octet-level reception of MPDUs from the
+// PHY, and validation, filtering, and decryption needed so higher
+// blocks have uniform, error-free information from the relevant rx
+// events. This block also maintains the MAC's view of channel state,
+// including the NAV (and remote variable mNavEnd), rx activity
+// (and the remote variable mRxA), and slot timing (providing the
+// Busy, Idle and Slot signals to the Transmission block).
 //
 module Ieee80211MacReception
 {

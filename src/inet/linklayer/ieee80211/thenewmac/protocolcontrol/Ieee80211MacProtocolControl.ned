@@ -18,8 +18,13 @@
 package inet.linklayer.ieee80211.thenewmac.protocolcontrol;
 
 //
-// Includes DCF, Rts/Cts, Ack & CF-Ack, retries,
-// CF-poll response, Atim handling, and PS-Poll.
+// This block performs the DCF functions, as well as
+// CF-responder functions if the station is CF-pollable.
+// Tx_Coordination includes RTS and ATIM generation.
+// Rx_Coordination generates acknowledgments, routes
+// data frames to MAC data service and management
+// frames to MLME, and indicates receipt of Ack,
+// Cts, and CF-Poll frames to Tx_Coordination.
 //
 module Ieee80211MacProtocolControl
 {

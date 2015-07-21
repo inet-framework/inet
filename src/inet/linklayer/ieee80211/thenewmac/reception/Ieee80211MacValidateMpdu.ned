@@ -17,8 +17,24 @@
 
 package inet.linklayer.ieee80211.thenewmac.reception;
 
-simple Ieee80211MacMpduValidator
+//
+// This process receives an MPDU from the
+// PHY while calculating and checking the
+// FCS value. Frames with valid FCS, length
+// and protocol version are sent for receive
+// filtering, along with a snapshot of the WEP
+// keys if dot11PrivacyOptionImplemented=true.
+//
+// This process also provides Channel_State
+// with Difs/Eifs and Rts timeout signals,
+// and maintains the mRxA remote variable.
+//
+simple Ieee80211MacValidateMpdu
 {
+    parameters:
+        string macsortsPackage = default("^.^.macsorts");
+        string macmibPackage = default("^.^.macmib");
+
 	gates:
 	    output ifsCtl;
 }

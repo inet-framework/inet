@@ -15,6 +15,13 @@
 
 package inet.linklayer.ieee80211.thenewmac.mpdugeneration;
 
+//
+// This process generates one or more Mpdus from
+// each outgoing Msdu or Mmpdu. If encryption is
+// needed, the Mpdus are encrypted before being
+// passed to be filtered for possible power save or
+// CF queuing before tx.
+//
 simple Ieee80211MacPrepareMpdu
 {
     parameters:
