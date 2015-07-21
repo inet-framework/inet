@@ -27,6 +27,18 @@ void Ieee80211MacPowerSaveMonitor::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        auto processSignalFunction = [=] (cMessage *m) { processSignal(m); };
+        sdlProcess = new SdlProcess(processSignalFunction,
+                                    {{POWER_SAVE_MONITOR_STATE_START,
+                                      {},
+                                     {}},
+                                      {POWER_SAVE_MONITOR_STATE_MONITOR_IDLE,
+                                      {{PS_INDICATE},
+                                       {STA_STATE},
+                                       {PS_INQUIRY},
+                                       {SS_INQUIRY}},
+                                      {}}
+                                    });
         handleResetMac();
         macsorts = getModuleFromPar<Ieee80211MacMacsorts>(par("macsortsPackage"), this);
         macmib = getModuleFromPar<Ieee80211MacMacmibPackage>(par("macmibPackage"), this);
