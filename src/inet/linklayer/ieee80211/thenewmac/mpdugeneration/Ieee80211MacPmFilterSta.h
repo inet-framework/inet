@@ -36,7 +36,7 @@ class INET_API IIeee80211MacPmFilterSta
     protected:
         virtual void handleResetMac() = 0;
         virtual void handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest, FragSdu *fsdu) = 0;
-        virtual void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm) = 0;
+        virtual void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm, FragSdu *fsdu) = 0;
         virtual void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) = 0;
         virtual void handleAtimW(Ieee80211MacSignalAtimW *awtimW) = 0;
         virtual void handlePsChange(Ieee80211MacSignalPsChange *psChange) = 0;
@@ -88,7 +88,7 @@ class INET_API Ieee80211MacPmFilterSta : public IIeee80211MacPmFilterSta, public
     protected:
         void handleResetMac() override;
         void handleFragRequest(Ieee80211MacSignalFragRequest *fragRequest, FragSdu *fsdu) override;
-        void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm) override;
+        void handlePduConfirm(Ieee80211MacSignalPduConfirm *pduConfirm, FragSdu *fsdu) override;
         void handleCfPolled(Ieee80211MacSignalCfPolled *cfPolled) override;
         void handleAtimW(Ieee80211MacSignalAtimW *awtimW) override;
         void handlePsChange(Ieee80211MacSignalPsChange *psChange) override;

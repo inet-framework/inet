@@ -89,7 +89,7 @@ void Ieee80211MacPmFilterSta::processSignal(cMessage* msg)
     if (dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()))
         handleFragRequest(dynamic_cast<Ieee80211MacSignalFragRequest *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
     else if (dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()))
-        handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()));
+        handlePduConfirm(dynamic_cast<Ieee80211MacSignalPduConfirm *>(msg->getControlInfo()), dynamic_cast<FragSdu *>(msg));
     else if (dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()))
         handleCfPolled(dynamic_cast<Ieee80211MacSignalCfPolled *>(msg->getControlInfo()));
     else if (dynamic_cast<Ieee80211MacSignalAtimW *>(msg->getControlInfo()))
@@ -154,9 +154,9 @@ void Ieee80211MacPmFilterSta::handleFragRequest(Ieee80211MacSignalFragRequest *f
     }
 }
 
-void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pduConfirm)
+void Ieee80211MacPmFilterSta::handlePduConfirm(Ieee80211MacSignalPduConfirm* pduConfirm, FragSdu *fsdu)
 {
-    fsdu = new FragSdu(pduConfirm->getFsdu());
+    this->fsdu = fsdu;
     resl = pduConfirm->getTxResult();
     if (state == PM_FILTER_STA_STATE_PM_IDLE)
         emitFragConfirm(fsdu, resl);
