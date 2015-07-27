@@ -17,6 +17,7 @@
 //
 
 #include "inet/routing/aodv/AODVRouting.h"
+#include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 
 #ifdef WITH_IDEALWIRELESS
@@ -145,6 +146,10 @@ void AODVRouting::handleMessage(cMessage *msg)
             handleBlackListTimer();
         else
             throw cRuntimeError("Unknown self message");
+    }
+    else if (ICMPMessage *icmpPacket = dynamic_cast<ICMPMessage *>(msg)) {
+        // ICMP packet arrived, dropped
+        delete icmpPacket;
     }
     else {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
