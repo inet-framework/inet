@@ -68,9 +68,13 @@ SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& c
     SerializerBase *serializer = serializers.lookup(group, id);
     if (serializer != nullptr)
         return *serializer;
-    serializer = serializers.lookup(pkt->getClassName());
-    if (serializer != nullptr)
-        return *serializer;
+    cClassDescriptor *classDescriptor = const_cast<cPacket *>(pkt)->getDescriptor();
+    while (classDescriptor != nullptr) {
+        serializer = serializers.lookup(classDescriptor->getName());
+        if (serializer != nullptr)
+            return *serializer;
+        classDescriptor = classDescriptor->getBaseClassDescriptor();
+    }
     if (context.throwOnSerializerNotFound)
         throw cRuntimeError("Serializer not found for '%s' (%i, %i)", pkt->getClassName(), group, id);
     return serializers.defaultSerializer;
