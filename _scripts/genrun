@@ -37,7 +37,7 @@ $EXAMPLES/ipv6/demonetworketh"
 for i in $DIRS; do
   echo $i
   echo '#!/bin/sh' >$i/run
-  echo '../../../src/run_inet $*' >>$i/run
+  echo '../../../src/run_inet "$@"' >>$i/run
   chmod +x $i/run
   svn add $i/run
   echo '..\..\..\src\run_inet %*' >$i/run.cmd

@@ -1,1 +1,1 @@
-../../../src/run_inet -n .:../../src $*
+../../../src/run_inet -n .:../../src "$@"
