@@ -27,7 +27,7 @@ namespace inet {
 
 #define GIGABIT_MAX_BURST_BYTES             8192  /* don't start new frame after 8192 or more bytes already transmitted */
 #define MAX_ETHERNET_DATA_BYTES             1500  /* including LLC, SNAP etc headers */
-#define MAX_ETHERNET_FRAME_BYTES            1518  /* excludes preamble and SFD */
+#define MAX_ETHERNET_FRAME_BYTES            1526  /* excludes preamble and SFD */
 #define MIN_ETHERNET_FRAME_BYTES            64  /* excludes preamble and SFD */
 #define GIGABIT_MIN_FRAME_BYTES_WITH_EXT    512  /* excludes preamble and SFD, but includes 448 byte extension */
 #define INTERFRAME_GAP_BITS                 96
