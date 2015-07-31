@@ -184,6 +184,9 @@ class INET_API EtherMACBase : public MACBase
     static simsignal_t packetSentToUpperSignal;
     static simsignal_t packetReceivedFromUpperSignal;
 
+    static simsignal_t transmitStateSignal;
+    static simsignal_t receiveStateSignal;
+
   public:
     static const double SPEED_OF_LIGHT_IN_CABLE;
 
