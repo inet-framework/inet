@@ -15,14 +15,32 @@ module GPSRRouter extends WirelessHost
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
 
     submodules:
-        gpsr: GPSR {
+        gpsr4: GPSR if hasIpv4 {
             parameters:
-                routingTableModule = default("^.ipv4.routingTable");
-                networkProtocolModule = default("^.ipv4.ip");
+                routingTableModule = "^.ipv4.routingTable";
+                networkProtocolModule = "^.ipv4.ip";
                 @display("p=700,300");
+        }
+        gpsr6: GPSR  if hasIpv6{
+            parameters:
+                routingTableModule = "^.ipv6.routingTable";
+                networkProtocolModule = "^.ipv6.ipv6";
+                @display("p=750,300");
+        }
+        gpsrGn: GPSR  if hasGn{
+            parameters:
+                routingTableModule = "^.gn.routingTable";
+                networkProtocolModule = "^.gn.gnp";
+                @display("p=800,300");
         }
 
     connections:
-        gpsr.ipOut --> tn.upperLayerIn++;
-        gpsr.ipIn <-- tn.upperLayerOut++;
+        gpsr4.ipOut --> tn.upperLayerIn++ if hasIpv4;
+        gpsr4.ipIn <-- tn.upperLayerOut++ if hasIpv4;
+
+        gpsr6.ipOut --> tn.upperLayerIn++ if hasIpv6;
+        gpsr6.ipIn <-- tn.upperLayerOut++ if hasIpv6;
+
+        gpsrGn.ipOut --> tn.upperLayerIn++ if hasGn;
+        gpsrGn.ipIn <-- tn.upperLayerOut++ if hasGn;
 }

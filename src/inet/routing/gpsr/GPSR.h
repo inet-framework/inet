@@ -27,6 +27,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/contract/L3Socket.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/routing/gpsr/PositionTable.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
@@ -56,6 +57,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     simtime_t neighborValidityInterval;
 
     // context
+    L3Socket socket;
     cModule *host = nullptr;
     NodeStatus *nodeStatus = nullptr;
     IMobility *mobility = nullptr;
