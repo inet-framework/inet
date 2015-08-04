@@ -400,8 +400,7 @@ void DYMO::sendUDPPacket(UDPPacket *packet, double delay)
 void DYMO::processUDPPacket(UDPPacket *packet)
 {
     cPacket *encapsulatedPacket = packet->decapsulate();
-    if (dynamic_cast<DYMOPacket *>(encapsulatedPacket)) {
-        DYMOPacket *dymoPacket = (DYMOPacket *)encapsulatedPacket;
+    if (DYMOPacket *dymoPacket = dynamic_cast<DYMOPacket *>(encapsulatedPacket)) {
         dymoPacket->setControlInfo(packet->removeControlInfo());
         processDYMOPacket(dymoPacket);
     }
