@@ -566,7 +566,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram, const InterfaceEntry *fr
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
 
-    if (datagramLocalInHook(datagram, getSourceInterfaceFrom(datagram)) != INetfilter::IHook::ACCEPT) {
+    if (datagramLocalInHook(datagram, fromIE) != INetfilter::IHook::ACCEPT) {
         return;
     }
 
