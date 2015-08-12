@@ -100,7 +100,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
                 continue; // already has one
 
             // add a prefix
-            IPv6Address prefix(0xaaaa0000 + nodeIndex, ie->getNetworkLayerGateIndex() << 16, 0, 0);
+            IPv6Address prefix(0xaaaa0000 + nodeIndex, ie->getInterfaceId() << 16, 0, 0);
             ASSERT(prefix.isGlobal());
 
             IPv6InterfaceData::AdvPrefix p;

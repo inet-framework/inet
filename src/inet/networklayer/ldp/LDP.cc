@@ -351,8 +351,11 @@ void LDP::rebuildFecList()
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->getNetworkLayerGateIndex() < 0)
-            continue;
+
+//TODO should replace to ie->isUp() or drop this code:
+//        if (ie->getNetworkLayerGateIndex() < 0)
+//            continue;
+
         if (!ie->ipv4Data())
             continue;
 

@@ -318,6 +318,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
         if (g->getType() == cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->getOwnerModule() == host)
             entry->setNodeInputGateId(g->getPreviousGate()->getId());
 
+        //TODO revise next code:
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
         if (g->getType() == cGate::OUTPUT && g->getNextGate() && g->getNextGate()->isName("ifIn")) // connected to ifIn in networkLayer?
             nwlayerInGate = g->getNextGate();
@@ -330,6 +331,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
 
+    //TODO revise next code:
     if (nwlayerInGate || nwlayerOutGate) {    // connected to a network layer (i.e. to another module's ifIn/ifOut gates)
         if (!nwlayerInGate || !nwlayerOutGate)
             throw cRuntimeError("addInterface(): interface module '%s' is connected only to an 'ifOut' or an 'ifIn' gate, must connect to either both or neither", ifmod->getFullPath().c_str());
@@ -337,7 +339,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
             throw cRuntimeError("addInterface(): interface module '%s' is connected to 'ifOut' and 'ifIn' gates in different modules", ifmod->getFullPath().c_str());
         if (nwlayerInGate->getIndex() != nwlayerOutGate->getIndex()) // if both are scalar, that's OK too (index==0)
             throw cRuntimeError("addInterface(): gate index mismatch: interface module '%s' is connected to different indices in 'ifOut[']/'ifIn[]' gates of the network layer module", ifmod->getFullPath().c_str());
-        entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
+        //entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
     }
 }
 

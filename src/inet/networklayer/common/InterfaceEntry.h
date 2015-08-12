@@ -106,7 +106,6 @@ class INET_API InterfaceEntry : public cNamedObject
     IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
     cModule *interfaceModule = nullptr;    ///< interface module, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
-    int nwLayerGateIndex = -1;    ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId = -1;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
     int mtu = 0;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
@@ -184,7 +183,6 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     int getInterfaceId() const { return interfaceId; }
     cModule *getInterfaceModule() const { return interfaceModule; }
-    int getNetworkLayerGateIndex() const { return nwLayerGateIndex; }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }
     int getMTU() const { return mtu; }
@@ -201,7 +199,6 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Field setters */
     //@{
     virtual void setName(const char *s) override { cNamedObject::setName(s); configChanged(F_NAME); }
-    virtual void setNetworkLayerGateIndex(int i) { if (nwLayerGateIndex != i) { nwLayerGateIndex = i; configChanged(F_NETW_GATEIDX); } }
     virtual void setNodeOutputGateId(int i) { if (nodeOutputGateId != i) { nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID); } }
     virtual void setNodeInputGateId(int i) { if (nodeInputGateId != i) { nodeInputGateId = i; configChanged(F_NODE_IN_GATEID); } }
     virtual void setMtu(int m) { if (mtu != m) { mtu = m; configChanged(F_MTU); } }
