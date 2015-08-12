@@ -422,18 +422,6 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
-{
-    // linear search is OK because normally we have don't have many interfaces and this func is rarely called
-    Enter_Method_Silent();
-    int n = idToInterface.size();
-    for (int i = 0; i < n; i++)
-        if (idToInterface[i] && idToInterface[i]->getNetworkLayerGateIndex() == index)
-            return idToInterface[i];
-
-    return nullptr;
-}
-
 InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it

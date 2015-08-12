@@ -196,12 +196,6 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) override;
 
     /**
-     * Returns an interface given by its getNetworkLayerGateIndex().
-     * Returns nullptr if not found.
-     */
-    virtual InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index) override;
-
-    /**
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */
