@@ -19,14 +19,15 @@
 #include <string.h>
 
 #include "inet/linklayer/ppp/PPP.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -309,10 +310,6 @@ void PPP::handleMessage(cMessage *msg)
             PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
             emit(rxPkOkSignal, pppFrame);
             cPacket *payload = decapsulate(pppFrame);
-            SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
-            controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
-            controlInfo->setNetworkProtocol(pppFrame->getProtocol());
-            payload->setControlInfo(controlInfo);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
             EV_INFO << "Sending " << payload << " to upper layer.\n";
@@ -424,7 +421,12 @@ PPPFrame *PPP::encapsulate(cPacket *msg)
 
 cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 {
-    return pppFrame->decapsulate();
+    cPacket *payload = pppFrame->decapsulate();
+    SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
+    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    controlInfo->setNetworkProtocol(pppFrame->getProtocol());
+    payload->setControlInfo(controlInfo);
+    return payload;
 }
 
 void PPP::flushQueue()
