@@ -18,6 +18,10 @@
 
 package inet.linklayer.newmac;
 
+import inet.linklayer.base.MACProtocolBase;
+import inet.linklayer.contract.IMACProtocol;
+
+
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
 // to be used in combination with the ~Ieee80211Radio module as the physical
@@ -51,12 +55,13 @@ package inet.linklayer.newmac;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211NewMac
+simple Ieee80211NewMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
+        string opMode @enum("a", "b", "g", "n", "p") = default("g");
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
@@ -66,14 +71,8 @@ simple Ieee80211NewMac
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
         int mtu = default(1500);
-        string NotificationBoardModule = default("^.^.notificationBoard");	//FIXME remove it and use signals
-        string interfaceTableModule = default(""); //default("^.^.interfaceTable");	//FIXME remove the default value
         @display("i=block/layer");
         @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
-    gates:
-        input uppergateIn @labels(Ieee80211Frame);
-        output uppergateOut @labels(Ieee80211Frame);
-        input lowergateIn @labels(Ieee80211Frame);
-        output lowergateOut @labels(Ieee80211Frame);
+        @class(Ieee80211NewMac);
 }

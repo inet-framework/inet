@@ -22,34 +22,35 @@
 
 #include "Ieee80211MacPlugin.h"
 #include "inet/common/INETDefs.h"
-#include "inet_old/linklayer/contract/RadioState.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
+namespace ieee80211 {
 
 class Ieee80211NewMac;
-class Ieee80211Frame;
 class Ieee80211UpperMac;
 
 class Ieee80211MacReception : public Ieee80211MacPlugin
 {
-    public:
+    protected:
         cMessage *nav = nullptr;
+        IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
 
-        /** Physical radio (medium) state copied from physical layer */
-        RadioState::State radioState;
-
+    protected:
         void handleMessage(cMessage *msg);
 
     public:
-        void radioStateChanged(RadioState::State newRadioState);
+        void receptionStateChanged(IRadio::ReceptionState newReceptionState);
         /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
         virtual bool isMediumFree() const;
         void setNav(simtime_t navInterval);
         void handleLowerFrame(Ieee80211Frame *frame);
 
         Ieee80211MacReception(Ieee80211NewMac *mac);
-
 };
+
+}
 
 } /* namespace inet */
 

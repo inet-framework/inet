@@ -24,15 +24,19 @@
 #include <list>
 
 #include "inet/common/INETDefs.h"
-
-#include "inet_old/linklayer/ieee80211/mac/WirelessMacBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Consts.h"
-#include "inet_old/base/NotificationBoard.h"
-#include "inet_old/linklayer/contract/RadioState.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
+
+namespace ieee80211 {
+
+using namespace physicallayer;
 
 class Ieee80211UpperMac;
 class Ieee80211MacReception;
@@ -64,13 +68,20 @@ class Ieee80211UpperMac;
 class Ieee80211MacReception;
 class Ieee80211MacTransmission;
 
-class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
+class INET_API Ieee80211NewMac : public MACProtocolBase
 {
   public:
 
     Ieee80211UpperMac *upperMac = nullptr;
     Ieee80211MacReception *reception = nullptr;
     Ieee80211MacTransmission *transmission = nullptr;
+
+    const Ieee80211ModeSet *modeSet = nullptr;
+    /** The bitrate is used to send unicast data and mgmt frames; be sure to use a valid 802.11 bitrate */
+    const IIeee80211Mode *dataFrameMode = nullptr;
+    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames and multicast/broadcast frames */
+    const IIeee80211Mode *basicFrameMode = nullptr;
+    const IIeee80211Mode *controlFrameMode = nullptr;
 
     /**
      * @name Configuration parameters
@@ -111,10 +122,12 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     //@}
 
   protected:
-
+    IRadio *radio = nullptr;
     cMessage *endImmediateIFS = nullptr;
     cMessage *immediateFrameDuration = nullptr;
     Ieee80211Frame *immediateFrame = nullptr;
+    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    bool immediateFrameTransmission = false;
 
   protected:
     /** @name Statistics */
@@ -149,32 +162,32 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
      */
     //@{
     /** @brief Initialization of the module and its variables */
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const {return NUM_INIT_STAGES;}
     virtual void initialize(int);
-    virtual void registerInterface();
+    void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    void configureRadioMode(IRadio::RadioMode radioMode);
+    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual const MACAddress& isInterfaceRegistered();
+    void transmissionStateChanged(IRadio::TransmissionState transmissionState);
+
     //@}
   protected:
-    /**
-     * @name Message handing functions
-     * @brief Functions called from other classes to notify about state changes and to handle messages.
-     */
-    //@{
-    /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cPolymorphic * details);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleCommand(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg);
 
     /** @brief Handle timer self messages */
-    virtual void handleSelfMsg(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg);
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerMsg(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg);
 
-    bool isForUs(Ieee80211Frame *frame) const;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
 
@@ -188,6 +201,8 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     Ieee80211MacReception *getReception() const { return reception; }
     Ieee80211MacTransmission *getTransmission() const { return transmission; }
 };
+
+} // namespace ieee80211
 
 } // namespace inet
 

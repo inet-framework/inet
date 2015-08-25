@@ -21,12 +21,13 @@
 #define IEEE80211MACADVANCEDFRAMEEXCHANGE_H_
 
 #include "Ieee80211MacFrameExchange.h"
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include <functional>
 
 class Ieee80211MacTransmission;
 
 namespace inet {
+namespace ieee80211 {
 
 class IStep
 {
@@ -157,6 +158,7 @@ class Ieee80211SendRtsCtsDataAckFrameExchange : public Ieee80211SendRtsCtsFrameE
         Ieee80211SendRtsCtsDataAckFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frameToSend);
 };
 
+}
 } /* namespace inet */
 
 #endif /* IEEE80211MACADVANCEDFRAMEEXCHANGE_H_ */

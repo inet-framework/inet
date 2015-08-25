@@ -24,6 +24,7 @@
 #include "Ieee80211NewMac.h"
 
 namespace inet {
+namespace ieee80211 {
 
 class Ieee80211NewMac;
 class Ieee80211UpperMac;
@@ -47,6 +48,7 @@ class Ieee80211MacPlugin : public cObject
         virtual ~Ieee80211MacPlugin();
 };
 
+}
 } /* namespace inet */
 
 #endif /* IEEE80211MACPLUGIN_H_ */

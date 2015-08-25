@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(Ieee80211NewMac,
    (Ieee80211MacTransmission::IDLE,
@@ -31,9 +33,6 @@ Register_Enum(Ieee80211NewMac,
    Ieee80211MacTransmission::TRANSMIT,
    Ieee80211MacTransmission::WAIT_IFS));
 
-/**
- * Msg can be upper, lower, self or NULL (when radio state changes)
- */
 void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
 {
     if (frame == nullptr)
@@ -61,7 +60,7 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
         {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(WAIT-Ifs,
-                                     event == CHANNEL_STATE_CHANGED && mediumFree,
+                                     event == MEDIUM_STATE_CHANGED && mediumFree,
                                      WAIT_IFS,
                                      ;
             );
@@ -75,7 +74,7 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
                                   ;
             );
             FSMA_Event_Transition(Busy,
-                                  event == CHANNEL_STATE_CHANGED && !mediumFree,
+                                  event == MEDIUM_STATE_CHANGED && !mediumFree,
                                   DEFER,
                                   ;
             );
@@ -89,16 +88,16 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
                                   ;
             );
             FSMA_Event_Transition(Backoff-Busy,
-                                  event == CHANNEL_STATE_CHANGED && !mediumFree,
+                                  event == MEDIUM_STATE_CHANGED && !mediumFree,
                                   DEFER,
-                                  updateBackoffPeriod(); // TODO: update txState backoff peroid with remaining time
+                                  updateBackoffPeriod();
             );
         }
         FSMA_State(TRANSMIT)
         {
             FSMA_Enter(mac->sendDataFrame(frame));
             FSMA_Event_Transition(TxFinished,
-                                  event == CHANNEL_STATE_CHANGED && mediumFree,
+                                  event == MEDIUM_STATE_CHANGED && transmissionState == IRadio::TRANSMISSION_STATE_IDLE,
                                   IDLE,
                                   mac->upperMac->transmissionFinished();
             );
@@ -121,7 +120,13 @@ void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, si
 void Ieee80211MacTransmission::mediumStateChanged(bool mediumFree)
 {
     this->mediumFree = mediumFree;
-    handleWithFSM(CHANNEL_STATE_CHANGED, nullptr);
+    handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
+}
+
+void Ieee80211MacTransmission::transmissionStateChanged(IRadio::TransmissionState transmissionState)
+{
+    this->transmissionState = transmissionState;
+    handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
 void Ieee80211MacTransmission::handleMessage(cMessage *msg)
@@ -135,7 +140,6 @@ Ieee80211MacTransmission::Ieee80211MacTransmission(Ieee80211NewMac* mac) : Ieee8
     fsm.setState(IDLE);
     endIFS = new cMessage("IFS");
     endBackoff = new cMessage("Backoff");
-    mediumStateChange = new cMessage("MediumStateChange");
     frameDuration = new cMessage("FrameDuration");
 }
 
@@ -161,5 +165,7 @@ void Ieee80211MacTransmission::logState()
     EV  << "state information: " << "state = " << fsm.getStateName() << ", backoffPeriod = " << backoffPeriod << endl;
 }
 
+}
 
 } //namespace
+

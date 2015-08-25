@@ -19,9 +19,35 @@
 
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211NewMac.h"
-#include "inet_old/linklayer/contract/PhyControlInfo_m.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
+
+namespace ieee80211 {
+
+
+Ieee80211UpperMac::Ieee80211UpperMac(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
+{
+    maxQueueSize = mac->par("maxQueueSize");
+    initializeQueueModule();
+}
+
+void Ieee80211UpperMac::handleMessage(cMessage* msg)
+{
+}
+
+void Ieee80211UpperMac::initializeQueueModule()
+{
+    // use of external queue module is optional -- find it if there's one specified
+    if (mac->par("queueModule").stringValue()[0])
+    {
+        cModule *module = getModuleFromPar<cModule>(mac->par("queueModule"), mac);
+        queueModule = check_and_cast<IPassiveQueue *>(module);
+
+        EV_DEBUG << "Requesting first two frames from queue module\n";
+        queueModule->requestPacket();
+    }
+}
 
 void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
 {
@@ -64,71 +90,30 @@ void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
 
 void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
 {
-    if (dynamic_cast<Ieee80211RTSFrame *>(frame))
+    if (isForUs(frame))
     {
-        sendCts(dynamic_cast<Ieee80211RTSFrame *>(frame));
+        if (dynamic_cast<Ieee80211RTSFrame *>(frame))
+        {
+            sendCts(dynamic_cast<Ieee80211RTSFrame *>(frame));
+        }
+        else if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
+        {
+            sendAck(dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame));
+            mac->sendUp(frame);
+        }
+        else if (frameExchange)
+            frameExchange->lowerFrameReceived(frame);
+        else
+        {
+            EV_INFO << "Dropped frame " << frame->getName() << std::endl;
+            delete frame;
+        }
     }
-    else if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
-    {
-        sendAck(dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame));
-        mac->sendUp(frame);
-    }
-    else if (frameExchange)
-        frameExchange->lowerFrameReceived(frame);
     else
     {
-        EV_INFO << "Dropped frame " << frame->getName() << std::endl;
+        EV_INFO << "This frame is not for us" << std::endl;
         delete frame;
     }
-}
-
-void Ieee80211UpperMac::transmissionFinished()
-{
-   if (frameExchange) // TODO:
-       frameExchange->transmissionFinished();
-}
-
-void Ieee80211UpperMac::initializeQueueModule()
-{
-    // use of external queue module is optional -- find it if there's one specified
-    if (mac->par("queueModule").stringValue()[0])
-    {
-        cModule *module = mac->getParentModule()->getSubmodule(mac->par("queueModule").stringValue());
-        queueModule = check_and_cast<IPassiveQueue *>(module);
-
-        EV << "Requesting first two frames from queue module\n";
-        queueModule->requestPacket();
-    }
-}
-
-Ieee80211UpperMac::Ieee80211UpperMac(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
-{
-    maxQueueSize = mac->par("maxQueueSize");
-    cwMinData = mac->par("cwMinData");
-    if (cwMinData == -1) cwMinData = CW_MIN;
-    ASSERT(cwMinData >= 0);
-
-    cwMinBroadcast = mac->par("cwMinBroadcast");
-    if (cwMinBroadcast == -1) cwMinBroadcast = 31;
-    ASSERT(cwMinBroadcast >= 0);
-
-    initializeQueueModule();
-}
-
-Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend)
-{
-    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-
-    if (isBroadcast(frameToSend))
-        frame->setDuration(0);
-    else if (!frameToSend->getMoreFragments())
-        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, mac->basicBitrate));
-    else
-        // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, mac->basicBitrate)
-                + computeFrameDuration(frameToSend));
-
-    return frame;
 }
 
 Ieee80211ACKFrame *Ieee80211UpperMac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
@@ -152,74 +137,6 @@ Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::buildBroadcastFrame(Ieee80211DataOr
     return frame;
 }
 
-double Ieee80211UpperMac::computeFrameDuration(Ieee80211Frame *msg)
-{
-    return computeFrameDuration(msg->getBitLength(), mac->bitrate);
-}
-
-double Ieee80211UpperMac::computeFrameDuration(int bits, double bitrate)
-{
-    return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
-}
-
-simtime_t Ieee80211UpperMac::getSIFS() const
-{
-// TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
-    return SIFS;
-}
-
-simtime_t Ieee80211UpperMac::getPIFS() const
-{
-    return getSIFS() + mac->getSlotTime();
-}
-
-simtime_t Ieee80211UpperMac::getDIFS() const
-{
-    return getSIFS() + 2 * mac->getSlotTime();
-}
-
-simtime_t Ieee80211UpperMac::getEIFS() const
-{
-// FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / BITRATE_HEADER;
-}
-
-Ieee80211Frame *Ieee80211UpperMac::setBasicBitrate(Ieee80211Frame *frame)
-{
-    ASSERT(frame->getControlInfo()==NULL);
-    PhyControlInfo *ctrl = new PhyControlInfo();
-    ctrl->setBitrate(mac->basicBitrate);
-    frame->setControlInfo(ctrl);
-    return frame;
-}
-
-bool Ieee80211UpperMac::isForUs(Ieee80211Frame *frame) const
-{
-    return frame && frame->getReceiverAddress() == mac->getAddress();
-}
-
-bool Ieee80211UpperMac::isBroadcast(Ieee80211Frame *frame) const
-{
-    return frame && frame->getReceiverAddress().isBroadcast();
-}
-
-void Ieee80211UpperMac::frameExchangeFinished(Ieee80211FrameExchange* what, bool successful)
-{
-    EV_INFO << "Frame exchange finished" << std::endl;
-    delete frameExchange;
-    frameExchange = nullptr;
-    if (!transmissionQueue.empty())
-    {
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
-        transmissionQueue.pop_front();
-        if (frame->getByteLength() >= mac->rtsThreshold)
-            frameExchange = new Ieee80211SendRtsCtsDataAckFrameExchange(mac, this, frame);
-        else
-            frameExchange = new Ieee80211SendDataAckFrameExchange(mac, this, frame);
-        frameExchange->start();
-    }
-}
-
 void Ieee80211UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = buildACKFrame(frame);
@@ -241,6 +158,106 @@ Ieee80211CTSFrame* Ieee80211UpperMac::buildCtsFrame(Ieee80211RTSFrame* rtsFrame)
     return frame;
 }
 
+bool Ieee80211UpperMac::isForUs(Ieee80211Frame *frame) const
+{
+    return frame && frame->getReceiverAddress() == mac->getAddress();
+}
+
+bool Ieee80211UpperMac::isBroadcast(Ieee80211Frame *frame) const
+{
+    return frame && frame->getReceiverAddress().isBroadcast();
+}
+
+double Ieee80211UpperMac::computeFrameDuration(Ieee80211Frame *msg) const
+{
+    return computeFrameDuration(msg->getBitLength(), mac->bitrate);
+}
+
+double Ieee80211UpperMac::computeFrameDuration(int bits, double bitrate) const
+{
+    double duration;
+    const IIeee80211Mode *modType = mac->modeSet->getMode(bps(bitrate));
+    if (PHY_HEADER_LENGTH < 0)
+        duration = SIMTIME_DBL(modType->getDuration(bits));
+    else
+        duration = SIMTIME_DBL(modType->getDataMode()->getDuration(bits)) + PHY_HEADER_LENGTH;
+
+    EV_DEBUG << " duration=" << duration * 1e6 << "us(" << bits << "bits " << bitrate / 1e6 << "Mbps)" << endl;
+    return duration;
+}
+
+Ieee80211Frame *Ieee80211UpperMac::setBasicBitrate(Ieee80211Frame *frame)
+{
+    ASSERT(frame->getControlInfo() == nullptr);
+    TransmissionRequest *ctrl = new TransmissionRequest();
+    ctrl->setBitrate(bps(mac->basicFrameMode->getDataMode()->getNetBitrate()));
+    frame->setControlInfo(ctrl);
+    return frame;
+}
+
+
+Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend)
+{
+    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
+
+    if (isBroadcast(frameToSend))
+        frame->setDuration(0);
+    else if (!frameToSend->getMoreFragments())
+        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, mac->basicBitrate));
+    else
+        // FIXME: shouldn't we use the next frame to be sent?
+        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, mac->basicBitrate)
+                + computeFrameDuration(frameToSend));
+
+    return frame;
+}
+
+
+void Ieee80211UpperMac::frameExchangeFinished(Ieee80211FrameExchange* what, bool successful)
+{
+    EV_INFO << "Frame exchange finished" << std::endl;
+    delete frameExchange;
+    frameExchange = nullptr;
+    if (!transmissionQueue.empty())
+    {
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
+        transmissionQueue.pop_front();
+        if (frame->getByteLength() >= mac->rtsThreshold)
+            frameExchange = new Ieee80211SendRtsCtsDataAckFrameExchange(mac, this, frame);
+        else
+            frameExchange = new Ieee80211SendDataAckFrameExchange(mac, this, frame);
+        frameExchange->start();
+    }
+}
+
+void Ieee80211UpperMac::transmissionFinished()
+{
+   if (frameExchange) // TODO:
+       frameExchange->transmissionFinished();
+
+}
+
+simtime_t Ieee80211UpperMac::getSIFS() const
+{
+    return mac->dataFrameMode->getSifsTime();
+}
+
+simtime_t Ieee80211UpperMac::getPIFS() const
+{
+    return getSIFS() + mac->getSlotTime();
+}
+
+simtime_t Ieee80211UpperMac::getDIFS() const
+{
+    return getSIFS() + 2 * mac->getSlotTime();
+}
+
+simtime_t Ieee80211UpperMac::getEIFS() const
+{
+    return getSIFS() + getDIFS() + computeFrameDuration(LENGTH_ACK, mac->dataFrameMode->getHeaderMode()->getNetBitrate().get());
+}
+
+
 Ieee80211UpperMac::~Ieee80211UpperMac()
 {
     while(!transmissionQueue.empty())
@@ -251,10 +268,7 @@ Ieee80211UpperMac::~Ieee80211UpperMac()
     }
 }
 
-void Ieee80211UpperMac::handleMessage(cMessage* msg)
-{
 }
-
 
 } /* namespace inet */
 

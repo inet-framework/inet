@@ -22,49 +22,37 @@
 
 #include "Ieee80211MacPlugin.h"
 #include "inet/common/FSMA.h"
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
+
+namespace ieee80211 {
 
 class Ieee80211MacTransmission : public Ieee80211MacPlugin
 {
     public:
-        /**
-             * @name Ieee80211NewMac state variables
-             * Various state information checked and modified according to the state machine.
-             */
-            //@{
-            // don't forget to keep synchronized the C++ enum and the runtime enum definition
-            /** the 80211 MAC state machine */
-            enum State {
-                IDLE,
-                DEFER,
-                BACKOFF,
-                WAIT_IFS,
-                TRANSMIT
-            };
-            enum EventType { LOWER_FRAME, CHANNEL_STATE_CHANGED, TIMER, START_TRANSMISSION, TX_FINISHED};
-
-            Ieee80211Frame *frame = nullptr;
-            simtime_t deferDuration;
-            int backoffSlots;
+        enum State {
+            IDLE,
+            DEFER,
+            BACKOFF,
+            WAIT_IFS,
+            TRANSMIT
+        };
+        enum EventType { LOWER_FRAME, MEDIUM_STATE_CHANGED, TIMER, START_TRANSMISSION };
 
     protected:
+        Ieee80211Frame *frame = nullptr;
+        simtime_t deferDuration;
+        int backoffSlots;
         bool mediumFree = false;
+        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
         cFSM fsm;
-
         /** End of the backoff period */
-        cMessage *endBackoff;
-
-        /** Radio state change self message. Currently this is optimized away and sent directly */
-        cMessage *mediumStateChange;
-
+        cMessage *endBackoff = nullptr;
         /** End of the Data Inter-Frame Time period */
-        cMessage *endIFS;
-
+        cMessage *endIFS = nullptr;
         /** Remaining backoff period in seconds */
         simtime_t backoffPeriod;
-
         cMessage *frameDuration = nullptr;
 
     protected:
@@ -78,9 +66,12 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
     public:
         void transmitContentionFrame(Ieee80211Frame *frame, simtime_t deferDuration, int cw);
         void mediumStateChanged(bool mediumFree);
+        void transmissionStateChanged(IRadio::TransmissionState transmissionState);
 
         Ieee80211MacTransmission(Ieee80211NewMac *mac);
 };
+
+}
 
 } //namespace
 

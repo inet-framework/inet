@@ -20,14 +20,16 @@
 #ifndef IEEE80211UPPERMAC_H_
 #define IEEE80211UPPERMAC_H_
 
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "Ieee80211NewMac.h"
 #include "Ieee80211MacPlugin.h"
 #include "Ieee80211MacFrameExchange.h"
 #include "Ieee80211MacAdvancedFrameExchange.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
+
+namespace ieee80211 {
 
 class Ieee80211NewMac;
 
@@ -35,20 +37,11 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
-        /**
-         * This is used to populate fragments and identify duplicated messages. See spec 9.2.9.
-         */
-        struct Ieee80211ASFTuple
-        {
-            MACAddress address;
-            int sequenceNumber;
-            int fragmentNumber;
-        };
-        typedef std::list<Ieee80211ASFTuple*> Ieee80211ASFTupleList;
 
     protected:
         /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
         int maxQueueSize;
+
         /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
         static const int fragmentationThreshold = 2346;
         //@}
@@ -63,48 +56,34 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
 
         Ieee80211FrameExchange *frameExchange = nullptr;
 
-        /**
-         * Number of frame retransmission attempts, this is a simpification of
-         * SLRC and SSRC, see 9.2.4 in the spec
-         */
-        int retryCounter;
-        int cwMinData;
-        int cwMinBroadcast;
+        void handleMessage(cMessage *msg);
 
-        /**
-         * A list of last sender, sequence and fragment number tuples to identify
-         * duplicates, see spec 9.2.9.
-         * TODO: this is not yet used
-         */
-        Ieee80211ASFTupleList asfTuplesList;
-
+    protected:
+        virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
         virtual Ieee80211DataOrMgmtFrame *setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend);
+        virtual void frameExchangeFinished(Ieee80211FrameExchange *what, bool successful);
+
+        Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame);
         virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
         virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+        void initializeQueueModule();
 
-        virtual simtime_t getEIFS() const;
-        virtual simtime_t getPIFS() const;
-
-        virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
+        void sendAck(Ieee80211DataOrMgmtFrame *frame);
+        void sendCts(Ieee80211RTSFrame *frame);
 
         /** @brief Returns true if message destination address is ours */
         virtual bool isForUs(Ieee80211Frame *msg) const;
         /** @brief Returns true if message is a broadcast message */
         virtual bool isBroadcast(Ieee80211Frame *msg) const;
-        void handleMessage(cMessage *msg);
-        virtual void frameExchangeFinished(Ieee80211FrameExchange *what, bool successful);
-        void sendAck(Ieee80211DataOrMgmtFrame *frame);
-        Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame);
-        void sendCts(Ieee80211RTSFrame *frame);
-
-    protected:
-        void initializeQueueModule();
 
     public:
-        double computeFrameDuration(Ieee80211Frame *msg); // TODO
-        double computeFrameDuration(int bits, double bitrate); // TODO
+        double computeFrameDuration(Ieee80211Frame *msg) const; // TODO
+        double computeFrameDuration(int bits, double bitrate) const; // TODO
         virtual simtime_t getSIFS() const; // TODO
         virtual simtime_t getDIFS() const; // TODO
+        virtual simtime_t getEIFS() const; // TODO
+        virtual simtime_t getPIFS() const; // TODO
+
         void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame);
         void lowerFrameReceived(Ieee80211Frame *frame);
         void transmissionFinished(); // callback for MAC
@@ -112,6 +91,8 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
         Ieee80211UpperMac(Ieee80211NewMac *mac);
         ~Ieee80211UpperMac();
 };
+
+} // namespace 80211
 
 } /* namespace inet */
 

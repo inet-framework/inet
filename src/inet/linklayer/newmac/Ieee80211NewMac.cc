@@ -18,25 +18,19 @@
 #include <algorithm>
 
 #include "Ieee80211NewMac.h"
-
-#include "inet_old/util/opp_utils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211MacReception.h"
-#include "inet_old/linklayer/contract/PhyControlInfo_m.h"
 #include "Ieee80211MacTransmission.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
+namespace ieee80211 {
+
 Define_Module(Ieee80211NewMac);
-
-
-// don't forget to keep synchronized the C++ enum and the runtime enum definition
-//Register_Enum(RadioState,
-//   (RadioState::IDLE,
-//    RadioState::RECV,
-//    RadioState::TRANSMIT,
-//    RadioState::SLEEP));
 
 simsignal_t Ieee80211NewMac::stateSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211NewMac::radioStateSignal = SIMSIGNAL_NULL;
@@ -61,11 +55,20 @@ Ieee80211NewMac::~Ieee80211NewMac()
  */
 void Ieee80211NewMac::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MACProtocolBase::initialize(stage);
 
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         EV << "Initializing stage 0\n";
+
+        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
+
+        // radio
+        cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
         // upper mac
         upperMac = new Ieee80211UpperMac(this);
@@ -74,9 +77,27 @@ void Ieee80211NewMac::initialize(int stage)
         endImmediateIFS = new cMessage("Immediate IFS");
         immediateFrameDuration = new cMessage("Immediate Frame Duration");
         // initialize parameters
+
         bitrate = par("bitrate");
         basicBitrate = par("basicBitrate");
         rtsThreshold = par("rtsThresholdBytes");
+
+        if (bitrate == -1)
+            dataFrameMode = modeSet->getFastestMode();
+        else
+            dataFrameMode = modeSet->getMode(bps(bitrate));
+
+        if (basicBitrate == -1)
+            basicFrameMode = modeSet->getFastestMode();
+        else
+            basicFrameMode = modeSet->getMode(bps(basicBitrate));
+
+//        double controlBitRate = par("controlBitrate");
+//        if (controlBitRate == -1)
+//            controlFrameMode = modeSet->getSlowestMode();
+//        else
+//            controlFrameMode = modeSet->getMode(bps(controlBitRate));
+
 
         // the variable is renamed due to a confusion in the standard
         // the name retry limit would be misleading, see the header file comment
@@ -93,9 +114,6 @@ void Ieee80211NewMac::initialize(int stage)
         }
         else
             address.setAddress(addressString);
-
-        // subscribe for the information of the carrier sense
-        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
 
         // initalize self messages
         stateSignal = registerSignal("state");
@@ -124,123 +142,148 @@ void Ieee80211NewMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        if (isOperational)
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
+            registerInterface();
+    }
 }
 
-void Ieee80211NewMac::registerInterface()
+const MACAddress& Ieee80211NewMac::isInterfaceRegistered()
 {
+//    if (!par("multiMac").boolValue())
+//        return MACAddress::UNSPECIFIED_ADDRESS;
+
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
-        return;
+        return MACAddress::UNSPECIFIED_ADDRESS;
+    cModule *interfaceModule = findModuleUnderContainingNode(this);
+    if (!interfaceModule)
+        throw cRuntimeError("NIC module not found in the host");
+    std::string interfaceName = utils::stripnonalnum(interfaceModule->getFullName());
+    InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
+    if (e)
+        return e->getMacAddress();
+    return MACAddress::UNSPECIFIED_ADDRESS;
+}
 
+InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
+{
     InterfaceEntry *e = new InterfaceEntry(this);
-
-    // interface name: NIC module's name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // address
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
-    // FIXME: MTU on 802.11 = ?
-    e->setMtu(par("mtu"));
+    e->setMtu(par("mtu").longValue());
 
     // capabilities
     e->setBroadcast(true);
     e->setMulticast(true);
     e->setPointToPoint(false);
 
-    // add
-    ift->addInterface(e);
+    return e;
 }
-
 
 /****************************************************************
  * Message handling functions.
  */
-void Ieee80211NewMac::handleSelfMsg(cMessage *msg)
+void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
     if (msg->getContextPointer() != nullptr)
         ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
     else if (msg == endImmediateIFS)
-    { // TODO!!!
-        scheduleAt(simTime() + immediateFrame->getBitLength() / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER, immediateFrameDuration);
+    {
+        immediateFrameTransmission = true;
+        configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
         sendDown(immediateFrame);
     }
-    else if (msg == immediateFrameDuration)
-        upperMac->transmissionFinished();
 }
 
-void Ieee80211NewMac::handleUpperMsg(cPacket *msg)
+void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
 {
     upperMac->upperFrameReceived(check_and_cast<Ieee80211DataOrMgmtFrame*>(msg));
 }
 
-void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
+void Ieee80211NewMac::handleLowerPacket(cPacket *msg)
 {
-    // TODO:
-    Ieee80211Frame *frame = check_and_cast<Ieee80211Frame *>(msg);
-    if (isForUs(frame))
-        reception->handleLowerFrame(frame);
-    else
-        delete frame;
+    reception->handleLowerFrame(check_and_cast<Ieee80211Frame *>(msg));
 }
 
-void Ieee80211NewMac::handleCommand(cMessage *msg)
+void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
 {
-    if (msg->getKind()==PHY_C_CONFIGURERADIO)
-    {
-        EV << "Passing on command " << msg->getName() << " to physical layer\n";
-        if (pendingRadioConfigMsg != NULL)
-        {
+    if (msg->getKind() == RADIO_C_CONFIGURE) {
+        EV_DEBUG << "Passing on command " << msg->getName() << " to physical layer\n";
+        if (pendingRadioConfigMsg != nullptr) {
             // merge contents of the old command into the new one, then delete it
-            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
-            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-            if (pNew->getChannelNumber()==-1 && pOld->getChannelNumber()!=-1)
-                pNew->setChannelNumber(pOld->getChannelNumber());
-            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
-                pNew->setBitrate(pOld->getBitrate());
+            Ieee80211ConfigureRadioCommand *oldConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
+            Ieee80211ConfigureRadioCommand *newConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(msg->getControlInfo());
+            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
+                newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
+            if (isNaN(newConfigureCommand->getBitrate().get()) && !isNaN(oldConfigureCommand->getBitrate().get()))
+                newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
             delete pendingRadioConfigMsg;
-            pendingRadioConfigMsg = NULL;
+            pendingRadioConfigMsg = nullptr;
         }
 
-        if (reception->isMediumFree()) // TODO
-        {
-            EV << "Sending it down immediately\n";
+        if (reception->isMediumFree()) { // TODO: !!!
+            EV_DEBUG << "Sending it down immediately\n";
+/*
+   // Dynamic power
+            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
+            if (phyControlInfo)
+                phyControlInfo->setAdaptiveSensitivity(true);
+   // end dynamic power
+ */
             sendDown(msg);
         }
-        else
-        {
-            EV << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
+        else {
+            EV_DEBUG << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
             pendingRadioConfigMsg = msg;
         }
     }
-    else
-    {
-        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d",
-                msg->getClassName(), msg->getName(), msg->getKind());
+    else {
+        throw cRuntimeError("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
     }
 }
 
 
-void Ieee80211NewMac::receiveChangeNotification(int category, const cPolymorphic *details)
+void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
-
-    if (category == NF_RADIOSTATE_CHANGED)
+    if (signalID == IRadio::receptionStateChangedSignal)
     {
-        RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
-
-        emit(radioStateSignal, newRadioState);
-        reception->radioStateChanged(newRadioState);
+        reception->receptionStateChanged((IRadio::ReceptionState)value);
         transmission->mediumStateChanged(reception->isMediumFree());
+    }
+    else if (signalID == IRadio::transmissionStateChangedSignal)
+    {
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        transmission->transmissionStateChanged(newRadioTransmissionState);
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        transmissionState = newRadioTransmissionState;
+    }
+}
+
+void Ieee80211NewMac::configureRadioMode(IRadio::RadioMode radioMode)
+{
+    if (radio->getRadioMode() != radioMode) {
+        ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
+        configureCommand->setRadioMode(radioMode);
+        cMessage *message = new cMessage("configureRadioMode", RADIO_C_CONFIGURE);
+        message->setControlInfo(configureCommand);
+        sendDown(message);
     }
 }
 
 void Ieee80211NewMac::sendDataFrame(Ieee80211Frame *frameToSend)
 {
     EV << "sending Data frame\n";
+    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frameToSend->dup());
 }
 
@@ -259,15 +302,42 @@ void Ieee80211NewMac::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t de
     immediateFrame = frame;
 }
 
-simtime_t Ieee80211NewMac::getSlotTime() const
+void Ieee80211NewMac::transmissionStateChanged(IRadio::TransmissionState transmissionState)
 {
-// TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
-    return ST;
+    if (immediateFrameTransmission && transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+        upperMac->transmissionFinished();
 }
 
-bool Ieee80211NewMac::isForUs(Ieee80211Frame *frame) const
+simtime_t Ieee80211NewMac::getSlotTime() const
 {
-    return frame && frame->getReceiverAddress() == address;
+    return dataFrameMode->getSlotTime();
+}
+
+// FIXME
+bool Ieee80211NewMac::handleNodeStart(IDoneCallback *doneCallback)
+{
+    if (!doneCallback)
+        return true; // do nothing when called from initialize() //FIXME It's a hack, should remove the initializeQueueModule() and setRadioMode() calls from initialize()
+
+    bool ret = MACProtocolBase::handleNodeStart(doneCallback);
+//    initializeQueueModule(); TODO
+    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+    return ret;
+}
+
+// FIXME
+bool Ieee80211NewMac::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    bool ret = MACProtocolBase::handleNodeStart(doneCallback);
+    handleNodeCrash();
+    return ret;
+}
+
+// FIXME
+void Ieee80211NewMac::handleNodeCrash()
+{
+}
+
 }
 
 } // namespace inet

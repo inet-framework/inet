@@ -18,27 +18,18 @@
 //
 
 #include "Ieee80211MacReception.h"
-#include "inet_old/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "Ieee80211NewMac.h"
 #include "Ieee80211UpperMac.h"
 
 namespace inet {
 
+namespace ieee80211 {
 
-bool Ieee80211MacReception::isMediumFree() const
+Ieee80211MacReception::Ieee80211MacReception(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
 {
-    return radioState == RadioState::IDLE && !nav->isScheduled();
+    nav = new cMessage("NAV");
 }
 
-void Ieee80211MacReception::radioStateChanged(RadioState::State newRadioState)
-{
-    radioState = newRadioState;
-}
-
-void Ieee80211MacReception::setNav(simtime_t navInterval)
-{
-    scheduleAt(navInterval, nav);
-}
 
 void Ieee80211MacReception::handleMessage(cMessage* msg)
 {
@@ -62,11 +53,23 @@ void Ieee80211MacReception::handleLowerFrame(Ieee80211Frame* frame)
     getUpperMac()->lowerFrameReceived(frame);
 
 }
-Ieee80211MacReception::Ieee80211MacReception(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
+
+bool Ieee80211MacReception::isMediumFree() const
 {
-    nav = new cMessage("NAV");
+    return receptionState == IRadio::RECEPTION_STATE_IDLE && !nav->isScheduled();
 }
 
+void Ieee80211MacReception::receptionStateChanged(IRadio::ReceptionState newReceptionState)
+{
+    receptionState = newReceptionState;
+}
+
+void Ieee80211MacReception::setNav(simtime_t navInterval)
+{
+    scheduleAt(navInterval, nav);
+}
+
+}
 
 } /* namespace inet */
 

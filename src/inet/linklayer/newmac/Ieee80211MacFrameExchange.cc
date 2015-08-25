@@ -22,6 +22,7 @@
 #include "Ieee80211MacTransmission.h"
 
 namespace inet {
+namespace ieee80211 {
 
 void Ieee80211FrameExchange::reportSuccess()
 {
@@ -338,8 +339,6 @@ bool Ieee80211SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211F
 
 IMPLEMENTATION DRAFT */
 
+}
 
 } /* namespace inet */
-
-
-
