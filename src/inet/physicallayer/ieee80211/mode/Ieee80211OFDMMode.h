@@ -153,6 +153,7 @@ class INET_API Ieee80211OFDMMode : public IIeee80211Mode, public Ieee80211OFDMTi
     // Table 18-17—OFDM PHY characteristics
     virtual const simtime_t getSlotTime() const override;
     virtual const simtime_t getSifsTime() const override;
+    virtual const simtime_t getRifsTime() const override;
     virtual const simtime_t getCcaTime() const override;
     virtual const simtime_t getPhyRxStartDelay() const override;
     virtual const simtime_t getRxTxTurnaroundTime() const override;

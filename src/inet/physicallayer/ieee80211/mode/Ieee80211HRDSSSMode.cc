@@ -83,6 +83,12 @@ const Ieee80211HrDsssMode Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsPbccLon
 const Ieee80211HrDsssMode Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckShortPreamble(&hrDsssPreambleMode1MbpsShortPreamble, &hrDsssHeaderMode2MbpsShortPreamble, &hrDsssDataMode11MbpsCckShortPreamble);
 const Ieee80211HrDsssMode Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsPbccShortPreamble(&hrDsssPreambleMode1MbpsShortPreamble, &hrDsssHeaderMode2MbpsShortPreamble, &hrDsssDataMode11MbpsPbccShortPreamble);
 
+const simtime_t Ieee80211HrDsssMode::getRifsTime() const
+{
+    throw cRuntimeError("Undefined physical layer parameter");
+    return SIMTIME_ZERO;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

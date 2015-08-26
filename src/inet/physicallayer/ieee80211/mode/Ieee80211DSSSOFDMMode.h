@@ -54,6 +54,7 @@ class INET_API Ieee80211DsssOfdmMode : public IIeee80211Mode
     // TODO: fill in
     virtual inline const simtime_t getSlotTime() const override { return 0; }
     virtual inline const simtime_t getSifsTime() const override { return 0; }
+    virtual const simtime_t getRifsTime() const override;
     virtual inline const simtime_t getCcaTime() const override { return 0; }
     virtual inline const simtime_t getPhyRxStartDelay() const override { return 0; }
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 0; }

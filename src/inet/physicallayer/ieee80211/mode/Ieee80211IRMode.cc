@@ -60,6 +60,12 @@ const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode2Mbps(&_4PPMModul
 const Ieee80211IrMode Ieee80211IrCompliantModes::irMode1Mbps(&irPreambleMode64SyncSlots, &irHeaderMode1Mbps, &irDataMode1Mbps);
 const Ieee80211IrMode Ieee80211IrCompliantModes::irMode2Mbps(&irPreambleMode64SyncSlots, &irHeaderMode2Mbps, &irDataMode2Mbps);
 
+const simtime_t Ieee80211IrMode::getRifsTime() const
+{
+    throw cRuntimeError("Undefined physical layer parameter");
+    return SIMTIME_ZERO;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

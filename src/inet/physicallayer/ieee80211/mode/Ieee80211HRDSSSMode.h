@@ -116,6 +116,7 @@ class INET_API Ieee80211HrDsssMode : public IIeee80211Mode
     virtual inline const simtime_t getSlotTime() const override { return 20E-6; }
     virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
     virtual inline const simtime_t getCcaTime() const override { return 15E-6; }
+    virtual const simtime_t getRifsTime() const override;
     virtual inline const simtime_t getPhyRxStartDelay() const override { return preambleMode->getPreambleType() == IEEE80211_HRDSSS_PREAMBLE_TYPE_LONG ? 192E-6 : 96E-6; }
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }

@@ -52,6 +52,13 @@ const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode2Mbps(&DQPS
 const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode1Mbps(&dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode1Mbps);
 const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode2Mbps(&dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode2Mbps);
 
+const simtime_t Ieee80211DsssMode::getRifsTime() const
+{
+    throw cRuntimeError("Undefined physical layer parameter");
+    return SIMTIME_ZERO;
+
+}
+
 } // namespace physicallayer
 
 } // namespace inet

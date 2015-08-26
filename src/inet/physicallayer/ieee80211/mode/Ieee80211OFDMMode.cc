@@ -135,6 +135,12 @@ const simtime_t Ieee80211OFDMMode::getPhyRxStartDelay() const
         throw cRuntimeError("Unknown channel spacing = %f", channelSpacing.get());
 }
 
+const simtime_t Ieee80211OFDMMode::getRifsTime() const
+{
+    throw cRuntimeError("Undefined physical layer parameter");
+    return SIMTIME_ZERO;
+}
+
 const simtime_t Ieee80211OFDMMode::getRxTxTurnaroundTime() const
 {
     throw cRuntimeError("< 2");

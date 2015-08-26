@@ -105,6 +105,7 @@ class INET_API Ieee80211IrMode : public IIeee80211Mode
     virtual inline const simtime_t getSlotTime() const override { return 8E-6; }
     virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
     virtual inline const simtime_t getCcaTime() const override { return 5E-6; }
+    virtual const simtime_t getRifsTime() const override;
     virtual inline const simtime_t getPhyRxStartDelay() const override { return 57E-6; }
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 0; }
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }

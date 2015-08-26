@@ -247,10 +247,10 @@ class INET_API Ieee80211HTMode : public IIeee80211Mode
         virtual const Ieee80211OFDMSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
 
         // Table 20-25—MIMO PHY characteristics
-        virtual inline const simtime_t getRifsTime() const { return 2E-6; }
         virtual const simtime_t getSlotTime() const override;
         virtual const simtime_t getShortSlotTime() const;
         virtual inline const simtime_t getSifsTime() const override;
+        virtual inline const simtime_t getRifsTime() const override { return 2E-6; }
         virtual inline const simtime_t getCcaTime() const override { return 4E-6; } // < 4
         virtual inline const simtime_t getPhyRxStartDelay() const override { return 33E-6; }
         virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
