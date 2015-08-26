@@ -598,7 +598,10 @@ if __name__ == "__main__":
     if args.oppargs:
         for oppArgList in args.oppargs:
             for oppArg in oppArgList:
-                extraOppRunArgs += " --" + oppArg
+                if oppArg[0] == "'" or oppArg[0] == '"':
+                    extraOppRunArgs += " " + oppArg[0] + "--" + oppArg[1:]
+                else:
+                    extraOppRunArgs += " '--" + oppArg + "'"
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
