@@ -79,10 +79,12 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
     public:
         double computeFrameDuration(Ieee80211Frame *msg) const; // TODO
         double computeFrameDuration(int bits, double bitrate) const; // TODO
+        virtual simtime_t getAIFS(int aifsNumber) const; // TODO
         virtual simtime_t getSIFS() const; // TODO
         virtual simtime_t getDIFS() const; // TODO
         virtual simtime_t getEIFS() const; // TODO
         virtual simtime_t getPIFS() const; // TODO
+        virtual simtime_t getRIFS() const; // TODO
 
         void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame);
         void lowerFrameReceived(Ieee80211Frame *frame);

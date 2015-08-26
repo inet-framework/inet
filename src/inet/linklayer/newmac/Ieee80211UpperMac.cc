@@ -234,7 +234,6 @@ void Ieee80211UpperMac::transmissionFinished()
 {
    if (frameExchange) // TODO:
        frameExchange->transmissionFinished();
-
 }
 
 simtime_t Ieee80211UpperMac::getSIFS() const
@@ -244,19 +243,28 @@ simtime_t Ieee80211UpperMac::getSIFS() const
 
 simtime_t Ieee80211UpperMac::getPIFS() const
 {
-    return getSIFS() + mac->getSlotTime();
+    return mac->dataFrameMode->getPifsTime();
 }
 
 simtime_t Ieee80211UpperMac::getDIFS() const
 {
-    return getSIFS() + 2 * mac->getSlotTime();
+    return mac->dataFrameMode->getDifsTime();
 }
 
 simtime_t Ieee80211UpperMac::getEIFS() const
 {
-    return getSIFS() + getDIFS() + computeFrameDuration(LENGTH_ACK, mac->dataFrameMode->getHeaderMode()->getNetBitrate().get());
+    return mac->dataFrameMode->getEifsTime(mac->modeSet->getSlowestMode(), LENGTH_ACK);
 }
 
+simtime_t Ieee80211UpperMac::getAIFS(int aifsNumber) const
+{
+    return mac->dataFrameMode->getAifsTime(aifsNumber);
+}
+
+simtime_t Ieee80211UpperMac::getRIFS() const
+{
+    return mac->dataFrameMode->getRifsTime();
+}
 
 Ieee80211UpperMac::~Ieee80211UpperMac()
 {
