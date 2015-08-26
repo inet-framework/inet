@@ -37,6 +37,7 @@ module LDP_LSR extends MplsTransportLayerNodeBase
         *.tedModule = default(absPath(".ted"));
         *.libTableModule = default(absPath(".libTable"));
         mpls.classifierModule = "^.ldp";
+        forwarding = true;
     submodules:
         ldp: LDP {
             parameters:

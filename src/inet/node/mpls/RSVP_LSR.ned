@@ -40,6 +40,7 @@ module RSVP_LSR extends MplsNetworkLayerNodeBase
         *.rsvpModule = default(absPath(".rsvp"));
         *.libTableModule = default(absPath(".libTable"));
         mpls.classifierModule = "^.classifier";
+        forwarding = true;
         @figure[submodules];
     submodules:
         ted: TED {
