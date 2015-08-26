@@ -18,12 +18,18 @@
 //
 
 #include "Ieee80211MacReception.h"
+#include "Ieee80211MacTransmission.h"
 #include "Ieee80211NewMac.h"
 #include "Ieee80211UpperMac.h"
 
 namespace inet {
 
 namespace ieee80211 {
+
+bool Ieee80211MacReception::isFcsOk(Ieee80211Frame* frame) const
+{
+    return !frame->hasBitError();
+}
 
 Ieee80211MacReception::Ieee80211MacReception(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
 {
@@ -33,30 +39,38 @@ Ieee80211MacReception::Ieee80211MacReception(Ieee80211NewMac* mac) : Ieee80211Ma
 
 void Ieee80211MacReception::handleMessage(cMessage* msg)
 {
-
+    if (msg == nav)
+        EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
+    else
+        throw cRuntimeError("Unexpected self message");
 }
 
 void Ieee80211MacReception::handleLowerFrame(Ieee80211Frame* frame)
 {
-    EV << "received message from lower layer: " << frame << endl;
-
     if (!frame)
-        opp_error("message from physical layer (%s)%s is not a subclass of Ieee80211Frame",
-              frame->getClassName(), frame->getName());
-
-//    EV << "Self address: " << address
-//       << ", receiver address: " << frame->getReceiverAddress()
-//       << ", received frame is for us: " << isForUs(frame) << endl;
-
-    Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(frame);
-    ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != mac->address);
-    getUpperMac()->lowerFrameReceived(frame);
+        throw cRuntimeError("message from physical layer (%s)%s is not a subclass of Ieee80211Frame", frame->getClassName(), frame->getName());
+    bool errorFree = isFcsOk(frame);
+    getTransmission()->lowerFrameReceived(errorFree);
+    if (errorFree)
+    {
+        EV_INFO << "Received message from lower layer: " << frame << endl;
+        if (!getUpperMac()->isForUs(frame))
+            setNav(frame->getDuration());
+        Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(frame);
+        ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != mac->address);
+        getUpperMac()->lowerFrameReceived(frame);
+    }
+    else
+    {
+        EV_INFO << "Received an erroneous frame. Dropping it." << std::endl;
+        delete frame;
+    }
 
 }
 
 bool Ieee80211MacReception::isMediumFree() const
 {
-    return receptionState == IRadio::RECEPTION_STATE_IDLE && !nav->isScheduled();
+    return receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING && !nav->isScheduled();
 }
 
 void Ieee80211MacReception::receptionStateChanged(IRadio::ReceptionState newReceptionState)
@@ -64,9 +78,34 @@ void Ieee80211MacReception::receptionStateChanged(IRadio::ReceptionState newRece
     receptionState = newReceptionState;
 }
 
+void Ieee80211MacReception::transmissionStateChanged(IRadio::TransmissionState newTransmissionState)
+{
+    transmissionState = newTransmissionState;
+}
+
 void Ieee80211MacReception::setNav(simtime_t navInterval)
 {
-    scheduleAt(navInterval, nav);
+    ASSERT(navInterval >= 0);
+    if (nav->isScheduled())
+    {
+        simtime_t oldNav = nav->getArrivalTime() - simTime();
+        if (oldNav > navInterval)
+            return;
+        cancelEvent(nav);
+    }
+    if (navInterval > 0)
+    {
+        EV_INFO << "Setting NAV to " << navInterval << std::endl;
+        scheduleAt(simTime() + navInterval, nav);
+    }
+    else
+        EV_INFO << "Frame duration field is 0" << std::endl; // e.g. Cf-End frame
+}
+
+Ieee80211MacReception::~Ieee80211MacReception()
+{
+    cancelEvent(nav);
+    delete nav;
 }
 
 }

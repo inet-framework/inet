@@ -26,14 +26,16 @@
 #include "Ieee80211MacFrameExchange.h"
 #include "Ieee80211MacAdvancedFrameExchange.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "Ieee80211MacTransmission.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
 class Ieee80211NewMac;
+class ITransmissionCompleteCallback;
 
-class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchange::IFinishedCallback
+class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchange::IFinishedCallback, public ITransmissionCompleteCallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
@@ -60,7 +62,7 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
 
     protected:
         virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
-        virtual Ieee80211DataOrMgmtFrame *setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend);
+        void setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend);
         virtual void frameExchangeFinished(Ieee80211FrameExchange *what, bool successful);
 
         Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame);
@@ -71,8 +73,6 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);
 
-        /** @brief Returns true if message destination address is ours */
-        virtual bool isForUs(Ieee80211Frame *msg) const;
         /** @brief Returns true if message is a broadcast message */
         virtual bool isBroadcast(Ieee80211Frame *msg) const;
 
@@ -85,10 +85,12 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
         virtual simtime_t getEIFS() const; // TODO
         virtual simtime_t getPIFS() const; // TODO
         virtual simtime_t getRIFS() const; // TODO
+        /** @brief Returns true if message destination address is ours */
+        virtual bool isForUs(Ieee80211Frame *msg) const; // TODO
 
         void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame);
         void lowerFrameReceived(Ieee80211Frame *frame);
-        void transmissionFinished(); // callback for MAC
+        void transmissionComplete(Ieee80211MacTransmission *tx); // callback for MAC
 
         Ieee80211UpperMac(Ieee80211NewMac *mac);
         ~Ieee80211UpperMac();

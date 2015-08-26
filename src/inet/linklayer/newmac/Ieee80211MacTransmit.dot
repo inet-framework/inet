@@ -1,0 +1,14 @@
+digraph g {
+   IDLE -> DEFER        [label="DataArr & Busy"];
+   IDLE -> WAIT_IFS     [label="DataArr & !Busy"];
+
+   DEFER -> WAIT_IFS    [label="Channel-Free"];
+
+   WAIT_IFS -> BACKOFF  [label="IFS-Done & !Busy"];
+   WAIT_IFS -> DEFER    [label="Channel-Busy"];
+
+   BACKOFF -> DEFER     [label="Channel-Busy"];
+   BACKOFF -> TRANSMIT  [label="Backoff-Done"];
+
+   TRANSMIT -> IDLE     [label="Tx-Finished"];
+}

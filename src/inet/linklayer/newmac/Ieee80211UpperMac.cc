@@ -65,25 +65,20 @@ void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
     if (frame->getByteLength() > fragmentationThreshold)
         opp_error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               frame->getClassName(), frame->getName(), (int)(frame->getByteLength()));
-    EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
-
+    EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(mac->getAddress());
     frame->setSequenceNumber(sequenceNumber);
+    setDataFrameDuration(frame);
     sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
 
     if (frameExchange)
         transmissionQueue.push_back(frame);
-    else if (frame->getByteLength() >= mac->rtsThreshold)
-    {
-        frameExchange = new Ieee80211SendRtsCtsDataAckFrameExchange(mac, this, frame);
-        frameExchange->start();
-    }
     else
     {
-        frameExchange = new Ieee80211SendDataAckFrameExchange(mac, this, frame);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10, getDIFS(), 4, 511);
         frameExchange->start();
     }
 }
@@ -140,13 +135,13 @@ Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::buildBroadcastFrame(Ieee80211DataOr
 void Ieee80211UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = buildACKFrame(frame);
-    mac->transmitImmediateFrame(ackFrame, getSIFS());
+    mac->transmitImmediateFrame(ackFrame, getSIFS(), this);
 }
 
 void Ieee80211UpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = buildCtsFrame(frame);
-    mac->transmitImmediateFrame(ctsFrame, getSIFS());
+    mac->transmitImmediateFrame(ctsFrame, getSIFS(), this);
 }
 
 Ieee80211CTSFrame* Ieee80211UpperMac::buildCtsFrame(Ieee80211RTSFrame* rtsFrame)
@@ -175,13 +170,8 @@ double Ieee80211UpperMac::computeFrameDuration(Ieee80211Frame *msg) const
 
 double Ieee80211UpperMac::computeFrameDuration(int bits, double bitrate) const
 {
-    double duration;
     const IIeee80211Mode *modType = mac->modeSet->getMode(bps(bitrate));
-    if (PHY_HEADER_LENGTH < 0)
-        duration = SIMTIME_DBL(modType->getDuration(bits));
-    else
-        duration = SIMTIME_DBL(modType->getDataMode()->getDuration(bits)) + PHY_HEADER_LENGTH;
-
+    double duration = SIMTIME_DBL(modType->getDuration(bits));
     EV_DEBUG << " duration=" << duration * 1e6 << "us(" << bits << "bits " << bitrate / 1e6 << "Mbps)" << endl;
     return duration;
 }
@@ -196,20 +186,16 @@ Ieee80211Frame *Ieee80211UpperMac::setBasicBitrate(Ieee80211Frame *frame)
 }
 
 
-Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211UpperMac::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame)
 {
-    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-
-    if (isBroadcast(frameToSend))
+    if (isBroadcast(frame))
         frame->setDuration(0);
-    else if (!frameToSend->getMoreFragments())
+    else if (!frame->getMoreFragments())
         frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, mac->basicBitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
         frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, mac->basicBitrate)
-                + computeFrameDuration(frameToSend));
-
-    return frame;
+                + computeFrameDuration(frame));
 }
 
 
@@ -222,18 +208,19 @@ void Ieee80211UpperMac::frameExchangeFinished(Ieee80211FrameExchange* what, bool
     {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();
-        if (frame->getByteLength() >= mac->rtsThreshold)
-            frameExchange = new Ieee80211SendRtsCtsDataAckFrameExchange(mac, this, frame);
-        else
-            frameExchange = new Ieee80211SendDataAckFrameExchange(mac, this, frame);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10, getDIFS(), 4, 511);
         frameExchange->start();
     }
 }
 
-void Ieee80211UpperMac::transmissionFinished()
+void Ieee80211UpperMac::transmissionComplete(Ieee80211MacTransmission *tx)
 {
-   if (frameExchange) // TODO:
+   if (tx)
+   {
+       // TODO: Select the corresponding frame exchange to notify it
        frameExchange->transmissionFinished();
+   }
+   else ; // Finished immediate frame tx
 }
 
 simtime_t Ieee80211UpperMac::getSIFS() const

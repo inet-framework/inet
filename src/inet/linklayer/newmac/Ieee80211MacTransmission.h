@@ -28,6 +28,13 @@ namespace inet {
 
 namespace ieee80211 {
 
+class Ieee80211MacTransmission;
+
+class ITransmissionCompleteCallback {  //or ITransmissionListener?
+    public:
+       virtual void transmissionComplete(Ieee80211MacTransmission *tx) = 0; //tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
+};
+
 class Ieee80211MacTransmission : public Ieee80211MacPlugin
 {
     public:
@@ -42,33 +49,39 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
 
     protected:
         Ieee80211Frame *frame = nullptr;
-        simtime_t deferDuration;
-        int backoffSlots;
+        ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
+        simtime_t deferDuration = SIMTIME_ZERO;
+        simtime_t eifs = SIMTIME_ZERO;
+        int backoffSlots = 0;
         bool mediumFree = false;
+        bool useEIFS = false;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
         cFSM fsm;
         /** End of the backoff period */
         cMessage *endBackoff = nullptr;
         /** End of the Data Inter-Frame Time period */
         cMessage *endIFS = nullptr;
+        cMessage *endEIFS = nullptr;
         /** Remaining backoff period in seconds */
-        simtime_t backoffPeriod;
+        simtime_t backoffPeriod = SIMTIME_ZERO;
         cMessage *frameDuration = nullptr;
 
     protected:
         void handleWithFSM(EventType event, cMessage *msg);
         void scheduleIFSPeriod(simtime_t deferDuration);
+        void scheduleEIFSPeriod(simtime_t deferDuration);
         void updateBackoffPeriod();
         void scheduleBackoffPeriod(int backoffPeriod);
         void logState();
         void handleMessage(cMessage *msg);
 
     public:
-        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t deferDuration, int cw);
+        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cw, ITransmissionCompleteCallback *transmissionCompleteCallback);
         void mediumStateChanged(bool mediumFree);
         void transmissionStateChanged(IRadio::TransmissionState transmissionState);
-
+        void lowerFrameReceived(bool isFcsOk); //TODO on receiving a frame with wrong FCS, we need to switch from DIFS to EIFS (ie. from ifs parameter to eifs parameter)!
         Ieee80211MacTransmission(Ieee80211NewMac *mac);
+        ~Ieee80211MacTransmission();
 };
 
 }

@@ -263,6 +263,8 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
     {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
         transmission->transmissionStateChanged(newRadioTransmissionState);
+        reception->transmissionStateChanged(newRadioTransmissionState);
+        transmission->mediumStateChanged(reception->isMediumFree());
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
         transmissionState = newRadioTransmissionState;
@@ -296,16 +298,17 @@ void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
     }
 }
 
-void Ieee80211NewMac::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t deferDuration)
+void Ieee80211NewMac::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t deferDuration, ITransmissionCompleteCallback *transmissionCompleteCallback)
 {
     scheduleAt(simTime() + deferDuration, endImmediateIFS);
     immediateFrame = frame;
+    this->transmissionCompleteCallback = transmissionCompleteCallback;
 }
 
 void Ieee80211NewMac::transmissionStateChanged(IRadio::TransmissionState transmissionState)
 {
     if (immediateFrameTransmission && transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-        upperMac->transmissionFinished();
+        transmissionCompleteCallback->transmissionComplete(nullptr);
 }
 
 simtime_t Ieee80211NewMac::getSlotTime() const

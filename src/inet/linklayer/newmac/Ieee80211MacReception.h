@@ -36,18 +36,22 @@ class Ieee80211MacReception : public Ieee80211MacPlugin
     protected:
         cMessage *nav = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
+        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     protected:
         void handleMessage(cMessage *msg);
+        void setNav(simtime_t navInterval);
+        bool isFcsOk(Ieee80211Frame *frame) const;
 
     public:
         void receptionStateChanged(IRadio::ReceptionState newReceptionState);
+        void transmissionStateChanged(IRadio::TransmissionState transmissionState);
         /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
         virtual bool isMediumFree() const;
-        void setNav(simtime_t navInterval);
         void handleLowerFrame(Ieee80211Frame *frame);
 
         Ieee80211MacReception(Ieee80211NewMac *mac);
+        ~Ieee80211MacReception();
 };
 
 }
