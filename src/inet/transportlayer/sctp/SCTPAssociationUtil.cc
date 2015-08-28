@@ -201,45 +201,45 @@ uint16 SCTPAssociation::chunkToInt(const char *type)
     EV_STATICCONTEXT;
 
     if (strcmp(type, "DATA") == 0)
-        return 0;
+        return DATA;
     if (strcmp(type, "INIT") == 0)
-        return 1;
+        return INIT;
     if (strcmp(type, "INIT_ACK") == 0)
-        return 2;
+        return INIT_ACK;
     if (strcmp(type, "SACK") == 0)
-        return 3;
+        return SACK;
     if (strcmp(type, "HEARTBEAT") == 0)
-        return 4;
+        return HEARTBEAT;
     if (strcmp(type, "HEARTBEAT_ACK") == 0)
-        return 5;
+        return HEARTBEAT_ACK;
     if (strcmp(type, "ABORT") == 0)
-        return 6;
+        return ABORT;
     if (strcmp(type, "SHUTDOWN") == 0)
-        return 7;
+        return SHUTDOWN;
     if (strcmp(type, "SHUTDOWN_ACK") == 0)
-        return 8;
+        return SHUTDOWN_ACK;
     if (strcmp(type, "ERRORTYPE") == 0)
-        return 9;
+        return ERRORTYPE;
     if (strcmp(type, "COOKIE_ECHO") == 0)
-        return 10;
+        return COOKIE_ECHO;
     if (strcmp(type, "COOKIE_ACK") == 0)
-        return 11;
+        return COOKIE_ACK;
     if (strcmp(type, "SHUTDOWN_COMPLETE") == 0)
-        return 14;
+        return SHUTDOWN_COMPLETE;
     if (strcmp(type, "AUTH") == 0)
-        return 15;
+        return AUTH;
     if (strcmp(type, "NR-SACK") == 0)
-        return 16;
+        return NR_SACK;
     if (strcmp(type, "ASCONF_ACK") == 0)
-        return 128;
+        return ASCONF_ACK;
     if (strcmp(type, "PKTDROP") == 0)
-        return 129;
+        return PKTDROP;
     if (strcmp(type, "STREAM_RESET") == 0)
-        return 130;
+        return STREAM_RESET;
     if (strcmp(type, "FORWARD_TSN") == 0)
-        return 192;
+        return FORWARD_TSN;
     if (strcmp(type, "ASCONF") == 0)
-        return 193;
+        return ASCONF;
     EV_WARN << "ChunkConversion not successful\n";
     return 0xffff;
 }
