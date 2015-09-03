@@ -37,6 +37,8 @@ simple InterfaceTable
 {
     parameters:
         bool displayAddresses = default(true);  // whether to display IP addresses on links
+        int nicPosXMin = default(0);
+        int nicPosXMax = default(-1);    // disabled nic module reposition when nicPosXMax <= nicPosXMin
         @display("i=block/table");
         @signal[NF_INTERFACE_CREATED](type=InterfaceEntry);
         @signal[NF_INTERFACE_DELETED](type=InterfaceEntry);

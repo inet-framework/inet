@@ -76,6 +76,7 @@ void InterfaceTable::initialize(int stage)
         WATCH_PTRVECTOR(idToInterface);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
+        updateInterfacePositions();
         updateDisplayString();
     }
 }
@@ -88,6 +89,42 @@ void InterfaceTable::updateDisplayString()
     char buf[80];
     sprintf(buf, "%d interfaces", getNumInterfaces());
     getDisplayString().setTagArg("t", 0, buf);
+}
+
+void InterfaceTable::updateInterfacePositions()
+{
+    int nicPosXMin = par("nicPosXMin");
+    int nicPosXMax = par("nicPosXMax");
+    if (nicPosXMin >= nicPosXMax)
+        return;    // nic module repositioning disabled, when nicPosXMax <= nicPosXMin
+    int n = getNumInterfaces();
+    if (n == 0)
+        return;
+    if (n > 0 && nicPosXMin < nicPosXMax) {
+        int groupCount = 0;
+        for (int i = 0; i < n; i++) {
+            InterfaceEntry *ie = getInterface(i);
+            if (i != 0 && ie->getInterfaceModule()->getIndex() == 0)
+                groupCount++;
+        }
+        int nicDelta = (nicPosXMax - nicPosXMin) / (n + groupCount);
+        int nicGroupSpace = ((nicPosXMax - nicPosXMin) - n * nicDelta) / (groupCount + 1);
+        int nicPosX = nicPosXMin + nicDelta/2;
+        for (int i = 0; i < n; i++) {
+            InterfaceEntry *ie = getInterface(i);
+            const char *newGroupName = ie->getInterfaceModule()->getName();
+            if (i != 0 && ie->getInterfaceModule()->getIndex() == 0)
+                nicPosX += nicGroupSpace;
+
+            //update position in displayString
+            cDisplayString& displayString = getContainingNicModule(ie->getInterfaceModule())->getDisplayString();
+            displayString.setTagArg("p", 0, nicPosX);
+            displayString.setTagArg("p", 3, nullptr);
+            displayString.setTagArg("p", 2, nullptr);
+
+            nicPosX += nicDelta;
+        }
+    }
 }
 
 void InterfaceTable::handleMessage(cMessage *msg)

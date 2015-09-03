@@ -62,7 +62,10 @@ module EtherSwitch
             @display("p=73,208;is=s");
         }
         interfaceTable: InterfaceTable {
-            @display("p=73,65;is=s");
+            parameters:
+                nicPosXMin = 50;
+                nicPosXMax = 650;
+                @display("p=73,65;is=s");
         }
         macTable: <macTableType> like IMACAddressTable {
             @display("p=73,19;is=s");
@@ -86,7 +89,7 @@ module EtherSwitch
         for i=0..sizeof(ethg)-1 {
             eth[i].upperLayerIn <-- relayUnit.ifOut++;
             eth[i].upperLayerOut --> relayUnit.ifIn++;
-            eth[i].phys <--> ethg[i];
+            eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 
         if spanningTreeProtocol != "" {
