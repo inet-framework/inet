@@ -47,7 +47,7 @@ class Ieee80211MacReception : public Ieee80211MacPlugin
         void receptionStateChanged(IRadio::ReceptionState newReceptionState);
         void transmissionStateChanged(IRadio::TransmissionState transmissionState);
         /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
-        virtual bool isMediumFree() const;
+        virtual bool isMediumFree() const; //TODO "tx-to-rx switching" state should also count as busy (but not rx-to-tx, otherwise we wont be able to transmit anything with contention)
         void handleLowerFrame(Ieee80211Frame *frame);
 
         Ieee80211MacReception(Ieee80211NewMac *mac);

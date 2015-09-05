@@ -132,7 +132,7 @@ class Ieee80211SendRtsCtsFrameExchangeXXX : public Ieee80211FSMBasedFrameExchang
 
 /* IMPLEMENTATION DRAFT
 
-class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
+class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange  //TODO take code from summit slides!
 {
     protected:
         int step = 0;
@@ -144,7 +144,7 @@ class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
 
         void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         void transmitContentionFrame(Ieee80211DataOrMgmtFrame *frame, int maxRetryCount, simtime_t ifs, int cw);
-        void transmitAckedContentionFrame(Ieee80211DataOrMgmtFrame *frame, int maxRetryCount, simtime_t ifs, int cwMin, int cwMax, simtime_t timeout);
+        void transmitAckedContentionFrame(Ieee80211DataOrMgmtFrame *frame, int maxRetryCount, simtime_t ifs, int cwMin, int cwMax, simtime_t timeout); //TODO this should be removed
         void expectReply(simtime_t timeout);
 
     public:

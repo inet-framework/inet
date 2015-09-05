@@ -35,6 +35,7 @@ class ITransmissionCompleteCallback {  //or ITransmissionListener?
        virtual void transmissionComplete(Ieee80211MacTransmission *tx) = 0; //tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
 };
 
+//TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
 class Ieee80211MacTransmission : public Ieee80211MacPlugin
 {
     public:
@@ -48,6 +49,7 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         enum EventType { LOWER_FRAME, MEDIUM_STATE_CHANGED, TIMER, START_TRANSMISSION };
 
     protected:
+        //TODO: simtime_t channelBecameFree; -- IFS should count from this time!
         Ieee80211Frame *frame = nullptr;
         ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
         simtime_t deferDuration = SIMTIME_ZERO;
@@ -76,7 +78,8 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         void handleMessage(cMessage *msg);
 
     public:
-        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cw, ITransmissionCompleteCallback *transmissionCompleteCallback);
+        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cw, ITransmissionCompleteCallback *transmissionCompleteCallback); //TODO ifs, eifs, cwMin, cwMax should become parameters of Transmit; and add a retryLastContentionFrame() call!
+        //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
         void mediumStateChanged(bool mediumFree);
         void transmissionStateChanged(IRadio::TransmissionState transmissionState);
         void lowerFrameReceived(bool isFcsOk); //TODO on receiving a frame with wrong FCS, we need to switch from DIFS to EIFS (ie. from ifs parameter to eifs parameter)!
