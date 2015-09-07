@@ -125,6 +125,7 @@ void EtherMACFullDuplex::startFrameTransmission()
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
+    emit(transmitStateSignal, TRANSMITTING_STATE);
 }
 
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
@@ -259,6 +260,7 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
     // End of IFG period, okay to transmit
     EV_DETAIL << "IFG elapsed" << endl;
 
+    getNextFrameFromQueue();
     beginSendFrames();
 }
 
@@ -288,7 +290,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
     delete curTxFrame;
     curTxFrame = nullptr;
     lastTxFinishTime = simTime();
-    getNextFrameFromQueue();
+
 
     if (pauseUnitsRequested > 0) {
         // if we received a PAUSE frame recently, go into PAUSE state
@@ -319,6 +321,7 @@ void EtherMACFullDuplex::handleEndPausePeriod()
         throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
     EV_DETAIL << "Pause finished, resuming transmissions\n";
+    getNextFrameFromQueue();
     beginSendFrames();
 }
 
@@ -368,6 +371,7 @@ void EtherMACFullDuplex::processPauseCommand(int pauseUnits)
 void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
     transmitState = WAIT_IFG_STATE;
+    emit(transmitStateSignal, WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIFGMsg);
 }
@@ -378,6 +382,7 @@ void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
+    emit(transmitStateSignal, PAUSE_STATE);
 }
 
 void EtherMACFullDuplex::beginSendFrames()
@@ -390,6 +395,7 @@ void EtherMACFullDuplex::beginSendFrames()
     else {
         // No more frames set transmitter to idle
         transmitState = TX_IDLE_STATE;
+        emit(transmitStateSignal, TX_IDLE_STATE);
         if (!txQueue.extQueue) {
             // Output only for internal queue (we cannot be shure that there
             //are no other frames in external queue)

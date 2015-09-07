@@ -41,24 +41,25 @@ class InterfaceEntry;
  */
 class INET_API EtherMACBase : public MACBase
 {
+  public:
+        enum MACTransmitState {
+            TX_IDLE_STATE = 1,
+            WAIT_IFG_STATE,
+            SEND_IFG_STATE,
+            TRANSMITTING_STATE,
+            JAMMING_STATE,
+            BACKOFF_STATE,
+            PAUSE_STATE
+        };
+
+        enum MACReceiveState {
+            RX_IDLE_STATE = 1,
+            RECEIVING_STATE,
+            RX_COLLISION_STATE,
+            RX_RECONNECT_STATE
+        };
+
   protected:
-    enum MACTransmitState {
-        TX_IDLE_STATE = 1,
-        WAIT_IFG_STATE,
-        SEND_IFG_STATE,
-        TRANSMITTING_STATE,
-        JAMMING_STATE,
-        BACKOFF_STATE,
-        PAUSE_STATE
-    };
-
-    enum MACReceiveState {
-        RX_IDLE_STATE = 1,
-        RECEIVING_STATE,
-        RX_COLLISION_STATE,
-        RX_RECONNECT_STATE
-    };
-
     // Self-message kind values
     enum SelfMsgKindValues {
         ENDIFG = 100,
@@ -183,6 +184,9 @@ class INET_API EtherMACBase : public MACBase
     static simsignal_t packetSentToUpperSignal;
     static simsignal_t packetReceivedFromUpperSignal;
 
+    static simsignal_t transmitStateSignal;
+    static simsignal_t receiveStateSignal;
+
   public:
     static const double SPEED_OF_LIGHT_IN_CABLE;
 
@@ -194,6 +198,9 @@ class INET_API EtherMACBase : public MACBase
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
+
+    MACTransmitState getTransmitState(){ return transmitState; }
+    MACReceiveState getReceiveState(){ return receiveState; }
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
