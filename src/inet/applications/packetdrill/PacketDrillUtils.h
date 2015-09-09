@@ -71,7 +71,7 @@ static inline bool is_valid_u32(int64 x) { return (x >= 0) && (x <= UINT_MAX); }
 
 
 #define ADDR_STR_LEN 66
-#define TUN_DRIVER_DEFAULT_MTU 1500	/* default MTU for tun device */
+#define TUN_DRIVER_DEFAULT_MTU 1500    /* default MTU for tun device */
 
 
 /* Types of events in a script */

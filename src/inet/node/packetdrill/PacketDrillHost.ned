@@ -17,14 +17,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.node.tun;
+package inet.node.packetdrill;
 
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 import inet.transportlayer.contract.ISCTP;
 import inet.linklayer.tun.TunInterface;
 import inet.node.inet.NodeBase;
-import inet.applications.tunapp.PacketDrillApp;
+import inet.applications.packetdrill.PacketDrillApp;
 
 
 //

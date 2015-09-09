@@ -34,13 +34,13 @@ struct int_symbol platform_symbols_table[] = {
     { IPPROTO_IP,                       "IPPROTO_IP"                      },
     { IPPROTO_UDP,                      "IPPROTO_UDP"                     },
 
-	/* Sentinel marking the end of the table. */
-	{ 0, NULL },
+    /* Sentinel marking the end of the table. */
+    { 0, NULL },
 };
 
 struct int_symbol *platform_symbols(void)
 {
-	return platform_symbols_table;
+    return platform_symbols_table;
 }
 
 

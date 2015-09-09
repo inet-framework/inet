@@ -28,9 +28,10 @@
 
 #ifndef HAVE_FMEMOPEN
 
+#include <stdio.h>
 #include "inet/common/INETDefs.h"
 
-extern FILE *fmemopen(char *buf, size_t size, const char *mode);
+extern FILE *fmemopen(void *buf, size_t size, const char *mode);
 
 #endif  /* HAVE_FMEMOPEN */
 

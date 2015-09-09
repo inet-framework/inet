@@ -1013,6 +1013,21 @@
         linkerFlags = ""
         />
     <feature
+        id="packetdrill"
+        name="PacketDrill testing"
+        description = "Provides PacketDrill testing application"
+        initiallyEnabled = "true"
+        requires = "TUN"
+        labels = ""
+        nedPackages = "
+                       inet.applications.packetdrill
+                       inet.node.packetdrill
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_PACKETDRILL"
+        linkerFlags = ""
+        />
+    <feature
         id="BMAC"
         name="BMAC"
         description = "Provides the B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"

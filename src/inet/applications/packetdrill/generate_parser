@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Execute this script whenever the parser.y or lexer.l is updated.
+#
+bison --output=parser.cc --defines=parser.h --report=state parser.y
+flex -o lexer.cc lexer.l

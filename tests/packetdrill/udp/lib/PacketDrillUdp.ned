@@ -16,8 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import inet.node.tun.PacketDrillHost;
-
+import inet.node.packetdrill.PacketDrillHost;
 
 network PacketDrillUdp
 {
