@@ -24,6 +24,7 @@
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211MacReception.h"
 #include "Ieee80211MacTransmission.h"
+#include "Ieee80211MacImmediateTx.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -73,8 +74,7 @@ void Ieee80211NewMac::initialize(int stage)
         upperMac = new Ieee80211UpperMac(this);
         reception = new Ieee80211MacReception(this);
         transmission = new Ieee80211MacTransmission(this);
-        endImmediateIFS = new cMessage("Immediate IFS");
-        immediateFrameDuration = new cMessage("Immediate Frame Duration");
+        immediateTx = new Ieee80211MacImmediateTx(this);
 
         // initialize parameters
         double bitrate = par("bitrate");
@@ -187,12 +187,8 @@ void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
     EV << "received self message: " << msg << endl;
     if (msg->getContextPointer() != nullptr)
         ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
-    else if (msg == endImmediateIFS)
-    {
-        immediateFrameTransmission = true;
-        configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-        sendDown(immediateFrame);
-    }
+    else
+        ASSERT(false);
 }
 
 void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
@@ -253,13 +249,18 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
     else if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
-        transmission->transmissionStateChanged(newRadioTransmissionState);
-        reception->transmissionStateChanged(newRadioTransmissionState);
-        transmission->mediumStateChanged(reception->isMediumFree());
-        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+        auto oldTransmissionState = transmissionState;
+        transmissionState = (IRadio::TransmissionState)value;
+
+        bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
+
+        if (transmissionFinished) {
+            immediateTx->transmissionFinished();
+            transmission->transmissionFinished();
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        transmissionState = newRadioTransmissionState;
+        }
+        reception->transmissionStateChanged(transmissionState);
+        transmission->mediumStateChanged(reception->isMediumFree());
     }
 }
 
@@ -274,33 +275,19 @@ void Ieee80211NewMac::configureRadioMode(IRadio::RadioMode radioMode)
     }
 }
 
-void Ieee80211NewMac::sendDataFrame(Ieee80211Frame *frameToSend)
+void Ieee80211NewMac::sendFrame(Ieee80211Frame *frame)
 {
-    EV << "sending Data frame\n";
+    EV << "sending frame\n";
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(frameToSend->dup());
+    sendDown(frame);
 }
 
 void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigMsg != NULL)
-    {
+    if (pendingRadioConfigMsg != NULL) {
         sendDown(pendingRadioConfigMsg);
         pendingRadioConfigMsg = NULL;
     }
-}
-
-void Ieee80211NewMac::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t deferDuration, ITransmissionCompleteCallback *transmissionCompleteCallback)
-{
-    scheduleAt(simTime() + deferDuration, endImmediateIFS);
-    immediateFrame = frame;
-    this->transmissionCompleteCallback = transmissionCompleteCallback;
-}
-
-void Ieee80211NewMac::transmissionStateChanged(IRadio::TransmissionState transmissionState)
-{
-    if (immediateFrameTransmission && transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-        transmissionCompleteCallback->transmissionComplete(nullptr);
 }
 
 // FIXME

@@ -67,6 +67,7 @@ class Ieee80211MacReception;
 class Ieee80211MacTransmission;
 class ITransmissionCompleteCallback;
 class IIeee80211MacContext;
+class Ieee80211MacImmediateTx;
 
 class INET_API Ieee80211NewMac : public MACProtocolBase
 {
@@ -75,6 +76,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     Ieee80211UpperMac *upperMac = nullptr;
     Ieee80211MacReception *reception = nullptr;
     Ieee80211MacTransmission *transmission = nullptr;
+    Ieee80211MacImmediateTx *immediateTx = nullptr;
 
     IIeee80211MacContext *context = nullptr;  // owned here
 
@@ -88,12 +90,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
 
   protected:
     IRadio *radio = nullptr;
-    cMessage *endImmediateIFS = nullptr;
-    cMessage *immediateFrameDuration = nullptr;
-    Ieee80211Frame *immediateFrame = nullptr;
-    ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-    bool immediateFrameTransmission = false;
+    IRadio::TransmissionState transmissionState = IRadio::TransmissionState::TRANSMISSION_STATE_UNDEFINED;
 
   protected:
     /** @name Statistics */
@@ -118,8 +115,6 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     Ieee80211NewMac();
     virtual ~Ieee80211NewMac();
     //@}
-
-    void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITransmissionCompleteCallback *transmissionCompleteCallback);
 
   protected:
     /**
@@ -156,7 +151,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
 
   public:
 
-    virtual void sendDataFrame(Ieee80211Frame *frameToSend);
+    virtual void sendFrame(Ieee80211Frame *frameToSend);
    /** @brief Send down the change channel message to the physical layer if there is any. */
     virtual void sendDownPendingRadioConfigMsg();
     //@}

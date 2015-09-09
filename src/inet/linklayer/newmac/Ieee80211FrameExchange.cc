@@ -17,6 +17,7 @@
 #include "inet/common/FSMA.h"
 #include "Ieee80211MacTransmission.h"
 #include "Ieee80211UpperMac.h"
+#include "Ieee80211MacImmediateTx.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -101,7 +102,7 @@ void Ieee80211StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame* fra
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->transmitImmediateFrame(frame, ifs, getUpperMac());
+    mac->immediateTx->transmitImmediateFrame(frame, ifs, getUpperMac());
     stepType = TRANSMIT_IMMEDIATE_FRAME;
 }
 
