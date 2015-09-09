@@ -33,6 +33,16 @@ Ieee80211UpperMac::Ieee80211UpperMac(Ieee80211NewMac* mac) : Ieee80211MacPlugin(
     initializeQueueModule();
 }
 
+Ieee80211UpperMac::~Ieee80211UpperMac()
+{
+    while(!transmissionQueue.empty())
+    {
+        Ieee80211Frame *temp = transmissionQueue.front();
+        transmissionQueue.pop_front();
+        delete temp;
+    }
+}
+
 void Ieee80211UpperMac::handleMessage(cMessage* msg)
 {
 }
@@ -70,32 +80,32 @@ void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
     ASSERT(!frame->getReceiverAddress().isUnspecified());
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
-    frame->setTransmitterAddress(mac->getAddress());
+    frame->setTransmitterAddress(context->getAddress());
     frame->setSequenceNumber(sequenceNumber);
-    setDataFrameDuration(frame);
+    context->setDataFrameDuration(frame);
     sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
 
     if (frameExchange)
         transmissionQueue.push_back(frame);
     else
     {
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, context, this, frame);
         frameExchange->start();
     }
 }
 
 void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
 {
-    if (isForUs(frame))
+    if (context->isForUs(frame))
     {
-        if (dynamic_cast<Ieee80211RTSFrame *>(frame))
+        if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame))
         {
-            sendCts(dynamic_cast<Ieee80211RTSFrame *>(frame));
+            sendCts(rtsFrame);
         }
-        else if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
+        else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
         {
-            sendAck(dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame));
-            mac->sendUp(frame);
+            sendAck(dataOrMgmtFrame);
+            mac->sendUp(dataOrMgmtFrame);
         }
         else if (frameExchange)
             frameExchange->lowerFrameReceived(frame);
@@ -112,20 +122,6 @@ void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
     }
 }
 
-Ieee80211ACKFrame *Ieee80211UpperMac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
-{
-    Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("ACK Frame");
-    frame->setReceiverAddress(frameToACK->getTransmitterAddress());
-
-    if (!frameToACK->getMoreFragments())
-        frame->setDuration(0);
-    else
-        frame->setDuration(frameToACK->getDuration() - getSIFS()
-                - computeFrameDuration(LENGTH_ACK, mac->basicBitrate));
-
-    return frame;
-}
-
 Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
@@ -135,68 +131,14 @@ Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::buildBroadcastFrame(Ieee80211DataOr
 
 void Ieee80211UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
-    Ieee80211ACKFrame *ackFrame = buildACKFrame(frame);
-    mac->transmitImmediateFrame(ackFrame, getSIFS(), this);
+    Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
+    mac->transmitImmediateFrame(ackFrame, context->getSIFS(), this);
 }
 
 void Ieee80211UpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
-    Ieee80211CTSFrame *ctsFrame = buildCtsFrame(frame);
-    mac->transmitImmediateFrame(ctsFrame, getSIFS(), this);
-}
-
-Ieee80211CTSFrame* Ieee80211UpperMac::buildCtsFrame(Ieee80211RTSFrame* rtsFrame)
-{
-    Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS Frame");
-    frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS()
-            - computeFrameDuration(LENGTH_CTS, mac->basicBitrate));
-    return frame;
-}
-
-bool Ieee80211UpperMac::isForUs(Ieee80211Frame *frame) const
-{
-    return frame && frame->getReceiverAddress() == mac->getAddress();
-}
-
-bool Ieee80211UpperMac::isBroadcast(Ieee80211Frame *frame) const
-{
-    return frame && frame->getReceiverAddress().isBroadcast();
-}
-
-double Ieee80211UpperMac::computeFrameDuration(Ieee80211Frame *msg) const
-{
-    return computeFrameDuration(msg->getBitLength(), mac->bitrate);
-}
-
-double Ieee80211UpperMac::computeFrameDuration(int bits, double bitrate) const
-{
-    const IIeee80211Mode *modType = mac->modeSet->getMode(bps(bitrate));
-    double duration = SIMTIME_DBL(modType->getDuration(bits));
-    EV_DEBUG << " duration=" << duration * 1e6 << "us(" << bits << "bits " << bitrate / 1e6 << "Mbps)" << endl;
-    return duration;
-}
-
-Ieee80211Frame *Ieee80211UpperMac::setBasicBitrate(Ieee80211Frame *frame)
-{
-    ASSERT(frame->getControlInfo() == nullptr);
-    TransmissionRequest *ctrl = new TransmissionRequest();
-    ctrl->setBitrate(bps(mac->basicFrameMode->getDataMode()->getNetBitrate()));
-    frame->setControlInfo(ctrl);
-    return frame;
-}
-
-
-void Ieee80211UpperMac::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame)
-{
-    if (isBroadcast(frame))
-        frame->setDuration(0);
-    else if (!frame->getMoreFragments())
-        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, mac->basicBitrate));
-    else
-        // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, mac->basicBitrate)
-                + computeFrameDuration(frame));
+    Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
+    mac->transmitImmediateFrame(ctsFrame, context->getSIFS(), this);
 }
 
 
@@ -209,7 +151,7 @@ void Ieee80211UpperMac::frameExchangeFinished(Ieee80211FrameExchange* what, bool
     {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, context, this, frame);
         frameExchange->start();
     }
 }
@@ -222,46 +164,6 @@ void Ieee80211UpperMac::transmissionComplete(Ieee80211MacTransmission *tx)
        frameExchange->transmissionFinished();
    }
    else ; // Finished immediate frame tx
-}
-
-simtime_t Ieee80211UpperMac::getSIFS() const
-{
-    return mac->dataFrameMode->getSifsTime();
-}
-
-simtime_t Ieee80211UpperMac::getPIFS() const
-{
-    return mac->dataFrameMode->getPifsTime();
-}
-
-simtime_t Ieee80211UpperMac::getDIFS() const
-{
-    return mac->dataFrameMode->getDifsTime();
-}
-
-simtime_t Ieee80211UpperMac::getEIFS() const
-{
-    return mac->dataFrameMode->getEifsTime(mac->modeSet->getSlowestMode(), LENGTH_ACK);
-}
-
-simtime_t Ieee80211UpperMac::getAIFS(int aifsNumber) const
-{
-    return mac->dataFrameMode->getAifsTime(aifsNumber);
-}
-
-simtime_t Ieee80211UpperMac::getRIFS() const
-{
-    return mac->dataFrameMode->getRifsTime();
-}
-
-Ieee80211UpperMac::~Ieee80211UpperMac()
-{
-    while(!transmissionQueue.empty())
-    {
-        Ieee80211Frame *temp = transmissionQueue.front();
-        transmissionQueue.pop_front();
-        delete temp;
-    }
 }
 
 }

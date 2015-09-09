@@ -26,8 +26,6 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExcha
 {
     protected:
         Ieee80211DataOrMgmtFrame *frame;
-        int maxRetryCount;
-
         int retryCount = 0;
         cMessage *ackTimer = nullptr;
 
@@ -44,23 +42,22 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExcha
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int maxRetryCount) :
-            Ieee80211FSMBasedFrameExchange(mac, callback), frame(frame), maxRetryCount(maxRetryCount) {}
+        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
+            Ieee80211FSMBasedFrameExchange(mac, context, callback), frame(frame) {}
         ~Ieee80211SendDataWithAckFrameExchange() { delete frame; if (ackTimer) delete cancelEvent(ackTimer); }
 };
 
-class SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameExchange
+class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
         int retryCount = 0;
-        int maxRetryCount = 10; //TODO
     protected:
         virtual void doStep(int step);
         virtual bool processReply(int step, Ieee80211Frame *frame);
         virtual void processTimeout(int step);
     public:
-        SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
 
 }

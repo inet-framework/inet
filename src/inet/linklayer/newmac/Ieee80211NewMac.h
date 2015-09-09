@@ -38,6 +38,8 @@ namespace ieee80211 {
 
 using namespace physicallayer;
 
+class IIeee80211MacContext;
+
 /**
  * IEEE 802.11b Media Access Control Layer.
  *
@@ -64,6 +66,7 @@ class Ieee80211UpperMac;
 class Ieee80211MacReception;
 class Ieee80211MacTransmission;
 class ITransmissionCompleteCallback;
+class IIeee80211MacContext;
 
 class INET_API Ieee80211NewMac : public MACProtocolBase
 {
@@ -73,49 +76,14 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     Ieee80211MacReception *reception = nullptr;
     Ieee80211MacTransmission *transmission = nullptr;
 
-    const Ieee80211ModeSet *modeSet = nullptr;
-    /** The bitrate is used to send unicast data and mgmt frames; be sure to use a valid 802.11 bitrate */
-    const IIeee80211Mode *dataFrameMode = nullptr;
-    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames and multicast/broadcast frames */
-    const IIeee80211Mode *basicFrameMode = nullptr;
-    const IIeee80211Mode *controlFrameMode = nullptr;
-
-    /**
-     * @name Configuration parameters
-     * These are filled in during the initialization phase and not supposed to change afterwards.
-     */
-    //@{
-    /** MAC address */
-    MACAddress address;
-
-    /** The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
-    double bitrate;  //FIXME this should go! use dataFrameMode instead
-
-    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
-    double basicBitrate; //FIXME this should go! use basicFrameMode instead
-
-
-    /**
-     * Maximum number of transmissions for a message.
-     * This includes the initial transmission and all subsequent retransmissions.
-     * Thus a value 0 is invalid and a value 1 means no retransmissions.
-     * See: dot11ShortRetryLimit on page 484.
-     *   'This attribute shall indicate the maximum number of
-     *    transmission attempts of a frame, the length of which is less
-     *    than or equal to dot11RTSThreshold, that shall be made before a
-     *    failure condition is indicated. The default value of this
-     *    attribute shall be 7'
-     */
-    int transmissionLimit;
-
-    int rtsThreshold;
+    IIeee80211MacContext *context = nullptr;  // owned here
 
   protected:
     /**
      * The last change channel message received and not yet sent to the physical layer, or NULL.
      * The message will be sent down when the state goes to IDLE or DEFER next time.
      */
-    cMessage *pendingRadioConfigMsg;
+    cMessage *pendingRadioConfigMsg = nullptr;
     //@}
 
   protected:
@@ -151,7 +119,6 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     virtual ~Ieee80211NewMac();
     //@}
 
-    MACAddress getAddress() const { return address; }
     void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITransmissionCompleteCallback *transmissionCompleteCallback);
 
   protected:

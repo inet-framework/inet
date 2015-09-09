@@ -21,6 +21,7 @@
 #include "Ieee80211MacTransmission.h"
 #include "Ieee80211NewMac.h"
 #include "Ieee80211UpperMac.h"
+#include "Ieee80211MacContext.h"
 
 namespace inet {
 
@@ -54,10 +55,10 @@ void Ieee80211MacReception::handleLowerFrame(Ieee80211Frame* frame)
     if (errorFree)
     {
         EV_INFO << "Received message from lower layer: " << frame << endl;
-        if (!getUpperMac()->isForUs(frame))
+        if (!context->isForUs(frame))
             setNav(frame->getDuration());
         Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(frame);
-        ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != mac->address);
+        ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != context->getAddress());
         getUpperMac()->lowerFrameReceived(frame);
     }
     else

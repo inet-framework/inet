@@ -54,22 +54,22 @@ void Ieee80211SendDataWithAckFrameExchange::handleWithFSM(EventType event, cMess
         {
             FSMA_Enter();
             FSMA_Event_Transition(Ack-arrived,
-                                  event == EVENT_FRAMEARRIVED && isAck(receivedFrame),
+                                  event == EVENT_FRAMEARRIVED && isAck(receivedFrame), //TODO is from right STA
                                   SUCCESS,
                                   delete receivedFrame;
             );
             FSMA_Event_Transition(Frame-arrived,
-                                  event == EVENT_FRAMEARRIVED && !isAck(receivedFrame),
+                                  event == EVENT_FRAMEARRIVED && !isAck(receivedFrame), //TODO is from right STA
                                   FAILURE,
                                   processFrame(receivedFrame);
             );
             FSMA_Event_Transition(Ack-timeout-retry,
-                                  event == EVENT_TIMER && retryCount < maxRetryCount,
+                                  event == EVENT_TIMER && retryCount < context->getShortRetryLimit(),
                                   TRANSMITDATA,
                                   retryDataFrame();
             );
             FSMA_Event_Transition(Ack-timeout-giveup,
-                                  event == EVENT_TIMER && retryCount == maxRetryCount,
+                                  event == EVENT_TIMER && retryCount == context->getShortRetryLimit(),
                                   FAILURE,
                                   ;
             );
@@ -88,21 +88,21 @@ void Ieee80211SendDataWithAckFrameExchange::handleWithFSM(EventType event, cMess
 void Ieee80211SendDataWithAckFrameExchange::transmitDataFrame()
 {
     retryCount = 0;
-    mac->transmission->transmitContentionFrame(frame, retryCount, getUpperMac());
+    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
 }
 
 void Ieee80211SendDataWithAckFrameExchange::retryDataFrame()
 {
     retryCount++;
     frame->setRetry(true);
-    mac->transmission->transmitContentionFrame(frame, retryCount, getUpperMac());
+    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
 }
 
 void Ieee80211SendDataWithAckFrameExchange::scheduleAckTimeout()
 {
     if (ackTimer == nullptr)
         ackTimer = new cMessage("timeout");
-    simtime_t t = simTime() + 2*MAX_PROPAGATION_DELAY + SIFS + LENGTH_ACK / mac->basicBitrate + PHY_HEADER_LENGTH / BITRATE_HEADER; //TODO
+    simtime_t t = simTime() + context->getAckTimeout();
     scheduleAt(t, ackTimer);
 }
 
@@ -118,37 +118,34 @@ bool Ieee80211SendDataWithAckFrameExchange::isAck(Ieee80211Frame* frame)
 
 //------------------------------
 
-SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
-    Ieee80211StepBasedFrameExchange(mac, callback), dataFrame(dataFrame)
+Ieee80211SendDataWithRtsCtsFrameExchange::Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
+    Ieee80211StepBasedFrameExchange(mac, context, callback), dataFrame(dataFrame)
 {
 }
 
-/*TODO
-void SendDataWithRtsCtsFrameExchange::doStep(int step)
+void Ieee80211SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(buildRtsFrame(dataFrame, retryCount)); break;
-        case 1: expectReply(ctsTimeout); break;
-        case 2: transmitImmediateFrame(dataFrame, sifs); break;
-        case 3: expectReply(ackTimeout); break;
+        case 0: transmitContentionFrame(context->buildRtsFrame(dataFrame), retryCount); break;
+        case 1: expectReply(context->getCtsTimeout()); break;
+        case 2: transmitImmediateFrame(dataFrame, context->getSIFS()); break;
+        case 3: expectReply(context->getAckTimeout()); break;
     }
 }
 
-//context? for getting channel parameters, building ACK frames, computing ACK timeouts, etc....
-bool SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
+bool Ieee80211SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
-    const MACAddress& destAddress = dataFrame->getReceiverAddress();
     switch (step) {
-        case 1: return isCtsFrom(frame, destAddress);  // true=accepted
-        case 3: return isAckFrom(frame, destAddress);
+        case 1: return context->isCts(frame);  // true=accepted
+        case 3: return context->isAck(frame);
+        default: return false;
     }
 }
-*/
 
-void SendDataWithRtsCtsFrameExchange::processTimeout(int step)
+void Ieee80211SendDataWithRtsCtsFrameExchange::processTimeout(int step)
 {
     switch (step) {
-        case 1: if (retryCount < maxRetryCount) {retryCount++; gotoStep(0);} else fail(); break;
+        case 1: if (++retryCount < context->getShortRetryLimit()) {dataFrame->setRetry(true); gotoStep(0);} else fail(); break;
         case 3: fail(); break;
     }
 }

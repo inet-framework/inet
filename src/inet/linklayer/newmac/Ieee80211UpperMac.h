@@ -58,42 +58,27 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
 
         Ieee80211FrameExchange *frameExchange = nullptr;
 
-        void handleMessage(cMessage *msg);
+        IIeee80211MacContext *context = nullptr; //TODO fill in!
 
     protected:
-        virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
-        void setDataFrameDuration(Ieee80211DataOrMgmtFrame *frameToSend);
+        void handleMessage(cMessage *msg);
+
         virtual void frameExchangeFinished(Ieee80211FrameExchange *what, bool successful);
 
-        Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame);
-        virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
         virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
         void initializeQueueModule();
 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);
 
-        /** @brief Returns true if message is a broadcast message */
-        virtual bool isBroadcast(Ieee80211Frame *msg) const;
-
     public:
-        double computeFrameDuration(Ieee80211Frame *msg) const; // TODO
-        double computeFrameDuration(int bits, double bitrate) const; // TODO
-        virtual simtime_t getAIFS(int aifsNumber) const; // TODO
-        virtual simtime_t getSIFS() const; // TODO
-        virtual simtime_t getDIFS() const; // TODO
-        virtual simtime_t getEIFS() const; // TODO
-        virtual simtime_t getPIFS() const; // TODO
-        virtual simtime_t getRIFS() const; // TODO
-        /** @brief Returns true if message destination address is ours */
-        virtual bool isForUs(Ieee80211Frame *msg) const; // TODO
-
+        Ieee80211UpperMac(Ieee80211NewMac *mac);
+        ~Ieee80211UpperMac();
+        void setContext(IIeee80211MacContext *context) { this->context = context; }
         void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame);
         void lowerFrameReceived(Ieee80211Frame *frame);
         void transmissionComplete(Ieee80211MacTransmission *tx); // callback for MAC
 
-        Ieee80211UpperMac(Ieee80211NewMac *mac);
-        ~Ieee80211UpperMac();
 };
 
 } // namespace 80211

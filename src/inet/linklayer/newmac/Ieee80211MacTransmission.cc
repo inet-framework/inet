@@ -55,14 +55,6 @@ Ieee80211MacTransmission::~Ieee80211MacTransmission()
     delete endEIFS;
 }
 
-void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback)
-{
-    transmitContentionFrame(frame,
-            mac->dataFrameMode->getDifsTime(), mac->dataFrameMode->getEifsTime(nullptr,0), //FIXME getEifsTime() args are dummy!!!
-            mac->dataFrameMode->getCwMin(), mac->dataFrameMode->getCwMax(),
-            retryCount, transmissionCompleteCallback);
-}
-
 void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback)
 {
     ASSERT(fsm.getState() == IDLE);

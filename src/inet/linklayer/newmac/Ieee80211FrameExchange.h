@@ -17,6 +17,7 @@
 #define IEEE80211MACFRAMEEXCHANGE_H_
 
 #include "Ieee80211MacPlugin.h"
+#include "Ieee80211MacContext.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,6 +32,7 @@ class Ieee80211FrameExchange : public Ieee80211MacPlugin
         };
 
     protected:
+        IIeee80211MacContext *context = nullptr;
         IFinishedCallback *finishedCallback = nullptr;
 
     protected:
@@ -38,7 +40,8 @@ class Ieee80211FrameExchange : public Ieee80211MacPlugin
         virtual void reportFailure();
 
     public:
-        Ieee80211FrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback) : Ieee80211MacPlugin(mac), finishedCallback(callback) {}
+        //TODO init context!
+        Ieee80211FrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211MacPlugin(mac), context(context), finishedCallback(callback) {}
         virtual ~Ieee80211FrameExchange() {}
 
         virtual void start() = 0;
@@ -57,7 +60,7 @@ class Ieee80211FSMBasedFrameExchange : public Ieee80211FrameExchange
         virtual void handleWithFSM(EventType eventType, cMessage *frameOrTimer) = 0;
 
     public:
-        Ieee80211FSMBasedFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, callback) { fsm.setName("Frame Exchange FSM"); }
+        Ieee80211FSMBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() { EV_INFO << "Starting " << getClassName() << std::endl; handleWithFSM(EVENT_START, nullptr); }
         virtual bool lowerFrameReceived(Ieee80211Frame *frame) { handleWithFSM(EVENT_FRAMEARRIVED, frame); return true; }
         virtual void transmissionFinished() { handleWithFSM(EVENT_TXFINISHED, nullptr); }
@@ -79,8 +82,8 @@ class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
         virtual bool processReply(int step, Ieee80211Frame *frame) = 0; // true = frame accepted as reply
         virtual void processTimeout(int step) = 0;
 
-        void transmitContentionFrame(Ieee80211DataOrMgmtFrame *frame, int retryCount);
-        void transmitContentionFrame(Ieee80211DataOrMgmtFrame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount);
+        void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
+        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount);
         void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         void expectReply(simtime_t timeout);
         void gotoStep(int step); // ~setNextStep()
@@ -90,7 +93,7 @@ class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
         void proceed();
 
     public:
-        Ieee80211StepBasedFrameExchange(Ieee80211NewMac *mac, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, callback) { }
+        Ieee80211StepBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { }
         virtual void start();
         virtual bool lowerFrameReceived(Ieee80211Frame *frame); // true = frame processed
         virtual void transmissionFinished();

@@ -20,6 +20,7 @@
 #include "Ieee80211NewMac.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211MacReception.h"
 #include "Ieee80211MacTransmission.h"
@@ -40,14 +41,13 @@ simsignal_t Ieee80211NewMac::radioStateSignal = SIMSIGNAL_NULL;
  */
 Ieee80211NewMac::Ieee80211NewMac()
 {
-    pendingRadioConfigMsg = nullptr;
 }
 
 Ieee80211NewMac::~Ieee80211NewMac()
 {
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
-
+    delete context;
 }
 
 /****************************************************************
@@ -61,7 +61,7 @@ void Ieee80211NewMac::initialize(int stage)
     {
         EV << "Initializing stage 0\n";
 
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
+        const Ieee80211ModeSet *modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
 
         // radio
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
@@ -70,41 +70,27 @@ void Ieee80211NewMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        // upper mac
         upperMac = new Ieee80211UpperMac(this);
         reception = new Ieee80211MacReception(this);
         transmission = new Ieee80211MacTransmission(this);
         endImmediateIFS = new cMessage("Immediate IFS");
         immediateFrameDuration = new cMessage("Immediate Frame Duration");
+
         // initialize parameters
+        double bitrate = par("bitrate");
+        double basicBitrate = par("basicBitrate");
+        int rtsThreshold = par("rtsThresholdBytes");
 
-        bitrate = par("bitrate");
-        basicBitrate = par("basicBitrate");
-        rtsThreshold = par("rtsThresholdBytes");
+        const IIeee80211Mode *dataFrameMode = (bitrate == -1) ? modeSet->getFastestMode() : modeSet->getMode(bps(bitrate));
+        const IIeee80211Mode *basicFrameMode = (basicBitrate == -1) ? modeSet->getSlowestMode() : modeSet->getMode(bps(basicBitrate));; //TODO ???
+        const IIeee80211Mode *controlFrameMode = (basicBitrate == -1) ? modeSet->getSlowestMode() : modeSet->getMode(bps(basicBitrate)); //TODO ???
 
-        if (bitrate == -1)
-            dataFrameMode = modeSet->getFastestMode();
-        else
-            dataFrameMode = modeSet->getMode(bps(bitrate));
+        int shortRetryLimit = par("retryLimit");
+        if (shortRetryLimit == -1)
+            shortRetryLimit = 7;
+        ASSERT(shortRetryLimit > 0);
 
-        if (basicBitrate == -1)
-            basicFrameMode = modeSet->getFastestMode();
-        else
-            basicFrameMode = modeSet->getMode(bps(basicBitrate));
-
-//        double controlBitRate = par("controlBitrate");
-//        if (controlBitRate == -1)
-//            controlFrameMode = modeSet->getSlowestMode();
-//        else
-//            controlFrameMode = modeSet->getMode(bps(controlBitRate));
-
-
-        // the variable is renamed due to a confusion in the standard
-        // the name retry limit would be misleading, see the header file comment
-        transmissionLimit = par("retryLimit");
-        if (transmissionLimit == -1) transmissionLimit = 7;
-        ASSERT(transmissionLimit > 0);
-
+        MACAddress address;
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
@@ -115,7 +101,12 @@ void Ieee80211NewMac::initialize(int stage)
         else
             address.setAddress(addressString);
 
-        // initalize self messages
+        context = new Ieee80211MacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold);
+
+        upperMac->setContext(context);
+        reception->setContext(context);
+
+        // Initialize self messages
         stateSignal = registerSignal("state");
     //        stateSignal.setEnum("Ieee80211NewMac");
         radioStateSignal = registerSignal("radioState");
@@ -174,6 +165,7 @@ InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // address
+    const MACAddress& address = context->getAddress();
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
@@ -311,11 +303,6 @@ void Ieee80211NewMac::transmissionStateChanged(IRadio::TransmissionState transmi
         transmissionCompleteCallback->transmissionComplete(nullptr);
 }
 
-simtime_t Ieee80211NewMac::getSlotTime() const
-{
-    return dataFrameMode->getSlotTime();
-}
-
 // FIXME
 bool Ieee80211NewMac::handleNodeStart(IDoneCallback *doneCallback)
 {
@@ -341,7 +328,11 @@ void Ieee80211NewMac::handleNodeCrash()
 {
 }
 
+simtime_t Ieee80211NewMac::getSlotTime() const
+{
+    return context->getSlotTime();
 }
 
+}
 } // namespace inet
 

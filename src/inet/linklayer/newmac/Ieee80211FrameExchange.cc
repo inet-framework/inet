@@ -81,15 +81,15 @@ void Ieee80211StepBasedFrameExchange::handleMessage(cMessage* msg)
     proceed();
 }
 
-void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211DataOrMgmtFrame* frame, int retryCount)
+void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, int retryCount)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->transmission->transmitContentionFrame(frame, retryCount, getUpperMac());
+    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
     stepType = TRANSMIT_CONTENTION_FRAME;
 }
 
-void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211DataOrMgmtFrame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount)
+void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);

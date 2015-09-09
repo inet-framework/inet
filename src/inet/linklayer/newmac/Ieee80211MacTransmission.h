@@ -30,6 +30,14 @@ namespace ieee80211 {
 
 class Ieee80211MacTransmission;
 
+class IIeee80211Tx {
+    public:
+    void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback); // explicit ifs, eifs, cwMin, cwMax
+    void mediumStateChanged(bool mediumFree);
+    void transmissionStateChanged(IRadio::TransmissionState transmissionState);
+    void lowerFrameReceived(bool isFcsOk);
+};
+
 class ITransmissionCompleteCallback {  //or ITransmissionListener?
     public:
        virtual void transmissionComplete(Ieee80211MacTransmission *tx) = 0; //tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
@@ -87,7 +95,6 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         Ieee80211MacTransmission(Ieee80211NewMac *mac);
         ~Ieee80211MacTransmission();
 
-        void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback);
         void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback); // explicit ifs, eifs, cwMin, cwMax
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)

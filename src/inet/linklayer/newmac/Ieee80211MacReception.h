@@ -30,6 +30,7 @@ namespace ieee80211 {
 
 class Ieee80211NewMac;
 class Ieee80211UpperMac;
+class IIeee80211MacContext;
 
 class Ieee80211MacReception : public Ieee80211MacPlugin
 {
@@ -37,6 +38,7 @@ class Ieee80211MacReception : public Ieee80211MacPlugin
         cMessage *nav = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+        IIeee80211MacContext *context; //TODO initialize!
 
     protected:
         void handleMessage(cMessage *msg);
@@ -44,14 +46,17 @@ class Ieee80211MacReception : public Ieee80211MacPlugin
         bool isFcsOk(Ieee80211Frame *frame) const;
 
     public:
+        Ieee80211MacReception(Ieee80211NewMac *mac);
+        ~Ieee80211MacReception();
+
+        void setContext(IIeee80211MacContext *context) { this->context = context; }
+
         void receptionStateChanged(IRadio::ReceptionState newReceptionState);
         void transmissionStateChanged(IRadio::TransmissionState transmissionState);
         /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
         virtual bool isMediumFree() const; //TODO "tx-to-rx switching" state should also count as busy (but not rx-to-tx, otherwise we wont be able to transmit anything with contention)
         void handleLowerFrame(Ieee80211Frame *frame);
 
-        Ieee80211MacReception(Ieee80211NewMac *mac);
-        ~Ieee80211MacReception();
 };
 
 }
