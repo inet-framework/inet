@@ -21,13 +21,13 @@ simple PacketDrillApp
 {
     parameters:
         string scriptFile;
-        double startTime @unit(s) = default(1s);
+        double startTime @unit(s) = default(0s);
         int localPort = default(1000); // port number of the initiator
         int remotePort = default(2000);
-        string localAddress = default("192.168.0.1");
-        string remoteAddress = default("192.168.0.2");
+        string localAddress;
+        string remoteAddress;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
-        double latency @unit(s) = default(0.1s);
+        double latency @unit(s) = default(0s);
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);

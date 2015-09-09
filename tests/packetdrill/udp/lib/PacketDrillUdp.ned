@@ -27,6 +27,8 @@ network PacketDrillUdp
             parameters:
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("p=544,194;i=device/server_l");
+                **.localAddress = "192.168.0.1";
+                **.remoteAddress = "192.168.0.2";
         }
     connections:
 }
