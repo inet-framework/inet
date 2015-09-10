@@ -18,9 +18,9 @@
 
 package inet.examples.manetrouting.fg80211;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network Fg80211Net
@@ -37,13 +37,13 @@ network Fg80211Net
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=140,50;i=block/cogwheel_s");
         }
     connections allowunconnected:

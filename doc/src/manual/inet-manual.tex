@@ -25,7 +25,7 @@
 \usepackage[tight]{shorttoc}   %% for generating a second table of contents, only containing chapter titles
 \usepackage{bytefield}  %% for drawing protocol frames
 \usepackage{paralist}   %% for compact lists
-\usepackage{tocbibind}  %% makes Bibliography and Index show up in TOC
+\usepackage[nottoc]{tocbibind}  %% makes Bibliography and Index show up in TOC
 \settocbibname{References}
 
 \setlength{\textwidth}{160mm}
@@ -46,8 +46,33 @@
 %% for navigation in dvi files, only needed by old teTeX versions
 %%\usepackage{srcltx}
 
-
 %% try this for spell checking: cat ess2002.tex | ispell -l -t -a | sort | uniq | more
+
+%%
+%% The following snippet changes the horizontal spacing between the number and
+%% the title in the table of contents.
+%%
+%% http://tex.stackexchange.com/questions/33841/how-to-modify-the-space-between-the-numbers-and-text-of-sectioning-titles-in-the
+%%
+\makeatletter
+ \renewcommand*\l@section{\@dottedtocline{1}{2em}{3em}}
+ \renewcommand*\l@subsection{\@dottedtocline{2}{5em}{4em}}
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{2em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\makeatother
 
 %%
 %% OMNeT++ logo, use as {\opp}
@@ -85,6 +110,13 @@
 \fi
 
 %%
+%% Draft conditional to include unfinished parts
+%%
+\newif\ifdraft
+\draftfalse %% uncomment for final version
+%\drafttrue %% uncomment for draft version
+
+%%
 %% Generate Index
 %%
 \makeindex
@@ -113,7 +145,7 @@
 \fancyhf{}
 \renewcommand{\footrulewidth}{0.5pt}
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-\lhead{{\opp} Manual -- \leftmark}
+\lhead{INET Framework Manual -- \leftmark}
 \rfoot{\thepage}
 
 %% this is used for chapter start pages
@@ -376,7 +408,13 @@
 \include{ch-ethernet}
 \cleardoublepage
 
-\include{ch-radio}
+\include{ch-environment}
+\cleardoublepage
+
+\include{ch-power}
+\cleardoublepage
+
+\include{ch-physicallayer}
 \cleardoublepage
 
 \include{ch-80211}
@@ -397,11 +435,15 @@
 \include{ch-tcp}
 \cleardoublepage
 
+\ifdraft TODO
 \include{ch-sctp}
 \cleardoublepage
+\fi
 
+\ifdraft TODO
 \include{ch-routing}
 \cleardoublepage
+\fi
 
 \include{ch-diffserv}
 \cleardoublepage
@@ -409,8 +451,10 @@
 \include{ch-mpls}
 \cleardoublepage
 
+\ifdraft TODO
 \include{ch-apps}
 \cleardoublepage
+\fi
 
 \include{ch-history}
 \cleardoublepage

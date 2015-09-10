@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<config>
+  <interface hosts="Source1" names="eth0" address="192.168.11.100" netmask="255.255.255.0"/>
+  <interface hosts="Host1" names="eth0" address="192.168.25.100" netmask="255.255.255.0"/>
+  <interface hosts="Host2" names="eth0" address="192.168.22.100" netmask="255.255.255.0"/>
+  <interface hosts="Host3" names="eth0" address="192.168.35.100" netmask="255.255.255.0"/>
+  <interface hosts="Source2" names="eth0" address="192.168.33.100" netmask="255.255.255.0"/>
+
+  <interface hosts="R1" names="eth0" address="192.168.12.1" netmask="255.255.255.0"/>
+  <interface hosts="R1" names="eth1" address="192.168.13.1" netmask="255.255.255.0"/>
+  <interface hosts="R1" names="eth2" address="192.168.11.1" netmask="255.255.255.0"/>
+  <interface hosts="R2" names="eth0" address="192.168.12.2" netmask="255.255.255.0"/>
+  <interface hosts="R2" names="eth1" address="192.168.25.2" netmask="255.255.255.0"/>
+  <interface hosts="R2" names="eth2" address="192.168.22.2" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth0" address="192.168.13.3" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth1" address="192.168.33.3" netmask="255.255.255.0"/>
+  <interface hosts="R3" names="eth2" address="192.168.35.3" netmask="255.255.255.0"/>
+
+  <route hosts="Source1" destination="*" gateway="R1"/>
+  <route hosts="Host1 Host2" destination="*" gateway="R2"/>
+  <route hosts="Source2 Host3" destination="*" gateway="R3"/>
+
+  <route hosts="R1" destination="192.168.22.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R1" destination="192.168.25.0" netmask="255.255.255.0" gateway="R2"/>
+  <route hosts="R1" destination="192.168.33.0" netmask="255.255.255.0" gateway="R3"/>
+  <route hosts="R1" destination="192.168.35.0" netmask="255.255.255.0" gateway="R3"/>
+
+  <route hosts="R2" destination="192.168.11.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R2" destination="192.168.33.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R2" destination="192.168.35.0" netmask="255.255.255.0" gateway="R1"/>
+
+  <route hosts="R3" destination="192.168.11.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R3" destination="192.168.22.0" netmask="255.255.255.0" gateway="R1"/>
+  <route hosts="R3" destination="192.168.25.0" netmask="255.255.255.0" gateway="R1"/>
+
+  <multicast-group hosts="Host2" address="226.1.1.1"/>
+
+</config>

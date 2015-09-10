@@ -17,11 +17,12 @@
 
 package inet.examples.dhcp;
 
-import inet.nodes.ethernet.Eth10M;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.base.LifecycleController;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth10M;
+import inet.node.inet.StandardHost;
+
 
 network DHCPShutdownReboot
 {

@@ -14,11 +14,10 @@
 
 package inet.examples.mpls.ldp;
 
-import inet.base.LifecycleController;
-import inet.base.UnimplementedModule;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.LDP_LSR;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.LDP_LSR;
 import ned.DatarateChannel;
 
 

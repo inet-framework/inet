@@ -1,0 +1,306 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-16  Zoltan Bojthe
+
+    Refactored and cleaned up TCP header options
+
+2015-03-12  Zoltan Bojthe
+
+    Fixed TCP/UDP checksum.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-18  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-11-18  Zoltan Bojthe
+
+	TCP_NSC/TCP_LWIP: icon was missing in ned files
+
+2013-09-27  Andras Varga
+
+	ev.printf is going to be removed in OMNeT++ 5.0
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-17  Zoltan Bojthe
+
+	TCP_lwIP,TCP_NSC: added ILifecycle as base class, but operations throw
+	error for now:
+	- throw error when nodeStatus is not UP in initialize()
+	- throw error when a lifecycle operation arrives
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-08  Zoltan Bojthe
+
+	Fixes for sending notifications to application layer
+
+2012-11-06  Zoltan Bojthe
+
+	Bugfix: TCP_NSC pointer in TCP_NSC_Connection was NULL
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-03-04  Zoltan Bojthe
+
+	ICMP messages are correctly handled now.
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-08  Andras Varga
+
+	TCP (INET,lwIP,NSC): renamed DataStreamQueue classes to ByteStreamQueue
+
+2011-12-20  Zoltan Bojthe
+
+	TCP bugfix: set msg kind in status response to TCP_I_STATUS
+
+2012-01-11  Zoltan Bojthe
+
+	remove support for OMNeT++ version 3.x (INET already requires 4.2)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-09-15  Zoltan Bojthe
+
+	Fixes for ev.disable_tracing
+
+	Also copied back old updateDisplayString() function to SCTP
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-06  Zoltan Bojthe
+
+	makefrag sets some include/library flags based on feature selection
+
+	 - makefrag checks installation of required libraries.
+	- and add tests for some features in source files for
+	  checking library existing.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-18  Zoltan Bojthe
+
+	TCP_LWIP, TCP_NSC: code style, #include
+
+2011-03-08  Zoltan Bojthe
+
+	Features: TCP_BASE, TCP_INET features added
+
+2011-03-03  Zoltan Bojthe
+
+	features: TCP_NSC, TCP_lwip, IPv6 completed
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Zoltan Bojthe
+
+	TCP, TCP_NSC: code styling
+
+2011-02-28  Zoltan Bojthe
+
+	TCP_NSC: error reporting, code style changes
+
+2011-02-28  Zoltan Bojthe
+
+	TCP_NSC: StatusInfo fix
+
+2011-02-28  Zoltan Bojthe
+
+	NEDDOC: Fixes in TCP documentations
+
+2011-02-28  Zoltan Bojthe
+
+	TCP_NSC: fill addresses/ports in StatusInfo
+
+2011-02-28  Zoltan Bojthe
+
+	ITCP, TCP_lwip, TCP_NSC, TCPCommand: modify documentations
+
+2011-02-24  Zoltan Bojthe
+
+	TCP, TCP_NSC, TCP_lwip: implemented "bytestream" transfer modes
+
+	also refactoring of queues for "object" and "bytecount" transfer modes
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-24  Zoltan Bojthe
+
+	Obsolete parameters in NED files
+
+2011-02-23  Zoltan Bojthe
+
+	TCP* : stop with error when someone uses old sendQueueClass /
+	receiveQueueClass parameters
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-02-17  Zoltan Bojthe
+
+	TCP NSC: remove unwanted decode_tcp()
+
+2011-01-11  Zoltan Bojthe
+
+	tcp*: remove some FIXME, correcting tcpEV macro
+
+2010-05-25  Andras Varga
+
+	use TCPDataTransferMode enum instead of int; comment refinements; other
+	cosmetic changes
+
+2010-05-20  Zoltan Bojthe
+
+	change method of sendqueue/receivequeue creating
+
+2010-05-20  Zoltan Bojthe
+
+	eliminate some compiler warnings
+
+2010-05-19  Zoltan Bojthe
+
+	Rename TCP transfer modes.
+
+2010-05-18  Zoltan Bojthe
+
+	initial version of TCPtransfermode
+
+2010-04-29  Zoltan Bojthe
+
+	refine includes in tcp_nsc for prevent compile error
+
+2010-05-25  Zoltan Bojthe
+
+	Eliminate compiler warnings in TCP_NSC
+
+2010-05-25  Andras Varga
+
+	use TCPDataTransferMode enum instead of int; comment refinements; other
+	cosmetic changes
+
+2010-05-20  Zoltan Bojthe
+
+	change method of sendqueue/receivequeue creating
+
+2010-05-20  Zoltan Bojthe
+
+	eliminate some compiler warnings
+
+2010-05-19  Zoltan Bojthe
+
+	Rename TCP transfer modes.
+
+2010-05-18  Zoltan Bojthe
+
+	initial version of TCPtransfermode
+
+2010-03-10  Zoltan Bojthe
+
+	Comment changes from Thomas Reschka
+
+2010-02-10 Andras Varga, Zoltan Bojthe, Rudolf Hornig
+
+	* Added parameters for configuring the NSC TCP stack (stack type, buffer size)
+
+2010-01-29 Andras Varga, Zoltan Bojthe, Rudolf Hornig
+
+	* Added support for NSC TCP modules. This is a new TCP implementation based
+	  on Linux/FreeBSD/OpenBSD/lwIP stacks.

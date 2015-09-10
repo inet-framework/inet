@@ -15,10 +15,11 @@
 #include <vector>
 #include <string>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
+namespace inet {
 
 /**
  * TCP client application for testing the TCP model.
@@ -139,7 +140,7 @@ void TcpTestClient::handleMessage(cMessage *msg)
         return;
     }
 
-    //ev << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
+    //EV << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
     if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
         rcvdPackets++;
@@ -159,10 +160,10 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             const char *connectAddress = par("connectAddress");
             int connectPort = par("connectPort");
 
-            socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+            socket.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort);
 
             if (par("active").boolValue())
-                socket.connect(IPvXAddress(par("connectAddress")), connectPort);
+                socket.connect(L3Address(par("connectAddress")), connectPort);
             else
                 socket.listenOnce();
             scheduleNextSend();
@@ -198,3 +199,6 @@ void TcpTestClient::finish()
 {
     EV << getFullPath() << ": received " << rcvdBytes << " bytes in " << rcvdPackets << " packets\n";
 }
+
+} // namespace inet
+

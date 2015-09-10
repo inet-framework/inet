@@ -1,0 +1,277 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-18  Levente Mészáros
+
+    Moved interface under contract.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-09  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	ARP refactoring (Andras Varga)
+	- ARP is now next to the IPv4 module not below it, so outgoing packets
+	  no longer pass through the ARP module. The IPv4 module uses the IARP
+	  interface to query the ARP cache and to initiate address resolution.
+	- Motivation:
+	  (1) performance improvement (datagrams no longer go through ARP)
+	  (2) conceptually better (packets to PPP used to go through ARP, too!)
+	  (3) more consistent with how IPv6 and NeighbourDiscovery are organized
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-17  Zoltan Bojthe
+
+	backport: InterfaceEntry: add field id to change notifications
+
+2014-01-14  Zoltan Bojthe
+
+	ARP: removed unused pendingQueue;
+
+2014-01-13  Zoltan Bojthe
+
+	backport: backported ARP, IPv4
+
+	TMP3
+
+2014-01-14  Zoltan Bojthe
+
+	backport: copied IPv4 and ARP codes from integration branch
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza
+
+	ARP: is now sensitive to IPv4 config changes (reacts to
+	NF_INTERFACE_IPv4CONFIG_CHANGED), and invalidates the cache
+	if necessary. )
+
+	Original patch modified by Zoltan Bojthe:
+	- removed localAddressVector member
+	- added 'owner' to ARPCacheEntry (used in GlobalArpCache)
+
+2013-05-09  Levente Meszaros
+
+	ARP: Fixed when there's no IP address during initialize.
+
+2013-04-17  Andras Varga
+
+	ARP: added lifecycle support
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-09  Tamas Borbely
+
+	mapping an IPv4 multicast address to a multicast MAC address as specified
+	in RFC112, section 6.4
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-12-15  Zoltan Bojthe
+
+	IPv4 bugfix #469: ARP: global cache is incompatible with dynamic module
+	creation
+
+	bug was: The initialize() and destructor functions of the ARP module
+	clear the global ARP cache. If it is called during simulation, then any
+	subsequent ARP request stops the simulation with an error.
+
+2011-12-15  Andras Varga
+
+	statistics: ARP: wording
+
+2011-08-02  Andras Varga
+
+	Set ETHERTYPE_IPv4 on outgoing packets
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-04  Zoltan Bojthe
+
+	eliminate some warnings: variable set but not used
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2010-11-22  Rudolf Hornig
+
+	Added GlobalARP support (from INETMANET)
+
+2011-02-25  Zoltan Bojthe
+
+	fix: cannot use "%d" format for size_t on 64-bit systems; use '<<' instead
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-02-22  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-07-08  Andras Varga
+
+	* ARP: performance: introduced nicOutBaseGateId for use in send(),
+	instead of looking up the gate by name each time
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-08-04  Andras Varga
+
+	ARP code moved from NetworkInterfaces/ARP/ into Network/ARP/.
+
+2004-04-26  Andras Varga
+
+	Initial revision of the ARP code, written from scratch.
+
+	If you are interested in the early history of the ARP code, change
+	to the project root and type
+
+	$ gitk -- NetworkInterfaces/ARP Network/ARP INET/src/networklayer/arp

@@ -1,0 +1,503 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-23  Zoltan Bojthe
+
+	Use incoming registerProtocol to detect icmpv6 module, removed icmpin/icmpOut gates
+
+2015-06-13  Zoltan Bojthe
+
+	Refactored IPv6 options to use TLVOptions structure.
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-13  Zoltan Bojthe
+
+	Added useAdminDist parameter to IPv6RoutingTable enable/disable the use of
+	Cisco specific routing entry extension (disabled by default).
+
+2015-02-02  Till Steinbach
+
+	Implementation is required for IPv6 feature and cannot be disabled when
+	xMIPv6 is disabled. (see header)
+
+2015-01-06  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Fixed memory leaks detected by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Dynamic registration of upper layer protocols (Levente Meszaros)
+	- TCP, UDP, SCTP, RSVP, OSPF and MANET used to have separate in/out
+	  gates in the IPv4 module. They have been merged into transportIn[]/
+	  transportOut[] gate vectors.
+	- Higher layer protocols must register their protocol numbers by
+	  sending an IPRegisterProtocolCommand in the initialization stage
+	  to IPv4.
+	- Introduced an IPSocket class that wraps the registration process
+
+	Network layer abstraction (Levente Meszaros, Andras Varga):
+	- Routing tables and routes now implement a common IRoutingTable and IRoute.
+
+	  Motivation: allow uniform access to the IPv4, IPv6 and possibly other
+	  routing tables; e.g. some wireless networks may use MAC address as
+	  network address. Also, in simulation it sometimes makes sense to work
+	  with simple abstract addresses like module names, indices or IDs.
+
+	  Being able to uniformly access routing tables containing different
+	  types of addresses makes it possible to implement routing protocols
+	  in a generic way. I.e. the same DYMO module can work with IPv6, IPv6,
+	  MAC and other addresses without change and recompiling.
+
+	- Overview:
+	  - interfaces for generic access: IRoutingTable, IRoute, INetworkDatagram, etc.
+	  - generic L3Address class that can hold all kinds of addresses (=union)
+	  - Ping refactoring (use generic addressing instead of hardcoded IPv4IPv6)
+	  - merged routing table change notification constants for IPv4 and IPv6
+
+	Directory restructuring:
+	- NetworkLayer6 was renamed to IPv6NetworkLayer and moved into src/networklayer/ipv6
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-08-07  Zoltan Bojthe
+
+	IPv6: bugfix: datagram source IP address remained unfilled when IPv6
+	sent a HL packet to neighbor discovery (ND)
+
+	Solution:
+	- IPv6 adds "IPv6-fromHL" parameter to IPv6Datagram before sending it to ND;
+	- IPv6 reads and removes the parameter when it receives an IPv6Datagram from ND
+
+	- added fromHL parameter to determineOutputInterface()
+	- handleDatagramFromNetwork() was merged to endService(), and reads
+	  fromHL value from the "IPv6-fromHL" parameter of IPv6Datagram.
+
+2013-07-05  Zoltan Bojthe
+
+	IPv6: fixes related to loopback interface and local delivery
+
+2013-07-26  Tamas Borbely
+
+	RoutingTable6: added 'forwardMulticast' parameter
+
+2013-07-26  Tamas Borbely
+
+	RoutingTable6: join ALL_NODES_2 and ALL_ROUTERS_2 (in routers)
+	multicast groups at initialization
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6 fix: clear cached routes when the interface is down or
+	the routing table is changed
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6: fire change notifications when the routes are changed
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6: added factory methods for creating route objects,
+	so that subclasses can use their own route types
+
+2013-07-25  Tamas Borbely
+
+	IPv4Route/IPv6Route: added administrative distance field
+
+	The route entries are sorted first by administrative distance, then by
+	metric. When looking up the best route for a destination, then routes
+	with lower administrative distances are preferred. Metrics are compared
+	only if the administrative distances are the same.
+
+	Default values for these distances are defined in RouteAdminDist enums,
+	but they are set only for interface and static routes.
+
+2013-06-14  Tamas Borbely
+
+	IPv6InterfaceData: added multicast data
+
+2013-04-29  Andras Varga
+
+	IPv6: lifecycle operations not supported yet
+
+2013-04-27  Andras Varga
+
+	RoutingTable6: added lifecycle support
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-05-15  Tamas Borbely
+
+	Added DSCP and ECN accessors to IPv6Datagram.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-17  Tamas Borbely
+
+	Fix #498: IPv6 ping now works on routerless networks.
+	The routing table contains an entry for the link local
+	prefix according to RFC 4861 5.1.
+
+2012-02-01  Tamas Borbely
+
+	Bug #413 is fixed; IPv6 now works with PPP. It is achieved by disabling
+	address resolution on point-to-point links.
+
+2012-02-01  Tamas Borbely
+
+	Fix #496: the destination cache does not return expired routes anymore.
+
+2012-01-03  Tamas Borbely
+
+	IPv6 tunneling is supported. Tunnels can be configured in the
+	routing file, or can be dynamically added by the createTunnel()
+	method of the IPv6Tunneling module.
+
+	Note: IPv6Tunneling was used by xMIPv6, but was disabled when
+	INET was compiled without the WITH_xMIPv6 flag.
+
+2011-12-20  Tamas Borbely
+
+	IPv6 module now ASSERTs that incoming datagrams do not
+	have the errorBit set. It is assumed that those datagrams
+	are dropped in the link layer.
+
+2011-12-15  Tamas Borbely
+
+	Transport layer don't have to specify the source address when
+	sending a multicast datagram; the IPv6 module will use the source
+	address of the outgoing interface. This earlier worked only for
+	unicast datagrams.
+
+	Note: if the destination is a solicited node multicast address (used
+	during DAD), then the datagram can be sent with unspecified source
+	address. Otherwise they are delayed until the interface obtains a
+	non-tentative address.
+
+2011-12-12  Tamas Borbely
+
+	Fragmentation and reassembly of datagrams is implemented in the IPv6
+	module. This fixes #470.
+
+2011-12-07  Tamas Borbely
+
+	Fix #473: ICMP errors are delivered to the higher layer
+	protocol that sent the datagram triggering the error.
+	This enables the UDP module to detect unopened ports.
+	Only ICMP queries are passes to the ICMPv6 module.
+
+2011-12-07  Tamas Borbely
+
+	Fix #471: wrong Interface Identifier was generated from the
+	MAC address.
+
+	Now the 7th bit of the Interface Identifier is complemented to comply
+	with RFC 4291 Appendix A.
+
+2011-08-02  Andras Varga
+
+	Set etherType=ETHERTYPE_IPv6 on outgoing datagrams
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Andras Varga
+
+	minor: use dropAndDelete() instead of drop()+delete [ZBojthe]
+
+2011-10-14  Zoltan Bojthe
+
+	adds missing dup()
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-08-02  Andras Varga
+
+	cosmetics
+
+2011-08-03  Zoltan Bojthe
+
+	RoutingTable6: bugfix
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6 related: Code style, #include optimisation
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: includes, haveClass() --> firstAvailable(), code style
+
+2011-04-14  Zoltan Bojthe
+
+	Merge branch 'topic/features_based' of xMIPv6 into topic/xMIPv6Feature
+
+	merged commit is
+	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
+
+2011-04-15  Rudolf Hornig
+
+	Removed empty.xml files. Renamed routingTableFile to routingTable. Added
+	default value to the parameter.
+
+2011-03-09  Zoltan Bojthe
+
+	Features: IPv4
+
+2011-03-18  Rudolf Hornig
+
+	Rename wrongly named localDeliver
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Rudolf Hornig
+
+	Fixed issues with routingTable6 file parameter.
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	removed obsolete and misleading !WORK_IN_PROGRESS! files
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-19  Zoltan Bojthe
+
+	IPv6: code style: reduce differences for xMIPv6
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2011-01-13  Zoltan Bojthe
+
+	minimal optimisation
+
+2011-01-13  Zoltan Bojthe
+
+	code style
+
+2011-01-13  Zoltan Bojthe
+
+	cleaning includes
+
+2011-01-13  Zoltan Bojthe
+
+	RoutingTable6: bugfix from xMIPv6 code
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2011-01-06  Zoltan Bojthe
+
+	cosmetic changes: indentation, spell checking
+
+2011-01-05  Zoltan Bojthe
+
+	minimal changes
+
+2010-12-21  Zoltan Bojthe
+
+	IPv6InterfaceData: getter functions be const
+
+	and name of getter functions be get....()
+
+2010-12-17  Zoltan Bojthe
+
+	code styling
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: identically change in RoutingTable6.cc
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: reordering fields of struct AdvPrefix
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6: add missing dup() function
+
+2010-12-15  Zoltan Bojthe
+
+	code style changes
+
+	add/remove empty lines move "break" to new line
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: Extension Header MSG refactoring
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: extension header in controlinfo
+
+2010-12-10  Zoltan Bojthe
+
+	IPv6Header: change type of fields to uint8 from unsigned char
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2010-02-27  Andras Varga
+
+	IPv6Datagram can now use ExtensionHeader's dup()
+
+2009-12-21  Andras Varga
+
+	fix: IP: fragmentOffset and moreFragments header fields were not cleared
+	on reassembled datagrams; fix typo [reported by vire]
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-07-02  Andras Varga
+
+	* RoutingTable6: now it listens to interface changes
+
+	* RoutingTable6: properly fire notifications on routing table changes
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-08-04  Andras Varga
+
+	* checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
+	Monash University; code skeleton and some initial code
+	implemented by Andras Varga
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Network/IPv6 INET/src/networklayer/ipv6

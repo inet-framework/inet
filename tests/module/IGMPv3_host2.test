@@ -1,0 +1,60 @@
+%description:
+
+Checks that a host responds to a General Query with a correct response.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=300s
+cmdenv-express-mode = false
+#cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = false
+**.multicastForwarding = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1" sources="10.0.0.1"/>
+<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+
+<set-filter t="3" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
+<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
+<send t="3" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# First check that the join was successful
+%#
+%postrun-command: grep "IGMPTester: .*groups =" test.out > groups.out || true
+%contains: groups.out
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
+
+%#
+%# Now check that the IGMP module responded with a correct report
+%#
+%postrun-command: grep "IGMPTester: .*Received" test.out > received.out || true
+%contains-regex: received.out
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_IN 10.0.0.1>.
+.*
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_EX 10.0.0.2>.
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

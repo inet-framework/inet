@@ -1,0 +1,89 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-04-02  Benjamin Seregi
+
+    Ieee80211ErrorModelBase, Ieee80211{Nist,Yans}ErrorModel: removed chunk
+    mode abstraction.
+
+2015-02-24  Levente Mészáros
+
+	Removed header success rate calculation from Ieee80211BerTableErrorModel.
+	The returned packet error rate value should already include all possible
+	header errors. Updated fingerprints.
+
+	Refactored 802.11 error models to reflect recent changes in the mode descriptors.
+	Introduced bps and Hz units where appropriate. Extracted
+	Ieee80211BerTableErrorModel as a separate error model. Removed opMode and
+	autoHeaderSize parameters for Ieee80211NistErrorModel and
+	Ieee80211YansErrorModel. They rather use the meta data on the transmission.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-28  Andras Varga
+
+	cosmetics: end-line spaces removed, using spaces.pl in OMNeT++.
+
+2011-05-11  Andras Varga
+
+	Compile fixes for MSVC
+
+	- disambiguate arg types for pow(), sqrt(), etc. (ambiguity caused
+	compile errors)
+	- added implementations for missing C99 functions
+	- MSVC does not have <stdint.h>, but most of its declarations are
+	already provided by <omnetpp.h>
+
+2011-04-15  Rudolf Hornig
+
+	Added new ieee802.11 model from INETMANET, supporting a,b,g,p modes.

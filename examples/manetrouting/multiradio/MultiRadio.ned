@@ -16,23 +16,21 @@
 //
 package inet.examples.manetrouting.multiradio;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 //
 // Models a network with several hosts. Each host may contain one or
 // more radios. Nodes are using adhoc routing to pass information.
-// It is necessary to use ChannelControlExtended instead of
-// ChannelControl because only the extended version handles multiple radios.
 //
 network MultiRadio
 {
     parameters:
         int numHosts;
     submodules:
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=83,15");
         }
         configurator: IPv4NetworkConfigurator {

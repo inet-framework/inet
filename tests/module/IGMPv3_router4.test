@@ -1,0 +1,97 @@
+%description:
+
+Checks that the router updates the list of listeners in response to reports.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = false
+#cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = true
+**.multicastForwarding = true
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- INCLUDE() -> ALLOW(10.0.0.1,10.0.0.2) -> INCLUDE(10.0.0.1,10.0.0.2) -->
+<send t="1" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="ALLOW" sources="10.0.0.1 10.0.0.2"/>
+</send>
+<dump t="1.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2) -> BLOCK(10.0.0.1) -> INCLUDE(10.0.0.1,10.0.0.2) -->
+<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="BLOCK" sources="10.0.0.1"/>
+</send>
+<dump t="2.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2) -> TO_IN(10.0.0.3) -> INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -->
+<send t="3" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_IN" sources="10.0.0.3"/>
+</send>
+<dump t="3.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -> TO_EX(10.0.0.3,10.0.0.4) -> EXCLUDE(10.0.0.3; 10.0.0.4) -->
+<send t="4" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_EX" sources="10.0.0.3 10.0.0.4"/>
+</send>
+<dump t="4.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- EXCLUDE(10.0.0.3; 10.0.0.4) -> ALLOW(10.0.0.4) -> EXCLUDE(10.0.0.3;) -->
+<send t="5" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="ALLOW" sources="10.0.0.4"/>
+</send>
+<dump t="5.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- EXCLUDE(10.0.0.3;) -> BLOCK(10.0.0.4) -> EXCLUDE(10.0.0.3,10.0.0.4;) -->
+<send t="6" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="BLOCK" sources="10.0.0.4"/>
+</send>
+<dump t="6.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- EXCLUDE(10.0.0.3,10.0.0.4;) -> TO_EX(10.0.0.1,10.0.0.3) -> EXCLUDE(10.0.0.1,10.0.0.3;) -->
+<send t="7" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_EX" sources="10.0.0.1 10.0.0.3"/>
+</send>
+<dump t="7.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<!-- EXCLUDE(10.0.0.1,10.0.0.3;) -> TO_IN(10.0.0.1,10.0.0.2) -> EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;) -->
+<send t="8" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_IN" sources="10.0.0.1 10.0.0.2"/>
+</send>
+<dump t="8.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
+%#
+%postrun-command: grep "IGMPTester: .* listeners" test.out > tester.out || true
+%contains-regex: tester.out
+IGMPTester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2.
+IGMPTester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2.
+IGMPTester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2 10.0.0.3.
+IGMPTester: eth0: listeners = 225.0.0.1 E 10.0.0.4.
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

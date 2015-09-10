@@ -18,7 +18,8 @@
 
 package inet.examples.mobility;
 
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
+
 
 network MobileNetworkWithScenario
 {

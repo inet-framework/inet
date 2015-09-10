@@ -1,0 +1,61 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-08-04  Andras Varga
+
+	HttpTools: NED files cosmetics
+
+2011-08-05  Andras Varga
+
+	HttpTools: cosmetics: remove spaces near parens
+
+2011-08-04  Andras Varga
+
+	HttpTools: introduced IHttpDirectApp; related small changes
+
+2011-11-12  Andras Varga
+
+	HttpTools: DirectHost moved into nodes/
+

@@ -1,0 +1,90 @@
+%description:
+
+Checks that a router sends Group-Specific and Group-and-Source-Specific Queries
+in response to Filter-Mode-Change and Source-List-Change records.
+See RFC 3376 6.4.2.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = false
+#cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = true
+**.multicastForwarding = true
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<!-- INCLUDE() -> ALLOW(10.0.0.1,10.0.0.2) -> INCLUDE(10.0.0.1,10.0.0.2) -->
+<send t="1" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="ALLOW" sources="10.0.0.1 10.0.0.2"/>
+</send>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2) -> BLOCK(10.0.0.1) -> INCLUDE(10.0.0.1,10.0.0.2) -->
+<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="BLOCK" sources="10.0.0.1"/>
+</send>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2) -> TO_IN(10.0.0.3) -> INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -->
+<send t="3" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_IN" sources="10.0.0.3"/>
+</send>
+
+<!-- INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -> TO_EX(10.0.0.3,10.0.0.4) -> EXCLUDE(10.0.0.3; 10.0.0.4) -->
+<send t="4" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_EX" sources="10.0.0.3 10.0.0.4"/>
+</send>
+
+<!-- EXCLUDE(10.0.0.3; 10.0.0.4) -> ALLOW(10.0.0.4) -> EXCLUDE(10.0.0.3;) -->
+<send t="5" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="ALLOW" sources="10.0.0.4"/>
+</send>
+
+<!-- EXCLUDE(10.0.0.3;) -> BLOCK(10.0.0.4) -> EXCLUDE(10.0.0.3,10.0.0.4;) -->
+<send t="6" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="BLOCK" sources="10.0.0.4"/>
+</send>
+
+<!-- EXCLUDE(10.0.0.3,10.0.0.4;) -> TO_EX(10.0.0.1,10.0.0.3) -> EXCLUDE(10.0.0.1,10.0.0.3;) -->
+<send t="7" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_EX" sources="10.0.0.1 10.0.0.3"/>
+</send>
+
+<!-- EXCLUDE(10.0.0.1,10.0.0.3;) -> TO_IN(10.0.0.1,10.0.0.2) -> EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;) -->
+<send t="8" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_IN" sources="10.0.0.1 10.0.0.2"/>
+</send>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
+%#
+%postrun-command: grep "IGMPTester: Received" test.out > tester.out || true
+%contains-regex: tester.out
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.2,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.4,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=,.*>.
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

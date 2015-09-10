@@ -1,9 +1,9 @@
-import inet.nodes.ethernet.EtherSwitch;
+import inet.node.ethernet.EtherSwitch;
 import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.world.scenario.ScenarioManager;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.common.scenario.ScenarioManager;
 
 network IGMPTestNetwork
 {
@@ -34,7 +34,7 @@ network IGMPTestNetwork
         // Querier router
         router: Router {
             @display("p=384,152");
-            forwardMulticast = true;
+            multicastForwarding = true;
         }
         etherSwitch: EtherSwitch {
             @display("p=221,151");
@@ -42,7 +42,7 @@ network IGMPTestNetwork
         // Non-querier router
         nqrouter: Router {
             @display("p=221,275");
-            forwardMulticast = true;
+            multicastForwarding = true;
         }
     connections:
         host.ethg++ <--> ethernetline <--> etherSwitch.ethg++;

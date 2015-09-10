@@ -2,10 +2,10 @@
 
 package inet.examples.rtp.unicast1;
 
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.rtp.RTPHost;
 import ned.DatarateChannel;
-import inet.nodes.rtp.RTPHost;
-import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network RTPUnicast1
@@ -19,8 +19,8 @@ network RTPUnicast1
     submodules:
         host1: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -28,8 +28,8 @@ network RTPUnicast1
         }
         host2: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -37,8 +37,8 @@ network RTPUnicast1
         }
         host3: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -46,8 +46,8 @@ network RTPUnicast1
         }
         host4: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "host1";
                 portNumber = 5004;
                 bandwidth = 8000;

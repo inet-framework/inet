@@ -18,10 +18,10 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.linklayer.IOutputQueue;
-import inet.linklayer.queue.DropTailQueue;
-import inet.linklayer.queue.PriorityScheduler;
-import inet.linklayer.queue.WRRScheduler;
+import inet.common.queue.DropTailQueue;
+import inet.common.queue.IOutputQueue;
+import inet.common.queue.PriorityScheduler;
+import inet.common.queue.WRRScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 

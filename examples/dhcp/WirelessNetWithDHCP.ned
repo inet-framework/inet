@@ -17,23 +17,23 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network WirelessNetWithDHCP
 {
     @display("bgb=590,407;bgl=2");
     int numHosts;
+    **.mgmt.numChannels = 5;
     submodules:
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=64,34");
-            numChannels = 5;
         }
         gateway: Router {
             @display("p=365,35");

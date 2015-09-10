@@ -18,12 +18,13 @@
 
 package inet.examples.manetrouting.hna;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.AdhocHost;
-import inet.nodes.inet.StandardHost;
-import inet.world.radio.ChannelControl;
-import inet.util.ThruputMeteringChannel;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
 
 network AdhocNet
 {
@@ -40,7 +41,7 @@ network AdhocNet
         }
 
     submodules:
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=83,15");
         }
 

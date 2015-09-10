@@ -8,14 +8,20 @@ src/Makefile
 src/Makefile.vc
 /doc/doxy/
 /doc/neddoc/
+/doc/src/manual/figures/*.pdf
+/doc/src/manual/inet-manual.pdf
 /examples/*/results/
 /examples/*/*/results/
 /examples/*/*/*/results/
 /tests/*/work/
+/tests/*/results*/
+*.log
+*.sim
 *.pyc
 *.pcap
 *.sca
 *.vec
+.buildlog*
 # ignore binary files
 out/
 *.so

@@ -6,9 +6,10 @@ Tests UDPSocket method calls:
 3. bind() can be called after connect().
 
 %file: TestApp.cc
-#include "UDPSocket.h"
-#include "UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
+using namespace inet;
 namespace UDPSocket_1 {
 
 class TestApp : public cSimpleModule
@@ -26,15 +27,15 @@ void TestApp::activity()
   UDPSocket s;
   s.setOutputGate(gate("udpOut"));
   s.setMulticastLoop(false);
-  s.connect(IPvXAddress("10.0.0.1"), 1000);
+  s.connect(L3Address("10.0.0.1"), 1000);
   s.bind(100);
-  s.connect(IPvXAddress("10.0.0.2"), 2000);
+  s.connect(L3Address("10.0.0.2"), 2000);
 }
 
 }
 
 %file: TestApp.ned
-import inet.applications.IUDPApp;
+import inet.applications.contract.IUDPApp;
 
 simple TestApp like IUDPApp
 {
@@ -53,20 +54,20 @@ cmdenv-message-trace = true
 **.client.udpApp[0].typename = "TestApp"
 
 %contains-regex: stdout
-SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPSetMulticastLoopCommand\)
+SENT:   src=SimpleTestNetwork\.client\.udpApp\[0\] \(id=\d+\)  dest=SimpleTestNetwork\.client\.udp \(id=\d+\)   control info: \(inet::UDPSetMulticastLoopCommand\)
 .*
-SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPConnectCommand\)
+SENT:   src=SimpleTestNetwork\.client\.udpApp\[0\] \(id=\d+\)  dest=SimpleTestNetwork\.client\.udp \(id=\d+\)   control info: \(inet::UDPConnectCommand\)
 .*
-SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPBindCommand\)
+SENT:   src=SimpleTestNetwork\.client\.udpApp\[0\] \(id=\d+\)  dest=SimpleTestNetwork\.client\.udp \(id=\d+\)   control info: \(inet::UDPBindCommand\)
 .*
-SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPConnectCommand\)
+SENT:   src=SimpleTestNetwork\.client\.udpApp\[0\] \(id=\d+\)  dest=SimpleTestNetwork\.client\.udp \(id=\d+\)   control info: \(inet::UDPConnectCommand\)
 
 %contains-regex: stdout
 Socket created: sockId=2 appGateIndex=0 localPort=1025
 .*
-Socket connected: sockId=2 appGateIndex=0 localPort=1025 remotePort=1000 remoteAddr=10.0.0.1 multicastLoop=0
+Socket connected: sockId=2 appGateIndex=0 localPort=1025 remotePort=1000 remoteAddr=10\.0\.0\.1 multicastLoop=0
 .*
-Socket connected: sockId=2 appGateIndex=0 localPort=100 remotePort=2000 remoteAddr=10.0.0.2 multicastLoop=0
+Socket connected: sockId=2 appGateIndex=0 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

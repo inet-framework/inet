@@ -12,7 +12,10 @@
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
 INET_ROOT=`pwd`
 
-export VERSION=`cat Version | sed 's/^.*-//'` 
+VERSION=`$INET_ROOT/_scripts/get_version` || exit 1
+
+echo "INET Version: $VERSION"
+
 if [ "$BUILDID" = "" ]; then
   # generate our own build identifier
   export BUILDDATE=`date +%Y%m%d`
@@ -28,10 +31,12 @@ mkdir -p $INET_ROOT/out/$DIRNAME
 
 git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
 
+echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
+
 # copying documentation
-cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+#cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir

@@ -1,0 +1,161 @@
+%description:
+QuadTreeNeighborCache test based on Ping results.
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.node.aodv.AODVRouter;
+import inet.physicallayer.idealradio.IdealRadioMedium;
+
+
+network NeighborCacheTest
+{
+    parameters:
+        int numHosts;
+    submodules:
+        radioMedium: IdealRadioMedium {
+            parameters:
+                @display("p=50,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                @display("p=50,100");
+        }
+        routingTableRecorder: RoutingTableRecorder {
+            parameters:
+                @display("p=50,150");
+        }
+        lifecycleController: LifecycleController {
+            parameters:
+                @display("p=50,200");
+        }
+        scenarioManager: ScenarioManager {
+            parameters:
+                script = default(xml("<scenario/>"));
+                @display("p=50,250");
+        }
+        host[numHosts]: AODVRouter {
+            parameters:
+                @display("i=device/pocketpc_s;r=,,#707070");
+        }
+    connections allowunconnected:
+}
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = NeighborCacheTest
+record-eventlog = true
+num-rngs = 3
+sim-time-limit = 60s
+cmdenv-express-mode = true
+cmdenv-status-frequency = 1000s
+**.mobility.rng-0 = 1
+**.wlan[*].mac.rng-0 = 2
+ned-path = .;../../../../src;../../lib
+
+# channel physical parameters
+**.wlan[*].typename = "IdealWirelessNic"
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].radioType = "IdealRadio"
+**.wlan[*].radio.transmitter.headerBitLength = 100b
+**.wlan[*].radio.transmitter.maxCommunicationRange = 250m
+**.wlan[*].radio.transmitter.maxInterferenceRange = 0m
+**.wlan[*].radio.transmitter.maxDetectionRange = 0m
+**.wlan[*].radio.receiver.ignoreInterference = true
+*.numHosts = 20
+
+# mobility
+**.host[0..1].mobilityType = "StationaryMobility"
+**.host[1].mobility.initialX = 600m
+**.host[1].mobility.initialY = 600m
+**.host[2..20].mobilityType = "LinearMobility"
+**.host[2..20].mobility.speed = 8mps
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 600m
+**.mobility.constraintAreaMaxY = 600m
+**.host[2..20].mobility.changeInterval = normal(5s, 0.1s)
+**.host[2..20].mobility.changeAngleBy = normal(0deg, 30deg)
+
+# ping app
+*.host[0].numPingApps = 1
+*.host[0].pingApp[0].startTime = uniform(1s,5s)
+*.host[0].pingApp[0].printPing = true
+*.host[0].pingApp[0].destAddr = "host[1](ipv4)"
+
+# lifecycle
+**.hasStatus = true
+
+# AODV protocol settings
+**.aodv.activeRouteTimeout = 3s
+
+# neighbor cache settigns
+**.neighborCache.refillPeriod = 1s
+
+# radio medium
+**.radioMedium.mediumLimitCache.maxCommunicationRange = 250m
+**.radioMedium.rangeFilter = "communicationRange"
+
+**.radioMedium.neighborCacheType = "QuadTreeNeighborCache"
+**.radioMedium.neighborCache.maxNumOfPointsPerQuadrant = 2
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=0 ttl=24 time=346.035830604 msec (ping0)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=1 ttl=24 time=3.733845915 msec (ping1)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=2 ttl=24 time=3.733935302 msec (ping2)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=4 ttl=24 time=348.018611011 msec (ping4)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=6 ttl=22 time=2454.574607203 msec (ping6)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=8 ttl=22 time=554.556128036 msec (ping8)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=9 ttl=22 time=1448.860234715 msec (ping9)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=11 ttl=22 time=3625.735369201 msec (ping11)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=12 ttl=22 time=2626.201570795 msec (ping12)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=15 ttl=24 time=822.381526594 msec (ping15)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=16 ttl=24 time=3.733552028 msec (ping16)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=17 ttl=24 time=3.733580561 msec (ping17)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=22 ttl=24 time=344.270524485 msec (ping22)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=23 ttl=24 time=3.733457495 msec (ping23)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=19 ttl=24 time=4410.701600734 msec (ping19)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=25 ttl=24 time=346.454001157 msec (ping25)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=26 ttl=24 time=3.73327421 msec (ping26)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=27 ttl=24 time=3.733222473 msec (ping27)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=28 ttl=24 time=3.733173946 msec (ping28)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=29 ttl=24 time=3.733128533 msec (ping29)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=30 ttl=24 time=3.733086166 msec (ping30)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=31 ttl=24 time=3.733046797 msec (ping31)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=32 ttl=24 time=3.733010407 msec (ping32)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=33 ttl=24 time=3.732977011 msec (ping33)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=34 ttl=24 time=3.732946657 msec (ping34)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=35 ttl=24 time=3.73291944 msec (ping35)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=36 ttl=24 time=3.732895492 msec (ping36)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=37 ttl=24 time=3.732875011 msec (ping37)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=38 ttl=24 time=3.732858248 msec (ping38)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=39 ttl=24 time=3.732845533 msec (ping39)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=41 ttl=22 time=1562.97359501 msec (ping41)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=43 ttl=23 time=4.68533507 msec (ping43)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=44 ttl=23 time=4.199879308 msec (ping44)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=45 ttl=23 time=4.199842638 msec (ping45)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=46 ttl=23 time=4.199809566 msec (ping46)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=48 ttl=24 time=340.01438259 msec (ping48)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=49 ttl=24 time=3.733449084 msec (ping49)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=50 ttl=24 time=3.73339418 msec (ping50)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=51 ttl=24 time=3.733351865 msec (ping51)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=52 ttl=24 time=3.733321937 msec (ping52)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=53 ttl=24 time=3.733304075 msec (ping53)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=54 ttl=24 time=3.733297866 msec (ping54)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=55 ttl=24 time=3.733302859 msec (ping55)
+NeighborCacheTest.host[0].pingApp[0]: reply of 60 bytes from 145.236.0.2 icmp_seq=56 ttl=24 time=3.73331859 msec (ping56)
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

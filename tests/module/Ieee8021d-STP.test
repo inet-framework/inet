@@ -1,0 +1,108 @@
+%description:
+
+Test RSTP treebuilding
+
+%file: test.ned
+
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherHost;
+import inet.common.lifecycle.LifecycleController;
+import inet.node.ethernet.EtherSwitch;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.configurator.L2NetworkConfigurator;
+import inet.linklayer.ieee8021d.tester.STPTester;
+
+network LargeNet
+{
+    submodules:
+        stpTester: STPTester;
+        scenarioManager: ScenarioManager;
+        l2NetworkConfigurator: L2NetworkConfigurator;
+        lifecycleController: LifecycleController;
+        
+        switch1: EtherSwitch;
+        switch2: EtherSwitch;
+        switch3: EtherSwitch;
+        switch4: EtherSwitch;
+        switch5: EtherSwitch;
+        switch6: EtherSwitch;
+        switch7: EtherSwitch;
+        switch8: EtherSwitch;
+        switch9: EtherSwitch;
+        switch10: EtherSwitch;
+        switch11: EtherSwitch;
+        
+        host1: EtherHost;
+        host2: EtherHost;
+        host3: EtherHost;
+        host4: EtherHost;
+        host5: EtherHost;
+        host6: EtherHost;
+
+    connections:
+        switch1.ethg++ <--> Eth1G <--> switch4.ethg++;
+        switch1.ethg++ <--> Eth1G <--> switch3.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch4.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch6.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch3.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch4.ethg++ <--> Eth1G <--> switch6.ethg++;
+        switch4.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch5.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch9.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch10.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch5.ethg++;
+        switch9.ethg++ <--> Eth1G <--> switch10.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch9.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch11.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch5.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch2.ethg++;
+        switch3.ethg++ <--> Eth1G <--> host3.ethg;
+        switch5.ethg++ <--> Eth1G <--> host2.ethg;
+        switch6.ethg++ <--> Eth1G <--> host1.ethg;
+        host5.ethg <--> Eth1G <--> switch9.ethg++;
+        host4.ethg <--> Eth1G <--> switch10.ethg++;
+        host6.ethg <--> Eth1G <--> switch8.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+sim-time-limit = 50s
+cmdenv-express-mode = false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.vector-recording = false
+**.agingTime = 1s
+network = LargeNet
+
+**.switch1.**.address="AAAAAA000001"
+**.switch2.**.address="AAAAAA000002"
+**.switch3.**.address="AAAAAA000003"
+**.switch4.**.address="AAAAAA000004"
+**.switch5.**.address="AAAAAA000005"
+**.switch6.**.address="AAAAAA000006"
+**.switch7.**.address="AAAAAA000007"
+**.switch8.**.address="AAAAAA000008"
+**.switch9.**.address="AAAAAA000009"
+**.switch10.**.address="AAAAAA00000A"
+**.switch11.**.address="AAAAAA00000B"
+**.host2.cli.destAddress = "LargeNet.host1"
+**.host3.cli.destAddress = "LargeNet.host1"
+**.host4.cli.destAddress = "LargeNet.host6"
+**.host5.cli.destAddress = "LargeNet.host3"
+**.host6.cli.destAddress = "LargeNet.host3"
+**.host*.cli.startTime = 10ms
+
+**.spanningTreeProtocol = "STP"
+
+%contains-regex: stdout
+
+The network topology is a tree topology
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

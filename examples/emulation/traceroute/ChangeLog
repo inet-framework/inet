@@ -1,12 +1,26 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-30  Rudolf Hornig
+
+    Network Emulation feature no longer depends on OMNeT++ to detect the
+    presence of PCAP. Instead the feature can be turned on/off by the user.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2015-03-04  ------ inet-2.6 released ------
+
 2014-11-07  ------ inet-2.5.1 released ------
 
 2014-10-29  ------ inet-2.5.0 released ------
 
 2014-06-12  ------ inet-2.4.0 released ------
 
+	* modified the example to work correctly without a "configurator" node.
 
-        * modified the example to work correctly without a "configurator" node.
-        
 2014-03-19  ------ inet-2.3.0 released ------
 
 2013-08-22  ------ inet-2.2.0 released ------
@@ -23,8 +37,8 @@
 
 2009-08-05 Thomas Reschka
 
-    * moved here from examples/sctp
+	* moved here from examples/sctp
 
 2008-..-.. Irene Ruengeler
 
-    * initial implementation
+	* initial implementation

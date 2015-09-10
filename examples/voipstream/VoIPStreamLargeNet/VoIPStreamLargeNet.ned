@@ -19,13 +19,13 @@
 
 package inet.examples.voipstream.VoIPStreamLargeNet;
 
-import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.linklayer.ethernet.EtherHub;
 import inet.linklayer.ethernet.EtherBus;
+import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
 
 
 channel cable extends DatarateChannel
@@ -43,7 +43,7 @@ module VoIPStreamSmallLAN
 {
     parameters:
         int h; // number of hosts on the hub
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -69,7 +69,7 @@ module VoIPStreamMediumLAN
     parameters:
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -111,7 +111,7 @@ module VoIPStreamLargeLAN
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
         int b; // number of hosts on the bus
-        @display("i=cloud");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     submodules:

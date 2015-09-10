@@ -1,0 +1,75 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added check for number of antennas. Added level parameter to printToStream
+    functions.
+
+2015-03-19  Levente Mészáros
+
+    Added checks for matching the used Ieee80211Mode in the mode set.
+    Fixed to use the right IIeee80211Mode to compute the header bit length.
+    Renamed the old Radio80211aControlInfo into Ieee80211ReceptionIndication.
+    Added Ieee80211TransmissionRequest with an optional IIeee80211Mode parameter.
+    This allows the mac module to determine the exact physical layer operational
+    mode.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed ieee80211/layered to ieee80211/bitlevel.
+    Moved remaining ieee80211 contents to ieee80211/packetlevel.
+
+2015-02-25  Levente Meszaros
+
+	Replaced opMode and preambleMode members with Ieee80211Mode in
+	Ieee80211*Transmitters/Iee80211*Transmissions.
+
+	Added initial implementation:
+	Ieee80211OfdmCode, Ieee80211OfdmModulation
+
+	Moved classes related to the layered implementation into the layered directory:
+	Ieee80211Interleaver, Ieee80211Scrambler
+
+	Deleted obsolete 802.11 modulation.
+
+2015-02-24  Levente Mészáros
+
+	Removed kludgie header length calculation from 802.11 transmitters.
+	For example, the old code incorrectly calculated with 24 bits (instead of
+	48 bits) long header length in DSSS mode. Updated fingerprints.
+	Removed header success rate calculation from Ieee80211BerTableErrorModel.
+	The returned packet error rate value should already include all possible
+	header errors. Updated fingerprints.
+	Added new 802.11 PHY mode description classes.
+
+2015-02-17  Levente Mészáros
+
+	Replaced double with simtime_t in duration computations to avoid rounding
+	errors. Removed superfluous, weird and precision loosing time conversion.
+	Updated fingerprints.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-19  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation:
+	BerParseFile, Ieee80211DimensionalReceiver, Ieee80211DimensionalTransmitter,
+	Ieee80211DimensionalTransmission, Ieee80211Modulation,
+	Ieee80211Radio, Ieee80211ScalarReceiver, Ieee80211ScalarTransmitter,
+	Ieee80211ScalarTransmission, Radio80211aControlInfo, Ieee80211Scrambler,
+	Ieee80211Interleaver
+
+====== inet-2.x ======

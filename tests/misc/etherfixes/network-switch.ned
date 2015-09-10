@@ -1,6 +1,6 @@
 
-import inet.nodes.ethernet.EtherHost2;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.node.ethernet.EtherHost2;
+import inet.node.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 
 

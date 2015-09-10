@@ -1,8 +1,18 @@
 #! /bin/sh
 DIR=`dirname $0`
 
-if [ -x $DIR/inet -o -x $DIR/inet.exe ]; then
-  $DIR/inet -n $DIR/../examples:$DIR $*
+# start with valgrind if the first argument is --valgrind
+VALGRIND=""
+VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+
+if [ "$1" = "--valgrind" ] ; then
+   echo "##### Running with Valgrind! ######"
+   VALGRIND="valgrind $VALGRIND_OPTIONS"
+   shift
+fi
+
+if [ -f $DIR/INET -o -f $DIR/INET.exe ]; then
+  $VALGRIND $DIR/INET -n $DIR/../tutorials:$DIR/../examples:$DIR $*
 else
-  opp_run -l $DIR/inet -n $DIR/../examples:$DIR $*
+  $VALGRIND opp_run -l $DIR/INET -n  $DIR/../tutorials:$DIR/../examples:$DIR $*
 fi

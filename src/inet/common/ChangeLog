@@ -1,0 +1,815 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-22  Andras Varga
+
+    Fixed PacketPrinter, do not access stale Transmission pointer in packet.
+
+2015-04-14  Andras Varga
+
+    Moved ResultRecorders to the INET namespace.
+
+2015-04-09  Levente Mészáros
+
+    Added reusable HeatMapFigure.
+
+2015-03-25  Benjamin Seregi
+
+    Added DelayedInitializer that supports static initalization without having
+    worry about the order.
+
+2015-03-31  Rudolf Hornig
+
+    Added patch level to the version information + a macro in NETDefs.h.
+
+2015-03-24  Levente Mészáros
+
+    Added fade out support to TrailFigure.
+
+2015-03-12  Zoltan Bojthe
+
+    Renamed ByteArrayMessage to RawPacket.
+
+2015-03-11  Zoltan Bojthe
+
+    Fixed NULL pointer error in PacketDump when IPv4Datagram doesn't have
+    encapsulated packet (typically DSRPkt)
+
+2015-03-16  Levente Mészáros
+
+    Moved generic dimensional data structures to common.
+
+2015-03-31  Rudolf Hornig
+
+	New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB.
+	where AA is the major while BB is the minor version in hex) and.
+	INET_PATCH_LEVEL (format: 0xCC is the patch level in hex).
+
+2015-03-12  Zoltan Bojthe
+
+	Renamed ByteArrayMessage to RawPacket.
+
+2015-02-24  Levente Mészáros
+
+	Added new SI bps prefixes.
+
+2015-02-25  Benjamin Seregi & Levente Mészáros
+
+	Refactored BitVector classes.
+
+2015-01-21  Irene Ruengeler & Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-09  Irene Rüngeler
+
+	Allow flushing the pcapFile after each write to ensure that all packets are
+	captured in case of a crash
+
+2014-12-10  Levente Mészáros
+
+	Removed obsolete and unpredictable findModuleWherever* and ModuleAccess class.
+
+2014-12-04  Florian Meier
+
+	Added Group count result recorder to counts the occurrences of signals with
+	the same attribute. Can for example be used to count the number of packets
+	received per source.
+
+2014-12-04  Florian Meier
+
+	Added ResultFilter for source address.
+
+2014-11-18  Zoltan Bojthe & Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-19  Levente Mészáros
+
+	Added IntervalTree cache for efficiently computing intersecting intervals.
+
+2015-02-25  Benjamin Seregi
+
+	Added a Complex number implementation.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-24  Zoltan Bojthe
+
+	Moved compatibility definitions to Compat.cc & .h
+
+2014-01-15  Zoltan Bojthe
+
+	backported xDymo
+
+2014-01-29  Zoltan Bojthe
+
+	omnet5 related fixes: getLastModuleId() --> getLastComponentId()
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-12-18  Zoltan Bojthe
+
+	OMNeT++/OMNEST version 4.3 required
+
+	removed WeightedTopology - already implemented in cTopology removed
+	OPP_Global::getModuleByPath(this, path) - uses
+	cModule::getModuleByPath(path)
+
+2013-11-25  Andras Varga
+
+	FSMA: compatibility with OMNeT++ 5.0 head
+
+2013-09-27  Andras Varga
+
+	INETDefs.h: backwards compatibility EV macros for OMNeT++ 5.0
+
+2014-01-22  Levente Meszaros
+
+	Added OperationalBase class.
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-14  Tamas Borbely
+
+	NotifierConsts.h: added new multicast-related and other notification
+	constants that will be needed by the ANSA project:
+
+	IPv4 multicast: NF_IPv4_NEW_MULTICAST, NF_IPv4_NEW_MULTICAST_DENSE,
+	NF_IPv4_NEW_MULTICAST_SPARSE, NF_IPv4_NEW_IGMP_ADDED,
+	NF_IPv4_NEW_IGMP_REMOVED, NF_IPv4_DATA_ON_NONRPF, NF_IPv4_DATA_ON_RPF,
+	NF_IPv4_RPF_CHANGE, NF_IPv4_DATA_ON_RPF_PIMSM, NF_IPv4_MDATA_REGISTER,
+	NF_IPv4_NEW_IGMP_ADDED_PISM, NF_IPv4_NEW_IGMP_REMOVED_PIMSM
+
+	IPv6 multicast: IPv6 NF_IPv6_MCAST_JOIN, NF_IPv6_MCAST_LEAVE,
+	NF_IPv6_MCAST_REGISTERED, NF_IPv6_MCAST_UNREGISTERED
+
+	Other: CLNS NF_CLNS_ROUTE_ADDED, NF_CLNS_ROUTE_DELETED,
+	NF_CLNS_ROUTE_CHANGED, NF_ISIS_ADJ_CHANGED
+
+2013-05-23  Zoltan Bojthe
+
+	Coord: fixed info(): print "(x, y, z)" instead of the pointer
+
+2013-04-29  Andras Varga
+
+	Interface operations (InterfaceOperation) removed for now
+
+2013-04-27  Andras Varga
+
+	AbstractQueue: added cancelService()
+
+2013-04-27  Andras Varga
+
+	Added lifecycle infrastructure: ILifecycle, LifecycleController,
+	NodeStatus, etc.
+
+	Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
+	NodeShutdownOperation) is applied to the submodule tree of the  node
+	(host or router) by LifecycleController. Each module can decide how to
+	handle the operation and how to store the resulting state (up/down,etc).
+	Operations can be multi-stage, and don't need to complete immediately
+	(i.e. they can take nonzero simulation time and multiple events to
+	complete).
+
+	Network nodes now also have a status submodule (type NodeStatus) with
+	the sole purpose of storing the whole node's status (up/down) and
+	displaying it via icons.
+
+	- classes: ILifecycle, LifecycleOperation (NodeOperation, InterfaceOperation),
+	  LifecycleController, NodeStatus
+	- NodeStatus module to store the network node's status (up or down)
+	- added optional NodeStatus submodule to NodeBase
+	- added a test for the basic Lifecycle infrastructure
+
+2013-04-27  Andras Varga
+
+	ModuleAccess: isNode() renamed to isNetworkNode()
+
+2013-04-14  Andras Varga
+
+	queues: added pop() to IPassiveQueue. It is useful for flushing queues
+	in MACs when they go down. clear() is not good enough because we want
+	to use packets as drop signal value.
+
+2013-04-17  Andras Varga
+
+	Removed obsolete classes QueueWithQoS and EnqueueHook
+
+2013-04-09  Zoltan Bojthe
+
+	PassiveQueueBase: optimization: removed the msgId2TimeMap, use
+	msg->arrivalTime for calculating queueing time values instead
+
+2013-03-21  Levente Meszaros
+
+	ModuleAccess: findModuleUnderContainingNode() function
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-22  Rudolf Hornig
+
+	base: fixed bug #620. The module pointer returned by a ModuleAccess
+	class is now cached only if get() was used. For get(module) no caching
+	is done.
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-05-11  Tamas Borbely
+
+	Add 'rcvdPk' signal to PassiveQueueBase. Now 'enqueuePk' signal
+	is emitted only if the the packet was stored in the queue.
+
+2012-04-26  Tamas Borbely
+
+	IPassiveQueue: added methods to manage queue listeners.
+	Listeners receives notifications about packet arrivals.
+	These notifications are required by schedulers that
+	join multiple queues.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-03-01  Andras Varga
+
+	Added createNode(), createLink() factory methods to Toplogy class.
+
+2012-02-14  Tamas Borbely
+
+	Added "multicast route changed/added/deleted" notification constants
+	to NotifierConsts.h
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-11 Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+	Added some notification codes in NotifierConstants.h for Access Point and
+	Station association / disassociation
+
+2012-02-04  Andras Varga
+
+	base: added Topology
+
+	This is a revised and expanded version of the OMNeT++ cTopology class.
+	(Makes it possible to add/remove nodes and links, etc.)  We'll put this
+	enhanced version back into OMNeT++ in the 4.3 version, but until then
+	it's available here in INET.
+
+	Changes:
+	- renamed private data members (underscore to camelcase convention)
+	- switched over to use STL containers internally instead of arrays
+	- getNodeFor(): hand-made binary search replaced by std::lower_bound
+	- new methods: addNode(), deleteNode(), addLink(), deleteLink()
+	- added Node::setPayload()/getPayload() Note: now that nodes/links can
+	be added that are not associated with modules and connections in the
+	network, methods like getModule(), getLocalGate() etc may return NULL.
+
+2012-01-09  Andras Varga
+
+	NotifierConsts: added NF_IPv4_ROUTE_CHANGED and NF_IPv6_ROUTE_CHANGED
+	notification (latter is unused yet)
+
+2012-01-19  Zoltan Bojthe
+
+	WeightedTopology now works with OMNeT++ 4.2 (without patching)
+
+2011-12-19  Zoltan Bojthe
+
+	Added WeightedTopology: it extends OMNeT++ cTopology, and adds
+	weighted shortest path computation (needed for fixing #465)
+
+	Requires OMNeT++ 4.2.1 or adding "friend class WeightedTopology;"
+	to the cTopology::Node class
+
+2012-01-05  Zoltan Bojthe
+
+	Coord: remove "copy from a pointer" constructor
+
+2012-01-04  Zoltan Bojthe
+
+	Coord: bugfix for #484: return type of *=, /=, +=, -=, and = operators
+	should be Coord& not Coord
+
+	Also fixed includes: Need INETDefs.h for INET_API in class definition.
+
+2011-12-21  Andras Varga
+
+	Sink: revised "rcvdPk" statistic:
+	- standardizing on lower case statistics titles
+	- record packet counts in a less confusing way: as rcvdPk:count instead
+	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
+	  recorded as rcvdPk:sum(packetBytes)
+
+2011-12-05  Andras Varga
+
+	base: added NED function select(index,...)
+
+	Returns the <index>th item from the rest of the argument list; numbering
+	starts from 0.
+
+2011-11-30  Andras Varga
+
+	fix of #477: erfc() implementation moved out from header file INETDefs.h
+
+2011-11-21  Zoltan Bojthe
+
+	mobility: Added result filters for IMobility and Coord classes
+
+	These filters need for recording node coordinataes in statistics.
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Zoltan Bojthe
+
+	Coord.h: minor optimization: use copy ctor instead of default ctor + op=
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+
+	Added a private copy() function per class (if needed) that contains the
+	common part of operator= and the copy constructor.
+
+	Added a private clean() function per class (if needed) that contains the
+	original code of destructor.
+
+	copy constructor
+	================
+	- explicitly calls base class copy constructor if there's a base class
+	- calls copy
+
+	<class>::<class>(const <class>& other) : <superclass>(other)
+	{
+	  //ptr = NULL; // if needed, and other initializations
+	  copy(other);
+	}
+
+	operator=
+	=========
+	- checks this==&other if class is not abstract
+	- calls clean() if need
+	- calls base class operator= if there's a base class
+	- calls copy
+	- returns *this
+
+	<class>& <class>::operator=(const <class>& other)
+	{
+	   if (this==&other) return *this; // omit if class is abstract
+	   clean(); // omit if class hasnot clean() function
+	   <superclass>::operator=(other); // omit if there is no base class
+	   copy(other);
+	   return *this;
+	}
+
+	copy
+	====
+	- is private, non-virtual and returns void
+	- does not call base class'es copy or any copy constructor or any
+	operator=
+
+	void <class>::copy(const <class>& other)
+	{
+	  <pointer> = NULL;
+	  <member> = 0;
+	  // etc
+	}
+
+	clean
+	====
+	- is private, non-virtual and returns void
+	- does not call base class'es clean function
+	- C++ code copied from destructor usually
+
+	void <class>::clean()
+	{
+	  delete <pointer>;
+	  // etc
+	}
+
+2011-09-28  Levente Meszaros
+
+	Mobility: fix bug in torus distance calculation
+
+	The old version returned NaN when the size of any dimension was zero.
+
+2011-09-15  Levente Meszaros
+
+	Mobility: reflect mobility state changes in the visual representation
+	module
+
+	Renamed hostModule to visualRepresentation. Splitted positionUpdated
+	into two functions to ease overriding. BasicModule subclasses (such as
+	mobility modules) should be useable without a full blown host. Changed
+	findHost to be able to return NULL if requested to do so. The default
+	findHost behavior did not change.
+
+2011-09-15  Levente Meszaros
+
+	Mobility: fix a bug related to adding a Coord and a number
+
+	This was possible, because C++ implicitly converted the number into a
+	Coord by treating it as a 1 dimensional coordinate.
+
+	Changed x and y arguments to be mandatory in the constructor. Added a
+	default constructor to be able to initialize arrays. Renamed
+	isInRectangle to better describe what it actually does.
+
+2011-08-05  Andras Varga
+
+	INETDefs.h: require at least OMNeT++ 4.2
+
+	due to signals, cNEDValue, conditional submodules in NED, etc.
+
+2011-08-03  Levente Meszaros
+
+	Changed findHost to search for a module upwards having @node() property.
+	Moved down NotificationBoard lookup.
+
+	We don't want to require a host to always have a NotificationBoard.
+	Looking up a NotificationBoard in BasicModule all the time is too
+	restrictive.
+
+2011-07-19  Levente Meszaros
+
+	Refactored mobility modules.
+
+	See ChangeLog in the mobility directory for details.
+
+2011-07-19  Levente Meszaros
+
+	Added 3D coordinate support from MiXiM.
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-07-07  Levente Meszaros
+
+	Deleted the obsolete Blackboard.
+
+2011-07-07  Levente Meszaros
+
+	Extended ModuleAccess::get* functions with a module parameter.
+
+2011-06-20  Andras Varga
+
+	NEDFunctions.cc: updated for NED function changes
+
+2011-06-03  Zoltan Bojthe
+
+	Added new NED function: string moduleListByPath(string modulePath,...)
+
+	Returns a space-separated list of the modules at the given path(s).
+	Based on cTopology::extractByModulePath()
+
+2011-06-03  Zoltan Bojthe
+
+	MMapBoard removed (was not really used)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-27  Zoltan Bojthe
+
+	code style, #include changes
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-05-24  Zoltan Bojthe
+
+	VoIPTool feature: misc fixes
+
+2011-05-19  Rudolf Hornig
+
+	Added a SPEED_OF_LIGHT global constant in INETDefs.h
+
+2011-05-11  Andras Varga
+
+	Compile fixes for MSVC
+
+	- disambiguate arg types for pow(), sqrt(), etc. (ambiguity caused
+	  compile errors)
+	- added implementations for missing C99 functions
+	- MSVC does not have <stdint.h>, but most of its declarations are
+	  already provided by <omnetpp.h>
+
+2011-05-10  Andras Varga
+
+	UnimplementedModule: comment, copyright header
+
+2011-05-10  Andras Varga
+
+	Packages moved: battery, mobility, scenario
+
+	mobility models: src/mobility -> src/mobility/models IMobility:
+	base/mobility -> src/mobility
+
+	battery models: src/battery -> src/battery/models IBattery (new): ->
+	src/battery
+
+	ScenarioManager: src/world -> src/world/scenario
+
+	IManetRouting: src/base/manetrouting -> src/networklayer
+
+2011-05-06  Zoltan Bojthe
+
+	IPassiveQueue: adding clear() and getNumPendingRequests()
+
+2011-04-21  Rudolf Hornig
+
+	Added UPDbasicBurst app and a global shared posix like MemoryMap
+	component (MMapBoard).
+
+2011-04-15  Rudolf Hornig
+
+	Added MANET-related constants to NotifierConsts.h
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-31  Rudolf Hornig
+
+	Migrated Obstacle, Battery, Annotation and multi-radio support from
+	INETMANET.
+
+2011-03-30  Zoltan Bojthe
+
+	NED: hasClass()/haveClass() fixes
+
+2011-03-29  Zoltan Bojthe
+
+	add NED function: hasClass
+
+2011-03-08  Rudolf Hornig
+
+	mf80211 and iee80211 can be compiled separately
+
+2011-03-08  Zoltan Bojthe
+
+	Features: SCTP
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Rudolf Hornig
+
+	Module interface renaming.
+
+2011-03-01  Rudolf Hornig
+
+	Doc and layout updates.
+
+2011-03-01  Rudolf Hornig
+
+	Dropped EmptyHook. Nop is used instead.
+
+2011-03-01  Zoltan Bojthe
+
+	NEDDOC changes
+
+2010-11-23  Rudolf Hornig
+
+	Bugfix for change channel(state must be IDLE if channel change
+	occurred).
+
+2010-11-22  Rudolf Hornig
+
+	Renamed IPlugin -> IHook
+
+2010-11-22  Rudolf Hornig
+
+	Added plugin interfaces to the network layer to be able to add
+	drop/duplicate modules, througput meters etc.
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-02-21  Zoltan Bojthe
+
+	ByteArrayBuffer bugfix
+
+2011-02-11  Zoltan Bojthe
+
+	add ByteArray class, ByteArrayMessage uses it
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-12-21  Zoltan Bojthe
+
+	NotifierConsts: add an MIPv6 constant
+
+2010-12-15  Zoltan Bojthe
+
+	code style changes
+
+	add/remove empty lines move "break" to new line
+
+2010-12-15  Zoltan Bojthe
+
+	ModuleAccess: add functions
+
+2010-09-26  Andras Varga
+
+	typos
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-02-26  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2010-06-09  Zoltan Bojthe
+
+	Add isEmpty() functions to IPassiveQueue and its child classes
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-11-05  Rudolf Hornig
+
+	Changes related to the TCP-SACK implementation from Thomas Reschka.
+
+2009-07-24  Andras Varga
+
+	Coord class: performance fixes: reduce copying and temporaries
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-09-10  Tamas Borbely
+
+	* ModuleAccess: use findModuleWhereverInNode() instead of
+	findModuleSomewhereUp. It goes up in the hierarchy up to
+	to @node module and search inside them recursively.
+
+2008-07-04  Andras Varga
+
+	* NotificationBoard: added bool hasSubscribers(int category) method.
+	By using a local boolean 'hasSubscriber' flag, it allows performance-
+	critical clients to leave out calls to fireChangeNotification() if
+	there's no one subscribed anyway. The flag should be refreshed on
+	each NF_SUBSCRIBERLIST_CHANGED notification (newly added too).
+
+2008-07-02  Andras Varga
+
+	* INotifiable: receiveChangeNotification() signature change: details
+	object pointer became "const"
+
+2008-06-30  Andras Varga
+
+	* NotifierConsts: added constants for overlay networks [from Ingmar
+	Baumgart, OverSim]
+
+2008-06-29  Andras Varga
+
+	* AbstractQueue improved so that if serviceTime is zero, it does not
+	  schedule a timer but sends out the message (i.e. invokes endService())
+	  immediately
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2006-05-09  Andras Varga
+
+	* added FSMA.h (written by Levente Meszaros for the IEEE802.11 model)
+
+2004-03-05  Andras Varga
+
+	Initial checkin of QueueBase, AbstractQueue, Sink, Join	and other
+	classes and modules as part of the IPSuite rewrite that resulted in
+	the INET Framework; see src/networklayer/ipv4/ChangeLog for a
+	detailed account.
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- src/base INET/src/base Base

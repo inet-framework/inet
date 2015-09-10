@@ -1,0 +1,263 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-30  Rudolf Hornig
+
+    Network Emulation feature no longer depends on OMNeT++ to detect the
+    presence of PCAP. Instead the feature can be turned on/off by the user.
+
+2015-03-13  Zoltan Bojthe
+
+    Drop packet only when there's an error during serialization.
+
+2015-02-23  Zoltan Bojthe
+
+    ExtInterface uses the new serializers.
+
+2015-03-30  Rudolf Hornig
+
+	The HAVE_PCAP macro is no longer used. To use the emulation feature
+	you have to install the libpcap-dev package, turn on the feature and
+	rebuild INET. Running ./configure in the omnetpp root and make changes to
+	inet/src/makefrag is no longer required.
+
+2015-03-23  Artur Scussel
+
+	On Linux pcap is now configured to use immediate mode. This results in
+	much better response times (sub ms ping responses over a local network)
+	and reduces the CPU time required for the packet capturing. On Windows
+	and MAC this API is not available so the interface still polls the
+	card every 500us. This still gives sub ms accuracy, but requires a bit more
+	CPU usage.
+
+2015-02-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-12  Zoltan Bojthe
+
+	ExtInterface fixes
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-22  Artur Scussel
+
+	and 500us on othe platforms. This allows getting much smaller response times when a
+	component receives a packet from the outside world while maintaining relatively low CPU
+	usage for polling.
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-12-02  Zoltan Bojthe
+
+	fixes for C++ 11
+
+2013-09-10  Zoltan Bojthe
+
+	cSocketRTScheduler: bugfix for OmNET 5.0
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+2013-04-09  Andras Varga
+
+	Introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+2013-03-13  Andras Varga
+
+	cSocketRTScheduler: added support for OMNeT++ 5.x
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	Renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-09-16  Zoltan Bojthe
+
+	Identical changes in ExtInterface::initialize(int stage) function
+	for more readability. In old code, stage 0 was in two code blocks.
+
+2011-09-15  Zoltan Bojthe
+
+	Fixes for ev.disable_tracing
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fix some compiler warnings.
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-27  Rudolf Hornig
+
+	IExtInterface renamed to IExternalNic for naming consistency.
+
+2011-04-27  Rudolf Hornig
+
+	ExtInterface now correctly implements IExtInterface
+
+2011-03-09  Zoltan Bojthe
+
+	IP Protocol ID constants
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-09  Zoltan Bojthe
+
+	Follow omnetpp changes related to include files:
+	include platdep/sockets.h before the platdep/timeutil.h
+
+2011-02-03  Levente Meszaros
+
+	Fix: code used obsolete display string tag to set connection line style
+	(the correct one is "ls")
+
+2010-09-30  Andras Varga
+
+	introduced a utility function for interface name creation
+
+2010-06-24  Zoltan Bojthe
+
+	Minor changes in ExtInterface
+
+	Add IPPROTO_TCP. Change some statistical variables to int. Correcting
+	output texts.
+
+2010-05-21  Andras Varga
+
+	SCTP compile fixes for msvc
+
+2010-03-11  Rudolf Hornig
+
+	Added SCTP patch from Irene Rungeler.
+
+2009-11-05  Rudolf Hornig
+
+	Changes related to the TCP-SACK implementation from Thomas Reschka.
+
+2009-08-26  Andras Varga
+
+	cosmetics (warnings, tab-to-space, reindent, typos, dead code removal)
+
+2009-08-26  Andras Varga
+
+	mingw compile fix: redeclaration of ssize_t in cSocketRTScheduler
+
+2009-07-16  unknown
+
+	MSVC compatibility fix
+
+2009-06-15  Rudolf Hornig
+
+	Patch to fix compilation errors on Windows.
+
+2009-03-25  ------ INET-20090325 released ------
+
+2009-03-18  Michael Tuexen
+
+	Fix compilation issue on platforms not supporting libpcap. - Fix crash
+	when an runtime exception is thrown. - Fix crash on pcap status output
+	when network is rebuild. - Cleanup of code. - Tested on Mac OS X and
+	Ubuntu.
+
+2008-09-25  Irene Ruengeler
+
+	Initial version of the external interface, written by Christian Dankbar,
+	Irene Ruengeler and Michael Tuexen. cSocketRTScheduler is based on the
+	OMNeT++ "sockets" example simulation (Andras Varga).
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- INET/src/linklayer/ext

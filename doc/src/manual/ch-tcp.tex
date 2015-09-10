@@ -1235,7 +1235,7 @@ sends 16K of data and closes the connection may be as simple as this
 
 \begin{cpp}
 TCPSocket socket;
-socket.connect(IPvXAddress("10.0.0.2"), 2000);
+socket.connect(L3AddressResolver().resolve("10.0.0.2"), 2000);
 
 msg = new cMessage("data1");
 msg->setByteLength(16*1024);  16K

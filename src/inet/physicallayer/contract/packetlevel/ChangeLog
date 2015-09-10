@@ -1,0 +1,45 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-15  Levente Mészáros
+
+    Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
+    to computeReceptionDecision.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed contract/layered to contract/bitlevel.
+    Moved remaining contract contents to contract/packetlevel.
+
+2015-02-25  Levente Meszaros
+
+	Added new interfaces for analog domain representation of radio signals:
+	IRadioSignal, IScalarSignal, IDimensionalSignal
+
+	Extended ITransmission, and IReception interfaces to support optional
+	PHY frame representation used by the layered implementation.
+
+2014-12-04  Florian Meier
+
+	Added Arrival to computeReception of IAnalogModel.
+
+2014-11-26  Levente Mészáros
+
+	Added computeIsReceptionSuccessful to IReceiver interface.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation:
+	IAntenna, IArrival, IAttenuation, IBackgroundNoise, IErrorModel,
+	IInterference, IListening, IListeningDecision, IModulation, INoise,
+	IObstacleLoss, IPathLoss, IPhysicalLayer, IPhysicalLayerFrame,
+	IPrintableObject, IPropagation, IRadio, IRadioFrame, IRadioMedium,
+	IReceiver, IReception IReceptionDecision, ISNIR, ITransmission, ITransmitter
+
+====== inet-2.x ======

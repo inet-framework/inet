@@ -31,17 +31,17 @@ record-eventlog = true
 
 %file: test.ned
 
-import inet.base.LifecycleController;
-import inet.nodes.inet.AdhocHost;
-import inet.nodes.inet.WirelessHost;
+import inet.common.lifecycle.LifecycleController;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.WirelessHost;
 import inet.status.NodeStatus;
-import inet.world.radio.ChannelControl;
-import inet.world.scenario.ScenarioManager;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
-        channelControl: ChannelControl;
+        radioMedium: Ieee80211ScalarRadioMedium;
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
         host: AdhocHost;

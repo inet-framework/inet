@@ -1,0 +1,82 @@
+\chapter{The Power Model}
+\label{cha:power}
+
+\section{Overview}
+
+Modeling power consumption becomes more and more important with the increasing
+number of embedded devices and the upcoming Internet of things. Mobile personal
+medical devices, large scale wireless environment monitoring devices, electric
+vehicles, solar panels, low-power wireless sensors, etc. require paying special
+attention to power consumption. The high fidelity simulation of power
+consumption allows designing power sensitive routing protocols, MAC protocols,
+physical layers, etc. which in turn results in more energy efficient devices.
+
+In order to help the modeling process the power model is separated from other
+simulation models. This separation makes the model extensible and it also allows
+easy experimentation with alternative implementations. In a nutshell the power
+model consists of the following components:
+
+\begin{itemize}
+  \item energy consumption models
+  \item energy generation models
+  \item temporary energy storage models
+\end{itemize}
+
+The following sections provide a brief overview of the power model.
+
+\section{Energy Consumer Models}
+
+These models describe the energy consumption of devices over time. For example,
+a radio consumes energy when it transmits or receives signals, or a CPU consumes
+energy when the network layer processes packets, or a display consumes energy
+when it's turned on, etc. Energy consumers connect to an energy storage that
+provides them with the required energy.
+
+The physical layer provides a \nedtype{StateBasedEnergyConsumer} module that 
+implements a simple radio energy consumption model. This model determines the
+current power consumption of the radio using module parameters for each valid
+combination of the radio mode, the transmitter state and the receiver state.
+
+In order to support testing energy storage models a simple energy consumer model
+is implemented in the \nedtype{AlternatingEnergyConsumer} module. This energy
+consumer model alternates between two modes called consumption mode and sleep
+mode. In consumption mode it consumes a randomly selected constant power for a
+random time interval. In sleep mode it doesn't consume any energy for another
+random time interval.
+ 
+\section{Energy Generator Models}
+
+These models describe the energy generation of devices over time. A solar panel,
+for example, produces energy based on time, the panel's position on the globe,
+its orientation towards the sun and the actual weather conditions. Energy
+generators connect to an energy storage that absorbs the generated energy. 
+
+In order to support testing energy storage models a simple energy generator
+model is implemented in the \nedtype{AlternatingEnergyGenerator} module.
+This energy generator model alternates between two modes called generation mode
+and sleep mode. In generation mode it generates a randomly selected constant
+power for a random time interval. In sleep mode it doesn't generate any energy
+for another random time interval.
+ 
+\section{Energy Storage Models}
+
+These models describe devices that absorb energy produced by generators, and
+provide energy for consumers. For example, an electrochemical battery in a
+mobile phone provides energy for its display, its CPU, and its communication
+devices. It might also absorb energy produced by a solar installed on its
+display, or by a portable charger plugged into the wall socket.
+
+The \nedtype{SimpleEnergyStorage} implements an energy storage model that is
+similar to a battery. It computes its residual capacity by integrating the
+difference between the total absorbed power and the total provided power over
+time. It can initiate node shutdown when the residual capacity drops below a
+configured threshold. It can also initiate node start when the residual capacity
+raises above another configured threshold. Although this model is similar to a
+real word battery it lacks some important properties such memory effect,
+self-discharge, overcharging, temperature dependence, and so on.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+

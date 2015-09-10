@@ -17,11 +17,12 @@
 //
 
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
-#include "EtherFrame_m.h"
-#include "MACAddress.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/common/MACAddress.h"
 
+namespace inet {
 
 class INET_API EthTestApp : public cSimpleModule
 {
@@ -110,4 +111,5 @@ void EthTestApp::finish()
 {
 }
 
+} // namespace inet
 

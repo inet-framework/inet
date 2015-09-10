@@ -1,0 +1,17 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation: StateBasedEnergyConsumer
+
+====== inet-2.x ======

@@ -16,29 +16,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.examples.wireless.throughput;
 
 import inet.applications.ethernet.EtherAppCli;
-import inet.base.NotificationBoard;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
-import inet.world.radio.ChannelControl;
-
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
-        @node();
+        @networkNode();
+        *.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,70");
-        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -72,7 +66,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=61,46");
         }

@@ -1,0 +1,353 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-02-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-21  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
+2013-04-09  Andras Varga
+
+	introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+	Details:
+	- introduce isOperational etc in MACs
+	- remove hasSubscribers optimization from PPP, we'll use signals soon
+	anyway
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-04-26  Zoltan Bojthe
+
+	PPP: bugfix: use the interface table only if it exists
+	a runtime error was thrown if no interface table was present in the host
+
+	PPPInterface:
+	- renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+
+2012-04-24  Tamas Borbely
+
+	PPPInterface: compound modules are accepted as external queue
+	module. The module must implement IOutputQueue, and the C++
+	class of the simple module connected to the "out" gate must
+	implement IPassiveQueue.
+
+2012-04-13  Tamas Borbely
+
+	Added optional ITrafficConditioner modules into the
+	ingress and egress path of PPPInterface.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-12-22  Andras Varga
+
+	statistics of PPP revised:
+	- lowercase names, consistent with other modules
+	- record packet counts in a less confusing way: as rcvdPk:count instead
+	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
+	  recorded as rcvdPk:sum(packetBytes)
+
+2011-12-08  Zoltan Bojthe
+
+	PPPInterface:
+	- use queueType="" to turn off external queue module (old setting was
+	  queueType="NoQueue")
+	- queue module is now conditional (not present if queueType="")
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-18  Zoltan Bojthe
+
+	NEDDOC fixes
+
+2011-08-15  Andras Varga
+
+	Adapted units to recent OMNeT++ change: replaced Kbps,KB,MB,GB with
+	kbps,KiB,MiB,GiB
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Zoltan Bojthe
+
+	PPP bugfix: notified when datarate changed on channel
+
+	bug was the next:
+	 FIXME: The module does not notice if the datarate of the channel
+	changed!
+	 It should update the interface entry.
+
+	also some code style changes
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-05-24  Zoltan Bojthe
+
+	added the following signals for use with the new PcapRecorder:
+	packetSentToLower, packetReceivedFromLower, packetSentToUpper,
+	packetReceivedFromUpper; data type is cPacket*.
+
+2011-05-13  Zoltan Bojthe
+
+	PPPInterface: change txQueueLimit value when use internal queue
+
+2011-05-13  Zoltan Bojthe
+
+	PPP: fixed queue cleaning, for statistics of dropped packets
+
+2011-05-06  Zoltan Bojthe
+
+	PPP: fixed handling of link disconnect/connect
+
+2011-04-27  Tamas Borbely
+
+	fix PPP signals (rxPkBytesOk and passedUpPkBytes)
+
+2011-04-12  Rudolf Hornig
+
+	Refactoring in Ethernet and PPP interfaces. NoQueue can be used also as
+	queueType parameter. Added support for input and output hooks in NICs.
+
+2011-03-22  Zoltan Bojthe
+
+	changes simsignal_t variables to static member
+
+	also some codestyle changes, include changes
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Interfaces renamed to start with I.
+
+2011-03-01  Rudolf Hornig
+
+	IHook implementations (drop,duplicate generator and thruputmeter) has
+	moved to util directory.
+
+2011-02-28  Rudolf Hornig
+
+	Renamed INetworkInterface to IWiredNic. Support for full duplex ethernet
+	NIC.
+
+2010-11-22  Rudolf Hornig
+
+	Renamed IPlugin -> IHook
+
+2010-11-22  Rudolf Hornig
+
+	Added plugin interfaces to the network layer to be able to add
+	drop/duplicate modules, througput meters etc.
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-02-03  Levente Meszaros
+
+	Fix: code used obsolete display string tag to set connection line style
+	(the correct one is "ls")
+
+2011-01-21  Zoltan Bojthe
+
+	PPP: bugfixes
+
+	- refreshOutGateConnection called bad parameter, when gate connected
+	- check existing of TTnterfaceTable
+
+2011-01-20  Zoltan Bojthe
+
+	PPP: handle channel connection/disconnection on phys out gate
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-09-30  Andras Varga
+
+	introduced a utility function for interface name creation
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-02-26  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-24  Zoltan Bojthe
+
+	use signals for statistics recording
+
+2010-06-22  Zoltan Bojthe
+
+	minimal changes - from Thomas Reschka
+
+	commits, node positions, indentation, copyright, ...
+
+2010-05-25  Zoltan Bojthe
+
+	Correcting interpretation of ThruputMeter parameters
+
+2009-12-23  Andras Varga
+
+	fix: PPP did not unsubscribe from nb when deleted
+	[reported by Christoph Mayer]
+
+2009-11-03  Rudolf Hornig
+
+	Drop and Duplicate generators in PPP interface from Thomas Reschka
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-07-26  Andras Varga
+
+	refactored to use cGate::getDatarateChannel()
+
+2008-07-07  Andras Varga
+
+	performance: only fire notifications if someone is listening
+
+	performance: remember output gate pointer instead of looking up
+	gate by name for each send()
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-07-14  Andras Varga
+
+	PPPModule renamed to PPP
+
+2004-04-26  Andras Varga
+
+	Initial version of the PPP model.
+
+	If you are interested in the early history of the PPP code,
+	change to the project root and type
+
+	$ gitk -- NetworkInterfaces/PPP INET/src/networkinterfaces/ppp INET/src/linklayer/ppp

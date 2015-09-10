@@ -1,0 +1,286 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-20  Zoltan Bojthe
+
+    UDPPacket totalLength field renamed to totalLengthField.
+
+2015-04-10  Zoltan Bojthe
+
+    Added totalLength field to UDPPacket. The total length maybe different from
+    than getByteLength().
+
+2015-03-30  Levente Mészáros
+
+    Fixed double delete after merging master.
+
+
+2015-03-18  Levente Mészáros
+
+    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+    SCTPMessage. This change allows generic handling of transport packets. For
+    example, see TunLoopbackApp.
+
+2015-03-11  Zoltan Bojthe
+
+    Fixed udp packet size.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-11  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-17  Tey
+
+	Fixed a memory leak when handling an undeliverable packet.
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-05-10  Tamás Borbély
+
+	backport: UDP: add option to specify the source address of the sent
+	datagram
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-12-02  Zoltan Bojthe
+
+	ICMPv4: sendErrorMessage(): better check for multicast/broadcast dest
+	address -- fingerprints changed
+
+	We must not sent ICMP error in reply to any bcast/mcast packet, but
+	network-directed bcasts (e.g. 10.0.0.255) were checked for.
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-25  Tamas Borbely
+
+	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
+	option in Linux). If ReuseAddress is set to true on two sockets,
+	then they can bind to the same local address/port.
+
+	E.g. the following works:
+
+	     UDPSocket s1, s2;
+	     s1.setReuseAddress(true);
+	     s1.bind(7777);
+	     s2.setReuseAddress(true);
+	     s2.bind(IPv4Address("10.0.0.1"), 7777);
+
+	s2 will receive packets whose destination address is 10.0.0.1, s1 will
+	receive all other packets
+
+2013-05-15  Alfonso Ariza - takeover from INETMANET
+
+	UDP: Send ICMP destination unreachable messages only to unicast addresses.
+
+2013-04-24  Zoltan Bojthe
+
+	UDP: implemented lifecycle operations support
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	Fixed feature-related bugfix: possible memory leak if packet is
+	multicast and IPv4 or IPv6 feature is disabled
+
+2012-06-12  Rudolf Hornig
+
+	Code takover from INETMANET-2.0:
+	Added the possibility to specify the output interface when
+	sending an UDP packet.
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-03-12  Tamas Borbely
+
+	Changes in the UDP socket API:
+
+	The first call on an UDP socket do not need to be bind() or connect()
+	anymore. It is possible to create a socket and sending data immediately
+	by calling sendTo(). It is also possible to set socket options before
+	calling connect() or bind(). connect() can be called several times.
+	However the bind() call fails if the socket is already bound.
+
+2012-02-14  Tamas Borbely
+
+	Implement IP_MULTICAST_LOOP socket option for UDP sockets.
+	If the option is true, then a copy of sent multicast datagrams
+	will be looped back to local sockets. The option can be set
+	by calling UDPSocket::setMulticastLoop(bool). The default value
+	of the option is true.
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-09  Andras Varga
+
+	Added QoS support (Type of Service / Traffic Class) to UDP; see
+	UDPSetTypeOfServiceCommand
+
+2012-01-27  Tamas Borbely
+
+	UDP: generalize UDPJoinMulticastGroupCommand and
+	UPDLeaveMulticastGroupCommand. The new commands
+	(UDPJoinMulticastGroupsCommand and UDPLeaveMulticastGroupsCommand)
+	accept more than one multicast groups.
+
+	added two methods to UDPSocket:
+	 - joinLocalMulticastGroups() joins to multicast groups
+	   that are accepted by any interface.
+	 - leaveLocalMulticastGroups() leaves all multicast groups.
+
+	Fix: C++ type of ports in SocketDesc changed to int.
+	They should be wide enough to store valid port values +
+	the unspecified port value.
+
+2012-01-11  Zoltan Bojthe
+
+	fix for bug #516: UDP leaks multicast
+
+2011-12-21  Andras Varga
+
+	statistics:
+	- revised rcvdPk, sentPk, dropPk
+	- standardizing on lower case statistics titles
+	- record packet counts in a less confusing way: as rcvdPk:count instead
+	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
+	  recorded as rcvdPk:sum(packetBytes)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-17  Andras Varga
+
+	UDP: fix #446: when there is no socket to deliver to, decapsulated
+	packet remains in memory
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-28  Andras Varga
+
+	UDP: cosmetics: functions reordered; no other change
+
+2011-07-28  Andras Varga
+
+	Heavy API changes; added multicast, broadcast and ttl support.
+
+	Features/improvements:
+	- added support for the following socket options (see Unix setsockopt()):
+	  time-to-live (unicast and multicast), broadcast, multicast output
+	  interface, join multicast group, leave multicast group.
+	- UDPControlInfo and UDPSocket has changed, see contract/ChangeLog!
+
+	Bugs fixed:
+	- connect without bind is now supported (used to be an error)
+	- send has previously ignored the socket altogether
+	- bug: for bind, port=0 was refused
+	- it was not possible to receive broadcasts and multicasts
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2010-03-26  Andras Varga
+
+	* fix: represent port numbers with ushort
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-06-29  Andras Varga
+
+	* factored out createUDPPacket()
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-07-14  Andras Varga
+
+	* UDPModule renamed to UDP
+
+2003..2004  Andras Varga
+
+	IPSuite extensive refactoring, see networklayer/ipv4/ChangeLog
+
+2003-09-23  Andras Varga
+
+	Initial version taken over from IPSuite.
+
+	If you are interested in the early history of the UDP code, change
+	to the project root and type
+
+	$ gitk -- Transport/UDP INET/src/transport/udp

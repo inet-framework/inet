@@ -7,13 +7,14 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.world.radio.ChannelControl;
-import inet.mobility.models.StationaryMobility;
-import inet.mobility.models.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+import inet.common.queue.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.single.CircleMobility;
+import inet.mobility.static.StationaryMobility;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
 
 module Ieee80211NicAdhoc extends Ieee80211Nic
 {
@@ -29,14 +30,11 @@ module ThroughputClient
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,70");
-        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -64,14 +62,11 @@ module ThroughputServer
         int maxSrv;
         @node();
         @display("i=device/wifilaptop");
+        **.interfaceTableModule = "";
     gates:
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,70");
-        }
         sink: Sink {
             parameters:
                 @display("p=210,68,col");
@@ -112,7 +107,7 @@ network Throughput
                 wlan.mac.address = "20:00:00:00:00:0"+string(index);
                 @display("p=350,350;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=61,46");
         }
@@ -139,7 +134,7 @@ sim-time-limit = 50s
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
-**.channelControl.numChannels = 1
+**.mgmt.numChannels = 1
 
 # positions
 **.mobility.cx = 200m
@@ -149,10 +144,8 @@ sim-time-limit = 50s
 **.mobility.updateInterval = 100ms
 
 # channel physical parameters
-*.channelControl.carrierFrequency = 2.4GHz
-*.channelControl.pMax = 20mW
-*.channelControl.sat = -110dBm
-*.channelControl.alpha = 2
+*.radioMedium.mediumLimitCache.carrierFrequency = 2.4GHz
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 20mW
 
 # access point
 
@@ -182,7 +175,9 @@ Throughput.numSrv = 10
 **.cli.sendInterval = 1ms
 
 %#--------------------------------------------------------------------------------------------------------------
-%postprocess-script: check.r
+%postrun-command: Rscript check.r
+%#--------------------------------------------------------------------------------------------------------------
+%file: check.r
 #!/usr/bin/env Rscript
 
 options(echo=FALSE)
@@ -193,7 +188,7 @@ library("omnetpp", warn.conflicts=FALSE)
 scafile <- 'results/General-0.sca'
 linecount <- 10 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
-expectedRate <- 52.0 # %
+expectedRate <- 50.0 # %
 maxDeviation <- 2.0 # %   (checking expectedRate +/- maxDeviation)
 unbalancedRate <- 15.0 # %
 # begin TEST:
@@ -252,7 +247,7 @@ if(length(sinkRcvd$value) == linecount & min(sinkRcvd$isGood))
 cat("END\n")
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: check.r.out
+%contains: postrun-command(1).out
 
 OMNETPP TEST RESULT:
   IEEE80211 TEST RESULT:

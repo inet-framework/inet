@@ -1,0 +1,45 @@
+%description:
+
+Test for depletion, energy storage should be depleted but should not be charged.
+
+%file: test.ned
+
+import inet.power.storage.SimpleEnergyStorage;
+import inet.power.consumer.AlternatingEnergyConsumer;
+import inet.power.generator.AlternatingEnergyGenerator;
+
+network Test
+{
+    submodules:
+        energyStorage: SimpleEnergyStorage;
+        energyConsumer: AlternatingEnergyConsumer;
+        energyGenerator: AlternatingEnergyGenerator;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 10s
+cmdenv-express-mode = false
+
+**.energyStorage.nominalCapacity = 10 J
+**.energyStorage.initialCapacity = 5 J
+**.energyConsumer.sleepInterval = uniform(10ms, 20ms)
+**.energyConsumer.consumptionInterval = uniform(5ms, 10ms)
+**.energyConsumer.powerConsumption = uniform(2W, 4W)
+**.energyGenerator.sleepInterval = uniform(10ms, 20ms)
+**.energyGenerator.generationInterval = uniform(5ms, 10ms)
+**.energyGenerator.powerGeneration = uniform(1W, 2W)
+
+%contains: stdout
+Energy storage depleted
+%not-contains: stdout
+Energy storage charged
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

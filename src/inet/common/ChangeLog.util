@@ -1,0 +1,578 @@
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-23  Zoltan Bojthe
+
+	backport: backported XMLUtils
+
+2014-01-17  Zoltan Bojthe
+
+	Fixed compliation on Android: - int128: fmodl(long double) doesn't exist
+	on Android (suggested by Ingmar Baumgart)
+
+2013-12-18  Zoltan Bojthe
+
+	OMNeT++/OMNEST version 4.3 required
+
+	removed WeightedTopology - already implemented in cTopology removed
+	OPP_Global::getModuleByPath(this, path) - uses
+	cModule::getModuleByPath(path)
+
+2013-12-02  Zoltan Bojthe
+
+	fixes for C++ 11
+
+2013-09-10  Zoltan Bojthe
+
+	UDPSerializer: parser: parses UDP packet to ByteArrayMessage with payload
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-17  Rudolf Hornig
+
+	SCTPSerializer: support for SCTP Stream Reset (RFC 6525) (patch submitted
+	by Irene Ruengeler).
+
+2013-07-11  Rudolf Hornig
+
+	SCTPSerializer: support for SCTP Authentication (RFC 4895) (patch
+	submitted by Irene Ruengeler).
+
+2013-07-10  Rudolf Hornig
+
+	SCTPSerializer: support for Add-IP feature for SCTP (RFC 5061)
+	(patch submitted by Irene Ruengeler).
+
+2013-07-03  Rudolf Hornig
+
+	SCTPSerializer: support for Partial Reliability SCTP (RFC 3758)
+	(patch submitted by Irene Ruengeler)
+
+2013-07-02  Rudolf Hornig
+
+	SCTPSerializer: support for NR_SACK (patch submitted by Irene Ruengeler)
+
+2012-12-27  Andras Varga
+
+	FWMath.h: TraCIMobility didn't compile with MSVC
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-02-22  Andras Varga
+
+	XMLUtils: getParameterIPAddressValue() to use IPvXAddressResolver
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-15  Zoltan Bojthe
+
+	PacketDump:
+	- Fix for TCP header options
+	- Dump TCP header options in verbose mode only.
+
+2012-10-30  Zoltan Bojthe
+
+	- Removed conversion operators from Uint128
+	- Added 'explicit' for Uint128 constructor by char string uses explicit
+	conversions in manetrouting code
+
+2012-10-25  Tamas Borbely
+
+	headerserializers: compile fix for Visual C++ 10.0 and later
+	they finally have <stdint.h>
+
+2012-10-18  Rudolf Hornig
+
+	Pcap now records by default on ALL interfaces (including external IFs).
+	Added Enter_Method for better error reporting if a packet cannot be
+	serialized.
+
+2012-09-19  Zoltan Bojthe
+
+	Added an icon  to PcapRecorder
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-07-18  Zoltan Bojthe
+
+	Added Delayer
+	Renamed DropsGenerator to OrdinalBasedDropper
+	Renamed DuplicatesGenerator to OrdinalBasedDuplicator
+
+2012-06-15  Zoltan Bojthe
+
+	OMNeT++ 4.3 compatibility fixes - for cClassDescriptor changes:
+	cClassDescriptor::getArraySize() renamed to getFieldArraySize()
+
+	Added getRequiredAttribute() to XMLUtils.cc
+
+	Fixed memory leaks in SCTPSerializer.
+
+2012-05-18  Rudolf Hornig
+
+	Removed unused variable warning.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-14  Zoltan Bojthe
+
+	NetAnimTrace: add node positions to tracefile when position changed
+
+2012-02-04  Andras Varga
+
+	util: added PatternMatcher
+
+	This is a pattern matcher class for inifile-style patterns.
+
+	It's near copy of an OMNeT++ internal class (in src/common/). Since we'd
+	like to use patterns in INET (and this is generally useful
+	functionality), we'll make part of the public OMNeT++ API in the 4.3
+	version; until then we have this copy in inet/src/util/.
+
+2011-11-16  Zoltan Bojthe
+
+	int128/uint128: remove IP address and MAC address related functions
+	from int128/uint128 classes
+
+2012-01-18  Andras Varga
+
+	getAddressLevel() moved from util/common.cc to the SCTP code
+
+	That was its only usage; "address level" as a concept doesn't appear to
+	be universally useful.
+
+2012-01-18  Andras Varga
+
+	common.cc: getLevel() --> getAddressLevel(); refinements on categorization
+
+	IPv4: BROADCAST should probably be on level 0 per analogy with IPv6;
+	IETF, TEST_NET, RESERVED are unused or special-purpose, probably better
+	on level 0 as well.
+
+2012-01-05  Zoltan Bojthe
+
+	common.cc: getLevel() rewritten to be based on getAddressCategory()
+
+2012-01-11  Zoltan Bojthe
+
+	NetAnimTrace: remove #ifdef code for supporting OMNeT++ 4.0 and earlier
+	(INET already requires version 4.2)
+
+2011-12-21  Andras Varga
+
+	DropsGenerator, DuplicatesGenerator: statistics revised (rcvdPkBytes ->
+	rcvdPk, titles changed to lowercase, etc.)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-15  Andras Varga
+
+	int128/uint128: remove unnecessary includes
+
+2011-11-14  Andras Varga
+
+	int128/uint128: code style: left-align '&'; some blank lines
+
+2011-11-14  Andras Varga
+
+	int128/uint128: added original copyright statement
+
+	http://mx-3.cz/tringi/www/int128 says these files are under the
+	"zlib license", http://mx-3.cz/tringi/www/zlib_License
+
+2011-11-14  Andras Varga
+
+	int128/uint128: code style: remove redundant semicolons
+
+2011-11-14  Zoltan Bojthe
+
+	int128: rename class to Int128, to be consistent with UInt128
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimization: move some funcs to inline
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimizations for some compare functions
+
+	convert conditional tests to logical operators
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: removes "throw()" from function declarations
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: removes unnecessary "this->"
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: code style
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: operator=: the check of (this==&other) unneccessary
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimize set from string (operator=, ctor)
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimizations when n>=64 in shift operators
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: use n>=64 instead n>63 (identically changes)
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: bugfix: return value of (uint64 a< uint64 b) not sure 1
+	when a < b
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimization: use copy ctor instead operator=
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: optimizations: uses local variable instead duplicate
+	function call
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: fixes for bit position >= 128
+
+2011-11-14  Zoltan Bojthe
+
+	int128/uint128: bug #348: operator minus look wrong
+
+2011-11-10  Zoltan Bojthe
+
+	int128/uint128: bug #345: shift operators look wrong
+
+	compiler warnings (in 1.99.1) about the Uint128 shift operators in
+	1.99.1: warning C4334: '<<' : result of 32-bit shift implicitly
+	converted to 64 bits (was 64-bit shift intended?)
+
+	optimized mask creation
+
+2011-08-15  Andras Varga
+
+	Adapted units to recent OMNeT++ change: replaced Kbps,KB,MB,GB with
+	kbps,KiB,MiB,GiB
+
+2011-07-19  Levente Meszaros
+
+	Added 3D coordinate support from MiXiM.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-19  Levente Meszaros
+
+	Changed internal MACAddress representation from unsigned char[6] to
+	uint64.
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Levente Meszaros
+
+	Fix int128 conversion.
+
+2011-05-27  Levente Meszaros
+
+	Fix MSVC compilation.
+
+2011-05-26  Zoltan Bojthe
+
+	feature fixes
+
+	fixed dependencies, file positions in directory structure fixes for
+	PcapRecorder an VoIPTool
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-05-24  Andras Varga
+
+	added PcapRecorder (ZBojthe)
+
+	Details:
+	- PcapRecorder module implemented
+	- instrumented L2 modules with appropriate signals
+	- pcapRecorder[] submodule array added to NodeBase (to ease
+	instantiation in hosts/routers)
+	- PcapRecorder relies on two new classes:
+	   - PacketDump (tcpdump-like text output), and
+	   - PcapDump (pcap file writer)
+	- TCPDump factored
+	- examples refactored
+
+2011-05-11  Rudolf Hornig
+
+	Moved header serializers to the util directory.
+
+2011-05-11  Andras Varga
+
+	Compile fixes for MSVC
+
+	- disambiguate arg types for pow(), sqrt(), etc. (ambiguity caused
+	  compile errors)
+	- added implementations for missing C99 functions
+	- MSVC does not have <stdint.h>, but most of its declarations are
+	  already provided by <omnetpp.h>
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6Feature: includes, haveClass() --> firstAvailable(), code style
+
+2011-04-28  Rudolf Hornig
+
+	Added Mesh network support to Ieee80211
+
+2011-03-31  Zoltan Bojthe
+
+	new place for PowerControl; base radio feature for 802.11 features
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-31  Rudolf Hornig
+
+	Migrated Obstacle, Battery, Annotation and multi-radio support from
+	INETMANET.
+
+2011-03-18  Zoltan Bojthe
+
+	code styling
+
+2011-03-17  Zoltan Bojthe
+
+	TCPDump: minimal changes
+
+2011-03-10  Rudolf Hornig
+
+	ChannelInstaller removed. Implemented ThruputMeteringChannel instead.
+
+2011-03-10  Rudolf Hornig
+
+	Moved NAMTrace and NAMTraceWriter to the obsolete directory.
+
+2011-03-09  Zoltan Bojthe
+
+	IP Protocol ID constants
+
+2011-03-09  Zoltan Bojthe
+
+	changes related to Project Features support
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-03-01  Rudolf Hornig
+
+	IHook implementations (drop,duplicate generator and thruputmeter) has
+	moved to util directory.
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-02-02  Levente Meszaros
+
+	Follow omnetpp changes related to include files.
+
+	Include platdep/sockets.h only from those source files which really need
+	it.
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-09-30  Andras Varga
+
+	introduced a utility function for interface name creation
+
+2010-08-08  Andras Varga
+
+	move all dtd and xsd files under etc/; fix xsd ref in example
+	sniffer.xml files
+
+2010-08-06  Andras Varga
+
+	BGPv4: MessageChecker moved from src/base to src/util; also minor change
+
+	minor change: getFieldAsString() call changed use the to new version of
+	the method
+
+2010-08-05  Andras Varga
+
+	BGPv4: added LGPL headers; refined comments; space changes
+	(tab-to-space, etc)
+
+2010-08-05  Andras Varga
+
+	checked in BGPv4 code contributed by Helene Lageber
+
+2010-05-14  Zoltan Bojthe
+
+	TCPDump calculates IP header checksum
+
+2010-06-22  Zoltan Bojthe
+
+	minimal changes - from Thomas Reschka
+
+	commits, node positions, indentation, copyright, ...
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2010-05-25  Zoltan Bojthe
+
+	eliminate compiler warnings
+
+2010-04-26  Andras Varga
+
+	added NetAnimTrace module
+
+2010-03-12  Rudolf Hornig
+
+	Fixed compilation on windows. Unnecessary pthread references were
+	removed from TCP dump too.
+
+2010-03-11  Rudolf Hornig
+
+	Added SCTP patch from Irene Rungeler.
+
+2010-03-10  Zoltan Bojthe
+
+	Comment changes from Thomas Reschka
+
+2010-02-09  Zoltan Bojthe
+
+	bugfix: TCP checksum calculation
+
+2010-01-28  Zoltan Bojthe
+
+	correcting BYTE_ORDER check
+
+2009-12-15  Andras Varga
+
+	fix previous commit for mingw: use the endian macros defined in defs.h
+
+	thanks Ariza!
+
+2009-12-15  Andras Varga
+
+	Improved header serializers
+
+	- multiple copies of the same checksum functions factored out into
+	  TCPIPChecksum.h/cc
+	- TCP header serializer/parser rewritten for better option management.
+	- SCTPSerializer: checksum() renamed to crc32() because it's not the
+	  same algorithm as the convential TCP/IP checksum
+	- tcp.h: use fixed-size int types (uint16_t, etc) instead of
+	  int/short/char
+	- some whitespace change (tabs to spaces)
+
+	Author: Zoltan Bojthe
+
+2009-11-05  Rudolf Hornig
+
+	Changes related to the TCP-SACK implementation from Thomas Reschka.
+
+2009-08-26  Andras Varga
+
+	cosmetics (warnings, tab-to-space, reindent, typos, dead code removal)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2009-03-19  Michael Tuexen
+
+	Fix handling of ICMP messages.
+
+2009-03-18  Michael Tuexen
+
+	Improve compilation on Windows as reported on the omnet mailing list.
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2003-09-23  Andras Varga
+
+	Source directory created.
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- src/util INET/src/util Util

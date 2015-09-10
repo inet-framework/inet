@@ -19,8 +19,13 @@
 
 #include "TCPTester.h"
 
-#include "IPSocket.h"
-#include "IPv4ControlInfo.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+
+namespace inet {
+
+namespace tcp {
 
 TCPTesterBase::TCPTesterBase() : cSimpleModule()
 {
@@ -35,7 +40,7 @@ void TCPTesterBase::initialize()
 
 void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
 {
-    if (ev.isDisabled()) return;
+    if (getEnvir()->isDisabled()) return;
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
@@ -129,6 +134,12 @@ void TCPScriptableTester::parseScript(const char *script)
 
 void TCPScriptableTester::handleMessage(cMessage *msg)
 {
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
+    {
+        delete msg;
+        return;
+    }
+
     if (msg->isSelfMessage())
     {
         TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
@@ -140,8 +151,7 @@ void TCPScriptableTester::handleMessage(cMessage *msg)
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
     }
-    else if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
+    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
         delete msg;
     }
     else
@@ -227,6 +237,12 @@ void TCPRandomTester::initialize()
 
 void TCPRandomTester::handleMessage(cMessage *msg)
 {
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
+    {
+        delete msg;
+        return;
+    }
+
     if (msg->isSelfMessage())
     {
         TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
@@ -238,8 +254,7 @@ void TCPRandomTester::handleMessage(cMessage *msg)
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
     }
-    else if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
+    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
         delete msg;
     }
     else
@@ -298,4 +313,8 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         send(seg, fromA ? "out2" : "out1");
     }
 }
+
+} // namespace tcp
+
+} // namespace inet
 

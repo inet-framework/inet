@@ -1,5 +1,8 @@
 #include "TCPQueueTesterFunctions.h"
 
+using namespace inet;
+using namespace inet::tcp;
+
 void enqueue(TCPMsgBasedSendQueue *sq, const char *msgname, ulong numBytes)
 {
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";

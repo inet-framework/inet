@@ -1,0 +1,143 @@
+%description:
+Testing dynamic behavior of RIP routing
+
+Topology with 2 hosts and 4 routers:
+
+             RA
+           /    \
+   H1---R1        R2---H2
+           \    /
+             RB
+
+Each link has metric 1, except between R1 and RB which has metric 2.
+RA is shut down 200s and restarted at 400s.
+
+It is checked that:
+ - initially the route from R1 to H2 goes through RA and has metric 3.
+ - at 220s R1 has a route to H2 through RB and has metric 4.
+ - at 430s R1 has a route to H2 through RA again and has metric 3.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RIPRouter;
+import inet.common.scenario.ScenarioManager;
+import ned.DatarateChannel;
+
+network Test1
+{
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        H1: StandardHost;
+        R1: RIPRouter { gates: ethg[3]; }
+        RA: RIPRouter { gates: ethg[2]; }
+        RB: RIPRouter { gates: ethg[2]; }
+        R2: RIPRouter { gates: ethg[3]; }
+        H2: StandardHost;
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config>"
+                        + "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.x' />"
+                        + "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.x' />"
+                        + "<interface among='R*' address='10.0.0.x' netmask='255.255.255.x' />"
+                        + "<route hosts='H1' destination='*' gateway='R1'/>"
+                        + "<route hosts='H2' destination='*' gateway='R2'/>"
+                        + "<route hosts='R*' destination='224.0.0.0' netmask='240.0.0.0' interface='eth0'/>"
+                        + "<route hosts='R*' destination='224.0.0.0' netmask='240.0.0.0' interface='eth1'/>"
+                        + "<route hosts='R1 R2' destination='224.0.0.0' netmask='240.0.0.0' interface='eth2'/>"
+                        + "</config>");
+                addStaticRoutes = false;
+                addSubnetRoutes = false;
+                addDefaultRoutes = false;
+        }
+        lifecycleController: LifecycleController;
+        scenarioManager: ScenarioManager;
+        routingTableLogger: RoutingTableLogger;
+    connections:
+        H1.ethg++ <--> C <--> R1.ethg[0];
+        R1.ethg[1] <--> C <--> RA.ethg[0];
+        R1.ethg[2] <--> C <--> RB.ethg[0];
+        RA.ethg[1] <--> C <--> R2.ethg[1];
+        RB.ethg[1] <--> C <--> R2.ethg[2];
+        R2.ethg[0] <--> C <--> H2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: RIPConfig.xml
+<?xml version="1.0"?>
+<RIPConfig>
+  <interface among="R1 RB" metric="2"/>
+  <interface among="R? R?" metric="1"/>
+</RIPConfig>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="0"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
+    <at t="10"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
+    <at t="200"><tell module="lifecycleController" target="RA" operation="NodeShutdownOperation"/></at>
+    <at t="220"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
+    <at t="400"><tell module="lifecycleController" target="RA" operation="NodeStartOperation"/></at>
+    <at t="430"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+description = "Dynamic test"
+network = Test1
+ned-path = .;../../../../src;../../lib
+# record-eventlog = true
+# cmdenv-express-mode = false
+# debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+sim-time-limit = 600s
+
+**.arp.cacheTimeout = 1s
+
+**.ripConfig = xmldoc("RIPConfig.xml")
+**.rip.startupTime = 0s
+
+*.scenarioManager.script = xmldoc("scenario.xml")
+*.routingTableLogger.outputFile = "routes.txt"
+
+# *.rtr.module-eventlog-recording = true
+# **.module-eventlog-recording = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: routes.txt
+R1 0
+10.0.0.0/30 <unspec> eth1 IFACENETMASK .*
+10.0.0.4/30 <unspec> eth2 IFACENETMASK .*
+192.168.1.0/30 <unspec> eth0 IFACENETMASK .*
+R1 10
+10.0.0.0/30 <unspec> eth1 IFACENETMASK .*
+10.0.0.4/30 <unspec> eth2 IFACENETMASK .*
+10.0.0.8/30 10.0.0.2 eth1 RIP 2
+10.0.0.12/30 10.0.0.6 eth2 RIP 3
+192.168.1.0/30 <unspec> eth0 IFACENETMASK .*
+192.168.2.0/30 10.0.0.2 eth1 RIP 3
+R1 220
+10.0.0.0/30 <unspec> eth1 IFACENETMASK .*
+10.0.0.4/30 <unspec> eth2 IFACENETMASK .*
+10.0.0.8/30 10.0.0.6 eth2 RIP 4
+10.0.0.12/30 10.0.0.6 eth2 RIP 3
+192.168.1.0/30 <unspec> eth0 IFACENETMASK .*
+192.168.2.0/30 10.0.0.6 eth2 RIP 4
+R1 430
+10.0.0.0/30 <unspec> eth1 IFACENETMASK .*
+10.0.0.4/30 <unspec> eth2 IFACENETMASK .*
+10.0.0.8/30 10.0.0.2 eth1 RIP 2
+10.0.0.12/30 10.0.0.6 eth2 RIP 3
+192.168.1.0/30 <unspec> eth0 IFACENETMASK .*
+192.168.2.0/30 10.0.0.2 eth1 RIP 3
+END

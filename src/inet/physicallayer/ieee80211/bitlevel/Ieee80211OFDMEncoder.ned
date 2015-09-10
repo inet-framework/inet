@@ -1,0 +1,55 @@
+//
+// Copyright (C) 2014 OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// 
+
+package inet.physicallayer.ieee80211.bitlevel;
+
+import inet.physicallayer.contract.bitlevel.IEncoder;
+import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IInterleaver;
+import inet.physicallayer.contract.bitlevel.IScrambler;
+
+// This is the encoder module for the layered IEEE 802.11
+// OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).
+//
+// This module integrates the bit domain specific components
+// of the OFDM physical layer and has three main submodules:
+//
+//       - Convolutional coder (18.3.5.6 Convolutional encoder) @see ~ConvolutionalCoder
+//       - Additive scrambler (18.3.5.5 PLCP DATA scrambler and descrambler) @see ~AdditiveScrambler
+//       - Block interleaver (18.3.5.7 Data interleaving) @see ~Ieee80211OFDMInterleaver
+//
+//
+module Ieee80211OFDMEncoder like IEncoder
+{
+    parameters:
+        string fecType = default("");
+        string scramblerType = default("");
+        string interleaverType = default("");
+        @display("i=block/blackboard");
+        @class(Ieee80211OFDMEncoderModule);
+
+    submodules:
+        fecEncoder: <fecType> like IFECCoder if fecType != "" {
+            @display("p=66,156");
+        }
+        scrambler: <scramblerType> like IScrambler if scramblerType != "" {
+            @display("p=66,73");
+        }
+        interleaver: <interleaverType> like IInterleaver if interleaverType != "" {
+            @display("p=66,238");
+        }
+}

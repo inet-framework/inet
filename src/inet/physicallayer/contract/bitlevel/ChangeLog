@@ -1,0 +1,46 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed contract/layered to contract/bitlevel.
+    Moved remaining contract contents to contract/packetlevel.
+
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+	Added a completely new layered radio (physical layer) implementation.
+
+	The term layered means that the radio is capable of simulating the
+	processing steps of the packet domain, bit domain, symbol domain, sample
+	domain, and analog domain in detail. The architecture supports setting
+	the level of detail independently of other parameters.
+
+	The new layered model contains the IEEE 802.11 OFDM physical layer packet
+	domain, bit domain, and symbol domain functions: including scrambling,
+	forward error correction, interleaving, and modulation.
+
+	There's also a simple hypothetical layered radio that makes the
+	understanding of the architecture easier.
+
+	Added common interfaces for various detailed physical layer functions
+	such as FEC encoding/decoding, scrambling/descrambling,
+	interleaving/deinterleaving, modulation/demodulation, etc. Also added
+	generic interfaces for radio signal packet domain, bit domain, symbol
+	domain, sample domain and analog domain representations.
+
+	Added the following new interfaces:
+	ISignalPacketModel, ISignalBitModel, ISignalSymbolModel,
+	ISignalSampleModel, ISignalAnalogModel
+	ILayeredErrorModel, ISymbol
+	IEncoder ,IDecoder, IFECCoder, IInterleaver, IScrambler
+	IModulator, IDemodulator,
+	IPulseShaper, IPulseFilter
+	IDigitalAnalogConverter, IAnalogDigitalConverter
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======

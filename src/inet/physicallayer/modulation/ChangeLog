@@ -1,0 +1,38 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-20  Benjamin Seregi
+
+    Added QBPSKModulation modulation.
+
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+	Refactored the interface and implementation of modulations.
+
+	Modulations now support the calculation of BER and SER. Added a number of
+	new base classes, interfaces and various implementations. Some
+	implementations are still incomplete.
+
+	Moved existing modulation classes from common subdirectory: BPSKModulation,
+	QPSKModulation, QAM16Modulation, QAM64Modulation and QAM256Modulation.
+	Adapted these modulations to the new modulation interface. Reimplemented the
+	calculateBER and calculateSER functions according to formulas found on
+	wikipedia.
+
+	Added an initial implementation for modulations used by the 802.11 PHY:
+	DBPSKModulation, DQPSKModulation, 2GFSKModulation, 4GFSKModulation,
+	4PPMModulation, 16PPMModulation
+
+	Added an initial implementation for some other generic modulations:
+	MASKModulation, MFSKModulation, MPSKModulation.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======

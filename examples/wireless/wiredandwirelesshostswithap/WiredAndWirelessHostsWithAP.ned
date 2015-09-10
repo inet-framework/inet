@@ -1,16 +1,16 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 package inet.examples.wireless.wiredandwirelesshostswithap;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network WiredAndWirelessHostsWithAP
@@ -37,7 +37,7 @@ network WiredAndWirelessHostsWithAP
                 assignDisjunctSubnetAddresses = false;
                 @display("p=367,165");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=115,165");
         }
     connections:

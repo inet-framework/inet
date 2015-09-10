@@ -21,4 +21,4 @@ digraph g {
   
   BACKOFF -> WAIT_IFG [ label="no carrier" ]
   BACKOFF -> TX_IDLE [ label="carrier detected"]
-};
+}

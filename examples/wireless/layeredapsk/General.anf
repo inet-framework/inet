@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/wireless/layeredapsk/results/*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Packet loss">
+      <items xsi:type="scave:Add" filterPattern="distance"/>
+      <items xsi:type="scave:Add" filterPattern="&quot;ping loss rate (%)&quot;"/>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(.) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot;"/>
+        <properties name="X.Axis.Title" value="distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <isoDataPattern>detail(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.2"/>
+  </chartSheets>
+</scave:Analysis>

@@ -18,8 +18,8 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
+import inet.node.inet.WirelessHost;
 
 
 //

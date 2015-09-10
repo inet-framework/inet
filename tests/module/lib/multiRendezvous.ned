@@ -1,6 +1,6 @@
-import inet.nodes.inet.StandardHost;
-import inet.transport.sctp.SCTPNatRouter;
-import inet.nodes.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.sctp.SCTPNatRouter;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 network multiRendezvous {
@@ -11,21 +11,21 @@ network multiRendezvous {
     submodules:
         Peer_1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
         @display("p=56,156;i=device/laptop");
             gates:
                 pppg[2];
     }
         Peer_2: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
         @display("p=436,160;i=device/laptop");
             gates:
                 pppg[2];
     }
         Server: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
         @display("p=252,140;i=device/server");
             gates:
                 pppg[2];

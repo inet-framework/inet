@@ -1,0 +1,42 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-18  Levente Mészáros
+
+    802.15.4 UWBIR: Moved under bitlevel, because it actually simulates the
+    bits.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed ieee802154 to ieee802154/packetlevel.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Florian Meier
+
+	Fixed physical layer characteristics.
+
+	Signed-off-by: Florian Meier <florian.meier@koalo.de>
+
+2014-12-02  Florian Meier
+
+	Added an IEEE 802.15.4 Narrowband Physical and Link Layer.
+
+	Default settings for the MAC are taken from the 802.15.4-2006 standard.
+	Uses BreakpointPathLoss taken from 802.15.4-2006 Standard Annex E.
+	Default radio settings are taken from the datasheet of the ATmega256RFR2.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Copied implementation from MiXiM.
+	Renamed a few things and did some minor cosmetics.
+
+====== inet-2.x ======

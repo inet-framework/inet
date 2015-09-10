@@ -1,8 +1,0 @@
-TraCI client modules to connect OMNeT++ and the SUMO road traffic simulator.
-
-This simulation requires SUMO to be started and listening for TraCI commands
-on a TCP socket, e.g. using "sumo-gui -c sumo.sumo.cfg".
-
-SUMO is an open source, highly portable, microscopic and continuous
-road traffic simulation package designed to handle large road networks.
-http://sumo.sourceforge.net

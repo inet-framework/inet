@@ -1,0 +1,56 @@
+%description:
+
+Checks the router leave latency.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=10s
+cmdenv-express-mode = false
+#cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.igmp.lastMemberQueryInterval = 1s
+**.igmp.lastMemberQueryCount = 1
+
+**.IPForward = true
+**.multicastForwarding = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<send t="1" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_EX" sources=""/>
+</send>
+<dump t="1.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Report">
+  <record group="225.0.0.1" type="TO_IN" sources=""/>
+</send>
+
+<dump t="3.001" module="node.tester" ifname="eth0" what="listeners"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
+%#
+%postrun-command: grep "IGMPTester: .* listeners" test.out > tester.out || true
+%contains: tester.out
+IGMPTester: eth0: listeners = 225.0.0.1 E.
+IGMPTester: eth0: listeners = .
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

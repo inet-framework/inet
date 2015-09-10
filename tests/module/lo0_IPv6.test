@@ -5,7 +5,7 @@ UDP communication via lo0 interface
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.nodes.ipv6.StandardHost6;
+import inet.node.ipv6.StandardHost6;
 
 network LocalUDP
 {

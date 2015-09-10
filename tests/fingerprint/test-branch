@@ -8,9 +8,15 @@
 # so commits that break things can be viewed with 'gitk'.
 #
 
+if [ $# -eq 0 ]
+  then
+    echo "Usage: test-branch <start> <end>"
+    exit
+fi
+
 # range of commits to test; edit to your needs
-ENDREV=topic/failover
-STARTREV=topic/tcp
+STARTREV=$1
+ENDREV=$2
 
 # build and fingerprint threads
 THREADS=7

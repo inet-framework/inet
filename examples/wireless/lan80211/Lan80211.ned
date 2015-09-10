@@ -18,16 +18,17 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network Lan80211
 {
     parameters:
         int numHosts;
+        **.mgmt.numChannels = 2;
     submodules:
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
@@ -37,12 +38,11 @@ network Lan80211
             @display("p=213,174;r=,,#707070");
             wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelControl: ChannelControl {
-            numChannels = 2;
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=61,46");
         }
         configurator: IPv4NetworkConfigurator {
-            config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+            config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
             @display("p=140,50");
         }
 }

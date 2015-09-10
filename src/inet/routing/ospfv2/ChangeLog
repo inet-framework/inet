@@ -1,0 +1,284 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-14  Andras Varga
+
+    Use Enter_Method_Silent() to set/restore OMNeT++ context.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-09  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-12  Zoltan Bojthe
+
+	Fixed router module for disabled features.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Directory restructuring:
+	- code moved from networklayer/ospfv2/ to routing/ospfv2/
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet::ospf namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2014-01-24  Zoltan Bojthe
+
+	backport: fix access-after-send of msg objects (it's illegal)
+
+	- OrdinalBasedDuplicator: fixed order of emit(packet) / send(packet)
+	- OSPF bugfix: msg pointer was used after send(msg)
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-24  Andras Varga
+
+	OSPFRouting: added lifecyle operations support
+
+2013-04-22  Andras Varga
+
+	OSPFRouting: eliminated pointless timer class
+
+2013-04-18  Andras Varga
+
+	OSPFRouting: configuration reader factored out
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	- changed the signature of OSPF::insertExternalRoute()
+	- a single IPv4AddressRange can be added to an Area only once
+	- OSPF IPv4AddressRange changes:
+	    added some functions and operators, removed IPv4AddressRange_Less class
+	- use std::set instead std::map, use type AreaID instead std::string in OSPFRouting
+	- remove IPv4Address_Less, maps can use operator the '<' operator of the IPv4Address
+	- Area::info() fixes
+	- show "0.0.0.0" instead "<unspec>"
+	- the router interfaces will join the OSPF multicast groups automatically
+	- eliminate IPv4Address <--> int conversions, use IPv4Address member
+	    functions for conversions, if needed
+	- use IPv4Address type instead of unsigned long for LinkStateID, RouterID, AreaID
+	- renamed the two overloaded getArea() functions to getAreaByID() and getAreaByAddr()
+	- fixes for network address/mask comparations
+	- bugfix: do not add the network address to the nextHop list
+	- bugfix: OSPFLSAHeader comparator was asimmetric
+	    ( booth operator<(MAX_AGE,0) and operator<(0,MAX_AGE) were true at the same time)
+	- changed type of interface index from unsigned char to integer
+	- uses 224.0.0.5 224.0.0.6 constants for the OSPF multicast groups from IPv4Address.h
+	- removed checksum field from the OSPFPacket
+	- uses the byteLength field of cPacket instead packetLength of OSPFPacket
+	- now it calculates the packet length (was missing)
+	- uses IP_MAX_HEADER_BYTES from IPv4Datagram instead IPV4_HEADER_LENGTH from OSPFCommon.h
+
+	XML config changes:
+	- improved error detection in xml config
+	- replaced the ospfConfigFile string-type ned parameter with ospfConfig parameter (xml type)
+	- uses IPvXAddressResolver for reading IP address and IP netmask values from xml
+	- uses @name instead @id to identify the routers in the xml config
+	- most attributes in xml config became optional, and default values
+	    come from ned the parameters of OSPFRouting (with same name)
+	- modified xml schema: converted most subnodes to attributes
+	- Added etc/OSPFold_to_OSPFnew.xsl for converting old xml to new, and
+	    converted ospf xml files to new the format in examples
+	    (you must convert router@id to router@name by hand).
+	- add @toward attribute to XML for easier interface specification
+	    old: interfaces were specified by their name (e.g. ifName="eth0").
+	    new: interfaces can be specified by their name (e.g. ifName="eth0"),
+	    or by the name of a module connected to the interface (e.g. towards="Area3.N9")
+	- fixed OSPF.xsd schema
+
+	IPv4Route: removed RouteType type field and getType(), setType()
+	  functions, too
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-03-01  Levente Meszaros
+
+	Gateway is now correcty set on routing entries.
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-19  Andras Varga
+
+	IPv4Route: member variables made private, updated OSPFv2 and BGP
+	accordingly
+
+	OSPFv2 and BGP had redundant getters/setters in OSPFRoutingTableEntry
+	etc, they were removed
+
+2012-01-19  Andras Varga
+
+	Adapted to change: "host" in IPv4Route renamed to "destination"
+
+2012-01-09  Andras Varga
+
+	Adapted to RoutingTable change: IPv4Route pointers returned by
+	RoutingTable are no longer const
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2010-09-22  Andras Varga
+
+	Changes related to the new BGP model: OSPFRouting::insertExternalRoute(),
+	etc.
+
+2010-08-13  Andras Varga
+
+	* coding style made more consistent with the rest of the INET:
+	- changed method names to start with lower-case letter
+	- changed enum constants to all-capitals with underscores
+	- removed excessive in-line spaces
+	- removed superfluous "void" keywords from arg-less methods
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-12-11  Andras Varga
+
+	* added LGPL headers to files
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2006-05-01  Andras Varga
+
+	* checked in more patches from author of this model, Andras Babos
+
+2005-10-28  Andras Varga
+
+	Initial revision of the OSPFv2 model, written by Andras Babos for MSc
+	final project at TU Budapest, with some help from Andras Varga.
+
+	If you are interested in the early history of the OSPF code, change
+	to the project root and type
+
+	$ gitk -- Network/OSPFv2 INET/src/networklayer/ospfv2

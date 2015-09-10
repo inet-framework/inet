@@ -1,0 +1,30 @@
+%description:
+
+Test for one host pinging another.
+
+%file: test.ned
+
+network Test
+{
+    submodules:
+        polyhedron: PolyhedronTest;
+}
+
+%inifile: omnetpp.ini
+
+network = Test
+ned-path = .;../../../../src;../../lib
+
+**.objectCacheType = ""
+
+**.polyhedron.points = "0 1 1 1 1 0 0 0 0 1 0 1"
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+The algorithm is incorrect!
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

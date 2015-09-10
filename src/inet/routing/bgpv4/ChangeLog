@@ -1,0 +1,201 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-14  Andras Varga
+
+    Use Enter_Method_Silent() to set/restore OMNeT++ context.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-12  Zoltan Bojthe
+
+	Fixed router module fixes for disabled features.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Directory restructuring:
+	- code moved from networklayer/bgpv4/ to routing/bgpv4/
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet::bgp namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-29  Andras Varga
+
+	BGPRouting: lifecycle operations not supported
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-08  Zoltan Bojthe
+
+	Minor optimizations
+
+	Bugfix: The text "sets the ConnectRetryTimer to zero" means: restart this
+	timer. The _connectRetryTime member now stores the timeout value (typically 120s)
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	BGPRouting: bgpConfigFile string parameter was replaced by bgpConfig xml
+	parameter
+
+	Eliminated some int <--> IPv4Address conversions
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-03-01  Levente Meszaros
+
+	- gateway is now correcty set on routing entries.
+	- eliminated redundant nextHop field from routingtable entries
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-19  Andras Varga
+
+	IPv4Route: member variables made private, updated OSPFv2 and BGP
+	accordingly
+
+	OSPFv2 and BGP had redundant getters/setters in OSPFRoutingTableEntry
+	etc, they were removed
+
+2012-01-19  Andras Varga
+
+	Adapted to change: "host" in IPv4Route renamed to "destination"
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-19  Rudolf Hornig
+
+	BGP: global functions are now members. Minor renamings.
+
+2011-04-18  Andras Varga
+
+	BGPRouting: cosmetics
+
+2011-04-18  Andras Varga
+
+	BGPRouting cosmetics
+
+	- removed unused return value from loadConfigFromXML()
+	- findMyAS(): take "out" parameter by reference, not by pointer
+
+2011-04-18  Rudolf Hornig
+
+	BGP: Use IF table to determine my AS id.
+
+2011-04-15  Rudolf Hornig
+
+	BGP model changes. BGP is now an ITTCPApp.
+
+2011-03-17  Zoltan Bojthe
+
+	Features: BGP: dependency, include
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-14  Zoltan Bojthe
+
+	TCP datatransfermode fixes
+
+2010-12-20  Zoltan Bojthe
+
+	modify initialization order in constructor (eliminate compiler warning)
+
+2010-08-05  Andras Varga
+
+	* initial checkin of BGPv4 model contributed by Helene Lageber (email:
+	helene.lageber at gmail dot com)

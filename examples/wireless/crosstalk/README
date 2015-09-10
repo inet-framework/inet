@@ -1,0 +1,11 @@
+This example demonstrates how to simulate crosstalk between IEEE 802.11 networks.
+
+NOTE: The current error model computes the bit error rate from the minimum SNIR.
+The minimum SNIR is computed over time and frequency which is clearly wrong in
+this case, because the spectrum may have a long tail which results in a low
+minimum SNIR especially if the two signals only slightly overlap>
+
+TODO: change the carrier frequency instead of the channel number of the signal
+to have a more fine grained parameter study
+
+TODO: change the error model to fix the above issue

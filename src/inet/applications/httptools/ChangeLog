@@ -1,0 +1,293 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-06  Zoltan Bojthe
+
+	Removed getParentModule calls.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Directory structure (Rudolf Hornig)
+	- split up to several subdirectories: browser/, server/, configurator/, common/
+	- configurator/ used to live in world/httptools/
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet::httptools namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-17  Tey
+
+		Fix: In random browsing mode the resource size is now properly set.
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-17  Zoltan Bojthe
+
+	httptools: removed the fileExists() function
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missing in some
+	handleOperationStage() functions
+
+2013-04-25  Levente Meszaros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-12  Andras Varga
+
+	HttpTools topic branch merged into the INET codebase (integration
+	branch)
+
+2011-08-06  Andras Varga
+
+	HttpTools: trimRight() crashed on empty string, replaced with a shorter
+	implementation
+
+2011-08-05  Andras Varga
+
+	HttpTools: HttpController.registerWWWserver() renamed to
+	registerServer()
+
+	Camelcase consistency, and consistency with getServerModule(),
+	getAnyServerModule()
+
+2011-08-05  Andras Varga
+
+	HttpTools: HttpUtils: parameter rename
+
+	extractServerName() and extractResourceName() actually accept URLs, so
+	rename "path" arg to "url". Also rename internal variables.
+
+2011-08-05  Andras Varga
+
+	HttpTools: refactoring of wwwName and getWWW()
+
+	wwwName and getWWW() renamed to hostName and getHostName() (i.e. host
+	name or domain name of the server), and moved from HttpNodeBase into
+	HttpServerBase where they belong.
+
+	port (listen port of the server) also moved to HttpServerBase.
+
+	TODO: the following line in HttpServerBase is now obviously wrong:
+	replymsg->setOriginatorUrl(hostName.c_str());
+
+2011-08-05  Andras Varga
+
+	HttpTools: rdObject::get() renamed to draw()
+
+2011-08-05  Andras Varga
+
+	HttpTools: rdHistogramBin moved into rdHistogram
+
+2011-08-05  Andras Varga
+
+	HttpTools: C++ cosmetics: if/then's broken to two lines
+
+2011-08-05  Andras Varga
+
+	HttpTools: C++ cosmetics: use empty() instead of size()==0; fix "\\n"
+
+2011-08-05  Andras Varga
+
+	HttpTools: doxy comment cosmetics only
+
+	Note: @brief's have been removed because in INET we have
+	JAVADOC_AUTOBRIEF=YES in doxy.cfg, which automatically treats the 1st
+	line (until the first dot) as brief description.
+
+	Also, HttpTools doesn't need its own doxy.cfg.
+
+2011-08-04  Andras Varga
+
+	HttpTools: cosmetics on C++ and NED sources (e.g. remove spaces
+	near parens)
+
+2011-08-04  Andras Varga
+
+	HttpTools: introduced IHttpDirectApp; related small changes
+
+2011-08-04  Andras Varga
+
+	HttpTools: SITE_DEF_STRUCT renamed to HtmlPageData
+
+2011-08-04  Andras Varga
+
+	HttpTools: small fixes on examples: linkSpeed; Mbps; sendQueueClass;
+	ethernetline
+
+2011-08-07  Andras Varga
+
+	HttpTools: NED parameter "www" renamed to "hostName"
+
+	It is a parameter of servers, and holds the domain name of the server.
+
+2011-08-04  Andras Varga
+
+	HttpTools: MESSAGE_QUEUE_TYPE renamed HttpRequestQueue, changed and
+	moved into HttpBrowserBase
+
+	Details:
+	- renamed to HttpRequestQueue
+	- moved into HttpBrowserBase (it was only used in browsers)
+	- it is actually used to queue up HTTP requests, so cMessage* was
+	  replaced with HttpRequestMessage* there and in related methods
+
+2011-08-04  Andras Varga
+
+	HttpTools: BROWSE_EVENT_ENTRY renamed to BrowseEvent, and made inner
+	class of HttpBrowserBase
+
+	Also: BROWSE_EVENT_QUEUE_TYPE renamed to BrowseEventsList.
+
+2011-08-04  Andras Varga
+
+	HttpTools: SOCK_DATA_STRUCT turned into inner class and renamed to
+	SockData
+
+	Reason: it was only used in HttpBrowser.
+
+2011-08-04  Andras Varga
+
+	HttpTools: renamed CONTENT_TYPE_ENUM to HttpContentType
+
+	- enum decl moved into .msg file, because it is needed in
+	  HttpReplyMessage too
+	- renamed CONTENT_TYPE_ENUM to HttpContentType
+	- its values renamed too: rt_unknown to CT_UNKNOWN, etc
+
+2011-08-04  Andras Varga
+
+	HttpTools: made it compile with MSVC
+
+2011-08-07  Andras Varga
+
+	HttpTools: removed GPL license text (we already have the GPL header in
+	each file)
+
+2011-08-04  Andras Varga
+
+	HttpTools: make_neddoc script removed (docu is now generated using
+	the IDE)
+
+2011-08-04  Andras Varga
+
+	HttpTools: HttpController moved to world/ [ZBojthe]
+
+2011-08-07  Andras Varga
+
+	HttpTools: added existing documentation as neddoc comments
+
+2011-08-xx  Andras Varga
+
+	HttpTools: HttpNodeBase to IHttpDirectApp
+
+2011-07-27  Zoltan Bojthe
+
+	HttpTools: remove "using namespace std"
+
+2011-06-xx  Andras Varga
+
+	HttpTools: DirectHost moved into nodes/
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: cosmetics: spacing (by spaces.pl script)
+
+2011-06-07  Andras Varga
+
+	HttpTools: Rename httpt* modules to Http*
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: converted NED files to OMNeT++ 4.1 syntax;
+	adapted NED files to the new INET version; more fixes.
+	Examples are now working.
+
+2011-06-07  Zoltan Bojthe
+
+	HttpTools: svn checkout, initial commit into a topic branch
+
+	svn checkout http://omnet-httptools.googlecode.com/svn/trunk/
+	omnet-httptools-read-only
+
+	--> svn rev.92

@@ -1,0 +1,34 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-08  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-12  Zoltan Bojthe
+
+	Fixed router module for disabled features.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-08-29  Tamas Borbely
+
+	First version added to the integration branch. Development was done
+	in Q1 2013 by Tamas Borbely, in src/networklayer/routing/rip/
+
+====== inet-2.x ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-02-03  Zoltan Bojthe
+
+	backported from the integration branch

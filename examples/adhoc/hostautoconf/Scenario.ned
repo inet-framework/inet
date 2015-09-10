@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network Scenario
@@ -27,6 +27,6 @@ network Scenario
         double hosts;
 
     submodules:
-        channelControl: ChannelControl;
+        radioMedium: Ieee80211ScalarRadioMedium;
         host[hosts]: Host;
 }

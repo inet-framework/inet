@@ -1,0 +1,86 @@
+%description:
+
+This is a test for APSKScalarRadio interference handling.
+The first signal is weaker than the reception threshold.
+The second signal is weaker than the reception threshold.
+No signals are expected to be received.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.apskradio.packetlevel.APSKScalarRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: APSKScalarRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 500us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.arpType = "GlobalARP"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostSender2.mobility.initialX = 800m
+*.hostReceiver.mobility.initialX = 400m
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radioType = "APSKScalarRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.carrierFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -80dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.hostSender1.wlan[*].radio.transmitter.power = 1mW
+*.hostSender2.wlan[*].radio.transmitter.power = 1mW
+*.hostReceiver.wlan[*].radio.transmitter.power = 0W
+
+# ping app
+*.hostSender*.numPingApps = 1
+*.hostSender*.pingApp[0].count = 1
+*.hostSender*.pingApp[0].printPing = true
+*.hostSender*.pingApp[0].destAddr = "hostReceiver"
+*.hostSender*.pingApp[0].startTime = 0s
+
+%not-contains: results/General-0.elog
+Changing radio reception state from IDLE to RECEIVING.
+%not-contains: results/General-0.elog
+Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
+%not-contains: results/General-0.elog
+Passing up contained packet `ping0' to higher layer
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

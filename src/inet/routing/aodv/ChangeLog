@@ -1,0 +1,55 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-10  Benjamin Seregi
+
+    Fixed missing byte length.
+
+2015-02-12  Benjamin Seregi
+
+    Added control packet lengths.
+
+2015-02-19  Benjamin Seregi
+
+    Fixed bug: if not an AODV entry, skip the update of precursor.
+
+2015-04-22 Rudolf Hornig
+
+	Added support for detecting NF_LINK_BREAK signal when BMAC or CSMA is used
+	for media access control in the link layer.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-12  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-05-08  Benjamin Seregi
+
+	AODV: Added implementation
+
+====== inet-2.x ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-05-23  Zoltan Bojthe
+
+	Backported the AODV implementation from the integration branch.

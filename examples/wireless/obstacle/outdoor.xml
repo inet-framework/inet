@@ -1,0 +1,102 @@
+<environment>
+    <!-- Roads along the X axis -->
+    <object position="center 150 50 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 350 50 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 550 50 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 750 50 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 150 150 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 350 150 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 550 150 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 750 150 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 150 250 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 350 250 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 550 250 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 750 250 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 150 350 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 350 350 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 550 350 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 750 350 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 150 450 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 350 450 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 550 450 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 750 450 0" orientation="0 0 0" shape="cuboid 180 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <!-- Roads along the Y axis -->
+    <object position="center 50 100 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 50 200 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 50 300 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 50 400 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 250 100 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 200 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 300 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 400 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 450 100 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 200 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 300 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 400 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 650 100 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 200 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 300 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 400 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 850 100 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 200 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 300 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 400 0" orientation="0 0 0" shape="cuboid 20 80 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <!-- Roads at the junctions -->
+    <object position="center 50 50 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 50 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 50 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 50 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 50 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 50 150 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 150 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 150 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 150 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 150 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 50 250 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 250 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 250 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 250 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 250 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 50 350 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 350 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 350 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 350 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 350 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <object position="center 50 450 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 250 450 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 450 450 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 650 450 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+    <object position="center 850 450 0" orientation="0 0 0" shape="cuboid 20 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144" opacity="0.5"/>
+
+    <!-- Houses -->
+    <object position="center 150 100 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 350 100 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 550 100 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 750 100 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 150 200 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 350 200 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 550 200 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 750 200 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 150 300 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 350 300 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 550 300 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 750 300 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 150 400 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 350 400 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 550 400 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+    <object position="center 750 400 15" orientation="0 0 0" shape="cuboid 100 50 30" material="brick" fill-color="203 65 84" opacity="0.8"/>
+</environment>

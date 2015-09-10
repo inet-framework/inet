@@ -1,0 +1,31 @@
+<environment>
+    <!-- Rotated cuboids represented as prisms -->
+    <object position="center 100 100 0" orientation="0 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 250 100 0" orientation="30 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 400 100 0" orientation="45 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 550 100 0" orientation="60 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 700 100 0" orientation="75 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 850 100 0" orientation="90 0 0" shape="prism 100 100 150 200 150 200 50 100 50" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+
+    <!-- Rotated cuboids -->
+    <object position="center 1100 100 0" orientation="0 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 1250 100 0" orientation="30 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 1400 100 0" orientation="45 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 1550 100 0" orientation="60 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 1700 100 0" orientation="75 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+    <object position="center 1850 100 0" orientation="90 0 0" shape="cuboid 100 100 100" material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
+
+    <!-- Rotated hexagon-based prisms -->
+    <object position="center 100 300 0" orientation="0 0 0" shape="prism 100 -86.6 -50 0 -100 86.6 -50 86.6 50 0 100 -86.6 50" material="brick" fill-color="203 65 84" />
+    <object position="center 300 300 0" orientation="30 0 0" shape="prism 100 -86.6 -50 0 -100 86.6 -50 86.6 50 0 100 -86.6 50" material="brick" fill-color="203 65 84" />
+
+    <!-- Rotated tetrahedrons -->
+    <object position="center 500 300 0" orientation="0 0 0" shape="prism 100 0 0 150 0 75 129.9" material="brick" fill-color="47 165 28" />
+    <object position="center 650 300 0" orientation="30 0 0" shape="prism 100 0 0 150 0 75 129.9" material="brick" fill-color="47 165 28" />
+    <object position="center 800 300 0" orientation="60 0 0" shape="prism 100 0 0 150 0 75 129.9" material="brick" fill-color="47 165 28" />
+
+    <!-- Rotated polyhedrons -->
+    <object position="center 500 450 0" orientation="30 0 0" shape="polyhedron 0 0 100 0 100 0 0 100 100 100 0 100 100 100 100 100 0 0 100 100 0 0 0 0" material="brick" fill-color="47 165 28" />
+    <object position="center 700 450 0" orientation="67 0 0" shape="polyhedron 0 100 100 100 100 0 0 0 0 100 0 100" material="brick" fill-color="47 165 28" />
+    <object position="center 900 450 0" orientation="10 0 0" shape="polyhedron 0 100 100 100 100 0 0 0 0 100 0 100 55 252 0" material="brick" fill-color="47 165 28" />
+</environment>

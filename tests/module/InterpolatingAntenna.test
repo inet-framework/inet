@@ -1,0 +1,89 @@
+%description:
+
+Tests InterpolatingAntenna for a simple configuration.
+
+%file: test.cc
+#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
+
+namespace InterpolatingAntenna {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+class AntennaTest : public cSimpleModule
+{
+    public:
+        AntennaTest() : cSimpleModule() {}
+
+    protected:
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage);
+};
+
+Define_Module(AntennaTest);
+
+void AntennaTest::initialize(int stage)
+{
+    if (stage == INITSTAGE_LAST)
+    {
+        IAntenna *antenna = check_and_cast<IAntenna *>(getSimulation()->getModuleByPath("host.wlan[0].radio.antenna"));
+        EV_INFO << antenna->computeGain(EulerAngles(0, 0, 0)) << " "
+                << antenna->computeGain(EulerAngles(M_PI / 2, 0, 0)) << " "
+                << antenna->computeGain(EulerAngles(M_PI, 0, 0)) << " "
+                << antenna->computeGain(EulerAngles(3 * M_PI / 2, 0, 0)) << " "
+                << antenna->computeGain(EulerAngles(2 * M_PI, 0, 0)) << "\n";
+    }
+}
+
+}
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple AntennaTest
+{
+//    @class(::inet::physicallayer::InterpolatingAntenna::AntennaTest);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        host: WirelessHost;
+        test: AntennaTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 400us
+ned-path = .;../../../../src
+
+# mobility
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# antenna
+**.antennaType = "InterpolatingAntenna"
+**.headingGains = "0 0 180 10 360 0"
+
+%contains: stdout
+1 5.5 10 5.5 1
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

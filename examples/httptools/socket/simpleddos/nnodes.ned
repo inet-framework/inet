@@ -31,10 +31,10 @@
 
 package inet.examples.httptools.socket.simpleddos;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.world.httptools.HttpController;
+import inet.applications.httptools.configurator.HttpController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 
 
 //
@@ -49,7 +49,8 @@ network HttpNnodes
         double numclients @prompt("Number of clients") = default(10);
         @display("bgb=474,374");
     types:
-        channel ethernetline extends ned.DatarateChannel {
+        channel ethernetline extends ned.DatarateChannel
+        {
             delay = 0.1us;
             datarate = 100Mbps;
         }
@@ -64,7 +65,7 @@ network HttpNnodes
             parameters:
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";
-                config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.x.x'/></config>");
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.x.x'/></config>");
                 @display("p=50,64;i=block/cogwheel");
         }
         controller: HttpController {

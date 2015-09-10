@@ -1,0 +1,28 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-18  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-12-09  Florian Meier & Levente Mészáros
+
+	Factored out the network topology extraction algorithm from IPv4NetworkConfigurator.
+	Added support to IPv4NetworkConfigurator for computing wireless shortest
+	paths based on packet error rate.
+	Added printing routing tables.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-02-20  Levente Meszaros
+
+	Added GenericNetworkConfigurator to configure GenericRoutingTables with static routes.
+
+====== inet-2.x ======

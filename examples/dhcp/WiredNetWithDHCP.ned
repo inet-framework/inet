@@ -18,12 +18,10 @@
 
 package inet.examples.dhcp;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.Eth10M;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.StandardHost;
-import inet.world.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.StandardHost;
 
 
 network WiredNetWithDHCP

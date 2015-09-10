@@ -1,0 +1,87 @@
+%description:
+
+This is a test for ideal radio interference handling.
+The first signal is stronger than the reception threshold.
+The second signal is stronger than the reception threshold.
+The first signal is much stronger than the second signal.
+The second signal is strong enough to cause bit errors.
+No signals are expected to be received.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.idealradio.IdealRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: IdealRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 500us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.arpType = "GlobalARP"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostSender2.mobility.initialX = 800m
+*.hostReceiver.mobility.initialX = 400m
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radioType = "IdealRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.receiver.ignoreInterference = false
+*.hostSender1.wlan[*].radio.transmitter.maxCommunicationRange = 300m
+*.hostSender1.wlan[*].radio.transmitter.maxInterferenceRange = 600m
+*.hostSender1.wlan[*].radio.transmitter.maxDetectionRange = 1.2km
+*.hostSender2.wlan[*].radio.transmitter.maxCommunicationRange = 1km
+*.hostSender2.wlan[*].radio.transmitter.maxInterferenceRange = 2km
+*.hostSender2.wlan[*].radio.transmitter.maxDetectionRange = 4km
+*.hostReceiver.wlan[*].radio.transmitter.maxCommunicationRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.maxInterferenceRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.maxDetectionRange = 0m
+
+# ping app
+*.hostSender*.numPingApps = 1
+*.hostSender*.pingApp[0].count = 1
+*.hostSender*.pingApp[0].printPing = true
+*.hostSender*.pingApp[0].destAddr = "hostReceiver"
+*.hostSender*.pingApp[0].startTime = 0s
+
+%contains: results/General-0.elog
+Changing radio reception state from IDLE to RECEIVING.
+%contains: results/General-0.elog
+Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
+%not-contains: results/General-0.elog
+Passing up contained packet `ping0' to higher layer
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

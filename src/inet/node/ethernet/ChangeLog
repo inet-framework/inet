@@ -1,0 +1,273 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-11-13  Benjamin Seregi (benmartin92)
+
+	EtherSwitch: L2NodeConfigurator is not needed in STP-unaware switch.
+
+2013-11-07  Benjamin Seregi (benmartin92)
+
+	EtherSwitch: spanningTreeProtocolVersion -> spanningTreeProtocol. - By
+	default the switch is STP/RSTP unaware. - relayUnit implements
+	IMACRelayUnit. - organized imports
+
+2013-10-30  Benjamin Seregi (benmartin92)
+
+	L2NetworkConfigurator, STP/RSTP: removed obsolete switches and examples.
+
+2013-10-28  Benjamin Seregi (benmartin92)
+
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+
+2013-10-24  Benjamin Seregi (benmartin92)
+
+	EtherSwitch: EtherSwitch now supports Spanning Tree algorithm.
+
+	ISpanningTree: moduleinterface added to supports different versions of
+	Spanning Tree protocols.
+
+	SpanningTree: module renamed to "STP", this abbreviation refer to the
+	protocol described in IEEE 802.1D-1998.
+
+2013-10-17  Benjamin Seregi (benmartin92)
+
+	STP: Spanning Tree Protocol added to INET.
+
+2013-09-18  Benjamin Seregi (benmartin92)
+
+	Switch:
+
+	MACAddressTable:
+
+	- MACAddressTable now has removeAgedEntriesIfNeeded() for efficient MAC
+	 table purge.
+	- Added clearTable() for lifecycle.
+
+	MACRelayUnit: Added a simplified MACRelayUnit. It was necessary because
+	MAC address table management has been separated from MACRelayUnitBase
+	module.
+
+	IMACRelayUnit: This moduleinterface changed to work with MACRelayUnit.
+	There are no need for MAC address table configuration parameters anymore.
+
+	EtherSwitch: Added MACAddressTable.
+
+	Examples: ethernet/lans/largeNet example changed to work with the new
+	RelayUnit.
+
+	MACAddressTableAccess: MACAddressTable access name changed to macTable.
+
+----------- lines above this marker have been added from git log -----------
+
+2013-11-07  Benjamin Seregi
+
+	EtherSwitch: added both STP and RSTP protocols. These protocols
+	are optional features of an EtherSwitch. The spanningTreeProtocol
+	parameter specifies which protocol will be used. The default value
+	of spanningTreeProtocol is an empty string indicating that the
+	switch is STP/RSTP unaware.
+
+	IEEE8021DRelay: The default relayUnit was replaced with IEEE8021DRelay.
+	It is intended for supporting STP/RSTP port roles and states. In STP/RSTP
+	unaware cases, however, its behavior was not changed.
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-26  Zoltan Bojthe
+
+	EtherSwitch: made eth[] modules replaceable
+
+2013-06-25  Zoltan Bojthe
+
+	EtherSwitch: replaced EtherMAC with EthernetInterface so that
+	external queues can be used (useful for e.g. QoS)
+
+2013-06-17  Zoltan Bojthe
+
+	EtherSwitch: added lifecycle support
+
+2013-06-14  Zoltan Bojthe
+
+	EtherHost: added NodeStatus, required by lifecycle operations
+
+2013-03-21  Levente Meszaros
+
+	EtherSwitch: renamed mac[] submodule vector to eth[]
+
+2013-03-21  Levente Meszaros
+
+	EtherSwitch: added InterfaceTable unconditionally; also added
+	NotificationBoard, required by InterfaceTable.
+
+2013-01-14  Zoltan Bojthe
+
+	EtherHost2: encap module made replaceable ("like IEtherEncap")
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-04-26  Tamas Borbely
+
+	EtherHost,EtherHost2: EtherQoSQueue used as external queue.
+	EtherQosQueue contains two queues: one for PAUSE frames,
+	and one for data frames. The 'queueType' parameter specifies
+	the type of the latter.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-14  Andras Varga
+
+	Added EtherLink.ned with various predefined Ethernet link types:
+	Eth10M, Eth100M, Eth1G, Eth10G, Eth40G, Eth100G
+
+2011-12-08  Andras Varga
+
+	EtherHost: comment editing; reordering of submodules and connections
+	for readability
+
+2011-08-31  Zoltan Bojthe
+
+	EtherHost/EtherHost2 fix: display string contained "q=queue" instead of
+	"q=txQueue" (EtherMAC internal queue object is called "txQueue")
+
+2011-08-03  Zoltan Bojthe
+
+	EtherHost: use queueType="" instead of queueType="NoQueue" to select
+	the internal queue of EtherMAC
+
+2011-12-06  Andras Varga
+
+	Added EtherHost2 that uses EtherEncap (EtherHost uses EtherLLC).
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	parameter rename: csmacdSupported -> csmacdSupport
+
+2011-04-28  Rudolf Hornig
+
+	EtherHost now defaults to internal queue implementation.
+
+2011-04-27  Rudolf Hornig
+
+	Ethernet refactoring. EtherHostQ removed. csmacdSupport parameter added
+	to Switch, EtherHost and EthernetInterface.
+
+2011-03-29  Zoltan Bojthe
+
+	featuresupport: add ETHERNET feature
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Interfaces renamed to start with I.
+
+2011-03-01  Rudolf Hornig
+
+	Module interface renaming.
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-06-14  Zoltan Bojthe
+
+	EtherMAC, EtherMacFullDuplex use IEtherMAC moduleinterface
+
+2010-06-14  Zoltan Bojthe
+
+	Rename modules
+
+	EtherMAC2 to EtherMACFullDuplex, EtherHost2 to EtherHostFullDuplex
+
+2010-06-10  Zoltan Bojthe
+
+	Add EtherHostQ and EtherHost2Q NED files
+
+2009-07-21  Andras Varga
+
+	labels change: EtherFrame/PPPFrame labels on hosts/routers renamed to
+	EtherFrame-conn/PPPFrame-conn, so that EtherMAC, PPPInterface etc are
+	not offered by the palette when editing a network
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+
+2009-07-18  Andras Varga
+
+	more gate labels added; also, fixed case of TCPOut gates (i.e. they got
+	renamed to tcpOut)
+
+2009-07-18  Andras Varga
+
+	added @labels(node) to hosts/routers so that they appear at top of the
+	palette when editing a network (in OMNeT++ 4.1+)
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2008-05-29  Andras Varga
+
+	Moved Ethernet switch and host to nodes/ethernet:
+	- EtherSwitch.ned was under networkinterfaces/etherswitch
+	- EtherHost was under examples/ethernet/lans
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- NetworkInterfaces/EtherSwitch INET/src/networkinterfaces/etherswitch

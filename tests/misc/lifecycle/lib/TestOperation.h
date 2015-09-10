@@ -20,8 +20,10 @@
 #ifndef __INET_TESTOPERATION_H_
 #define __INET_TESTOPERATION_H_
 
-#include "INETDefs.h"
-#include "NodeOperations.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+
+namespace inet {
 
 class INET_API TestNodeStartOperation : public NodeStartOperation {
   public:
@@ -33,4 +35,5 @@ class INET_API TestNodeShutdownOperation : public NodeShutdownOperation {
     virtual int getNumStages() const { return 4; }
 };
 
+}
 #endif

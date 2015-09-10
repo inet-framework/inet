@@ -2,8 +2,8 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 
 network OSPF_BackboneTest
@@ -16,6 +16,7 @@ network OSPF_BackboneTest
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
+                //                            "<route hosts='Backbone.R[*]' destination='224.0.0.0' netmask='240.0.0.0' interface='eth0' />"+
                 config = xml("<config>"+
                             "<interface hosts='Backbone.*' address='192.168.1.x' netmask='255.255.255.x' />"+
                             "<multicast-group hosts='Backbone.R[*]' address='224.0.0.5 224.0.0.6' />"+

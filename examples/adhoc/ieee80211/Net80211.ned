@@ -18,9 +18,9 @@
 
 package inet.examples.adhoc.ieee80211;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 network Net80211
@@ -32,13 +32,12 @@ network Net80211
             parameters:
                 @display("r=,,#707070;p=250,58");
         }
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=60,50");
         }
         configurator: IPv4NetworkConfigurator {
-            config=xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
+            config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
             @display("p=140,50");
         }
 }
-

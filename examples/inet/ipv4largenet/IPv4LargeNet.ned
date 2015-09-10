@@ -20,10 +20,10 @@ package inet.examples.inet.ipv4largenet;
 
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
@@ -45,7 +45,7 @@ module IPv4SmallLAN
 {
     parameters:
         int h; // number of hosts on the router
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -71,7 +71,7 @@ module IPv4MediumLAN
     parameters:
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
-        @display("i=cloud_s");
+        @display("i=old/cloud_s");
     gates:
         inout ethg;
     submodules:
@@ -117,7 +117,7 @@ module IPv4LargeLAN
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
         int b; // number of hosts on the bus
-        @display("i=cloud");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     types:

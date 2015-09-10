@@ -18,10 +18,10 @@
 
 package inet.examples.inet.pcaprecorder;
 
+import inet.common.misc.NetAnimTrace;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.util.NetAnimTrace;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network PcapRecorderTest

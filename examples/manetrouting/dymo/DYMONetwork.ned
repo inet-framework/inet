@@ -1,15 +1,15 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 package inet.examples.manetrouting.dymo;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.dymo.DYMORouter;
-import inet.world.radio.ChannelControl;
-import inet.world.scenario.ScenarioManager;
+import inet.node.dymo.DYMORouter;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 //
@@ -20,7 +20,7 @@ network DYMONetwork
     parameters:
         int numHosts;
     submodules:
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=50,50");
         }

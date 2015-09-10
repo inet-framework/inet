@@ -1,6 +1,6 @@
 
 
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.contract.IEtherMAC;
 import inet.linklayer.ethernet.EtherQoSQueue;
 
 
@@ -20,7 +20,8 @@ module EthTestHost
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
-        @node();
+        *.interfaceTableModule = "";
+        @networkNode();
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -34,7 +35,7 @@ module EthTestHost
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = (queueType == "" ? "" : "queue");
+                queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=155,272;q=txQueue");
         }
     connections:

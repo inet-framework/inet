@@ -15,8 +15,9 @@
 //
 
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
 
+namespace inet {
 
 class INET_API QQ : public cSimpleModule
 {
@@ -70,3 +71,6 @@ QQ::~QQ()
 {
     cancelAndDelete(timer);
 }
+
+} // namespace inet
+

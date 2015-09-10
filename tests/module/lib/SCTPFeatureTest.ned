@@ -1,5 +1,5 @@
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 network SCTPFeatureTest
@@ -23,25 +23,25 @@ network SCTPFeatureTest
     submodules:
         sctp_client: StandardHost {
             parameters:
-                IPForward = false;
-                routingFile = "../../lib/sctp_client.mrt";
+                forwarding = false;
+                routingTable.routingFile = "../../lib/sctp_client.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
-                @display("i=laptop3;p=128,317");
+                @display("i=old/laptop3;p=128,317");
             gates:
                 pppg[1];
         }
         sctp_server: StandardHost {
             parameters:
-                IPForward = false;
-                routingFile = "../../lib/sctp_server.mrt";
+                forwarding = false;
+                routingTable.routingFile = "../../lib/sctp_server.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
-                @display("i=laptop3");
+                @display("i=old/laptop3");
             gates:
                 pppg[1];
         }
         router1: Router {
             parameters:
-                routingFile = "../../lib/sctp_router1.mrt";
+                routingTable.routingFile = "../../lib/sctp_router1.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router;p=270,293");
             gates:
@@ -49,7 +49,7 @@ network SCTPFeatureTest
         }
         router2: Router {
             parameters:
-                routingFile = "../../lib/sctp_router2.mrt";
+                routingTable.routingFile = "../../lib/sctp_router2.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router");
             gates:

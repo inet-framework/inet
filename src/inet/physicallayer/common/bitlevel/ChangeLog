@@ -1,0 +1,47 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Renamed common/layered to common/bitlevel. Moved
+    remaining common contents to common/packetlevel.
+
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+	Added a completely new layered radio (physical layer) implementation.
+
+	The term layered means that the radio is capable of simulating the
+	processing steps of the packet domain, bit domain, symbol domain, sample
+	domain, and analog domain in detail. The architecture supports setting
+	the level of detail independently of other parameters.
+
+	The new layered model contains the IEEE 802.11 OFDM physical layer packet
+	domain, bit domain, and symbol domain functions: including scrambling,
+	forward error correction, interleaving, and modulation.
+
+	There's also a simple hypothetical layered radio that makes the
+	understanding of the architecture easier.
+
+	Added various common physical layer functions such as convolutional
+	coding, scrambling, and default signal representations for the packet
+	domain, bit domain, symbol domain, sample domain and analog domains.
+
+	Added the following new classes:
+	LayeredTransmission, LayeredReception, LayeredReceptionDecision
+	SignalPacketModel, SignalBitModel, SignalSymbolModel, SignalSampleModel
+	AdditiveScrambler, AdditiveScramblerModule, AdditiveScrambling
+	ConvolutionalCode, ConvolutionalCoder, ConvolutionalCoderModule
+	PulseFilter, PulseShaper
+	AnalogDigitalConverter, DigitalAnalogConverter
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======

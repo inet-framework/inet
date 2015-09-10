@@ -1,5 +1,5 @@
 
-import inet.nodes.ethernet.EtherHost2;
+import inet.node.ethernet.EtherHost2;
 import ned.DatarateChannel;
 
 

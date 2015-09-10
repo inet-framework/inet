@@ -1,11 +1,11 @@
 //
 package inet.examples.bgpv4.BGPandOSPFSimple;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.bgp.BGPRouter;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.bgp.BGPRouter;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
 
 
 network BGPNet

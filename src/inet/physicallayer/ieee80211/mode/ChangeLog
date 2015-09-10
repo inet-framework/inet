@@ -1,0 +1,78 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-02  Benjamin Seregi & Levente Meszaros
+
+	Added IEEE 802.11 High Throughput mode descriptor. This mode is defined
+	in Clause 20. High Throughput (HT) PHY specification in the IEEE 802.11-2012
+	specification. The new HT mode makes available the Wifi n modes in the
+	Ieee80211ModeSet.
+
+	Added the following classes:
+	Ieee80211HTMode, Ieee80211HTCode.
+
+2015-04-03  Levente Mészáros
+
+    Fixed non-mandatory modes. Added error reporting when mode is not found.
+    Fixed data bitrate for multiple spatial streams. Added number of spatial
+    streams to 802.11 mode interface. Added level parameter to printToStream
+    functions.
+
+2015-04-02  Benjamin Seregi
+
+    Added IEEE 802.11 Clause 20 compliant (and non-compliant) Wifi modes (High
+    Throughput (HT)).
+
+    Added initial implementation:
+    Ieee80211HTCode, Ieee80211HTMode, Ieee80211HTInterleaving.
+
+2015-04-02  Benjamin Seregi
+
+    Renamed Ieee80211Interleaver to Ieee80211OFDMInterleaver.
+
+2015-04-01  Benjamin Seregi
+
+    Added Wifi N modes to Ieee80211ModeSet.
+
+2015-03-13  Benjamin Seregi
+
+    Removed Ieee80211ChunkMode abstraction.
+
+2015-03-12  Benjamin Seregi
+
+    Added short slot time.
+
+2015-03-04  Benjamin Seregi
+
+    Replaced NUMBER_OF_OFDM_DATA_SUBCARRIERS with getNumberOfDataSubcarriers().
+    Simplified getDuration() and signed ints were replaced with unsigned ints.
+
+2015-03-11  Benjamin Seregi
+
+    IIeee80211PreambleMode does not require modulation and bitrate.
+
+2015-03-27  Raphael Riebl
+
+    Fixed channel spacing initialization of Ieee80211OFDMModeBase.
+
+2015-02-25  Benjamin Seregi & Levente Meszaros
+
+	Added initial implementation for various 802.11 PHY mode descriptors found
+	in the IEEE 802.11-2012 specification. Also added a new Ieee80211ModeSet
+	class that describes the usual Wifi modes: a, b, g, p, etc.
+
+	Added the following new classes:
+	Ieee80211DsssMode, Ieee80211PreambleDsssMode, Ieee80211DsssHeaderMode, Ieee80211DsssDataMode
+	Ieee80211HrDsssMode, Ieee80211HrDsssPreambleMode, Ieee80211HrDsssHeaderMode, Ieee80211HrDsssDataMode
+	Ieee80211FhssMode, Ieee80211FhssPreambleMode, Ieee80211FhssHeaderMode, Ieee80211FhssDataMode
+	Ieee80211IrMode, Ieee80211IrPreambleMode, Ieee80211IrHeaderMode, Ieee80211IrDataMode
+	Ieee80211OfdmMode, Ieee80211OfdmPreambleMode, Ieee80211OfdmHeaderMode, Ieee80211OfdmDataMode
+	Ieee80211ErpOfdmMode, Ieee80211DsssOfdmMode
+	Ieee80211ModeSet.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======

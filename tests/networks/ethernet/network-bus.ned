@@ -1,8 +1,8 @@
 package inet.tests.ethernet;
 
 import inet.linklayer.ethernet.EtherBus;
-import inet.nodes.ethernet.EtherHost2;
-import inet.world.scenario.ScenarioManager;
+import inet.node.ethernet.EtherHost2;
+import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
 //

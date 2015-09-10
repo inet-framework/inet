@@ -1,14 +1,14 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 // Created: 2012-6-10 for project inet
 
 package inet.examples.voip;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.internetcloud.InternetCloud;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
 
 

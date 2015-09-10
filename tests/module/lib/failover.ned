@@ -16,10 +16,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 
 network failover
@@ -43,14 +43,14 @@ network failover
     submodules:
         sctp_client: StandardHost {
             parameters:
-                routingFile = "../../lib/multi_client.mrt";
+                routingTable.routingFile = "../../lib/multi_client.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
         }
         sctp_server: StandardHost {
             parameters:
-                routingFile = "../../lib/multi_server.mrt";
+                routingTable.routingFile = "../../lib/multi_server.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
@@ -58,14 +58,14 @@ network failover
         }
         router1: Router {
             parameters:
-                routingFile = "../../lib/multi_router1.mrt";
+                routingTable.routingFile = "../../lib/multi_router1.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
-                routingFile = "../../lib/multi_router2.mrt";
+                routingTable.routingFile = "../../lib/multi_router2.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];

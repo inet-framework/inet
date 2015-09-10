@@ -19,7 +19,7 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.linklayer.ITrafficConditioner;
+import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.DSCPMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 

@@ -65,12 +65,12 @@ ned-path = .;../../../../src;../../lib
 **.sctp.packetDrop = false
 **.Peer_1.sctp.natFriendly = true
 
-**.Peer_1.routingFile="../../lib/nat_peer1.mrt"
-**.Server.routingFile="../../lib/nat_server.mrt"
-**.Nat_1_1.routingFile="../../lib/nat1_1.mrt"
-**.Nat_1_2.routingFile="../../lib/nat1_2.mrt"
-**.Router_1.routingFile="../../lib/nat_mrouter_1.mrt"
-**.Router_2.routingFile="../../lib/nat_mrouter_2.mrt"
+**.Peer_1.routingTable.routingFile="../../lib/nat_peer1.mrt"
+**.Server.routingTable.routingFile="../../lib/nat_server.mrt"
+**.Nat_1_1.routingTable.routingFile="../../lib/nat1_1.mrt"
+**.Nat_1_2.routingTable.routingFile="../../lib/nat1_2.mrt"
+**.Router_1.routingTable.routingFile="../../lib/nat_mrouter_1.mrt"
+**.Router_2.routingTable.routingFile="../../lib/nat_mrouter_2.mrt"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout

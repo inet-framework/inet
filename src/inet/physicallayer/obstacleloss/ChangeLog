@@ -1,0 +1,29 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-26  Levente Mészáros
+
+    Added a separate flag for leaving a trail for face normal vectors.
+
+2015-03-24  Levente Mészáros
+
+    Changed various line widths to unscaled.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation: TracingObstacleLoss
+
+====== inet-2.x ======

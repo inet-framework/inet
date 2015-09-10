@@ -20,6 +20,8 @@
 #include "TestProtocol.h"
 #include "TestOperation.h"
 
+namespace inet {
+
 Define_Module(TestProtocol);
 
 bool TestProtocol::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -86,4 +88,6 @@ void TestProtocol::handleMessage(cMessage * message)
     }
     else
         throw cRuntimeError("Unknown message");
+}
+
 }

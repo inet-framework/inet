@@ -1,7 +1,7 @@
 package inet.examples.bgpv4.BGPOpen;
 
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 
 network Net

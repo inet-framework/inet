@@ -1,0 +1,32 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-16  Levente Mészáros
+
+    Moved generic dimensional data structures to common.
+
+2015-03-02  Levente Mészáros
+
+	Fixed memory managements bugs found by valgrind memcheck.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-09  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Copied implementation from MiXiM.
+	Fixed printing 1 dimensional mappings.
+	Fixed TimeMappingIterator STEPS interpolation bug.
+	Added FrequencyMapping and FrequencyMappingIterator.
+
+====== inet-2.x ======

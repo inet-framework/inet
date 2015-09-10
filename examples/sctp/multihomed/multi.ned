@@ -17,9 +17,9 @@
 //
 
 package inet.examples.sctp.multihomed;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
@@ -42,14 +42,14 @@ network multi
     submodules:
         cli1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=61,142;i=device/laptop");
             gates:
                 pppg[1];
         }
         srv1: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 @display("p=426,135;i=device/server2");
             gates:
                 pppg[1];

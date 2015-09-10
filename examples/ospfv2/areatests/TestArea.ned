@@ -1,10 +1,10 @@
 
 package inet.examples.ospfv2.areatests;
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
 
 
 module TestArea
@@ -29,7 +29,7 @@ module TestArea
         N[numHosts]: EtherHub;
         R[numHosts]: OSPFRouter;
         B[extGates]: OSPFRouter;
-        connections:
+    connections:
         // host to router links
         for i=0..numHosts-1 {
             H[i].ethg++ <--> C <--> N[i].ethg++;

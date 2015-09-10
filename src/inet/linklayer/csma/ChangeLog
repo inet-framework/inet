@@ -1,0 +1,39 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-22  Rudolf Hornig
+
+    Added NF_LINK_BREAK notification. This enables adhoc routing protocols to
+    work correctly with this mac protocols.
+
+2015-04-22 Rudolf Hornig
+
+	Added support for sending NF_LINK_BREAK signal. This is required for certain
+	routing protocols (i.e. AODV) to function properly.
+
+2015-02-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-28  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Mészáros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-01-22  Levente Meszaros
+
+	Ported the MAC protocol from MiXiM and adapted to the MAC protocol contract.
+
+====== inet-2.x ======

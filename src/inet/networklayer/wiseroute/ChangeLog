@@ -1,0 +1,25 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with arpModule parameter.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-01-22  Levente Meszaros
+
+	Ported the network protocol from MiXiM and adapted to the network protocol contract.
+
+====== inet-2.x ======

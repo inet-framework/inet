@@ -2,8 +2,8 @@
 
 package inet.examples.ospfv2.areas;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.util.ThruputMeteringChannel;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 
 network OSPF_AreaTest

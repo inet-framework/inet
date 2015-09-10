@@ -1,0 +1,44 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-16  Zoltan Bojthe
+
+    Added nonstandard ETHERTYPE_INET_GENERIC to generic network protocol.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-12-09  Florian Meier
+
+	Added printRoutingTable function to GenericRoutingTable.
+
+2014-11-28  Levente Mészáros
+
+	Fixed generic network layer configuration and routing.
+
+2014-11-18  Zoltan Bojthe
+
+	Fixed memory leaks detected by valgrind memcheck.
+
+2014-11-14  Zoltan Bojthe
+
+	Network Protocol module should delete queued datagrams, hooks shouldn't
+	delete/send/scheduleat/take dgrams
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-02-06  Andras Varga
+
+	Added initial implementation:
+	GenericNetworkLayer, GenericNetworkProtocol, GenericDatagram,
+	GenericRoutingTable, GenericRoute, GenericNetworkProtocolInterfaceData
+
+====== inet-2.x ======

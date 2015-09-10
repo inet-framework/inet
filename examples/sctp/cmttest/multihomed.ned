@@ -17,9 +17,8 @@
 //
 
 package inet.examples.sctp.cmttest;
-//import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
@@ -32,7 +31,7 @@ network multihomed
     submodules:
         sctp_client: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("p=61,142;i=device/laptop");
             gates:
@@ -40,7 +39,7 @@ network multihomed
         }
         sctp_server: StandardHost {
             parameters:
-                IPForward = false;
+                forwarding = false;
                 networkLayer.configurator.networkConfiguratorModule = "";
                 @display("p=426,135;i=device/server2");
             gates:
@@ -75,7 +74,7 @@ channel BottlePath extends DatarateChannel
     parameters:
         delay = 0s;
         datarate = 1Mbps;
-    per = 0.005;
+        per = 0.005;
 }
 
 channel NormalPath extends DatarateChannel

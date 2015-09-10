@@ -17,14 +17,13 @@
 
 package inet.examples.bgpv4.BGPOpen;
 
-import inet.util.MessageChecker;
-import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.common.misc.MessageChecker;
+import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.bgpv4.BGPRouting;
-import inet.linklayer.IWiredNic;
-import inet.base.NotificationBoard;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
+import inet.networklayer.ipv4.IPv4RoutingTable;
+import inet.routing.bgpv4.BGPRouting;
+import inet.transportlayer.contract.ITCP;
 
 
 //
@@ -33,29 +32,28 @@ import inet.base.NotificationBoard;
 module BGPRouterSimple
 {
     parameters:
-        @node();
+        @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,44;i=block/control_s");
-        }
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             parameters:
-                IPForward = true;
+                forwarding = true;
                 routerId = "auto";
                 @display("p=52,172;i=block/table2_s");
         }
         bgp: BGPRouting {
             parameters:
+                ospfRoutingModule = "";
                 @display("p=160,50;i=block/network");
         }
         snifferIn: MessageChecker {
@@ -66,11 +64,11 @@ module BGPRouterSimple
             parameters:
                 @display("i=block/downarrow_s;p=196,124");
         }
-        tcp: <tcpType> like ITCP {
+        tcp: <tcpType> like ITCP if tcpType != "" {
             parameters:
                 @display("p=160,202;i=block/transport");
         }
-        networkLayer: NetworkLayer {
+        networkLayer: IPv4NetworkLayer {
             parameters:
                 proxyARP = true;
                 @display("p=120,284;i=block/layer;q=queue");

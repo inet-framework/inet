@@ -1,0 +1,248 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2014-01-22  Levente Meszaros
+
+	Moved queue modules from linklayer because they are independent of it.
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2013-04-14  Andras Varga
+
+	queues: added pop() to IPassiveQueue
+
+	Useful for flushing queues in MACs when they do down. clear() is not good
+	enough because we want to use packets as drop signal value.
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-10-29  Thomas Dreibholz
+
+    improved REDDropper, in order to provide a functionality similar to the old REDQueue.
+    (allows specifying avearge packet rate that is used for calculation when the queue is empty)
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-14  Andras Varga
+
+	queues: added pop() to IPassiveQueue
+
+	Useful for flushing queues in MACs when they go down. clear() is not
+	good enough because we want to use packets as drop signal value.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-05-16  Tamas Borbely
+
+	Old queuing components has been removed:
+	 - DropTailQosQueue
+	 - REDQueue
+	 - WeightedFairQueue
+	 - IQoSClassifier (moved to linklayer/ieee80211/mac)
+	 - BasicDSCPClassifier
+	Some of them can be substituted by compound modules composed
+	of these newly added components:
+	 - FIFOQueue
+	 - REDDropper
+	 - ThresholdDropper
+	 - PriorityScheduler
+	 - WRRScheduler
+	For example REDQueue is a combination of a REDDropper and a FIFOQueue,
+	and DropTailQosQueue is a combination of some classifier, DropTailQueues,
+	and a PriorityScheduler.
+
+2012-04-26  Tamas Borbely
+
+	DropTailQueue: name of the inner queue can be specified by
+	a parameter. This is useful when a compound module contains
+	multiple queues, and you want to specify one of them in
+	the 'q' tag of the display string.
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-10  Andras Varga
+
+	added WeigthedFairQueue from INETMANET (following some formatting and
+	C++ improvements)
+
+2011-12-22  Andras Varga
+
+	statistics revised:
+
+	- added dropPk and queueingTime
+	- changed statistics titles to lowercase
+	- add "max" recording mode to places where "timeavg" was present and
+	  it is appropriate
+	- fix: interpolationmode should be used with @statistic and not with
+	  @signal
+	- remove "histogram" recording from queue length statistics (makes
+	  no sense), added "timeavg" instead
+	- removed "stats" where "histogram" was already present (as it implies
+	  "stats")
+
+2011-08-03  Zoltan Bojthe
+
+	removed NoQueue (NICs now use queueType="" to select the internal queue)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-07-18  Andras Varga
+
+	BasicDSCPClassifier: fix
+
+2011-07-18  Andras Varga
+
+	statistics: emit pk (cPacket*) signals instead of pkBytes etc; added
+	more statistics
+
+	Utilize packetBytes() result filter in @statistic to record byte counts
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-12  Rudolf Hornig
+
+	Refactoring in Ethernet and PPP interfaces. NoQueue can be used also as
+	queueType parameter. Added support for input and output hooks in NICs.
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-03  Zoltan Bojthe
+
+	Features: IPv4 - milestone 1
+
+2011-03-03  Zoltan Bojthe
+
+	features: TCP_NSC, TCP_lwip, IPv6 completed
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-01  Rudolf Hornig
+
+	Interfaces renamed to start with I.
+
+2011-02-22  Andras Varga
+
+	removed obsolete and misleading !WORK_IN_PROGRESS! files
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2010-03-05  Andras Varga
+
+	removed redundant (long) conversion from emit() calls
+
+2010-03-05  Andras Varga
+
+	@statistic: added missing 'vector' recording mode
+
+2010-03-05  Andras Varga
+
+	update for omnet++ 4.1b3:
+
+	renamed @signal to @statistic modeHint= to record=
+
+2010-06-24  Zoltan Bojthe
+
+	convert statistics to use signals
+
+2010-06-09  Zoltan Bojthe
+
+	Add isEmpty() functions to IPassiveQueue and its child classes
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-07-19  Andras Varga
+
+	added further module @labels (ethernet-node, wireless-node, mpls-node);
+	added default icons to several module types
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-07-09  Andras Varga
+
+	* all queue modules: performance: remember output gate pointer
+	instead of looking up gate by name for each send()

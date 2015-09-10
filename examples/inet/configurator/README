@@ -1,0 +1,17 @@
+This example demonstrates the automatic routing table configuration features of
+the IPv4NetworkConfigurator. There are two networks in the example. The first
+one focuses on the basic settings, one by one. The second one demonstrates the
+IPv4NetworkConfigurator features on a complex network that contains both wired
+and wireless nodes.
+
+In the simple example, there are 4 nodes connected with each other in a square.
+Each node sends ping packets to all interfaces. Each configuration section
+demonstrates a single automatic routing table configuration feature. 
+
+In the complex example, there are two completely separate wireless networks and
+some wired nodes. The source node sends ping packets to the wireless and wired
+interfaces of the destination node. The routing tables are set up in the following
+way. The ping packets reach the wireless destination interface while going
+through both wireless networks and one shared wired link. On the other hand, the
+ping packets reach the wired destination interface using only wired links,
+including the shared wired link.

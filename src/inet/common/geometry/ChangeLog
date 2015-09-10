@@ -1,0 +1,24 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-18  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Benjamin Seregi & Levente Meszaros
+
+	Added initial implementation:
+	EulerAngles, Quaternion, Rotation,
+	ShapeBase, GeometricObjectBase,
+	BVHTree, QuadTree, SpatialGrid,
+	Box, LineSegment, Plane, Polygon,
+	Sphere, Cuboid, Prism, Polyhedron

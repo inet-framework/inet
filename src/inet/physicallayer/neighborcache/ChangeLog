@@ -1,0 +1,22 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Benjamin Seregi & Levente Meszaros
+
+	Added initial implementation:
+	GridNeighborCache, NeighborListNeighborCache, QuadTreeNeighborCache
+
+====== inet-2.x ======

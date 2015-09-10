@@ -15,9 +15,9 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
 package inet.examples.manetrouting.manetMultiradio;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 //
@@ -29,7 +29,7 @@ network MultiRadio
     parameters:
         int numHosts;
     submodules:
-        channelControl: ChannelControl {
+        radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=83,15");
         }
         configurator: IPv4NetworkConfigurator {

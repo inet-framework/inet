@@ -1,0 +1,77 @@
+%description:
+
+This is a test for APSKDimensionalRadio busy reception state.
+The received signal is strong enough to sense but too weak to receive.
+Transmission and reception parameters must match with ScalarRadio.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.apskradio.packetlevel.APSKDimensionalRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: APSKDimensionalRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 80us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.arpType = "GlobalARP"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.host1.mobility.initialX = 200m
+*.host2.mobility.initialX = 800m
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radioType = "APSKDimensionalRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.transmitter.power = 10mW
+*.host*.wlan[*].radio.carrierFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -80dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+
+# ping app
+*.host1.numPingApps = 1
+*.host1.pingApp[0].count = 1
+*.host1.pingApp[0].printPing = true
+*.host1.pingApp[0].destAddr = "host2"
+*.host1.pingApp[0].startTime = 0s
+
+%contains: results/General-0.elog
+Changing radio reception state from IDLE to BUSY.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,96 @@
+%description:
+
+Checks that a host reports multicast state changes of the interface.
+See RFC 3376 5.1.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=10s
+cmdenv-express-mode = false
+#cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = false
+**.multicastForwarding = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<dump t="1" module="node.tester" ifname="eth0" what="groups"/>
+
+<set-filter t="2" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1 10.0.0.2"/>
+<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+
+<set-filter t="3" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
+<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
+
+<set-filter t="4" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
+<dump t="4" module="node.tester" ifname="eth0" what="groups"/>
+
+<set-filter t="5" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.1 10.0.0.2"/>
+<dump t="5" module="node.tester" ifname="eth0" what="groups"/>
+
+<set-filter t="6" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
+<dump t="6" module="node.tester" ifname="eth0" what="groups"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# First check that join/leave commands has modified the interface state
+%#
+%postrun-command: grep "IGMPTester: .* groups = " test.out > groups.out || true
+%contains: groups.out
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E. 
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1 10.0.0.2.
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.1 10.0.0.2.
+IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
+
+%#
+%# Now check the state transitions of the IGMP module
+%#
+%postrun-command: grep ".*[Ss]tate" test.out > igmp.out || true
+%contains: igmp.out
+[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
+[test] DETAIL:     Old state: INCLUDE().
+[test] DETAIL:     New state: INCLUDE(10.0.0.1,10.0.0.2).
+[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
+[test] DETAIL:     Old state: INCLUDE(10.0.0.1,10.0.0.2).
+[test] DETAIL:     New state: INCLUDE(10.0.0.1).
+[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
+[test] DETAIL:     Old state: INCLUDE(10.0.0.1).
+[test] DETAIL:     New state: EXCLUDE(10.0.0.2).
+[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
+[test] DETAIL:     Old state: EXCLUDE(10.0.0.2).
+[test] DETAIL:     New state: EXCLUDE(10.0.0.1,10.0.0.2).
+[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
+[test] DETAIL:     Old state: EXCLUDE(10.0.0.1,10.0.0.2).
+[test] DETAIL:     New state: INCLUDE(10.0.0.1).
+
+%#
+%# Now check that the IGMP module sent the reports immediately
+%#
+%postrun-command: grep "IGMPTester: Received" test.out > received.out || true
+%contains: received.out
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.2>.
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_EX 10.0.0.2>.
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.1>.
+IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_IN 10.0.0.1>.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,40 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-23  Zoltan Bojthe
+
+    Get address length from IL3AddressType (instead of getting from ned parameter)
+    Renamed coordByteLength to positionByteLength and set to 2*4 byte
+    Removed confusing addressByteLength.
+
+2015-02-12  Zoltan Bojthe
+
+    Fixed packet length.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-05  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-06-14  Levente Meszaros
+
+	First version added to the integration branch. Development was done
+	in Q1 2013 by Tamas Borbely, in src/networklayer/routing/rip/
+
+====== inet-2.x ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-02-06  Levente Meszaros
+
+	added as networklayer/routing/gpsr/

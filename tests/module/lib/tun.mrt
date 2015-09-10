@@ -1,0 +1,12 @@
+ifconfig:
+
+# virtual tun interface
+name: tun0    inet_addr: 192.168.0.1   Mask: 255.255.255.0    MTU: 1500    Metric: 1    POINTTOPOINT MULTICAST
+
+ifconfigend.
+
+route:
+
+default:    0.0.0.0    0.0.0.0    G    0    tun0
+
+routeend.

@@ -6,9 +6,9 @@
 
 package inet.examples.httptools.socket.pairsocket;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.world.httptools.HttpController;
+import inet.applications.httptools.configurator.HttpController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
 
 
 network HttpSockPair
@@ -27,7 +27,7 @@ network HttpSockPair
             parameters:
                 //                moduleTypes = "StandardHost";
                 //                nonIPModuleTypes = "";
-                config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("i=block/cogwheel");
         }
         controller: HttpController {

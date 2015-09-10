@@ -5,8 +5,6 @@ INKSCAPE=inkscape
 DOT=dot
 TEMPLATE=omnetpp
 
-TITLE=User Manual
-
 # --- generating pdf ---
 
 # FIXME
@@ -16,7 +14,9 @@ TEXCHAPTERS = \
 	 ch-node-architecture.tex \
 	 ch-ppp.tex \
 	 ch-ethernet.tex \
-	 ch-radio.tex \
+	 ch-environment.tex \
+	 ch-power.tex \
+	 ch-physicallayer.tex \
 	 ch-80211.tex \
 	 ch-mobility.tex \
 	 ch-ipv4.tex \
@@ -54,7 +54,7 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png cover
 	pdflatex inet-manual.tex $(LOGFILTER)
 	pdflatex inet-manual.tex $(LOGFILTER)
 #	pdftk C=cover.pdf B=../cover/copyright.pdf D=inet-manual.pdf cat C B D3-end output ../../Manual.pdf
-	rm -f *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg
+	rm -f *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.bbl
 
 %.pdf: %.svg
 	$(INKSCAPE) $< -A $@

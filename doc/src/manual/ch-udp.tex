@@ -185,7 +185,7 @@ over it (the code can be placed in your handleMessage() or activity()):
 \begin{cpp}
 UDPSocket socket;
 socket.setOutputGate(gate("udpOut"));
-socket.connect(IPvXAddress("10.0.0.2"), 2000);
+socket.connect(L3AddressResolver().resolve("10.0.0.2"), 2000);
 
 cPacket *pk = new cPacket("dgram");
 pk->setByteLength(1024);
@@ -312,7 +312,7 @@ or for each burst, or for each packet, depending on the value of the
 The own addresses will be ignored.
 
 An address may be given in the dotted decimal notation, or with the module
-name. (The \cppclass{IPvXAddressResolver} class is used to resolve the address.)
+name. (The \cppclass{L3AddressResolver} class is used to resolve the address.)
 You can use the "Broadcast" string as address for sending broadcast messages.
 
 INET also defines several NED functions that can be useful:

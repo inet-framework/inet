@@ -18,6 +18,9 @@
 //
 
 #include "TestOperation.h"
+namespace inet {
 
 Register_Class(TestNodeStartOperation)
 Register_Class(TestNodeShutdownOperation)
+
+}

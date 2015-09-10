@@ -19,8 +19,9 @@ record-eventlog = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.numUdpApps = 1
 **.client.udpApp[0].typename = "DHCPClient"
-**.server.udpApp[0].typename = "DHCPServer"
+#**.client.udpApp[0].log-level = detail
 
+**.server.udpApp[0].typename = "DHCPServer"
 **.server.udpApp[0].subnetMask = "255.255.255.0"
 **.server.udpApp[0].ipAddressStart = "192.168.1.100"
 **.server.udpApp[0].maxNumClients = 100
@@ -30,11 +31,11 @@ record-eventlog = true
 
 %file: test.ned
 
-import inet.nodes.ethernet.Eth10M;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.base.LifecycleController;
-import inet.world.scenario.ScenarioManager;
+import inet.node.ethernet.Eth10M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
 
 network LifecycleTest
 {

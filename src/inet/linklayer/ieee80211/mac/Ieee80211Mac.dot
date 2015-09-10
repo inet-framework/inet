@@ -1,0 +1,80 @@
+digraph g {
+
+   // parameters
+   node [shape=box,fontsize=36,width=4,height=1]
+   edge [fontsize=24]
+   nodesep=.5;
+   ranksep=2;
+
+   // nodes
+   IDLE;
+   DEFER;
+   WAITAIFS;
+   BACKOFF;
+   WAITACK;
+   WAITMULTICAST;
+   WAITCTS;
+   WAITSIFS;
+   RECEIVE;
+
+   // edges
+   IDLE -> DEFER                [label="Data-Ready"];
+   IDLE -> DEFER                [label="Immediate-Data-Ready"];
+   IDLE -> RECEIVE              [label="Receive"];
+
+   DEFER -> WAITAIFS            [label="Wait-AIFS"];
+   DEFER -> WAITAIFS            [label="Immediate-Wait-AIFS"];
+   DEFER -> RECEIVE             [label="Receive"];
+
+   WAITAIFS -> WAITAIFS         [label="EDCAF-Do-Nothing"];
+   WAITAIFS -> WAITCTS          [label="Immediate-Transmit-RTS"];
+   WAITAIFS -> WAITMULTICAST    [label="Immediate-Transmit-Multicast"];
+   WAITAIFS -> WAITACK          [label="Immediate-Transmit-Data"];
+   WAITAIFS -> BACKOFF          [label="AIFS-Over"];
+   WAITAIFS -> BACKOFF          [label="DIFS-Over"];
+   WAITAIFS -> BACKOFF          [label="DIFS-Over"];
+   WAITAIFS -> DEFER            [label="Busy"];
+   WAITAIFS -> DEFER            [label="Immediate-Busy"];
+   WAITAIFS -> RECEIVE          [label="Receive"];
+
+   BACKOFF -> WAITCTS           [label="Transmit-RTS"];
+   BACKOFF -> WAITMULTICAST     [label="Transmit-Multicast"];
+   BACKOFF -> WAITACK           [label="Transmit-Data"];
+   BACKOFF -> BACKOFF           [label="AIFS-Over-backoff"];
+   BACKOFF -> WAITCTS           [label="AIFS-Immediate-Transmit-RTS"];
+   BACKOFF -> WAITMULTICAST     [label="AIFS-Immediate-Transmit-Multicast"];
+   BACKOFF -> WAITACK           [label="AIFS-Immediate-Transmit-Data"];
+   BACKOFF -> IDLE              [label="Backoff-Idle"];
+   BACKOFF -> DEFER             [label="Backoff-Busy"];
+
+   WAITACK -> IDLE              [label="Reception-ACK-failed"];
+   WAITACK -> DEFER             [label="Reception-ACK-error"];
+   WAITACK -> DEFER             [label="Receive-ACK-TXOP-Empty"];
+   WAITACK -> WAITSIFS          [label="Receive-ACK-TXOP"];
+   WAITACK -> DEFER             [label="Receive-ACK"];
+   WAITACK -> IDLE              [label="Transmit-Data-Failed"];
+   WAITACK -> DEFER             [label="Receive-ACK-Timeout"];
+   WAITACK -> RECEIVE           [label="Interrupted-ACK-Failure"];
+   WAITACK -> RECEIVE           [label="Retry-Interrupted-ACK"];
+
+   WAITMULTICAST -> DEFER       [label="Transmit-Multicast"];
+
+   WAITCTS -> IDLE              [label="Reception-CTS-Failed"];
+   WAITCTS -> DEFER             [label="Reception-CTS-error"];
+   WAITCTS -> WAITSIFS          [label="Receive-CTS"];
+   WAITCTS -> IDLE              [label="Transmit-RTS-Failed"];
+   WAITCTS -> DEFER             [label="Receive-CTS-Timeout"];
+
+   WAITSIFS -> WAITACK          [label="Transmit-Data-TXOP"];
+   WAITSIFS -> IDLE             [label="Transmit-CTS"];
+   WAITSIFS -> WAITACK          [label="Transmit-DATA"];
+   WAITSIFS -> IDLE             [label="Transmit-ACK"];
+
+   RECEIVE -> IDLE              [label="Immediate-Receive-Error"];
+   RECEIVE -> IDLE              [label="Immediate-Receive-Multicast"];
+   RECEIVE -> WAITSIFS          [label="Immediate-Receive-Data"];
+   RECEIVE -> WAITSIFS          [label="Immediate-Receive-RTS"];
+   RECEIVE -> DEFER             [label="Immediate-Receive-Other-backtobackoff"];
+   RECEIVE -> IDLE              [label="Immediate-Promiscuous-Data"];
+   RECEIVE -> IDLE              [label="Immediate-Receive-Other"];
+}

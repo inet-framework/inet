@@ -1,0 +1,253 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with classifierModule parameter.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-19  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-02-22  Andras Varga
+
+	LIBTable: xml parameter "conf" was renamed to "config", and default value
+	(empty XML document) was added
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-18  Zoltan Bojthe
+
+	NEDDOC fixes
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-12-20  Andras Varga
+
+	Fixed MPLSPacket assignment operator.
+
+	std::stack had to be replaced with std::vector, because stack does not
+	support random access, needed by the new info() method.
+
+	Reported by Sebastian Kehr and Alfonso Ariza Quintana
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-11-02  Andras Varga
+
+	* updated to Vojta Janota's latest code
+
+2005-10-03  Andras Varga
+
+	* checked in Vojta Janota's implementation which entirely replaces old code
+
+2003-2004  Andras Varga
+
+	MPLS/RSVP-TE/LDP models:
+
+	* an initial comment: the MPLS/RSVP-TE/LDP models represent a very large
+	  body of code, written by a single person -- a very remarkable achievement.
+	  It will take quite some time to fully understand and verify the code.
+
+	* Jack Foo (CTIE, Monash Uni) has worked a lot with the original model
+	  codebase. He provided heaps of patches which will have to be merged
+	  into this (somewhat changed) codebase
+
+	* code changed to use LIBTableAccess, LDPAccess, MPLSAccess etc classes
+	  instead of base classes. Some of these can probably be eliminated
+	  in the future, because these models use direct message sending
+	  at places where connections would probably be better, and that's why
+	  they need to find MPLS etc submodules.
+
+	* access to TED changed to TED::getGlobalInstance()
+
+	* ev << "Error occurred: ..."  changed to error("...") in all places --
+	  pops up an error dialog, so surely cannot go unnoticed (none popped up yet :-).
+
+	* Replaced one thousand C-style casts ((<nop>RsvpMessage*)msg)
+	  with check_and_cast<>. Luckily they caught no errors when run.
+
+	* MPLS: 400-line activity() converted to handleMessage() and split up
+	  into three. This was only one: there are still many very long
+	  functions (several hundred lines!!!) with lots of copy/pasted
+	  code blocks -- this a major headache and a maintentance nightmare.
+	  All these methods badly need to be split up into smaller ones, and
+	  the common/repeating parts factored out into functions.
+
+	* OSPF/TE: lots of std::vector code. Changed pointers to references
+	  (const references wherever possible). Commented calculateERO()
+	  methods. A bug due to incorrect STL usage (pointers to elements of
+	  std::vector) has been worked around, it'll be properly fixed later.
+	  Also some of the loops which do linear search could possibly be made
+	  more efficient.
+
+	* Uses ints to represent IP addresses throughout the code. It would
+	  probably be better to use the IPAddress class (fits into 4 bytes
+	  too) or maybe at least "typedef unsigned int ipaddress" -- this
+	  looks like a huge undertaking, not done yet.
+
+	* Some general tidying (e.g. run all code through the "indent" program),
+	  some bugfixes (STL usage, "not owner of message", etc.)
+
+	A second round of refactoring:
+
+	* OSPF-TE: renamings to enforce naming convention on variables & types
+
+	* LDP, RSVP-TE hand-coded message classes migrated to .msg files
+
+	* LDP rewritten for new TCP model
+
+	* LIBTable public interface revised, table contents made inspectable in Tkenv
+
+	* MPLS model and MPLSPacket extensive refactoring & dead code removal
+
+	* MPLS simulation examples revised, e.g. removed tons of empty LIB &
+	  PRT table files for clarity
+
+2003-10-03  Andras Varga
+
+	* fixed a lot of "unused variable" warnings
+	* made it compile with MSVC 6.0
+
+2003-09-19  Andras Varga
+
+	Added MPLS/LDP/RESVP-TE models written by Xuan Thang Nguyen at
+	University of Technology, Sydney (UTS) as a Capstone project.
+	Original URL (now defunct):
+	    http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/
+
+	If you are interested in the early history of the MPLS code,
+	change to the project root and type
+
+	$ gitk -- Network/MPLS INET/src/networklayer/mpls

@@ -1,0 +1,11 @@
+<config>
+  <interface hosts='FITgate1' address='192.168.100.1' netmask='255.255.255.0'/>
+  <interface hosts='FITgate2' towards="FITgate1" address='192.168.100.2' netmask='255.255.255.0'/>
+  <interface hosts='Alice Bob' address='192.168.100.x' netmask='255.255.255.0'/>
+  <interface hosts='FITgate2' address='192.168.200.1' netmask='255.255.255.0'/>
+  <interface hosts='Carlos' address='192.168.200.x' netmask='255.255.255.0'/>
+
+  <multicast-group hosts='Alice' address='227.0.13.37 229.1.2.3'/>
+  <multicast-group hosts='Bob' address='229.1.2.3'/>
+  <multicast-group hosts='Carlos' address='228.0.10.1'/>
+</config>

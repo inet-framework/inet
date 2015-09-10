@@ -1,0 +1,31 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-03  Levente Mészáros
+
+    Added level parameter to printToStream functions.
+
+2015-03-16  Levente Mészáros
+
+    Consistently renamed packet level and bit level implementations into
+    separate subdirectories. Moved apsk specific errormodels under
+    apskradio/bitlevel and apskradio/packetlevel.
+
+2015-02-25  Levente Meszaros
+
+	Extended APSKErrorModel with symbol error rate computation support with the
+	help of the used modulation.
+
+	Renamed ConstantErrorModel to StochasticErrorModel to better express its
+	behavior.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======

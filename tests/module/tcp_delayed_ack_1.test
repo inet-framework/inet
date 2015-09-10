@@ -2,7 +2,7 @@
 Test delayed ack: ack is sent after 200ms
 
 
-%inifile: {}.ini
+%inifile: omnetpp.ini
 [General]
 #preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
 ned-path = .;../../../../src;../../lib
@@ -13,6 +13,10 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
+
+####cmdenv-log-format=""
+*.tcptester.cmdenv-ev-output=true
+**.cmdenv-ev-output=false
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=100B

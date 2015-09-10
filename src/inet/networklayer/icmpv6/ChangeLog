@@ -1,0 +1,301 @@
+====== inet-3.x ======
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-03-10  Zoltan Bojthe
+
+    Fixed ICMPv6 serializer.
+
+2015-02-10  Zoltan Bojthe
+
+    Fixed IPv6NeighborDiscovery packet length.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-19  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-29  Andras Varga
+
+	ICMPv6: lifecycle operations not supported yet
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-01-17  Tamas Borbely
+
+	Default Router Selection is implemented as specified in RFC 4861 6.3.6:
+	first the reachable routers are tried in round-robin, then
+	if there are no known reachable routers, then the others are selected
+	in round-robin order.
+
+	Earlier always the first one was selected, which violates the RFC.
+
+2012-01-03  Tamas Borbely
+
+	Fix #476: now IPv6 Neighbour Discovery does not initiate DAD
+	if the dupAddrDetecTransmits variable is set to 0. The autoconfigured
+	addresses become permanent without checking their uniqueness.
+
+2011-12-21  Tamas Borbely
+
+	Fix #492: if a network contained an Ethernet switch, the unsolicited
+	RA messages are sent too often (between 30 and 70ms). This shorter
+	periods was used, because Ethernet switches were mistakenly identified
+	as wireless access points.
+
+	    Now the shorter periods are used only if the router has wireless interface
+	or directly attached to a wireless access point.
+
+2011-12-20  Tamas Borbely
+
+	Fix #474: now ICMPv6 error packets are truncated to the minimum MTU.
+	Before this change, they could erronously send large datagrams
+	that could not be delivered to the target without fragmentation.
+
+2011-12-15  Tamas Borbely
+
+	Fix #475: now it is possible to send a ping to a multicast address.
+	The bug was that the source address of the ping reply was always set
+	to the destination of the ping request, but multicast addresses
+	are not allowed as source. Now the ICMPv6 module sets the source
+	address	to the unicast address belonging to the interface on which
+	the echo request was received.
+
+2011-12-21  Andras Varga
+
+	IPv6NeighborDiscovery: added @signal[startDAD]
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-14  Zoltan Bojthe
+
+	xMIPv6 related: Code style, #include optimisation
+
+2011-03-31  Zoltan Bojthe
+
+	change simsignal_t member variables to static member
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	IPv6: bugfix: missing {/}
+
+2011-03-02  Zoltan Bojthe
+
+	eliminate warnings: comparison between signed and unsigned integers
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-22  Andras Varga
+
+	removed obsolete and misleading !WORK_IN_PROGRESS! files
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-19  Zoltan Bojthe
+
+	IPv6NeighbourCache: add isHomeAgent flag (merged from xMIPv6)
+
+2011-01-19  Zoltan Bojthe
+
+	reduce differences for xMIPv6
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2011-01-13  Zoltan Bojthe
+
+	code style
+
+2011-01-13  Zoltan Bojthe
+
+	cleaning includes
+
+2011-01-10  Zoltan Bojthe
+
+	Code style changes:
+
+	- tab-to-space conversion
+	- '{' to new line
+	- too long lines
+	- remove trailing whitespace from lines
+	- indentation
+
+2011-01-06  Zoltan Bojthe
+
+	IPv6ND: add a statistic signal.
+
+2011-01-06  Zoltan Bojthe
+
+	IPv6ND: remove unused variable
+
+2011-01-06  Zoltan Bojthe
+
+	cosmetic changes: indentation, spell checking
+
+2011-01-05  Zoltan Bojthe
+
+	minimal changes
+
+2010-12-21  Zoltan Bojthe
+
+	IPv6InterfaceData: getter functions be const
+
+	and name of getter functions be get....()
+
+2010-12-20  Zoltan Bojthe
+
+	add comments
+
+2010-12-20  Zoltan Bojthe
+
+	icmpv6: add MIPv6 variable, add/modify comments
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6Neighbour: using cancelAndDelete() for delete events, remove deleted
+	entry from list
+
+2010-12-15  Zoltan Bojthe
+
+	IPv6NDMessage: add structures, add and reordering fields, add comments
+
+2010-12-15  Zoltan Bojthe
+
+	(M)IPv6: add constants
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: scheduling simtime-relative (need it, when module created
+	dynamically)
+
+2010-12-13  Zoltan Bojthe
+
+	IPv6: bugfix: delete undisposed objects in IPv6NeighbourDiscovery
+
+2010-12-10  Zoltan Bojthe
+
+	comment change, newline at the end of file
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-08-04  Andras Varga
+
+	* checked in the IPv6 model implemented by Ng Wei Yang at CTIE,
+	Monash University; code skeleton and some initial code
+	implemented by Andras Varga

@@ -1,0 +1,42 @@
+%description:
+Testing the functionality of the TUN interface:
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+network = TunTest
+debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+
+**.testHost.numUdpApps = 1
+**.testHost.numTcpApps = 0
+**.testHost.numTunApps = 1
+**.testHost.numTunInterfaces = 1
+**.testHost.udpApp[0].typename = "UDPBasicApp"
+**.testHost.tunApp[0].typename = "TunLoopbackApp"
+**.testHost.udpApp[0].sendInterval = 0.05s
+**.testHost.udpApp[0].messageLength = 100B
+**.testHost.udpApp[0].startTime = 1s
+**.testHost.udpApp[0].stopTime = 2s
+**.testHost.udpApp[0].destAddresses = "192.168.0.2"
+**.testHost.udpApp[0].localAddress = "192.168.0.1"
+**.testHost.udpApp[0].destPort = 1000
+**.testHost.udpApp[0].localPort = 2000
+
+
+**.testHost.routingTable.routingFile = "../../lib/tun.mrt"
+**.testHost.numPcapRecorders=1
+**.testHost.pcapRecorder[0].pcapFile="tun.pcap"
+**.testHost.pcapRecorder[0].moduleNamePatterns="tun[0]"
+**.testHost.pcapRecorder[0].sendingSignalNames="packetSentToUpper"
+**.testHost.pcapRecorder[0].receivingSignalNames="packetReceivedFromUpper"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+packets sent: 20
+%contains-regex: stdout
+packets received: 20
+%#--------------------------------------------------------------------------------------------------------------

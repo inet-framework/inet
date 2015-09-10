@@ -1,7 +1,7 @@
 package inet.examples.rtp.unicast2;
 
-import inet.nodes.rtp.RTPHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.rtp.RTPHost;
 
 
 network RTPUnicast2
@@ -18,8 +18,8 @@ network RTPUnicast2
     submodules:
         sender: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "receiver";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -29,8 +29,8 @@ network RTPUnicast2
         }
         receiver: RTPHost {
             parameters:
-                IPForward = false;
-                profileName = "inet.transport.rtp.RTPAVProfile";
+                forwarding = false;
+                profileName = "inet.transportlayer.rtp.RTPAVProfile";
                 destinationAddress = "sender";
                 portNumber = 5004;
                 bandwidth = 8000;

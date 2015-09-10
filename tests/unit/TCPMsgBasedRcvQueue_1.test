@@ -7,18 +7,22 @@ Tests TCPMsgBasedSendQueue, TCPMsgBasedRcvQueue classes
 %includes:
 #include "TCPQueueTesterFunctions.h"
 
+%global:
+
+using namespace ::inet::tcp;
+
 %activity:
 TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
 
 sq->init(1000);
-ev << sq->info() <<"\n";
+EV << sq->info() <<"\n";
 
 TCPMsgBasedRcvQueue rcvQueue;
 TCPMsgBasedRcvQueue *rq = &rcvQueue;
 
 rq->init(1000);
-ev << rq->info() <<"\n";
+EV << rq->info() <<"\n";
 
 enqueue(sq, "msg1", 100); // 1000..1100
 enqueue(sq, "msg2", 400); // 1100..1500
@@ -50,7 +54,7 @@ extractBytesUpTo(rq, 2200);
 extractBytesUpTo(rq, 2300);
 discardUpTo(sq, 2300);
 
-ev << ".\n";
+EV << ".\n";
 
 %subst: /[\{\}]/ /
 

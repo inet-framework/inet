@@ -20,10 +20,12 @@
 #include <fstream>
 #include <iomanip>
 
-#include "INETDefs.h"
-#include "IPv4Datagram.h"
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 using namespace std;
+
+namespace inet {
 
 class MeterTestApp : public cSimpleModule
 {
@@ -80,7 +82,7 @@ void MeterTestApp::handleMessage(cMessage *msg)
       ostringstream packetName;
       packetName << "packet-" << (++counter);
       cPacket *packet = new IPv4Datagram(packetName.str().c_str());
-      packet->setByteLength(par("packetSize"));
+      packet->setByteLength(par("packetSize").longValue());
       send(packet, "out");
 
       if ((numPackets == 0 || counter < numPackets) &&
@@ -96,3 +98,6 @@ void MeterTestApp::handleMessage(cMessage *msg)
       delete msg;
     }
 }
+
+} // namespace inet
+

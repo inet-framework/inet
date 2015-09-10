@@ -20,8 +20,10 @@
 #ifndef __INET_TESTMOBILITY_H_
 #define __INET_TESTMOBILITY_H_
 
-#include "INETDefs.h"
-#include "ILifecycle.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+
+namespace inet {
 
 class INET_API TestMobility : public cSimpleModule, public ILifecycle {
   private:
@@ -37,5 +39,6 @@ class INET_API TestMobility : public cSimpleModule, public ILifecycle {
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage * message);
 };
+}
 
 #endif
