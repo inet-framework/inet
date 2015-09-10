@@ -67,6 +67,7 @@
     <feature enabled="true" id="Ieee8021d"/>
     <feature enabled="true" id="Ieee8021d_examples"/>
     <feature enabled="true" id="TUN"/>
+    <feature enabled="true" id="packetdrill"/>
     <feature enabled="true" id="BMAC"/>
     <feature enabled="true" id="LMAC"/>
     <feature enabled="true" id="CSMA"/>

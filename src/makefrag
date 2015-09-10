@@ -9,6 +9,8 @@ ifneq (,$(findstring -DWITH_TCP_NSC,$(COPTS)))
   endif
 endif
 
+CFLAGS += -DHAVE_FMEMOPEN
+
 #
 # pkg-config:
 #

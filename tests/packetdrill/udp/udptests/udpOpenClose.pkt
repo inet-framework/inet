@@ -1,0 +1,2 @@
+0.000 socket(..., SOCK_DGRAM, IPPROTO_UDP) = 3
++1.000 close(3) = 0
