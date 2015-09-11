@@ -33,6 +33,7 @@ class IIeee80211FrameExchange
         };
 
     public:
+        virtual ~IIeee80211FrameExchange() {}
         virtual void start() = 0;
         virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
 };

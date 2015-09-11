@@ -20,20 +20,17 @@
 #include "Ieee80211MacTx.h"
 #include "Ieee80211MacContentionTx.h"
 #include "Ieee80211MacImmediateTx.h"
+#include "IIeee80211UpperMac.h"
+#include "Ieee80211NewMac.h" //TODO
 
 namespace inet {
 
 namespace ieee80211 {
 
-Ieee80211MacTx::Ieee80211MacTx(Ieee80211NewMac *mac, int numContentionTx) :
-        Ieee80211MacPlugin(mac), numContentionTx(numContentionTx)
+Ieee80211MacTx::Ieee80211MacTx()
 {
-    ASSERT(numContentionTx < MAX_NUM_CONTENTIONTX);
     for (int i = 0; i < MAX_NUM_CONTENTIONTX; i++)
         contentionTx[i] = nullptr;
-    for (int i = 0; i < numContentionTx; i++)
-        contentionTx[i] = new Ieee80211MacContentionTx(mac, i); //TODO factory method
-    immediateTx = new Ieee80211MacImmediateTx(mac); //TODO factory method
 }
 
 Ieee80211MacTx::~Ieee80211MacTx()
@@ -41,6 +38,19 @@ Ieee80211MacTx::~Ieee80211MacTx()
     for (int i = 0; i < MAX_NUM_CONTENTIONTX; i++)
         delete contentionTx[i];
     delete immediateTx;
+}
+
+void Ieee80211MacTx::initialize()
+{
+    mac = check_and_cast<Ieee80211NewMac*>(getParentModule());  //TODO
+    upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("^.upperMac")); //TODO
+
+    numContentionTx = 4; //TODO
+    ASSERT(numContentionTx < MAX_NUM_CONTENTIONTX);
+    for (int i = 0; i < numContentionTx; i++)
+        contentionTx[i] = new Ieee80211MacContentionTx(mac, i); //TODO factory method
+    immediateTx = new Ieee80211MacImmediateTx(mac); //TODO factory method
+
 }
 
 void Ieee80211MacTx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)

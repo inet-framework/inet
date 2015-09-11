@@ -22,23 +22,27 @@
 
 #include "Ieee80211MacPlugin.h"
 #include "IIeee80211UpperMac.h"
-#include "IIeee80211FrameExchange.h"
 #include "IIeee80211MacTx.h"
+#include "IIeee80211MacRx.h"
+#include "IIeee80211FrameExchange.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
 class Ieee80211NewMac;
-class Ieee80211FrameExchange;
 
 
-class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback
+class Ieee80211UpperMac : public cSimpleModule, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
     protected:
+        Ieee80211NewMac *mac = nullptr;
+        IIeee80211MacTx *tx = nullptr;
+        IIeee80211MacRx *rx = nullptr;
+
         /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
         int maxQueueSize;
 
@@ -54,11 +58,12 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, 
         /** Passive queue module to request messages from */
         IPassiveQueue *queueModule = nullptr;
 
-        Ieee80211FrameExchange *frameExchange = nullptr;
+        IIeee80211FrameExchange *frameExchange = nullptr;
 
         IIeee80211UpperMacContext *context = nullptr; //TODO fill in!
 
     protected:
+        void initialize();
         void handleMessage(cMessage *msg);
 
         virtual void frameExchangeFinished(IIeee80211FrameExchange *what, bool successful);
@@ -73,7 +78,7 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, 
         virtual void internalCollision(int txIndex) override;
 
     public:
-        Ieee80211UpperMac(Ieee80211NewMac *mac);
+        Ieee80211UpperMac();
         ~Ieee80211UpperMac();
         virtual void setContext(IIeee80211UpperMacContext *context) override { this->context = context; }
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;

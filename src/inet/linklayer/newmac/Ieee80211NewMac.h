@@ -70,7 +70,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
   public:
 
     IIeee80211UpperMac *upperMac = nullptr;
-    IIeee80211MacRx *reception = nullptr;
+    IIeee80211MacRx *rx = nullptr;
     IIeee80211MacTx *tx = nullptr;
 
   protected:
@@ -151,7 +151,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     //@}
   public:
     IIeee80211UpperMac *getUpperMac() const { return upperMac; }
-    IIeee80211MacRx *getReception() const { return reception; }
+    IIeee80211MacRx *getReception() const { return rx; }
     IIeee80211MacTx *getTransmission() const { return tx; }
 };
 

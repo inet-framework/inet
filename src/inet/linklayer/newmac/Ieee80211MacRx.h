@@ -28,23 +28,27 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211NewMac;
+class IIeee80211MacTx;
+class IIeee80211UpperMac;
 
-class Ieee80211MacRx : public Ieee80211MacPlugin, public IIeee80211MacRx
+class Ieee80211MacRx : public cSimpleModule, public IIeee80211MacRx
 {
     protected:
         cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
         MACAddress address;
+        IIeee80211MacTx *tx = nullptr;
+        IIeee80211UpperMac *upperMac = nullptr;
 
     protected:
+        void initialize();
         void handleMessage(cMessage *msg);
         void setNav(simtime_t navInterval);
         bool isFcsOk(Ieee80211Frame *frame) const;
 
     public:
-        Ieee80211MacRx(Ieee80211NewMac *mac);
+        Ieee80211MacRx();
         ~Ieee80211MacRx();
 
         virtual void setAddress(const MACAddress& address) override { this->address = address; }

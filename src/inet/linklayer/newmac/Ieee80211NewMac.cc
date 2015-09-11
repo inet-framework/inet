@@ -71,9 +71,9 @@ void Ieee80211NewMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        upperMac = new Ieee80211UpperMac(this);
-        reception = new Ieee80211MacRx(this);
-        tx = new Ieee80211MacTx(this, 1);
+        upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("upperMac"));  //TODO
+        rx = check_and_cast<IIeee80211MacRx*>(getModuleByPath("rx"));  //TODO
+        tx = check_and_cast<IIeee80211MacTx*>(getModuleByPath("tx"));  //TODO
 
         // initialize parameters
         double bitrate = par("bitrate");
@@ -101,7 +101,7 @@ void Ieee80211NewMac::initialize(int stage)
 
         IIeee80211UpperMacContext *context = new Ieee80211UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, tx);
         upperMac->setContext(context);
-        reception->setAddress(address);
+        rx->setAddress(address);
 
         // Initialize self messages
         stateSignal = registerSignal("state");
@@ -194,7 +194,7 @@ void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
 
 void Ieee80211NewMac::handleLowerPacket(cPacket *msg)
 {
-    reception->lowerFrameReceived(check_and_cast<Ieee80211Frame *>(msg));
+    rx->lowerFrameReceived(check_and_cast<Ieee80211Frame *>(msg));
 }
 
 void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
@@ -213,7 +213,7 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (reception->isMediumFree()) { // TODO: !!!
+        if (rx->isMediumFree()) { // TODO: !!!
             EV_DEBUG << "Sending it down immediately\n";
 /*
    // Dynamic power
@@ -240,8 +240,8 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)
     {
-        reception->receptionStateChanged((IRadio::ReceptionState)value);
-        tx->mediumStateChanged(reception->isMediumFree());
+        rx->receptionStateChanged((IRadio::ReceptionState)value);
+        tx->mediumStateChanged(rx->isMediumFree());
     }
     else if (signalID == IRadio::transmissionStateChangedSignal)
     {
@@ -254,8 +254,8 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
             tx->radioTransmissionFinished();
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);  //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }
-        reception->transmissionStateChanged(transmissionState);
-        tx->mediumStateChanged(reception->isMediumFree());
+        rx->transmissionStateChanged(transmissionState);
+        tx->mediumStateChanged(rx->isMediumFree());
     }
 }
 

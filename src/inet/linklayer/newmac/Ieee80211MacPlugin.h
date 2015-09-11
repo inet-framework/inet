@@ -46,7 +46,7 @@ class Ieee80211MacPlugin : public cObject
 
         //TODO remove these
         IIeee80211UpperMac *getUpperMac() { return mac->upperMac; }
-        IIeee80211MacRx *getReception() { return mac->reception; }
+        IIeee80211MacRx *getReception() { return mac->rx; }
         IIeee80211MacTx *getTransmission() { return mac->tx; }
 };
 

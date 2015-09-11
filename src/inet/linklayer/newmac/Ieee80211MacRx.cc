@@ -19,20 +19,25 @@
 
 #include "Ieee80211MacRx.h"
 #include "IIeee80211MacTx.h"
-#include "Ieee80211NewMac.h"
 #include "IIeee80211UpperMac.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-bool Ieee80211MacRx::isFcsOk(Ieee80211Frame* frame) const
+Ieee80211MacRx::Ieee80211MacRx()
 {
-    return !frame->hasBitError();
 }
 
-Ieee80211MacRx::Ieee80211MacRx(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
+Ieee80211MacRx::~Ieee80211MacRx()
 {
+    delete cancelEvent(endNavTimer);
+}
+
+void Ieee80211MacRx::initialize()
+{
+    tx = check_and_cast<IIeee80211MacTx*>(getModuleByPath("^.tx"));  //TODO
+    upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("^.upperMac")); //TODO
     endNavTimer = new cMessage("NAV");
 }
 
@@ -49,13 +54,13 @@ void Ieee80211MacRx::lowerFrameReceived(Ieee80211Frame* frame)
     if (!frame)
         throw cRuntimeError("message from physical layer (%s)%s is not a subclass of Ieee80211Frame", frame->getClassName(), frame->getName());
     bool errorFree = isFcsOk(frame);
-    getTransmission()->lowerFrameReceived(errorFree);
+    tx->lowerFrameReceived(errorFree);
     if (errorFree)
     {
         EV_INFO << "Received message from lower layer: " << frame << endl;
         if (frame->getReceiverAddress() != address)
             setNav(frame->getDuration());
-        getUpperMac()->lowerFrameReceived(frame);
+        upperMac->lowerFrameReceived(frame);
     }
     else
     {
@@ -63,6 +68,11 @@ void Ieee80211MacRx::lowerFrameReceived(Ieee80211Frame* frame)
         delete frame;
     }
 
+}
+
+bool Ieee80211MacRx::isFcsOk(Ieee80211Frame* frame) const
+{
+    return !frame->hasBitError();
 }
 
 bool Ieee80211MacRx::isMediumFree() const
@@ -98,12 +108,6 @@ void Ieee80211MacRx::setNav(simtime_t navInterval)
     }
     else
         EV_INFO << "Frame duration field is 0" << std::endl; // e.g. Cf-End frame
-}
-
-Ieee80211MacRx::~Ieee80211MacRx()
-{
-    cancelEvent(endNavTimer);
-    delete endNavTimer;
 }
 
 }

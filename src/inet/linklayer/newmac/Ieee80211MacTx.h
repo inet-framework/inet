@@ -32,18 +32,21 @@ class IIeee80211MacImmediateTx;
 
 #define MAX_NUM_CONTENTIONTX 4
 
-class Ieee80211MacTx : public Ieee80211MacPlugin, public IIeee80211MacTx
+class Ieee80211MacTx : public cSimpleModule, public IIeee80211MacTx
 {
     protected:
+        Ieee80211NewMac *mac = nullptr;
+        IIeee80211UpperMac *upperMac = nullptr;
         int numContentionTx;
         IIeee80211MacContentionTx *contentionTx[MAX_NUM_CONTENTIONTX];
         IIeee80211MacImmediateTx *immediateTx = nullptr;
 
     protected:
+        virtual void initialize() override;
         virtual void handleMessage(cMessage *msg) override {}
 
     public:
-        Ieee80211MacTx(Ieee80211NewMac *mac, int numContentionTx);
+        Ieee80211MacTx();
         virtual ~Ieee80211MacTx();
 
         virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) override;
