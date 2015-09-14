@@ -556,6 +556,7 @@ void EtherMACBase::printParameters()
 
 void EtherMACBase::getNextFrameFromQueue()
 {
+    ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
         if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
@@ -568,6 +569,7 @@ void EtherMACBase::getNextFrameFromQueue()
 
 void EtherMACBase::requestNextFrameFromExtQueue()
 {
+    ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
         if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
