@@ -172,6 +172,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (txQueue.extQueue) {
         ASSERT(curTxFrame == nullptr);
+        ASSERT(transmitState == TX_IDLE_STATE);
         curTxFrame = frame;
     }
     else {
@@ -184,7 +185,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
         EV_DETAIL << "Frame " << frame << " arrived from higher layers, enqueueing\n";
         txQueue.innerQueue->insertFrame(frame);
 
-        if (!curTxFrame && !txQueue.innerQueue->isEmpty())
+        if (!curTxFrame && !txQueue.innerQueue->isEmpty() && transmitState == TX_IDLE_STATE)
             curTxFrame = (EtherFrame *)txQueue.innerQueue->pop();
     }
 
@@ -254,6 +255,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(cPacket *pk)
 
 void EtherMACFullDuplex::handleEndIFGPeriod()
 {
+    ASSERT(nullptr == curTxFrame);
     if (transmitState != WAIT_IFG_STATE)
         throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 
@@ -317,6 +319,7 @@ void EtherMACFullDuplex::finish()
 
 void EtherMACFullDuplex::handleEndPausePeriod()
 {
+    ASSERT(nullptr == curTxFrame);
     if (transmitState != PAUSE_STATE)
         throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
@@ -370,6 +373,7 @@ void EtherMACFullDuplex::processPauseCommand(int pauseUnits)
 
 void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
+    ASSERT(nullptr == curTxFrame);
     transmitState = WAIT_IFG_STATE;
     emit(transmitStateSignal, WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
@@ -378,6 +382,7 @@ void EtherMACFullDuplex::scheduleEndIFGPeriod()
 
 void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
 {
+    ASSERT(nullptr == curTxFrame);
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
