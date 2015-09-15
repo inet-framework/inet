@@ -21,7 +21,9 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
-#include <sys/socket.h>
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
+ #include <sys/socket.h>
+#endif
 
 using namespace inet;
 
@@ -318,6 +320,7 @@ class PacketDrillScript
 
         char *getBuffer() { return buffer; };
         int getLength() { return length; };
+        const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
         struct option_list *getOptionList() { return optionList; };
         void setOptionList(struct option_list *optL) { optionList = optL;};

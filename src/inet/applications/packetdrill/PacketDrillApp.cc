@@ -86,14 +86,13 @@ void PacketDrillApp::handleMessage(cMessage *msg)
     } else {
         if (msg->getArrivalGate()->isName("tunIn")) {
             if (outboundPackets->getLength() == 0) {
-                cMessage *nextmsg = simulation.getScheduler()->getNextEvent();
-                if ((simTime() + par("latency")) < nextmsg->getArrivalTime()) {
+                if ((simTime() + par("latency")) < getSimulation()->getScheduler()->guessNextEvent()->getArrivalTime()) {
                     delete (PacketDrillInfo *)msg->getContextPointer();
                     delete msg;
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                 } else {
                     PacketDrillInfo *info = new PacketDrillInfo();
-                    info->setLiveTime(simulation.getSimTime());
+                    info->setLiveTime(getSimulation()->getSimTime());
                     msg->setContextPointer(info);
                     receivedPackets->insert(PK(msg));
                 }
@@ -103,7 +102,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 if (datagram && live) {
                     PacketDrillInfo *info = (PacketDrillInfo *)datagram->getContextPointer();
                     if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
-                            info->getScriptTimeEnd(), info->getOffset(), simulation.getSimTime(), "outbound packet")
+                            info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
                             == STATUS_ERR) {
                         delete info;
                         delete msg;
@@ -127,7 +126,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
         } else if (msg->getArrivalGate()->isName("udpIn")) {
             PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
             if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
-                    event->getEventOffset(), simulation.getSimTime(), "inbound packet") == STATUS_ERR) {
+                    event->getEventOffset(), getSimulation()->getSimTime(), "inbound packet") == STATUS_ERR) {
                 delete msg;
                 return;
             }
@@ -150,7 +149,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 delete msg;
             } else {
                 PacketDrillInfo* info = new PacketDrillInfo();
-                info->setLiveTime(simulation.getSimTime());
+                info->setLiveTime(getSimulation()->getSimTime());
                 msg->setContextPointer(info);
                 receivedPackets->insert(PK(msg));
                 msgArrived = true;
@@ -171,7 +170,7 @@ void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
     if (event->getTimeType() == ANY_TIME ||
         event->getTimeType() == RELATIVE_TIME ||
         event->getTimeType() == RELATIVE_RANGE_TIME) {
-        offset = simulation.getSimTime() - simStartTime;
+        offset = getSimulation()->getSimTime() - simStartTime;
         cQueue *eventList = script->getEventList();
         offsetLastEvent = ((PacketDrillEvent *)(eventList->get(eventCounter - 1)))->getEventTime() - simStartTime;
         offset = (offset.dbl() > offsetLastEvent.dbl()) ? offset : offsetLastEvent;
@@ -252,7 +251,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_START: {
-            simStartTime = simulation.getSimTime();
+            simStartTime = getSimulation()->getSimTime();
             simRelTime = simStartTime;
             if (script->parseScriptAndSetConfig(config, NULL))
                 throw cRuntimeError("parseScriptAndSetConfig");
@@ -265,7 +264,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
         case MSGKIND_EVENT: {
             PacketDrillEvent *event = (PacketDrillEvent *)msg->getContextPointer();
             runEvent(event);
-            if ((!recvFromSet && outboundPackets->length() == 0) &&
+            if ((!recvFromSet && outboundPackets->getLength() == 0) &&
                 (!eventTimer->isScheduled() && eventCounter < numEvents - 1)) {
                 eventCounter++;
                 scheduleEvent();
@@ -322,7 +321,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
 
 int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, char **error)
 {
-    int domain, type;
+    int type;
     PacketDrillExpression *exp;
 
     if (args->getLength() != 3) {
@@ -341,7 +340,6 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
         return STATUS_ERR;
     }
 
-    domain = config->getSocketDomain();
     switch (protocol) {
         case IP_PROT_UDP:
             udpSocket.setOutputGate(gate("udpOut"));
