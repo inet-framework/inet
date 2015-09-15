@@ -87,11 +87,15 @@ void VectorCommunicationCache::addRadio(const IRadio *radio)
 {
     if (radioCache.size() == 0)
         baseRadioId = radio->getId();
-    getRadioCacheEntry(radio);
+    getRadioCacheEntry(radio)->receptionIntervals = new IntervalTree();
 }
 
 void VectorCommunicationCache::removeRadio(const IRadio *radio)
 {
+    auto& tree = getRadioCacheEntry(radio)->receptionIntervals;
+    delete tree;
+    tree = nullptr;
+
     int radioCount = 0;
     while (radioCount < (int)radioCache.size() && radioCache[radioCount].receptionIntervals == nullptr)
         radioCount++;
