@@ -37,15 +37,17 @@ class Ieee80211MacRx : public cSimpleModule, public IIeee80211MacRx
         cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+        bool mediumFree;  // cached state
         MACAddress address;
         IIeee80211MacTx *tx = nullptr;
         IIeee80211UpperMac *upperMac = nullptr;
 
     protected:
-        void initialize();
-        void handleMessage(cMessage *msg);
-        void setNav(simtime_t navInterval);
-        bool isFcsOk(Ieee80211Frame *frame) const;
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+        virtual void setNav(simtime_t navInterval);
+        virtual bool isFcsOk(Ieee80211Frame *frame) const;
+        virtual void recomputeMediumFree();
 
     public:
         Ieee80211MacRx();
@@ -54,7 +56,7 @@ class Ieee80211MacRx : public cSimpleModule, public IIeee80211MacRx
         virtual void setAddress(const MACAddress& address) override { this->address = address; }
         virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;
         virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
-        virtual bool isMediumFree() const override;
+        virtual bool isMediumFree() const override { return mediumFree; }
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 
 };

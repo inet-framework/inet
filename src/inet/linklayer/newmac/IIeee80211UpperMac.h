@@ -21,6 +21,7 @@
 #define __INET_IIEEE80211UPPERMAC_H
 
 #include "inet/common/INETDefs.h"
+#include "IIeee80211MacTx.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,6 +36,7 @@ class IIeee80211UpperMac
         virtual void setContext(IIeee80211UpperMacContext *context) = 0;
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
+        virtual void transmissionComplete(IIeee80211MacTx::ICallback *callback, int txIndex) = 0;
 };
 
 } // namespace ieee80211

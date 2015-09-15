@@ -55,17 +55,19 @@ class IIeee80211UpperMacContext
         virtual int getRtsThreshold() const = 0;
 
         virtual simtime_t getAckTimeout() const = 0;
+        virtual simtime_t getAckDuration() const = 0;
         virtual simtime_t getCtsTimeout() const = 0;
+        virtual simtime_t getCtsDuration() const = 0;
 
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const = 0;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const = 0;
         virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const = 0;
         virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const = 0;
 
-        virtual double computeFrameDuration(Ieee80211Frame *msg) const = 0;
         virtual double computeFrameDuration(int bits, double bitrate) const = 0;
         virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) const = 0;
-        virtual void setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame) const = 0;
+        virtual Ieee80211Frame *setDataBitrate(Ieee80211Frame *frame) const = 0;
+        virtual Ieee80211Frame *setControlBitrate(Ieee80211Frame *frame) const = 0;
 
         virtual bool isForUs(Ieee80211Frame *frame) const = 0;
         virtual bool isBroadcast(Ieee80211Frame *frame) const = 0;

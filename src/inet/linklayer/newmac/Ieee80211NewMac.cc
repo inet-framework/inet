@@ -66,9 +66,9 @@ void Ieee80211NewMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("upperMac"));  //TODO
-        rx = check_and_cast<IIeee80211MacRx*>(getModuleByPath("rx"));  //TODO
-        tx = check_and_cast<IIeee80211MacTx*>(getModuleByPath("tx"));  //TODO
+        upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath(".upperMac"));  //TODO
+        rx = check_and_cast<IIeee80211MacRx*>(getModuleByPath(".rx"));  //TODO
+        tx = check_and_cast<IIeee80211MacTx*>(getModuleByPath(".tx"));  //TODO
 
         // initialize parameters
         double bitrate = par("bitrate");
@@ -229,11 +229,10 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
 
 void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    Enter_Method_Silent();
+    Enter_Method("receiveSignal()");
     if (signalID == IRadio::receptionStateChangedSignal)
     {
         rx->receptionStateChanged((IRadio::ReceptionState)value);
-        tx->mediumStateChanged(rx->isMediumFree());
     }
     else if (signalID == IRadio::transmissionStateChangedSignal)
     {
@@ -244,10 +243,10 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
 
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
+            EV_DEBUG << "changing radio to receiver mode\n";
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);  //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }
         rx->transmissionStateChanged(transmissionState);
-        tx->mediumStateChanged(rx->isMediumFree());
     }
 }
 
@@ -262,9 +261,17 @@ void Ieee80211NewMac::configureRadioMode(IRadio::RadioMode radioMode)
     }
 }
 
+void Ieee80211NewMac::sendUp(cMessage *message)
+{
+    Enter_Method("sendUp()");
+    take(message);
+    MACProtocolBase::sendUp(message);
+}
+
 void Ieee80211NewMac::sendFrame(Ieee80211Frame *frame)
 {
-    EV << "sending frame\n";
+    Enter_Method("sendFrame()");
+    take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
 }

@@ -30,7 +30,7 @@ class Ieee80211NewMac;
 class IIeee80211UpperMacContext;
 class Ieee80211DataOrMgmtFrame;
 
-class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExchange
+class Ieee80211SendDataWithAckFSMBasedFrameExchange : public Ieee80211FSMBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *frame;
@@ -41,17 +41,29 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExcha
         State state = INIT;
 
     protected:
-        void handleWithFSM(EventType event, cMessage *frameOrTimer);
+        bool handleWithFSM(EventType event, cMessage *frameOrTimer);
 
         void transmitDataFrame();
         void retryDataFrame();
         void scheduleAckTimeout();
-        void processFrame(Ieee80211Frame *receivedFrame);
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        Ieee80211SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
-        ~Ieee80211SendDataWithAckFrameExchange();
+        Ieee80211SendDataWithAckFSMBasedFrameExchange(cSimpleModule *ownerModule, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
+        ~Ieee80211SendDataWithAckFSMBasedFrameExchange();
+};
+
+class Ieee80211SendDataWithAckFrameExchange : public Ieee80211StepBasedFrameExchange
+{
+    protected:
+        Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
+        int retryCount = 0;
+    protected:
+        virtual void doStep(int step);
+        virtual bool processReply(int step, Ieee80211Frame *frame);
+        virtual void processTimeout(int step);
+    public:
+        Ieee80211SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
 
 class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameExchange

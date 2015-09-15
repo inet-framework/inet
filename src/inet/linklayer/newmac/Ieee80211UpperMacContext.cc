@@ -96,18 +96,29 @@ int Ieee80211UpperMacContext::getRtsThreshold() const
 
 simtime_t Ieee80211UpperMacContext::getAckTimeout() const
 {
-    return 2*MAX_PROPAGATION_DELAY + getSIFS() +  basicFrameMode->getDuration(LENGTH_ACK);
+    return basicFrameMode->getPhyRxStartDelay() + getSIFS() + getAckDuration();
 }
 
 simtime_t Ieee80211UpperMacContext::getCtsTimeout() const
 {
-    return 2*MAX_PROPAGATION_DELAY + getSIFS() +  basicFrameMode->getDuration(LENGTH_CTS);
+    return basicFrameMode->getPhyRxStartDelay() + getSIFS() +  getCtsDuration();
+}
+
+simtime_t Ieee80211UpperMacContext::getAckDuration() const
+{
+    return basicFrameMode->getDuration(LENGTH_ACK) + basicFrameMode->getSlotTime();
+}
+
+simtime_t Ieee80211UpperMacContext::getCtsDuration() const
+{
+    return basicFrameMode->getDuration(LENGTH_CTS) + basicFrameMode->getSlotTime();
 }
 
 Ieee80211RTSFrame *Ieee80211UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const
 {
     Ieee80211RTSFrame *rtsFrame = new Ieee80211RTSFrame("RTS");
     rtsFrame->setTransmitterAddress(address);
+
     rtsFrame->setReceiverAddress(frame->getReceiverAddress());
     rtsFrame->setDuration(3 * getSIFS() + basicFrameMode->getDuration(LENGTH_CTS) +
             dataFrameMode->getDuration(frame->getBitLength()) +  //TODO maybe not always with dataFrameMode
@@ -118,6 +129,7 @@ Ieee80211RTSFrame *Ieee80211UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFr
 Ieee80211CTSFrame *Ieee80211UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rtsFrame) const
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS");
+    setBasicBitrate(rtsFrame);
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
     frame->setDuration(rtsFrame->getDuration() - getSIFS() - basicFrameMode->getDuration(LENGTH_CTS));
     return frame;
@@ -125,14 +137,15 @@ Ieee80211CTSFrame *Ieee80211UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rt
 
 Ieee80211ACKFrame *Ieee80211UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const
 {
-    Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("ACK");
-    frame->setReceiverAddress(frameToACK->getTransmitterAddress());
+    Ieee80211ACKFrame *ackFrame = new Ieee80211ACKFrame("ACK");
+    setBasicBitrate(ackFrame);
+    ackFrame->setReceiverAddress(frameToACK->getTransmitterAddress());
 
     if (!frameToACK->getMoreFragments())
-        frame->setDuration(0);
+        ackFrame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - basicFrameMode->getDuration(LENGTH_ACK));
-    return frame;
+        ackFrame->setDuration(frameToACK->getDuration() - getSIFS() - basicFrameMode->getDuration(LENGTH_ACK));
+    return ackFrame;
 }
 
 Ieee80211DataOrMgmtFrame *Ieee80211UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const //FIXME completely misleading name, random functionality
@@ -140,11 +153,6 @@ Ieee80211DataOrMgmtFrame *Ieee80211UpperMacContext::buildBroadcastFrame(Ieee8021
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
     frame->setDuration(0);
     return frame;
-}
-
-double Ieee80211UpperMacContext::computeFrameDuration(Ieee80211Frame *msg) const
-{
-    return 0; //TODO computeFrameDuration(msg->getBitLength(), basicFrameMode->getDataMode()->getNetBitrate());
 }
 
 double Ieee80211UpperMacContext::computeFrameDuration(int bits, double bitrate) const
@@ -155,26 +163,28 @@ double Ieee80211UpperMacContext::computeFrameDuration(int bits, double bitrate) 
     return duration;
 }
 
+Ieee80211Frame *Ieee80211UpperMacContext::setControlBitrate(Ieee80211Frame *frame) const
+{
+    return setBitrate(frame, controlFrameMode);
+}
+
 Ieee80211Frame *Ieee80211UpperMacContext::setBasicBitrate(Ieee80211Frame *frame) const
+{
+    return setBitrate(frame, basicFrameMode);
+}
+
+Ieee80211Frame *Ieee80211UpperMacContext::setDataBitrate(Ieee80211Frame *frame) const
+{
+    return setBitrate(frame, dataFrameMode);
+}
+
+Ieee80211Frame *Ieee80211UpperMacContext::setBitrate(Ieee80211Frame* frame, const IIeee80211Mode* mode) const
 {
     ASSERT(frame->getControlInfo() == nullptr);
     TransmissionRequest *ctrl = new TransmissionRequest();
-    ctrl->setBitrate(bps(basicFrameMode->getDataMode()->getNetBitrate()));
+    ctrl->setBitrate(bps(mode->getDataMode()->getNetBitrate()));
     frame->setControlInfo(ctrl);
     return frame;
-}
-
-void Ieee80211UpperMacContext::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame) const
-{
-    if (isBroadcast(frame))
-        frame->setDuration(0);
-//TODO
-//    else if (!frame->getMoreFragments())
-//        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicFrameMode->getDataMode()->getNetBitrate()));
-//    else
-//        // FIXME: shouldn't we use the next frame to be sent?
-//        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicFrameMode->getDataMode()->getNetBitrate())
-//                + computeFrameDuration(frame));
 }
 
 bool Ieee80211UpperMacContext::isForUs(Ieee80211Frame *frame) const

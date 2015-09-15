@@ -26,6 +26,8 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(Ieee80211MacTx);
+
 Ieee80211MacTx::Ieee80211MacTx()
 {
     for (int i = 0; i < MAX_NUM_CONTENTIONTX; i++)
@@ -42,12 +44,13 @@ Ieee80211MacTx::~Ieee80211MacTx()
 void Ieee80211MacTx::initialize()
 {
     IIeee80211MacRadioInterface *mac = check_and_cast<IIeee80211MacRadioInterface *>(getParentModule());  //TODO
+    IIeee80211UpperMac *upperMac = check_and_cast<IIeee80211UpperMac *>(getModuleByPath("^.upperMac"));  //TODO
 
     numContentionTx = 4; //TODO
-    ASSERT(numContentionTx < MAX_NUM_CONTENTIONTX);
+    ASSERT(numContentionTx <= MAX_NUM_CONTENTIONTX);
     for (int i = 0; i < numContentionTx; i++)
-        contentionTx[i] = new Ieee80211MacContentionTx(this, mac, i); //TODO factory method
-    immediateTx = new Ieee80211MacImmediateTx(this, mac); //TODO factory method
+        contentionTx[i] = new Ieee80211MacContentionTx(this, mac, upperMac, i); //TODO factory method
+    immediateTx = new Ieee80211MacImmediateTx(this, mac, upperMac); //TODO factory method
 
 }
 
@@ -61,29 +64,37 @@ void Ieee80211MacTx::handleMessage(cMessage *msg)
 
 void Ieee80211MacTx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
 {
+    Enter_Method("transmitContentionFrame()");
     ASSERT(txIndex >= 0 && txIndex < numContentionTx);
+    take(frame);
     contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, completionCallback);
 }
 
 void Ieee80211MacTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback)
 {
+    Enter_Method("transmitImmediateFrame()");
+    take(frame);
     immediateTx->transmitImmediateFrame(frame, ifs, completionCallback);
 }
 
 void Ieee80211MacTx::mediumStateChanged(bool mediumFree)
 {
+    Enter_Method("mediumState(%s)", mediumFree ? "FREE" : "BUSY");
     for (int i = 0; i < numContentionTx; i++)
         contentionTx[i]->mediumStateChanged(mediumFree);
 }
 
 void Ieee80211MacTx::radioTransmissionFinished()
 {
+    Enter_Method("radioTransmissionFinished()");
+    immediateTx->radioTransmissionFinished();
     for (int i = 0; i < numContentionTx; i++)
         contentionTx[i]->radioTransmissionFinished();
 }
 
 void Ieee80211MacTx::lowerFrameReceived(bool isFcsOk)
 {
+    Enter_Method("lowerFrameReceived(%s)", isFcsOk ? "OK" : "CORRUPT");
     for (int i = 0; i < numContentionTx; i++)
         contentionTx[i]->lowerFrameReceived(isFcsOk);
 }

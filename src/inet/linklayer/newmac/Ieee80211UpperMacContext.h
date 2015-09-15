@@ -44,6 +44,9 @@ class INET_API Ieee80211UpperMacContext : public IIeee80211UpperMacContext
         int rtsThreshold;
         IIeee80211MacTx *tx;
 
+    protected:
+        Ieee80211Frame *setBitrate(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
+
     public:
         Ieee80211UpperMacContext(const MACAddress& address, const IIeee80211Mode *dataFrameMode,
                 const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
@@ -65,18 +68,20 @@ class INET_API Ieee80211UpperMacContext : public IIeee80211UpperMacContext
         virtual int getShortRetryLimit() const override;
         virtual int getRtsThreshold() const override;
 
-        virtual simtime_t getAckTimeout() const override;
-        virtual simtime_t getCtsTimeout() const override;
+        virtual simtime_t getAckTimeout() const;
+        virtual simtime_t getAckDuration() const;
+        virtual simtime_t getCtsTimeout() const;
+        virtual simtime_t getCtsDuration() const;
 
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const override;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const override;
         virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const override;
         virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const override;
 
-        virtual double computeFrameDuration(Ieee80211Frame *msg) const override;
         virtual double computeFrameDuration(int bits, double bitrate) const override;
         virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) const override;
-        virtual void setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame) const override;
+        virtual Ieee80211Frame *setDataBitrate(Ieee80211Frame *frame) const override;
+        virtual Ieee80211Frame *setControlBitrate(Ieee80211Frame *frame) const override;
 
         virtual bool isForUs(Ieee80211Frame *frame) const override;
         virtual bool isBroadcast(Ieee80211Frame *frame) const override;

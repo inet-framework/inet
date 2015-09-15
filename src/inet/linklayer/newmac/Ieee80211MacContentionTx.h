@@ -29,6 +29,7 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+class IIeee80211UpperMac;
 class IIeee80211MacRadioInterface;
 
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
@@ -47,6 +48,7 @@ class Ieee80211MacContentionTx : public Ieee80211MacPlugin, public IIeee80211Mac
 
     protected:
         IIeee80211MacRadioInterface *mac;
+        IIeee80211UpperMac *upperMac;
         int txIndex;
 
         // current transmission's parameters
@@ -85,7 +87,7 @@ class Ieee80211MacContentionTx : public Ieee80211MacPlugin, public IIeee80211Mac
         bool isIFSNecessary();
 
     public:
-        Ieee80211MacContentionTx(cSimpleModule *ownerModule, IIeee80211MacRadioInterface *mac, int txIndex);
+        Ieee80211MacContentionTx(cSimpleModule *ownerModule, IIeee80211MacRadioInterface *mac, IIeee80211UpperMac *upperMac, int txIndex);
         ~Ieee80211MacContentionTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)

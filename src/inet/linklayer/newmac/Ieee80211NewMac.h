@@ -111,6 +111,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IIeee80211MacRad
     Ieee80211NewMac();
     virtual ~Ieee80211NewMac();
 
+    virtual void sendUp(cMessage *message) override;
     virtual void sendFrame(Ieee80211Frame *frameToSend);
     virtual void sendDownPendingRadioConfigMsg();
 };

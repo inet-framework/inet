@@ -84,6 +84,7 @@ class Ieee80211UpperMac : public cSimpleModule, public IIeee80211UpperMac, publi
         virtual void setContext(IIeee80211UpperMacContext *context) override { this->context = context; }
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
+        virtual void transmissionComplete(IIeee80211MacTx::ICallback *callback, int txIndex) override;
 
 };
 

@@ -24,6 +24,8 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(Ieee80211MacRx);
+
 Ieee80211MacRx::Ieee80211MacRx()
 {
 }
@@ -38,22 +40,26 @@ void Ieee80211MacRx::initialize()
     tx = check_and_cast<IIeee80211MacTx*>(getModuleByPath("^.tx"));  //TODO
     upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("^.upperMac")); //TODO
     endNavTimer = new cMessage("NAV");
+    recomputeMediumFree();
 }
 
 void Ieee80211MacRx::handleMessage(cMessage* msg)
 {
     if (msg->getContextPointer() != nullptr)
         ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
-    else if (msg == endNavTimer)  //FIXME should signal to tx!!!! or not????
+    else if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
+        recomputeMediumFree();
+    }
     else
         throw cRuntimeError("Unexpected self message");
 }
 
 void Ieee80211MacRx::lowerFrameReceived(Ieee80211Frame* frame)
 {
-    if (!frame)
-        throw cRuntimeError("message from physical layer (%s)%s is not a subclass of Ieee80211Frame", frame->getClassName(), frame->getName());
+    Enter_Method("lowerFrameReceived()");
+    take(frame);
+
     bool errorFree = isFcsOk(frame);
     tx->lowerFrameReceived(errorFree);
     if (errorFree)
@@ -76,39 +82,44 @@ bool Ieee80211MacRx::isFcsOk(Ieee80211Frame* frame) const
     return !frame->hasBitError();
 }
 
-bool Ieee80211MacRx::isMediumFree() const
+void Ieee80211MacRx::recomputeMediumFree()
 {
-    // note: the duration of mode switching (rx-to-tx or tx-to-rx) also counts as busy
-    return receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    bool oldMediumFree = mediumFree;
+    // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
+    mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    if (mediumFree != oldMediumFree)
+        tx->mediumStateChanged(mediumFree);
 }
 
-void Ieee80211MacRx::receptionStateChanged(IRadio::ReceptionState newReceptionState)
+void Ieee80211MacRx::receptionStateChanged(IRadio::ReceptionState state)
 {
-    receptionState = newReceptionState;  //TODO notification of Tx ????????
+    Enter_Method("receptionStateChanged()");
+    receptionState = state;
+    recomputeMediumFree();
 }
 
-void Ieee80211MacRx::transmissionStateChanged(IRadio::TransmissionState newTransmissionState)
+void Ieee80211MacRx::transmissionStateChanged(IRadio::TransmissionState state)
 {
-    transmissionState = newTransmissionState; //TODO notification of Tx ????????
+    Enter_Method("transmissionStateChanged()");
+    transmissionState = state;
+    recomputeMediumFree();
 }
 
-void Ieee80211MacRx::setNav(simtime_t navInterval)
+void Ieee80211MacRx::setNav(simtime_t navInterval)    //TODO: this should rather be called setOrExtendNav()!
 {
     ASSERT(navInterval >= 0);
-    if (endNavTimer->isScheduled())
-    {
-        simtime_t oldNav = endNavTimer->getArrivalTime() - simTime();
-        if (oldNav > navInterval)
-            return;
-        cancelEvent(endNavTimer);
-    }
-    if (navInterval > 0)
-    {
+    if (navInterval > 0) {
+        simtime_t endNav = simTime() + navInterval;
+        if (endNavTimer->isScheduled()) {
+            simtime_t oldEndNav = endNavTimer->getArrivalTime();
+            if (oldEndNav > endNav) // we are only willing to extend the NAV (TODO ok?)
+                return;
+            cancelEvent(endNavTimer);
+        }
         EV_INFO << "Setting NAV to " << navInterval << std::endl;
-        scheduleAt(simTime() + navInterval, endNavTimer);
+        scheduleAt(endNav, endNavTimer);
+        recomputeMediumFree();
     }
-    else
-        EV_INFO << "Frame duration field is 0" << std::endl; // e.g. Cf-End frame
 }
 
 } // namespace ieee80211

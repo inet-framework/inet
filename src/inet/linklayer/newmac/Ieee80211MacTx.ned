@@ -23,6 +23,7 @@ package inet.linklayer.newmac;
 //
 // TODO
 //
-simple Ieee80211MacTx
+simple Ieee80211MacTx like IIeee80211MacTx
 {
+    @display("i=block/tx");
 }

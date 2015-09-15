@@ -27,6 +27,8 @@
 namespace inet {
 namespace ieee80211 {
 
+Define_Module(Ieee80211UpperMac);
+
 Ieee80211UpperMac::Ieee80211UpperMac()
 {
 }
@@ -74,6 +76,9 @@ void Ieee80211UpperMac::initializeQueueModule()
 
 void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
 {
+    Enter_Method("upperFrameReceived()");
+    take(frame);
+
     if (queueModule)
         queueModule->requestPacket();
     // check for queue overflow
@@ -94,20 +99,23 @@ void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(context->getAddress());
     frame->setSequenceNumber(sequenceNumber);
-    context->setDataFrameDuration(frame);
     sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
-
+    context->setDataBitrate(frame);
     if (frameExchange)
         transmissionQueue.push_back(frame);
     else
     {
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, context, this, frame);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(this, context, this, frame);
         frameExchange->start();
     }
 }
 
 void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
 {
+    Enter_Method("lowerFrameReceived()");
+    EV_INFO << "Lower frame received" << std::endl;
+    take(frame);
+
     if (context->isForUs(frame))
     {
         if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame))
@@ -120,7 +128,14 @@ void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
             mac->sendUp(dataOrMgmtFrame);
         }
         else if (frameExchange)
-            frameExchange->lowerFrameReceived(frame);
+        {
+            bool processed = frameExchange->lowerFrameReceived(frame);
+            if (!processed)
+            {
+                EV_INFO << "Unexpected frame " << frame->getName() << "\n";
+                // TODO: do something
+            }
+        }
         else
         {
             EV_INFO << "Dropped frame " << frame->getName() << std::endl;
@@ -131,6 +146,38 @@ void Ieee80211UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
     {
         EV_INFO << "This frame is not for us" << std::endl;
         delete frame;
+    }
+}
+
+void Ieee80211UpperMac::transmissionComplete(IIeee80211MacTx::ICallback *callback, int txIndex)
+{
+    Enter_Method("transmissionComplete()");
+    callback->transmissionComplete(txIndex);
+}
+
+void Ieee80211UpperMac::transmissionComplete(int txIndex)
+{
+    Enter_Method("transmissionComplete()");
+    //TODO
+}
+
+void Ieee80211UpperMac::internalCollision(int txIndex)
+{
+    Enter_Method("internalCollision()");
+    //TODO
+}
+
+void Ieee80211UpperMac::frameExchangeFinished(IIeee80211FrameExchange* what, bool successful)
+{
+    EV_INFO << "Frame exchange finished" << std::endl;
+    delete frameExchange;
+    frameExchange = nullptr;
+    if (!transmissionQueue.empty())
+    {
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
+        transmissionQueue.pop_front();
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(this, context, this, frame);
+        frameExchange->start();
     }
 }
 
@@ -151,31 +198,6 @@ void Ieee80211UpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
     tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), this);
-}
-
-
-void Ieee80211UpperMac::frameExchangeFinished(IIeee80211FrameExchange* what, bool successful)
-{
-    EV_INFO << "Frame exchange finished" << std::endl;
-    delete frameExchange;
-    frameExchange = nullptr;
-    if (!transmissionQueue.empty())
-    {
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
-        transmissionQueue.pop_front();
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, context, this, frame);
-        frameExchange->start();
-    }
-}
-
-void Ieee80211UpperMac::transmissionComplete(int txIndex)
-{
-    //TODO
-}
-
-void Ieee80211UpperMac::internalCollision(int txIndex)
-{
-    //TODO
 }
 
 } // namespace ieee80211

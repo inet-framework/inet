@@ -25,7 +25,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211MacPlugin : public cObject
+class Ieee80211MacPlugin : public cOwnedObject
 {
     protected:
         cSimpleModule *ownerModule = nullptr;
@@ -38,6 +38,8 @@ class Ieee80211MacPlugin : public cObject
         virtual void handleMessage(cMessage *msg) = 0;
         virtual void scheduleAt(simtime_t t, cMessage *msg);
         virtual cMessage* cancelEvent(cMessage *msg);
+        virtual void cancelAndDelete(cMessage *msg);
+
 };
 
 } // namespace ieee80211

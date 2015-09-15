@@ -19,9 +19,34 @@
 
 package inet.linklayer.newmac;
 
-import inet.linklayer.base.MACProtocolBase;
+//import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.contract.IMACProtocol;
 
+
+// near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
+module LayeredProtocolBase
+{
+    parameters:
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetFromUpperDropped](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetFromLowerDropped](type=cPacket);
+}
+
+// near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
+module MACProtocolBase extends LayeredProtocolBase
+{
+    parameters:
+        string interfaceTableModule;
+        @display("i=block/rxtx");
+    gates:
+        input upperLayerIn @labels(INetworkDatagram/down);
+        output upperLayerOut @labels(INetworkDatagram/up);
+        input lowerLayerIn @labels(ILinkLayerFrame/up);
+        output lowerLayerOut @labels(ILinkLayerFrame/down);
+}
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
@@ -78,7 +103,13 @@ module Ieee80211NewMac extends MACProtocolBase like IMACProtocol
         @class(Ieee80211NewMac);
 
     submodules:
-        upperMac: <default("Ieee80211UpperMac")> like IIeee80211UpperMac;
-        tx: <default("Ieee80211Tx")> like IIeee80211MacTx;
-        rx: <default("Ieee80211Rx")> like IIeee80211MacRx;
+        upperMac: <default("Ieee80211UpperMac")> like IIeee80211UpperMac {
+            @display("p=162,65");
+        }
+        tx: <default("Ieee80211MacTx")> like IIeee80211MacTx {
+            @display("p=74,168");
+        }
+        rx: <default("Ieee80211MacRx")> like IIeee80211MacRx {
+            @display("p=247,168");
+        }
 }

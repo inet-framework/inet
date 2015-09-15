@@ -18,6 +18,7 @@
 //
 
 #include "Ieee80211MacContentionTx.h"
+#include "IIeee80211UpperMac.h"
 #include "IIeee80211MacRadioInterface.h"
 #include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -33,7 +34,7 @@ Register_Enum(Ieee80211NewMac,
    Ieee80211MacContentionTx::TRANSMIT,
    Ieee80211MacContentionTx::WAIT_IFS));
 
-Ieee80211MacContentionTx::Ieee80211MacContentionTx(cSimpleModule *ownerModule, IIeee80211MacRadioInterface *mac, int txIndex) : Ieee80211MacPlugin(ownerModule), mac(mac), txIndex(txIndex)
+Ieee80211MacContentionTx::Ieee80211MacContentionTx(cSimpleModule *ownerModule, IIeee80211MacRadioInterface *mac, IIeee80211UpperMac *upperMac, int txIndex) : Ieee80211MacPlugin(ownerModule), mac(mac), upperMac(upperMac), txIndex(txIndex)
 {
     fsm.setName("fsm");
     fsm.setState(IDLE);
@@ -82,8 +83,6 @@ int Ieee80211MacContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
 
 void Ieee80211MacContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
-    if (frame == nullptr)
-        return; //FIXME ????????????????
     logState();
 //    emit(stateSignal, fsm.getState()); TODO
     FSMA_Switch(fsm)
@@ -91,13 +90,13 @@ void Ieee80211MacContentionTx::handleWithFSM(EventType event, cMessage *msg)
         FSMA_State(IDLE)
         {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
-            FSMA_Event_Transition(Ready-To-Transmit,
-                                  event == START && mediumFree && !isIFSNecessary(),
-                                  TRANSMIT,
-                                  ;
-            );
+//            FSMA_Event_Transition(Ready-To-Transmit,
+//                                  event == START && mediumFree && !isIFSNecessary(),
+//                                  TRANSMIT,
+//                                  ;
+//            );
             FSMA_Event_Transition(Need-IFS-Before-Transmit,
-                                  event == START && mediumFree && isIFSNecessary(),
+                                  event == START && mediumFree /*&& isIFSNecessary()*/,
                                   WAIT_IFS,
                                   ;
             );
@@ -147,11 +146,11 @@ void Ieee80211MacContentionTx::handleWithFSM(EventType event, cMessage *msg)
         }
         FSMA_State(TRANSMIT)
         {
-            FSMA_Enter(mac->sendFrame(frame->dup()));  //FIXME why is the dup() here!!!
+            FSMA_Enter(mac->sendFrame(frame));
             FSMA_Event_Transition(TxFinished,
                                   event == TRANSMISSION_FINISHED,
                                   IDLE,
-                                  completionCallback->transmissionComplete(txIndex);
+                                  upperMac->transmissionComplete(completionCallback, txIndex);
             );
         }
     }
@@ -196,19 +195,22 @@ void Ieee80211MacContentionTx::scheduleEIFSPeriod(simtime_t duration)
 void Ieee80211MacContentionTx::scheduleIFS()
 {
     ASSERT(mediumFree);
-    simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
-    if (ifs > elapsedFreeChannelTime)
-        scheduleIFSPeriod(ifs - elapsedFreeChannelTime);
-    if (useEIFS && eifs > elapsedFreeChannelTime)
-        scheduleEIFSPeriod(eifs - elapsedFreeChannelTime);
-    useEIFS = false;
+//    simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
+//    if (ifs > elapsedFreeChannelTime)
+//        scheduleIFSPeriod(ifs - elapsedFreeChannelTime);
+//    if (useEIFS && eifs > elapsedFreeChannelTime)
+//        scheduleEIFSPeriod(eifs - elapsedFreeChannelTime);
+//    useEIFS = false;
+    if (useEIFS)
+        scheduleEIFSPeriod(eifs);
+    scheduleIFSPeriod(ifs);
 }
 
 
 void Ieee80211MacContentionTx::updateBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffSlots -= ((int)(elapsedBackoffTime / slotTime));
+    backoffSlots -= ((int)(elapsedBackoffTime / slotTime)); //FIXME add some epsilon...?
 }
 
 void Ieee80211MacContentionTx::scheduleBackoffPeriod(int backoffSlots)

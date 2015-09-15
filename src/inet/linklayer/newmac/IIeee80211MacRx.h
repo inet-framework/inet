@@ -40,8 +40,8 @@ class IIeee80211MacRx
 {
     public:
         virtual void setAddress(const MACAddress& address) = 0;
-        virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) = 0;
-        virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) = 0;
+        virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;
+        virtual void transmissionStateChanged(IRadio::TransmissionState state) = 0;
         virtual bool isMediumFree() const = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
 };
