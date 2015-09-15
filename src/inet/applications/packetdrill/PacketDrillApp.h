@@ -43,19 +43,20 @@ namespace inet {
 class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 {
     public:
+        PacketDrillApp();
         virtual ~PacketDrillApp();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-    int getLocalPort() { return localPort;};
-    int getRemotePort() { return remotePort;};
-    uint32 getIdInbound() { return idInbound;};
-    uint32 getIdOutbound() { return idOutbound;};
+    const int getLocalPort() { return localPort;};
+    const int getRemotePort() { return remotePort;};
+    const uint32 getIdInbound() { return idInbound;};
+    const uint32 getIdOutbound() { return idOutbound;};
     void increaseIdInbound() { idInbound++;};
     void increaseIdOutbound() { idOutbound++;};
-    L3Address getLocalAddress() { return localAddress; };
-    L3Address getRemoteAddress() { return remoteAddress; };
+    const L3Address getLocalAddress() { return localAddress; };
+    const L3Address getRemoteAddress() { return remoteAddress; };
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -56,7 +56,8 @@ IPv4Datagram* PacketDrill::makeIPPacket(int protocol, enum direction_t direction
         datagram->setDestAddress(remoteAddr.toIPv4());
         datagram->setIdentification(pdapp->getIdOutbound());
         pdapp->increaseIdOutbound();
-    }
+    } else
+        throw cRuntimeError("Unknown direction type %d", direction);
     datagram->setTransportProtocol(protocol);
     datagram->setTimeToLive(31);
     datagram->setMoreFragments(0);
@@ -86,7 +87,8 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
         udpPacket->setSourcePort(app->getLocalPort());
         udpPacket->setDestinationPort(app->getRemotePort());
         udpPacket->setName("UDPOutbound");
-    }
+    } else
+        throw cRuntimeError("Unknown direction");
 
     ipDatagram->encapsulate(udpPacket);
     cPacket* pkt = ipDatagram->dup();
@@ -143,8 +145,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)it())->getType());
-        if (evaluate((PacketDrillExpression *)it(), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(*it))->getType());
+        if (evaluate((PacketDrillExpression *)(*it), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }

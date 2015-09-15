@@ -33,6 +33,9 @@ class PacketDrillApp;
 
 class INET_API PacketDrill
 {
+    protected:
+        static PacketDrillApp *pdapp;
+
     public:
         PacketDrill(PacketDrillApp* mod);
         ~PacketDrill();
@@ -40,8 +43,6 @@ class INET_API PacketDrill
         static cPacket *buildUDPPacket(int address_family, enum direction_t direction,
         uint16 udp_payload_bytes,
         char **error);
-
-        static PacketDrillApp *pdapp;
 
         static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 

@@ -61,11 +61,13 @@
 
 #include "inet/common/INETDefs.h"
 
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <netinet/in.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,8 +75,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include "fmemopen.h"
 
 #include "PacketDrillUtils.h"
 #include "PacketDrill.h"
@@ -150,13 +150,11 @@ int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct in
 #endif
 
     /* Now parse the script from our buffer. */
-    yyin = fmemopen(script->getBuffer(), script->getLength(), "r");
-    if (yyin == NULL)
+    yyin = fopen(script->getScriptPath(), "r");
+    if (!yyin)
         printf("fmemopen: parse error opening script buffer");
-
     current_script_path = config->getScriptPath();
     in_config = config;
-    printf("set out_script\n");
     out_script = script;
     invocation = callback_invocation;
 
@@ -234,9 +232,9 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %token ELLIPSIS
 %token <reserved> UDP
 %token <reserved> OPTION
-%token <floating> FLOAT
+%token <floating> MYFLOAT
 %token <integer> INTEGER HEX_INTEGER
-%token <string> WORD MYSTRING
+%token <string> MYWORD MYSTRING
 %type <direction> direction
 %type <event> event events event_time action
 %type <time_usecs> time opt_end_time
@@ -339,7 +337,7 @@ event_time
 ;
 
 time
-: FLOAT {
+: MYFLOAT {
     if ($1 < 0) {
         printf("negative time");
     }
@@ -433,7 +431,7 @@ opt_end_time
 ;
 
 function_name
-: WORD {
+: MYWORD {
     $$ = $1;
     current_script_line = yylineno;
 }
@@ -468,7 +466,7 @@ expression
 | hex_integer {
     $$ = $1;
 }
-| WORD {
+| MYWORD {
     $$ = new PacketDrillExpression(EXPR_WORD);
     $$->setString($1);
 }
@@ -532,7 +530,7 @@ opt_errno
 : {
     $$ = NULL;
 }
-| WORD note {
+| MYWORD note {
     $$ = (struct errno_spec*)malloc(sizeof(struct errno_spec));
     $$->errno_macro = $1;
     $$->strerror = $2;
@@ -555,11 +553,15 @@ note
 ;
 
 word_list
-: WORD {
+: MYWORD {
     $$ = $1;
 }
-| word_list WORD {
+| word_list MYWORD {
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
     asprintf(&($$), "%s %s", $1, $2);
+#else
+    sprintf($$,"%s %s", $1, $2);
+#endif
     free($1);
     free($2);
 }

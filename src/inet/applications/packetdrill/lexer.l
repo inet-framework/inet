@@ -45,7 +45,9 @@
 
 #include "inet/common/INETDefs.h"
 
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include "PacketDrillUtils.h"
@@ -64,35 +66,19 @@
 /* Copy the string name "foo" after the "--" of a "--foo" option. */
 static char *option(const char *s) {
     const int dash_dash_len = 2;
-    return strndup(s + dash_dash_len, strlen(s) - dash_dash_len);
+    char *str = (char *)malloc (strlen(s) - dash_dash_len);
+    strncpy(str, s + dash_dash_len, strlen(s) - dash_dash_len);
+    return str;
 }
 
 /* Copy the string inside a quoted string. */
 static char *quoted(const char *s) {
     const int delim_len = 1;
-    return strndup(s + delim_len, strlen(s) - 2*delim_len);
+    char *str = (char *)malloc (strlen(s) - 2*delim_len);
+    strncpy(str, s + delim_len, strlen(s) - 2*delim_len);
+    return str;
 }
 
-/* Copy the code inside a code snippet that is enclosed in %{ }% after
- * first stripping the space and tab characters from either end of the
- * snippet. We strip leading and trailing whitespace for Python users
- * to remain sane, since Python is sensitive to whitespace. To summarize,
- * given an input %{<space><code><space>}% we return: <code>
- */
-static char *code(const char *s) {
-    const int delim_len = sizeof("%{")-1;
-
-    const char *start = s + delim_len;
-    while ((*start == ' ') || (*start == '\t'))
-        ++start;
-
-    const char *end = s + (strlen(s) - 1) - delim_len;
-    while ((*end == ' ') || (*end == '\t'))
-        --end;
-
-    const int code_len = end - start + 1;
-    return strndup(start, code_len);
-}
 
 /* Convert a hex string prefixed by "0x" to an integer value. */
 static int64 hextol(const char *s) {
@@ -120,14 +106,6 @@ cpp_comment	\/\/[^\n]*\n
  */
 c_comment    \/\*(([^*])|(\*[^\/]))*\*\/
 
-/* The regexp for code snippets is analogous to that for C comments.
- * Here is a summary of the regexp for code snippets:
- *   %{
- *   any number of:
- *     (non-}) or (} then non-%)
- *   }%
- */
-code    \%\{(([^}])|(\}[^\%]))*\}\%
 
 /* IPv4: a regular experssion for an IPv4 address */
 ipv4_addr    [0-9]+[.][0-9]+[.][0-9]+[.][0-9]+
@@ -160,10 +138,10 @@ ipv6_addr ({v0}|{v1}|{v2}|{v3}|{v4}|{v5}|{v6}|{v7}|{v8}|{v9}|{v10}|{v11}|{v12})
 udp             return UDP;
 [.][.][.]       return ELLIPSIS;
 --[a-zA-Z0-9_]+     yylval.string = option(yytext); return OPTION;
-[-]?[0-9]*[.][0-9]+ yylval.floating = atof(yytext);   return FLOAT;
+[-]?[0-9]*[.][0-9]+ yylval.floating = atof(yytext);   return MYFLOAT;
 [-]?[0-9]+          yylval.integer = atoll(yytext);  return INTEGER;
 0x[0-9a-fA-F]+      yylval.integer = hextol(yytext); return HEX_INTEGER;
-[a-zA-Z0-9_]+       yylval.string = strdup(yytext); return WORD;
+[a-zA-Z0-9_]+       yylval.string = strdup(yytext); return MYWORD;
 \"(\\.|[^"])*\"     yylval.string = quoted(yytext); return MYSTRING;
 [^ \t\n]            return (int) yytext[0];
 [ \t\n]+            /* ignore whitespace */;

@@ -22,11 +22,11 @@ simple PacketDrillApp
     parameters:
         string scriptFile;
         double startTime @unit(s) = default(0s);
-        int localPort = default(1000); // port number of the initiator
-        int remotePort = default(2000);
+        int localPort; // port number of the initiator
+        int remotePort;
         string localAddress;
         string remoteAddress;
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+     //   string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double latency @unit(s) = default(0s);
         @display("i=block/app");
     gates:

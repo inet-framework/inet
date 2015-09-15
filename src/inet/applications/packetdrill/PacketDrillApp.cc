@@ -34,7 +34,16 @@ namespace inet {
 #define MSGKIND_START  0
 #define MSGKIND_EVENT  1
 
-
+PacketDrillApp::PacketDrillApp()
+{
+    localPort = 1000;
+    remotePort = 2000;
+    protocol = 0;
+    idInbound = 0;
+    idOutbound = 0;
+    localAddress = L3Address("127.0.0.1");
+    remoteAddress = L3Address("127.0.0.1");
+}
 
 void PacketDrillApp::initialize(int stage)
 {
@@ -52,7 +61,6 @@ void PacketDrillApp::initialize(int stage)
         expectedMessageSize = 0;
         eventCounter = 0;
         numEvents = 0;
-        idInbound = idOutbound = 0;
         eventTimer = new cMessage("event timer");
         eventTimer->setKind(MSGKIND_EVENT);
         simStartTime = simTime();
@@ -70,7 +78,6 @@ void PacketDrillApp::initialize(int stage)
         remoteAddress = L3Address(par("remoteAddress"));
         localPort = par("localPort");
         remotePort = par("remotePort");
-        protocol = 0;
 
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
         timeMsg->setKind(MSGKIND_START);
@@ -86,24 +93,23 @@ void PacketDrillApp::handleMessage(cMessage *msg)
     } else {
         if (msg->getArrivalGate()->isName("tunIn")) {
             if (outboundPackets->getLength() == 0) {
-                cMessage *nextmsg = simulation.getScheduler()->getNextEvent();
-                if ((simTime() + par("latency")) < nextmsg->getArrivalTime()) {
+                if ((simTime() + par("latency")) < getSimulation()->getScheduler()->guessNextEvent()->getArrivalTime()) {
                     delete (PacketDrillInfo *)msg->getContextPointer();
                     delete msg;
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                 } else {
                     PacketDrillInfo *info = new PacketDrillInfo();
-                    info->setLiveTime(simulation.getSimTime());
+                    info->setLiveTime(getSimulation()->getSimTime());
                     msg->setContextPointer(info);
                     receivedPackets->insert(PK(msg));
                 }
             } else {
-                IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(outboundPackets->pop());
-                IPv4Datagram *live = check_and_cast<IPv4Datagram*>(msg);
+                IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *>(outboundPackets->pop());
+                IPv4Datagram *live = dynamic_cast<IPv4Datagram*>(msg);
                 if (datagram && live) {
                     PacketDrillInfo *info = (PacketDrillInfo *)datagram->getContextPointer();
                     if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
-                            info->getScriptTimeEnd(), info->getOffset(), simulation.getSimTime(), "outbound packet")
+                            info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
                             == STATUS_ERR) {
                         delete info;
                         delete msg;
@@ -127,7 +133,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
         } else if (msg->getArrivalGate()->isName("udpIn")) {
             PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
             if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
-                    event->getEventOffset(), simulation.getSimTime(), "inbound packet") == STATUS_ERR) {
+                    event->getEventOffset(), getSimulation()->getSimTime(), "inbound packet") == STATUS_ERR) {
                 delete msg;
                 return;
             }
@@ -136,7 +142,8 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 msgArrived = false;
                 if (!(PK(msg)->getByteLength() == expectedMessageSize)) {
                     delete msg;
-                    throw cTerminationException("Packetdrill error: Received data has unexpected size");
+                 //   throw cTerminationException("Packetdrill error: Received data has unexpected size");
+                 throw cRuntimeError("Packetdrill error: Received data has unexpected size");
                     if (!eventTimer->isScheduled() && eventCounter < numEvents - 1) {
                         eventCounter++;
                         scheduleEvent();
@@ -150,7 +157,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 delete msg;
             } else {
                 PacketDrillInfo* info = new PacketDrillInfo();
-                info->setLiveTime(simulation.getSimTime());
+                info->setLiveTime(getSimulation()->getSimTime());
                 msg->setContextPointer(info);
                 receivedPackets->insert(PK(msg));
                 msgArrived = true;
@@ -160,6 +167,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
             }
         } else {
+            throw cRuntimeError("Unknown gate");
             delete msg;
         }
     }
@@ -171,7 +179,7 @@ void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
     if (event->getTimeType() == ANY_TIME ||
         event->getTimeType() == RELATIVE_TIME ||
         event->getTimeType() == RELATIVE_RANGE_TIME) {
-        offset = simulation.getSimTime() - simStartTime;
+        offset = getSimulation()->getSimTime() - simStartTime;
         cQueue *eventList = script->getEventList();
         offsetLastEvent = ((PacketDrillEvent *)(eventList->get(eventCounter - 1)))->getEventTime() - simStartTime;
         offset = (offset.dbl() > offsetLastEvent.dbl()) ? offset : offsetLastEvent;
@@ -182,7 +190,8 @@ void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
         }
     } else if (event->getTimeType() == ABSOLUTE_TIME) {
         event->setEventTime(event->getEventTime() + simStartTime);
-    }
+    } else
+        throw cRuntimeError("Unknown time type");
 }
 
 void PacketDrillApp::scheduleEvent()
@@ -240,7 +249,8 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 ip->setName(str);
                 outboundPackets->insert(ip);
             }
-        }
+        } else
+            throw cRuntimeError("Invalid direction");
     } else if (event->getType() == SYSCALL_EVENT) {
         EV_INFO << "syscallEvent: time_type = " << event->getTimeType() << " event time = " << event->getEventTime()
                 << " end event time = " << event->getEventTimeEnd() << endl;
@@ -252,7 +262,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_START: {
-            simStartTime = simulation.getSimTime();
+            simStartTime = getSimulation()->getSimTime();
             simRelTime = simStartTime;
             if (script->parseScriptAndSetConfig(config, NULL))
                 throw cRuntimeError("parseScriptAndSetConfig");
@@ -265,7 +275,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
         case MSGKIND_EVENT: {
             PacketDrillEvent *event = (PacketDrillEvent *)msg->getContextPointer();
             runEvent(event);
-            if ((!recvFromSet && outboundPackets->length() == 0) &&
+            if ((!recvFromSet && outboundPackets->getLength() == 0) &&
                 (!eventTimer->isScheduled() && eventCounter < numEvents - 1)) {
                 eventCounter++;
                 scheduleEvent();
@@ -273,7 +283,8 @@ void PacketDrillApp::handleTimer(cMessage *msg)
             break;
         }
 
-        default: EV_INFO << "Kind of message not known\n";
+        default:
+            throw cRuntimeError("Unknown message kind");
     }
 }
 
@@ -322,7 +333,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
 
 int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, char **error)
 {
-    int domain, type;
+    int type;
     PacketDrillExpression *exp;
 
     if (args->getLength() != 3) {
@@ -341,7 +352,6 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
         return STATUS_ERR;
     }
 
-    domain = config->getSocketDomain();
     switch (protocol) {
         case IP_PROT_UDP:
             udpSocket.setOutputGate(gate("udpOut"));
@@ -349,7 +359,7 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             break;
 
         default:
-            EV_INFO << "Protocol type not supported for this system call\n";
+            throw cRuntimeError("Protocol type not supported for this system call");
     }
 
     return STATUS_OK;
@@ -667,13 +677,8 @@ bool PacketDrillApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram 
 
 bool PacketDrillApp::compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp)
 {
-    if (!(storedUdp->getSourcePort() == liveUdp->getSourcePort())) {
-        return false;
-    }
-    if (!(storedUdp->getDestinationPort() == liveUdp->getDestinationPort())) {
-        return false;
-    }
-    return true;
+    return (storedUdp->getSourcePort() == liveUdp->getSourcePort()) &&
+        (storedUdp->getDestinationPort() == liveUdp->getDestinationPort());
 }
 
 } // namespace INET

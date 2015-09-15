@@ -18,6 +18,8 @@ ned-path = .;../../../../../src;../../lib
 **.pdhost.numUdpTunApps = 1
 **.hasTun = true
 **.pdhost.numTunInterfaces = 1
+**.pdhost.tunApp[0].localPort = 1000
+**.pdhost.tunApp[0].remotePort = 2000
 
 **.startTime = 2s
 
