@@ -172,7 +172,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (txQueue.extQueue) {
         ASSERT(curTxFrame == nullptr);
-        ASSERT(transmitState == TX_IDLE_STATE);
+        ASSERT(transmitState == TX_IDLE_STATE || transmitState == PAUSE_STATE);
         curTxFrame = frame;
     }
     else {
