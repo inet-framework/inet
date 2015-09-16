@@ -37,6 +37,10 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          * Caches reception intervals for efficient interference queries.
          */
         IntervalTree *receptionIntervals;
+        /**
+         * True means the cache entry is invalid.
+         */
+        bool stale;
 
       private:
         RadioCacheEntry(const RadioCacheEntry &other);

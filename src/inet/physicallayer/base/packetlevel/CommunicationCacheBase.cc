@@ -23,12 +23,14 @@ namespace inet {
 namespace physicallayer {
 
 CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry() :
-    receptionIntervals(nullptr)
+    receptionIntervals(nullptr),
+    stale(false)
 {
 }
 
 CommunicationCacheBase::RadioCacheEntry::RadioCacheEntry(RadioCacheEntry &&other) :
-    receptionIntervals(other.receptionIntervals)
+    receptionIntervals(other.receptionIntervals),
+    stale(other.stale)
 {
     other.receptionIntervals = nullptr;
 }
@@ -39,6 +41,7 @@ CommunicationCacheBase::RadioCacheEntry &CommunicationCacheBase::RadioCacheEntry
         delete receptionIntervals;
         receptionIntervals = other.receptionIntervals;
         other.receptionIntervals = nullptr;
+        stale = other.stale;
     }
     return *this;
 }
