@@ -139,6 +139,8 @@ simple EtherMAC like IEtherMAC
         @signal[packetReceivedFromUpper](type=EtherFrame);
         @signal[collision](type=long);
         @signal[backoff](type=long);
+        @signal[transmitState](type=long); // enum=MACTransmitState
+        @signal[receiveState](type=long); // enum=MACReceiveState
 
         @statistic[txPk](title="packets transmitted"; source=txPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

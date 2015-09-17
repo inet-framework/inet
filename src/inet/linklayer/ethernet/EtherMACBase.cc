@@ -136,6 +136,9 @@ simsignal_t EtherMACBase::packetReceivedFromLowerSignal = registerSignal("packet
 simsignal_t EtherMACBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t EtherMACBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
+simsignal_t EtherMACBase::transmitStateSignal = registerSignal("transmitState");
+simsignal_t EtherMACBase::receiveStateSignal = registerSignal("receiveState");
+
 EtherMACBase::EtherMACBase()
 {
     lastTxFinishTime = -1.0;    // never equals to current simtime
@@ -386,7 +389,9 @@ void EtherMACBase::processConnectDisconnect()
         }
 
         transmitState = TX_IDLE_STATE;
+        emit(transmitStateSignal, TX_IDLE_STATE);
         receiveState = RX_IDLE_STATE;
+        emit(receiveStateSignal, RX_IDLE_STATE);
     }
 }
 
@@ -551,6 +556,7 @@ void EtherMACBase::printParameters()
 
 void EtherMACBase::getNextFrameFromQueue()
 {
+    ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
         if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
@@ -563,6 +569,7 @@ void EtherMACBase::getNextFrameFromQueue()
 
 void EtherMACBase::requestNextFrameFromExtQueue()
 {
+    ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
         if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
