@@ -38,18 +38,18 @@ void FrameExchange::reportFailure()
 
 //--------
 
-Ieee80211StepBasedFrameExchange::Ieee80211StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) :
+StepBasedFrameExchange::StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) :
         FrameExchange(ownerModule, context, callback)
 {
 }
 
-Ieee80211StepBasedFrameExchange::~Ieee80211StepBasedFrameExchange()
+StepBasedFrameExchange::~StepBasedFrameExchange()
 {
     if (timeoutMsg)
         cancelAndDelete(timeoutMsg);
 }
 
-std::string Ieee80211StepBasedFrameExchange::info() const
+std::string StepBasedFrameExchange::info() const
 {
     std::stringstream out;
     switch (status) {
@@ -60,7 +60,7 @@ std::string Ieee80211StepBasedFrameExchange::info() const
     return out.str();
 }
 
-const char *Ieee80211StepBasedFrameExchange::statusName(Status status)
+const char *StepBasedFrameExchange::statusName(Status status)
 {
 #define CASE(x) case x: return #x
     switch (status) {
@@ -72,7 +72,7 @@ const char *Ieee80211StepBasedFrameExchange::statusName(Status status)
 #undef CASE
 }
 
-const char *Ieee80211StepBasedFrameExchange::stepTypeName(StepType stepType)
+const char *StepBasedFrameExchange::stepTypeName(StepType stepType)
 {
 #define CASE(x) case x: return #x
     switch (stepType) {
@@ -88,7 +88,7 @@ const char *Ieee80211StepBasedFrameExchange::stepTypeName(StepType stepType)
 #undef CASE
 }
 
-const char *Ieee80211StepBasedFrameExchange::operationName(StepType stepType)
+const char *StepBasedFrameExchange::operationName(StepType stepType)
 {
     switch (stepType) {
         case NONE: return "n/a";
@@ -102,14 +102,14 @@ const char *Ieee80211StepBasedFrameExchange::operationName(StepType stepType)
     }
 }
 
-void Ieee80211StepBasedFrameExchange::start()
+void StepBasedFrameExchange::start()
 {
     ASSERT(step == 0);
     step--;  // will be incremented in proceed()
     proceed();
 }
 
-void Ieee80211StepBasedFrameExchange::proceed()
+void StepBasedFrameExchange::proceed()
 {
     if (status == INPROGRESS) {
         step++;
@@ -126,7 +126,7 @@ void Ieee80211StepBasedFrameExchange::proceed()
     }
 }
 
-bool Ieee80211StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
+bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
 {
     if (stepType != EXPECT_REPLY)
         return false;  // not ready to process frames
@@ -141,14 +141,14 @@ bool Ieee80211StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
     }
 }
 
-void Ieee80211StepBasedFrameExchange::transmissionComplete(int txIndex)
+void StepBasedFrameExchange::transmissionComplete(int txIndex)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == TRANSMIT_CONTENTION_FRAME || stepType == TRANSMIT_IMMEDIATE_FRAME);
     proceed();
 }
 
-void Ieee80211StepBasedFrameExchange::internalCollision(int txIndex)
+void StepBasedFrameExchange::internalCollision(int txIndex)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == TRANSMIT_CONTENTION_FRAME);
@@ -157,7 +157,7 @@ void Ieee80211StepBasedFrameExchange::internalCollision(int txIndex)
     proceed();
 }
 
-void Ieee80211StepBasedFrameExchange::handleMessage(cMessage* msg)
+void StepBasedFrameExchange::handleMessage(cMessage* msg)
 {
     if (status != INPROGRESS)
         return;  // too late, frame exchange already finished
@@ -166,27 +166,27 @@ void Ieee80211StepBasedFrameExchange::handleMessage(cMessage* msg)
     proceed();
 }
 
-void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
     int txIndex = 0; //TODO
     context->transmitContentionFrame(txIndex, frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), context->getSlotTime(), retryCount, this);
 }
 
-void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
     int txIndex = 0; //TODO
     context->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
-void Ieee80211StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs)
+void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs)
 {
     setOperation(TRANSMIT_IMMEDIATE_FRAME);
     context->transmitImmediateFrame(frame, ifs, this);
 }
 
-void Ieee80211StepBasedFrameExchange::expectReply(simtime_t timeout)
+void StepBasedFrameExchange::expectReply(simtime_t timeout)
 {
     setOperation(EXPECT_REPLY);
     if (!timeoutMsg)
@@ -194,13 +194,13 @@ void Ieee80211StepBasedFrameExchange::expectReply(simtime_t timeout)
     scheduleAt(simTime() + timeout, timeoutMsg);
 }
 
-void Ieee80211StepBasedFrameExchange::gotoStep(int step)
+void StepBasedFrameExchange::gotoStep(int step)
 {
     setOperation(GOTO_STEP);
     this->step = step;
 }
 
-void Ieee80211StepBasedFrameExchange::fail()
+void StepBasedFrameExchange::fail()
 {
     setOperation(FAIL);
     status = FAILED;
@@ -208,7 +208,7 @@ void Ieee80211StepBasedFrameExchange::fail()
     cleanup();
 }
 
-void Ieee80211StepBasedFrameExchange::succeed()
+void StepBasedFrameExchange::succeed()
 {
     setOperation(SUCCEED);
     status = SUCCEEDED;
@@ -216,7 +216,7 @@ void Ieee80211StepBasedFrameExchange::succeed()
     cleanup();
 }
 
-void Ieee80211StepBasedFrameExchange::setOperation(StepType newStepType)
+void StepBasedFrameExchange::setOperation(StepType newStepType)
 {
     if (status != INPROGRESS)
         throw cRuntimeError(this, "cannot do operation %s: frame exchange already terminated (%s)", operationName(newStepType), statusName(status));
@@ -225,7 +225,7 @@ void Ieee80211StepBasedFrameExchange::setOperation(StepType newStepType)
     stepType = newStepType;
 }
 
-void Ieee80211StepBasedFrameExchange::cleanup()
+void StepBasedFrameExchange::cleanup()
 {
     if (timeoutMsg)
         cancelEvent(timeoutMsg);

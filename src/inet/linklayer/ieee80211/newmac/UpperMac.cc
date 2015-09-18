@@ -105,7 +105,7 @@ void UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
         transmissionQueue.push_back(frame);
     else
     {
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(this, context, this, frame);
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
         frameExchange->start();
     }
 }
@@ -172,7 +172,7 @@ void UpperMac::frameExchangeFinished(IFrameExchange* what, bool successful)
     {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(this, context, this, frame);
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
         frameExchange->start();
     }
 }

@@ -30,7 +30,8 @@ class Ieee80211NewMac;
 class IUpperMacContext;
 class Ieee80211DataOrMgmtFrame;
 
-class Ieee80211SendDataWithAckFSMBasedFrameExchange : public Ieee80211FSMBasedFrameExchange
+// just to demonstrate the use FsmBasedFrameExchange; otherwise we prefer the step-based because it's simpler
+class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *frame;
@@ -49,11 +50,11 @@ class Ieee80211SendDataWithAckFSMBasedFrameExchange : public Ieee80211FSMBasedFr
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        Ieee80211SendDataWithAckFSMBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
-        ~Ieee80211SendDataWithAckFSMBasedFrameExchange();
+        SendDataWithAckFsmBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
+        ~SendDataWithAckFsmBasedFrameExchange();
 };
 
-class Ieee80211SendDataWithAckFrameExchange : public Ieee80211StepBasedFrameExchange
+class SendDataWithAckFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
@@ -64,10 +65,10 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211StepBasedFrameExch
         virtual void processTimeout(int step);
         virtual void processInternalCollision();
     public:
-        Ieee80211SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
 
-class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameExchange
+class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
@@ -78,7 +79,7 @@ class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameE
         virtual void processTimeout(int step);
         virtual void processInternalCollision() = 0;
     public:
-        Ieee80211SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
 
 } // namespace ieee80211
