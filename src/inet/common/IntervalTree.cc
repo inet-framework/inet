@@ -213,8 +213,8 @@ IntervalTreeNode* IntervalTree::insert(const Interval* new_interval)
             y = x->parent->parent->right;
             if (y->red)
             {
-                x->parent->red = true;
-                y->red = true;
+                x->parent->red = false;
+                y->red = false;
                 x->parent->parent->red = true;
                 x = x->parent->parent;
             }
