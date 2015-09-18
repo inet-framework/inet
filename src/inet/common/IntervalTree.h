@@ -134,6 +134,10 @@ class IntervalTree
     /// @brief Insert one node of the interval tree
     IntervalTreeNode* insert(const Interval* new_interval);
 
+    IntervalTreeNode* getMinimum(IntervalTreeNode *node) const;
+
+    IntervalTreeNode* getMaximum(IntervalTreeNode *node) const;
+
     /// @brief get the predecessor of a given node
     IntervalTreeNode* getPredecessor(IntervalTreeNode* node) const;
 

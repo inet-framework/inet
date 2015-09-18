@@ -255,26 +255,34 @@ IntervalTreeNode* IntervalTree::insert(const Interval* new_interval)
     return new_node;
 }
 
+IntervalTreeNode* IntervalTree::getMinimum(IntervalTreeNode *x) const
+{
+    while (x->left != nil)
+        x = x->left;
+    return x;
+}
+
+IntervalTreeNode* IntervalTree::getMaximum(IntervalTreeNode *x) const
+{
+    while (x->right != nil)
+        x = x->right;
+    return x;
+}
+
 IntervalTreeNode* IntervalTree::getSuccessor(IntervalTreeNode* x) const
 {
     IntervalTreeNode* y;
 
-    if (nil != (y = x->right))
-    {
-        while (y->left != nil)
-            y = y->left;
-        return y;
-    }
+    if (nil != x->right)
+        return getMinimum(x->right);
     else
     {
         y = x->parent;
-        while (x == y->right)
+        while (y != nil && x == y->right)
         {
             x = y;
             y = y->parent;
         }
-        if (y == root)
-            return nil;
         return y;
     }
 }
@@ -283,19 +291,13 @@ IntervalTreeNode* IntervalTree::getPredecessor(IntervalTreeNode* x) const
 {
     IntervalTreeNode* y;
 
-    if (nil != (y = x->left))
-    {
-        while (y->right != nil)
-            y = y->right;
-        return y;
-    }
+    if (nil != x->left)
+        return getMaximum(x->left);
     else
     {
         y = x->parent;
-        while (x == y->left)
+        while (y != nil && x == y->left)
         {
-            if (y == root)
-                return nil;
             x = y;
             y = y->parent;
         }
