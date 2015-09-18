@@ -58,6 +58,7 @@ struct Interval
 
     virtual void print() const
     {
+        std::cout << value;
     }
 
     /// @brief interval is defined as [low, high]
@@ -69,6 +70,7 @@ struct Interval
 class IntervalTreeNode
 {
     friend class IntervalTree;
+    friend class IntervalTreeTest;
 
   public:
     /// @brief Print the interval node information: set left = nil and right = root
@@ -118,6 +120,8 @@ struct it_recursion_node
 /// @brief Interval tree
 class IntervalTree
 {
+    friend class IntervalTreeTest;
+
   public:
     IntervalTree();
     ~IntervalTree();
