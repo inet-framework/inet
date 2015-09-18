@@ -141,10 +141,19 @@ bool Ieee80211StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
     }
 }
 
-void Ieee80211StepBasedFrameExchange::transmissionFinished()
+void Ieee80211StepBasedFrameExchange::transmissionComplete(int txIndex)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == TRANSMIT_CONTENTION_FRAME || stepType == TRANSMIT_IMMEDIATE_FRAME);
+    proceed();
+}
+
+void Ieee80211StepBasedFrameExchange::internalCollision(int txIndex)
+{
+    ASSERT(status == INPROGRESS);
+    ASSERT(stepType == TRANSMIT_CONTENTION_FRAME);
+
+    processInternalCollision();
     proceed();
 }
 

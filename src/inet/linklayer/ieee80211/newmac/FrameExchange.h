@@ -21,14 +21,14 @@
 #define __INET_IEEE80211FRAMEEXCHANGE_H
 
 #include "IFrameExchange.h"
+#include "ITx.h"
 #include "MacPlugin.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "UpperMac.h"  //TODO remove
 
 namespace inet {
 namespace ieee80211 {
 
-class UpperMacContext;
+class IUpperMacContext;
 
 class FrameExchange : public MacPlugin, public IFrameExchange, public ITx::ICallback
 {
@@ -40,10 +40,6 @@ class FrameExchange : public MacPlugin, public IFrameExchange, public ITx::ICall
         virtual void reportSuccess();
         virtual void reportFailure();
 
-        virtual void transmissionFinished() = 0;
-        virtual void transmissionComplete(int txIndex) override { cMethodCallContextSwitcher tmp(ownerModule); tmp.methodCall("transmissionComplete()"); transmissionFinished();}  //TODO merge the two calls...
-        virtual void internalCollision(int txIndex) override {}  //TODO handle...
-
     public:
         FrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) : MacPlugin(ownerModule), context(context), finishedCallback(callback) {}
         virtual ~FrameExchange() {}
@@ -53,7 +49,7 @@ class Ieee80211FSMBasedFrameExchange : public FrameExchange
 {
     protected:
         cFSM fsm;
-        enum EventType { EVENT_START, EVENT_FRAMEARRIVED, EVENT_TXFINISHED, EVENT_TIMER };
+        enum EventType { EVENT_START, EVENT_FRAMEARRIVED, EVENT_TXFINISHED, EVENT_INTERNALCOLLISION, EVENT_TIMER };
 
     protected:
         virtual bool handleWithFSM(EventType eventType, cMessage *frameOrTimer) = 0;
@@ -62,7 +58,8 @@ class Ieee80211FSMBasedFrameExchange : public FrameExchange
         Ieee80211FSMBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) : FrameExchange(ownerModule, context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() { EV_INFO << "Starting " << getClassName() << std::endl; handleWithFSM(EVENT_START, nullptr); }
         virtual bool lowerFrameReceived(Ieee80211Frame *frame) { return handleWithFSM(EVENT_FRAMEARRIVED, frame); }
-        virtual void transmissionFinished() { handleWithFSM(EVENT_TXFINISHED, nullptr); }
+        virtual void transmissionComplete(int txIndex) override { handleWithFSM(EVENT_TXFINISHED, nullptr); }
+        virtual void internalCollision(int txIndex) override { handleWithFSM(EVENT_INTERNALCOLLISION, nullptr); }
         virtual void handleMessage(cMessage *timer) { handleWithFSM(EVENT_TIMER, timer); } //TODO make it handleTimer in MAC and MACPlugin too!
 };
 
@@ -77,10 +74,13 @@ class Ieee80211StepBasedFrameExchange : public FrameExchange
         cMessage *timeoutMsg = nullptr;
 
     protected:
+        // to be redefined by user
         virtual void doStep(int step) = 0;
         virtual bool processReply(int step, Ieee80211Frame *frame) = 0; // true = frame accepted as reply
         virtual void processTimeout(int step) = 0;
+        virtual void processInternalCollision() = 0;
 
+        // operations that can be called from doStep()
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
         virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
@@ -88,10 +88,11 @@ class Ieee80211StepBasedFrameExchange : public FrameExchange
         virtual void gotoStep(int step); // ~setNextStep()
         virtual void fail();
         virtual void succeed();
+
+        // internal
         virtual void proceed();
         virtual void cleanup();
         void setOperation(StepType type);
-
         static const char *statusName(Status status);
         static const char *stepTypeName(StepType stepType);
         static const char *operationName(StepType stepType);
@@ -102,8 +103,9 @@ class Ieee80211StepBasedFrameExchange : public FrameExchange
         std::string info() const override;
         virtual void start();
         virtual bool lowerFrameReceived(Ieee80211Frame *frame); // true = frame processed
-        virtual void transmissionFinished();
-        virtual void handleMessage(cMessage *timer);
+        virtual void transmissionComplete(int txIndex) override;
+        virtual void internalCollision(int txIndex) override;
+        virtual void handleMessage(cMessage *timer) override;
 };
 
 } // namespace ieee80211

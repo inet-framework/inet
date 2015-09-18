@@ -37,6 +37,7 @@ class IUpperMac
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
         virtual void transmissionComplete(ITx::ICallback *callback, int txIndex) = 0;
+        virtual void internalCollision(ITx::ICallback *callback, int txIndex) = 0;
 };
 
 } // namespace ieee80211

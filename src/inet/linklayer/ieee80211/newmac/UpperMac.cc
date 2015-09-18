@@ -144,7 +144,7 @@ void UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
     }
     else
     {
-        EV_INFO << "This frame is not for us" << std::endl;
+        EV_INFO << "This frame is not for us" << std::endl; //TODO except when in an AP
         delete frame;
     }
 }
@@ -152,19 +152,15 @@ void UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
 void UpperMac::transmissionComplete(ITx::ICallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
-    callback->transmissionComplete(txIndex);
+    if (callback)
+        callback->transmissionComplete(txIndex);
 }
 
-void UpperMac::transmissionComplete(int txIndex)
+void UpperMac::internalCollision(ITx::ICallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
-    //TODO
-}
-
-void UpperMac::internalCollision(int txIndex)
-{
-    Enter_Method("internalCollision()");
-    //TODO
+    if (callback)
+        callback->internalCollision(txIndex);
 }
 
 void UpperMac::frameExchangeFinished(IFrameExchange* what, bool successful)
@@ -191,13 +187,13 @@ Ieee80211DataOrMgmtFrame *UpperMac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame
 void UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
-    tx->transmitImmediateFrame(ackFrame, context->getSIFS(), this);
+    tx->transmitImmediateFrame(ackFrame, context->getSIFS(), nullptr);
 }
 
 void UpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
-    tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), this);
+    tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), nullptr);
 }
 
 } // namespace ieee80211
