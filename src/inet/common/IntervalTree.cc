@@ -40,8 +40,6 @@
 
 namespace inet {
 
-namespace physicallayer {
-
 IntervalTreeNode::IntervalTreeNode()
 {
 }
@@ -560,8 +558,6 @@ std::deque<const Interval*> IntervalTree::query(simtime_t low, simtime_t high)
     }
     return result_stack;
 }
-
-} // namespace physicallayer
 
 } // namespace inet
 
