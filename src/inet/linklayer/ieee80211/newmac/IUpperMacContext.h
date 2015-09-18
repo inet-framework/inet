@@ -22,7 +22,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -32,6 +31,8 @@ class Ieee80211DataOrMgmtFrame;
 class Ieee80211ACKFrame;
 class Ieee80211RTSFrame;
 class Ieee80211CTSFrame;
+class ITxCallback;
+
 
 class IUpperMacContext
 {
@@ -42,15 +43,15 @@ class IUpperMacContext
         virtual const MACAddress& getAddress() const = 0;
 
         virtual simtime_t getSlotTime() const = 0;
-        virtual simtime_t getAIFS() const = 0;
-        virtual simtime_t getSIFS() const = 0;
-        virtual simtime_t getDIFS() const = 0;
-        virtual simtime_t getEIFS() const = 0;
-        virtual simtime_t getPIFS() const = 0;
-        virtual simtime_t getRIFS() const = 0;
+        virtual simtime_t getAifsTime() const = 0;
+        virtual simtime_t getSifsTime() const = 0;
+        virtual simtime_t getDifsTime() const = 0;
+        virtual simtime_t getEifsTime() const = 0;
+        virtual simtime_t getPifsTime() const = 0;
+        virtual simtime_t getRifsTime() const = 0;
 
-        virtual int getMinCW() const = 0;
-        virtual int getMaxCW() const = 0;
+        virtual int getCwMin() const = 0;
+        virtual int getCwMax() const = 0;
         virtual int getShortRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
 

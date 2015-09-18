@@ -20,13 +20,18 @@
 #ifndef __INET_ITXCALLBACK_H
 #define __INET_ITXCALLBACK_H
 
-#include "MacPlugin.h"
-#include "inet/common/FSMA.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * Tx processes use this interface to notify their callers that the
+ * last frame transmission has been completed, or that the transmission
+ * has had an internal collision with a higher priority Tx process (EDCA).
+ *
+ * @see IContentionTx and IImmediateTx
+ */
 class ITxCallback {
     public:
         virtual void transmissionComplete(int txIndex) = 0; // -1: immediate tx

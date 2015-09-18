@@ -41,6 +41,7 @@ class BasicImmediateTx : public cSimpleModule, public IImmediateTx
     protected:
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
+        virtual void updateDisplayString();
 
     public:
         BasicImmediateTx() {}

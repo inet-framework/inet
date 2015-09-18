@@ -38,17 +38,15 @@ BasicRx::~BasicRx()
 
 void BasicRx::initialize()
 {
-    upperMac = check_and_cast<IUpperMac*>(getModuleByPath("^.upperMac")); //TODO
-    collectContentionTxModules(getModuleByPath("^.conTx[0]"), contentionTx); //TODO
+    upperMac = check_and_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
+    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
     endNavTimer = new cMessage("NAV");
     recomputeMediumFree();
 }
 
 void BasicRx::handleMessage(cMessage* msg)
 {
-    if (msg->getContextPointer() != nullptr)
-        ((MacPlugin *)msg->getContextPointer())->handleMessage(msg);
-    else if (msg == endNavTimer) {
+    if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
         recomputeMediumFree();
     }
@@ -58,7 +56,7 @@ void BasicRx::handleMessage(cMessage* msg)
 
 void BasicRx::lowerFrameReceived(Ieee80211Frame* frame)
 {
-    Enter_Method("lowerFrameReceived()");
+    Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
     bool errorFree = isFcsOk(frame);
@@ -69,7 +67,7 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame* frame)
     {
         EV_INFO << "Received message from lower layer: " << frame << endl;
         if (frame->getReceiverAddress() != address)
-            setNav(frame->getDuration());
+            setOrExtendNav(frame->getDuration());
         upperMac->lowerFrameReceived(frame);
     }
     else
@@ -98,27 +96,27 @@ void BasicRx::recomputeMediumFree()
 
 void BasicRx::receptionStateChanged(IRadio::ReceptionState state)
 {
-    Enter_Method("receptionStateChanged()");
+    Enter_Method_Silent();
     receptionState = state;
     recomputeMediumFree();
 }
 
 void BasicRx::transmissionStateChanged(IRadio::TransmissionState state)
 {
-    Enter_Method("transmissionStateChanged()");
+    Enter_Method_Silent();
     transmissionState = state;
     recomputeMediumFree();
 }
 
-void BasicRx::setNav(simtime_t navInterval)    //TODO: this should rather be called setOrExtendNav()!
+void BasicRx::setOrExtendNav(simtime_t navInterval)
 {
     ASSERT(navInterval >= 0);
     if (navInterval > 0) {
         simtime_t endNav = simTime() + navInterval;
         if (endNavTimer->isScheduled()) {
             simtime_t oldEndNav = endNavTimer->getArrivalTime();
-            if (oldEndNav > endNav) // we are only willing to extend the NAV (TODO ok?)
-                return;
+            if (endNav < oldEndNav)
+                return;  // never decrease NAV
             cancelEvent(endNavTimer);
         }
         EV_INFO << "Setting NAV to " << navInterval << std::endl;

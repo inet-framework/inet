@@ -27,11 +27,14 @@ namespace ieee80211 {
 
 class Ieee80211Frame;
 
+/**
+ * Rx and Tx processes use this interface to transmit trames over the radio
+ */
 class INET_API IMacRadioInterface
 {
     public:
-        virtual void sendFrame(Ieee80211Frame *frameToSend) = 0;
-        virtual void sendDownPendingRadioConfigMsg() = 0;
+        virtual void sendFrame(Ieee80211Frame *frame) = 0;
+        virtual void sendDownPendingRadioConfigMsg() = 0;  //TODO remove
 };
 
 } // namespace ieee80211

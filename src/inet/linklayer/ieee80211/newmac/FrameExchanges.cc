@@ -28,7 +28,7 @@ namespace ieee80211 {
 SendDataWithAckFsmBasedFrameExchange::SendDataWithAckFsmBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
     FsmBasedFrameExchange(ownerModule, context, callback), frame(frame)
 {
-    frame->setDuration(context->getSIFS() + context->getAckDuration());
+    frame->setDuration(context->getSifsTime() + context->getAckDuration());
 }
 
 SendDataWithAckFsmBasedFrameExchange::~SendDataWithAckFsmBasedFrameExchange()
@@ -108,7 +108,7 @@ void SendDataWithAckFsmBasedFrameExchange::transmitDataFrame()
 {
     retryCount = 0;
     int txIndex = 0; //TODO
-    context->transmitContentionFrame(txIndex, frame->dup(), context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), context->getSlotTime(), retryCount, this);
+    context->transmitContentionFrame(txIndex, frame->dup(), context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
 void SendDataWithAckFsmBasedFrameExchange::retryDataFrame()
@@ -116,7 +116,7 @@ void SendDataWithAckFsmBasedFrameExchange::retryDataFrame()
     retryCount++;
     frame->setRetry(true);
     int txIndex = 0; //TODO
-    context->transmitContentionFrame(txIndex, frame->dup(), context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), context->getSlotTime(), retryCount, this);
+    context->transmitContentionFrame(txIndex, frame->dup(), context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
 void SendDataWithAckFsmBasedFrameExchange::scheduleAckTimeout()
@@ -187,7 +187,7 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
     switch (step) {
         case 0: transmitContentionFrame(context->buildRtsFrame(dataFrame), retryCount); break;
         case 1: expectReply(context->getCtsTimeout()); break;
-        case 2: transmitImmediateFrame(dataFrame->dup(), context->getSIFS()); break;
+        case 2: transmitImmediateFrame(dataFrame->dup(), context->getSifsTime()); break;
         case 3: expectReply(context->getAckTimeout()); break;
         case 4: succeed(); break;
         default: ASSERT(false);

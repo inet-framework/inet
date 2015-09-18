@@ -18,6 +18,7 @@
 //
 
 #include "UpperMacContext.h"
+#include "ITxCallback.h"
 #include "IImmediateTx.h"
 #include "IContentionTx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -45,44 +46,44 @@ simtime_t UpperMacContext::getSlotTime() const
     return dataFrameMode->getSlotTime();
 }
 
-simtime_t UpperMacContext::getAIFS() const
+simtime_t UpperMacContext::getAifsTime() const
 {
     return dataFrameMode->getAifsTime(2); //TODO!!!
 }
 
-simtime_t UpperMacContext::getSIFS() const
+simtime_t UpperMacContext::getSifsTime() const
 {
     return dataFrameMode->getSifsTime();
 }
 
-simtime_t UpperMacContext::getDIFS() const
+simtime_t UpperMacContext::getDifsTime() const
 {
     return dataFrameMode->getDifsTime();
 }
 
-simtime_t UpperMacContext::getEIFS() const
+simtime_t UpperMacContext::getEifsTime() const
 {
     return dataFrameMode->getEifsTime(basicFrameMode, LENGTH_ACK);  //TODO ???
 }
 
-simtime_t UpperMacContext::getPIFS() const
+simtime_t UpperMacContext::getPifsTime() const
 {
     return dataFrameMode->getPifsTime();
 }
 
-simtime_t UpperMacContext::getRIFS() const
+simtime_t UpperMacContext::getRifsTime() const
 {
     return dataFrameMode->getRifsTime();
 }
 
-int UpperMacContext::getMinCW() const
+int UpperMacContext::getCwMin() const
 {
-    return dataFrameMode->getCwMin(); //TODO naming
+    return dataFrameMode->getCwMin();
 }
 
-int UpperMacContext::getMaxCW() const
+int UpperMacContext::getCwMax() const
 {
-    return dataFrameMode->getCwMax(); //TODO naming
+    return dataFrameMode->getCwMax();
 }
 
 int UpperMacContext::getShortRetryLimit() const
@@ -97,12 +98,12 @@ int UpperMacContext::getRtsThreshold() const
 
 simtime_t UpperMacContext::getAckTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSIFS() + getAckDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + getAckDuration();
 }
 
 simtime_t UpperMacContext::getCtsTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSIFS() +  getCtsDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() +  getCtsDuration();
 }
 
 simtime_t UpperMacContext::getAckDuration() const
@@ -121,7 +122,7 @@ Ieee80211RTSFrame *UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *fram
     rtsFrame->setTransmitterAddress(address);
 
     rtsFrame->setReceiverAddress(frame->getReceiverAddress());
-    rtsFrame->setDuration(3 * getSIFS() + basicFrameMode->getDuration(LENGTH_CTS) +
+    rtsFrame->setDuration(3 * getSifsTime() + basicFrameMode->getDuration(LENGTH_CTS) +
             dataFrameMode->getDuration(frame->getBitLength()) +  //TODO maybe not always with dataFrameMode
             basicFrameMode->getDuration(LENGTH_ACK));
     return rtsFrame;
@@ -132,20 +133,20 @@ Ieee80211CTSFrame *UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rtsFrame) c
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS");
     setBasicBitrate(rtsFrame);
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS() - basicFrameMode->getDuration(LENGTH_CTS));
+    frame->setDuration(rtsFrame->getDuration() - getSifsTime() - basicFrameMode->getDuration(LENGTH_CTS));
     return frame;
 }
 
-Ieee80211ACKFrame *UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const
+Ieee80211ACKFrame *UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *frameToAck) const
 {
     Ieee80211ACKFrame *ackFrame = new Ieee80211ACKFrame("ACK");
     setBasicBitrate(ackFrame);
-    ackFrame->setReceiverAddress(frameToACK->getTransmitterAddress());
+    ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
 
-    if (!frameToACK->getMoreFragments())
+    if (!frameToAck->getMoreFragments())
         ackFrame->setDuration(0);
     else
-        ackFrame->setDuration(frameToACK->getDuration() - getSIFS() - basicFrameMode->getDuration(LENGTH_ACK));
+        ackFrame->setDuration(frameToAck->getDuration() - getSifsTime() - basicFrameMode->getDuration(LENGTH_ACK));
     return ackFrame;
 }
 

@@ -48,7 +48,7 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
 
         /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
         static const int fragmentationThreshold = 2346;
-        //@}
+
         /** Messages received from upper layer and to be transmitted later */
         Ieee80211DataOrMgmtFrameList transmissionQueue;
 
@@ -60,16 +60,14 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
 
         IFrameExchange *frameExchange = nullptr;
 
-        IUpperMacContext *context = nullptr; //TODO fill in!
+        IUpperMacContext *context = nullptr;
 
     protected:
         void initialize();
         void handleMessage(cMessage *msg);
-
+        virtual void initializeQueueModule();
+        virtual IUpperMacContext *createContext();
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful);
-
-        virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-        void initializeQueueModule();
 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);

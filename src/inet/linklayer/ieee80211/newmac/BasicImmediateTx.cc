@@ -20,7 +20,6 @@
 #include "BasicImmediateTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
-#include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -36,28 +35,33 @@ BasicImmediateTx::~BasicImmediateTx()
 
 void BasicImmediateTx::initialize()
 {
-    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath("^"));
-    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath("^.upperMac"));
+    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath(par("macModule")));
+    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
     endIfsTimer = new cMessage("endIFS");
+    updateDisplayString();
 }
 
 void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, ITxCallback *completionCallback)
 {
-    EV_DETAIL << "BasicImmediateTx: transmitImmediateFrame " << frame->getName() << endl;
+    Enter_Method("transmitImmediateFrame(\"%s\")", frame->getName());
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     this->frame = frame;
     this->completionCallback = completionCallback;
+    if (ev.isGUI())
+        updateDisplayString();
 }
 
 void BasicImmediateTx::radioTransmissionFinished()
 {
-    Enter_Method("radioTransmissionFinished()");
+    Enter_Method_Silent();
     if (transmitting) {
         EV_DETAIL << "BasicImmediateTx: radioTransmissionFinished()\n";
         upperMac->transmissionComplete(completionCallback, -1);
         transmitting = false;
         frame = nullptr;
+        if (ev.isGUI())
+            updateDisplayString();
     }
 }
 
@@ -67,9 +71,22 @@ void BasicImmediateTx::handleMessage(cMessage *msg)
         EV_DETAIL << "BasicImmediateTx: endIfsTimer expired\n";
         transmitting = true;
         mac->sendFrame(frame);
+        if (ev.isGUI())
+            updateDisplayString();
     }
     else
         ASSERT(false);
+}
+
+void BasicImmediateTx::updateDisplayString()
+{
+    const char *stateName = endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
+    // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);
+    std::stringstream os;
+    if (frame)
+        os << frame->getName() << "\n";
+    os << stateName;
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 } // namespace ieee80211

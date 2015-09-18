@@ -21,7 +21,7 @@ import inet.common.IHook;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.linklayer.ieee80211.newmac.Ieee80211NewMac;
+import inet.linklayer.ieee80211.newmac.Ieee80211CompatibleNewMac;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 
@@ -71,7 +71,7 @@ module Ieee80211NewNic like IWirelessNic
                 macModule = "^.mac";
                 @display("p=157,131;q=wlanDataQueue");
         }
-        mac: Ieee80211NewMac {
+        mac: Ieee80211CompatibleNewMac {
             parameters:
                 queueModule = "^.mgmt";
                 @display("p=157,217");

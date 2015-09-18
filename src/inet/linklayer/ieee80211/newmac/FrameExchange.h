@@ -21,9 +21,8 @@
 #define __INET_FRAMEEXCHANGE_H
 
 #include "IFrameExchange.h"
-#include "ITxCallback.h"
 #include "MacPlugin.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -56,11 +55,11 @@ class FsmBasedFrameExchange : public FrameExchange
 
     public:
         FsmBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) : FrameExchange(ownerModule, context, callback) { fsm.setName("Frame Exchange FSM"); }
-        virtual void start() { EV_INFO << "Starting " << getClassName() << std::endl; handleWithFSM(EVENT_START, nullptr); }
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) { return handleWithFSM(EVENT_FRAMEARRIVED, frame); }
-        virtual void transmissionComplete(int txIndex) override { handleWithFSM(EVENT_TXFINISHED, nullptr); }
-        virtual void internalCollision(int txIndex) override { handleWithFSM(EVENT_INTERNALCOLLISION, nullptr); }
-        virtual void handleMessage(cMessage *timer) { handleWithFSM(EVENT_TIMER, timer); } //TODO make it handleTimer in MAC and MACPlugin too!
+        virtual void start() override;
+        virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;
+        virtual void transmissionComplete(int txIndex) override;
+        virtual void internalCollision(int txIndex) override;
+        virtual void handleSelfMessage(cMessage* timer) override;
 };
 
 class StepBasedFrameExchange : public FrameExchange
@@ -105,7 +104,7 @@ class StepBasedFrameExchange : public FrameExchange
         virtual bool lowerFrameReceived(Ieee80211Frame *frame); // true = frame processed
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
-        virtual void handleMessage(cMessage *timer) override;
+        virtual void handleSelfMessage(cMessage *timer) override;
 };
 
 } // namespace ieee80211

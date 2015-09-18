@@ -87,32 +87,50 @@ module Ieee80211NewMac extends MACProtocolBase like IMACProtocol
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string opMode @enum("a", "b", "g", "n", "p") = default("g");
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
-        double bitrate @unit("bps");
-        double basicBitrate @unit("bps") = default(2000000bps);
-        int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS
-        int retryLimit = default(-1); // maximum number of retries per message, -1 means default
-        int cwMinData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
-        int mtu = default(1500);
+
+        string upperMacModule = ".upperMac";
+        string rxModule = ".rx";
+        string immediateTxModule = ".immTx";
+        string firstContentionTxModule = ".conTx[0]";
+        *.macModule = "^";
+        *.upperMacModule = "^" + upperMacModule;
+        *.rxModule = "^" + rxModule;
+        *.immediateTxModule = "^" + immediateTxModule;
+        *.firstContentionTxModule = "^" + firstContentionTxModule;
+
         @display("i=block/layer");
-        @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
-        @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @class(Ieee80211NewMac);
 
     submodules:
         upperMac: <default("BasicUpperMac")> like IUpperMac {
-            @display("p=183,65");
+            @display("p=208,66");
         }
         immTx: <default("BasicImmediateTx")> like IImmediateTx {
-            @display("p=74,168");
+            @display("p=74,210");
         }
         conTx[1]: <default("BasicContentionTx")> like IContentionTx {
-            @display("p=144,168");
+            @display("p=144,210");
         }
         rx: <default("BasicRx")> like IRx {
-            @display("p=280,168");
+            @display("p=343,210");
         }
+}
+
+// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC  
+module Ieee80211CompatibleNewMac extends Ieee80211NewMac
+{
+    parameters:
+        string opMode @enum("a", "b", "g", "n", "p") = default("g");
+        double bitrate @unit("bps");
+        double basicBitrate @unit("bps") = default(2000000bps);
+        int rtsThresholdBytes @unit("B") = default(2346B);
+        int retryLimit = default(-1);
+
+        upperMac.opMode = opMode;
+        upperMac.bitrate = bitrate;
+        upperMac.basicBitrate = basicBitrate;
+        upperMac.rtsThresholdBytes = rtsThresholdBytes;
+        upperMac.retryLimit = retryLimit;
 }

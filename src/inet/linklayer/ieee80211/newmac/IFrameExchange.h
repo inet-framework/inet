@@ -20,13 +20,18 @@
 #ifndef __INET_IFRAMEEXCHANGE_H
 #define __INET_IFRAMEEXCHANGE_H
 
-#include "MacPlugin.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 namespace ieee80211 {
 
 class Ieee80211Frame;
 
+/**
+ * Abstract interface for frame exhange classes. Frame exchanges are a basic
+ * building block of UpperMac (see IUpperMac), and coordinate interrelated
+ * frame sequences.
+ */
 class IFrameExchange
 {
     public:

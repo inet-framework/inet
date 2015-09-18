@@ -46,7 +46,7 @@ class BasicRx : public cSimpleModule, public IRx
     protected:
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
-        virtual void setNav(simtime_t navInterval);
+        virtual void setOrExtendNav(simtime_t navInterval);
         virtual bool isFcsOk(Ieee80211Frame *frame) const;
         virtual void recomputeMediumFree();
 

@@ -35,7 +35,7 @@ class MacPlugin : public cOwnedObject
         virtual ~MacPlugin() {}
 
     public:
-        virtual void handleMessage(cMessage *msg) = 0;
+        virtual void handleSelfMessage(cMessage *msg) = 0;
         virtual void scheduleAt(simtime_t t, cMessage *msg);
         virtual cMessage* cancelEvent(cMessage *msg);
         virtual void cancelAndDelete(cMessage *msg);

@@ -44,7 +44,7 @@ class INET_API UpperMacContext : public IUpperMacContext
         int shortRetryLimit;
         int rtsThreshold;
         IImmediateTx *immediateTx;
-        IContentionTx **contentionTx; //TODO
+        IContentionTx **contentionTx;
 
     protected:
         Ieee80211Frame *setBitrate(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
@@ -58,15 +58,15 @@ class INET_API UpperMacContext : public IUpperMacContext
         virtual const MACAddress& getAddress() const override;
 
         virtual simtime_t getSlotTime() const override;
-        virtual simtime_t getAIFS() const override;
-        virtual simtime_t getSIFS() const override;
-        virtual simtime_t getDIFS() const override;
-        virtual simtime_t getEIFS() const override;
-        virtual simtime_t getPIFS() const override;
-        virtual simtime_t getRIFS() const override;
+        virtual simtime_t getAifsTime() const override;
+        virtual simtime_t getSifsTime() const override;
+        virtual simtime_t getDifsTime() const override;
+        virtual simtime_t getEifsTime() const override;
+        virtual simtime_t getPifsTime() const override;
+        virtual simtime_t getRifsTime() const override;
 
-        virtual int getMinCW() const override;
-        virtual int getMaxCW() const override;
+        virtual int getCwMin() const override;
+        virtual int getCwMax() const override;
         virtual int getShortRetryLimit() const override;
         virtual int getRtsThreshold() const override;
 

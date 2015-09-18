@@ -21,18 +21,31 @@
 #define __INET_ICONTENTIONTX_H
 
 #include "inet/common/INETDefs.h"
-#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
 
 class Ieee80211Frame;
+class ITxCallback;
 
+/**
+ * Abstract interface for processes that implement contention-based channel
+ * access. For each frame, it listens on the channel for a DIFS (AIFS) period
+ * then for a random backoff period before transitting the frame, and defers when
+ * busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
+ * of the original DIFS (AIFS).
+ *
+ * Note that waiting for an ACK (or CTS) and initiating the retransmission if
+ * it does not arrive is not handled by this process. Instead, that is typically
+ * performed by a frame exchange class inside UpperMac (see IFrameExchange, IUpperMac).
+ */
 class IContentionTx
 {
     public:
         virtual ~IContentionTx() {}
         virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) = 0;
+
+        // notifications
         virtual void mediumStateChanged(bool mediumFree) = 0;
         virtual void radioTransmissionFinished() = 0;
         virtual void lowerFrameReceived(bool isFcsOk) = 0;

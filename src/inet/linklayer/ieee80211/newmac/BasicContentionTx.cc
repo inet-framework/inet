@@ -26,13 +26,13 @@
 namespace inet {
 namespace ieee80211 {
 
-// don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(Ieee80211NewMac,
+// for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
+Register_Enum(BasicContentionTx::State,
    (BasicContentionTx::IDLE,
    BasicContentionTx::DEFER,
    BasicContentionTx::BACKOFF,
-   BasicContentionTx::TRANSMIT,
-   BasicContentionTx::WAIT_IFS));
+   BasicContentionTx::WAIT_IFS,
+   BasicContentionTx::TRANSMIT));
 
 Define_Module(BasicContentionTx);
 
@@ -53,12 +53,12 @@ void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx 
 
 void BasicContentionTx::initialize()
 {
-    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath("^"));
-    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath("^.upperMac"));
+    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath(par("macModule")));
+    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
     txIndex = getIndex();
 
     fsm.setName("fsm");
-    fsm.setState(IDLE);
+    fsm.setState(IDLE, "IDLE");
     endIFS = new cMessage("IFS");
     endBackoff = new cMessage("Backoff");
     endEIFS = new cMessage("EIFS");
@@ -73,6 +73,7 @@ BasicContentionTx::~BasicContentionTx()
 
 void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
 {
+    Enter_Method("transmitContentionFrame(\"%s\")", frame->getName());
     ASSERT(fsm.getState() == IDLE);
     this->frame = frame;
     this->ifs = ifs;
@@ -165,13 +166,15 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(TxFinished,
                                   event == TRANSMISSION_FINISHED,
                                   IDLE,
-                                  upperMac->transmissionComplete(completionCallback, txIndex);
+                                  transmissionComplete();
             );
         }
     }
 
-    logState();
     // emit(stateSignal, fsm.getState()); TODO
+    logState();
+    if (ev.isGUI())
+        updateDisplayString();
 }
 
 void BasicContentionTx::mediumStateChanged(bool mediumFree)
@@ -184,7 +187,7 @@ void BasicContentionTx::mediumStateChanged(bool mediumFree)
 
 void BasicContentionTx::radioTransmissionFinished()
 {
-    Enter_Method("radioTransmissionFinished()");
+    Enter_Method_Silent();
     handleWithFSM(TRANSMISSION_FINISHED, nullptr);
 }
 
@@ -195,8 +198,8 @@ void BasicContentionTx::handleMessage(cMessage *msg)
 
 void BasicContentionTx::lowerFrameReceived(bool isFcsOk)
 {
-    Enter_Method("lowerFrameReceived(%s)", isFcsOk ? "HEALTHY" : "CORRUPT");
-    useEIFS = !isFcsOk;
+    Enter_Method("%s frame received", isFcsOk ? "HEALTHY" : "CORRUPTED");
+    useEIFS = !isFcsOk;  //TODO almost certainly not enough -- we probably need to schedule EIFS timer or something
 }
 
 void BasicContentionTx::scheduleIFSPeriod(simtime_t deferDuration)
@@ -237,9 +240,25 @@ void BasicContentionTx::scheduleBackoffPeriod(int backoffSlots)
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
+void BasicContentionTx::transmissionComplete()
+{
+    upperMac->transmissionComplete(completionCallback, txIndex);
+    frame = nullptr;
+}
+
 void BasicContentionTx::logState()
 {
-    EV  << "state information: " << "state = " << fsm.getStateName() << ", backoffPeriod = " << backoffPeriod << endl;
+    EV_DETAIL << "FSM state: " << fsm.getStateName() << ", frame: " << (frame ? frame->getName() : "none") <<endl;
+}
+
+void BasicContentionTx::updateDisplayString()
+{
+    // faster version is just to display the state: getDisplayString().setTagArg("t", 0, fsm.getStateName());
+    std::stringstream os;
+    if (frame)
+        os << frame->getName() << "\n";
+    os << fsm.getStateName();
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 bool BasicContentionTx::isIFSNecessary()

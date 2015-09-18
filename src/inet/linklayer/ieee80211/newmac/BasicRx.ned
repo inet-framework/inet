@@ -24,5 +24,8 @@ package inet.linklayer.ieee80211.newmac;
 //
 simple BasicRx like IRx
 {
-    @display("i=block/rx");
+    parameters:
+        string upperMacModule;
+        string firstContentionTxModule;
+        @display("i=block/rx");
 }

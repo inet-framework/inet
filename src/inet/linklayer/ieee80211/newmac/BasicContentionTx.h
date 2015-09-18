@@ -20,7 +20,6 @@
 #ifndef __INET_BASICCONTENTIONTX_H
 #define __INET_BASICCONTENTIONTX_H
 
-#include "MacPlugin.h"
 #include "IContentionTx.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
@@ -33,7 +32,10 @@ class IUpperMac;
 class IMacRadioInterface;
 
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
-//TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
+//TODO why do we need to schedule IFS and Backoff separately? why not compute waittime = ifs+backoff upfront, and schedule that?
+//TODO fsm is wrong wrt channelLastBusyTime (not all cases handled) -- FIGURE OUT HOW TO HANDLE IT WHEN CHANNEL IS LONG FREE WHEN WE WANT TO TRANSMIT!
+//TODO needs to be decided whether slots for different ACs are aligned; and if not, whether "within a slot time" is a good definition for collision!
+//TODO NOTE: latter is interlinked with the prev question -- what if we could transmit immediately? we should wait for 1 slot time to make sure we don't collide with a higher priority process??
 class BasicContentionTx : public cSimpleModule, public IContentionTx
 {
     public:
@@ -71,22 +73,22 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx
         cMessage *endBackoff = nullptr;
         cMessage *endIFS = nullptr;
         cMessage *endEIFS = nullptr;
-        simtime_t backoffPeriod = SIMTIME_ZERO;
-        cMessage *frameDuration = nullptr;
 
     protected:
-        void initialize();
-        void handleMessage(cMessage *msg);
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
 
         virtual int computeCW(int cwMin, int cwMax, int retryCount);
-        void handleWithFSM(EventType event, cMessage *msg);
-        void scheduleIFS();
-        void scheduleIFSPeriod(simtime_t deferDuration);
-        void scheduleEIFSPeriod(simtime_t deferDuration);
-        void updateBackoffPeriod();
-        void scheduleBackoffPeriod(int backoffPeriod);
-        void logState();
-        bool isIFSNecessary();
+        virtual void handleWithFSM(EventType event, cMessage *msg);
+        virtual bool isIFSNecessary();
+        virtual void scheduleIFS();
+        virtual void scheduleIFSPeriod(simtime_t deferDuration);
+        virtual void scheduleEIFSPeriod(simtime_t deferDuration);
+        virtual void updateBackoffPeriod();
+        virtual void scheduleBackoffPeriod(int backoffPeriod);
+        virtual void transmissionComplete();
+        virtual void logState();
+        virtual void updateDisplayString();
 
     public:
         BasicContentionTx() {}

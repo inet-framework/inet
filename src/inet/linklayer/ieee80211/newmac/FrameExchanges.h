@@ -20,14 +20,11 @@
 #ifndef __INET_FRAMEEXCHANGES_H
 #define __INET_FRAMEEXCHANGES_H
 
-#include "MacPlugin.h"
 #include "FrameExchange.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211NewMac;
-class IUpperMacContext;
 class Ieee80211DataOrMgmtFrame;
 
 // just to demonstrate the use FsmBasedFrameExchange; otherwise we prefer the step-based because it's simpler
