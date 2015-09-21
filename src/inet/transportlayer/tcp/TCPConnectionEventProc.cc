@@ -162,7 +162,7 @@ void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCom
 {
     delete msg;
     cMessage *dataMsg;
-    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != NULL)
+    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
     {
         dataMsg->setKind(TCP_I_DATA);
         TCPCommand *cmd = new TCPCommand();

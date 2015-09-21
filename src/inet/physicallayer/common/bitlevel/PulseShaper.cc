@@ -29,7 +29,7 @@ const ITransmissionSampleModel *PulseShaper::shape(const ITransmissionSymbolMode
 {
     const int sampleLength = symbolModel->getPayloadSymbolLength() * samplePerSymbol;
     const double sampleRate = symbolModel->getPayloadSymbolRate() * samplePerSymbol;
-    return new TransmissionSampleModel(sampleLength, sampleRate, NULL);
+    return new TransmissionSampleModel(sampleLength, sampleRate, nullptr);
 }
 
 } // namespace physicallayer

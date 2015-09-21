@@ -29,7 +29,7 @@ const IReceptionSymbolModel *PulseFilter::filter(const IReceptionSampleModel *sa
 {
     const int symbolLength = sampleModel->getSampleLength() / samplePerSymbol;
     const double symbolRate = sampleModel->getSampleRate() / samplePerSymbol;
-    return new ReceptionSymbolModel(symbolLength, symbolRate, -1, NaN, NULL);
+    return new ReceptionSymbolModel(symbolLength, symbolRate, -1, NaN, nullptr);
 }
 
 } // namespace physicallayer

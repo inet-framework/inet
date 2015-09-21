@@ -32,7 +32,7 @@ const IReceptionSampleModel *ScalarAnalogDigitalConverter::convertAnalogToDigita
 {
     const simtime_t duration = analogModel->getDuration();
     const int sampleLength = std::ceil(duration.dbl() / sampleRate);
-    return new ReceptionSampleModel(sampleLength, sampleRate, NULL, W(0));
+    return new ReceptionSampleModel(sampleLength, sampleRate, nullptr, W(0));
 }
 
 } // namespace physicallayer
