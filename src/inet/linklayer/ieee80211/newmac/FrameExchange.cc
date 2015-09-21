@@ -26,11 +26,13 @@ namespace ieee80211 {
 
 void FrameExchange::reportSuccess()
 {
+    EV_DETAIL << "Frame exchange successful\n";
     finishedCallback->frameExchangeFinished(this, true);    // may delete this FrameExchange object
 }
 
 void FrameExchange::reportFailure()
 {
+    EV_DETAIL << "Frame exchange failed\n";
     finishedCallback->frameExchangeFinished(this, false);    // may delete this FrameExchange object
 }
 
@@ -38,7 +40,7 @@ void FrameExchange::reportFailure()
 
 void FsmBasedFrameExchange::start()
 {
-    EV_INFO << "Starting " << getClassName() << std::endl;
+    EV_DETAIL << "Starting frame exchange " << getClassName() << std::endl;
     handleWithFSM(EVENT_START, nullptr);
 }
 
@@ -81,7 +83,7 @@ std::string StepBasedFrameExchange::info() const
     switch (status) {
         case SUCCEEDED: out << "SUCCEEDED in step " << step; break;
         case FAILED: out << "FAILED in step " << step; break;
-        case INPROGRESS: out << "step " << step << ", operation=" << stepTypeName(stepType); break;
+        case INPROGRESS: out << "step " << step << ", operation=" << operationName(operation); break;
     }
     return out.str();
 }
@@ -98,10 +100,10 @@ const char *StepBasedFrameExchange::statusName(Status status)
 #undef CASE
 }
 
-const char *StepBasedFrameExchange::stepTypeName(StepType stepType)
+const char *StepBasedFrameExchange::operationName(Operation operation)
 {
 #define CASE(x) case x: return #x
-    switch (stepType) {
+    switch (operation) {
         CASE(NONE);
         CASE(TRANSMIT_CONTENTION_FRAME);
         CASE(TRANSMIT_IMMEDIATE_FRAME);
@@ -114,10 +116,10 @@ const char *StepBasedFrameExchange::stepTypeName(StepType stepType)
 #undef CASE
 }
 
-const char *StepBasedFrameExchange::operationName(StepType stepType)
+const char *StepBasedFrameExchange::operationFunctionName(Operation operation)
 {
-    switch (stepType) {
-        case NONE: return "n/a";
+    switch (operation) {
+        case NONE: return "no-op";
         case TRANSMIT_CONTENTION_FRAME: return "transmitContentionFrame()";
         case TRANSMIT_IMMEDIATE_FRAME: return "transmitImmediateFrame()";
         case EXPECT_REPLY: return "expectReply()";
@@ -130,39 +132,29 @@ const char *StepBasedFrameExchange::operationName(StepType stepType)
 
 void StepBasedFrameExchange::start()
 {
+    EV_DETAIL << "Starting frame exchange " << getClassName() << std::endl;
     ASSERT(step == 0);
-    step--;    // will be incremented in proceed()
+    operation = GOTO_STEP;
+    gotoTarget = 0;
     proceed();
 }
 
 void StepBasedFrameExchange::proceed()
 {
     if (status == INPROGRESS) {
-        step++;
-        stepType = NONE;
+        if (operation == GOTO_STEP)
+            step = gotoTarget;
+        else
+            step++;
+        EV_DETAIL << "Doing step " << step << "\n";
+        operation = NONE;
         doStep(step);
         if (status == INPROGRESS) {
-            if (stepType == NONE)
-                throw cRuntimeError(this, "doStep(step=%d) should have executed an operation like transmitContentionFrame(), transmitImmediateFrame(), expectReply(); gotoStep(), fail(), or succeed()", step);
-            if (stepType == GOTO_STEP) {
-                step--;
+            logStatus("doStep()");
+            if (operation == NONE)
+                throw cRuntimeError(this, "doStep(step=%d) should have executed an operation like transmitContentionFrame(), transmitImmediateFrame(), expectReply(), gotoStep(), fail(), or succeed()", step);
+            if (operation == GOTO_STEP)
                 proceed();
-            }
-        }
-    }
-}
-
-bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
-{
-    if (stepType != EXPECT_REPLY)
-        return false;    // not ready to process frames
-    else {
-        bool accepted = processReply(step, frame);
-        if (!accepted)
-            return false;    // not for us
-        else {
-            proceed();
-            return true;
         }
     }
 }
@@ -170,27 +162,69 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 void StepBasedFrameExchange::transmissionComplete(int txIndex)
 {
     ASSERT(status == INPROGRESS);
-    ASSERT(stepType == TRANSMIT_CONTENTION_FRAME || stepType == TRANSMIT_IMMEDIATE_FRAME);
+    ASSERT(operation == TRANSMIT_CONTENTION_FRAME || operation == TRANSMIT_IMMEDIATE_FRAME);
+    EV_DETAIL << "Transmission complete\n";
     proceed();
 }
 
-void StepBasedFrameExchange::internalCollision(int txIndex)
+bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
+    EV_DETAIL << "Lower frame received in step " << step << "\n";
     ASSERT(status == INPROGRESS);
-    ASSERT(stepType == TRANSMIT_CONTENTION_FRAME);
 
-    processInternalCollision();
-    proceed();
+    if (operation != EXPECT_REPLY)
+        return false;    // not ready to process frames
+    else {
+        operation = NONE;
+        bool accepted = processReply(step, frame);
+        if (status == INPROGRESS) {
+            logStatus(accepted ? "processReply() returned ACCEPT": "processReply() returned REJECT");
+            checkOperation(operation, "processReply()"); //FIXME gotoStep+return false will result in strange behavior
+            if (accepted)
+                proceed();
+        }
+        return accepted;
+    }
 }
 
 void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
 {
-    ASSERT(msg == timeoutMsg);
+    EV_DETAIL << "Timeout in step " << step << "\n";
     ASSERT(status == INPROGRESS);
-    ASSERT(stepType == EXPECT_REPLY);
+    ASSERT(operation == EXPECT_REPLY);
+    ASSERT(msg == timeoutMsg);
 
-    processTimeout(step);    //TODO goto inside processTimeout(), handleMessage() etc requires more thought!
-    proceed();
+    operation = NONE;
+    processTimeout(step);
+    if (status == INPROGRESS) {
+        logStatus("processTimeout()");
+        checkOperation(operation, "processTimeout()");
+        proceed();
+    }
+}
+
+void StepBasedFrameExchange::internalCollision(int txIndex)
+{
+    EV_DETAIL << "Internal collision in step " << step << "\n";
+    ASSERT(status == INPROGRESS);
+    ASSERT(operation == TRANSMIT_CONTENTION_FRAME);
+
+    operation = NONE;
+    processInternalCollision(step);
+    if (status == INPROGRESS) {
+        logStatus("processInternalCollision()");
+        checkOperation(operation, "processInternalCollision()");
+        proceed();
+    }
+}
+
+void StepBasedFrameExchange::checkOperation(Operation operation, const char *where)
+{
+    switch (operation) {
+        case NONE: case GOTO_STEP: break; // compensate for step++ in proceed()
+        case FAIL: case SUCCEED: ASSERT(false); break;  // it is not safe to do anything after fail() or succeed(), as the callback may delete this object
+        default: throw cRuntimeError(this, "operation %s is not permitted inside %s, only gotoStep(), fail() and succeed())", where, operationFunctionName(operation));
+    }
 }
 
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount)
@@ -224,7 +258,7 @@ void StepBasedFrameExchange::expectReply(simtime_t timeout)
 void StepBasedFrameExchange::gotoStep(int step)
 {
     setOperation(GOTO_STEP);
-    this->step = step;
+    gotoTarget = step;
 }
 
 void StepBasedFrameExchange::fail()
@@ -243,13 +277,21 @@ void StepBasedFrameExchange::succeed()
     reportSuccess();    // must come last
 }
 
-void StepBasedFrameExchange::setOperation(StepType newStepType)
+void StepBasedFrameExchange::setOperation(Operation newOperation)
 {
     if (status != INPROGRESS)
-        throw cRuntimeError(this, "cannot do operation %s: frame exchange already terminated (%s)", operationName(newStepType), statusName(status));
-    if (stepType != NONE)
-        throw cRuntimeError(this, "only one operation is permitted per step: cannot do %s after %s, in doStep(step=%d)", operationName(newStepType), operationName(stepType), step);
-    stepType = newStepType;
+        throw cRuntimeError(this, "cannot do operation %s: frame exchange already terminated (%s)", operationFunctionName(newOperation), statusName(status));
+    if (operation != NONE)
+        throw cRuntimeError(this, "only one operation is permitted per step: cannot do %s after %s, in doStep(step=%d)", operationFunctionName(newOperation), operationFunctionName(operation), step);
+    operation = newOperation;
+}
+
+void StepBasedFrameExchange::logStatus(const char *what)
+{
+    if (status != INPROGRESS)
+        EV_DETAIL << what << " in step=" << step << " terminated the frame exchange: " << statusName(status) << endl;
+    else
+        EV_DETAIL << what << " in step=" << step << " performed " << operationFunctionName(operation) << endl;
 }
 
 void StepBasedFrameExchange::cleanup()

@@ -60,7 +60,7 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
         virtual void doStep(int step);
         virtual bool processReply(int step, Ieee80211Frame *frame);
         virtual void processTimeout(int step);
-        virtual void processInternalCollision();
+        virtual void processInternalCollision(int step);
     public:
         SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
@@ -74,7 +74,7 @@ class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
         virtual void doStep(int step);
         virtual bool processReply(int step, Ieee80211Frame *frame);
         virtual void processTimeout(int step);
-        virtual void processInternalCollision() = 0;
+        virtual void processInternalCollision(int step) = 0;
     public:
         SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };

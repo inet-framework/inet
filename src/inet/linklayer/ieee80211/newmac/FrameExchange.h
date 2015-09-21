@@ -64,20 +64,21 @@ class FsmBasedFrameExchange : public FrameExchange
 
 class StepBasedFrameExchange : public FrameExchange
 {
-    protected:
-        enum StepType { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };
+    private:
+        enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };
         enum Status { INPROGRESS, SUCCEEDED, FAILED };
         int step = 0;
-        StepType stepType = NONE;
+        Operation operation = NONE;
         Status status = INPROGRESS;
         cMessage *timeoutMsg = nullptr;
+        int gotoTarget = -1;
 
     protected:
         // to be redefined by user
         virtual void doStep(int step) = 0;
         virtual bool processReply(int step, Ieee80211Frame *frame) = 0; // true = frame accepted as reply
         virtual void processTimeout(int step) = 0;
-        virtual void processInternalCollision() = 0;
+        virtual void processInternalCollision(int step) = 0;
 
         // operations that can be called from doStep()
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
@@ -91,10 +92,12 @@ class StepBasedFrameExchange : public FrameExchange
         // internal
         virtual void proceed();
         virtual void cleanup();
-        void setOperation(StepType type);
+        virtual void setOperation(Operation type);
+        virtual void logStatus(const char *what);
+        virtual void checkOperation(Operation stepType, const char *where);
         static const char *statusName(Status status);
-        static const char *stepTypeName(StepType stepType);
-        static const char *operationName(StepType stepType);
+        static const char *operationName(Operation operation);
+        static const char *operationFunctionName(Operation operation);
 
     public:
         StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback);

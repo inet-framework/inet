@@ -161,7 +161,7 @@ void SendDataWithAckFrameExchange::processTimeout(int step)
     }
 }
 
-void SendDataWithAckFrameExchange::processInternalCollision()
+void SendDataWithAckFrameExchange::processInternalCollision(int step)
 {
     switch (step) {
         case 0: if (++retryCount < context->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
@@ -207,7 +207,7 @@ void SendDataWithRtsCtsFrameExchange::processTimeout(int step)
     }
 }
 
-void SendDataWithRtsCtsFrameExchange::processInternalCollision()
+void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
 {
     switch (step) {
         case 0: if (++retryCount < context->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
