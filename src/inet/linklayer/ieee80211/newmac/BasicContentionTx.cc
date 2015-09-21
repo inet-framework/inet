@@ -28,11 +28,11 @@ namespace ieee80211 {
 
 // for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(BasicContentionTx::State,
-   (BasicContentionTx::IDLE,
-   BasicContentionTx::DEFER,
-   BasicContentionTx::BACKOFF,
-   BasicContentionTx::WAIT_IFS,
-   BasicContentionTx::TRANSMIT));
+        (BasicContentionTx::IDLE,
+         BasicContentionTx::DEFER,
+         BasicContentionTx::BACKOFF,
+         BasicContentionTx::WAIT_IFS,
+         BasicContentionTx::TRANSMIT));
 
 Define_Module(BasicContentionTx);
 
@@ -42,19 +42,18 @@ void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx 
     ASSERT(firstContentionTxModule != nullptr);
     int count = firstContentionTxModule->getVectorSize();
 
-    contentionTx = new IContentionTx*[count+1];
+    contentionTx = new IContentionTx *[count + 1];
     for (int i = 0; i < count; i++) {
         cModule *sibling = firstContentionTxModule->getParentModule()->getSubmodule(firstContentionTxModule->getName(), i);
-        contentionTx[i] = check_and_cast<IContentionTx*>(sibling);
+        contentionTx[i] = check_and_cast<IContentionTx *>(sibling);
     }
     contentionTx[count] = nullptr;
 }
 
-
 void BasicContentionTx::initialize()
 {
-    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath(par("macModule")));
-    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
+    mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
+    upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     txIndex = getIndex();
 
     fsm.setName("fsm");
@@ -71,7 +70,7 @@ BasicContentionTx::~BasicContentionTx()
     cancelAndDelete(endEIFS);
 }
 
-void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
+void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
 {
     Enter_Method("transmitContentionFrame(\"%s\")", frame->getName());
     ASSERT(fsm.getState() == IDLE);
@@ -91,7 +90,7 @@ void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t
 
 int BasicContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
 {
-    int cw = ((cwMin+1) << retryCount) - 1;
+    int cw = ((cwMin + 1) << retryCount) - 1;
     if (cw > cwMax)
         cw = cwMax;
     return cw;
@@ -101,73 +100,67 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
     logState();
 //    emit(stateSignal, fsm.getState()); TODO
-    FSMA_Switch(fsm)
-    {
-        FSMA_State(IDLE)
-        {
+    FSMA_Switch(fsm) {
+        FSMA_State(IDLE) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
 //            FSMA_Event_Transition(Ready-To-Transmit,
 //                                  event == START && mediumFree && !isIFSNecessary(),
 //                                  TRANSMIT,
 //                                  ;
 //            );
-            FSMA_Event_Transition(Need-IFS-Before-Transmit,
-                                  event == START && mediumFree /*&& isIFSNecessary()*/,
-                                  WAIT_IFS,
-                                  ;
-            );
+            FSMA_Event_Transition(Need - IFS - Before - Transmit,
+                    event == START && mediumFree    /*&& isIFSNecessary()*/,
+                    WAIT_IFS,
+                    ;
+                    );
             FSMA_Event_Transition(Busy,
-                                  event == START && !mediumFree,
-                                  DEFER,
-                                  ;
-            );
+                    event == START && !mediumFree,
+                    DEFER,
+                    ;
+                    );
         }
-        FSMA_State(DEFER)
-        {
+        FSMA_State(DEFER) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
-            FSMA_Event_Transition(WAIT-Ifs,
-                                     event == MEDIUM_STATE_CHANGED && mediumFree,
-                                     WAIT_IFS,
-                                     ;
-            );
+            FSMA_Event_Transition(WAIT - Ifs,
+                    event == MEDIUM_STATE_CHANGED && mediumFree,
+                    WAIT_IFS,
+                    ;
+                    );
         }
-        FSMA_State(WAIT_IFS)
-        {
+        FSMA_State(WAIT_IFS) {
             FSMA_Enter(scheduleIFS());
             FSMA_Event_Transition(Backoff,
-                                  event == TIMER && !endIFS->isScheduled() && !endEIFS->isScheduled(),
-                                  BACKOFF,
-                                  ;
-            );
+                    event == TIMER && !endIFS->isScheduled() && !endEIFS->isScheduled(),
+                    BACKOFF,
+                    ;
+                    );
             FSMA_Event_Transition(Busy,
-                                  event == MEDIUM_STATE_CHANGED && !mediumFree,
-                                  DEFER,
-                                  cancelEvent(endIFS);
-            );
+                    event == MEDIUM_STATE_CHANGED && !mediumFree,
+                    DEFER,
+                    cancelEvent(endIFS);
+                    );
         }
-        FSMA_State(BACKOFF)
-        {
+        FSMA_State(BACKOFF) {
             FSMA_Enter(scheduleBackoffPeriod(backoffSlots));
-            FSMA_Event_Transition(Transmit-Data,
-                                  event == TIMER && msg == endBackoff,
-                                  TRANSMIT,
-                                  ;
-            );
-            FSMA_Event_Transition(Backoff-Busy,
-                                  event == MEDIUM_STATE_CHANGED && !mediumFree,
-                                  DEFER,
-                                  updateBackoffPeriod();
-                                  cancelEvent(endBackoff);
-            );
+            FSMA_Event_Transition(Transmit - Data,
+                    event == TIMER && msg == endBackoff,
+                    TRANSMIT,
+                    ;
+                    );
+            FSMA_Event_Transition(Backoff - Busy,
+                    event == MEDIUM_STATE_CHANGED && !mediumFree,
+                    DEFER,
+                    updateBackoffPeriod();
+                    cancelEvent(endBackoff);
+                    );
         }
-        FSMA_State(TRANSMIT)
-        {
+        FSMA_State(TRANSMIT) {
             FSMA_Enter(mac->sendFrame(frame));
             FSMA_Event_Transition(TxFinished,
-                                  event == TRANSMISSION_FINISHED,
-                                  IDLE,
-                                  transmissionComplete();
-            );
+                    event == TRANSMISSION_FINISHED,
+                    IDLE,
+                    transmissionComplete();
+                    );
         }
     }
 
@@ -199,7 +192,7 @@ void BasicContentionTx::handleMessage(cMessage *msg)
 void BasicContentionTx::lowerFrameReceived(bool isFcsOk)
 {
     Enter_Method("%s frame received", isFcsOk ? "HEALTHY" : "CORRUPTED");
-    useEIFS = !isFcsOk;  //TODO almost certainly not enough -- we probably need to schedule EIFS timer or something
+    useEIFS = !isFcsOk;    //TODO almost certainly not enough -- we probably need to schedule EIFS timer or something
 }
 
 void BasicContentionTx::scheduleIFSPeriod(simtime_t deferDuration)
@@ -227,11 +220,10 @@ void BasicContentionTx::scheduleIFS()
     scheduleIFSPeriod(ifs);
 }
 
-
 void BasicContentionTx::updateBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffSlots -= ((int)(elapsedBackoffTime / slotTime)); //FIXME add some epsilon...?
+    backoffSlots -= ((int)(elapsedBackoffTime / slotTime));    //FIXME add some epsilon...?
 }
 
 void BasicContentionTx::scheduleBackoffPeriod(int backoffSlots)
@@ -248,7 +240,7 @@ void BasicContentionTx::transmissionComplete()
 
 void BasicContentionTx::logState()
 {
-    EV_DETAIL << "FSM state: " << fsm.getStateName() << ", frame: " << (frame ? frame->getName() : "none") <<endl;
+    EV_DETAIL << "FSM state: " << fsm.getStateName() << ", frame: " << (frame ? frame->getName() : "none") << endl;
 }
 
 void BasicContentionTx::updateDisplayString()

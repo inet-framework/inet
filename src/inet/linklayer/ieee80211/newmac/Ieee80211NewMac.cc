@@ -50,8 +50,7 @@ void Ieee80211NewMac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
         // radio
@@ -61,9 +60,9 @@ void Ieee80211NewMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        upperMac = check_and_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
-        rx = check_and_cast<IRx*>(getModuleByPath(par("rxModule")));
-        immediateTx = check_and_cast<IImmediateTx*>(getModuleByPath(par("immediateTxModule")));
+        upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+        rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+        immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
         collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
         const char *addressString = par("address");
@@ -96,11 +95,10 @@ void Ieee80211NewMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         if (isOperational)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
+        if (isInterfaceRegistered().isUnspecified())    //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
     }
 }
@@ -148,7 +146,7 @@ void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
 
 void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
 {
-    upperMac->upperFrameReceived(check_and_cast<Ieee80211DataOrMgmtFrame*>(msg));
+    upperMac->upperFrameReceived(check_and_cast<Ieee80211DataOrMgmtFrame *>(msg));
 }
 
 void Ieee80211NewMac::handleLowerPacket(cPacket *msg)
@@ -172,7 +170,7 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree()) { // TODO: !!!
+        if (rx->isMediumFree()) {    // TODO: !!!
             EV_DEBUG << "Sending it down immediately\n";
 /*
    // Dynamic power
@@ -193,16 +191,13 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
     }
 }
 
-
 void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent("receiveSignal()");
-    if (signalID == IRadio::receptionStateChangedSignal)
-    {
+    if (signalID == IRadio::receptionStateChangedSignal) {
         rx->receptionStateChanged((IRadio::ReceptionState)value);
     }
-    else if (signalID == IRadio::transmissionStateChangedSignal)
-    {
+    else if (signalID == IRadio::transmissionStateChangedSignal) {
         auto oldTransmissionState = transmissionState;
         transmissionState = (IRadio::TransmissionState)value;
 
@@ -214,7 +209,7 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
                 contentionTx[i]->radioTransmissionFinished();
 
             EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);  //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);    //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }
         rx->transmissionStateChanged(transmissionState);
     }
@@ -258,7 +253,7 @@ void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
 bool Ieee80211NewMac::handleNodeStart(IDoneCallback *doneCallback)
 {
     if (!doneCallback)
-        return true; // do nothing when called from initialize() //FIXME It's a hack, should remove the initializeQueueModule() and setRadioMode() calls from initialize()
+        return true;    // do nothing when called from initialize() //FIXME It's a hack, should remove the initializeQueueModule() and setRadioMode() calls from initialize()
 
     bool ret = MACProtocolBase::handleNodeStart(doneCallback);
 //    initializeQueueModule(); TODO

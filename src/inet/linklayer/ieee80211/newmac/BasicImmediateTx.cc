@@ -35,16 +35,16 @@ BasicImmediateTx::~BasicImmediateTx()
 
 void BasicImmediateTx::initialize()
 {
-    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath(par("macModule")));
-    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath(par("upperMacModule")));
+    mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
+    upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     endIfsTimer = new cMessage("endIFS");
     updateDisplayString();
 }
 
-void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, ITxCallback *completionCallback)
+void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback)
 {
     Enter_Method("transmitImmediateFrame(\"%s\")", frame->getName());
-    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
+    ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     this->frame = frame;
     this->completionCallback = completionCallback;

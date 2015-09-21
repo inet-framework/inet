@@ -29,10 +29,10 @@ namespace ieee80211 {
 
 UpperMacContext::UpperMacContext(const MACAddress& address,
         const IIeee80211Mode *dataFrameMode, const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-        int shortRetryLimit,  int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx) :
-                    address(address),
-                    dataFrameMode(dataFrameMode), basicFrameMode(basicFrameMode), controlFrameMode(controlFrameMode),
-                    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), immediateTx(immediateTx), contentionTx(contentionTx)
+        int shortRetryLimit, int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx) :
+    address(address),
+    dataFrameMode(dataFrameMode), basicFrameMode(basicFrameMode), controlFrameMode(controlFrameMode),
+    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), immediateTx(immediateTx), contentionTx(contentionTx)
 {
 }
 
@@ -48,7 +48,7 @@ simtime_t UpperMacContext::getSlotTime() const
 
 simtime_t UpperMacContext::getAifsTime() const
 {
-    return dataFrameMode->getAifsTime(2); //TODO!!!
+    return dataFrameMode->getAifsTime(2);    //TODO!!!
 }
 
 simtime_t UpperMacContext::getSifsTime() const
@@ -63,7 +63,7 @@ simtime_t UpperMacContext::getDifsTime() const
 
 simtime_t UpperMacContext::getEifsTime() const
 {
-    return dataFrameMode->getEifsTime(basicFrameMode, LENGTH_ACK);  //TODO ???
+    return dataFrameMode->getEifsTime(basicFrameMode, LENGTH_ACK);    //TODO ???
 }
 
 simtime_t UpperMacContext::getPifsTime() const
@@ -103,7 +103,7 @@ simtime_t UpperMacContext::getAckTimeout() const
 
 simtime_t UpperMacContext::getCtsTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() +  getCtsDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + getCtsDuration();
 }
 
 simtime_t UpperMacContext::getAckDuration() const
@@ -122,9 +122,9 @@ Ieee80211RTSFrame *UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *fram
     rtsFrame->setTransmitterAddress(address);
 
     rtsFrame->setReceiverAddress(frame->getReceiverAddress());
-    rtsFrame->setDuration(3 * getSifsTime() + basicFrameMode->getDuration(LENGTH_CTS) +
-            dataFrameMode->getDuration(frame->getBitLength()) +  //TODO maybe not always with dataFrameMode
-            basicFrameMode->getDuration(LENGTH_ACK));
+    rtsFrame->setDuration(3 * getSifsTime() + basicFrameMode->getDuration(LENGTH_CTS)
+            + dataFrameMode->getDuration(frame->getBitLength())    //TODO maybe not always with dataFrameMode
+            + basicFrameMode->getDuration(LENGTH_ACK));
     return rtsFrame;
 }
 
@@ -150,7 +150,7 @@ Ieee80211ACKFrame *UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *fram
     return ackFrame;
 }
 
-Ieee80211DataOrMgmtFrame *UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const //FIXME completely misleading name, random functionality
+Ieee80211DataOrMgmtFrame *UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const    //FIXME completely misleading name, random functionality
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
     frame->setDuration(0);
@@ -180,7 +180,7 @@ Ieee80211Frame *UpperMacContext::setDataBitrate(Ieee80211Frame *frame) const
     return setBitrate(frame, dataFrameMode);
 }
 
-Ieee80211Frame *UpperMacContext::setBitrate(Ieee80211Frame* frame, const IIeee80211Mode* mode) const
+Ieee80211Frame *UpperMacContext::setBitrate(Ieee80211Frame *frame, const IIeee80211Mode *mode) const
 {
     ASSERT(frame->getControlInfo() == nullptr);
     TransmissionRequest *ctrl = new TransmissionRequest();

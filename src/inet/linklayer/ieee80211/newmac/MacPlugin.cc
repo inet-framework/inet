@@ -22,14 +22,14 @@
 namespace inet {
 namespace ieee80211 {
 
-void MacPlugin::scheduleAt(simtime_t t, cMessage* msg)
+void MacPlugin::scheduleAt(simtime_t t, cMessage *msg)
 {
     cContextSwitcher tmp(ownerModule);
     msg->setContextPointer(this);
     ownerModule->scheduleAt(t, msg);
 }
 
-cMessage* MacPlugin::cancelEvent(cMessage* msg)
+cMessage *MacPlugin::cancelEvent(cMessage *msg)
 {
     cContextSwitcher tmp(ownerModule);
     ASSERT(msg->getContextPointer() == nullptr || msg->getContextPointer() == this);

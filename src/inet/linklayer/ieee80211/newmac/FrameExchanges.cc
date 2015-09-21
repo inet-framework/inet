@@ -41,63 +41,59 @@ SendDataWithAckFsmBasedFrameExchange::~SendDataWithAckFsmBasedFrameExchange()
 bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessage *frameOrTimer)
 {
     bool frameProcessed = false;
-    Ieee80211Frame *receivedFrame = event == EVENT_FRAMEARRIVED ? check_and_cast<Ieee80211Frame*>(frameOrTimer) : nullptr;
+    Ieee80211Frame *receivedFrame = event == EVENT_FRAMEARRIVED ? check_and_cast<Ieee80211Frame *>(frameOrTimer) : nullptr;
 
-    FSMA_Switch(fsm)
-    {
-        FSMA_State(INIT)
-        {
+    FSMA_Switch(fsm) {
+        FSMA_State(INIT) {
             FSMA_Enter();
             FSMA_Event_Transition(Start,
-                                  event == EVENT_START,
-                                  TRANSMITDATA,
-                                  transmitDataFrame();
-            );
+                    event == EVENT_START,
+                    TRANSMITDATA,
+                    transmitDataFrame();
+                    );
         }
-        FSMA_State(TRANSMITDATA)
-        {
+        FSMA_State(TRANSMITDATA) {
             FSMA_Enter();
-            FSMA_Event_Transition(Wait-ACK,
-                                  event == EVENT_TXFINISHED,
-                                  WAITACK,
-                                  scheduleAckTimeout();
-            );
-            FSMA_Event_Transition(Frame-arrived,
-                                  event == EVENT_FRAMEARRIVED,
-                                  TRANSMITDATA,
-                                  ;
-            );
+            FSMA_Event_Transition(Wait - ACK,
+                    event == EVENT_TXFINISHED,
+                    WAITACK,
+                    scheduleAckTimeout();
+                    );
+            FSMA_Event_Transition(Frame - arrived,
+                    event == EVENT_FRAMEARRIVED,
+                    TRANSMITDATA,
+                    ;
+                    );
         }
-        FSMA_State(WAITACK)
-        {
+        FSMA_State(WAITACK) {
             FSMA_Enter();
-            FSMA_Event_Transition(Ack-arrived,
-                                  event == EVENT_FRAMEARRIVED && isAck(receivedFrame), //TODO is from right STA
-                                  SUCCESS,
-                                  {frameProcessed = true; delete receivedFrame;}
-            );
-            FSMA_Event_Transition(Frame-arrived,
-                                  event == EVENT_FRAMEARRIVED && !isAck(receivedFrame), //TODO is from right STA
-                                  FAILURE,
-                                  ;
-            );
-            FSMA_Event_Transition(Ack-timeout-retry,
-                                  event == EVENT_TIMER && retryCount < context->getShortRetryLimit(),
-                                  TRANSMITDATA,
-                                  retryDataFrame();
-            );
-            FSMA_Event_Transition(Ack-timeout-giveup,
-                                  event == EVENT_TIMER && retryCount == context->getShortRetryLimit(),
-                                  FAILURE,
-                                  ;
-            );
+            FSMA_Event_Transition(Ack - arrived,
+                    event == EVENT_FRAMEARRIVED && isAck(receivedFrame),    //TODO is from right STA
+                    SUCCESS,
+                    { frameProcessed = true;
+                      delete receivedFrame;
+                    }
+                    );
+            FSMA_Event_Transition(Frame - arrived,
+                    event == EVENT_FRAMEARRIVED && !isAck(receivedFrame),    //TODO is from right STA
+                    FAILURE,
+                    ;
+                    );
+            FSMA_Event_Transition(Ack - timeout - retry,
+                    event == EVENT_TIMER && retryCount < context->getShortRetryLimit(),
+                    TRANSMITDATA,
+                    retryDataFrame();
+                    );
+            FSMA_Event_Transition(Ack - timeout - giveup,
+                    event == EVENT_TIMER && retryCount == context->getShortRetryLimit(),
+                    FAILURE,
+                    ;
+                    );
         }
-        FSMA_State(SUCCESS)
-        {
+        FSMA_State(SUCCESS) {
             FSMA_Enter(reportSuccess());
         }
-        FSMA_State(FAILURE)
-        {
+        FSMA_State(FAILURE) {
             FSMA_Enter(reportFailure());
         }
     }
@@ -107,7 +103,7 @@ bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessa
 void SendDataWithAckFsmBasedFrameExchange::transmitDataFrame()
 {
     retryCount = 0;
-    int txIndex = 0; //TODO
+    int txIndex = 0;    //TODO
     context->transmitContentionFrame(txIndex, frame->dup(), context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
@@ -115,7 +111,7 @@ void SendDataWithAckFsmBasedFrameExchange::retryDataFrame()
 {
     retryCount++;
     frame->setRetry(true);
-    int txIndex = 0; //TODO
+    int txIndex = 0;    //TODO
     context->transmitContentionFrame(txIndex, frame->dup(), context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
@@ -127,7 +123,7 @@ void SendDataWithAckFsmBasedFrameExchange::scheduleAckTimeout()
     scheduleAt(t, ackTimer);
 }
 
-bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame* frame)
+bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame *frame)
 {
     return dynamic_cast<Ieee80211ACKFrame *>(frame) != nullptr;
 }
@@ -175,7 +171,6 @@ void SendDataWithAckFrameExchange::processInternalCollision()
 
 
 //------------------------------
-
 
 SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
     StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame)

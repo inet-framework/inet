@@ -26,12 +26,12 @@ namespace ieee80211 {
 
 void FrameExchange::reportSuccess()
 {
-    finishedCallback->frameExchangeFinished(this, true);  // may delete this FrameExchange object
+    finishedCallback->frameExchangeFinished(this, true);    // may delete this FrameExchange object
 }
 
 void FrameExchange::reportFailure()
 {
-    finishedCallback->frameExchangeFinished(this, false);  // may delete this FrameExchange object
+    finishedCallback->frameExchangeFinished(this, false);    // may delete this FrameExchange object
 }
 
 //--------
@@ -42,7 +42,7 @@ void FsmBasedFrameExchange::start()
     handleWithFSM(EVENT_START, nullptr);
 }
 
-bool FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
+bool FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
     return handleWithFSM(EVENT_FRAMEARRIVED, frame);
 }
@@ -65,7 +65,7 @@ void FsmBasedFrameExchange::handleSelfMessage(cMessage *msg)
 //--------
 
 StepBasedFrameExchange::StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) :
-        FrameExchange(ownerModule, context, callback)
+    FrameExchange(ownerModule, context, callback)
 {
 }
 
@@ -131,7 +131,7 @@ const char *StepBasedFrameExchange::operationName(StepType stepType)
 void StepBasedFrameExchange::start()
 {
     ASSERT(step == 0);
-    step--;  // will be incremented in proceed()
+    step--;    // will be incremented in proceed()
     proceed();
 }
 
@@ -148,18 +148,18 @@ void StepBasedFrameExchange::proceed()
                 step--;
                 proceed();
             }
-       }
+        }
     }
 }
 
-bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame* frame)
+bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
     if (stepType != EXPECT_REPLY)
-        return false;  // not ready to process frames
+        return false;    // not ready to process frames
     else {
         bool accepted = processReply(step, frame);
         if (!accepted)
-            return false;  // not for us
+            return false;    // not for us
         else {
             proceed();
             return true;
@@ -183,31 +183,31 @@ void StepBasedFrameExchange::internalCollision(int txIndex)
     proceed();
 }
 
-void StepBasedFrameExchange::handleSelfMessage(cMessage* msg)
+void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
 {
     ASSERT(msg == timeoutMsg);
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == EXPECT_REPLY);
 
-    processTimeout(step);  //TODO goto inside processTimeout(), handleMessage() etc requires more thought!
+    processTimeout(step);    //TODO goto inside processTimeout(), handleMessage() etc requires more thought!
     proceed();
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    int txIndex = 0; //TODO take this from where?
+    int txIndex = 0;    //TODO take this from where?
     context->transmitContentionFrame(txIndex, frame, context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    int txIndex = 0; //TODO take this from where?
+    int txIndex = 0;    //TODO take this from where?
     context->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
-void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs)
+void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
 {
     setOperation(TRANSMIT_IMMEDIATE_FRAME);
     context->transmitImmediateFrame(frame, ifs, this);
@@ -232,7 +232,7 @@ void StepBasedFrameExchange::fail()
     setOperation(FAIL);
     status = FAILED;
     cleanup();
-    reportFailure(); // must come last
+    reportFailure();    // must come last
 }
 
 void StepBasedFrameExchange::succeed()
@@ -240,7 +240,7 @@ void StepBasedFrameExchange::succeed()
     setOperation(SUCCEED);
     status = SUCCEEDED;
     cleanup();
-    reportSuccess(); // must come last
+    reportSuccess();    // must come last
 }
 
 void StepBasedFrameExchange::setOperation(StepType newStepType)
