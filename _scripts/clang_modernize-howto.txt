@@ -1,0 +1,46 @@
+howto run clang-modernize-3.5
+=============================
+
+make project
+
+remove all .o file from 'inet/out' folder
+
+replace in omnetpp/Makefile.in:
+< CC = gcc
+< CXX = g++
+---
+> CC = clang-modernize-3.5 __modernizer_parameters___
+> CXX = clang-modernize-3.5 __modernizer_parameters___
+
+-----------------------------
+
+replace in inet/src/Makefile:
+< $O/%.o: %.cc $(COPTS_FILE)
+< 	@$(MKPATH) $(dir $@)
+< 	$(qecho) "$<"
+< 	$(Q)$(CXX) -c $(CXXFLAGS) $(COPTS) -o $@ $<
+---
+> $O/%.o: %.cc $(COPTS_FILE)
+> 	@$(MKPATH) $(dir $@)
+> 	$(qecho) "$<"
+> 	$(Q)$(CXX) $< -- $(CXXFLAGS) $(COPTS)
+
+-----------------------------
+
+loop convert:
+ - add parameter "-loop-convert" for clang-modernize-3.5
+
+-----------------------------
+
+use 'nullptr':
+ - add parameter "-use-nullptr" for clang-modernize-3.5
+
+-----------------------------
+
+add 'override':
+ - generate path.lst in inet/src: `find . -type d | sort >path.lst`
+ - add parameters "-add-override -include-from=path.lst" for clang-modernize-3.5
+
+=============================
+
+run make in inet/src folder
