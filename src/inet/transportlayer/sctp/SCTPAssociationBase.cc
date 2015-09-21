@@ -430,7 +430,7 @@ SCTPStateVariables::SCTPStateVariables()
     initialWindow = 0;
     allowCMT = false;
     cmtSendAllComparisonFunction = nullptr;
-    cmtRetransmissionVariant = 0;
+    cmtRetransmissionVariant = nullptr;
     cmtCUCVariant = SCTPStateVariables::CUCV_Normal;
     cmtBufferSplitVariant = SCTPStateVariables::CBSV_None;
     cmtBufferSplittingUsesOSB = false;

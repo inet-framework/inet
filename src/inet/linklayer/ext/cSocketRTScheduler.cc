@@ -315,7 +315,7 @@ cMessage * cSocketRTScheduler::getNextEvent()
 
     // if needed, wait until that time arrives
     timeval curTime;
-    gettimeofday(&curTime, NULL);
+    gettimeofday(&curTime, nullptr);
     if (timeval_greater(targetTime, curTime))
     {
         int status = receiveUntil(targetTime);

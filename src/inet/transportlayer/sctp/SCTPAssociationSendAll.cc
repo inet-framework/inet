@@ -54,13 +54,13 @@ void SCTPAssociation::storePacket(SCTPPathVariables *pathVar,
     for (uint16 i = 0; i < sctpMsg->getChunksArraySize(); i++) {
         cPacketPtr& chunkPtr = sctpMsg->getChunks(i);
         SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
-        if(dataChunk != NULL) {
+        if(dataChunk != nullptr) {
             const uint32_t tsn = dataChunk->getTsn();
             SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-            assert(chunk != NULL);
+            assert(chunk != nullptr);
             decreaseOutstandingBytes(chunk);
             chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-            chunk->queuedOnPath = NULL;
+            chunk->queuedOnPath = nullptr;
             packetBytes += chunk->booksize;
         }
     }
@@ -104,10 +104,10 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
     for (uint16 i = 0; i < (*sctpMsg)->getChunksArraySize(); i++) {
         cPacketPtr& chunkPtr = (*sctpMsg)->getChunks(i);
         SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
-        if(dataChunk != NULL) {
+        if(dataChunk != nullptr) {
             const uint32_t tsn = dataChunk->getTsn();
             SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-            assert(chunk != NULL);
+            assert(chunk != nullptr);
             chunk->queuedOnPath = pathVar;
             chunk->queuedOnPath->queuedBytes += chunk->booksize;
             chunk->setLastDestination(pathVar);
