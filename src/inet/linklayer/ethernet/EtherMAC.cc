@@ -119,6 +119,7 @@ void EtherMAC::processConnectDisconnect()
         if (!duplexMode) {
             // start RX_RECONNECT_STATE
             receiveState = RX_RECONNECT_STATE;
+            emit(receiveStateSignal, RX_RECONNECT_STATE);
             simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
             endRxTimeList.clear();
             addReceptionInReconnectState(-1, reconnectEndTime);
@@ -374,6 +375,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
+        emit(receiveStateSignal, RX_COLLISION_STATE);
 
         addReception(endRxTime);
         delete msg;
@@ -442,6 +444,7 @@ void EtherMAC::processDetectedCollision()
         emit(collisionSignal, 1L);
         // go to collision state
         receiveState = RX_COLLISION_STATE;
+        emit(receiveStateSignal, RX_COLLISION_STATE);
     }
 }
 
@@ -515,6 +518,7 @@ void EtherMAC::startFrameTransmission()
         }
         // go to collision state
         receiveState = RX_COLLISION_STATE;
+        emit(receiveStateSignal, RX_COLLISION_STATE);
     }
     else {
         // no collision
@@ -554,7 +558,7 @@ void EtherMAC::handleEndTxPeriod()
     delete curTxFrame;
     curTxFrame = nullptr;
     lastTxFinishTime = simTime();
-    getNextFrameFromQueue();
+    getNextFrameFromQueue();    //TODO move getNextFrameFromQueue() to the end of IFG (See issue #163, https://github.com/inet-framework/inet/issues/163)
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode) {
@@ -586,6 +590,7 @@ void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
 
     frameBeingReceived = frame;
     receiveState = RECEIVING_STATE;
+    emit(receiveStateSignal, RECEIVING_STATE);
     addReception(simTime() + frame->getDuration());
 }
 
@@ -614,6 +619,7 @@ void EtherMAC::handleEndRxPeriod()
     }
 
     receiveState = RX_IDLE_STATE;
+    emit(receiveStateSignal, RX_IDLE_STATE);
     numConcurrentTransmissions = 0;
 
     if (transmitState == TX_IDLE_STATE)
@@ -635,6 +641,7 @@ void EtherMAC::handleEndBackoffPeriod()
     else {
         EV_DETAIL << "Backoff period ended but channel is not free, idling\n";
         transmitState = TX_IDLE_STATE;
+        emit(transmitStateSignal, TX_IDLE_STATE);
     }
 }
 
@@ -653,6 +660,7 @@ void EtherMAC::sendJamSignal()
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
     transmitState = JAMMING_STATE;
+    emit(transmitStateSignal, JAMMING_STATE);
 
     if (hasGUI())
         updateConnectionColor(JAMMING_STATE);
@@ -674,6 +682,7 @@ void EtherMAC::handleRetransmission()
         delete curTxFrame;
         curTxFrame = nullptr;
         transmitState = TX_IDLE_STATE;
+        emit(transmitStateSignal, TX_IDLE_STATE);
         backoffs = 0;
         getNextFrameFromQueue();
         beginSendFrames();
@@ -686,6 +695,7 @@ void EtherMAC::handleRetransmission()
 
     scheduleAt(simTime() + slotNumber * curEtherDescr->slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
+    emit(transmitStateSignal, BACKOFF_STATE);
 
     numBackoffs++;
     emit(backoffSignal, 1L);
@@ -843,6 +853,7 @@ void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)
 void EtherMAC::scheduleEndIFGPeriod()
 {
     transmitState = WAIT_IFG_STATE;
+    emit(transmitStateSignal, WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIFGMsg);
 }
@@ -868,6 +879,7 @@ void EtherMAC::fillIFGIfInBurst()
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);
         transmitState = SEND_IFG_STATE;
+        emit(transmitStateSignal, SEND_IFG_STATE);
         cancelEvent(endIFGMsg);
         scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
     }
@@ -887,6 +899,7 @@ void EtherMAC::scheduleEndTxPeriod(EtherFrame *frame)
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
+    emit(transmitStateSignal, TRANSMITTING_STATE);
 }
 
 void EtherMAC::scheduleEndPausePeriod(int pauseUnits)
@@ -895,6 +908,7 @@ void EtherMAC::scheduleEndPausePeriod(int pauseUnits)
     simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
+    emit(transmitStateSignal, PAUSE_STATE);
 }
 
 void EtherMAC::beginSendFrames()
@@ -907,6 +921,7 @@ void EtherMAC::beginSendFrames()
     else {
         // No more frames, set transmitter to idle
         transmitState = TX_IDLE_STATE;
+        emit(transmitStateSignal, TX_IDLE_STATE);
         EV_DETAIL << "No more frames to send, transmitter set to idle\n";
     }
 }

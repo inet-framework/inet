@@ -1,0 +1,39 @@
+%description:
+Test IntervalTree class
+
+%includes:
+#include "inet/common/IntervalTree.h"
+#include "IntervalTreeTest.h"
+
+%global:
+
+using namespace inet;
+
+%activity:
+
+IntervalTreeTest test1;
+test1.run(0);
+wait(1);
+
+IntervalTreeTest test2;
+test2.run(1);
+wait(1);
+
+IntervalTreeTest test3;
+test3.run(10);
+wait(1);
+
+IntervalTreeTest test4;
+test4.run(100);
+wait(1);
+
+IntervalTreeTest test5;
+test5.run(1000);
+wait(1);
+
+IntervalTreeTest test6;
+test6.run(10000);
+wait(1);
+
+%not-contains: stdout
+Broken:

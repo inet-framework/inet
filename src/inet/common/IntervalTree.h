@@ -43,8 +43,6 @@
 
 namespace inet {
 
-namespace physicallayer {
-
 /// @brief Interval trees implemented using red-black-trees as described in
 /// the book Introduction_To_Algorithms_ by Cormen, Leisserson, and Rivest.
 /// Can be replaced in part by boost::icl::interval_set, which is only supported after boost 1.46 and does not support delete node routine.
@@ -60,6 +58,7 @@ struct Interval
 
     virtual void print() const
     {
+        std::cout << value;
     }
 
     /// @brief interval is defined as [low, high]
@@ -71,6 +70,7 @@ struct Interval
 class IntervalTreeNode
 {
     friend class IntervalTree;
+    friend class IntervalTreeTest;
 
   public:
     /// @brief Print the interval node information: set left = nil and right = root
@@ -120,6 +120,8 @@ struct it_recursion_node
 /// @brief Interval tree
 class IntervalTree
 {
+    friend class IntervalTreeTest;
+
   public:
     IntervalTree();
     ~IntervalTree();
@@ -135,6 +137,10 @@ class IntervalTree
 
     /// @brief Insert one node of the interval tree
     IntervalTreeNode* insert(const Interval* new_interval);
+
+    IntervalTreeNode* getMinimum(IntervalTreeNode *node) const;
+
+    IntervalTreeNode* getMaximum(IntervalTreeNode *node) const;
 
     /// @brief get the predecessor of a given node
     IntervalTreeNode* getPredecessor(IntervalTreeNode* node) const;
@@ -177,8 +183,6 @@ class IntervalTree
     unsigned int current_parent = 0;
     unsigned int recursion_node_stack_top = 0;
 };
-
-} // namespace physicallayer
 
 } // namespace inet
 
