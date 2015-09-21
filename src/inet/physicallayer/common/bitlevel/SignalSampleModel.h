@@ -55,7 +55,7 @@ class INET_API ReceptionSampleModel : public SignalSampleModel, public virtual I
   public:
     ReceptionSampleModel(int sampleLength, double sampleRate, const std::vector<W> *samples, W rssi);
 
-    virtual const W getRSSI() const { return rssi; }
+    virtual const W getRSSI() const override { return rssi; }
 };
 
 } // namespace physicallayer

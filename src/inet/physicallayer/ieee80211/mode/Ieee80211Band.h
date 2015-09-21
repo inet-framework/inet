@@ -41,7 +41,7 @@ class INET_API Ieee80211BandBase : public IIeee80211Band
   public:
     Ieee80211BandBase(const char *name);
 
-    virtual const char *getName() const { return name; }
+    virtual const char *getName() const override { return name; }
 };
 
 class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
@@ -52,8 +52,8 @@ class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
   public:
     Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers);
 
-    virtual int getNumChannels() const { return centers.size(); }
-    virtual Hz getCenterFreqency(int channelNumber) const;
+    virtual int getNumChannels() const override { return centers.size(); }
+    virtual Hz getCenterFreqency(int channelNumber) const override;
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
@@ -66,8 +66,8 @@ class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
   public:
     Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels);
 
-    virtual int getNumChannels() const { return numChannels; }
-    virtual Hz getCenterFreqency(int channelNumber) const;
+    virtual int getNumChannels() const override { return numChannels; }
+    virtual Hz getCenterFreqency(int channelNumber) const override;
 };
 
 class INET_API Ieee80211CompliantBands

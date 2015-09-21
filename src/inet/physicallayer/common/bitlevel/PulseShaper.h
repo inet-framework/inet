@@ -34,7 +34,7 @@ class INET_API PulseShaper : public IPulseShaper
   public:
     PulseShaper();
 
-    virtual const ITransmissionSampleModel *shape(const ITransmissionSymbolModel *symbolModel) const;
+    virtual const ITransmissionSampleModel *shape(const ITransmissionSymbolModel *symbolModel) const override;
 };
 
 } // namespace physicallayer

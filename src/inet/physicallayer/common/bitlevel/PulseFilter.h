@@ -34,7 +34,7 @@ class INET_API PulseFilter : public IPulseFilter
   public:
     PulseFilter();
 
-    virtual const IReceptionSymbolModel *filter(const IReceptionSampleModel *sampleModel) const;
+    virtual const IReceptionSymbolModel *filter(const IReceptionSampleModel *sampleModel) const override;
 };
 
 } // namespace physicallayer

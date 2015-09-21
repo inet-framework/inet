@@ -56,8 +56,8 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
   public:
     ReceptionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless);
 
-    virtual double getPER() const { return per; }
-    virtual bool isPacketErrorless() const { return packetErrorless; }
+    virtual double getPER() const override { return per; }
+    virtual bool isPacketErrorless() const override { return packetErrorless; }
 };
 
 } // namespace physicallayer

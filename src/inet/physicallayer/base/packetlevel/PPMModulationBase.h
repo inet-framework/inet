@@ -32,8 +32,8 @@ class INET_API PPMModulationBase : public IModulation
   public:
     PPMModulationBase(unsigned int numberOfPulses);
 
-    double calculateBER(double snir, Hz bandwidth, bps bitrate) const { throw cRuntimeError("Unimplemented!"); }
-    double calculateSER(double snir, Hz bandwidth, bps bitrate) const { throw cRuntimeError("Unimplemented!"); }
+    double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
+    double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
 
     unsigned int getConstellationSize() const { return numberOfPulses; }
 };

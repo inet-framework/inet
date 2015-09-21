@@ -41,8 +41,8 @@ class INET_API QBPSKModulation : public MQAMModulationBase
 
     virtual void printToStream(std::ostream& stream) const { stream << "QBPSKModulation"; }
 
-    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const;
-    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
+    virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
+    virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;
 };
 
 } // namespace physicallayer

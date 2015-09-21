@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API NarrowbandRadioBase : public Radio
 {
   protected:
-    void handleUpperCommand(cMessage *message);
+    void handleUpperCommand(cMessage *message) override;
 
   public:
     NarrowbandRadioBase();
