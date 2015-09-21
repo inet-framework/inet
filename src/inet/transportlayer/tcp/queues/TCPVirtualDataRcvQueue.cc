@@ -107,8 +107,8 @@ std::string TCPVirtualDataRcvQueue::info() const
     sprintf(buf, "rcv_nxt=%u", rcv_nxt);
     res = buf;
 
-    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i) {
-        sprintf(buf, " [%u..%u)", (*i)->getBegin(), (*i)->getEnd());
+    for (const auto & elem : regionList) {
+        sprintf(buf, " [%u..%u)", (elem)->getBegin(), (elem)->getEnd());
         res += buf;
     }
     return res;
@@ -211,8 +211,8 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
 {
     uint32 bytes = 0;
 
-    for (auto i = regionList.begin(); i != regionList.end(); i++)
-        bytes += (*i)->getLength();
+    for (auto & elem : regionList)
+        bytes += (elem)->getLength();
 
     return bytes;
 }

@@ -818,8 +818,7 @@ std::vector<RoutingTableEntry *> Router::getRoutesToASBoundaryRouter(const std::
 void Router::pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry *>& asbrEntries) const
 {
     bool hasNonBackboneIntraAreaPath = false;
-    for (auto it = asbrEntries.begin(); it != asbrEntries.end(); it++) {
-        RoutingTableEntry *routingEntry = *it;
+    for (auto routingEntry : asbrEntries) {
         if ((routingEntry->getPathType() == RoutingTableEntry::INTRAAREA) &&
             (routingEntry->getArea() != BACKBONE_AREAID))
         {

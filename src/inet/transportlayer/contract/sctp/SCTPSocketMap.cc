@@ -28,9 +28,9 @@ SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
     if (!ind)
         throw cRuntimeError("SCTPSocketMap: findSocketFor(): no SCTPCommand control info in message (not from SCTP?)");
 
-    for (auto i = socketMap.begin(); i != socketMap.end(); ++i) {
-        if (i->second->belongsToSocket(msg)) {
-            return i->second;
+    for (auto & elem : socketMap) {
+        if (elem.second->belongsToSocket(msg)) {
+            return elem.second;
         }
     }
     return nullptr;
@@ -52,8 +52,8 @@ SCTPSocket *SCTPSocketMap::removeSocket(SCTPSocket *socket)
 
 void SCTPSocketMap::deleteSockets()
 {
-    for (auto i = socketMap.begin(); i != socketMap.end(); ++i)
-        delete i->second;
+    for (auto & elem : socketMap)
+        delete elem.second;
     socketMap.clear();
 }
 

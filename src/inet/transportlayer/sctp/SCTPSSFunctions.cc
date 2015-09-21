@@ -108,8 +108,8 @@ int32 SCTPAssociation::numUsableStreams(void)
 {
     int32 count = 0;
 
-    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); iter++)
-        if (iter->second->getStreamQ()->getLength() > 0 || iter->second->getUnorderedStreamQ()->getLength() > 0) {
+    for (auto & elem : sendStreams)
+        if (elem.second->getStreamQ()->getLength() > 0 || elem.second->getUnorderedStreamQ()->getLength() > 0) {
             count++;
         }
     return count;
@@ -173,12 +173,12 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
     EV_INFO << "Stream Scheduler: RandomPacket (peek: " << peek << ")" << endl;
 
     if (state->ssNextStream) {
-        for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
-            if (iter->second->getUnorderedStreamQ()->getLength() > 0 ||
-                iter->second->getStreamQ()->getLength() > 0)
+        for (auto & elem : sendStreams) {
+            if (elem.second->getUnorderedStreamQ()->getLength() > 0 ||
+                elem.second->getStreamQ()->getLength() > 0)
             {
-                SCTPWaitingSendStreamsList.push_back(iter->first);
-                EV_DETAIL << "Stream Scheduler: add sid " << iter->first << " to list of waiting streams.\n";
+                SCTPWaitingSendStreamsList.push_back(elem.first);
+                EV_DETAIL << "Stream Scheduler: add sid " << elem.first << " to list of waiting streams.\n";
             }
         }
         if (SCTPWaitingSendStreamsList.size() > 0) {
@@ -272,64 +272,64 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
     EV_INFO << "Stream Scheduler: FairBandwidthPacket (peek: " << peek << ")" << endl;
 
     if (state->ssFairBandwidthMap.empty()) {
-        for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
-            state->ssFairBandwidthMap[iter->first] = -1;
-            EV_DETAIL << "initialize sid " << iter->first << " in fb map." << endl;
+        for (auto & elem : sendStreams) {
+            state->ssFairBandwidthMap[elem.first] = -1;
+            EV_DETAIL << "initialize sid " << elem.first << " in fb map." << endl;
         }
     }
 
     if (peek) {
         EV_DETAIL << "just peeking, use duplicate fb map." << endl;
-        for (auto iter = state->ssFairBandwidthMap.begin(); iter != state->ssFairBandwidthMap.end(); ++iter) {
-            peekMap[iter->first] = iter->second;
+        for (auto & elem : state->ssFairBandwidthMap) {
+            peekMap[elem.first] = elem.second;
         }
         mapPointer = &peekMap;
     }
 
     lastDataChunkSize = (*mapPointer)[state->lastStreamScheduled];
 
-    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
+    for (auto & elem : sendStreams) {
         /* There is data in this stream */
-        if (iter->second->getUnorderedStreamQ()->getLength() > 0 || iter->second->getStreamQ()->getLength() > 0) {
+        if (elem.second->getUnorderedStreamQ()->getLength() > 0 || elem.second->getStreamQ()->getLength() > 0) {
             /* Get size of the first packet in stream */
-            if (iter->second->getUnorderedStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)iter->second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+            if (elem.second->getUnorderedStreamQ()->getLength() > 0) {
+                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)elem.second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
-            else if (iter->second->getStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)iter->second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+            else if (elem.second->getStreamQ()->getLength() > 0) {
+                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)elem.second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
 
             /* This stream is new to the map, so add it */
-            if ((*mapPointer)[iter->first] < 0) {
+            if ((*mapPointer)[elem.first] < 0) {
                 if (packetsize > 0) {
-                    (*mapPointer)[iter->first] = packetsize;
+                    (*mapPointer)[elem.first] = packetsize;
                     if (!peek)
-                        EV_DETAIL << "Stream Scheduler: add sid " << iter->first << " with size " << packetsize << " to fair bandwidth map.\n";
+                        EV_DETAIL << "Stream Scheduler: add sid " << elem.first << " with size " << packetsize << " to fair bandwidth map.\n";
                 }
             }
             /* This stream is already in the map, so update it if necessary */
             else if (state->ssLastDataChunkSizeSet) {
                 /* Subtract the size of the last scheduled chunk from all streams */
-                (*mapPointer)[iter->first] -= lastDataChunkSize;
-                if ((*mapPointer)[iter->first] < 0)
-                    (*mapPointer)[iter->first] = 0;
+                (*mapPointer)[elem.first] -= lastDataChunkSize;
+                if ((*mapPointer)[elem.first] < 0)
+                    (*mapPointer)[elem.first] = 0;
 
                 /* We sent from this stream the last time, so add a new message to it */
-                if (iter->first == state->lastStreamScheduled) {
-                    (*mapPointer)[iter->first] += packetsize;
+                if (elem.first == state->lastStreamScheduled) {
+                    (*mapPointer)[elem.first] += packetsize;
                     if (!peek)
-                        EV_DETAIL << "Stream Scheduler: updated sid " << iter->first << " with new packet of size " << packetsize << endl;
+                        EV_DETAIL << "Stream Scheduler: updated sid " << elem.first << " with new packet of size " << packetsize << endl;
                 }
 
                 if (!peek)
-                    EV_DETAIL << "Stream Scheduler: updated sid " << iter->first << " entry to size " << (*mapPointer)[iter->first] << endl;
+                    EV_DETAIL << "Stream Scheduler: updated sid " << elem.first << " entry to size " << (*mapPointer)[elem.first] << endl;
             }
         }
         /* There is no data in this stream, so delete it from map */
         else {
-            (*mapPointer)[iter->first] = -1;
+            (*mapPointer)[elem.first] = -1;
             if (!peek)
-                EV_DETAIL << "Stream Scheduler: sid " << iter->first << " removed from fb map" << endl;
+                EV_DETAIL << "Stream Scheduler: sid " << elem.first << " removed from fb map" << endl;
         }
     }
 
@@ -338,10 +338,10 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
     }
 
     if (state->ssNextStream) {
-        for (auto iter = mapPointer->begin(); iter != mapPointer->end(); ++iter) {
-            if ((sid < 0 || (uint32)iter->second < bandwidth) && iter->second >= 0) {
-                sid = iter->first;
-                bandwidth = iter->second;
+        for (auto & elem : *mapPointer) {
+            if ((sid < 0 || (uint32)elem.second < bandwidth) && elem.second >= 0) {
+                sid = elem.first;
+                bandwidth = elem.second;
                 if (!peek)
                     EV_DETAIL << "Stream Scheduler: chose sid " << sid << ".\n";
             }
@@ -463,8 +463,8 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, boo
 {
     int32 thisPath = -1;
     int32 workingPaths = 0;
-    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-        SCTPPathVariables *myPath = iterator->second;
+    for (auto & elem : sctpPathMap) {
+        SCTPPathVariables *myPath = elem.second;
         if (myPath->activePath) {
             if (myPath == path) {
                 thisPath = workingPaths;

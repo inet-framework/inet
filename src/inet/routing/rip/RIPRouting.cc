@@ -168,8 +168,8 @@ RIPRouting::RIPRouting()
 
 RIPRouting::~RIPRouting()
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        delete *it;
+    for (auto & elem : ripRoutes)
+        delete elem;
     cancelAndDelete(updateTimer);
     cancelAndDelete(triggeredUpdateTimer);
     cancelAndDelete(startupTimer);
@@ -344,10 +344,10 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
         // remove references to the deleted route and invalidate the RIP route
         route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
         if (route->getSource() != this) {
-            for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-                if ((*it)->getRoute() == route) {
-                    (*it)->setRoute(nullptr);
-                    invalidateRoute(*it);
+            for (auto & elem : ripRoutes)
+                if ((elem)->getRoute() == route) {
+                    (elem)->setRoute(nullptr);
+                    invalidateRoute(elem);
                 }
         }
     }
@@ -417,11 +417,11 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             // invalidate routes
-            for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-                invalidateRoute(*it);
+            for (auto & elem : ripRoutes)
+                invalidateRoute(elem);
             // send updates to neighbors
-            for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-                sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, *it, false);
+            for (auto & elem : ripInterfaces)
+                sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, false);
 
             stopRIPRouting();
 
@@ -465,14 +465,14 @@ void RIPRouting::startRIPRouting()
     socket.setMulticastLoop(false);
     socket.bind(ripUdpPort);
 
-    for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        if (it->mode != NO_RIP)
-            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
+    for (auto & elem : ripInterfaces)
+        if (elem.mode != NO_RIP)
+            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), elem.ie->getInterfaceId());
 
 
-    for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        if (it->mode != NO_RIP)
-            sendRIPRequest(*it);
+    for (auto & elem : ripInterfaces)
+        if (elem.mode != NO_RIP)
+            sendRIPRequest(elem);
 
 
     // set update timer
@@ -559,14 +559,14 @@ void RIPRouting::processUpdate(bool triggered)
     else
         EV_INFO << "sending regular updates on all interfaces\n";
 
-    for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        if (it->mode != NO_RIP)
-            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, *it, triggered);
+    for (auto & elem : ripInterfaces)
+        if (elem.mode != NO_RIP)
+            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, triggered);
 
 
     // clear changed flags
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        (*it)->setChanged(false);
+    for (auto & elem : ripRoutes)
+        (elem)->setChanged(false);
 }
 
 /**
@@ -656,8 +656,8 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
     packet->setEntryArraySize(maxEntries);
     int k = 0;    // index into RIP entries
 
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it) {
-        RIPRoute *ripRoute = checkRouteIsExpired(*it);
+    for (auto & elem : ripRoutes) {
+        RIPRoute *ripRoute = checkRouteIsExpired(elem);
         if (!ripRoute)
             continue;
 
@@ -1058,45 +1058,45 @@ void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int de
 
 RIPInterfaceEntry *RIPRouting::findInterfaceById(int interfaceId)
 {
-    for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        if (it->ie->getInterfaceId() == interfaceId)
-            return &(*it);
+    for (auto & elem : ripInterfaces)
+        if (elem.ie->getInterfaceId() == interfaceId)
+            return &(elem);
 
     return nullptr;
 }
 
 RIPRoute *RIPRouting::findRoute(const L3Address& destination, int prefixLength)
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        if ((*it)->getDestination() == destination && (*it)->getPrefixLength() == prefixLength)
-            return *it;
+    for (auto & elem : ripRoutes)
+        if ((elem)->getDestination() == destination && (elem)->getPrefixLength() == prefixLength)
+            return elem;
 
     return nullptr;
 }
 
 RIPRoute *RIPRouting::findRoute(const L3Address& destination, int prefixLength, RIPRoute::RouteType type)
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        if ((*it)->getType() == type && (*it)->getDestination() == destination && (*it)->getPrefixLength() == prefixLength)
-            return *it;
+    for (auto & elem : ripRoutes)
+        if ((elem)->getType() == type && (elem)->getDestination() == destination && (elem)->getPrefixLength() == prefixLength)
+            return elem;
 
     return nullptr;
 }
 
 RIPRoute *RIPRouting::findRoute(const IRoute *route)
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        if ((*it)->getRoute() == route)
-            return *it;
+    for (auto & elem : ripRoutes)
+        if ((elem)->getRoute() == route)
+            return elem;
 
     return nullptr;
 }
 
 RIPRoute *RIPRouting::findRoute(const InterfaceEntry *ie, RIPRoute::RouteType type)
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        if ((*it)->getType() == type && (*it)->getInterface() == ie)
-            return *it;
+    for (auto & elem : ripRoutes)
+        if ((elem)->getType() == type && (elem)->getInterface() == ie)
+            return elem;
 
     return nullptr;
 }
@@ -1139,9 +1139,9 @@ int RIPRouting::getInterfaceMetric(InterfaceEntry *ie)
 
 void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)
 {
-    for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-        if ((*it)->getInterface() == ie)
-            invalidateRoute(*it);
+    for (auto & elem : ripRoutes)
+        if ((elem)->getInterface() == ie)
+            invalidateRoute(elem);
 
 }
 

@@ -191,8 +191,8 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     u16_t rport = tcpsegP->getSrcPort();
 
     if (tcpsegP->getSynBit() && tcpsegP->getAckBit()) {
-        for (auto i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); i++) {
-            LwipTcpLayer::tcp_pcb *pcb = i->second->pcbM;
+        for (auto & elem : tcpAppConnMapM) {
+            LwipTcpLayer::tcp_pcb *pcb = elem.second->pcbM;
             if (pcb) {
                 if ((pcb->state == LwipTcpLayer::SYN_SENT)
                     && (pcb->local_ip.addr.isUnspecified())
@@ -492,8 +492,8 @@ void TCP_lwIP::updateDisplayString()
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto i = tcpAppConnMapM.begin(); i != tcpAppConnMapM.end(); ++i) {
-        LwipTcpLayer::tcp_pcb *pcb = (*i).second->pcbM;
+    for (auto & elem : tcpAppConnMapM) {
+        LwipTcpLayer::tcp_pcb *pcb = (elem).second->pcbM;
 
         if (nullptr == pcb) {
             numINIT++;

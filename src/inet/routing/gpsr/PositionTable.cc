@@ -24,8 +24,8 @@ namespace inet {
 std::vector<L3Address> PositionTable::getAddresses() const
 {
     std::vector<L3Address> addresses;
-    for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
-        addresses.push_back(it->first);
+    for (const auto & elem : addressToPositionMap)
+        addresses.push_back(elem.first);
     return addresses;
 }
 
@@ -74,8 +74,8 @@ void PositionTable::clear()
 simtime_t PositionTable::getOldestPosition() const
 {
     simtime_t oldestPosition = SimTime::getMaxTime();
-    for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++) {
-        const simtime_t& time = it->second.first;
+    for (const auto & elem : addressToPositionMap) {
+        const simtime_t& time = elem.second.first;
         if (time < oldestPosition)
             oldestPosition = time;
     }

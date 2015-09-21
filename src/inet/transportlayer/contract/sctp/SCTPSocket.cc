@@ -141,9 +141,9 @@ void SCTPSocket::addAddress(L3Address addr)
 void SCTPSocket::bindx(AddressVector lAddresses, int lPort)
 {
     L3Address lAddr;
-    for (auto i = lAddresses.begin(); i != lAddresses.end(); ++i) {
-        EV << "bindx: bind address " << (*i) << "\n";
-        localAddresses.push_back((*i));
+    for (auto & lAddresse : lAddresses) {
+        EV << "bindx: bind address " << (lAddresse) << "\n";
+        localAddresses.push_back((lAddresse));
     }
     localPrt = lPort;
     sockstate = CLOSED;

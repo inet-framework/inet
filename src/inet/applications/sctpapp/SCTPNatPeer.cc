@@ -900,16 +900,16 @@ void SCTPNatPeer::finish()
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
-    for (auto j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++) {
-        delete j->second;
+    for (auto & elem : bytesPerAssoc) {
+        delete elem.second;
     }
     bytesPerAssoc.clear();
-    for (auto k = endToEndDelay.begin(); k != endToEndDelay.end(); k++) {
-        delete k->second;
+    for (auto & elem : endToEndDelay) {
+        delete elem.second;
     }
     endToEndDelay.clear();
-    for (auto l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++) {
-        delete l->second;
+    for (auto & elem : histEndToEndDelay) {
+        delete elem.second;
     }
     histEndToEndDelay.clear();
     rcvdPacketsPerAssoc.clear();

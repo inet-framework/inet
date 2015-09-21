@@ -49,8 +49,8 @@ void RTPProfile::initialize()
 
 RTPProfile::~RTPProfile()
 {
-    for (auto i = _ssrcGates.begin(); i != _ssrcGates.end(); i++)
-        delete i->second;
+    for (auto & elem : _ssrcGates)
+        delete elem.second;
 }
 
 void RTPProfile::handleMessage(cMessage *msg)

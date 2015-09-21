@@ -219,8 +219,8 @@ void Buffer::writeMACAddress(const MACAddress& addr)
 IPv6Address Buffer::readIPv6Address() const
 {
     uint32_t d[4];
-    for (int i = 0; i < 4; i++)
-        d[i] = readUint32();
+    for (auto & elem : d)
+        elem = readUint32();
     return IPv6Address(d[0], d[1], d[2], d[3]);
 }
 

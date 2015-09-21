@@ -67,9 +67,9 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
         const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(transmissionSymbolModel->getPayloadModulation());
         const std::vector<const ISymbol*> *transmittedSymbols = transmissionSymbolModel->getSymbols();
         std::vector<const ISymbol*> *receivedSymbols = new std::vector<const ISymbol *>();
-        for (unsigned int i = 0; i < transmittedSymbols->size(); i++) {
+        for (auto & transmittedSymbols_i : *transmittedSymbols) {
             if (uniform(0, 1) < symbolErrorRate) {
-                const APSKSymbol *transmittedSymbol = check_and_cast<const APSKSymbol *>(transmittedSymbols->at(i));
+                const APSKSymbol *transmittedSymbol = check_and_cast<const APSKSymbol *>(transmittedSymbols_i);
                 ShortBitVector bits = modulation->demapToBitRepresentation(transmittedSymbol);
                 int errorIndex = intuniform(0, bits.getSize() - 1);
                 bits.setBit(errorIndex, !bits.getBit(errorIndex));
@@ -77,7 +77,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
                 receivedSymbols->push_back(receivedSymbol);
             }
             else
-                receivedSymbols->push_back(transmittedSymbols->at(i));
+                receivedSymbols->push_back(transmittedSymbols_i);
         }
         return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols);
     }

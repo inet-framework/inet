@@ -223,13 +223,13 @@ const ITransmissionSymbolModel *Ieee80211LayeredOFDMTransmitter::createSymbolMod
         const std::vector<const ISymbol *> *signalSymbols = signalFieldSymbolModel->getSymbols();
         std::vector<const ISymbol *> *mergedSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OFDMSymbol *ofdmSymbol = nullptr;
-        for (unsigned int i = 0; i < signalSymbols->size(); i++) {
-            ofdmSymbol = check_and_cast<const Ieee80211OFDMSymbol *>(signalSymbols->at(i));
+        for (auto & signalSymbol : *signalSymbols) {
+            ofdmSymbol = check_and_cast<const Ieee80211OFDMSymbol *>(signalSymbol);
             mergedSymbols->push_back(new Ieee80211OFDMSymbol(*ofdmSymbol));
         }
         const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getSymbols();
-        for (unsigned int i = 0; i < dataSymbols->size(); i++) {
-            ofdmSymbol = dynamic_cast<const Ieee80211OFDMSymbol *>(dataSymbols->at(i));
+        for (auto & dataSymbol : *dataSymbols) {
+            ofdmSymbol = dynamic_cast<const Ieee80211OFDMSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OFDMSymbol(*ofdmSymbol));
         }
         const Ieee80211OFDMTransmissionSymbolModel *transmissionSymbolModel = new Ieee80211OFDMTransmissionSymbolModel(1, 1.0 / mode->getSignalMode()->getDuration(), mergedSymbols->size() - 1, 1.0 / mode->getSymbolInterval(), mergedSymbols, signalFieldSymbolModel->getHeaderModulation(), dataFieldSymbolModel->getPayloadModulation());

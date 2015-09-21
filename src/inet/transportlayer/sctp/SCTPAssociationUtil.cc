@@ -68,9 +68,9 @@ void SCTPAssociation::calculateRcvBuffer()
 
 void SCTPAssociation::listOrderedQ()
 {
-    for (auto iter = receiveStreams.begin(); iter != receiveStreams.end(); iter++) {
-        EV_DEBUG << "stream " << iter->second->getStreamId() << ":\n";
-        iter->second->getOrderedQ()->printQueue();
+    for (auto & elem : receiveStreams) {
+        EV_DEBUG << "stream " << elem.second->getStreamId() << ":\n";
+        elem.second->getOrderedQ()->printQueue();
         EV_DEBUG << "\n";
     }
 }
@@ -96,10 +96,9 @@ void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
 void SCTPAssociation::printSctpPathMap() const
 {
     EV_DEBUG << "SCTP PathMap:" << endl;
-    for (SCTPPathMap::const_iterator iterator = sctpPathMap.begin();
-         iterator != sctpPathMap.end(); ++iterator)
+    for (const auto & elem : sctpPathMap)
     {
-        const SCTPPathVariables *path = iterator->second;
+        const SCTPPathVariables *path = elem.second;
         EV_DEBUG << " - " << path->remoteAddress << ":  osb=" << path->outstandingBytes
                  << " cwnd=" << path->cwnd << endl;
     }
@@ -544,38 +543,38 @@ void SCTPAssociation::sendInit()
         friendly = sctpMain->par("natFriendly");
     }
     if (remoteAddr.getType() == L3Address::IPv6) {
-        for (auto i = adv.begin(); i != adv.end(); ++i) {
+        for (auto & elem : adv) {
             if (!friendly) {
                 initChunk->setAddressesArraySize(addrNum + 1);
-                initChunk->setAddresses(addrNum++, (*i));
+                initChunk->setAddresses(addrNum++, (elem));
                 length += 20;
             }
-            sctpMain->addLocalAddress(this, (*i));
-            state->localAddresses.push_back((*i));
+            sctpMain->addLocalAddress(this, (elem));
+            state->localAddresses.push_back((elem));
             if (localAddr.isUnspecified())
-                localAddr = (*i);
+                localAddr = (elem);
         }
     }
     else if (remoteAddr.getType() == L3Address::IPv4) {
         int rlevel = getAddressLevel(remoteAddr);
         EV_DETAIL << "level of remote address=" << rlevel << "\n";
-        for (auto i = adv.begin(); i != adv.end(); ++i) {
-            int addressLevel = getAddressLevel(*i);
-            EV_DETAIL << "level of address " << (*i) << " = " << addressLevel << "\n";
+        for (auto & elem : adv) {
+            int addressLevel = getAddressLevel(elem);
+            EV_DETAIL << "level of address " << (elem) << " = " << addressLevel << "\n";
             if (addressLevel >= rlevel) {
                 initChunk->setAddressesArraySize(addrNum + 1);
-                initChunk->setAddresses(addrNum++, (*i));
+                initChunk->setAddresses(addrNum++, (elem));
                 length += 8;
-                sctpMain->addLocalAddress(this, (*i));
-                state->localAddresses.push_back((*i));
+                sctpMain->addLocalAddress(this, (elem));
+                state->localAddresses.push_back((elem));
                 if (localAddr.toIPv4().getInt() == 0)
-                    localAddr = (*i);
+                    localAddr = (elem);
             }
             else if (rlevel == 4 && addressLevel == 3 && friendly) {
-                sctpMain->addLocalAddress(this, (*i));
-                state->localAddresses.push_back((*i));
+                sctpMain->addLocalAddress(this, (elem));
+                state->localAddresses.push_back((elem));
                 if (localAddr.toIPv4().getInt() == 0)
-                    localAddr = (*i);
+                    localAddr = (elem);
             }
         }
     }
@@ -600,9 +599,9 @@ void SCTPAssociation::sendInit()
         state->sizeKeyVector += 2;
         initChunk->setChunkTypesArraySize(state->chunkList.size());
         int32 k = 0;
-        for (auto it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
-            initChunk->setChunkTypes(k, (*it));
-            state->keyVector[state->sizeKeyVector] = (*it);
+        for (auto & elem : state->chunkList) {
+            initChunk->setChunkTypes(k, (elem));
+            state->keyVector[state->sizeKeyVector] = (elem);
             state->sizeKeyVector++;
             k++;
         }
@@ -644,13 +643,13 @@ void SCTPAssociation::sendInit()
     sctpmsg->addChunk(initChunk);
     // set path variables
     if (remoteAddressList.size() > 0) {
-        for (auto it = remoteAddressList.begin(); it != remoteAddressList.end(); it++) {
-            EV_DEBUG << " get new path for " << (*it) << " at line " << __LINE__ << "\n";
-            SCTPPathVariables *path = new SCTPPathVariables((*it), this, rt);
-            sctpPathMap[(*it)] = path;
-            qCounter.roomTransQ[(*it)] = 0;
-            qCounter.bookedTransQ[(*it)] = 0;
-            qCounter.roomRetransQ[(*it)] = 0;
+        for (auto & elem : remoteAddressList) {
+            EV_DEBUG << " get new path for " << (elem) << " at line " << __LINE__ << "\n";
+            SCTPPathVariables *path = new SCTPPathVariables((elem), this, rt);
+            sctpPathMap[(elem)] = path;
+            qCounter.roomTransQ[(elem)] = 0;
+            qCounter.bookedTransQ[(elem)] = 0;
+            qCounter.roomRetransQ[(elem)] = 0;
         }
     }
     else {
@@ -787,12 +786,12 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         friendly = sctpMain->par("natFriendly");
     }
     if (!friendly)
-        for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
+        for (auto & elem : state->localAddresses) {
             initAckChunk->setAddressesArraySize(addrNum + 1);
-            initAckChunk->setAddresses(addrNum++, (*k));
-            if ((*k).getType() == L3Address::IPv4) {
+            initAckChunk->setAddresses(addrNum++, (elem));
+            if ((elem).getType() == L3Address::IPv4) {
                 length += 8;
-            } else if ((*k).getType() == L3Address::IPv6) {
+            } else if ((elem).getType() == L3Address::IPv6) {
                 length += 20;
             }
         }
@@ -807,8 +806,8 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
         }
         initAckChunk->setChunkTypesArraySize(state->chunkList.size());
         int32 k = 0;
-        for (auto it = state->chunkList.begin(); it != state->chunkList.end(); it++) {
-            initAckChunk->setChunkTypes(k, (*it));
+        for (auto & elem : state->chunkList) {
+            initAckChunk->setChunkTypes(k, (elem));
             k++;
         }
         initAckChunk->setHmacTypesArraySize(1);
@@ -1250,8 +1249,8 @@ SCTPForwardTsnChunk *SCTPAssociation::createForwardTsnChunk(const L3Address& pid
     forwChunk->setChunkType(FORWARD_TSN);
     advancePeerTsn();
     forwChunk->setNewCumTsn(state->advancedPeerAckPoint);
-    for (auto it = retransmissionQ->payloadQueue.begin(); it != retransmissionQ->payloadQueue.end(); it++) {
-        chunk = it->second;
+    for (auto & elem : retransmissionQ->payloadQueue) {
+        chunk = elem.second;
         EV_DETAIL << "tsn=" << chunk->tsn << " lastDestination=" << chunk->getLastDestination() << " abandoned=" << chunk->hasBeenAbandoned << "\n";
         if (chunk->getLastDestination() == pid && chunk->hasBeenAbandoned && chunk->tsn <= forwChunk->getNewCumTsn()) {
             if (chunk->ordered) {
@@ -1283,9 +1282,9 @@ SCTPForwardTsnChunk *SCTPAssociation::createForwardTsnChunk(const L3Address& pid
     forwChunk->setSidArraySize(sidMap.size());
     forwChunk->setSsnArraySize(sidMap.size());
     int32 i = 0;
-    for (auto j = sidMap.begin(); j != sidMap.end(); j++) {
-        forwChunk->setSid(i, j->first);
-        forwChunk->setSsn(i, j->second);
+    for (auto & elem : sidMap) {
+        forwChunk->setSid(i, elem.first);
+        forwChunk->setSsn(i, elem.second);
         chunkLength += 4;
         i++;
     }
@@ -1691,10 +1690,9 @@ SCTPSackChunk *SCTPAssociation::createSack()
     if (numDups > 0) {
         sackChunk->setDupTsnsArraySize(numDups);
         uint32 key = 0;
-        for (auto iterator = state->dupList.begin();
-             iterator != state->dupList.end(); iterator++)
+        for (auto & elem : state->dupList)
         {
-            sackChunk->setDupTsns(key, *iterator);
+            sackChunk->setDupTsns(key, elem);
             key++;
             if (key == numDups)
                 break;
@@ -2003,11 +2001,11 @@ void SCTPAssociation::removePath(const L3Address& addr)
 
 void SCTPAssociation::deleteStreams()
 {
-    for (auto it = sendStreams.begin(); it != sendStreams.end(); it++) {
-        it->second->deleteQueue();
+    for (auto & elem : sendStreams) {
+        elem.second->deleteQueue();
     }
-    for (auto it = receiveStreams.begin(); it != receiveStreams.end(); it++) {
-        delete it->second;
+    for (auto & elem : receiveStreams) {
+        delete elem.second;
     }
 }
 
@@ -2039,10 +2037,9 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
 
         const uint32 oldSum = sum;
         // ====== Iterate all streams to find chunk with TSN "tryTSN" =========
-        for (auto iterator = receiveStreams.begin();
-             iterator != receiveStreams.end(); iterator++)
+        for (auto & elem : receiveStreams)
         {
-            SCTPReceiveStream *receiveStream = iterator->second;
+            SCTPReceiveStream *receiveStream = elem.second;
 
             // ====== Get chunk to drop ========================================
             SCTPQueue *queue;
@@ -2243,10 +2240,9 @@ SCTPDataVariables *SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables *
     SCTPDataVariables *retChunk = nullptr;
 
     if (state->prMethod != 0 && !retransmissionQ->payloadQueue.empty()) {
-        for (auto it = retransmissionQ->payloadQueue.begin();
-             it != retransmissionQ->payloadQueue.end(); it++)
+        for (auto & elem : retransmissionQ->payloadQueue)
         {
-            SCTPDataVariables *chunk = it->second;
+            SCTPDataVariables *chunk = elem.second;
 
             if (chunk->getLastDestinationPath() == path) {
                 /* Apply policies if necessary */
@@ -2308,18 +2304,18 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
 
     EV_INFO << "dequeueOutboundDataMsg: now stream " << nextStream << endl;
 
-    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
-        if ((int32)iter->first == nextStream) {
-            SCTPSendStream *stream = iter->second;
+    for (auto & elem : sendStreams) {
+        if ((int32)elem.first == nextStream) {
+            SCTPSendStream *stream = elem.second;
             streamQ = nullptr;
 
             if (!stream->getUnorderedStreamQ()->isEmpty()) {
                 streamQ = stream->getUnorderedStreamQ();
-                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << iter->first << " unordered queue, queue size=" << stream->getUnorderedStreamQ()->getLength() << "\n";
+                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << elem.first << " unordered queue, queue size=" << stream->getUnorderedStreamQ()->getLength() << "\n";
             }
             else if (!stream->getStreamQ()->isEmpty()) {
                 streamQ = stream->getStreamQ();
-                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << iter->first << " ordered queue, queue size=" << stream->getStreamQ()->getLength() << "\n";
+                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << elem.first << " ordered queue, queue size=" << stream->getStreamQ()->getLength() << "\n";
             }
 
             if (streamQ) {
@@ -2455,7 +2451,7 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
                             state->lastMsgWasFragment = true;
                     }
 
-                    EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << &datMsg << ") in the stream queue " << &iter->first << "(" << streamQ << ") queue size=" << streamQ->getLength() << "\n";
+                    EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << &datMsg << ") in the stream queue " << &elem.first << "(" << streamQ << ") queue size=" << streamQ->getLength() << "\n";
                 }
             }
             break;
@@ -2519,10 +2515,9 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
 {
     int32 hit = 0;
     if (sctpPathMap.size() > 1) {
-        for (SCTPPathMap::const_iterator iterator = sctpPathMap.begin();
-             iterator != sctpPathMap.end(); iterator++)
+        for (const auto & elem : sctpPathMap)
         {
-            SCTPPathVariables *newPath = iterator->second;
+            SCTPPathVariables *newPath = elem.second;
             if (newPath == oldPath) {
                 if (++hit == 1) {
                     continue;
@@ -2603,8 +2598,8 @@ void SCTPAssociation::pmStartPathManagement()
     /* populate path structures !!! */
     /* set a high start value...this is appropriately decreased later (below) */
     state->assocPmtu = state->localRwnd;
-    for (auto piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
-        path = piter->second;
+    for (auto & elem : sctpPathMap) {
+        path = elem.second;
         path->pathErrorCount = 0;
         rtie = rt->getOutputInterfaceForDestination(path->remoteAddress);
         path->pmtu = rtie->getMTU();
@@ -2648,8 +2643,8 @@ void SCTPAssociation::pmStartPathManagement()
 int32 SCTPAssociation::getOutstandingBytes() const
 {
     int32 osb = 0;
-    for (SCTPPathMap::const_iterator pm = sctpPathMap.begin(); pm != sctpPathMap.end(); pm++) {
-        osb += pm->second->outstandingBytes;
+    for (const auto & elem : sctpPathMap) {
+        osb += elem.second->outstandingBytes;
     }
     return osb;
 }
@@ -2716,8 +2711,8 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables *path,
 
 bool SCTPAssociation::allPathsInactive() const
 {
-    for (SCTPPathMap::const_iterator it = sctpPathMap.begin(); it != sctpPathMap.end(); it++) {
-        if (it->second->activePath) {
+    for (const auto & elem : sctpPathMap) {
+        if (elem.second->activePath) {
             return false;
         }
     }

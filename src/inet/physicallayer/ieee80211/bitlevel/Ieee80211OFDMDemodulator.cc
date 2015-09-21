@@ -71,8 +71,8 @@ const IReceptionBitModel *Ieee80211OFDMDemodulator::demodulate(const IReceptionS
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
     BitVector *bitRepresentation = new BitVector();
-    for (unsigned int i = 0; i < symbols->size(); i++) {
-        const Ieee80211OFDMSymbol *symbol = dynamic_cast<const Ieee80211OFDMSymbol *>(symbols->at(i));
+    for (auto & symbols_i : *symbols) {
+        const Ieee80211OFDMSymbol *symbol = dynamic_cast<const Ieee80211OFDMSymbol *>(symbols_i);
         BitVector bits = demodulateSymbol(symbol);
         for (unsigned int j = 0; j < bits.getSize(); j++)
             bitRepresentation->appendBit(bits.getBit(j));

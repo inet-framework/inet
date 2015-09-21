@@ -358,10 +358,10 @@ void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int> 
 void ConvolutionalCoder::printTransferFunctionMatrix() const
 {
     std::cout << "Transfer function matrix" << endl;
-    for (unsigned int i = 0; i < transferFunctionMatrix.size(); i++) {
-        std::cout << transferFunctionMatrix.at(i).at(0);
-        for (unsigned int j = 1; j < transferFunctionMatrix.at(i).size(); j++)
-            std::cout << "," << transferFunctionMatrix.at(i).at(j);
+    for (auto & elem : transferFunctionMatrix) {
+        std::cout << elem.at(0);
+        for (unsigned int j = 1; j < elem.size(); j++)
+            std::cout << "," << elem.at(j);
         std::cout << endl;
     }
 }

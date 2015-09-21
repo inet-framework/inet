@@ -49,8 +49,8 @@ TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
 
 void TCPSocketMap::deleteSockets()
 {
-    for (auto i = socketMap.begin(); i != socketMap.end(); ++i)
-        delete i->second;
+    for (auto & elem : socketMap)
+        delete elem.second;
     socketMap.clear();
 }
 

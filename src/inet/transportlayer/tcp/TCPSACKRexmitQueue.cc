@@ -54,9 +54,9 @@ void TCPSACKRexmitQueue::info() const
 
     uint j = 1;
 
-    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++) {
-        EV_DETAIL << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum
-                  << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted
+    for (const auto & elem : rexmitQueue) {
+        EV_DETAIL << j << ". region: [" << elem.beginSeqNum << ".." << elem.endSeqNum
+                  << ") \t sacked=" << elem.sacked << "\t rexmitted=" << elem.rexmitted
                   << endl;
         j++;
     }
@@ -169,10 +169,10 @@ bool TCPSACKRexmitQueue::checkQueue() const
     uint32 b = begin;
     bool f = true;
 
-    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++) {
-        f = f && (b == i->beginSeqNum);
-        f = f && seqLess(i->beginSeqNum, i->endSeqNum);
-        b = i->endSeqNum;
+    for (const auto & elem : rexmitQueue) {
+        f = f && (b == elem.beginSeqNum);
+        f = f && seqLess(elem.beginSeqNum, elem.endSeqNum);
+        b = elem.endSeqNum;
     }
 
     f = f && (b == end);
@@ -300,23 +300,23 @@ uint32 TCPSACKRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32 f
 
 void TCPSACKRexmitQueue::resetSackedBit()
 {
-    for (auto i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
-        i->sacked = false; // reset sacked bit
+    for (auto & elem : rexmitQueue)
+        elem.sacked = false; // reset sacked bit
 }
 
 void TCPSACKRexmitQueue::resetRexmittedBit()
 {
-    for (auto i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
-        i->rexmitted = false; // reset rexmitted bit
+    for (auto & elem : rexmitQueue)
+        elem.rexmitted = false; // reset rexmitted bit
 }
 
 uint32 TCPSACKRexmitQueue::getTotalAmountOfSackedBytes() const
 {
     uint32 bytes = 0;
 
-    for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++) {
-        if (i->sacked)
-            bytes += (i->endSeqNum - i->beginSeqNum);
+    for (const auto & elem : rexmitQueue) {
+        if (elem.sacked)
+            bytes += (elem.endSeqNum - elem.beginSeqNum);
     }
 
     return bytes;

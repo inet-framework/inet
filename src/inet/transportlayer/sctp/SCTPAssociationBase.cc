@@ -880,8 +880,8 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg,
 
     if (fsm->getState() == SCTP_S_ESTABLISHED) {
         bool found = false;
-        for (auto k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
-            if ((*k) == msgDestAddr) {
+        for (auto & elem : state->localAddresses) {
+            if ((elem) == msgDestAddr) {
                 found = true;
                 break;
             }

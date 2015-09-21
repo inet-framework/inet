@@ -554,11 +554,11 @@ void Interface::sendDelayedAcknowledgements()
     MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
     long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
-    for (auto delayIt = delayedAcknowledgements.begin(); delayIt != delayedAcknowledgements.end(); delayIt++)
+    for (auto & elem : delayedAcknowledgements)
     {
-        int ackCount = delayIt->second.size();
+        int ackCount = elem.second.size();
         if (ackCount > 0) {
-            while (!(delayIt->second.empty())) {
+            while (!(elem.second.empty())) {
                 OSPFLinkStateAcknowledgementPacket *ackPacket = new OSPFLinkStateAcknowledgementPacket();
                 long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH;
 
@@ -570,11 +570,11 @@ void Interface::sendDelayedAcknowledgements()
                     ackPacket->setAuthentication(i, authenticationKey.bytes[i]);
                 }
 
-                while ((!(delayIt->second.empty())) && (packetSize <= (maxPacketSize - OSPF_LSA_HEADER_LENGTH))) {
+                while ((!(elem.second.empty())) && (packetSize <= (maxPacketSize - OSPF_LSA_HEADER_LENGTH))) {
                     unsigned long headerCount = ackPacket->getLsaHeadersArraySize();
                     ackPacket->setLsaHeadersArraySize(headerCount + 1);
-                    ackPacket->setLsaHeaders(headerCount, *(delayIt->second.begin()));
-                    delayIt->second.pop_front();
+                    ackPacket->setLsaHeaders(headerCount, *(elem.second.begin()));
+                    elem.second.pop_front();
                     packetSize += OSPF_LSA_HEADER_LENGTH;
                 }
 
@@ -598,7 +598,7 @@ void Interface::sendDelayedAcknowledgements()
                         messageHandler->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
                     }
                     else {
-                        messageHandler->sendPacket(ackPacket, delayIt->first, ifIndex, ttl);
+                        messageHandler->sendPacket(ackPacket, elem.first, ifIndex, ttl);
                     }
                 }
             }

@@ -235,8 +235,8 @@ void TCP::updateDisplayString()
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (auto i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i) {
-        int state = (*i).second->getFsmState();
+    for (auto & elem : tcpAppConnMap) {
+        int state = (elem).second->getFsmState();
 
         switch (state) {
             case TCP_S_INIT:
@@ -567,8 +567,8 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 
 void TCP::reset()
 {
-    for (auto it = tcpAppConnMap.begin(); it != tcpAppConnMap.end(); ++it)
-        delete it->second;
+    for (auto & elem : tcpAppConnMap)
+        delete elem.second;
     tcpAppConnMap.clear();
     tcpConnMap.clear();
     usedEphemeralPorts.clear();
