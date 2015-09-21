@@ -70,10 +70,10 @@ class INET_API UpperMacContext : public IUpperMacContext
         virtual int getShortRetryLimit() const override;
         virtual int getRtsThreshold() const override;
 
-        virtual simtime_t getAckTimeout() const;
-        virtual simtime_t getAckDuration() const;
-        virtual simtime_t getCtsTimeout() const;
-        virtual simtime_t getCtsDuration() const;
+        virtual simtime_t getAckTimeout() const override;
+        virtual simtime_t getAckDuration() const override;
+        virtual simtime_t getCtsTimeout() const override;
+        virtual simtime_t getCtsDuration() const override;
 
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const override;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const override;

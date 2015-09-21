@@ -103,8 +103,8 @@ class StepBasedFrameExchange : public FrameExchange
         StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback);
         virtual ~StepBasedFrameExchange();
         std::string info() const override;
-        virtual void start();
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame); // true = frame processed
+        virtual void start() override;
+        virtual bool lowerFrameReceived(Ieee80211Frame *frame) override; // true = frame processed
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage *timer) override;

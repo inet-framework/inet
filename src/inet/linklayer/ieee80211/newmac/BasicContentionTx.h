@@ -75,8 +75,8 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx
         cMessage *endEIFS = nullptr;
 
     protected:
-        virtual void initialize();
-        virtual void handleMessage(cMessage *msg);
+        virtual void initialize() override;
+        virtual void handleMessage(cMessage *msg) override;
 
         virtual int computeCW(int cwMin, int cwMax, int retryCount);
         virtual void handleWithFSM(EventType event, cMessage *msg);

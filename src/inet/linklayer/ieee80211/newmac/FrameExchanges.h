@@ -39,7 +39,7 @@ class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
         State state = INIT;
 
     protected:
-        bool handleWithFSM(EventType event, cMessage *frameOrTimer);
+        bool handleWithFSM(EventType event, cMessage *frameOrTimer) override;
 
         void transmitDataFrame();
         void retryDataFrame();
@@ -57,10 +57,10 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
         int retryCount = 0;
     protected:
-        virtual void doStep(int step);
-        virtual bool processReply(int step, Ieee80211Frame *frame);
-        virtual void processTimeout(int step);
-        virtual void processInternalCollision(int step);
+        virtual void doStep(int step) override;
+        virtual bool processReply(int step, Ieee80211Frame *frame) override;
+        virtual void processTimeout(int step) override;
+        virtual void processInternalCollision(int step) override;
     public:
         SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
@@ -71,9 +71,9 @@ class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
         int retryCount = 0;
     protected:
-        virtual void doStep(int step);
-        virtual bool processReply(int step, Ieee80211Frame *frame);
-        virtual void processTimeout(int step);
+        virtual void doStep(int step) override;
+        virtual bool processReply(int step, Ieee80211Frame *frame) override;
+        virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) = 0;
     public:
         SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);

@@ -83,26 +83,26 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
     //@}
 
   protected:
-    virtual int numInitStages() const {return NUM_INIT_STAGES;}
-    virtual void initialize(int);
+    virtual int numInitStages() const override {return NUM_INIT_STAGES;}
+    virtual void initialize(int) override;
 
-    void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
     void configureRadioMode(IRadio::RadioMode radioMode);
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual const MACAddress& isInterfaceRegistered();
     void transmissionStateChanged(IRadio::TransmissionState transmissionState);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleUpperCommand(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg) override;
 
     /** @brief Handle timer self messages */
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg) override;
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerPacket(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
@@ -113,8 +113,8 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
     virtual ~Ieee80211NewMac();
 
     virtual void sendUp(cMessage *message) override;
-    virtual void sendFrame(Ieee80211Frame *frameToSend);
-    virtual void sendDownPendingRadioConfigMsg();
+    virtual void sendFrame(Ieee80211Frame *frameToSend) override;
+    virtual void sendDownPendingRadioConfigMsg() override;
 };
 
 } // namespace ieee80211

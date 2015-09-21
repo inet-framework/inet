@@ -39,8 +39,8 @@ class BasicImmediateTx : public cSimpleModule, public IImmediateTx
         ITxCallback *completionCallback = nullptr;
 
     protected:
-        virtual void initialize();
-        virtual void handleMessage(cMessage *msg);
+        virtual void initialize() override;
+        virtual void handleMessage(cMessage *msg) override;
         virtual void updateDisplayString();
 
     public:
