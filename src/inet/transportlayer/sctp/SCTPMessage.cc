@@ -42,8 +42,8 @@ void SCTPMessage::copy(const SCTPMessage& other)
     setSrcPort(other.getSrcPort());
     setDestPort(other.getDestPort());
     setChecksumOk(other.getChecksumOk());
-    for (std::vector<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i) {
-        cPacket *chunk = (*i)->dup();
+    for (const auto & elem : other.chunkList) {
+        cPacket *chunk = (elem)->dup();
         take(chunk);
         chunkList.push_back(chunk);
     }
@@ -158,8 +158,8 @@ SCTPErrorChunk& SCTPErrorChunk::operator=(const SCTPErrorChunk& other)
 
 void SCTPErrorChunk::copy(const SCTPErrorChunk& other)
 {
-    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i) {
-        cPacket *param = (*i)->dup();
+    for (const auto & elem : other.parameterList) {
+        cPacket *param = (elem)->dup();
         take(param);
         parameterList.push_back(param);
     }
@@ -226,8 +226,8 @@ SCTPStreamResetChunk& SCTPStreamResetChunk::operator=(const SCTPStreamResetChunk
     SCTPStreamResetChunk_Base::operator=(other);
 
     this->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
-    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
-        addParameter((cPacket *)(*i)->dup());
+    for (const auto & elem : other.parameterList)
+        addParameter((cPacket *)(elem)->dup());
 
     return *this;
 }
@@ -283,8 +283,8 @@ SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)
 
     this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH + 8);
     this->setAddressParam(other.getAddressParam());
-    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
-        addAsconfParam((cPacket *)(*i)->dup());
+    for (const auto & elem : other.parameterList)
+        addAsconfParam((cPacket *)(elem)->dup());
 
     return *this;
 }
@@ -335,8 +335,8 @@ SCTPAsconfAckChunk& SCTPAsconfAckChunk::operator=(const SCTPAsconfAckChunk& othe
     SCTPAsconfAckChunk_Base::operator=(other);
 
     this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
-    for (std::vector<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
-        addAsconfResponse((cPacket *)(*i)->dup());
+    for (const auto & elem : other.parameterList)
+        addAsconfResponse((cPacket *)(elem)->dup());
 
     return *this;
 }

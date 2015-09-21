@@ -84,8 +84,8 @@ static std::ostream& operator<<(std::ostream& os, const UDP::SockDesc& sd)
 
 static std::ostream& operator<<(std::ostream& os, const UDP::SockDescList& list)
 {
-    for (UDP::SockDescList::const_iterator i = list.begin(); i != list.end(); ++i)
-        os << "sockId=" << (*i)->sockId << " ";
+    for (const auto & elem : list)
+        os << "sockId=" << (elem)->sockId << " ";
     return os;
 }
 
@@ -99,10 +99,8 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_)
 
 UDP::SockDesc::~SockDesc()
 {
-    for(auto it = multicastMembershipTable.begin();
-            it != multicastMembershipTable.end();
-            ++it)
-        delete (*it);
+    for(auto & elem : multicastMembershipTable)
+        delete (elem);
 }
 
 //--------
@@ -608,12 +606,12 @@ void UDP::clearAllSockets()
 {
     EV_INFO << "Clear all sockets\n";
 
-    for (auto it = socketsByPortMap.begin(); it != socketsByPortMap.end(); ++it) {
-        it->second.clear();
+    for (auto & elem : socketsByPortMap) {
+        elem.second.clear();
     }
     socketsByPortMap.clear();
-    for (auto it = socketsByIdMap.begin(); it != socketsByIdMap.end(); ++it)
-        delete it->second;
+    for (auto & elem : socketsByIdMap)
+        delete elem.second;
     socketsByIdMap.clear();
 }
 
@@ -643,8 +641,7 @@ UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const L3Address& localAddr, us
         return nullptr;
 
     SockDescList& list = it->second;
-    for (auto it = list.begin(); it != list.end(); ++it) {
-        SockDesc *sd = *it;
+    for (auto sd : list) {
         if (sd->localAddr.isUnspecified() || sd->localAddr == localAddr)
             return sd;
     }
@@ -685,8 +682,7 @@ std::vector<UDP::SockDesc *> UDP::findSocketsForMcastBcastPacket(const L3Address
         return result;
 
     SockDescList& list = it->second;
-    for (auto it = list.begin(); it != list.end(); ++it) {
-        SockDesc *sd = *it;
+    for (auto sd : list) {
         if (isBroadcast) {
             if (sd->isBroadcast) {
                 if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
@@ -929,11 +925,11 @@ void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
 {
     std::vector<L3Address> empty;
 
-    for (unsigned int i = 0; i < multicastAddresses.size(); i++) {
-        auto it = sd->findFirstMulticastMembership(multicastAddresses[i]);
+    for (auto & multicastAddresse : multicastAddresses) {
+        auto it = sd->findFirstMulticastMembership(multicastAddresse);
         while (it != sd->multicastMembershipTable.end()) {
             MulticastMembership *membership = *it;
-            if (membership->multicastAddress != multicastAddresses[i])
+            if (membership->multicastAddress != multicastAddresse)
                 break;
             it = sd->multicastMembershipTable.erase(it);
 
@@ -975,8 +971,8 @@ void UDP::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& excludedSources = membership->sourceList;
     bool changed = false;
-    for (unsigned int i = 0; i < sourceList.size(); ++i) {
-        const L3Address& sourceAddress = sourceList[i];
+    for (auto & elem : sourceList) {
+        const L3Address& sourceAddress = elem;
         auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
             excludedSources.push_back(sourceAddress);
@@ -1006,8 +1002,8 @@ void UDP::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mu
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& excludedSources = membership->sourceList;
     bool changed = false;
-    for (unsigned int i = 0; i < sourceList.size(); ++i) {
-        const L3Address& sourceAddress = sourceList[i];
+    for (auto & elem : sourceList) {
+        const L3Address& sourceAddress = elem;
         auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
             excludedSources.erase(it);
@@ -1041,8 +1037,8 @@ void UDP::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multi
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& includedSources = membership->sourceList;
     bool changed = false;
-    for (unsigned int i = 0; i < sourceList.size(); ++i) {
-        const L3Address& sourceAddress = sourceList[i];
+    for (auto & elem : sourceList) {
+        const L3Address& sourceAddress = elem;
         auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
             includedSources.push_back(sourceAddress);
@@ -1072,8 +1068,8 @@ void UDP::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& includedSources = membership->sourceList;
     bool changed = false;
-    for (unsigned int i = 0; i < sourceList.size(); ++i) {
-        const L3Address& sourceAddress = sourceList[i];
+    for (auto & elem : sourceList) {
+        const L3Address& sourceAddress = elem;
         auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
             includedSources.erase(it);

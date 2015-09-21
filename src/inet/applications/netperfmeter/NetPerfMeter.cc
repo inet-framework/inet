@@ -95,9 +95,9 @@ NetPerfMeter::~NetPerfMeter()
    ResetTimer = nullptr;
    cancelAndDelete(StopTimer);
    StopTimer = nullptr;
-   for(auto iterator = TransmitTimerVector.begin(); iterator != TransmitTimerVector.end(); iterator++) {
-      cancelAndDelete(*iterator);
-      *iterator = nullptr;
+   for(auto & elem : TransmitTimerVector) {
+      cancelAndDelete(elem);
+      elem = nullptr;
    }
 }
 
@@ -660,10 +660,9 @@ void NetPerfMeter::startSending()
 void NetPerfMeter::stopSending()
 {
     // ------ Stop all transmission timers ----------------------------------
-    for(std::vector<NetPerfMeterTransmitTimer*>::iterator iterator = TransmitTimerVector.begin();
-       iterator != TransmitTimerVector.end(); iterator++) {
-      cancelAndDelete(*iterator);
-      *iterator = nullptr;
+    for(auto & elem : TransmitTimerVector) {
+      cancelAndDelete(elem);
+      elem = nullptr;
    }
    OnOffCycleCounter++;
 
@@ -724,10 +723,9 @@ void NetPerfMeter::createAndBindSocket()
 // ###### Connection teardown ###############################################
 void NetPerfMeter::teardownConnection(const bool stopTimeReached)
 {
-   for(std::vector<NetPerfMeterTransmitTimer*>::iterator iterator = TransmitTimerVector.begin();
-       iterator != TransmitTimerVector.end(); iterator++) {
-      cancelAndDelete(*iterator);
-      *iterator = nullptr;
+   for(auto & elem : TransmitTimerVector) {
+      cancelAndDelete(elem);
+      elem = nullptr;
    }
 
    if(ActiveMode == false) {
@@ -782,14 +780,12 @@ void NetPerfMeter::teardownConnection(const bool stopTimeReached)
 void NetPerfMeter::resetStatistics()
 {
    StatisticsStartTime = simTime();
-   for(std::map<unsigned int, SenderStatistics*>::iterator iterator = SenderStatisticsMap.begin();
-       iterator != SenderStatisticsMap.end(); iterator++) {
-       SenderStatistics* senderStatistics = iterator->second;
+   for(auto & elem : SenderStatisticsMap) {
+       SenderStatistics* senderStatistics = elem.second;
        senderStatistics->reset();
    }
-   for(std::map<unsigned int, ReceiverStatistics*>::iterator iterator = ReceiverStatisticsMap.begin();
-       iterator != ReceiverStatisticsMap.end(); iterator++) {
-       ReceiverStatistics* receiverStatistics = iterator->second;
+   for(auto & elem : ReceiverStatisticsMap) {
+       ReceiverStatistics* receiverStatistics = elem.second;
        receiverStatistics->reset();
    }
 }
@@ -829,13 +825,12 @@ void NetPerfMeter::writeStatistics()
 
    unsigned long long totalReceivedBytes    = 0;
    unsigned long long totalReceivedMessages = 0;
-   for(std::map<unsigned int, ReceiverStatistics*>::iterator iterator = ReceiverStatisticsMap.begin();
-       iterator != ReceiverStatisticsMap.end(); iterator++) {
-      const unsigned int streamID = iterator->first;
+   for(auto & elem : ReceiverStatisticsMap) {
+      const unsigned int streamID = elem.first;
       if(streamID >= ActualInboundStreams) {
          break;
       }
-      ReceiverStatistics* receiverStatistics = iterator->second;
+      ReceiverStatistics* receiverStatistics = elem.second;
       totalReceivedBytes    += receiverStatistics->ReceivedBytes;
       totalReceivedMessages += receiverStatistics->ReceivedMessages;
 

@@ -176,10 +176,10 @@ uint32_t TCP_NSC::mapRemote2Nsc(L3Address const& addrP)
 
     // get first free remote NSC IP
     uint32_t ret = remoteFirstInnerIpS.toIPv4().getInt();
-    for (auto j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++) {
-        if (j->first > ret)
+    for (auto & elem : nsc2RemoteMapM) {
+        if (elem.first > ret)
             break;
-        ret = j->first + 1;
+        ret = elem.first + 1;
     }
 
     // add new pair to maps
@@ -418,8 +418,8 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     // Attempt to read from sockets
     int changes = 0;
 
-    for (auto j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
-        TCP_NSC_Connection& c = j->second;
+    for (auto & elem : tcpAppConnMapM) {
+        TCP_NSC_Connection& c = elem.second;
 
         if (c.pNscSocketM && c.isListenerM) {
             // accepting socket
@@ -1068,8 +1068,8 @@ void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, c
 
 void TCP_NSC::do_SEND_all()
 {
-    for (auto j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
-        TCP_NSC_Connection& conn = j->second;
+    for (auto & elem : tcpAppConnMapM) {
+        TCP_NSC_Connection& conn = elem.second;
         conn.do_SEND();
     }
 }

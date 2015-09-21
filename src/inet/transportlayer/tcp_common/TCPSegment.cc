@@ -107,8 +107,8 @@ TCPSegment& TCPSegment::operator=(const TCPSegment& other)
 
 void TCPSegment::copy(const TCPSegment& other)
 {
-    for (PayloadList::const_iterator i = other.payloadList.begin(); i != other.payloadList.end(); ++i)
-        addPayloadMessage(i->msg->dup(), i->endSequenceNo);
+    for (const auto & elem : other.payloadList)
+        addPayloadMessage(elem.msg->dup(), elem.endSequenceNo);
     for (const auto opt: other.headerOptionList)
         addHeaderOption(opt->dup());
 }

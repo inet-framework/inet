@@ -53,8 +53,8 @@ std::string TCPMsgBasedRcvQueue::info() const
 
     os << "rcv_nxt=" << rcv_nxt;
 
-    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i) {
-        os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
+    for (const auto & elem : regionList) {
+        os << " [" << (elem)->getBegin() << ".." << (elem)->getEnd() << ")";
     }
 
     os << " " << payloadList.size() << " msgs";

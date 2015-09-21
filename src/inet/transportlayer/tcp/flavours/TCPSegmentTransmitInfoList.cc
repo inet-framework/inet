@@ -75,11 +75,11 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
 
 const TCPSegmentTransmitInfoList::Item *TCPSegmentTransmitInfoList::get(uint32_t seq) const
 {
-    for (TCPSegmentTransmitInfoItems::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-        if (seqLess(seq, i->beg))
+    for (const auto & elem : regions) {
+        if (seqLess(seq, elem.beg))
             break;
-        if (seqLE(i->beg, seq) && seqLess(seq, i->end))
-            return &(*i);
+        if (seqLE(elem.beg, seq) && seqLess(seq, elem.end))
+            return &(elem);
     }
     return nullptr;
 }

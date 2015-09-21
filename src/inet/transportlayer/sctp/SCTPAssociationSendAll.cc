@@ -120,8 +120,8 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
 std::vector<SCTPPathVariables *> SCTPAssociation::getSortedPathMap()
 {
     std::vector<SCTPPathVariables *> sortedPaths;
-    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-        SCTPPathVariables *path = iterator->second;
+    for (auto & elem : sctpPathMap) {
+        SCTPPathVariables *path = elem.second;
         sortedPaths.insert(sortedPaths.end(), path);
     }
     if (state->cmtSendAllComparisonFunction != nullptr) {
@@ -129,8 +129,7 @@ std::vector<SCTPPathVariables *> SCTPAssociation::getSortedPathMap()
     }
 
     EV << "SORTED PATH MAP:" << endl;
-    for (auto iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
-        SCTPPathVariables *path = *iterator;
+    for (auto path : sortedPaths) {
         EV << " - " << path->remoteAddress
            << "  cwnd=" << path->cwnd
            << "  ssthresh=" << path->ssthresh
@@ -233,8 +232,8 @@ SCTPPathVariables *SCTPAssociation::choosePathForRetransmission()
     uint32 max = 0;
     SCTPPathVariables *temp = nullptr;
 
-    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-        SCTPPathVariables *path = iterator->second;
+    for (auto & elem : sctpPathMap) {
+        SCTPPathVariables *path = elem.second;
         CounterMap::const_iterator tq = qCounter.roomTransQ.find(path->remoteAddress);
         if ((tq != qCounter.roomTransQ.end()) && (tq->second > max)) {
             max = tq->second;
@@ -276,16 +275,13 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
 
         // ------ ... then, try sending on all other paths --------------------
         std::vector<SCTPPathVariables *> sortedPaths = getSortedPathMap();
-        for (auto iterator = sortedPaths.begin(); iterator != sortedPaths.end(); ++iterator) {
-            SCTPPathVariables *path = *iterator;
+        for (auto path : sortedPaths) {
             EV << path->remoteAddress << " [" << path->lastTransmission << "]\t";
         }
         EV << endl;
 
-        for (auto iterator = sortedPaths.begin();
-             iterator != sortedPaths.end(); ++iterator)
+        for (auto path : sortedPaths)
         {
-            SCTPPathVariables *path = *iterator;
             if (path != firstPath) {
                 sendOnPath(path);
                 path->sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
@@ -294,10 +290,8 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
         if ((state->strictCwndBooking) &&
             (sctpPathMap.size() > 1))    // T.D. 08.02.2010: strict behaviour only for more than 1 paths!
         {    // T.D. 14.01.2010: Second pass for "Strict Cwnd Booking" option.
-            for (auto iterator = sortedPaths.begin();
-                 iterator != sortedPaths.end(); ++iterator)
+            for (auto path : sortedPaths)
             {
-                SCTPPathVariables *path = *iterator;
                 sendOnPath(path, false);
             }
         }
@@ -309,8 +303,8 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
         }
 
         // ------ ... then, try sending on all other paths --------------------
-        for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-            SCTPPathVariables *path = iterator->second;
+        for (auto & elem : sctpPathMap) {
+            SCTPPathVariables *path = elem.second;
             if (path != firstPath) {
                 sendOnPath(path);
             }
@@ -320,8 +314,8 @@ void SCTPAssociation::sendOnAllPaths(SCTPPathVariables *firstPath)
             sendOnPath(firstPath, false);
 
             // ------ Then, try sending on all other paths ---------------------------
-            for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-                SCTPPathVariables *path = iterator->second;
+            for (auto & elem : sctpPathMap) {
+                SCTPPathVariables *path = elem.second;
                 if (path != firstPath) {
                     sendOnPath(path, false);
                 }
@@ -340,8 +334,8 @@ void SCTPAssociation::chunkReschedulingControl(SCTPPathVariables *path)
     double totalBandwidth = 0.0;
     unsigned int totalOutstandingBytes = 0;
     unsigned int totalQueuedBytes = 0;
-    for (auto iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
-        const SCTPPathVariables *myPath = iterator->second;
+    for (auto & elem : sctpPathMap) {
+        const SCTPPathVariables *myPath = elem.second;
         totalQueuedBytes += myPath->queuedBytes;
         totalOutstandingBytes += myPath->outstandingBytes;
         totalBandwidth += (double)myPath->cwnd / myPath->srtt.dbl();
@@ -521,10 +515,8 @@ void SCTPAssociation::sendSACKviaSelectedPath(SCTPMessage *sctpMsg)
 
             // Solution is now to make a round-robin selection among paths,
             // taking the path with the longest time passed since last SACK.
-            for (auto iterator = state->lastDataSourceList.begin();
-                 iterator != state->lastDataSourceList.end(); iterator++)
+            for (auto path : state->lastDataSourceList)
             {
-                SCTPPathVariables *path = *iterator;
                 if (path->lastSACKSent < sackPath->lastSACKSent) {
                     sackPath = path;
                 }
@@ -533,10 +525,8 @@ void SCTPAssociation::sendSACKviaSelectedPath(SCTPMessage *sctpMsg)
         else if (state->cmtSackPath == SCTPStateVariables::CSP_SmallestSRTT) {
             /* Instead of RR among last DATA paths, send SACK on
                the DATA path having the smallest SRTT. */
-            for (auto iterator = state->lastDataSourceList.begin();
-                 iterator != state->lastDataSourceList.end(); iterator++)
+            for (auto path : state->lastDataSourceList)
             {
-                SCTPPathVariables *path = *iterator;
                 if (path->srtt < sackPath->srtt) {
                     sackPath = path;
                 }
@@ -1451,8 +1441,8 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
 uint32 SCTPAssociation::getAllTransQ()
 {
     uint32 sum = 0;
-    for (auto tq = qCounter.roomTransQ.begin(); tq != qCounter.roomTransQ.end(); tq++) {
-        sum += tq->second;
+    for (auto & elem : qCounter.roomTransQ) {
+        sum += elem.second;
     }
     return sum;
 }

@@ -32,8 +32,8 @@ TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
 
 TCPMsgBasedSendQueue::~TCPMsgBasedSendQueue()
 {
-    for (auto it = payloadQueue.begin(); it != payloadQueue.end(); ++it)
-        delete it->msg;
+    for (auto & elem : payloadQueue)
+        delete elem.msg;
 }
 
 void TCPMsgBasedSendQueue::init(uint32 startSeq)

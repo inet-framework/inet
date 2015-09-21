@@ -169,10 +169,10 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate) const
 {
-    for (int index = 0; index < (int)entries.size(); index++) {
-        const IIeee80211Mode *mode = entries[index].mode;
+    for (auto & elem : entries) {
+        const IIeee80211Mode *mode = elem.mode;
         if (mode->getDataMode()->getNetBitrate() == bitrate)
-            return entries[index].mode;
+            return elem.mode;
     }
     return nullptr;
 }
@@ -216,8 +216,8 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(char mode)
 {
-    for (int index = 0; index < (int)(&modeSets)->size(); index++) {
-        const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
+    for (auto & elem : *(&modeSets)) {
+        const Ieee80211ModeSet *modeSet = &elem;
         if (modeSet->getName() == mode)
             return modeSet;
     }

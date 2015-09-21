@@ -268,16 +268,16 @@ void SCTPAssociation::sendStreamResetResponse(uint32 srrsn)
 
 void SCTPAssociation::resetExpectedSsns()
 {
-    for (auto iter = receiveStreams.begin(); iter != receiveStreams.end(); iter++)
-        iter->second->setExpectedStreamSeqNum(0);
+    for (auto & elem : receiveStreams)
+        elem.second->setExpectedStreamSeqNum(0);
     EV_INFO << "Expected Ssns have been resetted on " << localAddr << "\n";
     sendIndicationToApp(SCTP_I_RCV_STREAMS_RESETTED);
 }
 
 void SCTPAssociation::resetSsns()
 {
-    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); iter++)
-        iter->second->setNextStreamSeqNum(0);
+    for (auto & elem : sendStreams)
+        elem.second->setNextStreamSeqNum(0);
     EV_INFO << "SSns resetted on " << localAddr << "\n";
     sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
 }

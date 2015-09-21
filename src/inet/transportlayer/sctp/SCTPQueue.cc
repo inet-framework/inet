@@ -32,10 +32,9 @@ SCTPQueue::SCTPQueue()
 
 SCTPQueue::~SCTPQueue()
 {
-    for (auto iterator = payloadQueue.begin();
-         iterator != payloadQueue.end(); iterator++)
+    for (auto & elem : payloadQueue)
     {
-        SCTPDataVariables *chunk = iterator->second;
+        SCTPDataVariables *chunk = elem.second;
         delete chunk->userData;
     }
     if (!payloadQueue.empty()) {
@@ -83,11 +82,10 @@ SCTPDataVariables *SCTPQueue::getAndExtractChunk(const uint32 tsn)
 void SCTPQueue::printQueue() const
 {
     EV_DEBUG << "Queue contents:\n";
-    for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
-         iterator != payloadQueue.end(); ++iterator)
+    for (const auto & elem : payloadQueue)
     {
-        const uint32 key = iterator->first;
-        const SCTPDataVariables *chunk = iterator->second;
+        const uint32 key = elem.first;
+        const SCTPDataVariables *chunk = elem.second;
         EV_DEBUG << key << ":\t"
                  << "lastDestination=" << chunk->getLastDestination()
                  << " nextDestination=" << chunk->getNextDestination()
@@ -173,10 +171,9 @@ bool SCTPQueue::deleteMsg(const uint32 tsn)
 int32 SCTPQueue::getNumBytes() const
 {
     int32 qb = 0;
-    for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
-         iterator != payloadQueue.end(); iterator++)
+    for (const auto & elem : payloadQueue)
     {
-        qb += (iterator->second->len / 8);
+        qb += (elem.second->len / 8);
     }
     return qb;
 }
@@ -210,10 +207,9 @@ void SCTPQueue::findEarliestOutstandingTSNsForPath(const L3Address& remoteAddres
     bool findEarliestOutstandingTSN = true;
     bool findRTXEarliestOutstandingTSN = true;
 
-    for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
-         iterator != payloadQueue.end(); ++iterator)
+    for (const auto & elem : payloadQueue)
     {
-        const SCTPDataVariables *chunk = iterator->second;
+        const SCTPDataVariables *chunk = elem.second;
         if (chunk->getLastDestination() == remoteAddress) {
             // ====== Find earliest outstanding TSNs ===========================
             if (chunk->hasBeenAcked == false) {

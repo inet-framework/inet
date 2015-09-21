@@ -102,8 +102,8 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
     uint32 toSeq = fromSeq + numBytes;
 
     if ((!isValidSeqNoM) && (numBytes > 0)) {
-        for (auto i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
-            i->endSequenceNo += fromSeq;
+        for (auto & elem : payloadQueueM) {
+            elem.endSequenceNo += fromSeq;
         }
 
         beginM += fromSeq;
@@ -117,9 +117,9 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
     EV_DEBUG << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq
              << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
-    for (auto i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i) {
-        EV_DEBUG << "  buffered msg: endseq=" << i->endSequenceNo
-                 << ", length=" << i->msg->getByteLength() << endl;
+    for (auto & elem : payloadQueueM) {
+        EV_DEBUG << "  buffered msg: endseq=" << elem.endSequenceNo
+                 << ", length=" << elem.msg->getByteLength() << endl;
     }
 
     const char *payloadName = nullptr;

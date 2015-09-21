@@ -284,8 +284,8 @@ void SCTPAssociation::calculateAssocSharedKey()
 
 bool SCTPAssociation::typeInChunkList(const uint16 type)
 {
-    for (auto i = state->peerChunkList.begin(); i != state->peerChunkList.end(); i++) {
-        if ((*i) == type) {
+    for (auto & elem : state->peerChunkList) {
+        if ((elem) == type) {
             return true;
         }
     }
@@ -294,8 +294,8 @@ bool SCTPAssociation::typeInChunkList(const uint16 type)
 
 bool SCTPAssociation::typeInOwnChunkList(const uint16 type)
 {
-    for (auto i = state->chunkList.begin(); i != state->chunkList.end(); i++) {
-        if ((*i) == type) {
+    for (auto & elem : state->chunkList) {
+        if ((elem) == type) {
             return true;
         }
     }

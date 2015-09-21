@@ -329,8 +329,8 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
         symbols = dataFieldSymbolModel->getSymbols();
-        for (unsigned int i = 0; i < symbols->size(); i++)
-            completeSymbols->push_back(new Ieee80211OFDMSymbol(*static_cast<const Ieee80211OFDMSymbol *>(symbols->at(i))));
+        for (auto & symbol : *symbols)
+            completeSymbols->push_back(new Ieee80211OFDMSymbol(*static_cast<const Ieee80211OFDMSymbol *>(symbol)));
         return new Ieee80211OFDMReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getPayloadSymbolLength(), dataFieldSymbolModel->getPayloadSymbolRate(), completeSymbols);
     }
     return nullptr;
