@@ -41,6 +41,7 @@ BasicUpperMac::BasicUpperMac()
 
 BasicUpperMac::~BasicUpperMac()
 {
+    delete frameExchange;
     while (!transmissionQueue.empty()) {
         Ieee80211Frame *temp = transmissionQueue.front();
         transmissionQueue.pop_front();
@@ -134,8 +135,7 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     if (frameExchange)
         transmissionQueue.push_back(frame);
     else {
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
-        frameExchange->start();
+        startSendDataFrameExchange(frame);
     }
 }
 
@@ -184,6 +184,17 @@ void BasicUpperMac::internalCollision(ITxCallback *callback, int txIndex)
         callback->internalCollision(txIndex);
 }
 
+void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame)
+{
+    ASSERT(!frameExchange);
+    bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
+    if (useRtsCts)
+        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame);
+    else
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
+    frameExchange->start();
+}
+
 void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
 {
     EV_INFO << "Frame exchange finished" << std::endl;
@@ -192,8 +203,7 @@ void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     if (!transmissionQueue.empty()) {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
-        frameExchange->start();
+        startSendDataFrameExchange(frame);
     }
 }
 

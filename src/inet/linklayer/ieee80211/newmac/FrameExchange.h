@@ -81,8 +81,8 @@ class StepBasedFrameExchange : public FrameExchange
         virtual void processInternalCollision(int step) = 0;
 
         // operations that can be called from doStep()
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, int retryCount);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void expectReply(simtime_t timeout);
         virtual void gotoStep(int step); // ~setNextStep()
@@ -95,6 +95,7 @@ class StepBasedFrameExchange : public FrameExchange
         virtual void setOperation(Operation type);
         virtual void logStatus(const char *what);
         virtual void checkOperation(Operation stepType, const char *where);
+        virtual void cleanupAndReportResult();
         static const char *statusName(Status status);
         static const char *operationName(Operation operation);
         static const char *operationFunctionName(Operation operation);

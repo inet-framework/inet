@@ -67,6 +67,7 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
         void handleMessage(cMessage *msg) override;
         virtual void initializeQueueModule();
         virtual IUpperMacContext *createContext();
+        virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame);
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful) override;
 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);

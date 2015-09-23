@@ -55,6 +55,7 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
+        int txIndex = 0;
         int retryCount = 0;
     protected:
         virtual void doStep(int step) override;
@@ -62,21 +63,24 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
     public:
-        SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex=0);
+        ~SendDataWithAckFrameExchange();
 };
 
 class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
+        int txIndex = 0;
         int retryCount = 0;
     protected:
         virtual void doStep(int step) override;
         virtual bool processReply(int step, Ieee80211Frame *frame) override;
         virtual void processTimeout(int step) override;
-        virtual void processInternalCollision(int step) = 0;
+        virtual void processInternalCollision(int step) override;
     public:
-        SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex=0);
+        ~SendDataWithRtsCtsFrameExchange();
 };
 
 } // namespace ieee80211

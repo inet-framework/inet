@@ -27,13 +27,13 @@ namespace ieee80211 {
 void FrameExchange::reportSuccess()
 {
     EV_DETAIL << "Frame exchange successful\n";
-    finishedCallback->frameExchangeFinished(this, true);    // may delete this FrameExchange object
+    finishedCallback->frameExchangeFinished(this, true);    // may delete *this* FrameExchange object!
 }
 
 void FrameExchange::reportFailure()
 {
     EV_DETAIL << "Frame exchange failed\n";
-    finishedCallback->frameExchangeFinished(this, false);    // may delete this FrameExchange object
+    finishedCallback->frameExchangeFinished(this, false);    // may delete *this* FrameExchange object!
 }
 
 //--------
@@ -156,6 +156,9 @@ void StepBasedFrameExchange::proceed()
             if (operation == GOTO_STEP)
                 proceed();
         }
+        else {
+            cleanupAndReportResult(); // should be the last call in the lifetime of the object
+        }
     }
 }
 
@@ -183,6 +186,9 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
             if (accepted)
                 proceed();
         }
+        else {
+            cleanupAndReportResult(); // should be the last call in the lifetime of the object
+        }
         return accepted;
     }
 }
@@ -201,6 +207,9 @@ void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
         checkOperation(operation, "processTimeout()");
         proceed();
     }
+    else {
+        cleanupAndReportResult(); // should be the last call in the lifetime of the object
+    }
 }
 
 void StepBasedFrameExchange::internalCollision(int txIndex)
@@ -216,6 +225,9 @@ void StepBasedFrameExchange::internalCollision(int txIndex)
         checkOperation(operation, "processInternalCollision()");
         proceed();
     }
+    else {
+        cleanupAndReportResult(); // should be the last call in the lifetime of the object
+    }
 }
 
 void StepBasedFrameExchange::checkOperation(Operation operation, const char *where)
@@ -227,17 +239,27 @@ void StepBasedFrameExchange::checkOperation(Operation operation, const char *whe
     }
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount)
+void StepBasedFrameExchange::cleanupAndReportResult()
+{
+    cleanup();
+    switch (status) {
+        case SUCCEEDED: reportSuccess(); break;
+        case FAILED: reportFailure(); break;
+        default: ASSERT(false);
+    }
+    // NOTE: no members or methods may be accessed after this point, because the
+    // success/failure callback might has probably deleted the frame exchange object!
+}
+
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    int txIndex = 0;    //TODO take this from where?
     context->transmitContentionFrame(txIndex, frame, context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    int txIndex = 0;    //TODO take this from where?
     context->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
@@ -265,16 +287,14 @@ void StepBasedFrameExchange::fail()
 {
     setOperation(FAIL);
     status = FAILED;
-    cleanup();
-    reportFailure();    // must come last
+    // note: we cannot call reportFailure() right here as it might delete the frame exchange object
 }
 
 void StepBasedFrameExchange::succeed()
 {
     setOperation(SUCCEED);
     status = SUCCEEDED;
-    cleanup();
-    reportSuccess();    // must come last
+    // note: we cannot call reportSuccess() right here as it might delete the frame exchange object
 }
 
 void StepBasedFrameExchange::setOperation(Operation newOperation)

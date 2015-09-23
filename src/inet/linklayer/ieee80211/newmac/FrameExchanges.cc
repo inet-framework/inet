@@ -130,15 +130,20 @@ bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame *frame)
 
 //------------------------------
 
-SendDataWithAckFrameExchange::SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
-    StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame)
+SendDataWithAckFrameExchange::SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex) :
+    StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame), txIndex(txIndex)
 {
+}
+
+SendDataWithAckFrameExchange::~SendDataWithAckFrameExchange()
+{
+    delete dataFrame;
 }
 
 void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(dataFrame->dup(), retryCount); break;
+        case 0: transmitContentionFrame(dataFrame->dup(), txIndex, retryCount); break;
         case 1: expectReply(context->getAckTimeout()); break;
         case 2: succeed(); break;
         default: ASSERT(false);
@@ -148,7 +153,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
 bool SendDataWithAckFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
     switch (step) {
-        case 1: return context->isAck(frame);
+        case 1: if (context->isAck(frame)) {delete frame; return true;} else return false;
         default: ASSERT(false); return false;
     }
 }
@@ -172,15 +177,20 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
 
 //------------------------------
 
-SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
-    StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame)
+SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex) :
+    StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame), txIndex(txIndex)
 {
+}
+
+SendDataWithRtsCtsFrameExchange::~SendDataWithRtsCtsFrameExchange()
+{
+    delete dataFrame;
 }
 
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(context->buildRtsFrame(dataFrame), retryCount); break;
+        case 0: transmitContentionFrame(context->buildRtsFrame(dataFrame), txIndex, retryCount); break;
         case 1: expectReply(context->getCtsTimeout()); break;
         case 2: transmitImmediateFrame(dataFrame->dup(), context->getSifsTime()); break;
         case 3: expectReply(context->getAckTimeout()); break;
@@ -191,9 +201,10 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
 
 bool SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
+    bool accepted;
     switch (step) {
-        case 1: return context->isCts(frame);  // true=accepted
-        case 3: return context->isAck(frame);
+        case 1: if (context->isCts(frame)) {delete frame; return true;} else return false;
+        case 3: if (context->isAck(frame)) {delete frame; return true;} else return false;
         default: ASSERT(false); return false;
     }
 }
