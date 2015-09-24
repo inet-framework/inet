@@ -20,7 +20,7 @@
 
 #include "inet/physicallayer/modulation/DBPSKModulation.h"
 #include "inet/physicallayer/modulation/DQPSKModulation.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
 
@@ -91,12 +91,16 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
  * Represents a High Rate Direct Sequence Spread Spectrum PHY mode as described
  * in the IEEE 802.11-2012 specification clause 17.
  */
-class INET_API Ieee80211HrDsssMode : public IIeee80211Mode
+class INET_API Ieee80211HrDsssMode : public Ieee80211ModeBase
 {
   protected:
     const Ieee80211HrDsssPreambleMode *preambleMode;
     const Ieee80211HrDsssHeaderMode *headerMode;
     const Ieee80211HrDsssDataMode *dataMode;
+
+  protected:
+    virtual int getLegacyCwMin() const override { return 31; }
+    virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
     Ieee80211HrDsssMode(const Ieee80211HrDsssPreambleMode *preambleMode, const Ieee80211HrDsssHeaderMode *headerMode, const Ieee80211HrDsssDataMode *dataMode);
@@ -121,9 +125,8 @@ class INET_API Ieee80211HrDsssMode : public IIeee80211Mode
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 5E-6; }
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
-    virtual inline int getCwMin() const override { return 31; }
-    virtual inline int getCwMax() const override { return 1023; }
     virtual inline int getMpduMaxLength() const override { return 4095; }
+    virtual const simtime_t getTxopLimit(AccessCategory ac) const override;
 };
 
 /**

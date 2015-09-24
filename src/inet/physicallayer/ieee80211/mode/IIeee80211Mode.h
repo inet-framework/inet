@@ -24,6 +24,15 @@ namespace inet {
 
 namespace physicallayer {
 
+enum AccessCategory
+{
+    AC_BK,
+    AC_BE,
+    AC_VI,
+    AC_VO,
+    AC_LEGACY
+};
+
 class INET_API IIeee80211PreambleMode : public IPrintableObject
 {
   public:
@@ -53,26 +62,31 @@ class INET_API IIeee80211DataMode : public IPrintableObject
 
 class INET_API IIeee80211Mode : public IPrintableObject
 {
+  protected:
+    virtual int getAifsNumber(AccessCategory ac) const = 0;
+    virtual int getLegacyCwMin() const = 0;
+    virtual int getLegacyCwMax() const = 0;
+
   public:
     virtual const IIeee80211PreambleMode *getPreambleMode() const = 0;
     virtual const IIeee80211HeaderMode *getHeaderMode() const = 0;
     virtual const IIeee80211DataMode *getDataMode() const = 0;
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
-
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
-    virtual const simtime_t getEifsTime(const IIeee80211Mode *slowestMandatoryMode, int ackLength) const { return getSifsTime() + getDifsTime() + slowestMandatoryMode->getDuration(ackLength); }
-    virtual const simtime_t getDifsTime() const { return getSifsTime() + 2 * getSlotTime(); }
-    virtual const simtime_t getPifsTime() const { return getSifsTime() + getSlotTime(); }
-    virtual const simtime_t getAifsTime(int aifsNumber) const { return getSlotTime() * aifsNumber + getSifsTime(); }
+    virtual const simtime_t getEifsTime(const IIeee80211Mode *slowestMandatoryMode, AccessCategory ac, int ackLength) const = 0;
+    virtual const simtime_t getDifsTime() const = 0;
+    virtual const simtime_t getPifsTime() const = 0;
+    virtual const simtime_t getAifsTime(AccessCategory ac) const = 0;
     virtual const simtime_t getCcaTime() const = 0;
     virtual const simtime_t getPhyRxStartDelay() const = 0;
     virtual const simtime_t getRxTxTurnaroundTime() const = 0;
     virtual const simtime_t getPreambleLength() const = 0;
     virtual const simtime_t getPlcpHeaderLength() const = 0;
-    virtual int getCwMin() const = 0;
-    virtual int getCwMax() const = 0;
+    virtual const simtime_t getTxopLimit(AccessCategory ac) const = 0; // Table 8-105—Default EDCA Parameter Set element parameter values if dot11OCBActivated is false
+    virtual int getCwMin(AccessCategory ac) const = 0;
+    virtual int getCwMax(AccessCategory ac) const = 0;
     virtual int getMpduMaxLength() const = 0;
 };
 

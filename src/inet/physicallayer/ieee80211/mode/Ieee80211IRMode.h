@@ -19,7 +19,7 @@
 #define __INET_IEEE80211IRMODE_H
 
 #include "inet/physicallayer/base/packetlevel/PPMModulationBase.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
 
@@ -83,12 +83,16 @@ class INET_API Ieee80211IrDataMode : public IIeee80211DataMode
  * Represents an Infrared PHY mode as described in IEEE 802.11-2012 specification
  * clause 15.
  */
-class INET_API Ieee80211IrMode : public IIeee80211Mode
+class INET_API Ieee80211IrMode : public Ieee80211ModeBase
 {
   protected:
     const Ieee80211IrPreambleMode *preambleMode;
     const Ieee80211IrHeaderMode *headerMode;
     const Ieee80211IrDataMode *dataMode;
+
+  protected:
+    virtual int getLegacyCwMin() const override { return 63; }
+    virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
     Ieee80211IrMode(const Ieee80211IrPreambleMode *preambleMode, const Ieee80211IrHeaderMode *headerMode, const Ieee80211IrDataMode *dataMode);
@@ -110,9 +114,8 @@ class INET_API Ieee80211IrMode : public IIeee80211Mode
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 0; }
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
-    virtual inline int getCwMin() const override { return 63; }
-    virtual inline int getCwMax() const override { return 1023; }
     virtual inline int getMpduMaxLength() const override { return 2500; }
+    virtual const simtime_t getTxopLimit(AccessCategory ac) const override { return 0; }
 };
 
 /**

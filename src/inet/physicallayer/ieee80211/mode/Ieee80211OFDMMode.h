@@ -20,7 +20,7 @@
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
 
@@ -131,12 +131,16 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
-class INET_API Ieee80211OFDMMode : public IIeee80211Mode, public Ieee80211OFDMTimingRelatedParametersBase
+class INET_API Ieee80211OFDMMode : public Ieee80211ModeBase, public Ieee80211OFDMTimingRelatedParametersBase
 {
   protected:
     const Ieee80211OFDMPreambleMode *preambleMode;
     const Ieee80211OFDMSignalMode *signalMode;
     const Ieee80211OFDMDataMode *dataMode;
+
+  protected:
+    virtual int getLegacyCwMin() const override { return 15; }
+    virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
     Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
@@ -159,9 +163,8 @@ class INET_API Ieee80211OFDMMode : public IIeee80211Mode, public Ieee80211OFDMTi
     virtual const simtime_t getRxTxTurnaroundTime() const override;
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return signalMode->getDuration(); }
-    virtual inline int getCwMin() const override { return 15; }
-    virtual inline int getCwMax() const override { return 1023; }
     virtual inline int getMpduMaxLength() const override { return 4095; }
+    virtual const simtime_t getTxopLimit(AccessCategory ac) const override;
 };
 
 class INET_API Ieee80211OFDMCompliantModes

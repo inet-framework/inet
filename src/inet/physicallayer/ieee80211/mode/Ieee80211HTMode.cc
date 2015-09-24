@@ -357,6 +357,21 @@ const Ieee80211HTMode* Ieee80211HTCompliantModes::getCompliantMode(const Ieee802
     return mode->second;
 }
 
+const simtime_t Ieee80211HTMode::getTxopLimit(AccessCategory ac) const
+{
+    switch (ac)
+    {
+        case AC_BK: return 0;
+        case AC_BE: return 0;
+        case AC_VI: return ms(3.008).get();
+        case AC_VO: return ms(1.504).get();
+        case AC_LEGACY: return 0;
+    }
+    throw cRuntimeError("Unknown access category = %d", ac);
+    return 0;
+}
+
+
 Ieee80211HTMCS::~Ieee80211HTMCS()
 {
     delete code;
@@ -540,7 +555,5 @@ const DI<Ieee80211HTMCS> Ieee80211HTMCSTable::htMcs75BW40MHz([](){ return new Ie
 
 const DI<Ieee80211HTMCS> Ieee80211HTMCSTable::htMcs76BW40MHz([](){ return new Ieee80211HTMCS(76, &Ieee80211OFDMCompliantModulations::qam64Modulation, &Ieee80211OFDMCompliantModulations::qam64Modulation, &Ieee80211OFDMCompliantModulations::qam64Modulation, &Ieee80211OFDMCompliantModulations::qam16Modulation, &Ieee80211OFDMCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 
-
 } /* namespace physicallayer */
 } /* namespace inet */
-

@@ -19,7 +19,7 @@
 #define __INET_IEEE80211FHSSMODE_H
 
 #include "inet/physicallayer/base/packetlevel/GFSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {
 
@@ -75,12 +75,16 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
  * Represents a Frequency-Hopping Spread Spectrum PHY mode as described in IEEE
  * 802.11-2012 specification clause 14.
  */
-class INET_API Ieee80211FhssMode : public IIeee80211Mode
+class INET_API Ieee80211FhssMode : public Ieee80211ModeBase
 {
   protected:
     const Ieee80211FhssPreambleMode *preambleMode;
     const Ieee80211FhssHeaderMode *headerMode;
     const Ieee80211FhssDataMode *dataMode;
+
+  protected:
+    virtual inline int getLegacyCwMin() const override { return 15; }
+    virtual inline int getLegacyCwMax() const override { return 1023; }
 
   public:
     Ieee80211FhssMode(const Ieee80211FhssPreambleMode *preambleMode, const Ieee80211FhssHeaderMode *headerMode, const Ieee80211FhssDataMode *dataMode);
@@ -102,9 +106,8 @@ class INET_API Ieee80211FhssMode : public IIeee80211Mode
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 20E-6; }
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
-    virtual inline int getCwMin() const override { return 15; }
-    virtual inline int getCwMax() const override { return 1023; }
     virtual inline int getMpduMaxLength() const override { return 4095; }
+    virtual const simtime_t getTxopLimit(AccessCategory ac) const override { return 0; }
 };
 
 /**

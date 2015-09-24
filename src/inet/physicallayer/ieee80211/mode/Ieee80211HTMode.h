@@ -223,7 +223,7 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
         virtual const Ieee80211OFDMModulation* getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
 
-class INET_API Ieee80211HTMode : public IIeee80211Mode
+class INET_API Ieee80211HTMode : public Ieee80211ModeBase
 {
     public:
         enum BandMode
@@ -236,6 +236,10 @@ class INET_API Ieee80211HTMode : public IIeee80211Mode
         const Ieee80211HTPreambleMode *preambleMode;
         const Ieee80211HTDataMode *dataMode;
         const BandMode carrierFrequencyMode;
+
+    protected:
+        virtual inline int getLegacyCwMin() const override { return 15; }
+        virtual inline int getLegacyCwMax() const override { return 1023; }
 
     public:
         Ieee80211HTMode(const Ieee80211HTPreambleMode *preambleMode, const Ieee80211HTDataMode *dataMode, const BandMode carrierFrequencyMode);
@@ -256,12 +260,11 @@ class INET_API Ieee80211HTMode : public IIeee80211Mode
         virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
         virtual inline const simtime_t getPreambleLength() const override { return 16E-6; }
         virtual inline const simtime_t getPlcpHeaderLength() const override { return 4E-6; }
-        virtual inline int getCwMin() const override { return 15; }
-        virtual inline int getCwMax() const override { return 1023; }
         virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
         virtual BandMode getCarrierFrequencyMode() const { return carrierFrequencyMode; }
 
         virtual const simtime_t getDuration(int dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
+        virtual const simtime_t getTxopLimit(AccessCategory ac) const override;
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)
