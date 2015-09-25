@@ -29,10 +29,10 @@ namespace ieee80211 {
 
 UpperMacContext::UpperMacContext(const MACAddress& address,
         const IIeee80211Mode *dataFrameMode, const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-        int shortRetryLimit, int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx) :
+        int shortRetryLimit, int rtsThreshold, bool useEDCA, IImmediateTx *immediateTx, IContentionTx **contentionTx) :
     address(address),
     dataFrameMode(dataFrameMode), basicFrameMode(basicFrameMode), controlFrameMode(controlFrameMode),
-    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), immediateTx(immediateTx), contentionTx(contentionTx)
+    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), useEDCA(useEDCA), immediateTx(immediateTx), contentionTx(contentionTx)
 {
 }
 
@@ -54,6 +54,17 @@ const MACAddress& UpperMacContext::getAddress() const
     return address;
 }
 
+int UpperMacContext::getNumAccessCategories() const
+{
+    return useEDCA ? 4 : 1;
+}
+
+inline AccessCategory UpperMacContext::mapAC(int accessCategory) const
+{
+    ASSERT(accessCategory >= 0 && accessCategory < getNumAccessCategories());
+    return useEDCA ? (AccessCategory)accessCategory : AC_LEGACY;
+}
+
 simtime_t UpperMacContext::getSlotTime() const
 {
     return dataFrameMode->getSlotTime();
@@ -61,7 +72,7 @@ simtime_t UpperMacContext::getSlotTime() const
 
 simtime_t UpperMacContext::getAifsTime(int accessCategory) const
 {
-    return dataFrameMode->getAifsTime((AccessCategory)accessCategory);
+    return dataFrameMode->getAifsTime(mapAC(accessCategory));
 }
 
 simtime_t UpperMacContext::getSifsTime() const
@@ -76,7 +87,7 @@ simtime_t UpperMacContext::getDifsTime() const
 
 simtime_t UpperMacContext::getEifsTime(int accessCategory) const
 {
-    return dataFrameMode->getEifsTime(basicFrameMode, (AccessCategory)accessCategory, LENGTH_ACK);
+    return dataFrameMode->getEifsTime(basicFrameMode, mapAC(accessCategory), LENGTH_ACK);
 }
 
 simtime_t UpperMacContext::getPifsTime() const
@@ -91,12 +102,17 @@ simtime_t UpperMacContext::getRifsTime() const
 
 int UpperMacContext::getCwMin(int accessCategory) const
 {
-    return dataFrameMode->getCwMin((AccessCategory)accessCategory);
+    return dataFrameMode->getCwMin(mapAC(accessCategory));
 }
 
 int UpperMacContext::getCwMax(int accessCategory) const
 {
-    return dataFrameMode->getCwMax((AccessCategory)accessCategory);
+    return dataFrameMode->getCwMax(mapAC(accessCategory));
+}
+
+int UpperMacContext::getCwMulticast(int accessCategory) const
+{
+    return dataFrameMode->getCwMin(mapAC(accessCategory));  //TODO check
 }
 
 int UpperMacContext::getShortRetryLimit() const
@@ -111,7 +127,7 @@ int UpperMacContext::getRtsThreshold() const
 
 simtime_t UpperMacContext::getTxopLimit(int accessCategory) const
 {
-    return dataFrameMode->getTxopLimit((AccessCategory)accessCategory);
+    return dataFrameMode->getTxopLimit(mapAC(accessCategory));
 }
 
 simtime_t UpperMacContext::getAckTimeout() const
@@ -166,13 +182,6 @@ Ieee80211ACKFrame *UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *fram
     else
         ackFrame->setDuration(frameToAck->getDuration() - getSifsTime() - basicFrameMode->getDuration(LENGTH_ACK));
     return ackFrame;
-}
-
-Ieee80211DataOrMgmtFrame *UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const    //FIXME completely misleading name, random functionality
-{
-    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-    frame->setDuration(0);
-    return frame;
 }
 
 double UpperMacContext::computeFrameDuration(int bits, double bitrate) const

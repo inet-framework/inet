@@ -262,6 +262,17 @@ void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int 
     context->transmitContentionFrame(txIndex, frame, context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMin(ac), context->getCwMax(ac), context->getSlotTime(), retryCount, this);
 }
 
+void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame)
+{
+    transmitMulticastContentionFrame(frame, defaultTxIndex, defaultAccessCategory);
+}
+
+void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, int ac)
+{
+    setOperation(TRANSMIT_CONTENTION_FRAME);
+    context->transmitContentionFrame(txIndex, frame, context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMulticast(ac), context->getCwMulticast(ac), context->getSlotTime(), 0, this);
+}
+
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);

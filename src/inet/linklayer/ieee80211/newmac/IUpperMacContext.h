@@ -40,6 +40,7 @@ class IUpperMacContext
         virtual ~IUpperMacContext() {}
 
         virtual const MACAddress& getAddress() const = 0;
+        virtual int getNumAccessCategories() const = 0;
 
         virtual simtime_t getSlotTime() const = 0;
         virtual simtime_t getAifsTime(int accessCategory) const = 0;
@@ -51,6 +52,7 @@ class IUpperMacContext
 
         virtual int getCwMin(int accessCategory) const = 0;
         virtual int getCwMax(int accessCategory) const = 0;
+        virtual int getCwMulticast(int accessCategory) const = 0;
         virtual int getShortRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
         virtual simtime_t getTxopLimit(int accessCategory) const = 0;
@@ -63,7 +65,6 @@ class IUpperMacContext
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const = 0;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const = 0;
         virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const = 0;
-        virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const = 0;
 
         virtual double computeFrameDuration(int bits, double bitrate) const = 0;
         virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) const = 0;

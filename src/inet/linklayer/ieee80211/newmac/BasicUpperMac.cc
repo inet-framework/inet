@@ -87,7 +87,9 @@ IUpperMacContext *BasicUpperMac::createContext()
         shortRetryLimit = 7;
     ASSERT(shortRetryLimit > 0);
 
-    return new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, immediateTx, contentionTx);
+    bool useEDCA = false; //TODO
+
+    return new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, useEDCA, immediateTx, contentionTx);
 }
 
 void BasicUpperMac::handleMessage(cMessage *msg)
@@ -133,7 +135,6 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     frame->setTransmitterAddress(context->getAddress());
     frame->setSequenceNumber(sequenceNumber);
     sequenceNumber = (sequenceNumber + 1) % 4096;    //XXX seqNum must be checked upon reception of frames!
-    context->setDataBitrate(frame);
     if (frameExchange)
         transmissionQueue.push_back(frame);
     else {
@@ -152,14 +153,15 @@ void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             sendCts(rtsFrame);
         }
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
-            sendAck(dataOrMgmtFrame);
+            if (!context->isBroadcast(frame) && !context->isMulticast(frame))
+                sendAck(dataOrMgmtFrame);
             mac->sendUp(dataOrMgmtFrame);
         }
         else if (frameExchange) {
             bool processed = frameExchange->lowerFrameReceived(frame);
             if (!processed) {
-                EV_INFO << "Unexpected frame " << frame->getName() << "\n";
-                // TODO: do something
+                EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
+                delete frame;
             }
         }
         else {
@@ -190,11 +192,22 @@ void BasicUpperMac::internalCollision(ITxCallback *callback, int txIndex)
 void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame)
 {
     ASSERT(!frameExchange);
-    bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
-    if (useRtsCts)
-        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, 0, AccessCategory::AC_LEGACY);
+
+    int txIndex = 0; //TODO
+    int accessCategory = AccessCategory::AC_LEGACY; //TODO
+    if (context->isBroadcast(frame) || context->isMulticast(frame))
+        context->setBasicBitrate(frame);
     else
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, 0, AccessCategory::AC_LEGACY);
+        context->setDataBitrate(frame);
+
+    bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
+    if (context->isBroadcast(frame) || context->isMulticast(frame))
+        frameExchange = new SendMulticastDataFrameExchange(this, context, this, frame, txIndex, accessCategory);
+    else if (useRtsCts)
+        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, txIndex, accessCategory);
+    else
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, txIndex, accessCategory);
+
     frameExchange->start();
 }
 

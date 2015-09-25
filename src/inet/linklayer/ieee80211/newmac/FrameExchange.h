@@ -85,6 +85,8 @@ class StepBasedFrameExchange : public FrameExchange
         // operations that can be called from doStep()
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, int accessCategory);
+        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame);
+        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, int accessCategory);
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void expectReply(simtime_t timeout);

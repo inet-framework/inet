@@ -175,7 +175,6 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
     }
 }
 
-
 //------------------------------
 
 SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, int accessCategory) :
@@ -225,6 +224,57 @@ void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
         case 0: if (++retryCount < context->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
         default: ASSERT(false);
     }
+}
+
+//------------------------------
+
+SendMulticastDataFrameExchange::SendMulticastDataFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, int accessCategory) :
+    FrameExchange(ownerModule, context, callback), dataFrame(dataFrame), txIndex(txIndex), accessCategory(accessCategory)
+{
+    ASSERT(context->isBroadcast(dataFrame) || context->isMulticast(dataFrame));
+    dataFrame->setDuration(0);
+}
+
+SendMulticastDataFrameExchange::~SendMulticastDataFrameExchange()
+{
+    delete dataFrame;
+}
+
+void SendMulticastDataFrameExchange::start()
+{
+    transmitFrame();
+}
+
+bool SendMulticastDataFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
+{
+    return false;  // not ours
+}
+
+void SendMulticastDataFrameExchange::transmissionComplete(int txIndex)
+{
+    reportSuccess();
+}
+
+void SendMulticastDataFrameExchange::internalCollision(int txIndex)
+{
+    if (++retryCount < context->getShortRetryLimit()) {
+        dataFrame->setRetry(true);
+        transmitFrame();
+    }
+    else {
+        reportFailure();
+    }
+}
+
+void SendMulticastDataFrameExchange::handleSelfMessage(cMessage *msg)
+{
+    ASSERT(false);
+}
+
+void SendMulticastDataFrameExchange::transmitFrame()
+{
+    int ac = accessCategory;  // abbreviate
+    context->transmitContentionFrame(txIndex, dataFrame->dup(), context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMulticast(ac), context->getCwMulticast(ac), context->getSlotTime(), 0, this);
 }
 
 } // namespace ieee80211

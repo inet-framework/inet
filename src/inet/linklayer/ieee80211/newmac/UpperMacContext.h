@@ -43,22 +43,25 @@ class INET_API UpperMacContext : public cOwnedObject, public IUpperMacContext
         const IIeee80211Mode *controlFrameMode = nullptr;
         int shortRetryLimit;
         int rtsThreshold;
+        bool useEDCA;
         IImmediateTx *immediateTx;
         IContentionTx **contentionTx;
 
     protected:
+        AccessCategory mapAC(int accessCategory) const;
         Ieee80211Frame *setBitrate(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
 
     public:
         UpperMacContext(const MACAddress& address, const IIeee80211Mode *dataFrameMode,
                 const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-                int shortRetryLimit, int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx);
+                int shortRetryLimit, int rtsThreshold, bool useEDCA, IImmediateTx *immediateTx, IContentionTx **contentionTx);
         virtual ~UpperMacContext() {}
 
         virtual const char *getName() const override; // cObject
         virtual std::string info() const override; // cObject
 
         virtual const MACAddress& getAddress() const override;
+        virtual int getNumAccessCategories() const override;
 
         virtual simtime_t getSlotTime() const override;
         virtual simtime_t getAifsTime(int accessCategory) const override;
@@ -70,6 +73,7 @@ class INET_API UpperMacContext : public cOwnedObject, public IUpperMacContext
 
         virtual int getCwMin(int accessCategory) const override;
         virtual int getCwMax(int accessCategory) const override;
+        virtual int getCwMulticast(int accessCategory) const override;
         virtual int getShortRetryLimit() const override;
         virtual int getRtsThreshold() const override;
         virtual simtime_t getTxopLimit(int accessCategory) const override;
@@ -82,7 +86,6 @@ class INET_API UpperMacContext : public cOwnedObject, public IUpperMacContext
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const override;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const override;
         virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const override;
-        virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const override;
 
         virtual double computeFrameDuration(int bits, double bitrate) const override;
         virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) const override;
