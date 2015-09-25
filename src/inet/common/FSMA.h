@@ -54,42 +54,42 @@ namespace inet {
     bool ___is_event = true;
     bool ___exit = false;
     int ___c = 0;
-    cFSM ___fsm = fsm;
-    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm->getStateName())))
+    cFSM& ___fsm = fsm;
+    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm.getStateName())))
     {
-        if (condition_seen = false, ___exit = true, ___fsm->getState() == X)
+        if (transition_seen = false, ___exit = true, ___fsm.getState() == X)
         {
             if (!___is_event)
             {
-                if (condition_seen)
+                if (transition_seen)
                     throw cRuntimeError("...");
                 // enter code
             }
-            condition_seen = true; if (isFoo && ___is_event)
+            transition_seen = true; if (isFoo && ___is_event)
             {
-                EV_DEBUG << "firing " << XY << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << XY << " transition for " << ___fsm.getName() << endl;
                 doFoo;
-                ___fsm->setState(Y, "Y");
+                ___fsm.setState(Y, "Y");
                 ___is_event = false;
                 ___exit = false;
                 continue;
             }
-            condition_seen = true; if (isFooBar && !___is_event)
+            transition_seen = true; if (isFooBar && !___is_event)
             {
-                EV_DEBUG << "firing " << XZ << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << XZ << " transition for " << ___fsm.getName() << endl;
                 doFooBar;
-                ___fsm->setState(Z, "Z");
+                ___fsm.setState(Z, "Z");
                 ___exit = false;
                 continue;
             }
         }
-        if (condition_seen = false, ___exit = true, ___fsm->getState() == Y)
+        if (transition_seen = false, ___exit = true, ___fsm.getState() == Y)
         {
-            condition_seen = true; if (isBar && ___is_event)
+            transition_seen = true; if (isBar && ___is_event)
             {
-                EV_DEBUG << "firing " << YX << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << YX << " transition for " << ___fsm.getName() << endl;
                 doVar;
-                ___fsm->setState(X, "X");
+                ___fsm.setState(X, "X");
                 ___is_event = false;
                 ___exit = false;
                 continue;
@@ -101,47 +101,48 @@ namespace inet {
 #define FSMA_Switch(fsm) \
     bool ___is_event = true; \
     bool ___exit = false; \
-    bool ___condition_seen = false; \
+    bool ___transition_seen = false; \
     int ___c = 0; \
-    cFSM *___fsm = &fsm; \
-    EV_DEBUG << "processing event in state machine " << (fsm).getName() << endl; \
-    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, (fsm).getStateName()), 0)))
+    cFSM& ___fsm = (fsm); \
+    EV_DEBUG << "FSM " << ___fsm.getName() << ": processing event in state " << ___fsm.getStateName() << "\n"; \
+    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm.getStateName()), 0)))
 
 #define FSMA_Print(exiting) \
-    (EV_DEBUG << "FSM " << ___fsm->getName() \
-              << ((exiting) ? ": leaving state  " : ": entering state ") \
-              << ___fsm->getStateName() << endl)
+    (EV_DEBUG << "FSM " << ___fsm.getName() << ((exiting) ? ": leaving state " : ": entering state ") \
+              << ___fsm.getStateName() << endl)
 
-#define FSMA_State(s)    if (___condition_seen = false, ___exit = true, ___fsm->getState() == (s))
+#define FSMA_State(s)    if (___transition_seen = false, ___exit = true, ___fsm.getState() == (s))
+
+#define FSMA_Enter(action) \
+    if (!___is_event) \
+    { \
+        if (___transition_seen) \
+            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code"); \
+        action; \
+    }
 
 #define FSMA_Event_Transition(transition, condition, target, action) \
-    ___condition_seen = true; if ((condition) && ___is_event) \
+    ___transition_seen = true; if ((condition) && ___is_event) \
     { \
         ___is_event = false; \
         FSMA_Transition(transition, (condition), target, action)
 
 #define FSMA_No_Event_Transition(transition, condition, target, action) \
-    ___condition_seen = true; if ((condition) && !___is_event) \
+    ___transition_seen = true; if ((condition) && !___is_event) \
     { \
         FSMA_Transition(transition, (condition), target, action)
 
 #define FSMA_Transition(transition, condition, target, action) \
     FSMA_Print(true); \
-    EV_DEBUG << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
+    EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, taking transition \"" << #transition << "\" to state " << #target << endl; \
     action; \
-    ___fsm->setState(target, #target); \
+    ___fsm.setState(target, #target); \
+    EV_DEBUG << "FSM " << ___fsm.getName() << ": done processing associated actions\n"; \
     FSMA_Print(false); \
     ___exit = false; \
     continue; \
     }
 
-#define FSMA_Enter(action) \
-    if (!___is_event) \
-    { \
-        if (___condition_seen) \
-            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code"); \
-        action; \
-    }
 
 #if OMNETPP_VERSION < 0x500
 #define E_INFLOOP    eINFLOOP
