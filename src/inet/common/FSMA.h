@@ -104,12 +104,15 @@ namespace inet {
     bool ___transition_seen = false; \
     int ___c = 0; \
     cFSM& ___fsm = (fsm); \
-    EV_DEBUG << "FSM " << ___fsm.getName() << ": processing event in state " << ___fsm.getStateName() << "\n"; \
+    bool ___logging = true; \
+    if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": processing event in state " << ___fsm.getStateName() << "\n"; \
     while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm.getStateName()), 0)))
 
+#define FSMA_SetLogging(enabled) \
+        ___logging = enabled;
+
 #define FSMA_Print(exiting) \
-    (EV_DEBUG << "FSM " << ___fsm.getName() << ((exiting) ? ": leaving state " : ": entering state ") \
-              << ___fsm.getStateName() << endl)
+    if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ((exiting) ? ": leaving state " : ": entering state ") << ___fsm.getStateName() << endl
 
 #define FSMA_State(s)    if (___transition_seen = false, ___exit = true, ___fsm.getState() == (s))
 
@@ -117,7 +120,7 @@ namespace inet {
     if (!___is_event) \
     { \
         if (___transition_seen) \
-            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code"); \
+            throw cRuntimeError(&___fsm, "FSMA_Enter() must precede all FSMA_*_Transition()'s in the code"); \
         action; \
     }
 
@@ -134,13 +137,26 @@ namespace inet {
 
 #define FSMA_Transition(transition, condition, target, action) \
     FSMA_Print(true); \
-    EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, taking transition \"" << #transition << "\" to state " << #target << endl; \
+    if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, taking transition \"" << #transition << "\" to state " << #target << endl; \
     action; \
     ___fsm.setState(target, #target); \
-    EV_DEBUG << "FSM " << ___fsm.getName() << ": done processing associated actions\n"; \
+    if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": done processing associated actions\n"; \
     FSMA_Print(false); \
     ___exit = false; \
     continue; \
+    }
+
+#define FSMA_Ignore_Event(condition) \
+    ___transition_seen = true; if ((condition) && ___is_event) \
+    { \
+        if (___logging) EV_DEBUG << "FSM " << ___fsm.getName() << ": condition \"" << #condition << "\" holds, staying in current state"<< endl; \
+        ___is_event = false; \
+    }
+
+#define FSMA_Fail_On_Unhandled_Event() \
+    ___transition_seen = true; if (___is_event) \
+    { \
+        throw cRuntimeError(&___fsm, "Unhandled event"); \
     }
 
 
