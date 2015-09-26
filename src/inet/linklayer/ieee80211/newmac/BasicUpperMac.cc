@@ -41,13 +41,17 @@ BasicUpperMac::BasicUpperMac()
 
 BasicUpperMac::~BasicUpperMac()
 {
-    delete frameExchange;
-    delete context;
-    while (!transmissionQueue.empty()) {
-        Ieee80211Frame *temp = transmissionQueue.front();
-        transmissionQueue.pop_front();
-        delete temp;
+    int n = context ? context->getNumAccessCategories() : 0;
+    for (int i = 0; i < n; i++) {
+        delete acData[i].frameExchange;
+        while (!acData[i].transmissionQueue.empty()) {
+            Ieee80211Frame *temp = acData[i].transmissionQueue.front();
+            acData[i].transmissionQueue.pop_front();
+            delete temp;
+        }
     }
+    delete[] acData;
+    delete context;
 }
 
 void BasicUpperMac::initialize()
@@ -61,10 +65,12 @@ void BasicUpperMac::initialize()
     context = createContext();
     rx->setAddress(context->getAddress());
 
+    acData = new AccessCategoryData[context->getNumAccessCategories()];
+
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
     WATCH(sequenceNumber);
-    WATCH_LIST(transmissionQueue);
+    //WATCH_LIST(transmissionQueue);
 }
 
 IUpperMacContext *BasicUpperMac::createContext()
@@ -117,8 +123,13 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     Enter_Method("upperFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
+    if (queueModule)
+        queueModule->requestPacket();  //TODO: use internal queue only! (remove queue from mgmt module)
+
+    int ac = classifyFrame(frame);
+
     // check for queue overflow
-    if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize && (int)acData[ac].transmissionQueue.size() == maxQueueSize) {
         EV << "message " << frame << " received from higher layer but MAC queue is full, dropping message\n";
         delete frame;
         return;
@@ -135,11 +146,16 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     frame->setTransmitterAddress(context->getAddress());
     frame->setSequenceNumber(sequenceNumber);
     sequenceNumber = (sequenceNumber + 1) % 4096;    //XXX seqNum must be checked upon reception of frames!
-    if (frameExchange)
-        transmissionQueue.push_back(frame);
+    if (acData[ac].frameExchange)
+        acData[ac].transmissionQueue.push_back(frame);
     else {
-        startSendDataFrameExchange(frame);
+        startSendDataFrameExchange(frame, ac);
     }
+}
+
+int BasicUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
+{
+    return intrand(context->getNumAccessCategories()); //TODO temporary hack
 }
 
 void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
@@ -157,16 +173,17 @@ void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
                 sendAck(dataOrMgmtFrame);
             mac->sendUp(dataOrMgmtFrame);
         }
-        else if (frameExchange) {
-            bool processed = frameExchange->lowerFrameReceived(frame);
+        else {
+            // offer frame to all ongoing frame exchanges
+            int n = context->getNumAccessCategories();
+            bool processed = false;
+            for (int i = 0; i < n && !processed; i++)
+                if (acData[i].frameExchange)
+                    processed = acData[i].frameExchange->lowerFrameReceived(frame);
             if (!processed) {
                 EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
                 delete frame;
             }
-        }
-        else {
-            EV_INFO << "Dropped frame " << frame->getName() << std::endl;
-            delete frame;
         }
     }
     else {
@@ -189,12 +206,13 @@ void BasicUpperMac::internalCollision(ITxCallback *callback, int txIndex)
         callback->internalCollision(txIndex);
 }
 
-void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame)
+void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int ac)
 {
-    ASSERT(!frameExchange);
+    ASSERT(!acData[ac].frameExchange);
 
-    int txIndex = 0; //TODO
-    int accessCategory = AccessCategory::AC_LEGACY; //TODO
+    IFrameExchange *frameExchange;
+    int txIndex = ac; //TODO
+
     if (context->isBroadcast(frame) || context->isMulticast(frame))
         context->setBasicBitrate(frame);
     else
@@ -202,28 +220,35 @@ void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame)
 
     bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
     if (context->isBroadcast(frame) || context->isMulticast(frame))
-        frameExchange = new SendMulticastDataFrameExchange(this, context, this, frame, txIndex, accessCategory);
+        frameExchange = new SendMulticastDataFrameExchange(this, context, this, frame, txIndex, ac);
     else if (useRtsCts)
-        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, txIndex, accessCategory);
+        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, txIndex, ac);
     else
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, txIndex, accessCategory);
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, txIndex, ac);
 
     frameExchange->start();
+    acData[ac].frameExchange = frameExchange;
 }
 
 void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
 {
     EV_INFO << "Frame exchange finished" << std::endl;
-    delete frameExchange;
-    frameExchange = nullptr;
 
-    if (queueModule)
-        queueModule->requestPacket();
+    // find ac for this frame exchange
+    int n = context->getNumAccessCategories();
+    int ac = -1;
+    for (int i = 0; i < n; i++)
+        if (acData[i].frameExchange == what)
+            ac = i;
+    ASSERT(ac != -1);
 
-    if (!transmissionQueue.empty()) {
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
-        transmissionQueue.pop_front();
-        startSendDataFrameExchange(frame);
+    delete acData[ac].frameExchange;
+    acData[ac].frameExchange = nullptr;
+
+    if (!acData[ac].transmissionQueue.empty()) {
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(acData[ac].transmissionQueue.front());
+        acData[ac].transmissionQueue.pop_front();
+        startSendDataFrameExchange(frame, ac);
     }
 }
 

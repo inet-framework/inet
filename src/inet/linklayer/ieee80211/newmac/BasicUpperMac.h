@@ -40,34 +40,30 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
     protected:
+        IPassiveQueue *queueModule = nullptr;
         Ieee80211NewMac *mac = nullptr;
         IRx *rx = nullptr;
 
-        /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
+        IUpperMacContext *context = nullptr;
+
         int maxQueueSize;
-
-        /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
         int fragmentationThreshold = 2346;
-
-        /** Messages received from upper layer and to be transmitted later */
-        Ieee80211DataOrMgmtFrameList transmissionQueue;
-
-        /** Sequence number to be assigned to the next frame */
         uint16 sequenceNumber;
 
-        /** Passive queue module to request messages from */
-        IPassiveQueue *queueModule = nullptr;
-
-        IFrameExchange *frameExchange = nullptr;
-
-        IUpperMacContext *context = nullptr;
+        struct AccessCategoryData {
+            Ieee80211DataOrMgmtFrameList transmissionQueue;
+            IFrameExchange *frameExchange = nullptr;
+        };
+        AccessCategoryData *acData = nullptr;  // dynamically allocated array
 
     protected:
         void initialize() override;
         void handleMessage(cMessage *msg) override;
         virtual void initializeQueueModule();
         virtual IUpperMacContext *createContext();
-        virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame);
+        virtual int classifyFrame(Ieee80211DataOrMgmtFrame *frame);
+
+        virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int accessCategory);
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful) override;
 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
