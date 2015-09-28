@@ -105,7 +105,8 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
     const LineSegment lineSegment(rotation.rotateVectorCounterClockwise(transmissionPosition - position), rotation.rotateVectorCounterClockwise(receptionPosition - position));
     Coord intersection1, intersection2, normal1, normal2;
     intersectionComputationCount++;
-    if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
+    bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
+    if (hasIntersections && (intersection1 != intersection2))
     {
         intersectionCount++;
         double intersectionDistance = intersection2.distance(intersection1);
