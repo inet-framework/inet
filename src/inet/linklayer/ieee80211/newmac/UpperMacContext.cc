@@ -132,22 +132,22 @@ simtime_t UpperMacContext::getTxopLimit(int accessCategory) const
 
 simtime_t UpperMacContext::getAckTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + getAckDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + basicFrameMode->getSlotTime() + getAckDuration();
 }
 
 simtime_t UpperMacContext::getCtsTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + getCtsDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + basicFrameMode->getSlotTime() + getCtsDuration();
 }
 
 simtime_t UpperMacContext::getAckDuration() const
 {
-    return basicFrameMode->getDuration(LENGTH_ACK) + basicFrameMode->getSlotTime();
+    return basicFrameMode->getDuration(LENGTH_ACK);
 }
 
 simtime_t UpperMacContext::getCtsDuration() const
 {
-    return basicFrameMode->getDuration(LENGTH_CTS) + basicFrameMode->getSlotTime();
+    return basicFrameMode->getDuration(LENGTH_CTS);
 }
 
 Ieee80211RTSFrame *UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const
