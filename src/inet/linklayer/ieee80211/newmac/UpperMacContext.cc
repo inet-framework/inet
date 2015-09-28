@@ -132,7 +132,7 @@ simtime_t UpperMacContext::getTxopLimit(int accessCategory) const
 
 simtime_t UpperMacContext::getAckTimeout() const
 {
-    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + basicFrameMode->getSlotTime() + getAckDuration();
+    return basicFrameMode->getPhyRxStartDelay() + getSifsTime() + basicFrameMode->getSlotTime() + getAckDuration(); //TODO this should *exclude* ACK duration according to the spec! ie. if there's no RXStart indication within the interval, retx should start immediately
 }
 
 simtime_t UpperMacContext::getCtsTimeout() const
