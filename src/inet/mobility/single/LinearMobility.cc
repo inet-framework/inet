@@ -45,7 +45,7 @@ void LinearMobility::initialize(int stage)
 
 void LinearMobility::move()
 {
-    double rad = PI * angle / 180;
+    double rad = M_PI * angle / 180;
     Coord direction(cos(rad), sin(rad));
     lastSpeed = direction * speed;
     double elapsedTime = (simTime() - lastUpdate).dbl();

@@ -189,8 +189,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
 
         // FIXME handle zeros properly...
-        targetPosition.x += d * cos(PI * angle / 180);
-        targetPosition.y += d * sin(PI * angle / 180);
+        targetPosition.x += d * cos(M_PI * angle / 180);
+        targetPosition.y += d * sin(M_PI * angle / 180);
         nextChange += t;
     }
     else if (!strcmp(tag, "turn")) {

@@ -49,7 +49,7 @@ void MassMobility::setTargetPosition()
 {
     angle += changeAngleByParameter->doubleValue();
     EV_DEBUG << "angle: " << angle << endl;
-    double rad = PI * angle / 180.0;
+    double rad = M_PI * angle / 180.0;
     Coord direction(cos(rad), sin(rad));
     simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
     EV_DEBUG << "interval: " << nextChangeInterval << endl;

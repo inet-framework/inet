@@ -45,7 +45,7 @@ void CircleMobility::initialize(int stage)
         cz = par("cz");
         r = par("r");
         ASSERT(r > 0);
-        startAngle = par("startAngle").doubleValue() / 180.0 * PI;
+        startAngle = par("startAngle").doubleValue() / 180.0 * M_PI;
         speed = par("speed");
         omega = speed / r;
         stationary = (omega == 0);

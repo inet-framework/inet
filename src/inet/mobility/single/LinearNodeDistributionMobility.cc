@@ -46,7 +46,7 @@ void LinearNodeDistributionMobility::initialize(int stage)
 void LinearNodeDistributionMobility::setInitialPosition()
 {
     int index = visualRepresentation->getIndex();
-    double rad = PI * orientation / 180.0;
+    double rad = M_PI * orientation / 180.0;
     Coord initialPos;
     initialPos.x = initialX;
     initialPos.y = initialY;
