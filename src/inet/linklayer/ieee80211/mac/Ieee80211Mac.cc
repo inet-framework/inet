@@ -187,10 +187,6 @@ void Ieee80211Mac::initialize(int stage)
             }
         }
 
-        ST = par("slotTime");    //added by sorin
-        if (ST == -1)
-            ST = 20e-6; //20us
-
         duplicateDetect = par("duplicateDetectionFilter");
         purgeOldTuples = par("purgeOldTuples");
         duplicateTimeOut = par("duplicateTimeOut");
@@ -213,6 +209,10 @@ void Ieee80211Mac::initialize(int stage)
             controlFrameMode = modeSet->getSlowestMode();
         else
             controlFrameMode = modeSet->getMode(bps(controlBitRate));
+
+        ST = par("slotTime");
+        if (ST == -1)
+            ST = dataFrameMode->getSlotTime();
 
         EV_DEBUG << " slotTime=" << getSlotTime() * 1e6 << "us DIFS=" << getDIFS() * 1e6 << "us";
 
