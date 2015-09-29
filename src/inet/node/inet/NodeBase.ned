@@ -51,6 +51,8 @@ module NodeBase like INetworkNode
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
         int numTunInterfaces = default(0);
+        string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
+        string osgModelColor = default(""); // tint color, no colorization by default
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
         string networkLayerType = default("IPv4NetworkLayer");
         string routingTableType = default("IPv4RoutingTable");
