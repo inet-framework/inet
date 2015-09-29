@@ -169,10 +169,11 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
     if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
         endReceptionTimer = nullptr;
     }
-    else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
+    if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
         if (endTransmissionTimer->isScheduled()) {
             EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
             cancelEvent(endTransmissionTimer);
+            delete endTransmissionTimer->removeControlInfo();
         }
     }
     radioMode = previousRadioMode = nextRadioMode = newRadioMode;
@@ -270,17 +271,22 @@ bool Radio::handleNodeStart(IDoneCallback *doneCallback)
 bool Radio::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     // NOTE: we ignore switching time during shutdown
+    cancelEvent(endSwitchTimer);
     completeRadioModeSwitch(RADIO_MODE_OFF);
+    ASSERT(endTransmissionTimer->isScheduled() == false);
     return PhysicalLayerBase::handleNodeShutdown(doneCallback);
 }
 
 void Radio::handleNodeCrash()
 {
+    cancelEvent(endSwitchTimer);
     completeRadioModeSwitch(RADIO_MODE_OFF);
+    PhysicalLayerBase::handleNodeCrash();
 }
 
 void Radio::startTransmission(cPacket *macFrame)
 {
+    ASSERT(isOperational);
     if (endTransmissionTimer->isScheduled())
         throw cRuntimeError("Received frame from upper layer while already transmitting.");
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(medium->transmitPacket(this, macFrame));
