@@ -78,6 +78,18 @@ cObject *createOneIfClassIsKnown(const char *className, const char *defaultNames
  */
 cObject *createOne(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
 
+/**
+ * Duplicate a packet together with its control info. (cPacket's dup() ignores the control info,
+ * it will be nullptr in the returned copy).
+ */
+template<typename T>
+T *dupPacketAndControlInfo(T *packet) {
+    T *copy  = packet->dup();
+    if (cObject *ctrl = packet->getControlInfo())
+        copy->setControlInfo(ctrl->dup());
+    return copy;
+}
+
 } // namespace utils
 
 } // namespace inet
