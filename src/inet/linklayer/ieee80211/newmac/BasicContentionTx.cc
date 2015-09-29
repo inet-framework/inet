@@ -114,6 +114,8 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
     // emit(stateSignal, fsm.getState()); TODO
     EV_DEBUG << "handleWithFSM: processing event " << getEventName(event) << "\n";
+    bool finallyReportInternalCollision = false;
+    bool finallyReportTransmissionComplete = false;
     FSMA_Switch(fsm) {
         FSMA_State(IDLE) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg(); frame = nullptr);
@@ -139,8 +141,12 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     IFS_AND_BACKOFF,
                     scheduleTransmissionRequest();
                     );
-            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);
-            FSMA_Ignore_Event(event==CORRUPTED_FRAME_RECEIVED);         //TODO switch to eifs
+            FSMA_Event_Transition(Use-EIFS,
+                    event == CORRUPTED_FRAME_RECEIVED,
+                    DEFER,
+                    endEifsTime = simTime() + eifs;
+                    );
+            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);  // i.e. of another Tx
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(IFS_AND_BACKOFF) {
@@ -159,7 +165,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
                     IDLE,
-                    reportInternalCollision();
+                    finallyReportInternalCollision = true; delete frame;
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
@@ -173,13 +179,17 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(TxFinished,
                     event == TRANSMISSION_FINISHED,
                     IDLE,
-                    reportTransmissionComplete();
+                    finallyReportTransmissionComplete = true;
                     );
             FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
             FSMA_Fail_On_Unhandled_Event();
         }
     }
     // emit(stateSignal, fsm.getState()); TODO
+    if (finallyReportTransmissionComplete)
+        reportTransmissionComplete();
+    if (finallyReportInternalCollision)
+        reportInternalCollision();
     if (hasGUI())
         updateDisplayString();
 }
