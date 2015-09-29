@@ -1,4 +1,7 @@
 ====== inet-3.x ======
+2015-10-12  Zoltan Bojthe
+
+    Choose correct ieee802.11 slot time for the mode.
 
 2015-06-22  ------ inet-3.0.0 released ------
 
