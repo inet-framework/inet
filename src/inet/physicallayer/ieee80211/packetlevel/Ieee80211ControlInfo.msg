@@ -24,8 +24,8 @@ cplusplus {{
 namespace inet::physicallayer;
 
 cplusplus {{
-typedef Ieee80211ModeSet * Ieee80211ModeSetPtr;
-typedef IIeee80211Mode * IIeee80211ModePtr;
+typedef const Ieee80211ModeSet * Ieee80211ModeSetPtr;
+typedef const IIeee80211Mode * IIeee80211ModePtr;
 typedef IIeee80211Band * IIeee80211BandPtr;
 typedef Ieee80211Channel * Ieee80211ChannelPtr;
 }}

@@ -52,10 +52,10 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             char opMode = configureCommand->getOpMode();
             if (opMode != 0)
                 setModeSet(Ieee80211ModeSet::getModeSet(opMode));
-            Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
+            const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
             if (modeSet != nullptr)
                 setModeSet(modeSet);
-            IIeee80211Mode *mode = configureCommand->getMode();
+            const IIeee80211Mode *mode = configureCommand->getMode();
             if (mode != nullptr)
                 setMode(mode);
             IIeee80211Band *band = configureCommand->getBand();
