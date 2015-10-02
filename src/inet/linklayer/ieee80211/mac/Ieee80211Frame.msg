@@ -160,6 +160,7 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
     uint16 qos;             // optional field, exists when type = ST_DATA_WITH_QOS
+    uint8 tid;              // FIXME this should be part of the QoS byte above!
 }
 
 //
