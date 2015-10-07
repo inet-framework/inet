@@ -20,7 +20,7 @@ package inet.examples.wireless.testnewmac;
 
 import inet.applications.ethernet.EtherAppCli;
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211NewNic;
+import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -41,10 +41,11 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211NewNic {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=112,134;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
+                macType = "Ieee80211CompatibleNewMac";
         }
         mobility: CircleMobility {
             parameters:
@@ -69,7 +70,7 @@ module ThroughputServer
             parameters:
                 @display("p=210,68,col");
         }
-        wlan: Ieee80211NewNic {
+        wlan: Ieee80211Nic {
             parameters:
                 @display("p=120,158;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
