@@ -58,7 +58,7 @@ class INET_API WirelessMacBase : public cSimpleModule
     /** @brief Called every time a message arrives*/
     virtual void handleMessage(cMessage *msg);
 
-  protected:
+  public:
     /**
      * @name Handle Messages
      * @brief Functions to redefine by the programmer

@@ -37,7 +37,7 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
 
     InterfaceEntry *interfaceEntry;
 
-  protected:
+  public:
     MACProtocolBase();
 
     virtual void initialize(int stage) override;
