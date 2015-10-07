@@ -19,19 +19,13 @@
 #define __INET_IIEEE80211MODE_H
 
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/linklayer/ieee80211/newmac/AccessCategory.h"  //TODO REMOVE -- do not reference AccessCategory from the physical layer!
 
 namespace inet {
 
 namespace physicallayer {
 
-enum AccessCategory
-{
-    AC_BK,
-    AC_BE,
-    AC_VI,
-    AC_VO,
-    AC_LEGACY
-};
+using namespace inet::ieee80211; // for the AccessCategory enum -- TODO remove!
 
 class INET_API IIeee80211PreambleMode : public IPrintableObject
 {
