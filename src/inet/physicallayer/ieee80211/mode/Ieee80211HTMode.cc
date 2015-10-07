@@ -366,6 +366,7 @@ const simtime_t Ieee80211HTMode::getTxopLimit(AccessCategory ac) const
         case AC_VI: return ms(3.008).get();
         case AC_VO: return ms(1.504).get();
         case AC_LEGACY: return 0;
+        case AC_NUMCATEGORIES: break;
     }
     throw cRuntimeError("Unknown access category = %d", ac);
     return 0;

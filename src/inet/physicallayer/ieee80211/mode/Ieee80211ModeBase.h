@@ -25,10 +25,8 @@ namespace physicallayer {
 
 class INET_API Ieee80211ModeBase : public IIeee80211Mode
 {
-    protected:
-        virtual int getAifsNumber(AccessCategory ac) const override;
-
     public:
+        virtual int getAifsNumber(AccessCategory ac) const override;
         virtual const simtime_t getAifsTime(AccessCategory ac) const override;
         virtual const simtime_t getEifsTime(const IIeee80211Mode *slowestMandatoryMode, AccessCategory ac, int ackLength) const override;
         virtual const simtime_t getDifsTime() const override;

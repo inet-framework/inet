@@ -57,7 +57,6 @@ class INET_API IIeee80211DataMode : public IPrintableObject
 class INET_API IIeee80211Mode : public IPrintableObject
 {
   protected:
-    virtual int getAifsNumber(AccessCategory ac) const = 0;
     virtual int getLegacyCwMin() const = 0;
     virtual int getLegacyCwMax() const = 0;
 
@@ -66,6 +65,7 @@ class INET_API IIeee80211Mode : public IPrintableObject
     virtual const IIeee80211HeaderMode *getHeaderMode() const = 0;
     virtual const IIeee80211DataMode *getDataMode() const = 0;
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
+    virtual int getAifsNumber(AccessCategory ac) const = 0;
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;

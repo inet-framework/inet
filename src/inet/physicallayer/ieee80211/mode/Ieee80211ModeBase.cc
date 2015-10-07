@@ -29,6 +29,7 @@ int Ieee80211ModeBase::getAifsNumber(AccessCategory ac) const
         case AC_VI: return 2;
         case AC_VO: return 2;
         case AC_LEGACY: return 2;
+        case AC_NUMCATEGORIES: break;
     }
     throw cRuntimeError("Unknown access category = %d", ac);
     return -1;
@@ -45,6 +46,7 @@ int Ieee80211ModeBase::getCwMax(AccessCategory ac) const
         case AC_VI: return legacyCwMin;
         case AC_VO: return (legacyCwMin + 1) / 2 - 1;
         case AC_LEGACY: return legacyCwMax;
+        case AC_NUMCATEGORIES: break;
     }
     throw cRuntimeError("Unknown access category = %d", ac);
     return -1;
@@ -60,6 +62,7 @@ int Ieee80211ModeBase::getCwMin(AccessCategory ac) const
         case AC_VI: return (legacyCwMin + 1) / 2 - 1;
         case AC_VO: return (legacyCwMin + 1) / 4 - 1;
         case AC_LEGACY: return legacyCwMin;
+        case AC_NUMCATEGORIES: break;
     }
     throw cRuntimeError("Unknown access category = %d", ac);
     return -1;
