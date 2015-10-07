@@ -142,8 +142,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 msgArrived = false;
                 if (!(PK(msg)->getByteLength() == expectedMessageSize)) {
                     delete msg;
-                 //   throw cTerminationException("Packetdrill error: Received data has unexpected size");
-                 throw cRuntimeError("Packetdrill error: Received data has unexpected size");
+                    throw cTerminationException("Packetdrill error: Received data has unexpected size");
                     if (!eventTimer->isScheduled() && eventCounter < numEvents - 1) {
                         eventCounter++;
                         scheduleEvent();
