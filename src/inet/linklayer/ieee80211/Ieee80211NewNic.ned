@@ -21,7 +21,7 @@ import inet.common.IHook;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.linklayer.newmac.Ieee80211NewMac;
+import inet.linklayer.ieee80211.newmac.Ieee80211NewMac;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 

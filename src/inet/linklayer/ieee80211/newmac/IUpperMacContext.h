@@ -1,0 +1,85 @@
+//
+// Copyright (C) 2015 Andras Varga
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+//
+// Author: Andras Varga
+//
+
+#ifndef __INET_IIEEE80211UPPERMACCONTEXT_H
+#define __INET_IIEEE80211UPPERMACCONTEXT_H
+
+#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "ITx.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211Frame;
+class Ieee80211DataOrMgmtFrame;
+class Ieee80211ACKFrame;
+class Ieee80211RTSFrame;
+class Ieee80211CTSFrame;
+
+class IUpperMacContext
+{
+    public:
+        IUpperMacContext() {}
+        virtual ~IUpperMacContext() {}
+
+        virtual const MACAddress& getAddress() const = 0;
+
+        virtual simtime_t getSlotTime() const = 0;
+        virtual simtime_t getAIFS() const = 0;
+        virtual simtime_t getSIFS() const = 0;
+        virtual simtime_t getDIFS() const = 0;
+        virtual simtime_t getEIFS() const = 0;
+        virtual simtime_t getPIFS() const = 0;
+        virtual simtime_t getRIFS() const = 0;
+
+        virtual int getMinCW() const = 0;
+        virtual int getMaxCW() const = 0;
+        virtual int getShortRetryLimit() const = 0;
+        virtual int getRtsThreshold() const = 0;
+
+        virtual simtime_t getAckTimeout() const = 0;
+        virtual simtime_t getAckDuration() const = 0;
+        virtual simtime_t getCtsTimeout() const = 0;
+        virtual simtime_t getCtsDuration() const = 0;
+
+        virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const = 0;
+        virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) const = 0;
+        virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const = 0;
+        virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const = 0;
+
+        virtual double computeFrameDuration(int bits, double bitrate) const = 0;
+        virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) const = 0;
+        virtual Ieee80211Frame *setDataBitrate(Ieee80211Frame *frame) const = 0;
+        virtual Ieee80211Frame *setControlBitrate(Ieee80211Frame *frame) const = 0;
+
+        virtual bool isForUs(Ieee80211Frame *frame) const = 0;
+        virtual bool isBroadcast(Ieee80211Frame *frame) const = 0;
+        virtual bool isCts(Ieee80211Frame *frame) const = 0;
+        virtual bool isAck(Ieee80211Frame *frame) const = 0;
+
+        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITx::ICallback *completionCallback) const = 0;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *completionCallback) const = 0;
+};
+
+} // namespace ieee80211
+} // namespace inet
+
+#endif
+
