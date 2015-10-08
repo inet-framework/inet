@@ -22,6 +22,7 @@ package inet.examples.old.hosttohost;
 import inet.applications.ethernet.EtherAppCli;
 import inet.common.queue.Sink;
 import inet_old.base.NotificationBoard;
+import inet_old.linklayer.ieee80211.Ieee80211NewNic;
 import inet_old.linklayer.ieee80211.Ieee80211Nic;
 import inet_old.mobility.CircleMobility;
 import inet_old.mobility.NullMobility;
@@ -46,7 +47,7 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211NewNic {
             parameters:
                 @display("p=112,134;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
@@ -77,7 +78,7 @@ module ThroughputServer
             parameters:
                 @display("p=210,68,col");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211NewNic {
             parameters:
                 @display("p=120,158;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
