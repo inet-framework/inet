@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IIEEE80211FRAMEEXCHANGE_H
-#define __INET_IIEEE80211FRAMEEXCHANGE_H
+#ifndef __INET_IFRAMEEXCHANGE_H
+#define __INET_IFRAMEEXCHANGE_H
 
 #include "MacPlugin.h"
 

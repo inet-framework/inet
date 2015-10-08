@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "ImmediateTx.h"
+#include "BasicImmediateTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "inet/common/FSMA.h"
@@ -26,40 +26,40 @@
 namespace inet {
 namespace ieee80211 {
 
-ImmediateTx::ImmediateTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac) : MacPlugin(ownerModule), mac(mac), upperMac(upperMac)
+BasicImmediateTx::BasicImmediateTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac) : MacPlugin(ownerModule), mac(mac), upperMac(upperMac)
 {
     endIfsTimer = new cMessage("endIFS");
 }
 
-ImmediateTx::~ImmediateTx()
+BasicImmediateTx::~BasicImmediateTx()
 {
     cancelAndDelete(endIfsTimer);
     delete frame;
 }
 
-void ImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, IImmediateTx::ICallback *completionCallback)
+void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, IImmediateTx::ICallback *completionCallback)
 {
-    EV_DETAIL << "ImmediateTx: transmitImmediateFrame " << frame->getName() << endl;
+    EV_DETAIL << "BasicImmediateTx: transmitImmediateFrame " << frame->getName() << endl;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     this->frame = frame;
     this->completionCallback = completionCallback;
 }
 
-void ImmediateTx::radioTransmissionFinished()
+void BasicImmediateTx::radioTransmissionFinished()
 {
     if (transmitting) {
-        EV_DETAIL << "ImmediateTx: radioTransmissionFinished()\n";
+        EV_DETAIL << "BasicImmediateTx: radioTransmissionFinished()\n";
         upperMac->transmissionComplete(completionCallback, -1);
         transmitting = false;
         frame = nullptr;
     }
 }
 
-void ImmediateTx::handleMessage(cMessage *msg)
+void BasicImmediateTx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
-        EV_DETAIL << "ImmediateTx: endIfsTimer expired\n";
+        EV_DETAIL << "BasicImmediateTx: endIfsTimer expired\n";
         transmitting = true;
         mac->sendFrame(frame);
     }

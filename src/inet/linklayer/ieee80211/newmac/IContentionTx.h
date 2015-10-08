@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IIEEE80211MACCONTENTIONTX_H
-#define __INET_IIEEE80211MACCONTENTIONTX_H
+#ifndef __INET_ICONTENTIONTX_H
+#define __INET_ICONTENTIONTX_H
 
 #include "inet/common/INETDefs.h"
 #include "ITx.h"

@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211UPPERMAC_H
-#define __INET_IEEE80211UPPERMAC_H
+#ifndef __INET_BASICUPPERMAC_H
+#define __INET_BASICUPPERMAC_H
 
 #include "MacPlugin.h"
 #include "IUpperMac.h"
@@ -34,7 +34,7 @@ namespace ieee80211 {
 
 class Ieee80211NewMac;
 
-class UpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
+class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
@@ -76,8 +76,8 @@ class UpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchang
         void sendCts(Ieee80211RTSFrame *frame);
 
     public:
-        UpperMac();
-        ~UpperMac();
+        BasicUpperMac();
+        ~BasicUpperMac();
         virtual void setContext(IUpperMacContext *context) override { this->context = context; }
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;

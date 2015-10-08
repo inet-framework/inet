@@ -17,37 +17,41 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211MACIMMEDIATETX_H
-#define __INET_IEEE80211MACIMMEDIATETX_H
+#ifndef __INET_BASICTX_H
+#define __INET_BASICTX_H
 
 #include "MacPlugin.h"
-#include "IImmediateTx.h"
+#include "ITx.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class IUpperMac;
-class IMacRadioInterface;
+class IContentionTx;
+class IImmediateTx;
 
-class ImmediateTx : public MacPlugin, public IImmediateTx
+#define MAX_NUM_CONTENTIONTX 4
+
+class BasicTx : public cSimpleModule, public ITx
 {
     protected:
-        IMacRadioInterface *mac;
-        IUpperMac *upperMac;
-        Ieee80211Frame *frame = nullptr;
-        cMessage *endIfsTimer = nullptr;
-        bool transmitting = false;
-        ICallback *completionCallback = nullptr;
+        int numContentionTx;
+        IContentionTx *contentionTx[MAX_NUM_CONTENTIONTX];
+        IImmediateTx *immediateTx = nullptr;
 
     protected:
-        virtual void handleMessage(cMessage *msg);
+        virtual void initialize() override;
+        virtual void handleMessage(cMessage *msg) override;
 
     public:
-        ImmediateTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac);
-        ~ImmediateTx();
+        BasicTx();
+        virtual ~BasicTx();
 
+        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) override;
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) override;
+
+        virtual void mediumStateChanged(bool mediumFree) override;
         virtual void radioTransmissionFinished() override;
+        virtual void lowerFrameReceived(bool isFcsOk) override;
 };
 
 } // namespace ieee80211

@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211MACRX_H
-#define __INET_IEEE80211MACRX_H
+#ifndef __INET_BASICRX_H
+#define __INET_BASICRX_H
 
 #include "IRx.h"
 #include "MacPlugin.h"
@@ -31,7 +31,7 @@ namespace ieee80211 {
 class ITx;
 class IUpperMac;
 
-class Rx : public cSimpleModule, public IRx
+class BasicRx : public cSimpleModule, public IRx
 {
     protected:
         cMessage *endNavTimer = nullptr;
@@ -50,8 +50,8 @@ class Rx : public cSimpleModule, public IRx
         virtual void recomputeMediumFree();
 
     public:
-        Rx();
-        ~Rx();
+        BasicRx();
+        ~BasicRx();
 
         virtual void setAddress(const MACAddress& address) override { this->address = address; }
         virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;

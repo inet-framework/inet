@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211MACCONTENTIONTX_H
-#define __INET_IEEE80211MACCONTENTIONTX_H
+#ifndef __INET_BASICCONTENTIONTX_H
+#define __INET_BASICCONTENTIONTX_H
 
 #include "MacPlugin.h"
 #include "IContentionTx.h"
@@ -34,7 +34,7 @@ class IMacRadioInterface;
 
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
 //TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
-class ContentionTx : public MacPlugin, public IContentionTx
+class BasicContentionTx : public MacPlugin, public IContentionTx
 {
     public:
         enum State {
@@ -87,8 +87,8 @@ class ContentionTx : public MacPlugin, public IContentionTx
         bool isIFSNecessary();
 
     public:
-        ContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex);
-        ~ContentionTx();
+        BasicContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex);
+        ~BasicContentionTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
         virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) override;

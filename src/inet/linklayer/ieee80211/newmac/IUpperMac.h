@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IIEEE80211UPPERMAC_H
-#define __INET_IIEEE80211UPPERMAC_H
+#ifndef __INET_IUPPERMAC_H
+#define __INET_IUPPERMAC_H
 
 #include "inet/common/INETDefs.h"
 #include "ITx.h"

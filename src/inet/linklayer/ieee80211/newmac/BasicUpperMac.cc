@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "UpperMac.h"
+#include "BasicUpperMac.h"
 #include "Ieee80211NewMac.h"
 #include "IUpperMacContext.h"
 #include "inet/common/queue/IPassiveQueue.h"
@@ -27,13 +27,13 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(UpperMac);
+Define_Module(BasicUpperMac);
 
-UpperMac::UpperMac()
+BasicUpperMac::BasicUpperMac()
 {
 }
 
-UpperMac::~UpperMac()
+BasicUpperMac::~BasicUpperMac()
 {
     while(!transmissionQueue.empty())
     {
@@ -43,7 +43,7 @@ UpperMac::~UpperMac()
     }
 }
 
-void UpperMac::initialize()
+void BasicUpperMac::initialize()
 {
     mac = check_and_cast<Ieee80211NewMac*>(getParentModule());  //TODO
     tx = check_and_cast<ITx*>(getModuleByPath("^.tx"));  //TODO
@@ -53,7 +53,7 @@ void UpperMac::initialize()
     initializeQueueModule();
 }
 
-void UpperMac::handleMessage(cMessage* msg)
+void BasicUpperMac::handleMessage(cMessage* msg)
 {
     if (msg->getContextPointer() != nullptr)
         ((MacPlugin *)msg->getContextPointer())->handleMessage(msg);
@@ -61,7 +61,7 @@ void UpperMac::handleMessage(cMessage* msg)
         ASSERT(false);
 }
 
-void UpperMac::initializeQueueModule()
+void BasicUpperMac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
     if (mac->par("queueModule").stringValue()[0])
@@ -74,7 +74,7 @@ void UpperMac::initializeQueueModule()
     }
 }
 
-void UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
+void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
 {
     Enter_Method("upperFrameReceived()");
     take(frame);
@@ -110,7 +110,7 @@ void UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
     }
 }
 
-void UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
+void BasicUpperMac::lowerFrameReceived(Ieee80211Frame* frame)
 {
     Enter_Method("lowerFrameReceived()");
     EV_INFO << "Lower frame received" << std::endl;
@@ -149,21 +149,21 @@ void UpperMac::lowerFrameReceived(Ieee80211Frame* frame)
     }
 }
 
-void UpperMac::transmissionComplete(ITx::ICallback *callback, int txIndex)
+void BasicUpperMac::transmissionComplete(ITx::ICallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
         callback->transmissionComplete(txIndex);
 }
 
-void UpperMac::internalCollision(ITx::ICallback *callback, int txIndex)
+void BasicUpperMac::internalCollision(ITx::ICallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
         callback->internalCollision(txIndex);
 }
 
-void UpperMac::frameExchangeFinished(IFrameExchange* what, bool successful)
+void BasicUpperMac::frameExchangeFinished(IFrameExchange* what, bool successful)
 {
     EV_INFO << "Frame exchange finished" << std::endl;
     delete frameExchange;
@@ -177,20 +177,20 @@ void UpperMac::frameExchangeFinished(IFrameExchange* what, bool successful)
     }
 }
 
-Ieee80211DataOrMgmtFrame *UpperMac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataOrMgmtFrame *BasicUpperMac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
     frame->setDuration(0);
     return frame;
 }
 
-void UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
+void BasicUpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
     tx->transmitImmediateFrame(ackFrame, context->getSIFS(), nullptr);
 }
 
-void UpperMac::sendCts(Ieee80211RTSFrame* frame)
+void BasicUpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
     tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), nullptr);

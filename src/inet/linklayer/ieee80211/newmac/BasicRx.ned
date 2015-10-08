@@ -22,7 +22,7 @@ package inet.linklayer.ieee80211.newmac;
 //
 // TODO
 //
-simple Rx like IRx
+simple BasicRx like IRx
 {
     @display("i=block/rx");
 }

@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "ContentionTx.h"
+#include "BasicContentionTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "inet/common/FSMA.h"
@@ -28,13 +28,13 @@ namespace ieee80211 {
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(Ieee80211NewMac,
-   (ContentionTx::IDLE,
-   ContentionTx::DEFER,
-   ContentionTx::BACKOFF,
-   ContentionTx::TRANSMIT,
-   ContentionTx::WAIT_IFS));
+   (BasicContentionTx::IDLE,
+   BasicContentionTx::DEFER,
+   BasicContentionTx::BACKOFF,
+   BasicContentionTx::TRANSMIT,
+   BasicContentionTx::WAIT_IFS));
 
-ContentionTx::ContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex) : MacPlugin(ownerModule), mac(mac), upperMac(upperMac), txIndex(txIndex)
+BasicContentionTx::BasicContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex) : MacPlugin(ownerModule), mac(mac), upperMac(upperMac), txIndex(txIndex)
 {
     fsm.setName("fsm");
     fsm.setState(IDLE);
@@ -44,7 +44,7 @@ ContentionTx::ContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, 
     endEIFS = new cMessage("EIFS");
 }
 
-ContentionTx::~ContentionTx()
+BasicContentionTx::~BasicContentionTx()
 {
     cancelEvent(endIFS);
     cancelEvent(endBackoff);
@@ -56,7 +56,7 @@ ContentionTx::~ContentionTx()
     delete endEIFS;
 }
 
-void ContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
+void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
 {
     ASSERT(fsm.getState() == IDLE);
     this->frame = frame;
@@ -73,7 +73,7 @@ void ContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs,
     handleWithFSM(START, frame);
 }
 
-int ContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
+int BasicContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
 {
     int cw = ((cwMin+1) << retryCount) - 1;
     if (cw > cwMax)
@@ -81,7 +81,7 @@ int ContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
     return cw;
 }
 
-void ContentionTx::handleWithFSM(EventType event, cMessage *msg)
+void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
     logState();
 //    emit(stateSignal, fsm.getState()); TODO
@@ -159,40 +159,40 @@ void ContentionTx::handleWithFSM(EventType event, cMessage *msg)
     // emit(stateSignal, fsm.getState()); TODO
 }
 
-void ContentionTx::mediumStateChanged(bool mediumFree)
+void BasicContentionTx::mediumStateChanged(bool mediumFree)
 {
     this->mediumFree = mediumFree;
     channelLastBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
-void ContentionTx::radioTransmissionFinished()
+void BasicContentionTx::radioTransmissionFinished()
 {
     handleWithFSM(TRANSMISSION_FINISHED, nullptr);
 }
 
-void ContentionTx::handleMessage(cMessage *msg)
+void BasicContentionTx::handleMessage(cMessage *msg)
 {
     handleWithFSM(TIMER, msg);
 }
 
-void ContentionTx::lowerFrameReceived(bool isFcsOk)
+void BasicContentionTx::lowerFrameReceived(bool isFcsOk)
 {
     useEIFS = !isFcsOk;
 }
 
-void ContentionTx::scheduleIFSPeriod(simtime_t deferDuration)
+void BasicContentionTx::scheduleIFSPeriod(simtime_t deferDuration)
 {
     scheduleAt(simTime() + deferDuration, endIFS);
 }
 
-void ContentionTx::scheduleEIFSPeriod(simtime_t duration)
+void BasicContentionTx::scheduleEIFSPeriod(simtime_t duration)
 {
     cancelEvent(endEIFS);
     scheduleAt(simTime() + duration, endEIFS);
 }
 
-void ContentionTx::scheduleIFS()
+void BasicContentionTx::scheduleIFS()
 {
     ASSERT(mediumFree);
 //    simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
@@ -207,24 +207,24 @@ void ContentionTx::scheduleIFS()
 }
 
 
-void ContentionTx::updateBackoffPeriod()
+void BasicContentionTx::updateBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
     backoffSlots -= ((int)(elapsedBackoffTime / slotTime)); //FIXME add some epsilon...?
 }
 
-void ContentionTx::scheduleBackoffPeriod(int backoffSlots)
+void BasicContentionTx::scheduleBackoffPeriod(int backoffSlots)
 {
     simtime_t backoffPeriod = backoffSlots * slotTime;
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
-void ContentionTx::logState()
+void BasicContentionTx::logState()
 {
     EV  << "state information: " << "state = " << fsm.getStateName() << ", backoffPeriod = " << backoffPeriod << endl;
 }
 
-bool ContentionTx::isIFSNecessary()
+bool BasicContentionTx::isIFSNecessary()
 {
     simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
     return elapsedFreeChannelTime < ifs || (useEIFS && elapsedFreeChannelTime < eifs);

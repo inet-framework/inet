@@ -17,25 +17,25 @@
 // Author: Andras Varga
 //
 
-#include "Rx.h"
+#include "BasicRx.h"
 #include "ITx.h"
 #include "IUpperMac.h"
 
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(Rx);
+Define_Module(BasicRx);
 
-Rx::Rx()
+BasicRx::BasicRx()
 {
 }
 
-Rx::~Rx()
+BasicRx::~BasicRx()
 {
     delete cancelEvent(endNavTimer);
 }
 
-void Rx::initialize()
+void BasicRx::initialize()
 {
     tx = check_and_cast<ITx*>(getModuleByPath("^.tx"));  //TODO
     upperMac = check_and_cast<IUpperMac*>(getModuleByPath("^.upperMac")); //TODO
@@ -43,7 +43,7 @@ void Rx::initialize()
     recomputeMediumFree();
 }
 
-void Rx::handleMessage(cMessage* msg)
+void BasicRx::handleMessage(cMessage* msg)
 {
     if (msg->getContextPointer() != nullptr)
         ((MacPlugin *)msg->getContextPointer())->handleMessage(msg);
@@ -55,7 +55,7 @@ void Rx::handleMessage(cMessage* msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-void Rx::lowerFrameReceived(Ieee80211Frame* frame)
+void BasicRx::lowerFrameReceived(Ieee80211Frame* frame)
 {
     Enter_Method("lowerFrameReceived()");
     take(frame);
@@ -77,12 +77,12 @@ void Rx::lowerFrameReceived(Ieee80211Frame* frame)
 
 }
 
-bool Rx::isFcsOk(Ieee80211Frame* frame) const
+bool BasicRx::isFcsOk(Ieee80211Frame* frame) const
 {
     return !frame->hasBitError();
 }
 
-void Rx::recomputeMediumFree()
+void BasicRx::recomputeMediumFree()
 {
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
@@ -91,21 +91,21 @@ void Rx::recomputeMediumFree()
         tx->mediumStateChanged(mediumFree);
 }
 
-void Rx::receptionStateChanged(IRadio::ReceptionState state)
+void BasicRx::receptionStateChanged(IRadio::ReceptionState state)
 {
     Enter_Method("receptionStateChanged()");
     receptionState = state;
     recomputeMediumFree();
 }
 
-void Rx::transmissionStateChanged(IRadio::TransmissionState state)
+void BasicRx::transmissionStateChanged(IRadio::TransmissionState state)
 {
     Enter_Method("transmissionStateChanged()");
     transmissionState = state;
     recomputeMediumFree();
 }
 
-void Rx::setNav(simtime_t navInterval)    //TODO: this should rather be called setOrExtendNav()!
+void BasicRx::setNav(simtime_t navInterval)    //TODO: this should rather be called setOrExtendNav()!
 {
     ASSERT(navInterval >= 0);
     if (navInterval > 0) {

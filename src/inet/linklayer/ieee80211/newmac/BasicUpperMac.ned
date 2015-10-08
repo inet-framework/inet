@@ -17,13 +17,12 @@
 // Author: Andras Varga
 //
 
-
 package inet.linklayer.ieee80211.newmac;
 
 //
 // TODO
 //
-simple Tx like ITx
+simple BasicUpperMac like IUpperMac
 {
-    @display("i=block/tx");
+    @display("i=block/layer");
 }

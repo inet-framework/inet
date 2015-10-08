@@ -17,31 +17,31 @@
 // Author: Andras Varga
 //
 
-#include "Tx.h"
-#include "ContentionTx.h"
-#include "ImmediateTx.h"
+#include "BasicTx.h"
+#include "BasicContentionTx.h"
+#include "BasicImmediateTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(Tx);
+Define_Module(BasicTx);
 
-Tx::Tx()
+BasicTx::BasicTx()
 {
     for (int i = 0; i < MAX_NUM_CONTENTIONTX; i++)
         contentionTx[i] = nullptr;
 }
 
-Tx::~Tx()
+BasicTx::~BasicTx()
 {
     for (int i = 0; i < MAX_NUM_CONTENTIONTX; i++)
         delete contentionTx[i];
     delete immediateTx;
 }
 
-void Tx::initialize()
+void BasicTx::initialize()
 {
     IMacRadioInterface *mac = check_and_cast<IMacRadioInterface *>(getParentModule());  //TODO
     IUpperMac *upperMac = check_and_cast<IUpperMac *>(getModuleByPath("^.upperMac"));  //TODO
@@ -49,12 +49,12 @@ void Tx::initialize()
     numContentionTx = 4; //TODO
     ASSERT(numContentionTx <= MAX_NUM_CONTENTIONTX);
     for (int i = 0; i < numContentionTx; i++)
-        contentionTx[i] = new ContentionTx(this, mac, upperMac, i); //TODO factory method
-    immediateTx = new ImmediateTx(this, mac, upperMac); //TODO factory method
+        contentionTx[i] = new BasicContentionTx(this, mac, upperMac, i); //TODO factory method
+    immediateTx = new BasicImmediateTx(this, mac, upperMac); //TODO factory method
 
 }
 
-void Tx::handleMessage(cMessage *msg)
+void BasicTx::handleMessage(cMessage *msg)
 {
     if (msg->getContextPointer() != nullptr)
         ((MacPlugin *)msg->getContextPointer())->handleMessage(msg);
@@ -62,7 +62,7 @@ void Tx::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void Tx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
+void BasicTx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
 {
     Enter_Method("transmitContentionFrame()");
     ASSERT(txIndex >= 0 && txIndex < numContentionTx);
@@ -70,21 +70,21 @@ void Tx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t i
     contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, completionCallback);
 }
 
-void Tx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback)
+void BasicTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback)
 {
     Enter_Method("transmitImmediateFrame()");
     take(frame);
     immediateTx->transmitImmediateFrame(frame, ifs, completionCallback);
 }
 
-void Tx::mediumStateChanged(bool mediumFree)
+void BasicTx::mediumStateChanged(bool mediumFree)
 {
     Enter_Method("mediumState(%s)", mediumFree ? "FREE" : "BUSY");
     for (int i = 0; i < numContentionTx; i++)
         contentionTx[i]->mediumStateChanged(mediumFree);
 }
 
-void Tx::radioTransmissionFinished()
+void BasicTx::radioTransmissionFinished()
 {
     Enter_Method("radioTransmissionFinished()");
     immediateTx->radioTransmissionFinished();
@@ -92,7 +92,7 @@ void Tx::radioTransmissionFinished()
         contentionTx[i]->radioTransmissionFinished();
 }
 
-void Tx::lowerFrameReceived(bool isFcsOk)
+void BasicTx::lowerFrameReceived(bool isFcsOk)
 {
     Enter_Method("lowerFrameReceived(%s)", isFcsOk ? "OK" : "CORRUPT");
     for (int i = 0; i < numContentionTx; i++)

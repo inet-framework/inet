@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211FRAMEEXCHANGE_H
-#define __INET_IEEE80211FRAMEEXCHANGE_H
+#ifndef __INET_FRAMEEXCHANGE_H
+#define __INET_FRAMEEXCHANGE_H
 
 #include "IFrameExchange.h"
 #include "ITx.h"
