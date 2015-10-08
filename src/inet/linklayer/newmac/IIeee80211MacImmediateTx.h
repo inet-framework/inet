@@ -16,9 +16,8 @@
 #ifndef __MAC_IIEEE80211MACIMMEDIATETX_H_
 #define __MAC_IIEEE80211MACIMMEDIATETX_H_
 
-#include "Ieee80211MacPlugin.h"
-#include "inet/common/FSMA.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/INETDefs.h"
+#include "IIeee80211MacTx.h"
 
 namespace inet {
 
@@ -27,13 +26,10 @@ namespace ieee80211 {
 class IIeee80211MacImmediateTx
 {
     public:
-        class ICallback {
-            public:
-               virtual void immediateTransmissionComplete() = 0;
-        };
-
+        typedef IIeee80211MacTx::ICallback ICallback;
+        virtual ~IIeee80211MacImmediateTx() {}
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) = 0;
-        virtual void transmissionFinished() = 0;
+        virtual void radioTransmissionFinished() = 0;
 };
 
 }

@@ -26,27 +26,22 @@ namespace ieee80211 {
 
 class Ieee80211UpperMacContext;
 
-class Ieee80211FrameExchange : public Ieee80211MacPlugin /*TODO remove this!*/, public IIeee80211FrameExchange
+class Ieee80211FrameExchange : public Ieee80211MacPlugin, public IIeee80211FrameExchange, public IIeee80211MacTx::ICallback
 {
     protected:
         IIeee80211UpperMacContext *context = nullptr;
         IFinishedCallback *finishedCallback = nullptr;
 
-        Ieee80211UpperMac *getUpperMac() { return (Ieee80211UpperMac *)mac->upperMac; }  //FIXME remove! todo remove 'mac' ptr!
-
     protected:
         virtual void reportSuccess();
         virtual void reportFailure();
 
+        virtual void transmissionFinished() = 0;
+        virtual void transmissionComplete(int txIndex) override {transmissionFinished();}  //TODO merge the two calls...
+        virtual void internalCollision(int txIndex) override {}  //TODO handle...
     public:
-        //TODO init context!
         Ieee80211FrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback) : Ieee80211MacPlugin(mac), context(context), finishedCallback(callback) {}
         virtual ~Ieee80211FrameExchange() {}
-
-        virtual void start() = 0;
-
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
-        virtual void transmissionFinished() = 0;
 };
 
 class Ieee80211FSMBasedFrameExchange : public Ieee80211FrameExchange
@@ -82,7 +77,7 @@ class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
         virtual void processTimeout(int step) = 0;
 
         void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
-        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount);
+        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         void expectReply(simtime_t timeout);
         void gotoStep(int step); // ~setNextStep()

@@ -39,7 +39,7 @@ class Ieee80211MacImmediateTx : public Ieee80211MacPlugin, public IIeee80211MacI
         ~Ieee80211MacImmediateTx();
 
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) override;
-        virtual void transmissionFinished() override;
+        virtual void radioTransmissionFinished() override;
 };
 
 }

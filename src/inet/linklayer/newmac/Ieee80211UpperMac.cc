@@ -20,7 +20,6 @@
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211NewMac.h"
 #include "IIeee80211MacTx.h"
-#include "IIeee80211MacImmediateTx.h"
 #include "IIeee80211UpperMacContext.h"
 #include "inet/common/ModuleAccess.h"
 #include "Ieee80211FrameExchanges.h"
@@ -135,13 +134,13 @@ Ieee80211DataOrMgmtFrame *Ieee80211UpperMac::buildBroadcastFrame(Ieee80211DataOr
 void Ieee80211UpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
-    mac->immediateTx->transmitImmediateFrame(ackFrame, context->getSIFS(), this);
+    mac->tx->transmitImmediateFrame(ackFrame, context->getSIFS(), this);
 }
 
 void Ieee80211UpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
-    mac->immediateTx->transmitImmediateFrame(ctsFrame, context->getSIFS(), this);
+    mac->tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), this);
 }
 
 
@@ -159,16 +158,16 @@ void Ieee80211UpperMac::frameExchangeFinished(IIeee80211FrameExchange* what, boo
     }
 }
 
-void Ieee80211UpperMac::transmissionComplete(IIeee80211MacTx *tx)
+void Ieee80211UpperMac::transmissionComplete(int txIndex)
 {
-    // TODO: Select the corresponding frame exchange to notify it
-    frameExchange->transmissionFinished();
+    //TODO
 }
 
-void Ieee80211UpperMac::immediateTransmissionComplete()
+void Ieee80211UpperMac::internalCollision(int txIndex)
 {
-    // Finished immediate frame tx
+    //TODO
 }
+
 
 }
 

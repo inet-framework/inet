@@ -41,10 +41,10 @@ void Ieee80211MacImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simt
     this->completionCallback = completionCallback;
 }
 
-void Ieee80211MacImmediateTx::transmissionFinished()
+void Ieee80211MacImmediateTx::radioTransmissionFinished()
 {
     if (transmitting) {
-        completionCallback->immediateTransmissionComplete();
+        completionCallback->transmissionComplete(-1);
         transmitting = false;
         frame = nullptr;
     }

@@ -25,7 +25,6 @@
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211MacRx.h"
 #include "Ieee80211MacTx.h"
-#include "Ieee80211MacImmediateTx.h"
 #include "Ieee80211UpperMacContext.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -50,7 +49,6 @@ Ieee80211NewMac::~Ieee80211NewMac()
 {
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
-    delete context;
 }
 
 /****************************************************************
@@ -75,8 +73,7 @@ void Ieee80211NewMac::initialize(int stage)
 
         upperMac = new Ieee80211UpperMac(this);
         reception = new Ieee80211MacRx(this);
-        tx = new Ieee80211MacTx(this);
-        immediateTx = new Ieee80211MacImmediateTx(this);
+        tx = new Ieee80211MacTx(this, 1);
 
         // initialize parameters
         double bitrate = par("bitrate");
@@ -92,7 +89,6 @@ void Ieee80211NewMac::initialize(int stage)
             shortRetryLimit = 7;
         ASSERT(shortRetryLimit > 0);
 
-        MACAddress address;
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
@@ -103,8 +99,7 @@ void Ieee80211NewMac::initialize(int stage)
         else
             address.setAddress(addressString);
 
-        context = new Ieee80211UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold);
-
+        IIeee80211UpperMacContext *context = new Ieee80211UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, tx);
         upperMac->setContext(context);
         reception->setAddress(address);
 
@@ -167,7 +162,6 @@ InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // address
-    const MACAddress& address = context->getAddress();
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
@@ -257,9 +251,8 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
 
         if (transmissionFinished) {
-            immediateTx->transmissionFinished();
-            tx->transmissionFinished();
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            tx->radioTransmissionFinished();
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER);  //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }
         reception->transmissionStateChanged(transmissionState);
         tx->mediumStateChanged(reception->isMediumFree());
@@ -315,11 +308,6 @@ bool Ieee80211NewMac::handleNodeShutdown(IDoneCallback *doneCallback)
 // FIXME
 void Ieee80211NewMac::handleNodeCrash()
 {
-}
-
-simtime_t Ieee80211NewMac::getSlotTime() const
-{
-    return context->getSlotTime();
 }
 
 }

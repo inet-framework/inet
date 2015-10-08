@@ -15,16 +15,17 @@
 
 #include "Ieee80211UpperMacContext.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "IIeee80211MacTx.h"
 
 namespace inet {
 namespace ieee80211 {
 
 Ieee80211UpperMacContext::Ieee80211UpperMacContext(const MACAddress& address,
         const IIeee80211Mode *dataFrameMode, const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-        int shortRetryLimit,  int rtsThreshold) :
+        int shortRetryLimit,  int rtsThreshold, IIeee80211MacTx *tx) :
                     address(address),
                     dataFrameMode(dataFrameMode), basicFrameMode(basicFrameMode), controlFrameMode(controlFrameMode),
-                    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold)
+                    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), tx(tx)
 {
 }
 
@@ -78,12 +79,12 @@ int Ieee80211UpperMacContext::getMaxCW() const
     return dataFrameMode->getCwMax(); //TODO naming
 }
 
-int Ieee80211UpperMacContext::getShortRetryLimit()
+int Ieee80211UpperMacContext::getShortRetryLimit() const
 {
     return shortRetryLimit;
 }
 
-int Ieee80211UpperMacContext::getRtsThreshold()
+int Ieee80211UpperMacContext::getRtsThreshold() const
 {
     return rtsThreshold;
 }
@@ -98,7 +99,7 @@ simtime_t Ieee80211UpperMacContext::getCtsTimeout() const
     return 2*MAX_PROPAGATION_DELAY + getSIFS() +  basicFrameMode->getDuration(LENGTH_CTS);
 }
 
-Ieee80211RTSFrame *Ieee80211UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *frame)
+Ieee80211RTSFrame *Ieee80211UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) const
 {
     Ieee80211RTSFrame *rtsFrame = new Ieee80211RTSFrame("RTS");
     rtsFrame->setTransmitterAddress(address);
@@ -109,7 +110,7 @@ Ieee80211RTSFrame *Ieee80211UpperMacContext::buildRtsFrame(Ieee80211DataOrMgmtFr
     return rtsFrame;
 }
 
-Ieee80211CTSFrame *Ieee80211UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rtsFrame)
+Ieee80211CTSFrame *Ieee80211UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rtsFrame) const
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
@@ -117,7 +118,7 @@ Ieee80211CTSFrame *Ieee80211UpperMacContext::buildCtsFrame(Ieee80211RTSFrame *rt
     return frame;
 }
 
-Ieee80211ACKFrame *Ieee80211UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK)
+Ieee80211ACKFrame *Ieee80211UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) const
 {
     Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("ACK");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
@@ -129,7 +130,7 @@ Ieee80211ACKFrame *Ieee80211UpperMacContext::buildAckFrame(Ieee80211DataOrMgmtFr
     return frame;
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) //FIXME completely misleading name, random functionality
+Ieee80211DataOrMgmtFrame *Ieee80211UpperMacContext::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) const //FIXME completely misleading name, random functionality
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
     frame->setDuration(0);
@@ -149,7 +150,7 @@ double Ieee80211UpperMacContext::computeFrameDuration(int bits, double bitrate) 
     return duration;
 }
 
-Ieee80211Frame *Ieee80211UpperMacContext::setBasicBitrate(Ieee80211Frame *frame)
+Ieee80211Frame *Ieee80211UpperMacContext::setBasicBitrate(Ieee80211Frame *frame) const
 {
     ASSERT(frame->getControlInfo() == nullptr);
     TransmissionRequest *ctrl = new TransmissionRequest();
@@ -158,7 +159,7 @@ Ieee80211Frame *Ieee80211UpperMacContext::setBasicBitrate(Ieee80211Frame *frame)
     return frame;
 }
 
-void Ieee80211UpperMacContext::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame)
+void Ieee80211UpperMacContext::setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame) const
 {
     if (isBroadcast(frame))
         frame->setDuration(0);
@@ -189,6 +190,16 @@ bool Ieee80211UpperMacContext::isCts(Ieee80211Frame *frame) const
 bool Ieee80211UpperMacContext::isAck(Ieee80211Frame *frame) const
 {
     return dynamic_cast<Ieee80211ACKFrame *>(frame);
+}
+
+void Ieee80211UpperMacContext::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IIeee80211MacTx::ICallback *completionCallback) const
+{
+    tx->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, completionCallback);
+}
+
+void Ieee80211UpperMacContext::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, IIeee80211MacTx::ICallback *completionCallback) const
+{
+    tx->transmitImmediateFrame(frame, ifs, completionCallback);
 }
 
 

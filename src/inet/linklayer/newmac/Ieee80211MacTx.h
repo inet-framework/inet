@@ -27,64 +27,30 @@ namespace inet {
 
 namespace ieee80211 {
 
-//TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
-//TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
+class IIeee80211MacContentionTx;
+class IIeee80211MacImmediateTx;
+
+#define MAX_NUM_CONTENTIONTX 4
+
 class Ieee80211MacTx : public Ieee80211MacPlugin, public IIeee80211MacTx
 {
-    public:
-        enum State {
-            IDLE,
-            DEFER,
-            BACKOFF,
-            WAIT_IFS,
-            TRANSMIT
-        };
-        enum EventType { START, MEDIUM_STATE_CHANGED, TRANSMISSION_FINISHED, TIMER, FRAME_ARRIVED };
+    protected:
+        int numContentionTx;
+        IIeee80211MacContentionTx *contentionTx[MAX_NUM_CONTENTIONTX];
+        IIeee80211MacImmediateTx *immediateTx = nullptr;
 
     protected:
-        // current transmission's parameters
-        Ieee80211Frame *frame = nullptr;
-        simtime_t ifs = SIMTIME_ZERO;
-        simtime_t eifs = SIMTIME_ZERO;
-        int cwMin = 0;
-        int cwMax = 0;
-        int retryCount = 0;
-        ICallback *completionCallback = nullptr;
-
-        simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
-        int backoffSlots = 0;
-        bool mediumFree = false;
-        bool useEIFS = false;
-        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-
-        cFSM fsm;
-        cMessage *endBackoff = nullptr;
-        cMessage *endIFS = nullptr;
-        cMessage *endEIFS = nullptr;
-        simtime_t backoffPeriod = SIMTIME_ZERO;
-        cMessage *frameDuration = nullptr;
-
-    protected:
-        virtual int computeCW(int cwMin, int cwMax, int retryCount);
-        void handleWithFSM(EventType event, cMessage *msg);
-        void scheduleIFS();
-        void scheduleIFSPeriod(simtime_t deferDuration);
-        void scheduleEIFSPeriod(simtime_t deferDuration);
-        void updateBackoffPeriod();
-        void scheduleBackoffPeriod(int backoffPeriod);
-        void logState();
-        void handleMessage(cMessage *msg);
-        bool isIFSNecessary();
+        virtual void handleMessage(cMessage *msg) override {}
 
     public:
-        Ieee80211MacTx(Ieee80211NewMac *mac);
-        ~Ieee80211MacTx();
+        Ieee80211MacTx(Ieee80211NewMac *mac, int numContentionTx);
+        virtual ~Ieee80211MacTx();
 
-        //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ICallback *completionCallback) override;
+        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) override;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) override;
 
         virtual void mediumStateChanged(bool mediumFree) override;
-        virtual void transmissionFinished() override;
+        virtual void radioTransmissionFinished() override;
         virtual void lowerFrameReceived(bool isFcsOk) override;
 };
 

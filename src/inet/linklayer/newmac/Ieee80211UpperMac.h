@@ -24,7 +24,6 @@
 #include "IIeee80211UpperMac.h"
 #include "IIeee80211FrameExchange.h"
 #include "IIeee80211MacTx.h"
-#include "IIeee80211MacImmediateTx.h"
 
 namespace inet {
 
@@ -34,7 +33,7 @@ class Ieee80211NewMac;
 class Ieee80211FrameExchange;
 
 
-class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback, public IIeee80211MacImmediateTx::ICallback
+class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
@@ -70,8 +69,8 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);
 
-        virtual void transmissionComplete(IIeee80211MacTx *tx) override;
-        virtual void immediateTransmissionComplete() override;
+        virtual void transmissionComplete(int txIndex) override;
+        virtual void internalCollision(int txIndex) override;
 
     public:
         Ieee80211UpperMac(Ieee80211NewMac *mac);

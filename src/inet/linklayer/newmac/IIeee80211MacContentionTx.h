@@ -13,32 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef IIEEE80211MACFRAMEEXCHANGE_H_
-#define IIEEE80211MACFRAMEEXCHANGE_H_
+#ifndef __MAC_IIEEE80211MACCONTENTIONTX_H_
+#define __MAC_IIEEE80211MACCONTENTIONTX_H_
 
-#include "Ieee80211MacPlugin.h"
+#include "inet/common/INETDefs.h"
+#include "IIeee80211MacTx.h"
 
 namespace inet {
+
 namespace ieee80211 {
 
 class Ieee80211Frame;
 
-class IIeee80211FrameExchange
+class IIeee80211MacContentionTx
 {
     public:
-        class IFinishedCallback {
-            public:
-                virtual void frameExchangeFinished(IIeee80211FrameExchange *what, bool successful) = 0;
-                virtual ~IFinishedCallback() {}
-        };
-
-    public:
-        virtual void start() = 0;
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
+        typedef IIeee80211MacTx::ICallback ICallback;
+        virtual ~IIeee80211MacContentionTx() {}
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) = 0;
+        virtual void mediumStateChanged(bool mediumFree) = 0;
+        virtual void radioTransmissionFinished() = 0;
+        virtual void lowerFrameReceived(bool isFcsOk) = 0;
 };
 
 }
-} /* namespace inet */
+
+} //namespace
 
 #endif
-

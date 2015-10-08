@@ -17,7 +17,6 @@
 #include "IIeee80211UpperMacContext.h"
 #include "Ieee80211UpperMac.h"
 #include "IIeee80211MacTx.h"
-#include "IIeee80211MacImmediateTx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -87,15 +86,17 @@ void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* fr
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->tx->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
+    int txIndex = 0; //TODO
+    context->transmitContentionFrame(txIndex, frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), context->getSlotTime(), retryCount, this);
     stepType = TRANSMIT_CONTENTION_FRAME;
 }
 
-void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount)
+void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->tx->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, retryCount, getUpperMac());
+    int txIndex = 0; //TODO
+    context->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
     stepType = TRANSMIT_CONTENTION_FRAME;
 }
 
@@ -103,7 +104,7 @@ void Ieee80211StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame* fra
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->immediateTx->transmitImmediateFrame(frame, ifs, getUpperMac());
+    context->transmitImmediateFrame(frame, ifs, this);
     stepType = TRANSMIT_IMMEDIATE_FRAME;
 }
 
