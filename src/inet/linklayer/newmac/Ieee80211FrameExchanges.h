@@ -23,7 +23,7 @@ namespace inet {
 namespace ieee80211 {
 
 class Ieee80211NewMac;
-class IIeee80211MacContext;
+class IIeee80211UpperMacContext;
 class Ieee80211DataOrMgmtFrame;
 
 class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExchange
@@ -46,7 +46,7 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExcha
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
+        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
         ~Ieee80211SendDataWithAckFrameExchange();
 };
 
@@ -60,7 +60,7 @@ class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameE
         virtual bool processReply(int step, Ieee80211Frame *frame);
         virtual void processTimeout(int step);
     public:
-        Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
+        Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame);
 };
 
 }

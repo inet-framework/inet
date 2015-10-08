@@ -33,6 +33,7 @@ namespace ieee80211 {
 class Ieee80211NewMac;
 class Ieee80211FrameExchange;
 
+
 class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback, public IIeee80211MacImmediateTx::ICallback
 {
     public:
@@ -56,7 +57,7 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, 
 
         Ieee80211FrameExchange *frameExchange = nullptr;
 
-        IIeee80211MacContext *context = nullptr; //TODO fill in!
+        IIeee80211UpperMacContext *context = nullptr; //TODO fill in!
 
     protected:
         void handleMessage(cMessage *msg);
@@ -75,7 +76,7 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, 
     public:
         Ieee80211UpperMac(Ieee80211NewMac *mac);
         ~Ieee80211UpperMac();
-        virtual void setContext(IIeee80211MacContext *context) override { this->context = context; }
+        virtual void setContext(IIeee80211UpperMacContext *context) override { this->context = context; }
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 

@@ -21,7 +21,6 @@
 #include "IIeee80211MacTx.h"
 #include "Ieee80211NewMac.h"
 #include "IIeee80211UpperMac.h"
-#include "IIeee80211MacContext.h"
 
 namespace inet {
 

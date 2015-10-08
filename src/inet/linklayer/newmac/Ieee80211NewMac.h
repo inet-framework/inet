@@ -59,7 +59,7 @@ using namespace physicallayer;
  * @ingroup macLayer
  */
 
-class IIeee80211MacContext;
+class IIeee80211UpperMacContext;
 class IIeee80211MacTx;
 class IIeee80211MacImmediateTx;
 class IIeee80211MacRx;
@@ -75,7 +75,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     IIeee80211MacTx *tx = nullptr;
     IIeee80211MacImmediateTx *immediateTx = nullptr;
 
-    IIeee80211MacContext *context = nullptr;  // owned here
+    IIeee80211UpperMacContext *context = nullptr;  // owned here
 
   protected:
     /**

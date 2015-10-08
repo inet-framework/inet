@@ -22,14 +22,14 @@ namespace inet {
 
 namespace ieee80211 {
 
-class IIeee80211MacContext;
+class IIeee80211UpperMacContext;
 class Ieee80211Frame;
 class Ieee80211DataOrMgmtFrame;
 
 class IIeee80211UpperMac
 {
     public:
-        virtual void setContext(IIeee80211MacContext *context) = 0;
+        virtual void setContext(IIeee80211UpperMacContext *context) = 0;
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
 };

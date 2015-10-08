@@ -26,7 +26,7 @@
 #include "Ieee80211MacRx.h"
 #include "Ieee80211MacTx.h"
 #include "Ieee80211MacImmediateTx.h"
-#include "Ieee80211MacContext.h"
+#include "Ieee80211UpperMacContext.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -103,7 +103,7 @@ void Ieee80211NewMac::initialize(int stage)
         else
             address.setAddress(addressString);
 
-        context = new Ieee80211MacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold);
+        context = new Ieee80211UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold);
 
         upperMac->setContext(context);
         reception->setAddress(address);

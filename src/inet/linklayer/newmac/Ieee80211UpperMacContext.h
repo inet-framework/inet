@@ -3,20 +3,20 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-#ifndef IEEE80211MACCONTEXT_H_
-#define IEEE80211MACCONTEXT_H_
+#ifndef IEEE80211UPPERMACCONTEXT_H_
+#define IEEE80211UPPERMACCONTEXT_H_
 
-#include "IIeee80211MacContext.h"
+#include "IIeee80211UpperMacContext.h"
 #include "Ieee80211NewMac.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ class Ieee80211Mode;
 
 namespace ieee80211 {
 
-class INET_API Ieee80211MacContext : public IIeee80211MacContext
+class INET_API Ieee80211UpperMacContext : public IIeee80211UpperMacContext
 {
     private:
         MACAddress address;
@@ -40,10 +40,10 @@ class INET_API Ieee80211MacContext : public IIeee80211MacContext
         int rtsThreshold;
 
     public:
-        Ieee80211MacContext(const MACAddress& address, const IIeee80211Mode *dataFrameMode,
+        Ieee80211UpperMacContext(const MACAddress& address, const IIeee80211Mode *dataFrameMode,
                 const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
                 int shortRetryLimit, int rtsThreshold);
-        virtual ~Ieee80211MacContext() {}
+        virtual ~Ieee80211UpperMacContext() {}
 
         virtual const MACAddress& getAddress() const;
 

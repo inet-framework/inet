@@ -24,12 +24,12 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211MacContext;
+class Ieee80211UpperMacContext;
 
-class Ieee80211FrameExchange : public Ieee80211MacPlugin, public IIeee80211FrameExchange
+class Ieee80211FrameExchange : public Ieee80211MacPlugin /*TODO remove this!*/, public IIeee80211FrameExchange
 {
     protected:
-        IIeee80211MacContext *context = nullptr;
+        IIeee80211UpperMacContext *context = nullptr;
         IFinishedCallback *finishedCallback = nullptr;
 
         Ieee80211UpperMac *getUpperMac() { return (Ieee80211UpperMac *)mac->upperMac; }  //FIXME remove! todo remove 'mac' ptr!
@@ -40,7 +40,7 @@ class Ieee80211FrameExchange : public Ieee80211MacPlugin, public IIeee80211Frame
 
     public:
         //TODO init context!
-        Ieee80211FrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211MacPlugin(mac), context(context), finishedCallback(callback) {}
+        Ieee80211FrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback) : Ieee80211MacPlugin(mac), context(context), finishedCallback(callback) {}
         virtual ~Ieee80211FrameExchange() {}
 
         virtual void start() = 0;
@@ -59,7 +59,7 @@ class Ieee80211FSMBasedFrameExchange : public Ieee80211FrameExchange
         virtual void handleWithFSM(EventType eventType, cMessage *frameOrTimer) = 0;
 
     public:
-        Ieee80211FSMBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { fsm.setName("Frame Exchange FSM"); }
+        Ieee80211FSMBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() { EV_INFO << "Starting " << getClassName() << std::endl; handleWithFSM(EVENT_START, nullptr); }
         virtual bool lowerFrameReceived(Ieee80211Frame *frame) { handleWithFSM(EVENT_FRAMEARRIVED, frame); return true; }
         virtual void transmissionFinished() { handleWithFSM(EVENT_TXFINISHED, nullptr); }
@@ -92,7 +92,7 @@ class Ieee80211StepBasedFrameExchange : public Ieee80211FrameExchange
         void proceed();
 
     public:
-        Ieee80211StepBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { }
+        Ieee80211StepBasedFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback) : Ieee80211FrameExchange(mac, context, callback) { }
         virtual void start();
         virtual bool lowerFrameReceived(Ieee80211Frame *frame); // true = frame processed
         virtual void transmissionFinished();

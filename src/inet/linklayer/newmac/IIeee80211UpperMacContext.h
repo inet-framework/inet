@@ -29,11 +29,11 @@ class Ieee80211ACKFrame;
 class Ieee80211RTSFrame;
 class Ieee80211CTSFrame;
 
-class IIeee80211MacContext
+class IIeee80211UpperMacContext
 {
     public:
-        IIeee80211MacContext() {}
-        virtual ~IIeee80211MacContext() {}
+        IIeee80211UpperMacContext() {}
+        virtual ~IIeee80211UpperMacContext() {}
 
         virtual const MACAddress& getAddress() const = 0;
 

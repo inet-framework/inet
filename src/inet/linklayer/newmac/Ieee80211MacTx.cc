@@ -208,7 +208,7 @@ void Ieee80211MacTx::scheduleIFS()
 void Ieee80211MacTx::updateBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffSlots -= ((int)(elapsedBackoffTime / mac->getSlotTime()));
+    backoffSlots -= ((int)(elapsedBackoffTime / mac->getSlotTime()));  //FIXME slot should be a parameter
 }
 
 void Ieee80211MacTx::scheduleBackoffPeriod(int backoffSlots)

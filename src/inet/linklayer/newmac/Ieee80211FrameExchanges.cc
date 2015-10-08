@@ -16,13 +16,13 @@
 #include "Ieee80211FrameExchanges.h"
 #include "inet/common/FSMA.h"
 #include "Ieee80211UpperMac.h"
-#include "IIeee80211MacContext.h"
+#include "IIeee80211UpperMacContext.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
 
-Ieee80211SendDataWithAckFrameExchange::Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
+Ieee80211SendDataWithAckFrameExchange::Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
     Ieee80211FSMBasedFrameExchange(mac, context, callback), frame(frame)
 {
 }
@@ -131,7 +131,7 @@ bool Ieee80211SendDataWithAckFrameExchange::isAck(Ieee80211Frame* frame)
 
 //------------------------------
 
-Ieee80211SendDataWithRtsCtsFrameExchange::Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
+Ieee80211SendDataWithRtsCtsFrameExchange::Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
     Ieee80211StepBasedFrameExchange(mac, context, callback), dataFrame(dataFrame)
 {
 }
