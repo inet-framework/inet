@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API Ieee80211ErpOfdmMode : public Ieee80211OFDMMode
 {
     public:
-        Ieee80211ErpOfdmMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode);
+        Ieee80211ErpOfdmMode(const char *name, const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode);
 
         virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ErpOfdmMode"; }
 

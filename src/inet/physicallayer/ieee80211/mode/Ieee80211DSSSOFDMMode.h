@@ -30,7 +30,7 @@ namespace physicallayer {
  * Multiplexing PHY mode as described in IEEE 802.11-2012 specification subclause
  * 19.3.2.6.
  */
-class INET_API Ieee80211DsssOfdmMode : public IIeee80211Mode
+class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
 {
   protected:
     const Ieee80211DsssPreambleMode *dsssPreambleMode;
@@ -44,7 +44,7 @@ class INET_API Ieee80211DsssOfdmMode : public IIeee80211Mode
     virtual inline int getLegacyCwMax() const override { return -1; }
 
   public:
-    Ieee80211DsssOfdmMode(const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OFDMPreambleMode *ofdmPreambleMode, const Ieee80211OFDMSignalMode *ofdmSignalMode, const Ieee80211OFDMDataMode *ofdmDataMode);
+    Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OFDMPreambleMode *ofdmPreambleMode, const Ieee80211OFDMSignalMode *ofdmSignalMode, const Ieee80211OFDMDataMode *ofdmDataMode);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211DsssOfdmMode"; }
 

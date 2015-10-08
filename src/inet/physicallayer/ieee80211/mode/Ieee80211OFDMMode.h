@@ -143,7 +143,7 @@ class INET_API Ieee80211OFDMMode : public Ieee80211ModeBase, public Ieee80211OFD
     virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
-    Ieee80211OFDMMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
+    Ieee80211OFDMMode(const char *name, const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode, Hz channelSpacing, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

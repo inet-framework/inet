@@ -61,6 +61,7 @@ class INET_API IIeee80211Mode : public IPrintableObject
     virtual int getLegacyCwMax() const = 0;
 
   public:
+    virtual const char *getName() const = 0;
     virtual const IIeee80211PreambleMode *getPreambleMode() const = 0;
     virtual const IIeee80211HeaderMode *getHeaderMode() const = 0;
     virtual const IIeee80211DataMode *getDataMode() const = 0;

@@ -25,7 +25,11 @@ namespace physicallayer {
 
 class INET_API Ieee80211ModeBase : public IIeee80211Mode
 {
+    private:
+        std::string name;
     public:
+        Ieee80211ModeBase(const char *name) : name(name) {}
+        virtual const char *getName() const override { return name.c_str(); }
         virtual int getAifsNumber(AccessCategory ac) const override;
         virtual const simtime_t getAifsTime(AccessCategory ac) const override;
         virtual const simtime_t getEifsTime(const IIeee80211Mode *slowestMandatoryMode, AccessCategory ac, int ackLength) const override;

@@ -20,20 +20,20 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211ErpOfdmMode::Ieee80211ErpOfdmMode(const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode) :
-        Ieee80211OFDMMode(preambleMode, signalMode, dataMode, MHz(20), MHz(20)) // review the channel spacing
+Ieee80211ErpOfdmMode::Ieee80211ErpOfdmMode(const char *name, const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode) :
+        Ieee80211OFDMMode(name, preambleMode, signalMode, dataMode, MHz(20), MHz(20)) // review the channel spacing
 {
 
 }
 
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate13, &Ieee80211OFDMCompliantModes::ofdmDataMode6MbpsCS20MHz);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate15, &Ieee80211OFDMCompliantModes::ofdmDataMode9MbpsCS20MHz);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate5, &Ieee80211OFDMCompliantModes::ofdmDataMode12MbpsCS20MHz);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate7, &Ieee80211OFDMCompliantModes::ofdmDataMode18MbpsCS20MHz);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate9, &Ieee80211OFDMCompliantModes::ofdmDataMode24MbpsCS20MHz);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate11, &Ieee80211OFDMCompliantModes::ofdmDataMode36Mbps);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate1, &Ieee80211OFDMCompliantModes::ofdmDataMode48Mbps);
-const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps(&Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate3, &Ieee80211OFDMCompliantModes::ofdmDataMode54Mbps);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps("erpOfdmMode6Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate13, &Ieee80211OFDMCompliantModes::ofdmDataMode6MbpsCS20MHz);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps("erpOfdmMode9Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate15, &Ieee80211OFDMCompliantModes::ofdmDataMode9MbpsCS20MHz);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps("erpOfdmMode12Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate5, &Ieee80211OFDMCompliantModes::ofdmDataMode12MbpsCS20MHz);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps("erpOfdmMode18Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate7, &Ieee80211OFDMCompliantModes::ofdmDataMode18MbpsCS20MHz);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps("erpOfdmMode24Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate9, &Ieee80211OFDMCompliantModes::ofdmDataMode24MbpsCS20MHz);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps("erpOfdmMode36Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate11, &Ieee80211OFDMCompliantModes::ofdmDataMode36Mbps);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps("erpOfdmMode48Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate1, &Ieee80211OFDMCompliantModes::ofdmDataMode48Mbps);
+const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps("erpOfdmMode54Mbps", &Ieee80211OFDMCompliantModes::ofdmPreambleModeCS20MHz, &Ieee80211OFDMCompliantModes::ofdmHeaderMode6MbpsRate3, &Ieee80211OFDMCompliantModes::ofdmDataMode54Mbps);
 
 const simtime_t Ieee80211ErpOfdmMode::getRifsTime() const
 {

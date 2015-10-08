@@ -28,7 +28,8 @@ Ieee80211FhssDataMode::Ieee80211FhssDataMode(const GFSKModulationBase *modulatio
 {
 }
 
-Ieee80211FhssMode::Ieee80211FhssMode(const Ieee80211FhssPreambleMode *preambleMode, const Ieee80211FhssHeaderMode *headerMode, const Ieee80211FhssDataMode *dataMode) :
+Ieee80211FhssMode::Ieee80211FhssMode(const char *name, const Ieee80211FhssPreambleMode *preambleMode, const Ieee80211FhssHeaderMode *headerMode, const Ieee80211FhssDataMode *dataMode) :
+    Ieee80211ModeBase(name),
     preambleMode(preambleMode),
     headerMode(headerMode),
     dataMode(dataMode)
@@ -46,8 +47,8 @@ const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode1Mbps(&_2GF
 const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode2Mbps(&_4GFSKModulation::singleton);
 
 // modes
-const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode1Mbps(&fhssPreambleMode1Mbps, &fhssHeaderMode1Mbps, &fhssDataMode1Mbps);
-const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode2Mbps(&fhssPreambleMode1Mbps, &fhssHeaderMode1Mbps, &fhssDataMode2Mbps);
+const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode1Mbps("fhssMode1Mbps", &fhssPreambleMode1Mbps, &fhssHeaderMode1Mbps, &fhssDataMode1Mbps);
+const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode2Mbps("fhssMode2Mbps", &fhssPreambleMode1Mbps, &fhssHeaderMode1Mbps, &fhssDataMode2Mbps);
 
 const simtime_t Ieee80211FhssMode::getRifsTime() const
 {
