@@ -39,6 +39,8 @@ void BasicImmediateTx::initialize()
     mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     endIfsTimer = new cMessage("endIFS");
+
+    WATCH(transmitting);
     updateDisplayString();
 }
 
@@ -51,7 +53,7 @@ void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t i
 
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -63,7 +65,7 @@ void BasicImmediateTx::radioTransmissionFinished()
         upperMac->transmissionComplete(completionCallback, -1);
         transmitting = false;
         frame = nullptr;
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplayString();
     }
 }
@@ -74,7 +76,7 @@ void BasicImmediateTx::handleMessage(cMessage *msg)
         EV_DETAIL << "BasicImmediateTx: endIfsTimer expired\n";
         transmitting = true;
         mac->sendFrame(frame);
-        if (ev.isGUI())
+        if (hasGUI())
             updateDisplayString();
     }
     else

@@ -66,8 +66,8 @@ void FsmBasedFrameExchange::handleSelfMessage(cMessage *msg)
 
 //--------
 
-StepBasedFrameExchange::StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) :
-    FrameExchange(ownerModule, context, callback)
+StepBasedFrameExchange::StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, int txIndex, int accessCategory) :
+    FrameExchange(ownerModule, context, callback), defaultTxIndex(txIndex), defaultAccessCategory(accessCategory)
 {
 }
 
@@ -95,7 +95,7 @@ const char *StepBasedFrameExchange::statusName(Status status)
         CASE(SUCCEEDED);
         CASE(FAILED);
         CASE(INPROGRESS);
-        default: return "???";
+        default: ASSERT(false); return "???";
     }
 #undef CASE
 }
@@ -111,7 +111,7 @@ const char *StepBasedFrameExchange::operationName(Operation operation)
         CASE(GOTO_STEP);
         CASE(FAIL);
         CASE(SUCCEED);
-        default: return "???";
+        default: ASSERT(false); return "???";
     }
 #undef CASE
 }
@@ -126,7 +126,7 @@ const char *StepBasedFrameExchange::operationFunctionName(Operation operation)
         case GOTO_STEP: return "gotoStep()";
         case FAIL: return "fail()";
         case SUCCEED: return "succeed()";
-        default: return "???";
+        default: ASSERT(false); return "???";
     }
 }
 
@@ -251,10 +251,15 @@ void StepBasedFrameExchange::cleanupAndReportResult()
     // success/failure callback might has probably deleted the frame exchange object!
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, int retryCount)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount)
+{
+    transmitContentionFrame(frame, retryCount, defaultTxIndex, defaultAccessCategory);
+}
+
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, int ac)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    context->transmitContentionFrame(txIndex, frame, context->getDifsTime(), context->getEifsTime(), context->getCwMin(), context->getCwMax(), context->getSlotTime(), retryCount, this);
+    context->transmitContentionFrame(txIndex, frame, context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMin(ac), context->getCwMax(ac), context->getSlotTime(), retryCount, this);
 }
 
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)

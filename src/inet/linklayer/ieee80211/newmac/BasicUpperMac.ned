@@ -32,7 +32,6 @@ simple BasicUpperMac like IUpperMac
 
         string opMode @enum("a", "b", "g", "n", "p") = default("g");
         double bitrate @unit("bps");
-        double basicBitrate @unit("bps") = default(2000000bps);
         int rtsThresholdBytes @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per frame, -1 means default
         @display("i=block/layer");

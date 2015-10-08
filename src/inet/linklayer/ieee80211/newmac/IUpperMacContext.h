@@ -33,7 +33,6 @@ class Ieee80211RTSFrame;
 class Ieee80211CTSFrame;
 class ITxCallback;
 
-
 class IUpperMacContext
 {
     public:
@@ -43,17 +42,18 @@ class IUpperMacContext
         virtual const MACAddress& getAddress() const = 0;
 
         virtual simtime_t getSlotTime() const = 0;
-        virtual simtime_t getAifsTime() const = 0;
+        virtual simtime_t getAifsTime(int accessCategory) const = 0;
         virtual simtime_t getSifsTime() const = 0;
         virtual simtime_t getDifsTime() const = 0;
-        virtual simtime_t getEifsTime() const = 0;
+        virtual simtime_t getEifsTime(int accessCategory) const = 0;
         virtual simtime_t getPifsTime() const = 0;
         virtual simtime_t getRifsTime() const = 0;
 
-        virtual int getCwMin() const = 0;
-        virtual int getCwMax() const = 0;
+        virtual int getCwMin(int accessCategory) const = 0;
+        virtual int getCwMax(int accessCategory) const = 0;
         virtual int getShortRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
+        virtual simtime_t getTxopLimit(int accessCategory) const = 0;
 
         virtual simtime_t getAckTimeout() const = 0;
         virtual simtime_t getAckDuration() const = 0;
@@ -71,6 +71,7 @@ class IUpperMacContext
         virtual Ieee80211Frame *setControlBitrate(Ieee80211Frame *frame) const = 0;
 
         virtual bool isForUs(Ieee80211Frame *frame) const = 0;
+        virtual bool isMulticast(Ieee80211Frame *frame) const = 0;
         virtual bool isBroadcast(Ieee80211Frame *frame) const = 0;
         virtual bool isCts(Ieee80211Frame *frame) const = 0;
         virtual bool isAck(Ieee80211Frame *frame) const = 0;

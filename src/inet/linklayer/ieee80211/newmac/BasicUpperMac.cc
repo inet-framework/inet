@@ -42,6 +42,7 @@ BasicUpperMac::BasicUpperMac()
 BasicUpperMac::~BasicUpperMac()
 {
     delete frameExchange;
+    delete context;
     while (!transmissionQueue.empty()) {
         Ieee80211Frame *temp = transmissionQueue.front();
         transmissionQueue.pop_front();
@@ -59,23 +60,26 @@ void BasicUpperMac::initialize()
 
     context = createContext();
     rx->setAddress(context->getAddress());
+
+    WATCH(maxQueueSize);
+    WATCH(fragmentationThreshold);
+    WATCH(sequenceNumber);
+    WATCH_LIST(transmissionQueue);
 }
 
 IUpperMacContext *BasicUpperMac::createContext()
 {
-    IImmediateTx *immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));    //TODO
+    IImmediateTx *immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
     IContentionTx **contentionTx = nullptr;
-    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);    //TODO
+    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
     MACAddress address(mac->par("address").stringValue());    // note: we rely on MAC to have replaced "auto" with concrete address by now
 
     const Ieee80211ModeSet *modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
     double bitrate = par("bitrate");
-    double basicBitrate = par("basicBitrate");
     const IIeee80211Mode *dataFrameMode = (bitrate == -1) ? modeSet->getFastestMode() : modeSet->getMode(bps(bitrate));
-    const IIeee80211Mode *basicFrameMode = (basicBitrate == -1) ? modeSet->getSlowestMode() : modeSet->getMode(bps(basicBitrate));
-    ;    //TODO ???
-    const IIeee80211Mode *controlFrameMode = (basicBitrate == -1) ? modeSet->getSlowestMode() : modeSet->getMode(bps(basicBitrate));    //TODO ???
+    const IIeee80211Mode *basicFrameMode = modeSet->getSlowestMode();
+    const IIeee80211Mode *controlFrameMode = modeSet->getSlowestMode(); //TODO check
 
     int rtsThreshold = par("rtsThresholdBytes");
     int shortRetryLimit = par("retryLimit");
@@ -111,8 +115,6 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     Enter_Method("upperFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
-    if (queueModule)
-        queueModule->requestPacket();
     // check for queue overflow
     if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize) {
         EV << "message " << frame << " received from higher layer but MAC queue is full, dropping message\n";
@@ -122,7 +124,7 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
     if (frame->getByteLength() > fragmentationThreshold)
-        opp_error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+        throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
                 frame->getClassName(), frame->getName(), (int)(frame->getByteLength()));
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
@@ -142,6 +144,7 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
+    delete frame->removeControlInfo();          //TODO
     take(frame);
 
     if (context->isForUs(frame)) {
@@ -189,9 +192,9 @@ void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame)
     ASSERT(!frameExchange);
     bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
     if (useRtsCts)
-        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame);
+        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, 0, AccessCategory::AC_LEGACY);
     else
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame);
+        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, 0, AccessCategory::AC_LEGACY);
     frameExchange->start();
 }
 
@@ -200,6 +203,10 @@ void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     EV_INFO << "Frame exchange finished" << std::endl;
     delete frameExchange;
     frameExchange = nullptr;
+
+    if (queueModule)
+        queueModule->requestPacket();
+
     if (!transmissionQueue.empty()) {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();

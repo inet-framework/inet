@@ -33,7 +33,7 @@ using namespace inet::physicallayer;
 class IImmediateTx;
 class IContentionTx;
 
-class INET_API UpperMacContext : public IUpperMacContext
+class INET_API UpperMacContext : public cOwnedObject, public IUpperMacContext
 {
     private:
         MACAddress address;
@@ -55,20 +55,24 @@ class INET_API UpperMacContext : public IUpperMacContext
                 int shortRetryLimit, int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx);
         virtual ~UpperMacContext() {}
 
+        virtual const char *getName() const override; // cObject
+        virtual std::string info() const override; // cObject
+
         virtual const MACAddress& getAddress() const override;
 
         virtual simtime_t getSlotTime() const override;
-        virtual simtime_t getAifsTime() const override;
+        virtual simtime_t getAifsTime(int accessCategory) const override;
         virtual simtime_t getSifsTime() const override;
         virtual simtime_t getDifsTime() const override;
-        virtual simtime_t getEifsTime() const override;
+        virtual simtime_t getEifsTime(int accessCategory) const override;
         virtual simtime_t getPifsTime() const override;
         virtual simtime_t getRifsTime() const override;
 
-        virtual int getCwMin() const override;
-        virtual int getCwMax() const override;
+        virtual int getCwMin(int accessCategory) const override;
+        virtual int getCwMax(int accessCategory) const override;
         virtual int getShortRetryLimit() const override;
         virtual int getRtsThreshold() const override;
+        virtual simtime_t getTxopLimit(int accessCategory) const override;
 
         virtual simtime_t getAckTimeout() const override;
         virtual simtime_t getAckDuration() const override;
@@ -86,6 +90,7 @@ class INET_API UpperMacContext : public IUpperMacContext
         virtual Ieee80211Frame *setControlBitrate(Ieee80211Frame *frame) const override;
 
         virtual bool isForUs(Ieee80211Frame *frame) const override;
+        virtual bool isMulticast(Ieee80211Frame *frame) const override;
         virtual bool isBroadcast(Ieee80211Frame *frame) const override;
         virtual bool isCts(Ieee80211Frame *frame) const override;
         virtual bool isAck(Ieee80211Frame *frame) const override;

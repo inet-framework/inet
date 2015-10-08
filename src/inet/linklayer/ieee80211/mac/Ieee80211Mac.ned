@@ -20,7 +20,7 @@
 package inet.linklayer.ieee80211.mac;
 
 import inet.linklayer.base.MACProtocolBase;
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.ieee80211.IIeee80211Mac;
 
 
 //
@@ -56,7 +56,7 @@ import inet.linklayer.contract.IMACProtocol;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
+simple Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -84,10 +84,10 @@ simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
         double bitrate @unit("bps");
-        string opMode @enum("a", "b", "g", "n", "p") = default("g");
+        string opMode @enum("a","b","g","n","p") = default("g");
 
-		// TODO: These bitrates are not a real degrees of freedom
-		// with OFDM modulation the basic bitrate is 6Mbps
+        // TODO: These bitrates are not a real degrees of freedom
+        // with OFDM modulation the basic bitrate is 6Mbps
         double basicBitrate @unit("bps") = default(1e6bps); // used for broadcast frames
         double controlBitrate @unit("bps") = default(1e6bps); // used for control frames
 

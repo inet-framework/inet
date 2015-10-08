@@ -47,7 +47,7 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
         int maxQueueSize;
 
         /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
-        static const int fragmentationThreshold = 2346;
+        int fragmentationThreshold = 2346;
 
         /** Messages received from upper layer and to be transmitted later */
         Ieee80211DataOrMgmtFrameList transmissionQueue;

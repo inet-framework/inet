@@ -67,6 +67,8 @@ class StepBasedFrameExchange : public FrameExchange
     private:
         enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };
         enum Status { INPROGRESS, SUCCEEDED, FAILED };
+        int defaultTxIndex;
+        int defaultAccessCategory;
         int step = 0;
         Operation operation = NONE;
         Status status = INPROGRESS;
@@ -81,7 +83,8 @@ class StepBasedFrameExchange : public FrameExchange
         virtual void processInternalCollision(int step) = 0;
 
         // operations that can be called from doStep()
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, int retryCount);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, int accessCategory);
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void expectReply(simtime_t timeout);
@@ -101,7 +104,7 @@ class StepBasedFrameExchange : public FrameExchange
         static const char *operationFunctionName(Operation operation);
 
     public:
-        StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback);
+        StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, int txIndex, int accessCategory);
         virtual ~StepBasedFrameExchange();
         std::string info() const override;
         virtual void start() override;

@@ -54,12 +54,27 @@ void BasicContentionTx::initialize()
     mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
+
     txIndex = getIndex();
     if (txIndex > 0 && !collisionController)
         throw cRuntimeError("No collision controller module -- one is needed when multiple ContentionTx instances are present");
 
     fsm.setName("fsm");
     fsm.setState(IDLE, "IDLE");
+
+    WATCH(txIndex);
+    WATCH(ifs);
+    WATCH(eifs);
+    WATCH(cwMin);
+    WATCH(cwMax);
+    WATCH(slotTime);
+    WATCH(retryCount);
+    WATCH(endEifsTime);
+    WATCH(backoffSlots);
+    WATCH(scheduledTransmissionTime);
+    WATCH(channelLastBusyTime);
+    WATCH(mediumFree);
+    updateDisplayString();
 }
 
 BasicContentionTx::~BasicContentionTx()
@@ -95,42 +110,41 @@ int BasicContentionTx::computeCw(int cwMin, int cwMax, int retryCount)
     return cw;
 }
 
-//TODO into FSMA.h when mature
-#define FSMA_Ignore_Event(condition)  .....
-
-#define FSMA_Event_Transition_Error()
-//#define FSMA_Event_Transition_Error()   FSMA_Event_Transition(Unexpected-event, true, 0, throw cRuntimeError(this, "Unhandled event"););
-
 void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
-    logState();
     // emit(stateSignal, fsm.getState()); TODO
+    EV_DEBUG << "handleWithFSM: processing event " << getEventName(event) << "\n";
     FSMA_Switch(fsm) {
         FSMA_State(IDLE) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg(); frame = nullptr);
             FSMA_Event_Transition(Starting-IFS-and-Backoff,
                     event == START && mediumFree,
                     IFS_AND_BACKOFF,
-                    ;
+                    scheduleTransmissionRequest();
                     );
             FSMA_Event_Transition(Busy,
                     event == START && !mediumFree,
                     DEFER,
                     ;
                     );
-            FSMA_Event_Transition_Error();
+            FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
+            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);
+            FSMA_Ignore_Event(event==CORRUPTED_FRAME_RECEIVED);
+            FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(DEFER) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Restarting-IFS-and-Backoff,
                     event == MEDIUM_STATE_CHANGED && mediumFree,
                     IFS_AND_BACKOFF,
-                    ;
+                    scheduleTransmissionRequest();
                     );
-            FSMA_Event_Transition_Error();
+            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);
+            FSMA_Ignore_Event(event==CORRUPTED_FRAME_RECEIVED);         //TODO switch to eifs
+            FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(IFS_AND_BACKOFF) {
-            FSMA_Enter(scheduleTransmissionRequest());
+            FSMA_Enter();
             FSMA_Event_Transition(Backoff-expired,
                     event == TRANSMISSION_GRANTED,
                     TRANSMIT,
@@ -140,6 +154,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     event == MEDIUM_STATE_CHANGED && !mediumFree,
                     DEFER,
                     cancelTransmissionRequest();
+                    computeRemainingBackoffSlots();
                     );
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
@@ -151,8 +166,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     IFS_AND_BACKOFF,
                     switchToEifs();
                     );
-
-            FSMA_Event_Transition_Error();
+            FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(TRANSMIT) {
             FSMA_Enter(mac->sendFrame(frame));
@@ -161,13 +175,12 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     IDLE,
                     reportTransmissionComplete();
                     );
-            FSMA_Event_Transition_Error();
+            FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
+            FSMA_Fail_On_Unhandled_Event();
         }
     }
-
     // emit(stateSignal, fsm.getState()); TODO
-    logState();
-    if (ev.isGUI())
+    if (hasGUI())
         updateDisplayString();
 }
 
@@ -263,9 +276,19 @@ void BasicContentionTx::reportInternalCollision()
     upperMac->internalCollision(completionCallback, txIndex);
 }
 
-void BasicContentionTx::logState()
+const char *BasicContentionTx::getEventName(EventType event)
 {
-    EV_DETAIL << "FSM state: " << fsm.getStateName() << ", frame: " << (frame ? frame->getName() : "none") << endl;
+#define CASE(x)   case x: return #x;
+    switch (event) {
+        CASE(START);
+        CASE(MEDIUM_STATE_CHANGED);
+        CASE(CORRUPTED_FRAME_RECEIVED);
+        CASE(TRANSMISSION_GRANTED);
+        CASE(INTERNAL_COLLISION);
+        CASE(TRANSMISSION_FINISHED);
+        default: ASSERT(false); return "";
+    }
+#undef CASE
 }
 
 void BasicContentionTx::updateDisplayString()

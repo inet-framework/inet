@@ -19,10 +19,10 @@ package inet.linklayer.ieee80211;
 
 import inet.common.IHook;
 import inet.linklayer.contract.IWirelessNic;
-import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
 import inet.physicallayer.contract.packetlevel.IRadio;
+
 
 //
 // This NIC implements an 802.11 network interface card.
@@ -39,7 +39,8 @@ module Ieee80211Nic like IWirelessNic
         string energySourceModule = default("");
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
-        string opMode @enum("a", "b", "g", "n", "p") = default("g");
+        string macType = default("Ieee80211CompatibleNewMac");   // choose from Ieee80211Mac, Ieee80211NewMac, Ieee80211CompatibleNewMac
+        string opMode @enum("a","b","g","n","p") = default("g");
         double bitrate @unit("bps") = default(opMode == "b" ? 11Mbps : opMode == "p" ? 27Mbps : 54Mbps);
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -70,7 +71,7 @@ module Ieee80211Nic like IWirelessNic
                 macModule = "^.mac";
                 @display("p=157,131;q=wlanDataQueue");
         }
-        mac: Ieee80211Mac {
+        mac: <macType> like IIeee80211Mac {
             parameters:
                 queueModule = "^.mgmt";
                 @display("p=157,217");

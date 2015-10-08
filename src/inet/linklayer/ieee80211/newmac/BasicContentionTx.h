@@ -65,7 +65,6 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx, protected 
         simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
         simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
         bool mediumFree = false;
-        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     protected:
         virtual void initialize() override;
@@ -82,8 +81,8 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx, protected 
         virtual void computeRemainingBackoffSlots();
         virtual void reportTransmissionComplete();
         virtual void reportInternalCollision();
-        virtual void logState();
         virtual void updateDisplayString();
+        const char *getEventName(EventType event);
 
     public:
         BasicContentionTx() {}

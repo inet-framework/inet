@@ -36,6 +36,19 @@ UpperMacContext::UpperMacContext(const MACAddress& address,
 {
 }
 
+const char *UpperMacContext::getName() const
+{
+    return "MAC parameters";
+}
+
+std::string UpperMacContext::info() const
+{
+    std::stringstream os;
+    os << "dataBitrate: " << dataFrameMode->getDataMode()->getGrossBitrate();
+    os << ", basicBitrate: " << basicFrameMode->getDataMode()->getGrossBitrate();
+    return os.str().c_str();
+}
+
 const MACAddress& UpperMacContext::getAddress() const
 {
     return address;
@@ -46,9 +59,9 @@ simtime_t UpperMacContext::getSlotTime() const
     return dataFrameMode->getSlotTime();
 }
 
-simtime_t UpperMacContext::getAifsTime() const
+simtime_t UpperMacContext::getAifsTime(int accessCategory) const
 {
-    return dataFrameMode->getAifsTime(2);    //TODO!!!
+    return dataFrameMode->getAifsTime((AccessCategory)accessCategory);
 }
 
 simtime_t UpperMacContext::getSifsTime() const
@@ -61,9 +74,9 @@ simtime_t UpperMacContext::getDifsTime() const
     return dataFrameMode->getDifsTime();
 }
 
-simtime_t UpperMacContext::getEifsTime() const
+simtime_t UpperMacContext::getEifsTime(int accessCategory) const
 {
-    return dataFrameMode->getEifsTime(basicFrameMode, LENGTH_ACK);    //TODO ???
+    return dataFrameMode->getEifsTime(basicFrameMode, (AccessCategory)accessCategory, LENGTH_ACK);
 }
 
 simtime_t UpperMacContext::getPifsTime() const
@@ -76,14 +89,14 @@ simtime_t UpperMacContext::getRifsTime() const
     return dataFrameMode->getRifsTime();
 }
 
-int UpperMacContext::getCwMin() const
+int UpperMacContext::getCwMin(int accessCategory) const
 {
-    return dataFrameMode->getCwMin();
+    return dataFrameMode->getCwMin((AccessCategory)accessCategory);
 }
 
-int UpperMacContext::getCwMax() const
+int UpperMacContext::getCwMax(int accessCategory) const
 {
-    return dataFrameMode->getCwMax();
+    return dataFrameMode->getCwMax((AccessCategory)accessCategory);
 }
 
 int UpperMacContext::getShortRetryLimit() const
@@ -94,6 +107,11 @@ int UpperMacContext::getShortRetryLimit() const
 int UpperMacContext::getRtsThreshold() const
 {
     return rtsThreshold;
+}
+
+simtime_t UpperMacContext::getTxopLimit(int accessCategory) const
+{
+    return dataFrameMode->getTxopLimit((AccessCategory)accessCategory);
 }
 
 simtime_t UpperMacContext::getAckTimeout() const
@@ -191,7 +209,14 @@ Ieee80211Frame *UpperMacContext::setBitrate(Ieee80211Frame *frame, const IIeee80
 
 bool UpperMacContext::isForUs(Ieee80211Frame *frame) const
 {
-    return frame->getReceiverAddress() == address;
+    return frame->getReceiverAddress() == address
+            || frame->getReceiverAddress().isBroadcast()
+            || frame->getReceiverAddress().isMulticast();       //TODO may need to filter for locally joined mcast groups
+}
+
+bool UpperMacContext::isMulticast(Ieee80211Frame *frame) const
+{
+    return frame && frame->getReceiverAddress().isMulticast();
 }
 
 bool UpperMacContext::isBroadcast(Ieee80211Frame *frame) const

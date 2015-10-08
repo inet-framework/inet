@@ -42,6 +42,11 @@ void BasicRx::initialize()
     collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
     endNavTimer = new cMessage("NAV");
     recomputeMediumFree();
+
+    WATCH(address);
+    WATCH(receptionState);
+    WATCH(transmissionState);
+    WATCH(mediumFree);
 }
 
 void BasicRx::handleMessage(cMessage *msg)
