@@ -21,7 +21,7 @@
 #define __INET_FRAMEEXCHANGE_H
 
 #include "IFrameExchange.h"
-#include "ITx.h"
+#include "ITxCallback.h"
 #include "MacPlugin.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -30,7 +30,7 @@ namespace ieee80211 {
 
 class IUpperMacContext;
 
-class FrameExchange : public MacPlugin, public IFrameExchange, public ITx::ICallback
+class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
 {
     protected:
         IUpperMacContext *context = nullptr;

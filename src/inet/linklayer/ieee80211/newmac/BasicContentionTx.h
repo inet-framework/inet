@@ -34,7 +34,7 @@ class IMacRadioInterface;
 
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
 //TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
-class BasicContentionTx : public MacPlugin, public IContentionTx
+class BasicContentionTx : public cSimpleModule, public IContentionTx
 {
     public:
         enum State {
@@ -59,7 +59,7 @@ class BasicContentionTx : public MacPlugin, public IContentionTx
         int cwMax = 0;
         simtime_t slotTime;
         int retryCount = 0;
-        ICallback *completionCallback = nullptr;
+        ITxCallback *completionCallback = nullptr;
 
         simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
         int backoffSlots = 0;
@@ -75,6 +75,9 @@ class BasicContentionTx : public MacPlugin, public IContentionTx
         cMessage *frameDuration = nullptr;
 
     protected:
+        void initialize();
+        void handleMessage(cMessage *msg);
+
         virtual int computeCW(int cwMin, int cwMax, int retryCount);
         void handleWithFSM(EventType event, cMessage *msg);
         void scheduleIFS();
@@ -83,15 +86,14 @@ class BasicContentionTx : public MacPlugin, public IContentionTx
         void updateBackoffPeriod();
         void scheduleBackoffPeriod(int backoffPeriod);
         void logState();
-        void handleMessage(cMessage *msg);
         bool isIFSNecessary();
 
     public:
-        BasicContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex);
+        BasicContentionTx() {}
         ~BasicContentionTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) override;
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) override;
 
         virtual void mediumStateChanged(bool mediumFree) override;
         virtual void radioTransmissionFinished() override;

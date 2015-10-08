@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "ITx.h"
+#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -74,8 +74,8 @@ class IUpperMacContext
         virtual bool isCts(Ieee80211Frame *frame) const = 0;
         virtual bool isAck(Ieee80211Frame *frame) const = 0;
 
-        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITx::ICallback *completionCallback) const = 0;
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *completionCallback) const = 0;
+        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) const = 0;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) const = 0;
 };
 
 } // namespace ieee80211

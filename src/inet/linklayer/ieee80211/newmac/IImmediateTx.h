@@ -21,7 +21,7 @@
 #define __INET_IIMMEDIATETX_H
 
 #include "inet/common/INETDefs.h"
-#include "ITx.h"
+#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -29,9 +29,8 @@ namespace ieee80211 {
 class IImmediateTx
 {
     public:
-        typedef ITx::ICallback ICallback;
         virtual ~IImmediateTx() {}
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) = 0;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 

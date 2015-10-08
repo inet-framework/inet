@@ -34,29 +34,44 @@ Register_Enum(Ieee80211NewMac,
    BasicContentionTx::TRANSMIT,
    BasicContentionTx::WAIT_IFS));
 
-BasicContentionTx::BasicContentionTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac, int txIndex) : MacPlugin(ownerModule), mac(mac), upperMac(upperMac), txIndex(txIndex)
+Define_Module(BasicContentionTx);
+
+// non-member utility function
+void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx **& contentionTx)
 {
+    ASSERT(firstContentionTxModule != nullptr);
+    int count = firstContentionTxModule->getVectorSize();
+
+    contentionTx = new IContentionTx*[count+1];
+    for (int i = 0; i < count; i++) {
+        cModule *sibling = firstContentionTxModule->getParentModule()->getSubmodule(firstContentionTxModule->getName(), i);
+        contentionTx[i] = check_and_cast<IContentionTx*>(sibling);
+    }
+    contentionTx[count] = nullptr;
+}
+
+
+void BasicContentionTx::initialize()
+{
+    mac = dynamic_cast<IMacRadioInterface*>(getModuleByPath("^"));
+    upperMac = dynamic_cast<IUpperMac*>(getModuleByPath("^.upperMac"));
+    txIndex = getIndex();
+
     fsm.setName("fsm");
     fsm.setState(IDLE);
     endIFS = new cMessage("IFS");
     endBackoff = new cMessage("Backoff");
-    frameDuration = new cMessage("FrameDuration");
     endEIFS = new cMessage("EIFS");
 }
 
 BasicContentionTx::~BasicContentionTx()
 {
-    cancelEvent(endIFS);
-    cancelEvent(endBackoff);
-    cancelEvent(frameDuration);
-    cancelEvent(endEIFS);
-    delete endIFS;
-    delete endBackoff;
-    delete frameDuration;
-    delete endEIFS;
+    cancelAndDelete(endIFS);
+    cancelAndDelete(endBackoff);
+    cancelAndDelete(endEIFS);
 }
 
-void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
+void BasicContentionTx::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
 {
     ASSERT(fsm.getState() == IDLE);
     this->frame = frame;
@@ -161,6 +176,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 
 void BasicContentionTx::mediumStateChanged(bool mediumFree)
 {
+    Enter_Method(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
     channelLastBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
@@ -168,6 +184,7 @@ void BasicContentionTx::mediumStateChanged(bool mediumFree)
 
 void BasicContentionTx::radioTransmissionFinished()
 {
+    Enter_Method("radioTransmissionFinished()");
     handleWithFSM(TRANSMISSION_FINISHED, nullptr);
 }
 
@@ -178,6 +195,7 @@ void BasicContentionTx::handleMessage(cMessage *msg)
 
 void BasicContentionTx::lowerFrameReceived(bool isFcsOk)
 {
+    Enter_Method("lowerFrameReceived(%s)", isFcsOk ? "HEALTHY" : "CORRUPT");
     useEIFS = !isFcsOk;
 }
 

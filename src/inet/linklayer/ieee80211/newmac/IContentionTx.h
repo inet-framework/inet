@@ -21,7 +21,7 @@
 #define __INET_ICONTENTIONTX_H
 
 #include "inet/common/INETDefs.h"
-#include "ITx.h"
+#include "ITxCallback.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -31,13 +31,14 @@ class Ieee80211Frame;
 class IContentionTx
 {
     public:
-        typedef ITx::ICallback ICallback;
         virtual ~IContentionTx() {}
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback) = 0;
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) = 0;
         virtual void mediumStateChanged(bool mediumFree) = 0;
         virtual void radioTransmissionFinished() = 0;
         virtual void lowerFrameReceived(bool isFcsOk) = 0;
 };
+
+void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx **& contentionTx);
 
 } // namespace ieee80211
 } // namespace inet

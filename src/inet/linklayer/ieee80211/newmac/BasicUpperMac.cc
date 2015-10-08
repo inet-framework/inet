@@ -19,6 +19,7 @@
 
 #include "BasicUpperMac.h"
 #include "Ieee80211NewMac.h"
+#include "IRx.h"
 #include "IUpperMacContext.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
@@ -46,7 +47,6 @@ BasicUpperMac::~BasicUpperMac()
 void BasicUpperMac::initialize()
 {
     mac = check_and_cast<Ieee80211NewMac*>(getParentModule());  //TODO
-    tx = check_and_cast<ITx*>(getModuleByPath("^.tx"));  //TODO
     rx = check_and_cast<IRx*>(getModuleByPath("^.rx"));  //TODO
 
     maxQueueSize = mac->par("maxQueueSize");
@@ -149,14 +149,14 @@ void BasicUpperMac::lowerFrameReceived(Ieee80211Frame* frame)
     }
 }
 
-void BasicUpperMac::transmissionComplete(ITx::ICallback *callback, int txIndex)
+void BasicUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
         callback->transmissionComplete(txIndex);
 }
 
-void BasicUpperMac::internalCollision(ITx::ICallback *callback, int txIndex)
+void BasicUpperMac::internalCollision(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
@@ -187,13 +187,13 @@ Ieee80211DataOrMgmtFrame *BasicUpperMac::buildBroadcastFrame(Ieee80211DataOrMgmt
 void BasicUpperMac::sendAck(Ieee80211DataOrMgmtFrame* frame)
 {
     Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
-    tx->transmitImmediateFrame(ackFrame, context->getSIFS(), nullptr);
+    context->transmitImmediateFrame(ackFrame, context->getSIFS(), nullptr);
 }
 
 void BasicUpperMac::sendCts(Ieee80211RTSFrame* frame)
 {
     Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
-    tx->transmitImmediateFrame(ctsFrame, context->getSIFS(), nullptr);
+    context->transmitImmediateFrame(ctsFrame, context->getSIFS(), nullptr);
 }
 
 } // namespace ieee80211

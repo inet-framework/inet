@@ -22,9 +22,10 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "BasicUpperMac.h"
-#include "BasicRx.h"
-#include "BasicTx.h"
+#include "IUpperMac.h"
+#include "IRx.h"
+#include "IImmediateTx.h"
+#include "IContentionTx.h"
 #include "UpperMacContext.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -36,7 +37,6 @@ Define_Module(Ieee80211NewMac);
 
 simsignal_t Ieee80211NewMac::stateSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211NewMac::radioStateSignal = SIMSIGNAL_NULL;
-
 
 Ieee80211NewMac::Ieee80211NewMac()
 {
@@ -67,7 +67,8 @@ void Ieee80211NewMac::initialize(int stage)
 
         upperMac = check_and_cast<IUpperMac*>(getModuleByPath(".upperMac"));  //TODO
         rx = check_and_cast<IRx*>(getModuleByPath(".rx"));  //TODO
-        tx = check_and_cast<ITx*>(getModuleByPath(".tx"));  //TODO
+        immediateTx = check_and_cast<IImmediateTx*>(getModuleByPath(".immTx"));  //TODO
+        collectContentionTxModules(getModuleByPath(".conTx[0]"), contentionTx); //TODO
 
         // initialize parameters
         double bitrate = par("bitrate");
@@ -93,7 +94,7 @@ void Ieee80211NewMac::initialize(int stage)
         else
             address.setAddress(addressString);
 
-        IUpperMacContext *context = new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, tx);
+        IUpperMacContext *context = new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, immediateTx, contentionTx);
         upperMac->setContext(context);
         rx->setAddress(address);
 
@@ -241,7 +242,10 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
 
         if (transmissionFinished) {
-            tx->radioTransmissionFinished();
+            immediateTx->radioTransmissionFinished();
+            for (int i = 0; contentionTx[i]; i++)
+                contentionTx[i]->radioTransmissionFinished();
+
             EV_DEBUG << "changing radio to receiver mode\n";
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);  //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }

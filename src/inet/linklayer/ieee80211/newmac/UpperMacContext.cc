@@ -18,7 +18,8 @@
 //
 
 #include "UpperMacContext.h"
-#include "ITx.h"
+#include "IImmediateTx.h"
+#include "IContentionTx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
@@ -27,10 +28,10 @@ namespace ieee80211 {
 
 UpperMacContext::UpperMacContext(const MACAddress& address,
         const IIeee80211Mode *dataFrameMode, const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-        int shortRetryLimit,  int rtsThreshold, ITx *tx) :
+        int shortRetryLimit,  int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx) :
                     address(address),
                     dataFrameMode(dataFrameMode), basicFrameMode(basicFrameMode), controlFrameMode(controlFrameMode),
-                    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), tx(tx)
+                    shortRetryLimit(shortRetryLimit), rtsThreshold(rtsThreshold), immediateTx(immediateTx), contentionTx(contentionTx)
 {
 }
 
@@ -207,14 +208,15 @@ bool UpperMacContext::isAck(Ieee80211Frame *frame) const
     return dynamic_cast<Ieee80211ACKFrame *>(frame);
 }
 
-void UpperMacContext::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITx::ICallback *completionCallback) const
+void UpperMacContext::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) const
 {
-    tx->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, completionCallback);
+    //TODO assert txIndex < N
+    contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, completionCallback);
 }
 
-void UpperMacContext::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *completionCallback) const
+void UpperMacContext::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) const
 {
-    tx->transmitImmediateFrame(frame, ifs, completionCallback);
+    immediateTx->transmitImmediateFrame(frame, ifs, completionCallback);
 }
 
 } // namespace ieee80211

@@ -21,26 +21,27 @@
 #define __INET_BASICRX_H
 
 #include "IRx.h"
-#include "MacPlugin.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class ITx;
 class IUpperMac;
+class IImmediateTx;
+class IContentionTx;
 
 class BasicRx : public cSimpleModule, public IRx
 {
     protected:
+        IUpperMac *upperMac = nullptr;
+        IContentionTx **contentionTx = nullptr; // nullptr-terminated pointer array
+
+        MACAddress address;
         cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
         bool mediumFree;  // cached state
-        MACAddress address;
-        ITx *tx = nullptr;
-        IUpperMac *upperMac = nullptr;
 
     protected:
         virtual void initialize();

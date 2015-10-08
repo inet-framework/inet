@@ -18,7 +18,8 @@
 //
 
 #include "BasicRx.h"
-#include "ITx.h"
+#include "IContentionTx.h"
+#include "IImmediateTx.h"
 #include "IUpperMac.h"
 
 namespace inet {
@@ -37,8 +38,8 @@ BasicRx::~BasicRx()
 
 void BasicRx::initialize()
 {
-    tx = check_and_cast<ITx*>(getModuleByPath("^.tx"));  //TODO
     upperMac = check_and_cast<IUpperMac*>(getModuleByPath("^.upperMac")); //TODO
+    collectContentionTxModules(getModuleByPath("^.conTx[0]"), contentionTx); //TODO
     endNavTimer = new cMessage("NAV");
     recomputeMediumFree();
 }
@@ -61,7 +62,9 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame* frame)
     take(frame);
 
     bool errorFree = isFcsOk(frame);
-    tx->lowerFrameReceived(errorFree);
+    for (int i = 0; contentionTx[i]; i++)
+        contentionTx[i]->lowerFrameReceived(errorFree);
+
     if (errorFree)
     {
         EV_INFO << "Received message from lower layer: " << frame << endl;
@@ -87,8 +90,10 @@ void BasicRx::recomputeMediumFree()
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
     mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
-    if (mediumFree != oldMediumFree)
-        tx->mediumStateChanged(mediumFree);
+    if (mediumFree != oldMediumFree) {
+        for (int i = 0; contentionTx[i]; i++)
+            contentionTx[i]->mediumStateChanged(mediumFree);
+    }
 }
 
 void BasicRx::receptionStateChanged(IRadio::ReceptionState state)

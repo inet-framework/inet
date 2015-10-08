@@ -20,7 +20,6 @@
 #ifndef __INET_BASICIMMEDIATETX_H
 #define __INET_BASICIMMEDIATETX_H
 
-#include "MacPlugin.h"
 #include "IImmediateTx.h"
 
 namespace inet {
@@ -29,7 +28,7 @@ namespace ieee80211 {
 class IUpperMac;
 class IMacRadioInterface;
 
-class BasicImmediateTx : public MacPlugin, public IImmediateTx
+class BasicImmediateTx : public cSimpleModule, public IImmediateTx
 {
     protected:
         IMacRadioInterface *mac;
@@ -37,16 +36,17 @@ class BasicImmediateTx : public MacPlugin, public IImmediateTx
         Ieee80211Frame *frame = nullptr;
         cMessage *endIfsTimer = nullptr;
         bool transmitting = false;
-        ICallback *completionCallback = nullptr;
+        ITxCallback *completionCallback = nullptr;
 
     protected:
+        virtual void initialize();
         virtual void handleMessage(cMessage *msg);
 
     public:
-        BasicImmediateTx(cSimpleModule *ownerModule, IMacRadioInterface *mac, IUpperMac *upperMac);
+        BasicImmediateTx() {}
         ~BasicImmediateTx();
 
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) override;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) override;
         virtual void radioTransmissionFinished() override;
 };
 

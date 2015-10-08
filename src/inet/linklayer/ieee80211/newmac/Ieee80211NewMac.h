@@ -38,7 +38,8 @@ namespace ieee80211 {
 using namespace physicallayer;
 
 class IUpperMacContext;
-class ITx;
+class IImmediateTx;
+class IContentionTx;
 class IRx;
 class IUpperMac;
 class Ieee80211Frame;
@@ -58,7 +59,8 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
 
     IUpperMac *upperMac = nullptr;
     IRx *rx = nullptr;
-    ITx *tx = nullptr;
+    IImmediateTx *immediateTx = nullptr;
+    IContentionTx **contentionTx = nullptr;  // nullptr-terminated pointer array
     IRadio *radio = nullptr;
 
     IRadio::TransmissionState transmissionState = IRadio::TransmissionState::TRANSMISSION_STATE_UNDEFINED;

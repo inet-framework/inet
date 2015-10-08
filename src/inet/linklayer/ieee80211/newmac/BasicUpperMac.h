@@ -20,10 +20,7 @@
 #ifndef __INET_BASICUPPERMAC_H
 #define __INET_BASICUPPERMAC_H
 
-#include "MacPlugin.h"
 #include "IUpperMac.h"
-#include "ITx.h"
-#include "IRx.h"
 #include "IFrameExchange.h"
 
 namespace inet {
@@ -32,7 +29,10 @@ class IPassiveQueue;
 
 namespace ieee80211 {
 
+class IRx;
+class ITxCallback;
 class Ieee80211NewMac;
+class Ieee80211RTSFrame;
 
 class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
@@ -41,7 +41,6 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
 
     protected:
         Ieee80211NewMac *mac = nullptr;
-        ITx *tx = nullptr;
         IRx *rx = nullptr;
 
         /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
@@ -81,8 +80,8 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
         virtual void setContext(IUpperMacContext *context) override { this->context = context; }
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
-        virtual void transmissionComplete(ITx::ICallback *callback, int txIndex) override;
-        virtual void internalCollision(ITx::ICallback *callback, int txIndex) override;
+        virtual void transmissionComplete(ITxCallback *callback, int txIndex) override;
+        virtual void internalCollision(ITxCallback *callback, int txIndex) override;
 };
 
 } // namespace ieee80211

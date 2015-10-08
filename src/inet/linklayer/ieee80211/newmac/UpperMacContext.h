@@ -30,7 +30,8 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
-class ITx;
+class IImmediateTx;
+class IContentionTx;
 
 class INET_API UpperMacContext : public IUpperMacContext
 {
@@ -42,7 +43,8 @@ class INET_API UpperMacContext : public IUpperMacContext
         const IIeee80211Mode *controlFrameMode = nullptr;
         int shortRetryLimit;
         int rtsThreshold;
-        ITx *tx;
+        IImmediateTx *immediateTx;
+        IContentionTx **contentionTx; //TODO
 
     protected:
         Ieee80211Frame *setBitrate(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
@@ -50,7 +52,7 @@ class INET_API UpperMacContext : public IUpperMacContext
     public:
         UpperMacContext(const MACAddress& address, const IIeee80211Mode *dataFrameMode,
                 const IIeee80211Mode *basicFrameMode, const IIeee80211Mode *controlFrameMode,
-                int shortRetryLimit, int rtsThreshold, ITx *tx);
+                int shortRetryLimit, int rtsThreshold, IImmediateTx *immediateTx, IContentionTx **contentionTx);
         virtual ~UpperMacContext() {}
 
         virtual const MACAddress& getAddress() const override;
@@ -88,8 +90,8 @@ class INET_API UpperMacContext : public IUpperMacContext
         virtual bool isCts(Ieee80211Frame *frame) const override;
         virtual bool isAck(Ieee80211Frame *frame) const override;
 
-        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITx::ICallback *completionCallback) const override;
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *completionCallback) const override;
+        virtual void transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) const override;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) const override;
 };
 
 } // namespace ieee80211
