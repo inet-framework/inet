@@ -20,6 +20,7 @@
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211NewMac.h"
 #include "inet/common/ModuleAccess.h"
+#include "Ieee80211FrameExchanges.h"
 
 namespace inet {
 
@@ -78,7 +79,7 @@ void Ieee80211UpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame* frame)
         transmissionQueue.push_back(frame);
     else
     {
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10, getDIFS(), 4, 511);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10);
         frameExchange->start();
     }
 }
@@ -208,7 +209,7 @@ void Ieee80211UpperMac::frameExchangeFinished(Ieee80211FrameExchange* what, bool
     {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
         transmissionQueue.pop_front();
-        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10, getDIFS(), 4, 511);
+        frameExchange = new Ieee80211SendDataWithAckFrameExchange(mac, this, frame, 10);
         frameExchange->start();
     }
 }

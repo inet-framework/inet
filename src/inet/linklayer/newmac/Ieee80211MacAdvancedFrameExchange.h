@@ -20,7 +20,7 @@
 #ifndef IEEE80211MACADVANCEDFRAMEEXCHANGE_H_
 #define IEEE80211MACADVANCEDFRAMEEXCHANGE_H_
 
-#include "Ieee80211MacFrameExchange.h"
+#include "Ieee80211FrameExchange.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include <functional>
 

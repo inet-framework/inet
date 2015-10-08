@@ -23,7 +23,7 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "Ieee80211NewMac.h"
 #include "Ieee80211MacPlugin.h"
-#include "Ieee80211MacFrameExchange.h"
+#include "Ieee80211FrameExchange.h"
 #include "Ieee80211MacAdvancedFrameExchange.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "Ieee80211MacTransmission.h"

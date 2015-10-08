@@ -89,10 +89,10 @@ class INET_API Ieee80211NewMac : public MACProtocolBase
     MACAddress address;
 
     /** The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
-    double bitrate;
+    double bitrate;  //FIXME this should go! use dataFrameMode instead
 
     /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
-    double basicBitrate;
+    double basicBitrate; //FIXME this should go! use basicFrameMode instead
 
 
     /**

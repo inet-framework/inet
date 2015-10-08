@@ -33,10 +33,64 @@ Register_Enum(Ieee80211NewMac,
    Ieee80211MacTransmission::TRANSMIT,
    Ieee80211MacTransmission::WAIT_IFS));
 
+Ieee80211MacTransmission::Ieee80211MacTransmission(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
+{
+    fsm.setName("Ieee80211NewMac State Machine");
+    fsm.setState(IDLE);
+    endIFS = new cMessage("IFS");
+    endBackoff = new cMessage("Backoff");
+    frameDuration = new cMessage("FrameDuration");
+    endEIFS = new cMessage("EIFS");
+}
+
+Ieee80211MacTransmission::~Ieee80211MacTransmission()
+{
+    cancelEvent(endIFS);
+    cancelEvent(endBackoff);
+    cancelEvent(frameDuration);
+    cancelEvent(endEIFS);
+    delete endIFS;
+    delete endBackoff;
+    delete frameDuration;
+    delete endEIFS;
+}
+
+void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback)
+{
+    transmitContentionFrame(frame,
+            mac->dataFrameMode->getDifsTime(), mac->dataFrameMode->getEifsTime(nullptr,0), //FIXME getEifsTime() args are dummy!!!
+            mac->dataFrameMode->getCwMin(), mac->dataFrameMode->getCwMax(),
+            retryCount, transmissionCompleteCallback);
+}
+
+void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback)
+{
+    ASSERT(fsm.getState() == IDLE);
+    this->frame = frame;
+    this->ifs = ifs;
+    this->eifs = eifs;
+    this->cwMin = cwMin;
+    this->cwMax = cwMax;
+    this->retryCount = retryCount;
+    this->transmissionCompleteCallback = transmissionCompleteCallback;
+
+    int cw = computeCW(cwMin, cwMax, retryCount);
+    backoffSlots = intrand(cw + 1);
+    handleWithFSM(START_TRANSMISSION, frame);
+}
+
+int Ieee80211MacTransmission::computeCW(int cwMin, int cwMax, int retryCount)
+{
+    int cw = ((cwMin+1) << retryCount) - 1;
+    if (cw > cwMax)
+        cw = cwMax;
+    return cw;
+}
+
 void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
 {
     if (frame == nullptr)
-        return;
+        return; //FIXME ????????????????
     logState();
 //    emit(stateSignal, fsm.getState()); TODO
     FSMA_Switch(fsm)
@@ -44,8 +98,13 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
         FSMA_State(IDLE)
         {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
-            FSMA_Event_Transition(Data-Ready,
-                                  event == START_TRANSMISSION && mediumFree,
+            FSMA_Event_Transition(Ready-To-Transmit,
+                                  event == START_TRANSMISSION && mediumFree && !isIFSNecessary(),
+                                  TRANSMIT,
+                                  ;
+            );
+            FSMA_Event_Transition(Need-IFS-Before-Transmit,
+                                  event == START_TRANSMISSION && mediumFree && isIFSNecessary(),
                                   WAIT_IFS,
                                   ;
             );
@@ -66,11 +125,7 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
         }
         FSMA_State(WAIT_IFS)
         {
-            FSMA_Enter(
-                    scheduleIFSPeriod(deferDuration);
-                    if (useEIFS)
-                        scheduleEIFSPeriod(eifs);
-            );
+            FSMA_Enter(scheduleIFS());
             FSMA_Event_Transition(Backoff,
                                   event == TIMER && !endIFS->isScheduled() && !endEIFS->isScheduled(),
                                   BACKOFF,
@@ -112,19 +167,10 @@ void Ieee80211MacTransmission::handleWithFSM(EventType event, cMessage *msg)
     // emit(stateSignal, fsm.getState()); TODO
 }
 
-void Ieee80211MacTransmission::transmitContentionFrame(Ieee80211Frame* frame, simtime_t deferDuration, simtime_t eifs, int cw, ITransmissionCompleteCallback *transmissionCompleteCallback)
-{
-    ASSERT(fsm.getState() == IDLE);
-    this->frame = frame;
-    this->deferDuration = deferDuration;
-    this->transmissionCompleteCallback = transmissionCompleteCallback;
-    backoffSlots = intrand(cw + 1);
-    handleWithFSM(START_TRANSMISSION, frame);
-}
-
 void Ieee80211MacTransmission::mediumStateChanged(bool mediumFree)
 {
     this->mediumFree = mediumFree;
+    channelBecameFree = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
@@ -144,25 +190,25 @@ void Ieee80211MacTransmission::lowerFrameReceived(bool isFcsOk)
     useEIFS = !isFcsOk;
 }
 
-Ieee80211MacTransmission::Ieee80211MacTransmission(Ieee80211NewMac* mac) : Ieee80211MacPlugin(mac)
-{
-    fsm.setName("Ieee80211NewMac State Machine");
-    fsm.setState(IDLE);
-    endIFS = new cMessage("IFS");
-    endBackoff = new cMessage("Backoff");
-    frameDuration = new cMessage("FrameDuration");
-    endEIFS = new cMessage("EIFS");
-}
-
 void Ieee80211MacTransmission::scheduleIFSPeriod(simtime_t deferDuration)
 {
     scheduleAt(simTime() + deferDuration, endIFS);
 }
 
-void Ieee80211MacTransmission::scheduleEIFSPeriod(simtime_t deferDuration)
+void Ieee80211MacTransmission::scheduleEIFSPeriod(simtime_t duration)
 {
     cancelEvent(endEIFS);
-    scheduleAt(simTime() + deferDuration, endEIFS);
+    scheduleAt(simTime() + duration, endEIFS);
+}
+
+void Ieee80211MacTransmission::scheduleIFS()
+{
+    ASSERT(mediumFree);
+    simtime_t elapsedFreeChannelTime = simTime() - channelBecameFree;
+    if (ifs > elapsedFreeChannelTime)
+        scheduleIFSPeriod(ifs - elapsedFreeChannelTime);
+    if (useEIFS && eifs > elapsedFreeChannelTime)
+        scheduleEIFSPeriod(eifs - elapsedFreeChannelTime);
     useEIFS = false;
 }
 
@@ -184,18 +230,14 @@ void Ieee80211MacTransmission::logState()
     EV  << "state information: " << "state = " << fsm.getStateName() << ", backoffPeriod = " << backoffPeriod << endl;
 }
 
-Ieee80211MacTransmission::~Ieee80211MacTransmission()
+bool Ieee80211MacTransmission::isIFSNecessary()
 {
-    cancelEvent(endIFS);
-    cancelEvent(endBackoff);
-    cancelEvent(frameDuration);
-    cancelEvent(endEIFS);
-    delete endIFS;
-    delete endBackoff;
-    delete frameDuration;
-    delete endEIFS;
+    simtime_t elapsedFreeChannelTime = simTime() - channelBecameFree;
+    return elapsedFreeChannelTime < ifs || (useEIFS && elapsedFreeChannelTime < eifs);
 }
+
 
 }
 
 } //namespace
+

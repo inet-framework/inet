@@ -49,42 +49,51 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         enum EventType { LOWER_FRAME, MEDIUM_STATE_CHANGED, TIMER, START_TRANSMISSION };
 
     protected:
-        //TODO: simtime_t channelBecameFree; -- IFS should count from this time!
+        // current transmission's parameters
         Ieee80211Frame *frame = nullptr;
-        ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
-        simtime_t deferDuration = SIMTIME_ZERO;
+        simtime_t ifs = SIMTIME_ZERO;
         simtime_t eifs = SIMTIME_ZERO;
+        int cwMin = 0;
+        int cwMax = 0;
+        int retryCount = 0;
+        ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
+
+        simtime_t channelBecameFree = SIMTIME_ZERO;
         int backoffSlots = 0;
         bool mediumFree = false;
         bool useEIFS = false;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+
         cFSM fsm;
-        /** End of the backoff period */
         cMessage *endBackoff = nullptr;
-        /** End of the Data Inter-Frame Time period */
         cMessage *endIFS = nullptr;
         cMessage *endEIFS = nullptr;
-        /** Remaining backoff period in seconds */
         simtime_t backoffPeriod = SIMTIME_ZERO;
         cMessage *frameDuration = nullptr;
 
     protected:
+        virtual int computeCW(int cwMin, int cwMax, int retryCount);
         void handleWithFSM(EventType event, cMessage *msg);
+        void scheduleIFS();
         void scheduleIFSPeriod(simtime_t deferDuration);
         void scheduleEIFSPeriod(simtime_t deferDuration);
         void updateBackoffPeriod();
         void scheduleBackoffPeriod(int backoffPeriod);
         void logState();
         void handleMessage(cMessage *msg);
+        bool isIFSNecessary();
 
     public:
-        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cw, ITransmissionCompleteCallback *transmissionCompleteCallback); //TODO ifs, eifs, cwMin, cwMax should become parameters of Transmit; and add a retryLastContentionFrame() call!
+        Ieee80211MacTransmission(Ieee80211NewMac *mac);
+        ~Ieee80211MacTransmission();
+
+        void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback);
+        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback); // explicit ifs, eifs, cwMin, cwMax
+
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
         void mediumStateChanged(bool mediumFree);
         void transmissionStateChanged(IRadio::TransmissionState transmissionState);
-        void lowerFrameReceived(bool isFcsOk); //TODO on receiving a frame with wrong FCS, we need to switch from DIFS to EIFS (ie. from ifs parameter to eifs parameter)!
-        Ieee80211MacTransmission(Ieee80211NewMac *mac);
-        ~Ieee80211MacTransmission();
+        void lowerFrameReceived(bool isFcsOk);
 };
 
 }
