@@ -21,6 +21,7 @@
 #define __INET_BASICCONTENTIONTX_H
 
 #include "IContentionTx.h"
+#include "ICollisionController.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -36,21 +37,16 @@ class IMacRadioInterface;
 //TODO fsm is wrong wrt channelLastBusyTime (not all cases handled) -- FIGURE OUT HOW TO HANDLE IT WHEN CHANNEL IS LONG FREE WHEN WE WANT TO TRANSMIT!
 //TODO needs to be decided whether slots for different ACs are aligned; and if not, whether "within a slot time" is a good definition for collision!
 //TODO NOTE: latter is interlinked with the prev question -- what if we could transmit immediately? we should wait for 1 slot time to make sure we don't collide with a higher priority process??
-class BasicContentionTx : public cSimpleModule, public IContentionTx
+class BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
 {
     public:
-        enum State {
-            IDLE,
-            DEFER,
-            BACKOFF,
-            WAIT_IFS,
-            TRANSMIT
-        };
-        enum EventType { START, MEDIUM_STATE_CHANGED, TRANSMISSION_FINISHED, TIMER, FRAME_ARRIVED };
+        enum State { IDLE, DEFER, IFS_AND_BACKOFF, TRANSMIT };
+        enum EventType { START, MEDIUM_STATE_CHANGED, CORRUPTED_FRAME_RECEIVED, TRANSMISSION_GRANTED, INTERNAL_COLLISION, TRANSMISSION_FINISHED };
 
     protected:
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
+        ICollisionController *collisionController;  // optional
         int txIndex;
 
         // current transmission's parameters
@@ -63,30 +59,29 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx
         int retryCount = 0;
         ITxCallback *completionCallback = nullptr;
 
-        simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
-        int backoffSlots = 0;
-        bool mediumFree = false;
-        bool useEIFS = false;
-        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-
         cFSM fsm;
-        cMessage *endBackoff = nullptr;
-        cMessage *endIFS = nullptr;
-        cMessage *endEIFS = nullptr;
+        simtime_t endEifsTime = SIMTIME_ZERO;
+        int backoffSlots = 0;
+        simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
+        simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
+        bool mediumFree = false;
+        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     protected:
         virtual void initialize() override;
         virtual void handleMessage(cMessage *msg) override;
+        virtual void transmissionGranted(int txIndex) override; // called back from collision controller
+        virtual void internalCollision(int txIndex) override; // called back from collision controller
 
-        virtual int computeCW(int cwMin, int cwMax, int retryCount);
+        virtual int computeCw(int cwMin, int cwMax, int retryCount);
         virtual void handleWithFSM(EventType event, cMessage *msg);
-        virtual bool isIFSNecessary();
-        virtual void scheduleIFS();
-        virtual void scheduleIFSPeriod(simtime_t deferDuration);
-        virtual void scheduleEIFSPeriod(simtime_t deferDuration);
-        virtual void updateBackoffPeriod();
-        virtual void scheduleBackoffPeriod(int backoffPeriod);
-        virtual void transmissionComplete();
+        virtual void scheduleTransmissionRequest();
+        virtual void scheduleTransmissionRequestFor(simtime_t txStartTime);
+        virtual void cancelTransmissionRequest();
+        virtual void switchToEifs();
+        virtual void computeRemainingBackoffSlots();
+        virtual void reportTransmissionComplete();
+        virtual void reportInternalCollision();
         virtual void logState();
         virtual void updateDisplayString();
 
@@ -99,7 +94,7 @@ class BasicContentionTx : public cSimpleModule, public IContentionTx
 
         virtual void mediumStateChanged(bool mediumFree) override;
         virtual void radioTransmissionFinished() override;
-        virtual void lowerFrameReceived(bool isFcsOk) override;
+        virtual void corruptedFrameReceived() override;
 };
 
 } // namespace ieee80211

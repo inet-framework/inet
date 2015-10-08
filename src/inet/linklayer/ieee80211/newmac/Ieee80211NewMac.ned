@@ -92,13 +92,16 @@ module Ieee80211NewMac extends MACProtocolBase like IMACProtocol
 
         string upperMacModule = ".upperMac";
         string rxModule = ".rx";
-        string immediateTxModule = ".immTx";
-        string firstContentionTxModule = ".conTx[0]";
+        string immediateTxModule = ".iTx";
+        string firstContentionTxModule = ".cTx[0]";
+        int numContentionTx = default(4);
+        string collisionControllerModule = ".ctrl";
         *.macModule = "^";
         *.upperMacModule = "^" + upperMacModule;
         *.rxModule = "^" + rxModule;
         *.immediateTxModule = "^" + immediateTxModule;
         *.firstContentionTxModule = "^" + firstContentionTxModule;
+        *.collisionControllerModule = "^" + collisionControllerModule;
 
         @display("i=block/layer");
         @class(Ieee80211NewMac);
@@ -107,14 +110,17 @@ module Ieee80211NewMac extends MACProtocolBase like IMACProtocol
         upperMac: <default("BasicUpperMac")> like IUpperMac {
             @display("p=208,66");
         }
-        immTx: <default("BasicImmediateTx")> like IImmediateTx {
-            @display("p=74,210");
+        iTx: <default("BasicImmediateTx")> like IImmediateTx {
+            @display("p=70,200");
         }
-        conTx[1]: <default("BasicContentionTx")> like IContentionTx {
-            @display("p=144,210");
+        cTx[numContentionTx]: <default("BasicContentionTx")> like IContentionTx {
+            @display("p=140,200,r,50");
         }
         rx: <default("BasicRx")> like IRx {
-            @display("p=343,210");
+            @display("p=380,200");
+        }
+        ctrl: <default("BasicCollisionController")> like ICollisionController {
+            @display("p=208,300");
         }
 }
 

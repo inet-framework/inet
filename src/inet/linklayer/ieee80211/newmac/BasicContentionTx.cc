@@ -30,8 +30,7 @@ namespace ieee80211 {
 Register_Enum(BasicContentionTx::State,
         (BasicContentionTx::IDLE,
          BasicContentionTx::DEFER,
-         BasicContentionTx::BACKOFF,
-         BasicContentionTx::WAIT_IFS,
+         BasicContentionTx::IFS_AND_BACKOFF,
          BasicContentionTx::TRANSMIT));
 
 Define_Module(BasicContentionTx);
@@ -52,28 +51,28 @@ void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx 
 
 void BasicContentionTx::initialize()
 {
-    mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
-    upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+    mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
+    upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+    collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
     txIndex = getIndex();
+    if (txIndex > 0 && !collisionController)
+        throw cRuntimeError("No collision controller module -- one is needed when multiple ContentionTx instances are present");
 
     fsm.setName("fsm");
     fsm.setState(IDLE, "IDLE");
-    endIFS = new cMessage("IFS");
-    endBackoff = new cMessage("Backoff");
-    endEIFS = new cMessage("EIFS");
 }
 
 BasicContentionTx::~BasicContentionTx()
 {
-    cancelAndDelete(endIFS);
-    cancelAndDelete(endBackoff);
-    cancelAndDelete(endEIFS);
+    if (frame && fsm.getState() != TRANSMIT)
+        delete frame;
 }
 
 void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
 {
     Enter_Method("transmitContentionFrame(\"%s\")", frame->getName());
     ASSERT(fsm.getState() == IDLE);
+    take(frame);
     this->frame = frame;
     this->ifs = ifs;
     this->eifs = eifs;
@@ -83,12 +82,12 @@ void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t
     this->retryCount = retryCount;
     this->completionCallback = completionCallback;
 
-    int cw = computeCW(cwMin, cwMax, retryCount);
+    int cw = computeCw(cwMin, cwMax, retryCount);
     backoffSlots = intrand(cw + 1);
     handleWithFSM(START, frame);
 }
 
-int BasicContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
+int BasicContentionTx::computeCw(int cwMin, int cwMax, int retryCount)
 {
     int cw = ((cwMin + 1) << retryCount) - 1;
     if (cw > cwMax)
@@ -96,21 +95,22 @@ int BasicContentionTx::computeCW(int cwMin, int cwMax, int retryCount)
     return cw;
 }
 
+//TODO into FSMA.h when mature
+#define FSMA_Ignore_Event(condition)  .....
+
+#define FSMA_Event_Transition_Error()
+//#define FSMA_Event_Transition_Error()   FSMA_Event_Transition(Unexpected-event, true, 0, throw cRuntimeError(this, "Unhandled event"););
+
 void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
 {
     logState();
-//    emit(stateSignal, fsm.getState()); TODO
+    // emit(stateSignal, fsm.getState()); TODO
     FSMA_Switch(fsm) {
         FSMA_State(IDLE) {
-            FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
-//            FSMA_Event_Transition(Ready-To-Transmit,
-//                                  event == START && mediumFree && !isIFSNecessary(),
-//                                  TRANSMIT,
-//                                  ;
-//            );
-            FSMA_Event_Transition(Need - IFS - Before - Transmit,
-                    event == START && mediumFree    /*&& isIFSNecessary()*/,
-                    WAIT_IFS,
+            FSMA_Enter(mac->sendDownPendingRadioConfigMsg(); frame = nullptr);
+            FSMA_Event_Transition(Starting-IFS-and-Backoff,
+                    event == START && mediumFree,
+                    IFS_AND_BACKOFF,
                     ;
                     );
             FSMA_Event_Transition(Busy,
@@ -118,49 +118,50 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     DEFER,
                     ;
                     );
+            FSMA_Event_Transition_Error();
         }
         FSMA_State(DEFER) {
             FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
-            FSMA_Event_Transition(WAIT - Ifs,
+            FSMA_Event_Transition(Restarting-IFS-and-Backoff,
                     event == MEDIUM_STATE_CHANGED && mediumFree,
-                    WAIT_IFS,
+                    IFS_AND_BACKOFF,
                     ;
                     );
+            FSMA_Event_Transition_Error();
         }
-        FSMA_State(WAIT_IFS) {
-            FSMA_Enter(scheduleIFS());
-            FSMA_Event_Transition(Backoff,
-                    event == TIMER && !endIFS->isScheduled() && !endEIFS->isScheduled(),
-                    BACKOFF,
-                    ;
-                    );
-            FSMA_Event_Transition(Busy,
-                    event == MEDIUM_STATE_CHANGED && !mediumFree,
-                    DEFER,
-                    cancelEvent(endIFS);
-                    );
-        }
-        FSMA_State(BACKOFF) {
-            FSMA_Enter(scheduleBackoffPeriod(backoffSlots));
-            FSMA_Event_Transition(Transmit - Data,
-                    event == TIMER && msg == endBackoff,
+        FSMA_State(IFS_AND_BACKOFF) {
+            FSMA_Enter(scheduleTransmissionRequest());
+            FSMA_Event_Transition(Backoff-expired,
+                    event == TRANSMISSION_GRANTED,
                     TRANSMIT,
                     ;
                     );
-            FSMA_Event_Transition(Backoff - Busy,
+            FSMA_Event_Transition(Defer-on-channel-busy,
                     event == MEDIUM_STATE_CHANGED && !mediumFree,
                     DEFER,
-                    updateBackoffPeriod();
-                    cancelEvent(endBackoff);
+                    cancelTransmissionRequest();
                     );
+            FSMA_Event_Transition(Internal-collision,
+                    event == INTERNAL_COLLISION,
+                    IDLE,
+                    reportInternalCollision();
+                    );
+            FSMA_Event_Transition(Use-EIFS,
+                    event == CORRUPTED_FRAME_RECEIVED,
+                    IFS_AND_BACKOFF,
+                    switchToEifs();
+                    );
+
+            FSMA_Event_Transition_Error();
         }
         FSMA_State(TRANSMIT) {
             FSMA_Enter(mac->sendFrame(frame));
             FSMA_Event_Transition(TxFinished,
                     event == TRANSMISSION_FINISHED,
                     IDLE,
-                    transmissionComplete();
+                    reportTransmissionComplete();
                     );
+            FSMA_Event_Transition_Error();
         }
     }
 
@@ -186,56 +187,80 @@ void BasicContentionTx::radioTransmissionFinished()
 
 void BasicContentionTx::handleMessage(cMessage *msg)
 {
-    handleWithFSM(TIMER, msg);
+    ASSERT(false);
 }
 
-void BasicContentionTx::lowerFrameReceived(bool isFcsOk)
+void BasicContentionTx::corruptedFrameReceived()
 {
-    Enter_Method("%s frame received", isFcsOk ? "HEALTHY" : "CORRUPTED");
-    useEIFS = !isFcsOk;    //TODO almost certainly not enough -- we probably need to schedule EIFS timer or something
+    Enter_Method("corruptedFrameReceived()");
+    handleWithFSM(CORRUPTED_FRAME_RECEIVED, nullptr);
 }
 
-void BasicContentionTx::scheduleIFSPeriod(simtime_t deferDuration)
+void BasicContentionTx::transmissionGranted(int txIndex)
 {
-    scheduleAt(simTime() + deferDuration, endIFS);
+    Enter_Method("transmissionGranted()");
+    handleWithFSM(TRANSMISSION_GRANTED, nullptr);
 }
 
-void BasicContentionTx::scheduleEIFSPeriod(simtime_t duration)
+void BasicContentionTx::internalCollision(int txIndex)
 {
-    cancelEvent(endEIFS);
-    scheduleAt(simTime() + duration, endEIFS);
+    Enter_Method("internalCollision()");
+    handleWithFSM(INTERNAL_COLLISION, nullptr);
 }
 
-void BasicContentionTx::scheduleIFS()
+void BasicContentionTx::scheduleTransmissionRequestFor(simtime_t txStartTime)
+{
+    collisionController->scheduleTransmissionRequest(txIndex, txStartTime, this);
+}
+
+void BasicContentionTx::cancelTransmissionRequest()
+{
+    collisionController->cancelTransmissionRequest(txIndex);
+}
+
+void BasicContentionTx::scheduleTransmissionRequest()
 {
     ASSERT(mediumFree);
-//    simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
-//    if (ifs > elapsedFreeChannelTime)
-//        scheduleIFSPeriod(ifs - elapsedFreeChannelTime);
-//    if (useEIFS && eifs > elapsedFreeChannelTime)
-//        scheduleEIFSPeriod(eifs - elapsedFreeChannelTime);
-//    useEIFS = false;
-    if (useEIFS)
-        scheduleEIFSPeriod(eifs);
-    scheduleIFSPeriod(ifs);
+
+    simtime_t now = simTime();
+    bool useEifs = endEifsTime > now + ifs;
+    simtime_t waitInterval = (useEifs ? eifs : ifs) + backoffSlots * slotTime;
+
+    if (retryCount == 0) {
+        // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
+        simtime_t elapsedFreeChannelTime = now - channelLastBusyTime;
+        if (elapsedFreeChannelTime > waitInterval)
+            waitInterval = 0;
+        else
+            waitInterval -= elapsedFreeChannelTime;
+    }
+    scheduledTransmissionTime = now + waitInterval;
+    scheduleTransmissionRequestFor(scheduledTransmissionTime);
 }
 
-void BasicContentionTx::updateBackoffPeriod()
+void BasicContentionTx::switchToEifs()
 {
-    simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffSlots -= ((int)(elapsedBackoffTime / slotTime));    //FIXME add some epsilon...?
+    endEifsTime = simTime() + eifs;
+    cancelTransmissionRequest();
+    scheduleTransmissionRequest();
 }
 
-void BasicContentionTx::scheduleBackoffPeriod(int backoffSlots)
+void BasicContentionTx::computeRemainingBackoffSlots()
 {
-    simtime_t backoffPeriod = backoffSlots * slotTime;
-    scheduleAt(simTime() + backoffPeriod, endBackoff);
+    simtime_t remainingTime = scheduledTransmissionTime - simTime();
+    int remainingSlots = (int)ceil(remainingTime / slotTime);  //TODO this is not accurate
+    if (remainingSlots < backoffSlots) // don't count IFS
+        backoffSlots = remainingSlots;
 }
 
-void BasicContentionTx::transmissionComplete()
+void BasicContentionTx::reportTransmissionComplete()
 {
     upperMac->transmissionComplete(completionCallback, txIndex);
-    frame = nullptr;
+}
+
+void BasicContentionTx::reportInternalCollision()
+{
+    upperMac->internalCollision(completionCallback, txIndex);
 }
 
 void BasicContentionTx::logState()
@@ -251,12 +276,6 @@ void BasicContentionTx::updateDisplayString()
         os << frame->getName() << "\n";
     os << fsm.getStateName();
     getDisplayString().setTagArg("t", 0, os.str().c_str());
-}
-
-bool BasicContentionTx::isIFSNecessary()
-{
-    simtime_t elapsedFreeChannelTime = simTime() - channelLastBusyTime;
-    return elapsedFreeChannelTime < ifs || (useEIFS && elapsedFreeChannelTime < eifs);
 }
 
 } // namespace ieee80211

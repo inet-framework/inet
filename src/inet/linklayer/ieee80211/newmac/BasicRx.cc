@@ -59,11 +59,12 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
-    bool errorFree = isFcsOk(frame);
-    for (int i = 0; contentionTx[i]; i++)
-        contentionTx[i]->lowerFrameReceived(errorFree);
+    bool isFrameOk = isFcsOk(frame);
+    if (!isFrameOk)
+        for (int i = 0; contentionTx[i]; i++)
+            contentionTx[i]->corruptedFrameReceived();
 
-    if (errorFree) {
+    if (isFrameOk) {
         EV_INFO << "Received message from lower layer: " << frame << endl;
         if (frame->getReceiverAddress() != address)
             setOrExtendNav(frame->getDuration());

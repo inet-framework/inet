@@ -48,7 +48,7 @@ class IContentionTx
         // notifications
         virtual void mediumStateChanged(bool mediumFree) = 0;
         virtual void radioTransmissionFinished() = 0;
-        virtual void lowerFrameReceived(bool isFcsOk) = 0;
+        virtual void corruptedFrameReceived() = 0;
 };
 
 void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx **& contentionTx);
