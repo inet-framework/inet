@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef IEEE80211UPPERMAC_H_
-#define IEEE80211UPPERMAC_H_
+#ifndef __INET_IEEE80211UPPERMAC_H
+#define __INET_IEEE80211UPPERMAC_H
 
 #include "Ieee80211MacPlugin.h"
 #include "IIeee80211UpperMac.h"
@@ -28,10 +28,11 @@
 
 namespace inet {
 
+class IPassiveQueue;
+
 namespace ieee80211 {
 
 class Ieee80211NewMac;
-
 
 class Ieee80211UpperMac : public cSimpleModule, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback
 {
@@ -86,8 +87,8 @@ class Ieee80211UpperMac : public cSimpleModule, public IIeee80211UpperMac, publi
 
 };
 
-} // namespace 80211
+} // namespace ieee80211
+} // namespace inet
 
-} /* namespace inet */
+#endif
 
-#endif /* IEEE80211UPPERMAC_H_ */

@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,10 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
 #include "Ieee80211UpperMacContext.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "IIeee80211MacTx.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -202,7 +207,6 @@ void Ieee80211UpperMacContext::transmitImmediateFrame(Ieee80211Frame *frame, sim
     tx->transmitImmediateFrame(frame, ifs, completionCallback);
 }
 
-
-}
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

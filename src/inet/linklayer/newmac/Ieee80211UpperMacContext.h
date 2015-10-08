@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,21 +14,21 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
-#ifndef IEEE80211UPPERMACCONTEXT_H_
-#define IEEE80211UPPERMACCONTEXT_H_
+#ifndef __INET_IEEE80211UPPERMACCONTEXT_H
+#define __INET_IEEE80211UPPERMACCONTEXT_H
 
 #include "IIeee80211UpperMacContext.h"
-#include "Ieee80211NewMac.h"
+#include "IIeee80211UpperMacContext.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
-
-namespace physicallayer {
-class Ieee80211ModeSet;
-class Ieee80211Mode;
-}
-
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 class IIeee80211MacTx;
 
@@ -85,7 +87,8 @@ class INET_API Ieee80211UpperMacContext : public IIeee80211UpperMacContext
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, IIeee80211MacTx::ICallback *completionCallback) const override;
 };
 
-}
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
+

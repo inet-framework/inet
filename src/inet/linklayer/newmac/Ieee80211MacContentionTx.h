@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,16 +14,22 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
-#ifndef __MAC_IEEE80211MACCONTENTIONTX_H_
-#define __MAC_IEEE80211MACCONTENTIONTX_H_
+#ifndef __INET_IEEE80211MACCONTENTIONTX_H
+#define __INET_IEEE80211MACCONTENTIONTX_H
 
 #include "Ieee80211MacPlugin.h"
 #include "IIeee80211MacContentionTx.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
+
+class IIeee80211MacRadioInterface;
 
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
 //TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
@@ -38,6 +46,7 @@ class Ieee80211MacContentionTx : public Ieee80211MacPlugin, public IIeee80211Mac
         enum EventType { START, MEDIUM_STATE_CHANGED, TRANSMISSION_FINISHED, TIMER, FRAME_ARRIVED };
 
     protected:
+        IIeee80211MacRadioInterface *mac;
         int txIndex;
 
         // current transmission's parameters
@@ -76,7 +85,7 @@ class Ieee80211MacContentionTx : public Ieee80211MacPlugin, public IIeee80211Mac
         bool isIFSNecessary();
 
     public:
-        Ieee80211MacContentionTx(Ieee80211NewMac *mac, int txIndex);
+        Ieee80211MacContentionTx(cSimpleModule *ownerModule, IIeee80211MacRadioInterface *mac, int txIndex);
         ~Ieee80211MacContentionTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
@@ -87,8 +96,8 @@ class Ieee80211MacContentionTx : public Ieee80211MacPlugin, public IIeee80211Mac
         virtual void lowerFrameReceived(bool isFcsOk) override;
 };
 
-}
-
-} //namespace
+} // namespace ieee80211
+} // namespace inet
 
 #endif
+

@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef IEEE80211MACRX_H_
-#define IEEE80211MACRX_H_
+#ifndef __INET_IEEE80211MACRX_H
+#define __INET_IEEE80211MACRX_H
 
 #include "IIeee80211MacRx.h"
 #include "Ieee80211MacPlugin.h"
@@ -59,8 +59,8 @@ class Ieee80211MacRx : public cSimpleModule, public IIeee80211MacRx
 
 };
 
-}
+} // namespace ieee80211
+} // namespace inet
 
-} /* namespace inet */
+#endif
 
-#endif /* IEEE80211MACRECEPTION_H_ */

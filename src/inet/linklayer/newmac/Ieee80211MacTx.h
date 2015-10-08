@@ -17,14 +17,13 @@
 // Author: Andras Varga
 //
 
-#ifndef __MAC_IEEE80211MACTX_H_
-#define __MAC_IEEE80211MACTX_H_
+#ifndef __INET_IEEE80211MACTX_H
+#define __INET_IEEE80211MACTX_H
 
 #include "Ieee80211MacPlugin.h"
 #include "IIeee80211MacTx.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 class IIeee80211MacContentionTx;
@@ -35,15 +34,13 @@ class IIeee80211MacImmediateTx;
 class Ieee80211MacTx : public cSimpleModule, public IIeee80211MacTx
 {
     protected:
-        Ieee80211NewMac *mac = nullptr;
-        IIeee80211UpperMac *upperMac = nullptr;
         int numContentionTx;
         IIeee80211MacContentionTx *contentionTx[MAX_NUM_CONTENTIONTX];
         IIeee80211MacImmediateTx *immediateTx = nullptr;
 
     protected:
         virtual void initialize() override;
-        virtual void handleMessage(cMessage *msg) override {}
+        virtual void handleMessage(cMessage *msg) override;
 
     public:
         Ieee80211MacTx();
@@ -57,8 +54,8 @@ class Ieee80211MacTx : public cSimpleModule, public IIeee80211MacTx
         virtual void lowerFrameReceived(bool isFcsOk) override;
 };
 
-}
-
-} //namespace
+} // namespace ieee80211
+} // namespace inet
 
 #endif
+

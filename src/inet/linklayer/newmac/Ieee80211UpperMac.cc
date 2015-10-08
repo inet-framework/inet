@@ -20,13 +20,12 @@
 #include "Ieee80211UpperMac.h"
 #include "Ieee80211NewMac.h"
 #include "IIeee80211UpperMacContext.h"
+#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "Ieee80211FrameExchanges.h"
 
 namespace inet {
-
 namespace ieee80211 {
-
 
 Ieee80211UpperMac::Ieee80211UpperMac()
 {
@@ -54,6 +53,10 @@ void Ieee80211UpperMac::initialize()
 
 void Ieee80211UpperMac::handleMessage(cMessage* msg)
 {
+    if (msg->getContextPointer() != nullptr)
+        ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
+    else
+        ASSERT(false);
 }
 
 void Ieee80211UpperMac::initializeQueueModule()
@@ -175,8 +178,6 @@ void Ieee80211UpperMac::internalCollision(int txIndex)
     //TODO
 }
 
-
-}
-
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

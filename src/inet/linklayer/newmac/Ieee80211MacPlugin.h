@@ -17,40 +17,31 @@
 // Author: Andras Varga
 //
 
-#ifndef IEEE80211MACPLUGIN_H_
-#define IEEE80211MACPLUGIN_H_
+#ifndef __INET_IEEE80211MACPLUGIN_H
+#define __INET_IEEE80211MACPLUGIN_H
 
 #include "inet/common/INETDefs.h"
-#include "Ieee80211NewMac.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211NewMac;
-class IIeee80211UpperMac;
-class IIeee80211MacRx;
-class IIeee80211MacTx;
-
 class Ieee80211MacPlugin : public cObject
 {
     protected:
-        Ieee80211NewMac *mac = nullptr;
+        cSimpleModule *ownerModule = nullptr;
 
     public:
-        Ieee80211MacPlugin(Ieee80211NewMac *mac) : mac(mac) {}
+        Ieee80211MacPlugin(cSimpleModule *ownerModule) : ownerModule(ownerModule) {}
         virtual ~Ieee80211MacPlugin() {}
 
+    public:
         virtual void handleMessage(cMessage *msg) = 0;
         virtual void scheduleAt(simtime_t t, cMessage *msg);
         virtual cMessage* cancelEvent(cMessage *msg);
-
-        //TODO remove these
-        IIeee80211UpperMac *getUpperMac() { return mac->upperMac; }
-        IIeee80211MacRx *getReception() { return mac->rx; }
-        IIeee80211MacTx *getTransmission() { return mac->tx; }
 };
 
-}
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
-#endif /* IEEE80211MACPLUGIN_H_ */
+#endif
+

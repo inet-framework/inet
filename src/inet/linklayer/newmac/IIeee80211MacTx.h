@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,16 +14,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
-#ifndef __MAC_IIEEE80211MACTX_H_
-#define __MAC_IIEEE80211MACTX_H_
+#ifndef __INET_IIEEE80211MACTX_H
+#define __INET_IIEEE80211MACTX_H
 
 #include "Ieee80211MacPlugin.h"
 #include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 class IIeee80211MacTx
@@ -41,8 +44,8 @@ class IIeee80211MacTx
         virtual void lowerFrameReceived(bool isFcsOk) = 0;
 };
 
-}
-
-} //namespace
+} // namespace ieee80211
+} // namespace inet
 
 #endif
+

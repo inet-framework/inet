@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,16 +14,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
-#ifndef IIEEE80211MACCONTEXT_H_
-#define IIEEE80211MACCONTEXT_H_
+#ifndef __INET_IIEEE80211UPPERMACCONTEXT_H
+#define __INET_IIEEE80211UPPERMACCONTEXT_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "IIeee80211MacTx.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 class Ieee80211Frame;
@@ -73,7 +76,8 @@ class IIeee80211UpperMacContext
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, IIeee80211MacTx::ICallback *completionCallback) const = 0;
 };
 
-}
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif
+

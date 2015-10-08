@@ -18,7 +18,6 @@
 //
 
 #include "Ieee80211MacPlugin.h"
-#include "Ieee80211NewMac.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -26,17 +25,16 @@ namespace ieee80211 {
 void Ieee80211MacPlugin::scheduleAt(simtime_t t, cMessage* msg)
 {
     msg->setContextPointer(this);
-    mac->scheduleAt(t, msg);
+    ownerModule->scheduleAt(t, msg);
 }
 
 cMessage* Ieee80211MacPlugin::cancelEvent(cMessage* msg)
 {
     ASSERT(msg->getContextPointer() == this);
-    mac->cancelEvent(msg);
+    ownerModule->cancelEvent(msg);
     return msg;
 }
 
-}
-
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

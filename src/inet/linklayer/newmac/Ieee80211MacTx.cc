@@ -21,10 +21,9 @@
 #include "Ieee80211MacContentionTx.h"
 #include "Ieee80211MacImmediateTx.h"
 #include "IIeee80211UpperMac.h"
-#include "Ieee80211NewMac.h" //TODO
+#include "IIeee80211MacRadioInterface.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Ieee80211MacTx::Ieee80211MacTx()
@@ -42,15 +41,22 @@ Ieee80211MacTx::~Ieee80211MacTx()
 
 void Ieee80211MacTx::initialize()
 {
-    mac = check_and_cast<Ieee80211NewMac*>(getParentModule());  //TODO
-    upperMac = check_and_cast<IIeee80211UpperMac*>(getModuleByPath("^.upperMac")); //TODO
+    IIeee80211MacRadioInterface *mac = check_and_cast<IIeee80211MacRadioInterface *>(getParentModule());  //TODO
 
     numContentionTx = 4; //TODO
     ASSERT(numContentionTx < MAX_NUM_CONTENTIONTX);
     for (int i = 0; i < numContentionTx; i++)
-        contentionTx[i] = new Ieee80211MacContentionTx(mac, i); //TODO factory method
-    immediateTx = new Ieee80211MacImmediateTx(mac); //TODO factory method
+        contentionTx[i] = new Ieee80211MacContentionTx(this, mac, i); //TODO factory method
+    immediateTx = new Ieee80211MacImmediateTx(this, mac); //TODO factory method
 
+}
+
+void Ieee80211MacTx::handleMessage(cMessage *msg)
+{
+    if (msg->getContextPointer() != nullptr)
+        ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
+    else
+        ASSERT(false);
 }
 
 void Ieee80211MacTx::transmitContentionFrame(int txIndex, Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ICallback *completionCallback)
@@ -82,8 +88,6 @@ void Ieee80211MacTx::lowerFrameReceived(bool isFcsOk)
         contentionTx[i]->lowerFrameReceived(isFcsOk);
 }
 
-
-}
-
-} //namespace
+} // namespace ieee80211
+} // namespace inet
 

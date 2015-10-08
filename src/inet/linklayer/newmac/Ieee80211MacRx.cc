@@ -22,7 +22,6 @@
 #include "IIeee80211UpperMac.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Ieee80211MacRx::Ieee80211MacRx()
@@ -43,7 +42,9 @@ void Ieee80211MacRx::initialize()
 
 void Ieee80211MacRx::handleMessage(cMessage* msg)
 {
-    if (msg == endNavTimer)  //FIXME should signal to tx!!!! or not????
+    if (msg->getContextPointer() != nullptr)
+        ((Ieee80211MacPlugin *)msg->getContextPointer())->handleMessage(msg);
+    else if (msg == endNavTimer)  //FIXME should signal to tx!!!! or not????
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
     else
         throw cRuntimeError("Unexpected self message");
@@ -110,7 +111,6 @@ void Ieee80211MacRx::setNav(simtime_t navInterval)
         EV_INFO << "Frame duration field is 0" << std::endl; // e.g. Cf-End frame
 }
 
-}
-
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 

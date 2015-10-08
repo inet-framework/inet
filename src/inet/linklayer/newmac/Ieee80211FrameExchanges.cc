@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,6 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+// Author: Andras Varga
+//
 
 #include "Ieee80211FrameExchanges.h"
 #include "inet/common/FSMA.h"
@@ -22,8 +26,8 @@
 namespace inet {
 namespace ieee80211 {
 
-Ieee80211SendDataWithAckFrameExchange::Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
-    Ieee80211FSMBasedFrameExchange(mac, context, callback), frame(frame)
+Ieee80211SendDataWithAckFrameExchange::Ieee80211SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
+    Ieee80211FSMBasedFrameExchange(ownerModule, context, callback), frame(frame)
 {
 }
 
@@ -133,8 +137,8 @@ bool Ieee80211SendDataWithAckFrameExchange::isAck(Ieee80211Frame* frame)
 
 //------------------------------
 
-Ieee80211SendDataWithRtsCtsFrameExchange::Ieee80211SendDataWithRtsCtsFrameExchange(Ieee80211NewMac *mac, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
-    Ieee80211StepBasedFrameExchange(mac, context, callback), dataFrame(dataFrame)
+Ieee80211SendDataWithRtsCtsFrameExchange::Ieee80211SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IIeee80211UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame) :
+    Ieee80211StepBasedFrameExchange(ownerModule, context, callback), dataFrame(dataFrame)
 {
 }
 
@@ -165,6 +169,6 @@ void Ieee80211SendDataWithRtsCtsFrameExchange::processTimeout(int step)
     }
 }
 
-}
+} // namespace ieee80211
+} // namespace inet
 
-} /* namespace inet */

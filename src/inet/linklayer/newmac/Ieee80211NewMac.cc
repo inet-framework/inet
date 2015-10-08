@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente M�sz�ros
+// Copyright (C) 2015 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,9 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
-
+// Author: Andras Varga
+//
 #include <algorithm>
 
 #include "Ieee80211NewMac.h"
@@ -30,7 +31,6 @@
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Define_Module(Ieee80211NewMac);
@@ -38,9 +38,7 @@ Define_Module(Ieee80211NewMac);
 simsignal_t Ieee80211NewMac::stateSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211NewMac::radioStateSignal = SIMSIGNAL_NULL;
 
-/****************************************************************
- * Construction functions.
- */
+
 Ieee80211NewMac::Ieee80211NewMac()
 {
 }
@@ -51,9 +49,6 @@ Ieee80211NewMac::~Ieee80211NewMac()
         delete pendingRadioConfigMsg;
 }
 
-/****************************************************************
- * Initialization functions.
- */
 void Ieee80211NewMac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
@@ -175,9 +170,6 @@ InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
     return e;
 }
 
-/****************************************************************
- * Message handling functions.
- */
 void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
@@ -310,6 +302,6 @@ void Ieee80211NewMac::handleNodeCrash()
 {
 }
 
-}
+} // namespace ieee80211
 } // namespace inet
 

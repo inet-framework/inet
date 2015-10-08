@@ -12,9 +12,10 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
-
+// Author: Andras Varga
+//
 
 package inet.linklayer.newmac;
 
@@ -55,7 +56,7 @@ import inet.linklayer.contract.IMACProtocol;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211NewMac extends MACProtocolBase like IMACProtocol
+module Ieee80211NewMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -75,4 +76,9 @@ simple Ieee80211NewMac extends MACProtocolBase like IMACProtocol
         @statistic[state](title="State"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @statistic[radioState](title="Radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @class(Ieee80211NewMac);
+
+    submodules:
+        upperMac: <default("Ieee80211UpperMac")> like IIeee80211UpperMac;
+        tx: <default("Ieee80211Tx")> like IIeee80211MacTx;
+        rx: <default("Ieee80211Rx")> like IIeee80211MacRx;
 }
