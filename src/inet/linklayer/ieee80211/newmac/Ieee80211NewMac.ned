@@ -136,9 +136,13 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         double bitrate @unit("bps");
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
+        bool EDCA = default(false);
+        string classifierClass = default("");
 
         upperMac.opMode = opMode;
         upperMac.bitrate = bitrate;
         upperMac.rtsThresholdBytes = rtsThresholdBytes;
         upperMac.retryLimit = retryLimit;
+        upperMac.useEDCA = EDCA;
+        upperMac.classifierClass = classifierClass;
 }

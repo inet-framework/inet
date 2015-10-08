@@ -24,6 +24,7 @@
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
 #include "IUpperMacContext.h"
+#include "IMacQoSClassifier.h"
 #include "FrameExchanges.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
@@ -59,6 +60,10 @@ void BasicUpperMac::initialize()
     mac = check_and_cast<Ieee80211NewMac *>(getModuleByPath(par("macModule")));
     rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
 
+    std::string classifierClass = par("classifierClass");
+    if (classifierClass != "")
+        classifier = check_and_cast<IMacQoSClassifier *>(createOne(classifierClass.c_str()));
+
     maxQueueSize = mac->par("maxQueueSize");
     initializeQueueModule();
 
@@ -93,7 +98,7 @@ IUpperMacContext *BasicUpperMac::createContext()
         shortRetryLimit = 7;
     ASSERT(shortRetryLimit > 0);
 
-    bool useEDCA = true; //TODO
+    bool useEDCA = par("useEDCA");
 
     return new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, useEDCA, immediateTx, contentionTx);
 }
@@ -155,7 +160,10 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
 int BasicUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    return intrand(context->getNumAccessCategories()); //TODO temporary hack
+    // return intrand(context->getNumAccessCategories()); //TODO temporary hack, for testing
+    if (!classifier)
+        return 0;
+    return classifier->classifyPacket(frame);
 }
 
 void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)

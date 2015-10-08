@@ -34,5 +34,7 @@ simple BasicUpperMac like IUpperMac
         double bitrate @unit("bps");
         int rtsThresholdBytes @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per frame, -1 means default
+        bool useEDCA = default(false);
+        string classifierClass = default("");
         @display("i=block/layer");
 }
