@@ -15,7 +15,8 @@
 
 #include "Ieee80211MacImmediateTx.h"
 #include "Ieee80211NewMac.h"
-#include "Ieee80211UpperMac.h"
+#include "inet/common/FSMA.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 
@@ -23,7 +24,7 @@ namespace ieee80211 {
 
 Ieee80211MacImmediateTx::Ieee80211MacImmediateTx(Ieee80211NewMac *mac) : Ieee80211MacPlugin(mac)
 {
-    endIfsTimer = new cMessage("Immediate IFS");
+    endIfsTimer = new cMessage("endIFS");
 }
 
 Ieee80211MacImmediateTx::~Ieee80211MacImmediateTx()
@@ -32,18 +33,18 @@ Ieee80211MacImmediateTx::~Ieee80211MacImmediateTx()
     delete frame;
 }
 
-void Ieee80211MacImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, ITransmissionCompleteCallback *transmissionCompleteCallback)
+void Ieee80211MacImmediateTx::transmitImmediateFrame(Ieee80211Frame* frame, simtime_t ifs, IIeee80211MacImmediateTx::ICallback *completionCallback)
 {
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     this->frame = frame;
-    this->transmissionCompleteCallback = transmissionCompleteCallback;
+    this->completionCallback = completionCallback;
 }
 
 void Ieee80211MacImmediateTx::transmissionFinished()
 {
     if (transmitting) {
-        transmissionCompleteCallback->transmissionComplete(nullptr);
+        completionCallback->immediateTransmissionComplete();
         transmitting = false;
         frame = nullptr;
     }

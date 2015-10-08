@@ -15,11 +15,24 @@
 
 #include "Ieee80211FrameExchanges.h"
 #include "inet/common/FSMA.h"
-#include "Ieee80211MacTransmission.h"
 #include "Ieee80211UpperMac.h"
+#include "IIeee80211MacContext.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
+
+Ieee80211SendDataWithAckFrameExchange::Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
+    Ieee80211FSMBasedFrameExchange(mac, context, callback), frame(frame)
+{
+}
+
+Ieee80211SendDataWithAckFrameExchange::~Ieee80211SendDataWithAckFrameExchange()
+{
+    delete frame;
+    if (ackTimer)
+        delete cancelEvent(ackTimer);
+}
 
 void Ieee80211SendDataWithAckFrameExchange::handleWithFSM(EventType event, cMessage *frameOrTimer)
 {
@@ -88,14 +101,14 @@ void Ieee80211SendDataWithAckFrameExchange::handleWithFSM(EventType event, cMess
 void Ieee80211SendDataWithAckFrameExchange::transmitDataFrame()
 {
     retryCount = 0;
-    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
+    mac->tx->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
 }
 
 void Ieee80211SendDataWithAckFrameExchange::retryDataFrame()
 {
     retryCount++;
     frame->setRetry(true);
-    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
+    mac->tx->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
 }
 
 void Ieee80211SendDataWithAckFrameExchange::scheduleAckTimeout()

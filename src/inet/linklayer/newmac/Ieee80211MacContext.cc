@@ -14,6 +14,7 @@
 // 
 
 #include "Ieee80211MacContext.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {

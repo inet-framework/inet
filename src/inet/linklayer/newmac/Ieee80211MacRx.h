@@ -17,11 +17,11 @@
 // Author: Andras Varga
 //
 
-#ifndef IEEE80211MACRECEPTION_H_
-#define IEEE80211MACRECEPTION_H_
+#ifndef IEEE80211MACRX_H_
+#define IEEE80211MACRX_H_
 
+#include "IIeee80211MacRx.h"
 #include "Ieee80211MacPlugin.h"
-#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -29,16 +29,14 @@ namespace inet {
 namespace ieee80211 {
 
 class Ieee80211NewMac;
-class Ieee80211UpperMac;
-class IIeee80211MacContext;
 
-class Ieee80211MacReception : public Ieee80211MacPlugin
+class Ieee80211MacRx : public Ieee80211MacPlugin, public IIeee80211MacRx
 {
     protected:
-        cMessage *nav = nullptr;
+        cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-        IIeee80211MacContext *context; //TODO initialize!
+        MACAddress address;
 
     protected:
         void handleMessage(cMessage *msg);
@@ -46,16 +44,14 @@ class Ieee80211MacReception : public Ieee80211MacPlugin
         bool isFcsOk(Ieee80211Frame *frame) const;
 
     public:
-        Ieee80211MacReception(Ieee80211NewMac *mac);
-        ~Ieee80211MacReception();
+        Ieee80211MacRx(Ieee80211NewMac *mac);
+        ~Ieee80211MacRx();
 
-        void setContext(IIeee80211MacContext *context) { this->context = context; }
-
-        void receptionStateChanged(IRadio::ReceptionState newReceptionState);
-        void transmissionStateChanged(IRadio::TransmissionState transmissionState);
-        /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
-        virtual bool isMediumFree() const; //TODO "tx-to-rx switching" state should also count as busy (but not rx-to-tx, otherwise we wont be able to transmit anything with contention)
-        void handleLowerFrame(Ieee80211Frame *frame);
+        virtual void setAddress(const MACAddress& address) override { this->address = address; }
+        virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;
+        virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
+        virtual bool isMediumFree() const override;
+        virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 
 };
 

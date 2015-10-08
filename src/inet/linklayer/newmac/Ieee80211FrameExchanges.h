@@ -22,6 +22,10 @@
 namespace inet {
 namespace ieee80211 {
 
+class Ieee80211NewMac;
+class IIeee80211MacContext;
+class Ieee80211DataOrMgmtFrame;
+
 class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExchange
 {
     protected:
@@ -42,9 +46,8 @@ class Ieee80211SendDataWithAckFrameExchange : public Ieee80211FSMBasedFrameExcha
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame) :
-            Ieee80211FSMBasedFrameExchange(mac, context, callback), frame(frame) {}
-        ~Ieee80211SendDataWithAckFrameExchange() { delete frame; if (ackTimer) delete cancelEvent(ackTimer); }
+        Ieee80211SendDataWithAckFrameExchange(Ieee80211NewMac *mac, IIeee80211MacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame);
+        ~Ieee80211SendDataWithAckFrameExchange();
 };
 
 class Ieee80211SendDataWithRtsCtsFrameExchange : public Ieee80211StepBasedFrameExchange

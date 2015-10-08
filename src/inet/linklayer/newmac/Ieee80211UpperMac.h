@@ -20,22 +20,20 @@
 #ifndef IEEE80211UPPERMAC_H_
 #define IEEE80211UPPERMAC_H_
 
-#include "inet/common/queue/IPassiveQueue.h"
-#include "Ieee80211NewMac.h"
 #include "Ieee80211MacPlugin.h"
-#include "Ieee80211FrameExchange.h"
-#include "Ieee80211MacAdvancedFrameExchange.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "Ieee80211MacTransmission.h"
+#include "IIeee80211UpperMac.h"
+#include "IIeee80211FrameExchange.h"
+#include "IIeee80211MacTx.h"
+#include "IIeee80211MacImmediateTx.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
 class Ieee80211NewMac;
-class ITransmissionCompleteCallback;
+class Ieee80211FrameExchange;
 
-class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchange::IFinishedCallback, public ITransmissionCompleteCallback
+class Ieee80211UpperMac : public Ieee80211MacPlugin, public IIeee80211UpperMac, public IIeee80211FrameExchange::IFinishedCallback, public IIeee80211MacTx::ICallback, public IIeee80211MacImmediateTx::ICallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
@@ -63,7 +61,7 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
     protected:
         void handleMessage(cMessage *msg);
 
-        virtual void frameExchangeFinished(Ieee80211FrameExchange *what, bool successful);
+        virtual void frameExchangeFinished(IIeee80211FrameExchange *what, bool successful);
 
         virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
         void initializeQueueModule();
@@ -71,13 +69,15 @@ class Ieee80211UpperMac : public Ieee80211MacPlugin, public Ieee80211FrameExchan
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);
 
+        virtual void transmissionComplete(IIeee80211MacTx *tx) override;
+        virtual void immediateTransmissionComplete() override;
+
     public:
         Ieee80211UpperMac(Ieee80211NewMac *mac);
         ~Ieee80211UpperMac();
-        void setContext(IIeee80211MacContext *context) { this->context = context; }
-        void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame);
-        void lowerFrameReceived(Ieee80211Frame *frame);
-        void transmissionComplete(Ieee80211MacTransmission *tx); // callback for MAC
+        virtual void setContext(IIeee80211MacContext *context) override { this->context = context; }
+        virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 
 };
 

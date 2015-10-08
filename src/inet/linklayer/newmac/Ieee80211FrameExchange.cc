@@ -14,10 +14,11 @@
 //
 
 #include "Ieee80211FrameExchange.h"
-#include "inet/common/FSMA.h"
-#include "Ieee80211MacTransmission.h"
+#include "IIeee80211MacContext.h"
 #include "Ieee80211UpperMac.h"
-#include "Ieee80211MacImmediateTx.h"
+#include "IIeee80211MacTx.h"
+#include "IIeee80211MacImmediateTx.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -86,7 +87,7 @@ void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* fr
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->transmission->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
+    mac->tx->transmitContentionFrame(frame, context->getDIFS(), context->getEIFS(), context->getMinCW(), context->getMaxCW(), retryCount, getUpperMac());
     stepType = TRANSMIT_CONTENTION_FRAME;
 }
 
@@ -94,7 +95,7 @@ void Ieee80211StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame* fr
 {
     ASSERT(status == INPROGRESS);
     ASSERT(stepType == NONE);
-    mac->transmission->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, retryCount, getUpperMac());
+    mac->tx->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, retryCount, getUpperMac());
     stepType = TRANSMIT_CONTENTION_FRAME;
 }
 

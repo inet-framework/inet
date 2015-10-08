@@ -1,6 +1,4 @@
 //
-// Copyright (C) 2015 Andras Varga
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,29 +12,34 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// Author: Andras Varga
-//
+
+#ifndef IIEEE80211MACFRAMEEXCHANGE_H_
+#define IIEEE80211MACFRAMEEXCHANGE_H_
 
 #include "Ieee80211MacPlugin.h"
-#include "Ieee80211NewMac.h"
 
 namespace inet {
 namespace ieee80211 {
 
-void Ieee80211MacPlugin::scheduleAt(simtime_t t, cMessage* msg)
+class Ieee80211Frame;
+
+class IIeee80211FrameExchange
 {
-    msg->setContextPointer(this);
-    mac->scheduleAt(t, msg);
-}
+    public:
+        class IFinishedCallback {
+            public:
+                virtual void frameExchangeFinished(IIeee80211FrameExchange *what, bool successful) = 0;
+                virtual ~IFinishedCallback() {}
+        };
 
-cMessage* Ieee80211MacPlugin::cancelEvent(cMessage* msg)
-{
-    ASSERT(msg->getContextPointer() == this);
-    mac->cancelEvent(msg);
-    return msg;
-}
+    public:
+        virtual void start() = 0;
+        virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
+        virtual void transmissionFinished() = 0;
+};
 
 }
-
 } /* namespace inet */
+
+#endif
 

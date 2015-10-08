@@ -16,7 +16,7 @@
 #ifndef IEEE80211MACCONTEXT_H_
 #define IEEE80211MACCONTEXT_H_
 
-#include "inet/common/INETDefs.h"
+#include "IIeee80211MacContext.h"
 #include "Ieee80211NewMac.h"
 
 namespace inet {
@@ -27,46 +27,6 @@ class Ieee80211Mode;
 }
 
 namespace ieee80211 {
-
-class IIeee80211MacContext
-{
-    public:
-        IIeee80211MacContext() {}
-        virtual ~IIeee80211MacContext() {}
-
-        virtual const MACAddress& getAddress() const = 0;
-
-        virtual simtime_t getSlotTime() const = 0;
-        virtual simtime_t getAIFS() const = 0;
-        virtual simtime_t getSIFS() const = 0;
-        virtual simtime_t getDIFS() const = 0;
-        virtual simtime_t getEIFS() const = 0;
-        virtual simtime_t getPIFS() const = 0;
-        virtual simtime_t getRIFS() const = 0;
-
-        virtual int getMinCW() const = 0;
-        virtual int getMaxCW() const = 0;
-        virtual int getShortRetryLimit() = 0;
-        virtual int getRtsThreshold() = 0;
-
-        virtual simtime_t getAckTimeout() const = 0;
-        virtual simtime_t getCtsTimeout() const = 0;
-
-        virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *frame) = 0;
-        virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *frame) = 0;
-        virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *frameToACK) = 0;
-        virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend) = 0;
-
-        virtual double computeFrameDuration(Ieee80211Frame *msg) const = 0;
-        virtual double computeFrameDuration(int bits, double bitrate) const = 0;
-        virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame) = 0;
-        virtual void setDataFrameDuration(Ieee80211DataOrMgmtFrame *frame) = 0;
-
-        virtual bool isForUs(Ieee80211Frame *frame) const = 0;
-        virtual bool isBroadcast(Ieee80211Frame *frame) const = 0;
-        virtual bool isCts(Ieee80211Frame *frame) const = 0;
-        virtual bool isAck(Ieee80211Frame *frame) const = 0;
-};
 
 class INET_API Ieee80211MacContext : public IIeee80211MacContext
 {
@@ -122,4 +82,4 @@ class INET_API Ieee80211MacContext : public IIeee80211MacContext
 }
 } /* namespace inet */
 
-#endif /* IEEE80211MACPLUGIN_H_ */
+#endif

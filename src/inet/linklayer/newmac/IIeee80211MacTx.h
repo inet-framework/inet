@@ -13,33 +13,29 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __MAC_IEEE80211MACIMMEDIATETX_H_
-#define __MAC_IEEE80211MACIMMEDIATETX_H_
+#ifndef __MAC_IIEEE80211MACTX_H_
+#define __MAC_IIEEE80211MACTX_H_
 
 #include "Ieee80211MacPlugin.h"
-#include "IIeee80211MacImmediateTx.h"
+#include "inet/common/FSMA.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-class Ieee80211MacImmediateTx : public Ieee80211MacPlugin, public IIeee80211MacImmediateTx
+class IIeee80211MacTx
 {
-    protected:
-        Ieee80211Frame *frame = nullptr;
-        cMessage *endIfsTimer = nullptr;
-        bool transmitting = false;
-        ICallback *completionCallback = nullptr;
-
-    protected:
-        virtual void handleMessage(cMessage *msg);
-
     public:
-        Ieee80211MacImmediateTx(Ieee80211NewMac *mac);
-        ~Ieee80211MacImmediateTx();
+        class ICallback {
+            public:
+               virtual void transmissionComplete(IIeee80211MacTx *tx) = 0; // tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
+        };
 
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ICallback *completionCallback) override;
-        virtual void transmissionFinished() override;
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ICallback *completionCallback) = 0;
+        virtual void mediumStateChanged(bool mediumFree) = 0;
+        virtual void transmissionFinished() = 0;
+        virtual void lowerFrameReceived(bool isFcsOk) = 0;
 };
 
 }

@@ -17,41 +17,19 @@
 // Author: Andras Varga
 //
 
-#ifndef __MAC_IEEE80211MACTRANSMISSION_H_
-#define __MAC_IEEE80211MACTRANSMISSION_H_
+#ifndef __MAC_IEEE80211MACTX_H_
+#define __MAC_IEEE80211MACTX_H_
 
 #include "Ieee80211MacPlugin.h"
-#include "inet/common/FSMA.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "IIeee80211MacTx.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-class Ieee80211MacTransmission;
-
-//class IIeee80211Tx {
-//    public:
-//        class ICallback {
-//            public:
-//               virtual void transmissionComplete(IIeee80211Tx *tx) = 0; // tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
-//        };
-//
-//        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback) = 0;
-//        virtual void mediumStateChanged(bool mediumFree) = 0;
-//        virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) = 0;
-//        virtual void lowerFrameReceived(bool isFcsOk) = 0;
-//};
-
-class ITransmissionCompleteCallback {
-    public:
-       virtual void transmissionComplete(Ieee80211MacTransmission *tx) = 0; // tx=nullptr if frame was transmitted by MAC itself (immediate frame!), not a tx process
-};
-
-
 //TODO EDCA internal collisions should trigger retry (exp.backoff) in the lower pri tx process(es)
 //TODO fsm is wrong wrt channelLastBusyTime (not all cases handled)
-class Ieee80211MacTransmission : public Ieee80211MacPlugin
+class Ieee80211MacTx : public Ieee80211MacPlugin, public IIeee80211MacTx
 {
     public:
         enum State {
@@ -71,9 +49,9 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         int cwMin = 0;
         int cwMax = 0;
         int retryCount = 0;
-        ITransmissionCompleteCallback *transmissionCompleteCallback = nullptr;
+        ICallback *completionCallback = nullptr;
 
-        simtime_t channelLastBusyTime = SIMTIME_ZERO;
+        simtime_t channelLastBusyTime = SIMTIME_ZERO;  //TODO lastChannelStateChangeTime?
         int backoffSlots = 0;
         bool mediumFree = false;
         bool useEIFS = false;
@@ -99,15 +77,15 @@ class Ieee80211MacTransmission : public Ieee80211MacPlugin
         bool isIFSNecessary();
 
     public:
-        Ieee80211MacTransmission(Ieee80211NewMac *mac);
-        ~Ieee80211MacTransmission();
-
-        void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ITransmissionCompleteCallback *transmissionCompleteCallback); // explicit ifs, eifs, cwMin, cwMax
+        Ieee80211MacTx(Ieee80211NewMac *mac);
+        ~Ieee80211MacTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
-        void mediumStateChanged(bool mediumFree);
-        void transmissionFinished();
-        void lowerFrameReceived(bool isFcsOk);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, int retryCount, ICallback *completionCallback) override;
+
+        virtual void mediumStateChanged(bool mediumFree) override;
+        virtual void transmissionFinished() override;
+        virtual void lowerFrameReceived(bool isFcsOk) override;
 };
 
 }
