@@ -36,7 +36,6 @@ namespace inet::ieee80211;
 //
 enum Ieee80211FrameType
 {
-
     // management:
     ST_ASSOCIATIONREQUEST = 0x00;
     ST_ASSOCIATIONRESPONSE = 0x01;
@@ -66,6 +65,17 @@ enum Ieee80211FrameType
     //Feedback frame for multicast tramsmission
     ST_LBMS_REQUEST = 0x30;
     ST_LBMS_REPORT = 0x31;
+}
+
+//
+// Ack policy values for the 802.11 QoS control field
+//
+enum AckPolicy
+{
+    NORMAL_ACK = 0;
+    NO_ACK = 1;
+    NO_EXPLICIT_ACK = 2;
+    BLOCK_ACK = 3;
 }
 
 //
@@ -159,9 +169,20 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
     byteLength = DATAFRAME_HEADER_MINLENGTH / 8;
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
-    uint16 qos;             // optional field, exists when type = ST_DATA_WITH_QOS
-    uint8 tid;              // FIXME this should be part of the QoS byte above!
+    uint16 qos;             // TODO nobody uses this currently, only its parts like tid below... 
+    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
+    uint8 tid; //FIXME in real life this is part of the optional qos field above...
 }
+
+//TODO this can be introduced when the SNAP header 
+//packet Ieee80211QoSDataFrame extends Ieee80211DataFrame
+//{
+//    type = ST_DATA_WITH_QOS;
+//    byteLength = (DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) / 8;
+//    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
+//    uint8 tid;
+//    // TODO: other QoS control field parts
+//}
 
 //
 // 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte ~EtherType>)

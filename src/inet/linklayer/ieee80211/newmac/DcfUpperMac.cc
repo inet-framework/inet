@@ -22,11 +22,11 @@
 #include "IRx.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
-#include "IMacQoSClassifier.h"
 #include "MacUtils.h"
 #include "MacParameters.h"
 #include "FrameExchanges.h"
 #include "DuplicateDetectors.h"
+#include "Fragmentation.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -70,6 +70,8 @@ void DcfUpperMac::initialize()
     rx->setAddress(params->getAddress());
 
     duplicateDetection = new NonQoSDuplicateDetector(); //TODO or LegacyDuplicateDetector();
+    fragmenter = new FragmentationNotSupported();
+    reassembly = new ReassemblyNotSupported();
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
@@ -119,29 +121,33 @@ void DcfUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     Enter_Method("upperFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
-    // check for queue overflow
-    if (maxQueueSize && transmissionQueue.size() == maxQueueSize) {
-        EV << "message " << frame << " received from higher layer but MAC queue is full, dropping message\n";
+    EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
+
+    if (maxQueueSize > 0 && (int)transmissionQueue.size() == maxQueueSize) {
+        EV << "Frame " << frame << " received from higher layer but MAC queue is full, dropping\n";
         delete frame;
         return;
     }
 
-    // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
-    if (frame->getByteLength() > fragmentationThreshold)
-        throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                frame->getClassName(), frame->getName(), (int)(frame->getByteLength()));
-    EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
-
-    // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(params->getAddress());
     duplicateDetection->assignSequenceNumber(frame);
 
+    if (frame->getByteLength() <= fragmentationThreshold)
+        enqueue(frame);
+    else {
+        auto fragments = fragmenter->fragment(frame);
+        for (Ieee80211DataOrMgmtFrame *fragment : fragments)
+            enqueue(fragment);
+    }
+}
+
+void DcfUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame)
+{
     if (frameExchange)
         transmissionQueue.push_back(frame);
-    else {
+    else
         startSendDataFrameExchange(frame, 0, AC_LEGACY);
-    }
 }
 
 void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
@@ -153,6 +159,7 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     if (utils->isForUs(frame)) {
         if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
             sendCts(rtsFrame);
+            delete rtsFrame;
         }
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
             if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
@@ -162,7 +169,13 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
                 delete dataOrMgmtFrame;
             }
             else {
-                mac->sendUp(dataOrMgmtFrame);
+                if (!utils->isFragment(dataOrMgmtFrame))
+                    mac->sendUp(dataOrMgmtFrame);
+                else {
+                    Ieee80211DataOrMgmtFrame *completeFrame = reassembly->addFragment(dataOrMgmtFrame);
+                    if (completeFrame)
+                        mac->sendUp(completeFrame);
+                }
             }
         }
         else {

@@ -139,7 +139,6 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
         bool EDCA = default(true);
-        string classifierClass = default("");
 
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
         numContentionTx = EDCA ? 4 : 1;
@@ -148,5 +147,4 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         upperMac.bitrate = bitrate;
         upperMac.rtsThreshold = rtsThresholdBytes;
         upperMac.shortRetryLimit = retryLimit;
-        upperMac.classifierClass = classifierClass;
 }

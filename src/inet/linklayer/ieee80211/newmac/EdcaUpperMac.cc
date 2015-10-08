@@ -22,11 +22,11 @@
 #include "IRx.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
-#include "IMacQoSClassifier.h"
 #include "MacUtils.h"
 #include "MacParameters.h"
 #include "FrameExchanges.h"
 #include "DuplicateDetectors.h"
+#include "Fragmentation.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -67,10 +67,6 @@ void EdcaUpperMac::initialize()
     contentionTx = nullptr;
     collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
-    std::string classifierClass = par("classifierClass");
-    if (classifierClass != "")
-        classifier = check_and_cast<IMacQoSClassifier *>(createOne(classifierClass.c_str()));
-
     maxQueueSize = mac->par("maxQueueSize");  //FIXME
 
     readParameters();
@@ -80,6 +76,8 @@ void EdcaUpperMac::initialize()
     acData = new AccessCategoryData[params->isEdcaEnabled() ? 4 : 1];
 
     duplicateDetection = new QoSDuplicateDetector();
+    fragmenter = new FragmentationNotSupported();
+    reassembly = new ReassemblyNotSupported();
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
@@ -136,37 +134,61 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     AccessCategory ac = classifyFrame(frame);
 
-    // check for queue overflow
-    if (maxQueueSize && (int)acData[ac].transmissionQueue.size() == maxQueueSize) {
-        EV << "message " << frame << " received from higher layer but MAC queue is full, dropping message\n";
+    EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
+
+    if (maxQueueSize > 0 && (int)acData[ac].transmissionQueue.size() == maxQueueSize) {
+        EV << "Frame " << frame << " received from higher layer, but its MAC subqueue is full, dropping\n";
         delete frame;
         return;
     }
 
-    // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
-    if (frame->getByteLength() > fragmentationThreshold)
-        throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                frame->getClassName(), frame->getName(), (int)(frame->getByteLength()));
-    EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
-
-    // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(params->getAddress());
     duplicateDetection->assignSequenceNumber(frame);
 
+    if (frame->getByteLength() <= fragmentationThreshold)
+        enqueue(frame, ac);
+    else {
+        auto fragments = fragmenter->fragment(frame);
+        for (Ieee80211DataOrMgmtFrame *fragment : fragments)
+            enqueue(fragment, ac);
+    }
+}
+
+void EdcaUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac)
+{
     if (acData[ac].frameExchange)
         acData[ac].transmissionQueue.push_back(frame);
     else {
-        startSendDataFrameExchange(frame, (int)ac, ac); //FIXME!!!!
+        int txIndex = (int)ac;  //one-to-one mapping
+        startSendDataFrameExchange(frame, txIndex, ac);
     }
 }
 
 AccessCategory EdcaUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    // return intrand(context->utils->getNumAccessCategories()); //TODO temporary hack, for testing
-    if (!classifier)
-        return AC_BE;
-    return (AccessCategory)classifier->classifyPacket(frame); //TODO
+    if (frame->getType() == ST_DATA) {
+        return AC_BE;  // non-QoS frames are Best Effort
+    }
+    else if (frame->getType() == ST_DATA_WITH_QOS) {
+        Ieee80211DataFrame *dataFrame = check_and_cast<Ieee80211DataFrame*>(frame);
+        return mapTidToAc(dataFrame->getTid());  // QoS frames: map TID to AC
+    }
+    else {
+        return AC_VO; // management frames travel in the Voice category
+    }
+}
+
+AccessCategory EdcaUpperMac::mapTidToAc(int tid)
+{
+    // standard static mapping (see "UP-to-AC mappings" table in the 802.11 spec.)
+    switch (tid) {
+        case 1: case 2: return AC_BK;
+        case 0: case 3: return AC_BE;
+        case 4: case 5: return AC_VI;
+        case 6: case 7: return AC_VO;
+        default: throw cRuntimeError("No mapping from TID=%d to AccessCategory (must be in the range 0..7)", tid);
+    }
 }
 
 void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
@@ -178,6 +200,7 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     if (utils->isForUs(frame)) {
         if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
             sendCts(rtsFrame);
+            delete rtsFrame;
         }
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
             if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
@@ -187,7 +210,13 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
                 delete dataOrMgmtFrame;
             }
             else {
-                mac->sendUp(dataOrMgmtFrame);
+                if (!utils->isFragment(dataOrMgmtFrame))
+                    mac->sendUp(dataOrMgmtFrame);
+                else {
+                    Ieee80211DataOrMgmtFrame *completeFrame = reassembly->addFragment(dataOrMgmtFrame);
+                    if (completeFrame)
+                        mac->sendUp(completeFrame);
+                }
             }
         }
         else {

@@ -107,7 +107,7 @@ void QoSDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
     }
     else if (type == DATA)
     {
-        Ieee80211QoSDataFrame *qosDataFrame = check_and_cast<Ieee80211QoSDataFrame *>(frame);
+        Ieee80211DataFrame *qosDataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
         Key key(frame->getReceiverAddress(), qosDataFrame->getTid());
         auto it = lastSentSeqNums.find(key);
         if (it == lastSentSeqNums.end())
@@ -123,14 +123,13 @@ void QoSDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
 
 bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 {
-    Ieee80211DataFrame *dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame);
     int seqNum = frame->getSequenceNumber();
     bool isManagementFrame = dynamic_cast<Ieee80211ManagementFrame *>(frame);
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
         MACAddress transmitterAddr = frame->getTransmitterAddress();
-        std::map<MACAddress, int16_t> &cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
+        std::map<MACAddress,int16_t>& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
         auto it = cache.find(transmitterAddr);
         if (it == cache.end())
             cache[transmitterAddr] = seqNum;
@@ -142,7 +141,7 @@ bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
     }
     else
     {
-        Ieee80211QoSDataFrame *qosDataFrame = check_and_cast<Ieee80211QoSDataFrame *>(frame);
+        Ieee80211DataFrame *qosDataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
         Key key(frame->getTransmitterAddress(), qosDataFrame->getTid());
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end())

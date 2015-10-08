@@ -25,9 +25,6 @@
 #include "AccessCategory.h"
 
 namespace inet {
-
-class IPassiveQueue;
-
 namespace ieee80211 {
 
 class IRx;
@@ -40,6 +37,8 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 class IDuplicateDetector;
+class IFragmenter;
+class IReassembly;
 
 /**
  * UpperMac for EDCA (802.11e QoS mode)
@@ -50,7 +49,6 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
     protected:
-        IMacQoSClassifier *classifier = nullptr;
         IMacParameters *params;
         MacUtils *utils;
         Ieee80211NewMac *mac = nullptr;
@@ -68,13 +66,17 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         AccessCategoryData *acData = nullptr;  // dynamically allocated array
 
         IDuplicateDetector *duplicateDetection = nullptr;
+        IFragmenter *fragmenter = nullptr;
+        IReassembly *reassembly = nullptr;
 
     protected:
         void initialize() override;
         virtual void readParameters();
         virtual void handleMessage(cMessage *msg) override;
-        virtual AccessCategory classifyFrame(Ieee80211DataOrMgmtFrame *frame);
 
+        virtual AccessCategory classifyFrame(Ieee80211DataOrMgmtFrame *frame);
+        virtual AccessCategory mapTidToAc(int tid);
+        virtual void enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac);
         virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory ac);
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful) override;
 

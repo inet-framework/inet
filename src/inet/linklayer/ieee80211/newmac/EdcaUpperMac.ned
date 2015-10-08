@@ -20,7 +20,16 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// UpperMac for EDCA (802.11e QoS mode)
+// UpperMac for EDCA (802.11e QoS mode).
+//
+// Note: Access Category comes from the TID fields of QoS Data frames.
+// Non-QoS Data frames are always transmitted in the AC_BE, and management 
+// frames in the AC_VO category.
+//
+// Currently TID is filled in by the Mgmt modules encapsulate higher-layer packets
+// from the 802.1d User Priority (UP) field of the Ieee802Ctrl control info.
+// The best way to assign an UP is to configure a classifier (IIeee8021dQoSClassifier)
+// in Ieee80211Nic.
 //
 simple EdcaUpperMac like IUpperMac
 {
@@ -35,7 +44,6 @@ simple EdcaUpperMac like IUpperMac
         int rtsThreshold @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
         int shortRetryLimit = default(-1); // maximum number of retries per frame, -1 means default
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
-        string classifierClass;  // name of the QoS classifier C++ class (needs to  implement IMacQoSClassifier)
 
         double sifsTime @unit("s") = default(-1s); // SIFS time, -1 means default (mode dependent)
         double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)

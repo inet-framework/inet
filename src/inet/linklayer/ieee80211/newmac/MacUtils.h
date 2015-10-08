@@ -60,6 +60,7 @@ class INET_API MacUtils
         virtual bool isForUs(Ieee80211Frame *frame) const;
         virtual bool isMulticast(Ieee80211Frame *frame) const;
         virtual bool isBroadcast(Ieee80211Frame *frame) const;
+        virtual bool isFragment(Ieee80211DataOrMgmtFrame *frame) const;
         virtual bool isCts(Ieee80211Frame *frame) const;
         virtual bool isAck(Ieee80211Frame *frame) const;
 };

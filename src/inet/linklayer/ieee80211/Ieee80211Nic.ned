@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.common.IHook;
+import inet.linklayer.common.IIeee8021dQoSClassifier;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
@@ -30,20 +30,21 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 // as an AP or a STA, or for ad-hoc mode.
 //
 // Potential mgmType values: Ieee80211MgmtSTASimplified, Ieee80211MgmtSTA
-// Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc
+// Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc.
+//
+// A classifier is needed if you want to use QoS.
 //
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string interfaceTableModule;
         string energySourceModule = default("");
+        string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID 
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
         string macType = default("Ieee80211CompatibleNewMac");   // choose from Ieee80211Mac, Ieee80211NewMac, Ieee80211CompatibleNewMac
         string opMode @enum("a","b","g","n","p") = default("g");
         double bitrate @unit("bps") = default(opMode == "b" ? 11Mbps : opMode == "p" ? 27Mbps : 54Mbps);
-        int numOutputHooks = default(0);
-        int numInputHooks = default(0);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
         **.bitrate = bitrate;
@@ -55,13 +56,9 @@ module Ieee80211Nic like IWirelessNic
         output upperLayerOut; // from upper layers
         input radioIn @labels(IRadioFrame); // to receive radio frames
     submodules:
-        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=218,70");
+        classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
+            @display("p=110,59;i=block/classifier");
         }
-        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=107,55");
-        }
-        // optional agent module (can be either 0 or 1 sized vector)
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
                 @display("p=261,131");
@@ -91,18 +88,9 @@ module Ieee80211Nic like IWirelessNic
         mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
         mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
 
-        mgmt.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
-        mgmt.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if numOutputHooks == 0;
-
-        mgmt.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
-        for i=0..numInputHooks-2 {
-            inputHook[i].out --> inputHook[i+1].in;
-        }
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
-        outputHook[0].in <-- { @display("m=n"); } <-- upperLayerIn if numOutputHooks > 0;
-        for i=0..numOutputHooks-2 {
-            outputHook[i].out --> outputHook[i+1].in;
-        }
-        mgmt.upperLayerIn <-- outputHook[numOutputHooks-1].out if numOutputHooks > 0;
+        mgmt.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        mgmt.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        mgmt.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
 }
 

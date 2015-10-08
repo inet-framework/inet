@@ -70,6 +70,13 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     ASSERT(!ctrl->getDest().isUnspecified());
     frame->setAddress3(ctrl->getDest());
     frame->setEtherType(ctrl->getEtherType());
+    int up = ctrl->getUserPriority();
+    if (up >= 0) {
+        // make it a QoS frame, and set TID
+        frame->setType(ST_DATA_WITH_QOS);
+        frame->addBitLength(QOSCONTROL_BITS);
+        frame->setTid(up);
+    }
     delete ctrl;
 
     frame->encapsulate(msg);
@@ -83,6 +90,9 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     ctrl->setSrc(frame->getAddress3());
     ctrl->setDest(frame->getReceiverAddress());
+    int tid = frame->getTid();
+    if (tid < 8)
+        ctrl->setUserPriority(tid); // TID values 0..7 are UP
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());

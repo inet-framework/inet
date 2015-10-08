@@ -16,102 +16,93 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ExampleMacQoSClassifier.h"
+#include "ExampleQoSClassifier.h"
+#include "UserPriority.h"
+
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #ifdef WITH_IPv4
-  #include "inet/networklayer/ipv4/IPv4Datagram.h"
-  #include "inet/networklayer/ipv4/ICMPMessage_m.h"
-#endif // ifdef WITH_IPv4
+#  include "inet/networklayer/ipv4/IPv4Datagram.h"
+#  include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#endif
 #ifdef WITH_IPv6
-  #include "inet/networklayer/ipv6/IPv6Datagram.h"
-  #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
-#endif // ifdef WITH_IPv6
+#  include "inet/networklayer/ipv6/IPv6Datagram.h"
+#  include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#endif
 #ifdef WITH_UDP
-  #include "inet/transportlayer/udp/UDPPacket.h"
-#endif // ifdef WITH_UDP
+#  include "inet/transportlayer/udp/UDPPacket.h"
+#endif
 #ifdef WITH_TCP_COMMON
-  #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#endif // ifdef WITH_TCP_COMMON
+#  include "inet/transportlayer/tcp_common/TCPSegment.h"
+#endif
 
 namespace inet {
 
-namespace ieee80211 {
+Define_Module(ExampleQoSClassifier);
 
-Register_Class(ExampleMacQoSClassifier);
-
-ExampleMacQoSClassifier::ExampleMacQoSClassifier()
+void ExampleQoSClassifier::initialize()
 {
-    defaultAC = 0;
-    defaultManagement = 3;
+    //TODO parameters
 }
 
-int ExampleMacQoSClassifier::getNumQueues()
+void ExampleQoSClassifier::handleMessage(cMessage *msg)
 {
-    return 4;
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->getControlInfo());
+    int userPriority = getUserPriority(msg);
+    ctrl->setUserPriority(userPriority);
+    send(msg, "out");
 }
 
-int ExampleMacQoSClassifier::classifyPacket(cMessage *frame)
+int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 {
-    ASSERT(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame));
-    cPacket *ipData = nullptr;    // must be initialized in case neither IPv4 nor IPv6 is present
-
-    // if this is a management type, use a pre-configured default class
-    if (dynamic_cast<Ieee80211ManagementFrame *>(frame))
-        return defaultManagement;
-
-    // we have a data packet
-    cPacket *encapsulatedNetworkPacket = PK(frame)->getEncapsulatedPacket();
-    ASSERT(encapsulatedNetworkPacket);    // frame must contain an encapsulated network data frame
+    cPacket *ipData = nullptr;
 
 #ifdef WITH_IPv4
-    ipData = dynamic_cast<IPv4Datagram *>(encapsulatedNetworkPacket);
+    ipData = dynamic_cast<IPv4Datagram *>(msg);
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
-        return 1; // ICMP class
-#endif // ifdef WITH_IPv4
+        return UP_BE; // ICMP class
+#endif
 
 #ifdef WITH_IPv6
     if (!ipData) {
-        ipData = dynamic_cast<IPv6Datagram *>(encapsulatedNetworkPacket);
+        ipData = dynamic_cast<IPv6Datagram *>(msg);
         if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
-            return 1; // ICMPv6 class
+            return UP_BE; // ICMPv6 class
     }
-#endif // ifdef WITH_IPv6
+#endif
 
     if (!ipData)
-        return defaultAC; // neither IPv4 nor IPv6 packet (unknown protocol) = default AC
+        return UP_BE;
 
 #ifdef WITH_UDP
     UDPPacket *udp = dynamic_cast<UDPPacket *>(ipData->getEncapsulatedPacket());
     if (udp) {
         if (udp->getDestinationPort() == 21 || udp->getSourcePort() == 21)
-            return 0;
+            return UP_BK;
         if (udp->getDestinationPort() == 80 || udp->getSourcePort() == 80)
-            return 1;
+            return UP_BE;
         if (udp->getDestinationPort() == 4000 || udp->getSourcePort() == 4000)
-            return 2;
+            return UP_VI;
         if (udp->getDestinationPort() == 5000 || udp->getSourcePort() == 5000)
-            return 3;
+            return UP_VO;
     }
-#endif // ifdef WITH_UDP
+#endif
 
 #ifdef WITH_TCP_COMMON
     tcp::TCPSegment *tcp = dynamic_cast<tcp::TCPSegment *>(ipData->getEncapsulatedPacket());
     if (tcp) {
         if (tcp->getDestPort() == 21 || tcp->getSrcPort() == 21)
-            return 0;
+            return UP_BK;
         if (tcp->getDestPort() == 80 || tcp->getSrcPort() == 80)
-            return 1;
+            return UP_BE;
         if (tcp->getDestPort() == 4000 || tcp->getSrcPort() == 4000)
-            return 2;
+            return UP_VI;
         if (tcp->getDestPort() == 5000 || tcp->getSrcPort() == 5000)
-            return 3;
+            return UP_VO;
     }
-#endif // ifdef WITH_TCP_COMMON
+#endif
 
-    return defaultAC;
+    return UP_BE;
 }
-
-} // namespace ieee80211
 
 } // namespace inet
 

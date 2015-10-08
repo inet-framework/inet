@@ -25,9 +25,6 @@
 #include "AccessCategory.h"
 
 namespace inet {
-
-class IPassiveQueue;
-
 namespace ieee80211 {
 
 class IRx;
@@ -40,7 +37,8 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 class IDuplicateDetector;
-
+class IFragmenter;
+class IReassembly;
 
 /**
  * UpperMac for DCF mode.
@@ -64,12 +62,15 @@ class INET_API DcfUpperMac : public cSimpleModule, public IUpperMac, protected I
         Ieee80211DataOrMgmtFrameList transmissionQueue;
         IFrameExchange *frameExchange = nullptr;
         IDuplicateDetector *duplicateDetection = nullptr;
+        IFragmenter *fragmenter = nullptr;
+        IReassembly *reassembly = nullptr;
 
     protected:
         void initialize() override;
         virtual void readParameters();
         void handleMessage(cMessage *msg) override;
 
+        virtual void enqueue(Ieee80211DataOrMgmtFrame *frame);
         virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory ac);
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful) override;
 

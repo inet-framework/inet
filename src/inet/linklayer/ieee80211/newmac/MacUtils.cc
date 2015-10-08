@@ -111,6 +111,11 @@ bool MacUtils::isBroadcast(Ieee80211Frame *frame) const
     return frame && frame->getReceiverAddress().isBroadcast();
 }
 
+bool MacUtils::isFragment(Ieee80211DataOrMgmtFrame *frame) const
+{
+    return frame->getFragmentNumber() != 0 || frame->getMoreFragments() == true;
+}
+
 bool MacUtils::isCts(Ieee80211Frame *frame) const
 {
     return dynamic_cast<Ieee80211CTSFrame *>(frame);
