@@ -46,7 +46,8 @@ const simtime_t Ieee80211DsssMode::getTxopLimit(AccessCategory ac) const
     return 0;
 }
 
-Ieee80211DsssMode::Ieee80211DsssMode(const Ieee80211DsssPreambleMode *preambleMode, const Ieee80211DsssHeaderMode *headerMode, const Ieee80211DsssDataMode *dataMode) :
+Ieee80211DsssMode::Ieee80211DsssMode(const char *name, const Ieee80211DsssPreambleMode *preambleMode, const Ieee80211DsssHeaderMode *headerMode, const Ieee80211DsssDataMode *dataMode) :
+    Ieee80211ModeBase(name),
     preambleMode(preambleMode),
     headerMode(headerMode),
     dataMode(dataMode)
@@ -64,8 +65,8 @@ const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode1Mbps(&DBPS
 const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode2Mbps(&DQPSKModulation::singleton);
 
 // modes
-const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode1Mbps(&dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode1Mbps);
-const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode2Mbps(&dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode2Mbps);
+const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode1Mbps("dsssMode1Mbps", &dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode1Mbps);
+const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode2Mbps("dsssMode2Mbps", &dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode2Mbps);
 
 const simtime_t Ieee80211DsssMode::getRifsTime() const
 {

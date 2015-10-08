@@ -103,7 +103,7 @@ class INET_API Ieee80211HrDsssMode : public Ieee80211ModeBase
     virtual int getLegacyCwMax() const override { return 1023; }
 
   public:
-    Ieee80211HrDsssMode(const Ieee80211HrDsssPreambleMode *preambleMode, const Ieee80211HrDsssHeaderMode *headerMode, const Ieee80211HrDsssDataMode *dataMode);
+    Ieee80211HrDsssMode(const char *name, const Ieee80211HrDsssPreambleMode *preambleMode, const Ieee80211HrDsssHeaderMode *headerMode, const Ieee80211HrDsssDataMode *dataMode);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211HrDsssMode"; }
 

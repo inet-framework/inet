@@ -242,7 +242,7 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         virtual inline int getLegacyCwMax() const override { return 1023; }
 
     public:
-        Ieee80211HTMode(const Ieee80211HTPreambleMode *preambleMode, const Ieee80211HTDataMode *dataMode, const BandMode carrierFrequencyMode);
+        Ieee80211HTMode(const char *name, const Ieee80211HTPreambleMode *preambleMode, const Ieee80211HTDataMode *dataMode, const BandMode carrierFrequencyMode);
         virtual ~Ieee80211HTMode() { delete preambleMode; delete dataMode; }
 
         virtual const Ieee80211HTDataMode* getDataMode() const override { return dataMode; }

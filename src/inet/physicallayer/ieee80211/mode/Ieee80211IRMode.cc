@@ -38,7 +38,8 @@ Ieee80211IrDataMode::Ieee80211IrDataMode(const PPMModulationBase *modulation) :
 {
 }
 
-Ieee80211IrMode::Ieee80211IrMode(const Ieee80211IrPreambleMode *preambleMode, const Ieee80211IrHeaderMode *headerMode, const Ieee80211IrDataMode *dataMode) :
+Ieee80211IrMode::Ieee80211IrMode(const char *name, const Ieee80211IrPreambleMode *preambleMode, const Ieee80211IrHeaderMode *headerMode, const Ieee80211IrDataMode *dataMode) :
+    Ieee80211ModeBase(name),
     preambleMode(preambleMode),
     headerMode(headerMode),
     dataMode(dataMode)
@@ -57,8 +58,8 @@ const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode1Mbps(&_16PPMModu
 const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode2Mbps(&_4PPMModulation::singleton);
 
 // modes
-const Ieee80211IrMode Ieee80211IrCompliantModes::irMode1Mbps(&irPreambleMode64SyncSlots, &irHeaderMode1Mbps, &irDataMode1Mbps);
-const Ieee80211IrMode Ieee80211IrCompliantModes::irMode2Mbps(&irPreambleMode64SyncSlots, &irHeaderMode2Mbps, &irDataMode2Mbps);
+const Ieee80211IrMode Ieee80211IrCompliantModes::irMode1Mbps("irMode1Mbps", &irPreambleMode64SyncSlots, &irHeaderMode1Mbps, &irDataMode1Mbps);
+const Ieee80211IrMode Ieee80211IrCompliantModes::irMode2Mbps("irMode2Mbps", &irPreambleMode64SyncSlots, &irHeaderMode2Mbps, &irDataMode2Mbps);
 
 const simtime_t Ieee80211IrMode::getRifsTime() const
 {
