@@ -32,7 +32,6 @@ namespace ieee80211 {
 
 class IRx;
 class ITxCallback;
-class UpperMacContext;
 class Ieee80211NewMac;
 class Ieee80211RTSFrame;
 class IMacQoSClassifier;
@@ -40,6 +39,7 @@ class IMacParameters;
 class MacUtils;
 class IImmediateTx;
 class IContentionTx;
+class IDuplicateDetector;
 
 /**
  * UpperMac for EDCA (802.11e QoS mode)
@@ -60,13 +60,14 @@ class EdcaUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExc
 
         int maxQueueSize;
         int fragmentationThreshold = 2346;
-        uint16 sequenceNumber;  //TODO per-receiver and per-TID!
 
         struct AccessCategoryData {
             Ieee80211DataOrMgmtFrameList transmissionQueue;
             IFrameExchange *frameExchange = nullptr;
         };
         AccessCategoryData *acData = nullptr;  // dynamically allocated array
+
+        IDuplicateDetector *duplicateDetection = nullptr;
 
     protected:
         void initialize() override;

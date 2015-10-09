@@ -27,6 +27,7 @@
 #include "MacUtils.h"
 #include "MacParameters.h"
 #include "FrameExchanges.h"
+#include "DuplicateDetectors.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -44,6 +45,10 @@ DcfUpperMac::DcfUpperMac()
 DcfUpperMac::~DcfUpperMac()
 {
     delete frameExchange;
+    delete duplicateDetection;
+    delete fragmenter;
+    delete reassembly;
+
     while (!transmissionQueue.empty()) {
         Ieee80211Frame *temp = transmissionQueue.front();
         transmissionQueue.pop_front();
@@ -65,9 +70,10 @@ void DcfUpperMac::initialize()
     utils = new MacUtils(params);
     rx->setAddress(params->getAddress());
 
+    duplicateDetection = new NonQoSDuplicateDetector(); //TODO or LegacyDuplicateDetector();
+
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
-    WATCH(sequenceNumber);
     WATCH_LIST(transmissionQueue);
 }
 
@@ -130,8 +136,8 @@ void DcfUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(params->getAddress());
-    frame->setSequenceNumber(sequenceNumber);
-    sequenceNumber = (sequenceNumber + 1) % 4096;    //XXX seqNum must be checked upon reception of frames!
+    duplicateDetection->assignSequenceNumber(frame);
+
     if (frameExchange)
         transmissionQueue.push_back(frame);
     else {
@@ -152,7 +158,13 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
             if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
                 sendAck(dataOrMgmtFrame);
-            mac->sendUp(dataOrMgmtFrame);
+            if (duplicateDetection->isDuplicate(dataOrMgmtFrame)) {
+                EV_INFO << "Duplicate frame " << frame->getName() << ", dropping\n";
+                delete dataOrMgmtFrame;
+            }
+            else {
+                mac->sendUp(dataOrMgmtFrame);
+            }
         }
         else {
             // offer frame to ongoing frame exchange

@@ -27,6 +27,7 @@
 #include "MacUtils.h"
 #include "MacParameters.h"
 #include "FrameExchanges.h"
+#include "DuplicateDetectors.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -43,6 +44,10 @@ EdcaUpperMac::EdcaUpperMac()
 
 EdcaUpperMac::~EdcaUpperMac()
 {
+    delete duplicateDetection;
+    delete fragmenter;
+    delete reassembly;
+
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     for (int i = 0; i < numACs; i++) {
         delete acData[i].frameExchange;
@@ -75,9 +80,10 @@ void EdcaUpperMac::initialize()
 
     acData = new AccessCategoryData[params->isEdcaEnabled() ? 4 : 1];
 
+    duplicateDetection = new QoSDuplicateDetector();
+
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
-    WATCH(sequenceNumber);
     //WATCH_LIST(transmissionQueue);
 }
 
@@ -147,8 +153,8 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(params->getAddress());
-    frame->setSequenceNumber(sequenceNumber);
-    sequenceNumber = (sequenceNumber + 1) % 4096;    //XXX seqNum must be checked upon reception of frames!
+    duplicateDetection->assignSequenceNumber(frame);
+
     if (acData[ac].frameExchange)
         acData[ac].transmissionQueue.push_back(frame);
     else {
@@ -177,7 +183,13 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
             if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
                 sendAck(dataOrMgmtFrame);
-            mac->sendUp(dataOrMgmtFrame);
+            if (duplicateDetection->isDuplicate(dataOrMgmtFrame)) {
+                EV_INFO << "Duplicate frame " << frame->getName() << ", dropping\n";
+                delete dataOrMgmtFrame;
+            }
+            else {
+                mac->sendUp(dataOrMgmtFrame);
+            }
         }
         else {
             // offer frame to all ongoing frame exchanges

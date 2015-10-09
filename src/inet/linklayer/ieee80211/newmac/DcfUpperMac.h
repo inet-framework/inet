@@ -32,7 +32,6 @@ namespace ieee80211 {
 
 class IRx;
 class ITxCallback;
-class UpperMacContext;
 class Ieee80211NewMac;
 class Ieee80211RTSFrame;
 class IMacQoSClassifier;
@@ -40,6 +39,8 @@ class IMacParameters;
 class MacUtils;
 class IImmediateTx;
 class IContentionTx;
+class IDuplicateDetector;
+
 
 /**
  * UpperMac for DCF mode.
@@ -59,10 +60,10 @@ class DcfUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExch
 
         int maxQueueSize;
         int fragmentationThreshold = 2346;
-        uint16 sequenceNumber;
 
         Ieee80211DataOrMgmtFrameList transmissionQueue;
         IFrameExchange *frameExchange = nullptr;
+        IDuplicateDetector *duplicateDetection = nullptr;
 
     protected:
         void initialize() override;
