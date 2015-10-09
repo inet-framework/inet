@@ -30,17 +30,18 @@ namespace ieee80211 {
 class NoDuplicateDetector : public IDuplicateDetector
 {
     public:
-        virtual void processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame) override {}
+        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override {}
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override {return false;}
 };
 
+//TODO we should track received fragment numbers, too! int16 -> struct{int16 seq; int8 frag;};
 class LegacyDuplicateDetector : public IDuplicateDetector
 {
     protected:
         int16_t lastSeqNum = 0;
         std::map<MACAddress, int16_t> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
     public:
-        virtual void processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
 };
 
@@ -49,20 +50,35 @@ class NonQoSDuplicateDetector : public LegacyDuplicateDetector
     protected:
         std::map<MACAddress, int16_t> lastSentSeqNums; // last sent sequence numbers per RA
     public:
-        virtual void processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
 };
 
 class QoSDuplicateDetector : public IDuplicateDetector
 {
+    private:
+        enum CacheType
+        {
+            SHARED,
+            TIME_PRIORITY,
+            DATA
+        };
+
     protected:
         typedef int8_t tid_t;
         typedef std::pair<MACAddress,tid_t> Key;
         std::map<Key, int16_t> lastSeenSeqNumCache;// cache of last seen sequence numbers per TA
+        std::map<MACAddress, int16_t> lastSeenSharedSeqNumCache;
+        std::map<MACAddress, int16_t> lastSeenTimePriorityManagementSeqNumCache;
+
         std::map<Key, int16_t> lastSentSeqNums; // last sent sequence numbers per RA
+        std::map<MACAddress, int16_t> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
+
+        std::map<MACAddress, int16_t> lastSentSharedSeqNums; // last sent sequence numbers per RA
+        int16_t lastSentSharedCounterSeqNum;
     protected:
-        Key getKey(Ieee80211DataOrMgmtFrame *frame, bool incoming);
+        CacheType getCacheType(Ieee80211DataOrMgmtFrame *frame, bool incoming);
     public:
-        virtual void processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
 };
 

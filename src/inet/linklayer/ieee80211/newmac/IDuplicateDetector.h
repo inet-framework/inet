@@ -30,7 +30,7 @@ class Ieee80211DataOrMgmtFrame;
 class IDuplicateDetector
 {
     public:
-        virtual void processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) = 0;
         //TODO some purge mechanism
         virtual ~IDuplicateDetector() {}

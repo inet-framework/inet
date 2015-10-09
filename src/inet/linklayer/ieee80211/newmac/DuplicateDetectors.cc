@@ -24,20 +24,22 @@
 namespace inet {
 namespace ieee80211 {
 
-void LegacyDuplicateDetector::processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame)
+void LegacyDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
 {
+    ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = (lastSeqNum + 1) % 4096;
     frame->setSequenceNumber(lastSeqNum);
 }
 
 bool LegacyDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 {
+    ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     const MACAddress& address = frame->getTransmitterAddress();
     int16_t seqNum = frame->getSequenceNumber();
     auto it = lastSeenSeqNumCache.find(address);
     if (it == lastSeenSeqNumCache.end())
         lastSeenSeqNumCache[address] = seqNum;
-    else if (it->second == seqNum)
+    else if (it->second == seqNum && frame->getRetry())
         return true;
     else
         it->second = seqNum;
@@ -46,8 +48,9 @@ bool LegacyDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 
 //---
 
-void NonQoSDuplicateDetector::processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame)
+void NonQoSDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
 {
+    ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = (lastSeqNum + 1) % 4096;
     const MACAddress& address = frame->getReceiverAddress();
     auto it = lastSentSeqNums.find(address);
@@ -63,44 +66,93 @@ void NonQoSDuplicateDetector::processOutgoingPacket(Ieee80211DataOrMgmtFrame *fr
 
 //---
 
-QoSDuplicateDetector::Key QoSDuplicateDetector::getKey(Ieee80211DataOrMgmtFrame *frame, bool incoming)
+QoSDuplicateDetector::CacheType QoSDuplicateDetector::getCacheType(Ieee80211DataOrMgmtFrame *frame, bool incoming)
 {
-    static Key multicastKey(MACAddress::UNSPECIFIED_ADDRESS, 0);
-    Ieee80211DataFrame *dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame);
-    if (!dataFrame)
-        return multicastKey;
-    if (frame->getType() != ST_DATA_WITH_QOS)  // has no QoS header
-        return multicastKey;
+    bool isTimePriorityFrame = false; // TODO
     const MACAddress& address = incoming ? frame->getTransmitterAddress() : frame->getReceiverAddress();
-    if (address.isMulticast())
-        return multicastKey;
-    return Key(address, dataFrame->getTid());
+    if (isTimePriorityFrame)
+        return TIME_PRIORITY;
+    else if (frame->getType() != ST_DATA_WITH_QOS || address.isMulticast())
+        return SHARED;
+    else
+        return DATA;
 }
 
-void QoSDuplicateDetector::processOutgoingPacket(Ieee80211DataOrMgmtFrame *frame)
+void QoSDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
 {
-    Key key = getKey(frame, false);
+    CacheType type = getCacheType(frame, false);
     int seqNum;
-    auto it = lastSentSeqNums.find(key);
-    if (it == lastSentSeqNums.end())
-        lastSentSeqNums[key] = seqNum = 0;
+    MACAddress address = frame->getReceiverAddress();
+    if (type == TIME_PRIORITY)
+    {
+        // Error in spec?
+        // "QoS STA may use values from additional modulo-4096 counters per <Address 1, TID> for sequence numbers assigned to
+        // time priority management frames." 9.3.2.10 Duplicate detection and recovery, But management frames don't have QoS Control field.
+        auto it = lastSentTimePrioritySeqNums.find(address);
+        if (it == lastSentTimePrioritySeqNums.end())
+            lastSentTimePrioritySeqNums[address] = seqNum = 0;
+        else
+            it->second = seqNum = (it->second + 1) % 4096;
+    }
+    if (type == SHARED)
+    {
+        auto it = lastSentSharedSeqNums.find(address);
+        if (it == lastSentSharedSeqNums.end())
+            lastSentSharedSeqNums[address] = seqNum = lastSentSharedCounterSeqNum;
+        else {
+            if (it->second == lastSentSharedCounterSeqNum)
+                lastSentSharedCounterSeqNum = (lastSentSharedCounterSeqNum + 1) % 4096; // make it different from the last sequence number sent to that RA (spec: "add 2")
+            it->second = seqNum = lastSentSharedCounterSeqNum;
+        }
+    }
+    else if (type == DATA)
+    {
+        Ieee80211QoSDataFrame *qosDataFrame = check_and_cast<Ieee80211QoSDataFrame *>(frame);
+        Key key(frame->getReceiverAddress(), qosDataFrame->getTid());
+        auto it = lastSentSeqNums.find(key);
+        if (it == lastSentSeqNums.end())
+            lastSentSeqNums[key] = seqNum = 0;
+        else
+            it->second = seqNum = (it->second + 1) % 4096;
+    }
     else
-        it->second = seqNum = (it->second + 1) % 4096;
+        ASSERT(false);
+
     frame->setSequenceNumber(seqNum);
 }
 
 bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 {
-    Key key = getKey(frame, true);
+    Ieee80211DataFrame *dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame);
     int seqNum = frame->getSequenceNumber();
-    auto it = lastSeenSeqNumCache.find(key);
-    if (it == lastSeenSeqNumCache.end())
-        lastSeenSeqNumCache[key] = seqNum;
-    else if (it->second == seqNum)
-        return true;
+    bool isManagementFrame = dynamic_cast<Ieee80211ManagementFrame *>(frame);
+    bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
+    if (isTimePriorityManagementFrame || isManagementFrame)
+    {
+        MACAddress transmitterAddr = frame->getTransmitterAddress();
+        std::map<MACAddress, int16_t> &cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
+        auto it = cache.find(transmitterAddr);
+        if (it == cache.end())
+            cache[transmitterAddr] = seqNum;
+        if (it->second == seqNum && frame->getRetry())
+            return true;
+        else
+            it->second = seqNum;
+        return false;
+    }
     else
-        it->second = seqNum;
-    return false;
+    {
+        Ieee80211QoSDataFrame *qosDataFrame = check_and_cast<Ieee80211QoSDataFrame *>(frame);
+        Key key(frame->getTransmitterAddress(), qosDataFrame->getTid());
+        auto it = lastSeenSeqNumCache.find(key);
+        if (it == lastSeenSeqNumCache.end())
+            lastSeenSeqNumCache[key] = seqNum;
+        if (it->second == seqNum && frame->getRetry())
+            return true;
+        else
+            it->second = seqNum;
+        return false;
+    }
 }
 
 
