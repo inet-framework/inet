@@ -17,7 +17,6 @@
 // Author: Andras Varga
 //
 
-
 package inet.linklayer.ieee80211.newmac;
 
 //

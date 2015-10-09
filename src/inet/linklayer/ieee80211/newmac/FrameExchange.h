@@ -34,6 +34,9 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 
+/**
+ * The default base class for implementing frame exchanges (see IFrameExchange).
+ */
 class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
 {
     protected:

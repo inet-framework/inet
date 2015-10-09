@@ -21,7 +21,6 @@ package inet.linklayer.ieee80211.newmac;
 
 import inet.linklayer.ieee80211.IIeee80211Mac;
 
-
 // near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
 module LayeredProtocolBase
 {
@@ -131,7 +130,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         }
 }
 
-// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC  
+// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC
 module Ieee80211CompatibleNewMac extends Ieee80211NewMac
 {
     parameters:

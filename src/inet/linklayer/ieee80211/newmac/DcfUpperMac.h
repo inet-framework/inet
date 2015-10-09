@@ -41,6 +41,9 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 
+/**
+ * UpperMac for DCF mode.
+ */
 class DcfUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:

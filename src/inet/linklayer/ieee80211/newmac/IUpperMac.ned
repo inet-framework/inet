@@ -20,7 +20,11 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// Interface for UpperMacs. UpperMacs deal with exchanging frames, and build
+// on the services of IContentionTx, IImmediateTx and IRx for accessing the
+// channel. Responsibilities of UpperMacs include queueing, ACK generation
+// and retransmissions, RTS/CTS, duplicate detection, fragmentation,
+// aggregation, block acknowledgement, rate selection, and more.
 //
 moduleinterface IUpperMac
 {

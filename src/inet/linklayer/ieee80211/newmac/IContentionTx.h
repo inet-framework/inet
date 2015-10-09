@@ -29,8 +29,8 @@ class Ieee80211Frame;
 class ITxCallback;
 
 /**
- * Abstract interface for processes that implement contention-based channel
- * access. For each frame, it listens on the channel for a DIFS (AIFS) period
+ * Abstract interface for processes that implement contention-based channel access.
+ * For each frame, ContentionTx listens on the channel for a DIFS (AIFS) period
  * then for a random backoff period before transitting the frame, and defers when
  * busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
  * of the original DIFS (AIFS).

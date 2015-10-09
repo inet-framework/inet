@@ -25,6 +25,11 @@
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * The default implementation of a collision controller. Collision controllers
+ * detect and report internal collisions between ContentionTx instances
+ * (i.e. EDCA queues). This implementation uses a single timer.
+ */
 class BasicCollisionController : public cSimpleModule, public ICollisionController
 {
     private:

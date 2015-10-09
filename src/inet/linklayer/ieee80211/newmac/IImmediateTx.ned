@@ -20,7 +20,10 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// Interface for processes that unconditionally transmit a frame
+// after waiting for a specified inter-frame space (usually SIFS). Such
+// processes can be used to transmit frames where no contention is needed,
+// e.g. ACK, CTS, or the second and further frames of a TXOP.
 //
 moduleinterface IImmediateTx
 {

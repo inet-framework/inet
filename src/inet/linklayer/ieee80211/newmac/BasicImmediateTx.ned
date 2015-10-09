@@ -17,11 +17,10 @@
 // Author: Andras Varga
 //
 
-
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// The default implementation of IImmediateTx.
 //
 simple BasicImmediateTx like IImmediateTx
 {

@@ -25,6 +25,9 @@
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * IEEE 802.11e QoS (EDCA) access categories.
+ */
 enum AccessCategory
 {
     AC_BK = 0,

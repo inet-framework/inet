@@ -30,6 +30,13 @@ class IUpperMacContext;
 class Ieee80211Frame;
 class Ieee80211DataOrMgmtFrame;
 
+/**
+ * Abstract class interface for UpperMacs. UpperMacs deal with exchanging
+ * frames, and build on the services of IContentionTx, IImmediateTx and IRx
+ * for accessing the channel. Responsibilities of UpperMacs include queueing,
+ * ACK generation and retransmissions, RTS/CTS, duplicate detection,
+ * fragmentation, aggregation, block acknowledgement, rate selection, and more.
+ */
 class IUpperMac
 {
     public:

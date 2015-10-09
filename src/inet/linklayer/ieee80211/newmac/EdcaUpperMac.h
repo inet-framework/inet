@@ -41,6 +41,9 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 
+/**
+ * UpperMac for EDCA (802.11e QoS mode)
+ */
 class EdcaUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:

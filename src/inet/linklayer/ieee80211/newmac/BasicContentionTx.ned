@@ -20,7 +20,7 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// The default implementation of IContentionTx.
 //
 simple BasicContentionTx like IContentionTx
 {

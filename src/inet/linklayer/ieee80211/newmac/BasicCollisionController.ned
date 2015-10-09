@@ -20,7 +20,7 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// The default implementation of ICollisionController.
 //
 simple BasicCollisionController like ICollisionController
 {

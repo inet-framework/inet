@@ -36,6 +36,9 @@ class Ieee80211ACKFrame;
 class Ieee80211DataOrMgmtFrame;
 class IMacParameters;
 
+/**
+ * Frame manipulation and other utilities for use by frame exchanges and UpperMac.
+ */
 class INET_API MacUtils
 {
     private:

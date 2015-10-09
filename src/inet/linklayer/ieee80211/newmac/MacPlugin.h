@@ -25,6 +25,12 @@
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * Base class for classes in the MAC that are not modules themselves
+ * but need to schedule timers. MacPlugin implements timers by using
+ * the facilities of the "host" or "container" module that the plugin
+ * is part of.
+ */
 class MacPlugin : public cOwnedObject
 {
     protected:
@@ -37,7 +43,7 @@ class MacPlugin : public cOwnedObject
     public:
         virtual void handleSelfMessage(cMessage *msg) = 0;
         virtual void scheduleAt(simtime_t t, cMessage *msg);
-        virtual cMessage* cancelEvent(cMessage *msg);
+        virtual cMessage *cancelEvent(cMessage *msg);
         virtual void cancelAndDelete(cMessage *msg);
 
 };

@@ -17,11 +17,14 @@
 // Author: Andras Varga
 //
 
-
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// Interface for modules that implement contention-based channel access.
+// For each frame, ContentionTx listens on the channel for a DIFS (AIFS) period
+// then for a random backoff period before transitting the frame, and defers when
+// busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
+// of the original DIFS (AIFS).
 //
 moduleinterface IContentionTx
 {
