@@ -17,11 +17,12 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICUPPERMAC_H
-#define __INET_BASICUPPERMAC_H
+#ifndef __INET_EDCAUPPERMAC_H
+#define __INET_EDCAUPPERMAC_H
 
 #include "IUpperMac.h"
 #include "IFrameExchange.h"
+#include "AccessCategory.h"
 
 namespace inet {
 
@@ -31,26 +32,32 @@ namespace ieee80211 {
 
 class IRx;
 class ITxCallback;
+class UpperMacContext;
 class Ieee80211NewMac;
 class Ieee80211RTSFrame;
 class IMacQoSClassifier;
+class IMacParameters;
+class MacUtils;
+class IImmediateTx;
+class IContentionTx;
 
-class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
+class EdcaUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
     protected:
-        IPassiveQueue *queueModule = nullptr;
         IMacQoSClassifier *classifier = nullptr;
+        IMacParameters *params;
+        MacUtils *utils;
         Ieee80211NewMac *mac = nullptr;
         IRx *rx = nullptr;
-
-        IUpperMacContext *context = nullptr;
+        IImmediateTx *immediateTx;
+        IContentionTx **contentionTx;
 
         int maxQueueSize;
         int fragmentationThreshold = 2346;
-        uint16 sequenceNumber;
+        uint16 sequenceNumber;  //TODO per-receiver and per-TID!
 
         struct AccessCategoryData {
             Ieee80211DataOrMgmtFrameList transmissionQueue;
@@ -60,21 +67,19 @@ class BasicUpperMac : public cSimpleModule, public IUpperMac, protected IFrameEx
 
     protected:
         void initialize() override;
-        void handleMessage(cMessage *msg) override;
-        virtual void initializeQueueModule();
-        virtual IUpperMacContext *createContext();
-        virtual int classifyFrame(Ieee80211DataOrMgmtFrame *frame);
+        virtual void readParameters();
+        virtual void handleMessage(cMessage *msg) override;
+        virtual AccessCategory classifyFrame(Ieee80211DataOrMgmtFrame *frame);
 
-        virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int accessCategory);
+        virtual void startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory ac);
         virtual void frameExchangeFinished(IFrameExchange *what, bool successful) override;
 
         void sendAck(Ieee80211DataOrMgmtFrame *frame);
         void sendCts(Ieee80211RTSFrame *frame);
 
     public:
-        BasicUpperMac();
-        ~BasicUpperMac();
-        virtual void setContext(IUpperMacContext *context) override { this->context = context; }
+        EdcaUpperMac();
+        ~EdcaUpperMac();
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
         virtual void transmissionComplete(ITxCallback *callback, int txIndex) override;

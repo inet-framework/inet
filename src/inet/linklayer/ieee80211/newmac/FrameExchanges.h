@@ -33,7 +33,7 @@ class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
     protected:
         Ieee80211DataOrMgmtFrame *frame;
         int txIndex;
-        int accessCategory;
+        AccessCategory accessCategory;
         cMessage *ackTimer = nullptr;
         int retryCount = 0;
 
@@ -49,7 +49,7 @@ class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
         bool isAck(Ieee80211Frame *frame);
 
     public:
-        SendDataWithAckFsmBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, int accessCategory);
+        SendDataWithAckFsmBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithAckFsmBasedFrameExchange();
 };
 
@@ -64,7 +64,7 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
     public:
-        SendDataWithAckFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, int accessCategory);
+        SendDataWithAckFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithAckFrameExchange();
 };
 
@@ -79,7 +79,7 @@ class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
     public:
-        SendDataWithRtsCtsFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, int accessCategory);
+        SendDataWithRtsCtsFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithRtsCtsFrameExchange();
 };
 
@@ -88,12 +88,12 @@ class SendMulticastDataFrameExchange : public FrameExchange
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame;
         int txIndex;
-        int accessCategory;
+        AccessCategory accessCategory;
         int retryCount = 0;
     protected:
         virtual void transmitFrame();
     public:
-        SendMulticastDataFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, int accessCategory);
+        SendMulticastDataFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendMulticastDataFrameExchange();
         virtual void start() override;
         virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;

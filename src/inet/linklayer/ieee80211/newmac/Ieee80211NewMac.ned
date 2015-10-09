@@ -96,12 +96,15 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string firstContentionTxModule = ".cTx[0]";
         int numContentionTx = default(4);
         string collisionControllerModule = ".ctrl";
+        string parametersModule = ".params";
+
         *.macModule = "^";
         *.upperMacModule = "^" + upperMacModule;
         *.rxModule = "^" + rxModule;
         *.immediateTxModule = "^" + immediateTxModule;
         *.firstContentionTxModule = "^" + firstContentionTxModule;
         *.collisionControllerModule = "^" + collisionControllerModule;
+        *.parametersModule = "^" + parametersModule;
 
         @display("i=block/layer");
         @class(Ieee80211NewMac);
@@ -111,7 +114,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     submodules:
-        upperMac: <default("BasicUpperMac")> like IUpperMac {
+        upperMac: <default("EdcaUpperMac")> like IUpperMac {
             @display("p=208,66");
         }
         iTx: <default("BasicImmediateTx")> like IImmediateTx {
@@ -136,13 +139,15 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         double bitrate @unit("bps");
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
-        bool EDCA = default(false);
+        bool EDCA = default(true);
         string classifierClass = default("");
+
+        upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
+        numContentionTx = EDCA ? 4 : 1;
 
         upperMac.opMode = opMode;
         upperMac.bitrate = bitrate;
-        upperMac.rtsThresholdBytes = rtsThresholdBytes;
-        upperMac.retryLimit = retryLimit;
-        upperMac.useEDCA = EDCA;
+        upperMac.rtsThreshold = rtsThresholdBytes;
+        upperMac.shortRetryLimit = retryLimit;
         upperMac.classifierClass = classifierClass;
 }

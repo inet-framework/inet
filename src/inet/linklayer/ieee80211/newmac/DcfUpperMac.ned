@@ -20,21 +20,25 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// TODO
+// UpperMac for DCF mode.
 //
-simple BasicUpperMac like IUpperMac
+simple DcfUpperMac like IUpperMac
 {
     parameters:
         string macModule;
         string rxModule;
         string immediateTxModule;
         string firstContentionTxModule;
-
         string opMode @enum("a", "b", "g", "n", "p") = default("g");
         double bitrate @unit("bps");
-        int rtsThresholdBytes @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
-        int retryLimit = default(-1); // maximum number of retries per frame, -1 means default
-        bool useEDCA = default(false);
-        string classifierClass = default("");
+        int rtsThreshold @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
+        int shortRetryLimit = default(-1); // maximum number of retries per frame, -1 means default
+        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
+        double sifsTime @unit("s") = default(-1s); // SIFS time, -1 means default (mode dependent)
+        double difsTime @unit("s") = default(-1s); // DIFS time, -1 means default (mode dependent)
+        double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)
+        int cwMin = default(-1); // minimum contention window, -1 means default
+        int cwMax = default(-1); // maximum contention window, -1 means default
+        int cwMulticast = default(-1); // contention window for multicast frames, -1 means default
         @display("i=block/layer");
 }

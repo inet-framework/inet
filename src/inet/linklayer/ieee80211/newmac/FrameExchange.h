@@ -23,25 +23,35 @@
 #include "IFrameExchange.h"
 #include "MacPlugin.h"
 #include "ITxCallback.h"
+#include "AccessCategory.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class IUpperMacContext;
+class UpperMacContext;
+class IMacParameters;
+class MacUtils;
+class IImmediateTx;
+class IContentionTx;
 
 class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
 {
     protected:
-        IUpperMacContext *context = nullptr;
+        IMacParameters *params;
+        MacUtils *utils;
+        IImmediateTx *immediateTx;
+        IContentionTx **contentionTx;
         IFinishedCallback *finishedCallback = nullptr;
 
     protected:
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void reportSuccess();
         virtual void reportFailure();
 
     public:
-        FrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) : MacPlugin(ownerModule), context(context), finishedCallback(callback) {}
-        virtual ~FrameExchange() {}
+        FrameExchange(UpperMacContext *context, IFinishedCallback *callback);
+        virtual ~FrameExchange();
 };
 
 class FsmBasedFrameExchange : public FrameExchange
@@ -54,7 +64,7 @@ class FsmBasedFrameExchange : public FrameExchange
         virtual bool handleWithFSM(EventType eventType, cMessage *frameOrTimer) = 0;
 
     public:
-        FsmBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback) : FrameExchange(ownerModule, context, callback) { fsm.setName("Frame Exchange FSM"); }
+        FsmBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback) : FrameExchange(context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() override;
         virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;
         virtual void transmissionComplete(int txIndex) override;
@@ -68,7 +78,7 @@ class StepBasedFrameExchange : public FrameExchange
         enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };
         enum Status { INPROGRESS, SUCCEEDED, FAILED };
         int defaultTxIndex;
-        int defaultAccessCategory;
+        AccessCategory defaultAccessCategory;
         int step = 0;
         Operation operation = NONE;
         Status status = INPROGRESS;
@@ -84,9 +94,9 @@ class StepBasedFrameExchange : public FrameExchange
 
         // operations that can be called from doStep()
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount);
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, int accessCategory);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, AccessCategory accessCategory);
         virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame);
-        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, int accessCategory);
+        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, AccessCategory accessCategory);
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void expectReply(simtime_t timeout);
@@ -106,7 +116,7 @@ class StepBasedFrameExchange : public FrameExchange
         static const char *operationFunctionName(Operation operation);
 
     public:
-        StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, int txIndex, int accessCategory);
+        StepBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory);
         virtual ~StepBasedFrameExchange();
         std::string info() const override;
         virtual void start() override;

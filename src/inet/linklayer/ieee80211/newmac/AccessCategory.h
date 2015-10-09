@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+// Author: Andras Varga, Benjamin Seregi
+//
 
 #ifndef __INET_ACCESSCATEGORY_H
 #define __INET_ACCESSCATEGORY_H
@@ -25,11 +27,12 @@ namespace ieee80211 {
 
 enum AccessCategory
 {
-    AC_BK,
-    AC_BE,
-    AC_VI,
-    AC_VO,
-    AC_LEGACY
+    AC_BK = 0,
+    AC_BE = 1,
+    AC_VI = 2,
+    AC_VO = 3,
+    AC_LEGACY,
+    AC_NUMCATEGORIES
 };
 
 } // namespace ieee80211

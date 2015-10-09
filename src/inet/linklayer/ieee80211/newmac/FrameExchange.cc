@@ -18,11 +18,38 @@
 //
 
 #include "FrameExchange.h"
-#include "IUpperMacContext.h"
+#include "UpperMacContext.h"
+#include "IMacParameters.h"
+#include "IContentionTx.h"
+#include "IImmediateTx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
+
+FrameExchange::FrameExchange(UpperMacContext *context, IFinishedCallback *callback) :
+    MacPlugin(context->ownerModule),
+    params(context->params),
+    utils(context->utils),
+    immediateTx(context->immediateTx),
+    contentionTx(context->contentionTx),
+    finishedCallback(callback)
+{
+}
+
+FrameExchange::~FrameExchange()
+{
+}
+
+void FrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
+{
+    contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
+}
+
+void FrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
+{
+    immediateTx->transmitImmediateFrame(frame, ifs, this);
+}
 
 void FrameExchange::reportSuccess()
 {
@@ -66,8 +93,8 @@ void FsmBasedFrameExchange::handleSelfMessage(cMessage *msg)
 
 //--------
 
-StepBasedFrameExchange::StepBasedFrameExchange(cSimpleModule *ownerModule, IUpperMacContext *context, IFinishedCallback *callback, int txIndex, int accessCategory) :
-    FrameExchange(ownerModule, context, callback), defaultTxIndex(txIndex), defaultAccessCategory(accessCategory)
+StepBasedFrameExchange::StepBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory) :
+    FrameExchange(context, callback), defaultTxIndex(txIndex), defaultAccessCategory(accessCategory)
 {
 }
 
@@ -256,10 +283,10 @@ void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int 
     transmitContentionFrame(frame, retryCount, defaultTxIndex, defaultAccessCategory);
 }
 
-void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, int ac)
+void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, AccessCategory ac)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    context->transmitContentionFrame(txIndex, frame, context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMin(ac), context->getCwMax(ac), context->getSlotTime(), retryCount, this);
+    contentionTx[txIndex]->transmitContentionFrame(frame, params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
 }
 
 void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame)
@@ -267,22 +294,22 @@ void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *fr
     transmitMulticastContentionFrame(frame, defaultTxIndex, defaultAccessCategory);
 }
 
-void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, int ac)
+void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, AccessCategory ac)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    context->transmitContentionFrame(txIndex, frame, context->getAifsTime(ac), context->getEifsTime(ac), context->getCwMulticast(ac), context->getCwMulticast(ac), context->getSlotTime(), 0, this);
+    contentionTx[txIndex]->transmitContentionFrame(frame, params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMulticast(ac), params->getCwMulticast(ac), params->getSlotTime(), 0, this);
 }
 
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
-    context->transmitContentionFrame(txIndex, frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
+    contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
 void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
 {
     setOperation(TRANSMIT_IMMEDIATE_FRAME);
-    context->transmitImmediateFrame(frame, ifs, this);
+    immediateTx->transmitImmediateFrame(frame, ifs, this);
 }
 
 void StepBasedFrameExchange::expectReply(simtime_t timeout)

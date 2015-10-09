@@ -17,14 +17,15 @@
 // Author: Andras Varga
 //
 
-#include "BasicUpperMac.h"
+#include "EdcaUpperMac.h"
 #include "UpperMacContext.h"
 #include "Ieee80211NewMac.h"
 #include "IRx.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
-#include "IUpperMacContext.h"
 #include "IMacQoSClassifier.h"
+#include "MacUtils.h"
+#include "MacParameters.h"
 #include "FrameExchanges.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
@@ -34,16 +35,16 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(BasicUpperMac);
+Define_Module(EdcaUpperMac);
 
-BasicUpperMac::BasicUpperMac()
+EdcaUpperMac::EdcaUpperMac()
 {
 }
 
-BasicUpperMac::~BasicUpperMac()
+EdcaUpperMac::~EdcaUpperMac()
 {
-    int n = context ? context->getNumAccessCategories() : 0;
-    for (int i = 0; i < n; i++) {
+    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    for (int i = 0; i < numACs; i++) {
         delete acData[i].frameExchange;
         while (!acData[i].transmissionQueue.empty()) {
             Ieee80211Frame *temp = acData[i].transmissionQueue.front();
@@ -52,25 +53,27 @@ BasicUpperMac::~BasicUpperMac()
         }
     }
     delete[] acData;
-    delete context;
 }
 
-void BasicUpperMac::initialize()
+void EdcaUpperMac::initialize()
 {
     mac = check_and_cast<Ieee80211NewMac *>(getModuleByPath(par("macModule")));
     rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
+    immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
+    contentionTx = nullptr;
+    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
     std::string classifierClass = par("classifierClass");
     if (classifierClass != "")
         classifier = check_and_cast<IMacQoSClassifier *>(createOne(classifierClass.c_str()));
 
-    maxQueueSize = mac->par("maxQueueSize");
-    initializeQueueModule();
+    maxQueueSize = mac->par("maxQueueSize");  //FIXME
 
-    context = createContext();
-    rx->setAddress(context->getAddress());
+    readParameters();
+    utils = new MacUtils(params);
+    rx->setAddress(params->getAddress());
 
-    acData = new AccessCategoryData[context->getNumAccessCategories()];
+    acData = new AccessCategoryData[params->isEdcaEnabled() ? 4 : 1];
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
@@ -78,32 +81,42 @@ void BasicUpperMac::initialize()
     //WATCH_LIST(transmissionQueue);
 }
 
-IUpperMacContext *BasicUpperMac::createContext()
-{
-    IImmediateTx *immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
-    IContentionTx **contentionTx = nullptr;
-    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
+inline double fallback(double a, double b) {return a!=-1 ? a : b;}
+inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
+inline std::string suffix(const char *s, int i) {std::stringstream ss; ss << s << i; return ss.str();}
 
-    MACAddress address(mac->par("address").stringValue());    // note: we rely on MAC to have replaced "auto" with concrete address by now
+void EdcaUpperMac::readParameters()
+{
+    MacParameters *params = new MacParameters();
 
     const Ieee80211ModeSet *modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
     double bitrate = par("bitrate");
     const IIeee80211Mode *dataFrameMode = (bitrate == -1) ? modeSet->getFastestMode() : modeSet->getMode(bps(bitrate));
     const IIeee80211Mode *basicFrameMode = modeSet->getSlowestMode();
-    const IIeee80211Mode *controlFrameMode = modeSet->getSlowestMode(); //TODO check
 
-    int rtsThreshold = par("rtsThresholdBytes");
-    int shortRetryLimit = par("retryLimit");
-    if (shortRetryLimit == -1)
-        shortRetryLimit = 7;
-    ASSERT(shortRetryLimit > 0);
+    params->setAddress(mac->getAddress());
+    params->setBasicFrameMode(basicFrameMode);
+    params->setDefaultDataFrameMode(dataFrameMode);
+    params->setShortRetryLimit(fallback(par("shortRetryLimit"), 7));
+    params->setRtsThreshold(par("rtsThreshold"));
 
-    bool useEDCA = par("useEDCA");
+    params->setEdcaEnabled(true);
+    params->setSlotTime(fallback(par("slotTime"), dataFrameMode->getSlotTime()));
+    params->setSifsTime(fallback(par("sifsTime"), dataFrameMode->getSifsTime()));
+    for (int i = 0; i < 4; i++) {
+        AccessCategory ac = (AccessCategory)i;
+        int aifsn = fallback(par(suffix("aifsn",i).c_str()), dataFrameMode->getAifsNumber(ac));
+        params->setAifsTime(ac, params->getSifsTime() + aifsn*params->getSlotTime());
+        params->setEifsTime(ac, params->getSifsTime() + params->getAifsTime(ac) + basicFrameMode->getDuration(LENGTH_ACK));
+        params->setCwMin(ac, fallback(par(suffix("cwMin",i).c_str()), dataFrameMode->getCwMin(ac)));
+        params->setCwMax(ac, fallback(par(suffix("cwMax",i).c_str()), dataFrameMode->getCwMax(ac)));
+        params->setCwMulticast(ac, fallback(par(suffix("cwMulticast",i).c_str()), dataFrameMode->getCwMin(ac)));
+    }
 
-    return new UpperMacContext(address, dataFrameMode, basicFrameMode, controlFrameMode, shortRetryLimit, rtsThreshold, useEDCA, immediateTx, contentionTx);
+    this->params = params;
 }
 
-void BasicUpperMac::handleMessage(cMessage *msg)
+void EdcaUpperMac::handleMessage(cMessage *msg)
 {
     if (msg->getContextPointer() != nullptr)
         ((MacPlugin *)msg->getContextPointer())->handleSelfMessage(msg);
@@ -111,27 +124,12 @@ void BasicUpperMac::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void BasicUpperMac::initializeQueueModule()
-{
-    // use of external queue module is optional -- find it if there's one specified
-    if (mac->par("queueModule").stringValue()[0]) {
-        cModule *module = getModuleFromPar<cModule>(mac->par("queueModule"), mac);
-        queueModule = check_and_cast<IPassiveQueue *>(module);
-
-        EV_DEBUG << "Requesting first two frames from queue module\n";
-        queueModule->requestPacket();
-    }
-}
-
-void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
+void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 {
     Enter_Method("upperFrameReceived(\"%s\")", frame->getName());
     take(frame);
 
-    if (queueModule)
-        queueModule->requestPacket();  //TODO: use internal queue only! (remove queue from mgmt module)
-
-    int ac = classifyFrame(frame);
+    AccessCategory ac = classifyFrame(frame);
 
     // check for queue overflow
     if (maxQueueSize && (int)acData[ac].transmissionQueue.size() == maxQueueSize) {
@@ -148,44 +146,44 @@ void BasicUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     ASSERT(!frame->getReceiverAddress().isUnspecified());
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
-    frame->setTransmitterAddress(context->getAddress());
+    frame->setTransmitterAddress(params->getAddress());
     frame->setSequenceNumber(sequenceNumber);
     sequenceNumber = (sequenceNumber + 1) % 4096;    //XXX seqNum must be checked upon reception of frames!
     if (acData[ac].frameExchange)
         acData[ac].transmissionQueue.push_back(frame);
     else {
-        startSendDataFrameExchange(frame, ac);
+        startSendDataFrameExchange(frame, (int)ac, ac); //FIXME!!!!
     }
 }
 
-int BasicUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
+AccessCategory EdcaUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    // return intrand(context->getNumAccessCategories()); //TODO temporary hack, for testing
+    // return intrand(context->utils->getNumAccessCategories()); //TODO temporary hack, for testing
     if (!classifier)
-        return 0;
-    return classifier->classifyPacket(frame);
+        return AC_BE;
+    return (AccessCategory)classifier->classifyPacket(frame); //TODO
 }
 
-void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
+void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
     delete frame->removeControlInfo();          //TODO
     take(frame);
 
-    if (context->isForUs(frame)) {
+    if (utils->isForUs(frame)) {
         if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
             sendCts(rtsFrame);
         }
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
-            if (!context->isBroadcast(frame) && !context->isMulticast(frame))
+            if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
                 sendAck(dataOrMgmtFrame);
             mac->sendUp(dataOrMgmtFrame);
         }
         else {
             // offer frame to all ongoing frame exchanges
-            int n = context->getNumAccessCategories();
+            int numACs = params->isEdcaEnabled() ? 4 : 1;
             bool processed = false;
-            for (int i = 0; i < n && !processed; i++)
+            for (int i = 0; i < numACs && !processed; i++)
                 if (acData[i].frameExchange)
                     processed = acData[i].frameExchange->lowerFrameReceived(frame);
             if (!processed) {
@@ -200,54 +198,59 @@ void BasicUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
-void BasicUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
+void EdcaUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
         callback->transmissionComplete(txIndex);
 }
 
-void BasicUpperMac::internalCollision(ITxCallback *callback, int txIndex)
+void EdcaUpperMac::internalCollision(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
     if (callback)
         callback->internalCollision(txIndex);
 }
 
-void BasicUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int ac)
+void EdcaUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory ac)
 {
     ASSERT(!acData[ac].frameExchange);
 
+    if (utils->isBroadcast(frame) || utils->isMulticast(frame))
+        utils->setFrameMode(frame, params->getBasicFrameMode());
+    else
+        utils->setFrameMode(frame, params->getDefaultDataFrameMode());
+
+    UpperMacContext context;
+    context.ownerModule = this;
+    context.params = params;
+    context.utils = utils;
+    context.contentionTx = contentionTx;
+    context.immediateTx = immediateTx;
+
     IFrameExchange *frameExchange;
-    int txIndex = ac; //TODO
-
-    if (context->isBroadcast(frame) || context->isMulticast(frame))
-        context->setBasicBitrate(frame);
-    else
-        context->setDataBitrate(frame);
-
-    bool useRtsCts = frame->getByteLength() > context->getRtsThreshold();
-    if (context->isBroadcast(frame) || context->isMulticast(frame))
-        frameExchange = new SendMulticastDataFrameExchange(this, context, this, frame, txIndex, ac);
+    bool useRtsCts = frame->getByteLength() > params->getRtsThreshold();
+    if (utils->isBroadcast(frame) || utils->isMulticast(frame))
+        frameExchange = new SendMulticastDataFrameExchange(&context, this, frame, txIndex, ac);
     else if (useRtsCts)
-        frameExchange = new SendDataWithRtsCtsFrameExchange(this, context, this, frame, txIndex, ac);
+        frameExchange = new SendDataWithRtsCtsFrameExchange(&context, this, frame, txIndex, ac);
     else
-        frameExchange = new SendDataWithAckFrameExchange(this, context, this, frame, txIndex, ac);
+        frameExchange = new SendDataWithAckFrameExchange(&context, this, frame, txIndex, ac);
 
     frameExchange->start();
     acData[ac].frameExchange = frameExchange;
 }
 
-void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
+void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
 {
     EV_INFO << "Frame exchange finished" << std::endl;
 
     // find ac for this frame exchange
-    int n = context->getNumAccessCategories();
-    int ac = -1;
-    for (int i = 0; i < n; i++)
+    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    AccessCategory ac = (AccessCategory)-1;  //TODO
+    for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange == what)
-            ac = i;
+            ac = (AccessCategory)i;
     ASSERT(ac != -1);
 
     delete acData[ac].frameExchange;
@@ -256,20 +259,20 @@ void BasicUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     if (!acData[ac].transmissionQueue.empty()) {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(acData[ac].transmissionQueue.front());
         acData[ac].transmissionQueue.pop_front();
-        startSendDataFrameExchange(frame, ac);
+        startSendDataFrameExchange(frame, (int)ac, ac); //FIXME!!!!
     }
 }
 
-void BasicUpperMac::sendAck(Ieee80211DataOrMgmtFrame *frame)
+void EdcaUpperMac::sendAck(Ieee80211DataOrMgmtFrame *frame)
 {
-    Ieee80211ACKFrame *ackFrame = context->buildAckFrame(frame);
-    context->transmitImmediateFrame(ackFrame, context->getSifsTime(), nullptr);
+    Ieee80211ACKFrame *ackFrame = utils->buildAckFrame(frame);
+    immediateTx->transmitImmediateFrame(ackFrame, params->getSifsTime(), nullptr);
 }
 
-void BasicUpperMac::sendCts(Ieee80211RTSFrame *frame)
+void EdcaUpperMac::sendCts(Ieee80211RTSFrame *frame)
 {
-    Ieee80211CTSFrame *ctsFrame = context->buildCtsFrame(frame);
-    context->transmitImmediateFrame(ctsFrame, context->getSifsTime(), nullptr);
+    Ieee80211CTSFrame *ctsFrame = utils->buildCtsFrame(frame);
+    immediateTx->transmitImmediateFrame(ctsFrame, params->getSifsTime(), nullptr);
 }
 
 } // namespace ieee80211

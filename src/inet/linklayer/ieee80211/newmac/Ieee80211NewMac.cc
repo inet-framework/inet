@@ -67,6 +67,8 @@ void Ieee80211NewMac::initialize(int stage)
         immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
         collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
+        initializeQueueModule();
+
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // change module parameter from "auto" to concrete address
@@ -102,6 +104,16 @@ void Ieee80211NewMac::initialize(int stage)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         if (isInterfaceRegistered().isUnspecified())    //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
+    }
+}
+
+void Ieee80211NewMac::initializeQueueModule()
+{
+    // TODO kill external queue support -- it's no practical use to us
+    if (par("queueModule").stringValue()[0]) {
+        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
+        queueModule = check_and_cast<IPassiveQueue *>(module);
+        queueModule->requestPacket();
     }
 }
 
@@ -148,6 +160,7 @@ void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
 
 void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
 {
+    queueModule->requestPacket();
     upperMac->upperFrameReceived(check_and_cast<Ieee80211DataOrMgmtFrame *>(msg));
 }
 

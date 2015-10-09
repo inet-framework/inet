@@ -57,6 +57,7 @@ class Ieee80211Frame;
 class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterface
 {
   protected:
+    IPassiveQueue *queueModule = nullptr;
     MACAddress address; // only because createInterfaceEntry() needs it
 
     IUpperMac *upperMac = nullptr;
@@ -87,6 +88,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
   protected:
     virtual int numInitStages() const override {return NUM_INIT_STAGES;}
     virtual void initialize(int) override;
+    virtual void initializeQueueModule();
 
     void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
     void configureRadioMode(IRadio::RadioMode radioMode);
@@ -114,6 +116,7 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
     Ieee80211NewMac();
     virtual ~Ieee80211NewMac();
 
+    virtual const MACAddress& getAddress() const {return address;}
     virtual void sendUp(cMessage *message) override;
     virtual void sendFrame(Ieee80211Frame *frameToSend) override;
     virtual void sendDownPendingRadioConfigMsg() override;
