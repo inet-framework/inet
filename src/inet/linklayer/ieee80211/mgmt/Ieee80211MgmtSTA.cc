@@ -187,7 +187,7 @@ void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
     }
 
     Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
@@ -299,7 +299,7 @@ void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, cons
     frame->setReceiverAddress(address);
     //XXX set sequenceNumber?
 
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)

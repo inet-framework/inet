@@ -1,12 +1,19 @@
 ====== inet-3.x ======
 
+2015-10-10  Andras Varga
+
+	Removed queue from management modules: mgmt modules no longer serve as 
+	external queue for the 802.11 MAC. This may change simulation results in
+	certain cases, e.g. bacause mgmt didn't support the prioritizeMulticast
+	MAC option.
+
 2015-06-22  ------ inet-3.0.0 released ------
 
 2015-05-13  ------ inet-2.99.1 released ------
 
 2015-03-24  Zoltan Bojthe
 
-    Fixed 802.11 mgmt packet length.
+	Fixed 802.11 mgmt packet length.
 
 2015-02-05  Zoltan Bojthe
 

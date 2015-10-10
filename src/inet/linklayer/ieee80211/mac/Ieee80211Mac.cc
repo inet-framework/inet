@@ -247,9 +247,6 @@ void Ieee80211Mac::initialize(int stage)
         endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
 
-        // obtain pointer to external queue
-        initializeQueueModule();    //FIXME STAGE: this should be in L2 initialization!!!!
-
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
@@ -466,20 +463,6 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     return e;
 }
 
-void Ieee80211Mac::initializeQueueModule()
-{
-    // use of external queue module is optional -- find it if there's one specified
-    if (par("queueModule").stringValue()[0]) {
-        cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
-        queueModule = check_and_cast<IPassiveQueue *>(module);
-
-        EV_DEBUG << "Requesting first two frames from queue module\n";
-        queueModule->requestPacket();
-        // needed for backoff: mandatory if next message is already present
-        queueModule->requestPacket();
-    }
-}
-
 /****************************************************************
  * Message handling functions.
  */
@@ -538,12 +521,6 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 
 void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 {
-    if (queueModule && numCategories() > 1 && (int)transmissionQueueSize() < maxQueueSize) {
-        // the module are continuously asking for packets, except if the queue is full
-        EV_DEBUG << "requesting another frame from queue module\n";
-        queueModule->requestPacket();
-    }
-
     // check if it's a command from the mgmt layer
     if (msg->getBitLength() == 0 && msg->getKind() != 0) {
         handleUpperCommand(msg);
@@ -1968,19 +1945,6 @@ void Ieee80211Mac::popTransmissionQueue()
     Ieee80211Frame *temp = dynamic_cast<Ieee80211Frame *>(transmissionQueue()->front());
     ASSERT(!transmissionQueue()->empty());
     transmissionQueue()->pop_front();
-    if (queueModule) {
-        if (numCategories() == 1) {
-            // the module are continuously asking for packets
-            EV_DEBUG << "requesting another frame from queue module\n";
-            queueModule->requestPacket();
-        }
-        else if (numCategories() > 1 && (int)transmissionQueueSize() == maxQueueSize - 1) {
-            // Now exist a empty frame space
-            // the module are continuously asking for packets
-            EV_DEBUG << "requesting another frame from queue module\n";
-            queueModule->requestPacket();
-        }
-    }
     delete temp;
 }
 
@@ -2079,15 +2043,6 @@ unsigned int Ieee80211Mac::transmissionQueueSize()
 
 void Ieee80211Mac::flushQueue()
 {
-    if (queueModule) {
-        while (!queueModule->isEmpty()) {
-            cMessage *msg = queueModule->pop();
-            //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
-            delete msg;
-        }
-        queueModule->clear();    // clear request count
-    }
-
     for (int i = 0; i < numCategories(); i++) {
         while (!transmissionQueue(i)->empty()) {
             cMessage *msg = transmissionQueue(i)->front();
@@ -2100,10 +2055,6 @@ void Ieee80211Mac::flushQueue()
 
 void Ieee80211Mac::clearQueue()
 {
-    if (queueModule) {
-        queueModule->clear();    // clear request count
-    }
-
     for (int i = 0; i < numCategories(); i++) {
         while (!transmissionQueue(i)->empty()) {
             cMessage *msg = transmissionQueue(i)->front();
@@ -2634,10 +2585,9 @@ double Ieee80211Mac::controlFrameTxTime(int bits)
 bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
 {
     if (!doneCallback)
-        return true; // do nothing when called from initialize() //FIXME It's a hack, should remove the initializeQueueModule() and setRadioMode() calls from initialize()
+        return true; // do nothing when called from initialize()
 
     bool ret = MACProtocolBase::handleNodeStart(doneCallback);
-    initializeQueueModule();
     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     return ret;
 }

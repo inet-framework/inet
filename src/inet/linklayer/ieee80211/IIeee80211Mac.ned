@@ -26,6 +26,4 @@ import inet.linklayer.contract.IMACProtocol;
 //
 moduleinterface IIeee80211Mac extends IMACProtocol
 {
-    parameters:
-        string queueModule; // name of optional external queue module
 }

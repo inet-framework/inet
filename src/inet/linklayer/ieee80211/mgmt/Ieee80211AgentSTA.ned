@@ -39,7 +39,6 @@ simple Ieee80211AgentSTA
         double startingTime @unit("s") = default(-1s); // agent starting time.
         string default_ssid = default("SSID"); // default ssid
         @display("i=block/control");
-        @signal[rcvdPk](type=cPacket);
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode
         @signal[acceptConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
         @signal[dropConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode

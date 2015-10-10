@@ -43,7 +43,7 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
 void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)

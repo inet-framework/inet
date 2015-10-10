@@ -27,26 +27,15 @@ namespace inet {
 
 namespace ieee80211 {
 
-simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = registerSignal("dataQueueLen");
-
 void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        PassiveQueueBase::initialize();
-
-        dataQueue.setName("wlanDataQueue");
-        mgmtQueue.setName("wlanMgmtQueue");
-        emit(dataQueueLenSignal, dataQueue.getLength());
-
         numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
         WATCH(numDataFramesReceived);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
-
-        // configuration
-        frameCapacity = par("frameCapacity");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -88,70 +77,14 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         // packet from upper layers, to be sent out
         cPacket *pk = PK(msg);
         EV << "Packet arrived from upper layers: " << pk << "\n";
-        if (pk->getByteLength() > 2312)
-            throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-                    pk->getClassName(), pk->getName(), (int)(pk->getByteLength()));
-
         handleUpperMessage(pk);
     }
 }
 
-void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
+void Ieee80211MgmtBase::sendDown(cPacket *frame)
 {
     ASSERT(isOperational);
-    PassiveQueueBase::handleMessage(frame);
-}
-
-cMessage *Ieee80211MgmtBase::enqueue(cMessage *msg)
-{
-    ASSERT(dynamic_cast<Ieee80211DataOrMgmtFrame *>(msg) != nullptr);
-    bool isDataFrame = dynamic_cast<Ieee80211DataFrame *>(msg) != nullptr;
-
-    if (!isDataFrame) {
-        // management frames are inserted into mgmtQueue
-        mgmtQueue.insert(msg);
-        return nullptr;
-    }
-    else if (frameCapacity && dataQueue.getLength() >= frameCapacity) {
-        EV << "Queue full, dropping packet.\n";
-        return msg;
-    }
-    else {
-        dataQueue.insert(msg);
-        emit(dataQueueLenSignal, dataQueue.getLength());
-        return nullptr;
-    }
-}
-
-bool Ieee80211MgmtBase::isEmpty()
-{
-    if (!mgmtQueue.isEmpty())
-        return false;
-
-    return dataQueue.isEmpty();
-}
-
-cMessage *Ieee80211MgmtBase::dequeue()
-{
-    // management frames have priority
-    if (!mgmtQueue.isEmpty())
-        return (cMessage *)mgmtQueue.pop();
-
-    // return a data frame if we have one
-    if (dataQueue.isEmpty())
-        return nullptr;
-
-    cMessage *pk = (cMessage *)dataQueue.pop();
-
-    // statistics
-    emit(dataQueueLenSignal, dataQueue.getLength());
-    return pk;
-}
-
-void Ieee80211MgmtBase::sendOut(cMessage *msg)
-{
-    ASSERT(isOperational);
-    send(msg, "macOut");
+    send(frame, "macOut");
 }
 
 void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
@@ -258,10 +191,6 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
-    clear();
-    dataQueue.clear();
-    emit(dataQueueLenSignal, dataQueue.getLength());
-    mgmtQueue.clear();
     isOperational = false;
 }
 

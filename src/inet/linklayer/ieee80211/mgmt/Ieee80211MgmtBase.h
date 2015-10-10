@@ -21,7 +21,6 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -32,30 +31,20 @@ namespace ieee80211 {
 
 /**
  * Abstract base class for 802.11 infrastructure mode management components.
- * Performs queueing for MAC, and dispatching incoming frames by frame type.
- * Also keeps some simple statistics (frame counts).
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
+class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
 {
   protected:
     // configuration
-    int frameCapacity;
     MACAddress myAddress;
     bool isOperational;    // for lifecycle
-
-    // state
-    cQueue dataQueue;    // queue for data frames
-    cQueue mgmtQueue;    // queue for management frames (higher priority than data frames)
 
     // statistics
     long numDataFramesReceived;
     long numMgmtFramesReceived;
     long numMgmtFramesDropped;
-
-    // queue statistics
-    static simsignal_t dataQueueLenSignal;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -73,20 +62,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cObject *ctrl) = 0;
 
-    /** Utility method for implementing handleUpperMessage(): gives the message to PassiveQueueBase */
-    virtual void sendOrEnqueue(cPacket *frame);
-
-    /** Redefined from PassiveQueueBase. */
-    virtual cMessage *enqueue(cMessage *msg) override;
-
-    /** Redefined from PassiveQueueBase. */
-    virtual cMessage *dequeue() override;
-
-    /** Redefined from IPassiveQueue. */
-    virtual bool isEmpty() override;
-
-    /** Redefined from PassiveQueueBase: send message to MAC */
-    virtual void sendOut(cMessage *msg) override;
+    /** Utility method for implementing handleUpperMessage(): send message to MAC */
+    virtual void sendDown(cPacket *frame);
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);

@@ -47,7 +47,7 @@ void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
         return;
     }
     Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cObject *ctrl)

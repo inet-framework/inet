@@ -30,19 +30,10 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // number of channels to scan
-        int frameCapacity = default(100); // maximum queue length
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
-        @signal[enqueuePk](type=cPacket);
-        @signal[dequeuePk](type=cPacket);
-        @signal[dropPkByQueue](type=cPacket);
-        @signal[queueingTime](type=simtime_t);
-        @signal[dataQueueLen](type=long);  // number of stored packets
-        @signal[rcvdPk](type=cPacket);
         @signal[NF_L2_ASSOCIATED](type=inet::InterfaceEntry);
         @signal[NF_L2_BEACON_LOST](type=inet::InterfaceEntry);
-        @statistic[dataQueueLen](title="data queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
-        @statistic[dropPkByQueue](title="packets dropped by queue"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input upperLayerIn;
         output upperLayerOut;

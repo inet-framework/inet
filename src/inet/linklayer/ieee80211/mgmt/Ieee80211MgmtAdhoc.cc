@@ -37,7 +37,7 @@ void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
 void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)

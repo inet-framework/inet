@@ -27,7 +27,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h" //TODO not needed here
@@ -57,7 +56,6 @@ class Ieee80211Frame;
 class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterface
 {
   protected:
-    IPassiveQueue *queueModule = nullptr;
     MACAddress address; // only because createInterfaceEntry() needs it
 
     IUpperMac *upperMac = nullptr;
@@ -88,7 +86,6 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
   protected:
     virtual int numInitStages() const override {return NUM_INIT_STAGES;}
     virtual void initialize(int) override;
-    virtual void initializeQueueModule();
 
     void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
     void configureRadioMode(IRadio::RadioMode radioMode);

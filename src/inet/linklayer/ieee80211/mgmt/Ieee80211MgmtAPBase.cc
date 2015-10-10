@@ -60,7 +60,7 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
     frame->setReceiverAddress(frame->getAddress3());
     frame->setAddress3(frame->getTransmitterAddress());
 
-    sendOrEnqueue(frame);
+    sendDown(frame);
 }
 
 void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
