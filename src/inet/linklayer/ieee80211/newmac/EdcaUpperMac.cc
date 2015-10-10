@@ -67,7 +67,7 @@ void EdcaUpperMac::initialize()
     contentionTx = nullptr;
     collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
-    maxQueueSize = mac->par("maxQueueSize");  //FIXME
+    maxQueueSize = par("maxQueueSize");
 
     readParameters();
     utils = new MacUtils(params);

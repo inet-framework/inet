@@ -86,8 +86,6 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
-
         string upperMacModule = ".upperMac";
         string rxModule = ".rx";
         string immediateTxModule = ".iTx";
@@ -138,6 +136,7 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
         bool EDCA = default(true);
+        int maxQueueSize = default(14);
 
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
         numContentionTx = EDCA ? 4 : 1;
@@ -146,4 +145,5 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         upperMac.bitrate = bitrate;
         upperMac.rtsThreshold = rtsThresholdBytes;
         upperMac.shortRetryLimit = retryLimit;
+        upperMac.maxQueueSize = maxQueueSize;
 }
