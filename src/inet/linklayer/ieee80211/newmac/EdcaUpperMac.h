@@ -60,7 +60,7 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         int fragmentationThreshold = 2346;
 
         struct AccessCategoryData {
-            Ieee80211DataOrMgmtFrameList transmissionQueue;
+            cQueue transmissionQueue;
             IFrameExchange *frameExchange = nullptr;
         };
         AccessCategoryData *acData = nullptr;  // dynamically allocated array

@@ -47,12 +47,6 @@ DcfUpperMac::~DcfUpperMac()
     delete duplicateDetection;
     delete fragmenter;
     delete reassembly;
-
-    while (!transmissionQueue.empty()) {
-        Ieee80211Frame *temp = transmissionQueue.front();
-        transmissionQueue.pop_front();
-        delete temp;
-    }
 }
 
 void DcfUpperMac::initialize()
@@ -64,6 +58,8 @@ void DcfUpperMac::initialize()
     collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
 
     maxQueueSize = par("maxQueueSize");
+    transmissionQueue.setName("txQueue");
+    transmissionQueue.setup(par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData);
 
     readParameters();
     utils = new MacUtils(params);
@@ -75,7 +71,6 @@ void DcfUpperMac::initialize()
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
-    WATCH_LIST(transmissionQueue);
 }
 
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}
@@ -123,7 +118,7 @@ void DcfUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    if (maxQueueSize > 0 && (int)transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize > 0 && transmissionQueue.length() >= maxQueueSize) {
         EV << "Frame " << frame << " received from higher layer but MAC queue is full, dropping\n";
         delete frame;
         return;
@@ -145,7 +140,7 @@ void DcfUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 void DcfUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame)
 {
     if (frameExchange)
-        transmissionQueue.push_back(frame);
+        transmissionQueue.insert(frame);
     else
         startSendDataFrameExchange(frame, 0, AC_LEGACY);
 }
@@ -241,8 +236,7 @@ void DcfUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     frameExchange = nullptr;
 
     if (!transmissionQueue.empty()) {
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.front());
-        transmissionQueue.pop_front();
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(transmissionQueue.pop());
         startSendDataFrameExchange(frame, 0, AC_LEGACY);
     }
 }

@@ -65,6 +65,9 @@ class INET_API MacUtils
         virtual bool isFragment(Ieee80211DataOrMgmtFrame *frame) const;
         virtual bool isCts(Ieee80211Frame *frame) const;
         virtual bool isAck(Ieee80211Frame *frame) const;
+
+        static int cmpMgmtOverData(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);
+        static int cmpMgmtOverMulticastOverUnicast(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);
 };
 
 } // namespace ieee80211

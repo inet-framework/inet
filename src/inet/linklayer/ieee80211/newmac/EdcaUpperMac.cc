@@ -37,6 +37,8 @@ namespace ieee80211 {
 
 Define_Module(EdcaUpperMac);
 
+inline std::string suffix(const char *s, int i) {std::stringstream ss; ss << s << i; return ss.str();}
+
 EdcaUpperMac::EdcaUpperMac()
 {
 }
@@ -50,11 +52,6 @@ EdcaUpperMac::~EdcaUpperMac()
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     for (int i = 0; i < numACs; i++) {
         delete acData[i].frameExchange;
-        while (!acData[i].transmissionQueue.empty()) {
-            Ieee80211Frame *temp = acData[i].transmissionQueue.front();
-            acData[i].transmissionQueue.pop_front();
-            delete temp;
-        }
     }
     delete[] acData;
 }
@@ -73,7 +70,13 @@ void EdcaUpperMac::initialize()
     utils = new MacUtils(params);
     rx->setAddress(params->getAddress());
 
-    acData = new AccessCategoryData[params->isEdcaEnabled() ? 4 : 1];
+    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    acData = new AccessCategoryData[numACs];
+    CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
+    for (int i = 0; i < numACs; i++) {
+        acData[i].transmissionQueue.setName(suffix("txQueue-", i).c_str());
+        acData[i].transmissionQueue.setup(compareFunc);
+    }
 
     duplicateDetection = new QoSDuplicateDetector();
     fragmenter = new FragmentationNotSupported();
@@ -81,12 +84,10 @@ void EdcaUpperMac::initialize()
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
-    //WATCH_LIST(transmissionQueue);
 }
 
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}
 inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
-inline std::string suffix(const char *s, int i) {std::stringstream ss; ss << s << i; return ss.str();}
 
 void EdcaUpperMac::readParameters()
 {
@@ -136,7 +137,7 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    if (maxQueueSize > 0 && (int)acData[ac].transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize > 0 && acData[ac].transmissionQueue.length() >= maxQueueSize) {
         EV << "Frame " << frame << " received from higher layer, but its MAC subqueue is full, dropping\n";
         delete frame;
         return;
@@ -158,7 +159,7 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 void EdcaUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac)
 {
     if (acData[ac].frameExchange)
-        acData[ac].transmissionQueue.push_back(frame);
+        acData[ac].transmissionQueue.insert(frame);
     else {
         int txIndex = (int)ac;  //one-to-one mapping
         startSendDataFrameExchange(frame, txIndex, ac);
@@ -194,7 +195,7 @@ AccessCategory EdcaUpperMac::mapTidToAc(int tid)
 void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
-    delete frame->removeControlInfo();          //TODO
+    delete frame->removeControlInfo();
     take(frame);
 
     if (utils->isForUs(frame)) {
@@ -233,7 +234,7 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
         }
     }
     else {
-        EV_INFO << "This frame is not for us" << std::endl;    //TODO except when in an AP
+        EV_INFO << "This frame is not for us" << std::endl;
         delete frame;
     }
 }
@@ -287,7 +288,7 @@ void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
 
     // find ac for this frame exchange
     int numACs = params->isEdcaEnabled() ? 4 : 1;
-    AccessCategory ac = (AccessCategory)-1;  //TODO
+    AccessCategory ac = (AccessCategory) -1;
     for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange == what)
             ac = (AccessCategory)i;
@@ -297,9 +298,9 @@ void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     acData[ac].frameExchange = nullptr;
 
     if (!acData[ac].transmissionQueue.empty()) {
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(acData[ac].transmissionQueue.front());
-        acData[ac].transmissionQueue.pop_front();
-        startSendDataFrameExchange(frame, (int)ac, ac); //FIXME!!!!
+        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(acData[ac].transmissionQueue.pop());
+        int txIndex = (int)ac;  //one-to-one mapping
+        startSendDataFrameExchange(frame, txIndex, ac);
     }
 }
 

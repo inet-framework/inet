@@ -136,5 +136,19 @@ bool MacUtils::isAck(Ieee80211Frame *frame) const
     return dynamic_cast<Ieee80211ACKFrame *>(frame);
 }
 
+int MacUtils::cmpMgmtOverData(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b)
+{
+    int aPri = dynamic_cast<Ieee80211ManagementFrame*>(a) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
+    int bPri = dynamic_cast<Ieee80211ManagementFrame*>(b) ? 1 : 0;
+    return bPri - aPri;
+}
+
+int MacUtils::cmpMgmtOverMulticastOverUnicast(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b)
+{
+    int aPri = dynamic_cast<Ieee80211ManagementFrame*>(a) ? 2 : a->getReceiverAddress().isMulticast() ? 1 : 0;
+    int bPri = dynamic_cast<Ieee80211ManagementFrame*>(a) ? 2 : b->getReceiverAddress().isMulticast() ? 1 : 0;
+    return bPri - aPri;
+}
+
 } // namespace ieee80211
 } // namespace inet
