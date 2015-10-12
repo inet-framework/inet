@@ -44,7 +44,7 @@ class IDuplicateDetector;
 /**
  * UpperMac for EDCA (802.11e QoS mode)
  */
-class EdcaUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
+class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;

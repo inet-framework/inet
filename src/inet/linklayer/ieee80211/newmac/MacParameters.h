@@ -28,7 +28,7 @@ namespace ieee80211 {
 /**
  * The default implementation of IMacParameters
  */
-class MacParameters : public IMacParameters
+class INET_API MacParameters : public IMacParameters
 {
     private:
         MACAddress address;

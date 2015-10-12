@@ -33,7 +33,7 @@ namespace ieee80211 {
  * Frame exchange classes and other parts of UpperMac access channel access
  * parameters and other parts of the MAC configuration via this interface.
  */
-class IMacParameters
+class INET_API IMacParameters
 {
     public:
         IMacParameters() {}

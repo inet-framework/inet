@@ -45,7 +45,7 @@ class IDuplicateDetector;
 /**
  * UpperMac for DCF mode.
  */
-class DcfUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
+class INET_API DcfUpperMac : public cSimpleModule, public IUpperMac, protected IFrameExchange::IFinishedCallback
 {
     public:
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;

@@ -34,7 +34,7 @@ class ITxCallback;
  * processes can be used to transmit frames where no contention is needed,
  * e.g. ACK, CTS, or the second and further frames of a TXOP.
  */
-class IImmediateTx
+class INET_API IImmediateTx
 {
     public:
         virtual ~IImmediateTx() {}

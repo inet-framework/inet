@@ -32,7 +32,7 @@ namespace ieee80211 {
  *
  * @see IContentionTx and IImmediateTx
  */
-class ITxCallback {
+class INET_API ITxCallback {
     public:
         virtual void transmissionComplete(int txIndex) = 0; // -1: immediate tx
         virtual void internalCollision(int txIndex) = 0;

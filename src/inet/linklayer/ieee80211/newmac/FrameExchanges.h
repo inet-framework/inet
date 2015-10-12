@@ -28,7 +28,7 @@ namespace ieee80211 {
 class Ieee80211DataOrMgmtFrame;
 
 // just to demonstrate the use FsmBasedFrameExchange; otherwise we prefer the step-based because it's simpler
-class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
+class INET_API SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *frame;
@@ -53,7 +53,7 @@ class SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
         ~SendDataWithAckFsmBasedFrameExchange();
 };
 
-class SendDataWithAckFrameExchange : public StepBasedFrameExchange
+class INET_API SendDataWithAckFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
@@ -68,7 +68,7 @@ class SendDataWithAckFrameExchange : public StepBasedFrameExchange
         ~SendDataWithAckFrameExchange();
 };
 
-class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
+class INET_API SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
@@ -83,7 +83,7 @@ class SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
         ~SendDataWithRtsCtsFrameExchange();
 };
 
-class SendMulticastDataFrameExchange : public FrameExchange
+class INET_API SendMulticastDataFrameExchange : public FrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame;

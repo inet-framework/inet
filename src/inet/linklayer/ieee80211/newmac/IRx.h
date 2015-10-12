@@ -43,7 +43,7 @@ using namespace inet::physicallayer;  //TODO Khmm
  * correctly received frames. so they can switch between using DIFS/AIFS and EIFS
  * according to the channel access procedure.
  */
-class IRx
+class INET_API IRx
 {
     public:
         virtual void setAddress(const MACAddress& address) = 0;

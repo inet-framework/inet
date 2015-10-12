@@ -30,10 +30,10 @@ namespace ieee80211 {
  * used with EDCA, and it detects and reports internal collisions between
  * ContentionTx instances.
  */
-class ICollisionController
+class INET_API ICollisionController
 {
     public:
-        class ICallback {
+        class INET_API ICallback {
             public:
                 virtual ~ICallback() {}
                 virtual void transmissionGranted(int txIndex) = 0;

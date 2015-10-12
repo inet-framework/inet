@@ -27,7 +27,7 @@ namespace ieee80211 {
 
 class Ieee80211DataOrMgmtFrame;
 
-class IDuplicateDetector
+class INET_API IDuplicateDetector
 {
     public:
         virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) = 0;

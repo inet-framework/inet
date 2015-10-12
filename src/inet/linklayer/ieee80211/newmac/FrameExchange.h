@@ -46,7 +46,7 @@ class INET_API FrameExchangeContext
 /**
  * The default base class for implementing frame exchanges (see IFrameExchange).
  */
-class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
+class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
 {
     protected:
         IMacParameters *params;
@@ -66,7 +66,7 @@ class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallbac
         virtual ~FrameExchange();
 };
 
-class FsmBasedFrameExchange : public FrameExchange
+class INET_API FsmBasedFrameExchange : public FrameExchange
 {
     protected:
         cFSM fsm;
@@ -84,7 +84,7 @@ class FsmBasedFrameExchange : public FrameExchange
         virtual void handleSelfMessage(cMessage* timer) override;
 };
 
-class StepBasedFrameExchange : public FrameExchange
+class INET_API StepBasedFrameExchange : public FrameExchange
 {
     private:
         enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };

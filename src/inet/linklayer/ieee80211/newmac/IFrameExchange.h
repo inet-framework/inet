@@ -31,10 +31,10 @@ class Ieee80211Frame;
  * Abstract interface for frame exhange classes. Frame exchanges are a basic
  * building block of UpperMac (see IUpperMac), and coordinate frame sequences.
  */
-class IFrameExchange
+class INET_API IFrameExchange
 {
     public:
-        class IFinishedCallback {
+        class INET_API IFinishedCallback {
             public:
                 virtual void frameExchangeFinished(IFrameExchange *what, bool successful) = 0;
                 virtual ~IFinishedCallback() {}

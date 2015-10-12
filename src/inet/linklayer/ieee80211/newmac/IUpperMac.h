@@ -37,7 +37,7 @@ class Ieee80211DataOrMgmtFrame;
  * ACK generation and retransmissions, RTS/CTS, duplicate detection,
  * fragmentation, aggregation, block acknowledgement, rate selection, and more.
  */
-class IUpperMac
+class INET_API IUpperMac
 {
     public:
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;

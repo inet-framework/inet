@@ -27,7 +27,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class NoDuplicateDetector : public IDuplicateDetector
+class INET_API NoDuplicateDetector : public IDuplicateDetector
 {
     public:
         virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override {}
@@ -35,7 +35,7 @@ class NoDuplicateDetector : public IDuplicateDetector
 };
 
 //TODO we should track received fragment numbers, too! int16 -> struct{int16 seq; int8 frag;};
-class LegacyDuplicateDetector : public IDuplicateDetector
+class INET_API LegacyDuplicateDetector : public IDuplicateDetector
 {
     protected:
         int16_t lastSeqNum = 0;
@@ -45,7 +45,7 @@ class LegacyDuplicateDetector : public IDuplicateDetector
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
 };
 
-class NonQoSDuplicateDetector : public LegacyDuplicateDetector
+class INET_API NonQoSDuplicateDetector : public LegacyDuplicateDetector
 {
     protected:
         std::map<MACAddress, int16_t> lastSentSeqNums; // last sent sequence numbers per RA
@@ -53,7 +53,7 @@ class NonQoSDuplicateDetector : public LegacyDuplicateDetector
         virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
 };
 
-class QoSDuplicateDetector : public IDuplicateDetector
+class INET_API QoSDuplicateDetector : public IDuplicateDetector
 {
     private:
         enum CacheType

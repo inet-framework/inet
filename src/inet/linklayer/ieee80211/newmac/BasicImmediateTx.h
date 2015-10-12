@@ -28,7 +28,7 @@ namespace ieee80211 {
 class IUpperMac;
 class IMacRadioInterface;
 
-class BasicImmediateTx : public cSimpleModule, public IImmediateTx
+class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
 {
     protected:
         IMacRadioInterface *mac;

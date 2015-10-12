@@ -30,7 +30,7 @@ namespace ieee80211 {
  * detect and report internal collisions between ContentionTx instances
  * (i.e. EDCA queues). This implementation uses a single timer.
  */
-class BasicCollisionController : public cSimpleModule, public ICollisionController
+class INET_API BasicCollisionController : public cSimpleModule, public ICollisionController
 {
     private:
         static simtime_t MAX_TIME;   // used as the "invalid" value

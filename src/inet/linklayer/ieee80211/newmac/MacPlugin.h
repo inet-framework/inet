@@ -31,7 +31,7 @@ namespace ieee80211 {
  * the facilities of the "host" or "container" module that the plugin
  * is part of.
  */
-class MacPlugin : public cOwnedObject
+class INET_API MacPlugin : public cOwnedObject
 {
     protected:
         cSimpleModule *ownerModule = nullptr;

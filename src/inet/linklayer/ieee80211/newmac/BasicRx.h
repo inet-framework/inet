@@ -31,7 +31,7 @@ class IUpperMac;
 class IImmediateTx;
 class IContentionTx;
 
-class BasicRx : public cSimpleModule, public IRx
+class INET_API BasicRx : public cSimpleModule, public IRx
 {
     protected:
         IUpperMac *upperMac = nullptr;

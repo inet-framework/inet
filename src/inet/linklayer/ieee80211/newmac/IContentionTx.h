@@ -37,9 +37,9 @@ class ITxCallback;
  *
  * Note that waiting for an ACK (or CTS) and initiating the retransmission if
  * it does not arrive is not handled by this process. Instead, that is typically
- * performed by a frame exchange class inside UpperMac (see IFrameExchange, IUpperMac).
+ * performed by a frame exchange class INET_API inside UpperMac (see IFrameExchange, IUpperMac).
  */
-class IContentionTx
+class INET_API IContentionTx
 {
     public:
         virtual ~IContentionTx() {}

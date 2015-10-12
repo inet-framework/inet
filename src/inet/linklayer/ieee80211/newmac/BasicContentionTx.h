@@ -32,7 +32,7 @@ using namespace inet::physicallayer;
 class IUpperMac;
 class IMacRadioInterface;
 
-class BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
+class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
 {
     public:
         enum State { IDLE, DEFER, IFS_AND_BACKOFF, TRANSMIT };
