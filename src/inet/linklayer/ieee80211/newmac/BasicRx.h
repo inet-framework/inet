@@ -55,9 +55,10 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         ~BasicRx();
 
         virtual void setAddress(const MACAddress& address) override { this->address = address; }
+        virtual bool isReceptionInProgress() const override;
+        virtual bool isMediumFree() const override { return mediumFree; }
         virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;
         virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
-        virtual bool isMediumFree() const override { return mediumFree; }
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 
 };

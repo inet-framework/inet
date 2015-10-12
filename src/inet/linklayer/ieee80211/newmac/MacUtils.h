@@ -48,8 +48,10 @@ class INET_API MacUtils
 
         virtual simtime_t getAckDuration() const;
         virtual simtime_t getCtsDuration() const;
-        virtual simtime_t getAckTimeout() const;
-        virtual simtime_t getCtsTimeout() const;
+        virtual simtime_t getAckEarlyTimeout() const;  // reception of ACK should begin after this time; TODO use this
+        virtual simtime_t getAckFullTimeout() const;  // ACK should be received after this time
+        virtual simtime_t getCtsEarlyTimeout() const;
+        virtual simtime_t getCtsFullTimeout() const;
 
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame, const IIeee80211Mode *dataFrameMode) const;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *rtsFrame) const;

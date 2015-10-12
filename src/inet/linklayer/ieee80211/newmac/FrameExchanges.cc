@@ -76,14 +76,14 @@ bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessa
         FSMA_State(WAITACK) {
             FSMA_Enter();
             FSMA_Event_Transition(Ack - arrived,
-                    event == EVENT_FRAMEARRIVED && isAck(receivedFrame),    //TODO is from right STA
+                    event == EVENT_FRAMEARRIVED && isAck(receivedFrame),
                     SUCCESS,
                     { frameProcessed = true;
                       delete receivedFrame;
                     }
                     );
             FSMA_Event_Transition(Frame - arrived,
-                    event == EVENT_FRAMEARRIVED && !isAck(receivedFrame),    //TODO is from right STA
+                    event == EVENT_FRAMEARRIVED && !isAck(receivedFrame),
                     FAILURE,
                     ;
                     );
@@ -127,7 +127,7 @@ void SendDataWithAckFsmBasedFrameExchange::scheduleAckTimeout()
 {
     if (ackTimer == nullptr)
         ackTimer = new cMessage("timeout");
-    simtime_t t = simTime() + utils->getAckTimeout();
+    simtime_t t = simTime() + utils->getAckFullTimeout();
     scheduleAt(t, ackTimer);
 }
 
@@ -153,7 +153,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
         case 0: transmitContentionFrame(dupPacketAndControlInfo(dataFrame), retryCount); break;
-        case 1: expectReply(utils->getAckTimeout()); break;
+        case 1: expectReply(utils->getAckFullTimeout()); break;
         case 2: succeed(); break;
         default: ASSERT(false);
     }
@@ -200,9 +200,9 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
         case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame, params->getDefaultDataFrameMode()), retryCount); break;
-        case 1: expectReply(utils->getCtsTimeout()); break;
+        case 1: expectReply(utils->getCtsFullTimeout()); break;
         case 2: transmitImmediateFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
-        case 3: expectReply(utils->getAckTimeout()); break;
+        case 3: expectReply(utils->getAckFullTimeout()); break;
         case 4: succeed(); break;
         default: ASSERT(false);
     }

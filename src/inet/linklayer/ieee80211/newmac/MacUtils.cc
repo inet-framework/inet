@@ -40,13 +40,23 @@ simtime_t MacUtils::getCtsDuration() const
     return params->getBasicFrameMode()->getDuration(LENGTH_CTS);
 }
 
-simtime_t MacUtils::getAckTimeout() const
+simtime_t MacUtils::getAckEarlyTimeout() const
 {
-
-    return params->getBasicFrameMode()->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getAckDuration(); //TODO this should *exclude* ACK duration according to the spec! ie. if there's no RXStart indication within the interval, retx should start immediately
+    // Note: This excludes ACK duration. If there's no RXStart indication within this interval, retransmission should begin immediately
+    return params->getBasicFrameMode()->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime();
 }
 
-simtime_t MacUtils::getCtsTimeout() const
+simtime_t MacUtils::getAckFullTimeout() const
+{
+    return params->getBasicFrameMode()->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getAckDuration();
+}
+
+simtime_t MacUtils::getCtsEarlyTimeout() const
+{
+    return params->getBasicFrameMode()->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime();
+}
+
+simtime_t MacUtils::getCtsFullTimeout() const
 {
     return params->getBasicFrameMode()->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getCtsDuration();
 }

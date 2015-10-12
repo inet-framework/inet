@@ -46,10 +46,16 @@ using namespace inet::physicallayer;  //TODO Khmm
 class INET_API IRx
 {
     public:
+        // from UpperMac
         virtual void setAddress(const MACAddress& address) = 0;
+        virtual bool isReceptionInProgress() const = 0; // needed on ACK timeout
+
+        // from ContentionTx
+        virtual bool isMediumFree() const = 0;
+
+        // events
         virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;
         virtual void transmissionStateChanged(IRadio::TransmissionState state) = 0;
-        virtual bool isMediumFree() const = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
 };
 

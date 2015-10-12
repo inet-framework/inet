@@ -81,6 +81,11 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+bool BasicRx::isReceptionInProgress() const
+{
+    return receptionState == IRadio::RECEPTION_STATE_RECEIVING;
+}
+
 bool BasicRx::isFcsOk(Ieee80211Frame *frame) const
 {
     return !frame->hasBitError();
