@@ -59,6 +59,9 @@ void BasicContentionTx::initialize()
     if (txIndex > 0 && !collisionController)
         throw cRuntimeError("No collision controller module -- one is needed when multiple ContentionTx instances are present");
 
+    if (!collisionController)
+        startTxEvent = new cMessage("startTx");
+
     fsm.setName("fsm");
     fsm.setState(IDLE, "IDLE");
 
@@ -81,6 +84,7 @@ BasicContentionTx::~BasicContentionTx()
 {
     if (frame && fsm.getState() != TRANSMIT)
         delete frame;
+    cancelAndDelete(startTxEvent);
 }
 
 void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
@@ -210,7 +214,8 @@ void BasicContentionTx::radioTransmissionFinished()
 
 void BasicContentionTx::handleMessage(cMessage *msg)
 {
-    ASSERT(false);
+    ASSERT(msg == startTxEvent);
+    transmissionGranted(txIndex);
 }
 
 void BasicContentionTx::corruptedFrameReceived()
@@ -233,12 +238,18 @@ void BasicContentionTx::internalCollision(int txIndex)
 
 void BasicContentionTx::scheduleTransmissionRequestFor(simtime_t txStartTime)
 {
-    collisionController->scheduleTransmissionRequest(txIndex, txStartTime, this);
+    if (collisionController)
+        collisionController->scheduleTransmissionRequest(txIndex, txStartTime, this);
+    else
+        scheduleAt(txStartTime, startTxEvent);
 }
 
 void BasicContentionTx::cancelTransmissionRequest()
 {
-    collisionController->cancelTransmissionRequest(txIndex);
+    if (collisionController)
+        collisionController->cancelTransmissionRequest(txIndex);
+    else
+        cancelEvent(startTxEvent);
 }
 
 void BasicContentionTx::scheduleTransmissionRequest()

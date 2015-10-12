@@ -122,7 +122,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         rx: <default("BasicRx")> like IRx {
             @display("p=420,200");
         }
-        ctrl: <default("BasicCollisionController")> like ICollisionController {
+        ctrl: <default("BasicCollisionController")> like ICollisionController if numContentionTx > 1 {
             @display("p=208,300");
         }
 }

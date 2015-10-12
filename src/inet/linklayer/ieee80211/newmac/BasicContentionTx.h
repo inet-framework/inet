@@ -42,6 +42,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
         ICollisionController *collisionController;  // optional
+        cMessage *startTxEvent = nullptr;  // in the absence of collisionController
         int txIndex;
 
         // current transmission's parameters
