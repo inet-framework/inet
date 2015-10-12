@@ -135,7 +135,7 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         double bitrate @unit("bps");
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
-        bool EDCA = default(true);
+        bool EDCA = default(false);
         int maxQueueSize = default(14);
 
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
