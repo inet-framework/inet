@@ -39,7 +39,6 @@ class INET_API MacParameters : public IMacParameters
         bool edca = false;
         simtime_t slotTime;
         simtime_t sifsTime;
-        simtime_t difsTime;
         simtime_t aifsTime[AC_NUMCATEGORIES];
         simtime_t eifsTime[AC_NUMCATEGORIES];
         simtime_t pifsTime;
@@ -64,7 +63,6 @@ class INET_API MacParameters : public IMacParameters
         void setEdcaEnabled(bool enabled) {edca = enabled;}
         void setSlotTime(simtime_t value) {slotTime = value;}
         void setSifsTime(simtime_t value) {sifsTime = value;}
-        void setDifsTime(simtime_t value) {difsTime = value;}
         void setAifsTime(AccessCategory ac, simtime_t value) {checkAC(ac); aifsTime[ac] = value;}
         void setEifsTime(AccessCategory ac, simtime_t value) {checkAC(ac); eifsTime[ac] = value;} //TODO this is mode-dependent
         void setPifsTime(simtime_t value) {pifsTime = value;}
@@ -83,7 +81,6 @@ class INET_API MacParameters : public IMacParameters
         virtual bool isEdcaEnabled() const override {return edca;}
         virtual simtime_t getSlotTime() const override {return slotTime;}
         virtual simtime_t getSifsTime() const override {return sifsTime;}
-        virtual simtime_t getDifsTime() const override {return difsTime;}
         virtual simtime_t getAifsTime(AccessCategory ac) const override {checkAC(ac); return aifsTime[ac];}
         virtual simtime_t getEifsTime(AccessCategory ac) const override {checkAC(ac); return eifsTime[ac];}
         virtual simtime_t getPifsTime() const override {return pifsTime;}

@@ -94,7 +94,7 @@ void DcfUpperMac::readParameters()
     params->setEdcaEnabled(false);
     params->setSlotTime(fallback(par("slotTime"), dataFrameMode->getSlotTime()));
     params->setSifsTime(fallback(par("sifsTime"), dataFrameMode->getSifsTime()));
-    params->setDifsTime(fallback(par("difsTime"), dataFrameMode->getSifsTime() + dataFrameMode->getAifsNumber(AC_LEGACY)*params->getSlotTime()));
+    params->setAifsTime(AC_LEGACY, fallback(par("difsTime"), dataFrameMode->getSifsTime() + dataFrameMode->getAifsNumber(AC_LEGACY)*params->getSlotTime()));
     params->setEifsTime(AC_LEGACY, params->getSifsTime() + params->getAifsTime(AC_LEGACY) + basicFrameMode->getDuration(LENGTH_ACK));
     params->setCwMin(AC_LEGACY, fallback(par("cwMin"), dataFrameMode->getCwMin(AC_LEGACY)));
     params->setCwMax(AC_LEGACY, fallback(par("cwMax"), dataFrameMode->getCwMax(AC_LEGACY)));

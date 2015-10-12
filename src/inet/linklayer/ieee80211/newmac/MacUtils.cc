@@ -106,10 +106,17 @@ Ieee80211Frame *MacUtils::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mo
 
 bool MacUtils::isForUs(Ieee80211Frame *frame) const
 {
-    return frame->getReceiverAddress() == params->getAddress()
-            || frame->getReceiverAddress().isBroadcast()
-            || frame->getReceiverAddress().isMulticast();       //TODO may need to filter for locally joined mcast groups
+    return frame->getReceiverAddress() == params->getAddress() || (frame->getReceiverAddress().isMulticast() && !isSentByUs(frame));
 }
+
+bool MacUtils::isSentByUs(Ieee80211Frame *frame) const
+{
+    if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
+        return dataOrMgmtFrame->getAddress3() == params->getAddress();
+    else
+        return false;
+}
+
 
 bool MacUtils::isMulticast(Ieee80211Frame *frame) const
 {

@@ -75,9 +75,6 @@ void Ieee80211NewMac::initialize(int stage)
         }
         address.setAddress(addressString);
 
-        // interface
-        registerInterface();
-
         // statistics
         numRetry = 0;
         numSentWithoutRetry = 0;
@@ -98,6 +95,9 @@ void Ieee80211NewMac::initialize(int stage)
         WATCH(numReceivedBroadcast);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        // interface
+        registerInterface();
+
         if (isOperational)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         if (isInterfaceRegistered().isUnspecified())    //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras

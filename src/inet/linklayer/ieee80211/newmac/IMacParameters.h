@@ -49,7 +49,6 @@ class INET_API IMacParameters
         virtual bool isEdcaEnabled() const = 0;
         virtual simtime_t getSlotTime() const = 0;
         virtual simtime_t getSifsTime() const = 0;
-        virtual simtime_t getDifsTime() const = 0;
         virtual simtime_t getAifsTime(AccessCategory ac) const = 0;
         virtual simtime_t getEifsTime(AccessCategory ac) const = 0;
         virtual simtime_t getPifsTime() const = 0;
