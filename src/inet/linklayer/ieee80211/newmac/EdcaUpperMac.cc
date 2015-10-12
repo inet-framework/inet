@@ -18,7 +18,6 @@
 //
 
 #include "EdcaUpperMac.h"
-#include "UpperMacContext.h"
 #include "Ieee80211NewMac.h"
 #include "IRx.h"
 #include "IContentionTx.h"
@@ -233,7 +232,7 @@ void EdcaUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, i
     else
         utils->setFrameMode(frame, params->getDefaultDataFrameMode());
 
-    UpperMacContext context;
+    FrameExchangeContext context;
     context.ownerModule = this;
     context.params = params;
     context.utils = utils;

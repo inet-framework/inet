@@ -18,7 +18,6 @@
 //
 
 #include "FrameExchange.h"
-#include "UpperMacContext.h"
 #include "IMacParameters.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
@@ -27,7 +26,7 @@
 namespace inet {
 namespace ieee80211 {
 
-FrameExchange::FrameExchange(UpperMacContext *context, IFinishedCallback *callback) :
+FrameExchange::FrameExchange(FrameExchangeContext *context, IFinishedCallback *callback) :
     MacPlugin(context->ownerModule),
     params(context->params),
     utils(context->utils),
@@ -93,7 +92,7 @@ void FsmBasedFrameExchange::handleSelfMessage(cMessage *msg)
 
 //--------
 
-StepBasedFrameExchange::StepBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory) :
+StepBasedFrameExchange::StepBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory) :
     FrameExchange(context, callback), defaultTxIndex(txIndex), defaultAccessCategory(accessCategory)
 {
 }

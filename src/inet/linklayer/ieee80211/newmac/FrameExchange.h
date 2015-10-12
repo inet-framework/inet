@@ -28,11 +28,20 @@
 namespace inet {
 namespace ieee80211 {
 
-class UpperMacContext;
 class IMacParameters;
 class MacUtils;
 class IImmediateTx;
 class IContentionTx;
+
+class INET_API FrameExchangeContext
+{
+    public:
+        cSimpleModule *ownerModule;
+        IMacParameters *params;
+        IImmediateTx *immediateTx;
+        IContentionTx **contentionTx;
+        MacUtils *utils;
+};
 
 /**
  * The default base class for implementing frame exchanges (see IFrameExchange).
@@ -53,7 +62,7 @@ class FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallbac
         virtual void reportFailure();
 
     public:
-        FrameExchange(UpperMacContext *context, IFinishedCallback *callback);
+        FrameExchange(FrameExchangeContext *context, IFinishedCallback *callback);
         virtual ~FrameExchange();
 };
 
@@ -67,7 +76,7 @@ class FsmBasedFrameExchange : public FrameExchange
         virtual bool handleWithFSM(EventType eventType, cMessage *frameOrTimer) = 0;
 
     public:
-        FsmBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback) : FrameExchange(context, callback) { fsm.setName("Frame Exchange FSM"); }
+        FsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback) : FrameExchange(context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() override;
         virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;
         virtual void transmissionComplete(int txIndex) override;
@@ -119,7 +128,7 @@ class StepBasedFrameExchange : public FrameExchange
         static const char *operationFunctionName(Operation operation);
 
     public:
-        StepBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory);
+        StepBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, int txIndex, AccessCategory accessCategory);
         virtual ~StepBasedFrameExchange();
         std::string info() const override;
         virtual void start() override;

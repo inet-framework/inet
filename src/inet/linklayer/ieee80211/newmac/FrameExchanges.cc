@@ -31,7 +31,9 @@ using namespace inet::utils;
 namespace inet {
 namespace ieee80211 {
 
-SendDataWithAckFsmBasedFrameExchange::SendDataWithAckFsmBasedFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory) :
+//TODO utilize rx->isReceptionInProgress() after AckTimeout-AckDuration to determine if a frame (expectedly an ACK) is being received, and start retransmission immediately if not
+
+SendDataWithAckFsmBasedFrameExchange::SendDataWithAckFsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory) :
     FsmBasedFrameExchange(context, callback), frame(frame), txIndex(txIndex), accessCategory(accessCategory)
 {
     frame->setDuration(params->getSifsTime() + utils->getAckDuration());
@@ -136,7 +138,7 @@ bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame *frame)
 
 //------------------------------
 
-SendDataWithAckFrameExchange::SendDataWithAckFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
+SendDataWithAckFrameExchange::SendDataWithAckFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     StepBasedFrameExchange(context, callback, txIndex, accessCategory), dataFrame(dataFrame)
 {
     dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration());
@@ -183,7 +185,7 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
 
 //------------------------------
 
-SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
+SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     StepBasedFrameExchange(context, callback, txIndex, accessCategory), dataFrame(dataFrame)
 {
     dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration());
@@ -234,7 +236,7 @@ void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
 
 //------------------------------
 
-SendMulticastDataFrameExchange::SendMulticastDataFrameExchange(UpperMacContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
+SendMulticastDataFrameExchange::SendMulticastDataFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     FrameExchange(context, callback), dataFrame(dataFrame), txIndex(txIndex), accessCategory(accessCategory)
 {
     ASSERT(utils->isBroadcast(dataFrame) || utils->isMulticast(dataFrame));
