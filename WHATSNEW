@@ -1,11 +1,71 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.1.0 (Oct, 2015) - Stable
+-------------------------------
+
+This release requires OMNeT++ 4.6 or later. In addition to several bug fixes,
+it features the following additions compared to INET-3.0:
+
+1. A modular and extensible new 802.11 MAC model.
+
+   It replaces the existing monolithic 802.11 MAC model that has become
+   increasingly difficult to maintain and extend over the years. The new MAC
+   has a modular design, where components can be swapped in and out. Concepts
+   such as contention-based channel access, frame exchange sequences, EDCA
+   queues, aggregation, fragmentation, duplicate detection, block acknow-
+   ledgement, frame rate selection, automatic rate selection, etc would
+   be expressed as self-contained C++ classes that implement abstract
+   interfaces and (may) have multiple implementations.
+
+   This kind of modular design also favours the open-source development model,
+   because abstract interfaces give contributors better cues on where to start
+   implementing a new feature, and new classes can be more readily accepted
+   into the codebase because changes to existing code (and thus the risk of
+   introducing new bugs) can be minimized.
+
+   In this initial form, it has roughly the same set of 802.11 features as the
+   old Ieee80211Mac module: basic DCF and EDCA, with the channel access and
+   some more parameters being configurable.
+
+   For now, the old Ieee80211Mac is still the default one for simulations.
+   To switch to using the new one, add the following line to your omnetpp.ini:
+
+   **.macType = "Ieee80211CompatibleNewMac"
+
+   Ieee80211CompatibleNewMac is a wrapper around Ieee80211NewMac to make its
+   parameterization similar to the old MAC.
+
+   Note that the new MAC is a compound module. You can double-click on the mac
+   submodule (in Tkenv) and expore its internals.
+
+   See the ChangeLog in src/inet/linklayer/ieee80211/newmac/ for more
+   information. The same folder also contains a presentation about the
+   architecture of the new MAC, as it was presented at the 2nd OMNeT++
+   Community Summit in September 2015 (see http://summit.omnetpp.org).
+
+2. Packetdrill. This a port of Google's Packetdrill testing tool into
+   the INET Framework.
+
+   Google released the script-based Packetdrill tool in 2013. It allows one
+   to test transport protocols like UDP and TCP on Linux and BSD-based
+   operating systems. Scripts define test cases that inject packets to the
+   protocol implementation under test, perform operations using the API
+   controlling the transport protocol, and verify the sending of packets, all
+   at specified times. The ported version provides a simple and powerful
+   method of testing transport protocols implemented in INET.
+
+   Packetdrill has been contributed by Irene Rungeler and Michael Tuexen at
+   FH Muenster. Packetdrill has been presented at the 2nd OMNeT++ Community
+   Summit in September 2015; find the paper and presentation slides
+   at http://summit.omnetpp.org.
+
+
 INET-3.0.0 (Jun, 2015) - Stable
 -------------------------------
 
 This release requires OMNeT++ 4.6 or later. There are numerous breaking changes
-since the latest stable version (2.6). Please read this file carefully and 
+since the latest stable version (2.6). Please read this file carefully and
 see the ChangeLog files in the source for more details.
 
 Nodes:
@@ -14,7 +74,7 @@ Nodes:
    too generic.) The INode module interface was renamed to INetworkNode, too.
 
 Applications:
- - The functionality of PingTestApp was merged into PingApp and PingTestApp 
+ - The functionality of PingTestApp was merged into PingApp and PingTestApp
    was removed.
 
 Network Layer:
@@ -66,8 +126,8 @@ All components:
    to regenerate the makefile based on the new feature enablement state.
 
 Nodes:
- - All "node type" modules implement the INode module interface so it is now 
-   possible to create networks (using the <"actualNodeType"> like INode construct) 
+ - All "node type" modules implement the INode module interface so it is now
+   possible to create networks (using the <"actualNodeType"> like INode construct)
    where the actual node type can be configured from an ini file.
 
 Emulation:
@@ -76,8 +136,8 @@ Emulation:
 
 Common:
  - Added create-module and delete-module commands to ScenarioManager.
- - New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB 
-   where AA is the major while BB is the minor version in hex) and 
+ - New macros in INETDefs.h to test INET version: INET_VERSION (format: 0xAABB
+   where AA is the major while BB is the minor version in hex) and
    INET_PATCH_LEVEL (format: 0xCC is the patch level in hex).
  - On Linux, specifying --valgrind as the first argument for the opp_run script
    (or a run script in the examples folder) will start the simulation using the
@@ -102,7 +162,7 @@ Serializer:
    write binary data. This allows parsing incorrect binary representations without
    runtime errors required by bit precise physical layer models.
  - Refactored recursion in serializers to be extensible with new packet formats
-   without modifying existing code. 
+   without modifying existing code.
  - Fixed a number of packet length bugs and inconsistencies between serialized
    and non-serialized forms.
 
@@ -142,7 +202,7 @@ Network Layer:
 
 Routing:
  - Added PIM-DM and PIM-SM implementation. The original codebase (from the ANSA project
-   http://nes.fit.vutbr.cz/ansa) has been extensively reviewed, refactored and 
+   http://nes.fit.vutbr.cz/ansa) has been extensively reviewed, refactored and
    extended by Tamas Borbely.
 
 Configurator:
@@ -169,9 +229,9 @@ Link layer:
  - Renamed getNetworkInterfaceModule to getInterfaceModule in InterfaceEntry.
  - Improved response time on external interfaces. On Linux cSocketScheduler is now
    using immediate mode to reduce the CPU usage while still maintaining a fast
-   sub millisec response time (Artur Scussel). On Windows and MAC OS X the polling 
+   sub millisec response time (Artur Scussel). On Windows and MAC OS X the polling
    interval was reduced to improve the response time.
- - Added support for sending NF_LINK_BREAK signal from BMAC and CSMA. This is 
+ - Added support for sending NF_LINK_BREAK signal from BMAC and CSMA. This is
    required for certain routing protocols (i.e. AODV) to function properly.
  - Extended Ethernet macs accept raw packet
 
