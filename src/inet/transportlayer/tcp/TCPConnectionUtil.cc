@@ -1083,13 +1083,16 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
 
             // Update WS variables
-            //ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
-            ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
-            state->rcv_wnd_scale = 0;
+            if (tcpMain->hasPar("windowScalingFactor") && tcpMain->par("windowScalingFactor") > -1) {
+                state->rcv_wnd_scale = tcpMain->par("windowScalingFactor");
+            } else {
+                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                state->rcv_wnd_scale = 0;
 
-            while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
-                scaled_rcv_wnd = scaled_rcv_wnd >> 1;
-                state->rcv_wnd_scale++;
+                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
+                    scaled_rcv_wnd = scaled_rcv_wnd >> 1;
+                    state->rcv_wnd_scale++;
+                }
             }
 
             TCPOptionWindowScale *option = new TCPOptionWindowScale();
