@@ -22,7 +22,7 @@ import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Lan80211
 {
@@ -30,6 +30,19 @@ network Lan80211
         int numHosts;
         **.mgmt.numChannels = 2;
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+                config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
             wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
@@ -37,12 +50,5 @@ network Lan80211
         ap: AccessPoint {
             @display("p=213,174;r=,,#707070");
             wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=61,46");
-        }
-        configurator: IPv4NetworkConfigurator {
-            config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-            @display("p=140,50");
         }
 }

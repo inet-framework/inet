@@ -21,7 +21,7 @@ package inet.examples.wireless.scaling;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network TestRadioScaling
 {
@@ -29,13 +29,17 @@ network TestRadioScaling
         int numHosts;
         string radioMediumType;
     submodules:
-        radioMedium: <radioMediumType> like IRadioMedium {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
-                @display("p=50,50");
+                @display("p=100,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                @display("p=50,100");
+                @display("p=100,150");
+        }
+        radioMedium: <radioMediumType> like IRadioMedium {
+            parameters:
+                @display("p=100,250");
         }
         host[numHosts]: WirelessHost {
             parameters:

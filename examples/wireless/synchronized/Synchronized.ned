@@ -16,13 +16,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.examples.wireless.synchronized;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Synchronized
 {
@@ -32,7 +31,18 @@ network Synchronized
         **.arpType = "GlobalARP";
         @display("bgl=3");
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium;
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
         node[nodeCount]: AdhocHost {
             parameters:
                 numUdpApps = 1;
@@ -43,6 +53,5 @@ network Synchronized
                 udpApp[0].messageLength = 100B;
                 udpApp[0].joinLocalMulticastGroups = true;
         }
-        configurator: IPv4NetworkConfigurator;
 }
 
