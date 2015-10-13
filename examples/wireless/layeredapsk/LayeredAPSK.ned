@@ -20,22 +20,27 @@ package inet.examples.wireless.layeredapsk;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.apskradio.bitlevel.APSKLayeredScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network LayeredAPSK
 {
     parameters:
         int numHosts;
     submodules:
-        host[numHosts]: AdhocHost {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
-                @display("r=,,#707070;p=250,58");
+                @display("p=100,250");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
         }
         radioMedium: APSKLayeredScalarRadioMedium {
             parameters:
-                @display("p=60,50");
+                @display("p=100,50");
         }
-        configurator: IPv4NetworkConfigurator {
-            config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
-            @display("p=140,50");
+        host[numHosts]: AdhocHost {
+            parameters:
+                @display("r=,,#707070;p=250,58");
         }
 }

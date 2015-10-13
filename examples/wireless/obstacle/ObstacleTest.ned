@@ -30,20 +30,19 @@ network ObstacleTest
         int numHosts;
         @display("bgb=0,0");
     submodules:
-        physicalEnvironment: PhysicalEnvironment {
+        visualizer: IntegratedVisualizer {
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        physicalEnvironment: PhysicalEnvironment {
             parameters:
                 @display("p=100,150");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=100,250");
         }
-        visualizer: IntegratedVisualizer {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,350");
         }

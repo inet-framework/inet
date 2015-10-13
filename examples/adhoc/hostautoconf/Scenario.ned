@@ -19,14 +19,20 @@
 package inet.examples.adhoc.hostautoconf;
 
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Scenario
 {
     parameters:
         double hosts;
-
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium;
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
         host[hosts]: Host;
 }
