@@ -96,6 +96,7 @@ void BasicRx::recomputeMediumFree()
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
     mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    updateDisplayString();
     if (mediumFree != oldMediumFree) {
         for (int i = 0; contentionTx[i]; i++)
             contentionTx[i]->mediumStateChanged(mediumFree);
@@ -130,6 +131,40 @@ void BasicRx::setOrExtendNav(simtime_t navInterval)
         EV_INFO << "Setting NAV to " << navInterval << std::endl;
         scheduleAt(endNav, endNavTimer);
         recomputeMediumFree();
+    }
+}
+
+void BasicRx::updateDisplayString()
+{
+    if (mediumFree)
+        getDisplayString().setTagArg("t", 0, "FREE");
+    else {
+        std::stringstream os;
+        os << "BUSY (";
+        bool addSpace = false;
+        if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED) {
+            switch (transmissionState) {
+                case IRadio::IRadio::TRANSMISSION_STATE_UNDEFINED: break; // cannot happen
+                case IRadio::IRadio::TRANSMISSION_STATE_IDLE: os << "Tx-Idle"; break;
+                case IRadio::IRadio::TRANSMISSION_STATE_TRANSMITTING: os << "Tx"; break;
+            }
+            addSpace = true;
+        }
+        else {
+            switch (receptionState) {
+                case IRadio::RECEPTION_STATE_UNDEFINED: os << "Switching"; break;
+                case IRadio::RECEPTION_STATE_IDLE: os << "Rx-Idle"; break; // cannot happen
+                case IRadio::RECEPTION_STATE_BUSY: os << "Noise"; break;
+                case IRadio::RECEPTION_STATE_RECEIVING: os << "Recv"; break;
+                case IRadio::RECEPTION_STATE_SYNCHRONIZING: os << "Syncing"; break;
+            }
+            addSpace = true;
+        }
+        if (endNavTimer->isScheduled()) {
+            os << (addSpace ? " " : "") << "NAV";
+        }
+        os << ")";
+        getDisplayString().setTagArg("t", 0, os.str().c_str());
     }
 }
 

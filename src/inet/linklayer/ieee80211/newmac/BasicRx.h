@@ -49,6 +49,7 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         virtual void setOrExtendNav(simtime_t navInterval);
         virtual bool isFcsOk(Ieee80211Frame *frame) const;
         virtual void recomputeMediumFree();
+        virtual void updateDisplayString();
 
     public:
         BasicRx();
