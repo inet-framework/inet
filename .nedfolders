@@ -5,5 +5,7 @@ tutorials
 -inet.transportlayer.tcp_lwip
 -inet.applications.voipstream
 -inet.linklayer.ext
--inet.transportlayer.tcp_nsc
+-inet.examples.manetrouting
 -inet.examples.voipstream
+-inet.transportlayer.tcp_nsc
+-inet.routing.extras
