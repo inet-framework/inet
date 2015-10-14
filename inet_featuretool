@@ -486,7 +486,7 @@ class FeatureTool:
             update = True
             print "Selected features: ", ", ".join(featureOffList)
             if len(dependencyList) and not self.args.with_dependencies:
-                print "Next features depends on selected features: ", ", ".join(dependencyList)
+                print "The following features depend on selected features: ", ", ".join(dependencyList)
                 update = queryYesNo("Disable these features?", default="yes")
             if update:
                 featureOffList.update(dependencyList)

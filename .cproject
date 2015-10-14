@@ -49,11 +49,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -87,11 +87,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -140,11 +140,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -175,11 +175,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -195,7 +195,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/applications/voipstream|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/applications/voipstream|inet/routing/extras|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -245,11 +245,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -283,11 +283,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -336,11 +336,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -371,11 +371,11 @@
 									<listOptionValue builtIn="false" value="WITH_POWER"/>
 									<listOptionValue builtIn="false" value="WITH_RADIO"/>
 									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_MANET"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
 									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
 									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
 									<listOptionValue builtIn="false" value="WITH_TUN"/>
+									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
 									<listOptionValue builtIn="false" value="WITH_BMAC"/>
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
@@ -391,7 +391,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/applications/voipstream|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/applications/voipstream|inet/routing/extras|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -1,11 +1,11 @@
 examples
 src
 tutorials
--inet.examples.emulation
--inet.transportlayer.tcp_lwip
 -inet.applications.voipstream
--inet.linklayer.ext
+-inet.examples.emulation
 -inet.examples.manetrouting
 -inet.examples.voipstream
--inet.transportlayer.tcp_nsc
+-inet.linklayer.ext
 -inet.routing.extras
+-inet.transportlayer.tcp_lwip
+-inet.transportlayer.tcp_nsc
