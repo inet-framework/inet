@@ -69,11 +69,12 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
     const cFigure::Color lineColor;
     const cFigure::Color fillColor;
     const double opacity;
+    const char *texture;
     const char *tags;
     //@}
 
   public:
-    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags);
+    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *texture, const char *tags);
 
     virtual int getId() const { return id; }
 
@@ -87,6 +88,7 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
     virtual const cFigure::Color& getLineColor() const override { return lineColor; }
     virtual const cFigure::Color& getFillColor() const override { return fillColor; }
     virtual double getOpacity() const override { return opacity; }
+    virtual const char *getTexture() const override { return texture; }
     virtual const char *getTags() const override { return tags; }
 };
 
