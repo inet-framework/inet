@@ -1,5 +1,14 @@
 ====== inet-3.x ======
 
+2015-10-14  Andras Varga
+
+	Bugfix: change maxQueueSize's meaning to per AC queue.
+	Before, maxQueueSize referred to the total of the AC queue lengths, which
+	could lead to wrong simulation results. (Supposed that the AC_BK and
+	AC_BE queues themselves add up to maxQueueSize -- then the MAC no longer
+	accepts packets from the external queue, effectively blocking AC_VI and
+	AC_VO traffic)
+
 2015-10-10  Andras Varga
 
 	Removed external queue support, i.e. the mgmt submodule in the Nic no

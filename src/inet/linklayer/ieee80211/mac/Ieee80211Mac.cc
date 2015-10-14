@@ -557,7 +557,7 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
     currentAC = classifier ? classifier->classifyPacket(frame) : 0;
 
     // check for queue overflow
-    if (isDataFrame && maxQueueSize && (int)transmissionQueueSize() >= maxQueueSize) {
+    if (isDataFrame && maxQueueSize > 0 && (int)transmissionQueue()->size() >= maxQueueSize) {
         EV_WARN << "message " << frame << " received from higher layer but AC queue is full, dropping message\n";
         numDropped()++;
         delete frame;
@@ -815,7 +815,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                     invalidateBackoffPeriod();
                     );
             FSMA_No_Event_Transition(Immediate - Data - Ready,
-                    !transmissionQueueEmpty(),
+                    !transmissionQueuesEmpty(),
                     DEFER,
                     );
             FSMA_Event_Transition(Receive,
@@ -886,7 +886,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                     );
             // end the difs and no other packet has been received
             FSMA_Event_Transition(DIFS - Over,
-                    msg == endDIFS && transmissionQueueEmpty(),
+                    msg == endDIFS && transmissionQueuesEmpty(),
                     BACKOFF,
                     currentAC = numCategories() - 1;
                     if (isInvalidBackoffPeriod())
@@ -1001,7 +1001,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                     cancelBackoffPeriod();
                     );
             FSMA_Event_Transition(Backoff - Idle,
-                    isBackoffMsg(msg) && transmissionQueueEmpty(),
+                    isBackoffMsg(msg) && transmissionQueuesEmpty(),
                     IDLE,
                     resetStateVariables();
                     );
@@ -2024,7 +2024,7 @@ const char *Ieee80211Mac::modeName(int mode)
 #undef CASE
 }
 
-bool Ieee80211Mac::transmissionQueueEmpty()
+bool Ieee80211Mac::transmissionQueuesEmpty()
 {
     for (int i = 0; i < numCategories(); i++)
         if (!transmissionQueue(i)->empty())
@@ -2033,7 +2033,7 @@ bool Ieee80211Mac::transmissionQueueEmpty()
     return true;
 }
 
-unsigned int Ieee80211Mac::transmissionQueueSize()
+unsigned int Ieee80211Mac::getTotalQueueLength()
 {
     unsigned int totalSize = 0;
     for (int i = 0; i < numCategories(); i++)

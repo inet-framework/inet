@@ -62,7 +62,7 @@ simple Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        int maxQueueSize = default(50);   // max queue length in frames
+        int maxQueueSize = default(50);   // max queue length in frames (for EDCA this is a per AC queue limit)
 
         bool EDCA = default(false); // enable Enhanced Distributed Channel Access (802.11e)
         // parameters for EDCA = true

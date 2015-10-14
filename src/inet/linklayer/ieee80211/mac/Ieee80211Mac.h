@@ -566,8 +566,8 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void finishCurrentTransmission();
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
-    virtual bool transmissionQueueEmpty();
-    virtual unsigned int transmissionQueueSize();
+    virtual bool transmissionQueuesEmpty();
+    virtual unsigned int getTotalQueueLength();
     virtual void flushQueue();
     virtual void clearQueue();
 
@@ -679,7 +679,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
   public:
     virtual State getState() { return static_cast<State>(fsm.getState()); }
-    virtual unsigned int getQueueSize() { return transmissionQueueSize(); }
+    virtual unsigned int getQueueSize() { return getTotalQueueLength(); }
 };
 
 } // namespace ieee80211
