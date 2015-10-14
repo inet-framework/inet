@@ -215,6 +215,7 @@ class INET_API TCPStateVariables : public cObject
     // WINDOW_SCALE related variables
     bool ws_support;    // set if the host supports Window Scale (header option) (RFC 1322)
     bool ws_enabled;    // set if the connection uses Window Scale (header option)
+    int  ws_manual_scale; // the value of scale parameter if it was set manually (-1 otherwise)
     bool snd_ws;    // set if initial WINDOW_SCALE has been sent
     bool rcv_ws;    // set if initial WINDOW_SCALE has been received
     uint rcv_wnd_scale;    // RFC 1323, page 31: "Receive window scale power"
