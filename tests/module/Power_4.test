@@ -75,7 +75,7 @@ cmdenv-express-mode = false
 
 %contains: stdout
 sent: 81   received: 30   loss rate (%): 62.963
-round-trip min/avg/max (ms): 0.462262/0.500237/1.60152
+round-trip min/avg/max (ms): 0.506262/0.546804/1.72252
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
