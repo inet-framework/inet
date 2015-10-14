@@ -434,10 +434,12 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *opacityAttribute = element->getAttribute("opacity");
         if (opacityAttribute)
             opacity = atof(opacityAttribute);
+        // texture
+        const char *texture = element->getAttribute("texture");
         // tags
         const char *tags = element->getAttribute("tags");
         // insert object
-        PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
+        PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, texture, tags);
         objects.push_back(object);
         if (id != -1)
             idToObjectMap.insert(std::pair<int, const PhysicalObject *>(id, object));

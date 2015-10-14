@@ -39,6 +39,7 @@ class INET_API IPhysicalObject
     virtual const cFigure::Color& getLineColor() const = 0;
     virtual const cFigure::Color& getFillColor() const = 0;
     virtual double getOpacity() const = 0;
+    virtual const char *getTexture() const = 0;
     virtual const char *getTags() const = 0;
 };
 
