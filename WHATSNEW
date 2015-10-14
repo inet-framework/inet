@@ -64,6 +64,19 @@ it features the following additions compared to INET-3.0:
 3. Manet protocols in inet.routing.extras packege are now disabled by default.
    You can still enable the MANET feature manually or you can use INETMANET 
    (a fork of INET) which contains a more up to date codebase for these protocols.
+   
+4. Changes and bug fixes in the (old) 802.11 MAC:
+
+   - The default lot time was not always correctly chosen for the configured
+     mode (modulation and coding scheme).
+
+   - Change maxQueueSize's meaning to per AC queue. Before, maxQueueSize
+     referred to the total of the AC queue lengths, which could cause starvation
+     of higher priority queues (see ChangeLog for more info.)
+
+   - Removed external queue support, that is, the mgmt submodule in the Nic
+     no longer serves as a passive queue for the MAC.
+
 
 INET-3.0.0 (Jun, 2015) - Stable
 -------------------------------
