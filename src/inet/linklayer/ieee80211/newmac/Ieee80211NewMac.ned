@@ -127,7 +127,10 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         }
 }
 
-// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC
+//
+// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC.
+// NOTE: NOT ALL PARAMETERS OF THE OLD MAC CAN BE MAPPED.
+//
 module Ieee80211CompatibleNewMac extends Ieee80211NewMac
 {
     parameters:
@@ -138,12 +141,42 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         bool EDCA = default(false);
         int maxQueueSize = default(14);
 
+        int AIFSN0 = default(7); // AIFSN for background
+        int AIFSN1 = default(3); // AIFSN for best effort
+        int AIFSN2 = default(2); // AIFSN for video
+        int AIFSN3 = default(2); // AIFSN for voice
+        double TXOP0 @unit(s) = default(0s);
+        double TXOP1 @unit(s) = default(0s);
+        double TXOP2 @unit(s) = default(3.008ms);
+        double TXOP3 @unit(s) = default(1.504ms);
+        int AIFSN = default(2); // if there is only one AC (EDCA = false)
+        bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
+        double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)
+        int cwMinData = default(-1); // contention window for normal data frames, -1 means default
+        int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
+        int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
+
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
         numContentionTx = EDCA ? 4 : 1;
 
-        upperMac.opMode = opMode;
-        upperMac.bitrate = bitrate;
-        upperMac.rtsThreshold = rtsThresholdBytes;
-        upperMac.shortRetryLimit = retryLimit;
-        upperMac.maxQueueSize = maxQueueSize;
+        upperMac.opMode = opMode; // DcfUpperMac, EdcaUpperMac
+        upperMac.bitrate = bitrate; // DcfUpperMac, EdcaUpperMac
+        upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
+        upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
+        upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac
+        
+        upperMac.aifsn0 = AIFSN0; // EdcaUpperMac
+        upperMac.aifsn1 = AIFSN1; // EdcaUpperMac
+        upperMac.aifsn2 = AIFSN2; // EdcaUpperMac
+        upperMac.aifsn3 = AIFSN3; // EdcaUpperMac
+        upperMac.txopLimit0 = TXOP0; // EdcaUpperMac
+        upperMac.txopLimit1 = TXOP1; // EdcaUpperMac
+        upperMac.txopLimit2 = TXOP2; // EdcaUpperMac
+        upperMac.txopLimit3 = TXOP3; // EdcaUpperMac
+        //TODO upperMac.difsn =  AIFSN;
+        upperMac.prioritizeMulticast = prioritizeMulticast; // DcfUpperMac, EdcaUpperMac
+        upperMac.slotTime = slotTime; // DcfUpperMac, EdcaUpperMac
+        upperMac.cwMin = cwMinData; // DcfUpperMac
+        upperMac.cwMax = cwMaxData; // DcfUpperMac
+        upperMac.cwMinMulticast = cwMulticast; // DcfUpperMac, EdcaUpperMac
 }
