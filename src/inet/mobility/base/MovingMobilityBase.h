@@ -89,6 +89,9 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() override;
+
+    /** @brief Returns the current angular position at the current simulation time. */
+    virtual EulerAngles getCurrentAngularPosition() override;
 };
 
 } // namespace inet
