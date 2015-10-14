@@ -105,7 +105,7 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *source, simsign
 
 void RoutingTableRecorder::recordSnapshot()
 {
-    for (int id = 0; id < getSimulation()->getLastComponentId(); id++) {
+    for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         cModule *module = getSimulation()->getModule(id);
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(module);
         if (ift) {
@@ -114,7 +114,7 @@ void RoutingTableRecorder::recordSnapshot()
                 recordInterface(host, ift->getInterface(i), -1);
         }
     }
-    for (int id = 0; id < getSimulation()->getLastComponentId(); id++) {
+    for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         cModule *module = getSimulation()->getModule(id);
         IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
         if (rt) {
