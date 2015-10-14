@@ -44,7 +44,7 @@ it features the following additions compared to INET-3.0:
    architecture of the new MAC, as it was presented at the 2nd OMNeT++
    Community Summit in September 2015 (see http://summit.omnetpp.org).
 
-2. Packetdrill. This a port of Google's Packetdrill testing tool into
+2. Packetdrill. This is a port of Google's Packetdrill testing tool into
    the INET Framework.
 
    Google released the script-based Packetdrill tool in 2013. It allows one
@@ -53,13 +53,17 @@ it features the following additions compared to INET-3.0:
    protocol implementation under test, perform operations using the API
    controlling the transport protocol, and verify the sending of packets, all
    at specified times. The ported version provides a simple and powerful
-   method of testing transport protocols implemented in INET.
+   method of testing transport protocols implemented in INET. The current 
+   implementation supports only UDP.
 
    Packetdrill has been contributed by Irene Rungeler and Michael Tuexen at
    FH Muenster. Packetdrill has been presented at the 2nd OMNeT++ Community
    Summit in September 2015; find the paper and presentation slides
    at http://summit.omnetpp.org.
 
+3. Manet protocols in inet.routing.extras packege are now disabled by default.
+   You can still enable the MANET feature manually or you can use INETMANET 
+   (a fork of INET) which contains a more up to date codebase for these protocols.
 
 INET-3.0.0 (Jun, 2015) - Stable
 -------------------------------
