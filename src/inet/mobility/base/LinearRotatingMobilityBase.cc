@@ -24,7 +24,7 @@ LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 
 void LinearRotatingMobilityBase::initializeOrientation()
 {
-    MobilityBase::initializePosition();
+    MobilityBase::initializeOrientation();
     if (!stationary) {
         setTargetOrientation();
         EV_INFO << "current target orientation = " << targetOrientation << ", next change = " << nextChange << endl;
