@@ -41,6 +41,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     int localPort = -1, destPort = -1;
     simtime_t startTime;
     simtime_t stopTime;
+    const char *packetName = nullptr;
 
     // state
     UDPSocket socket;

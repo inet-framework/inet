@@ -50,6 +50,7 @@ void UDPBasicApp::initialize(int stage)
         destPort = par("destPort");
         startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
+        packetName = par("packetName");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
@@ -110,9 +111,9 @@ L3Address UDPBasicApp::chooseDestAddr()
 
 void UDPBasicApp::sendPacket()
 {
-    char msgName[32];
-    sprintf(msgName, "UDPBasicAppData-%d", numSent);
-    cPacket *payload = new cPacket(msgName);
+    std::ostringstream str;
+    str << packetName << "-" << numSent;
+    cPacket *payload = new cPacket(str.str().c_str());
     payload->setByteLength(par("messageLength").longValue());
 
     L3Address destAddr = chooseDestAddr();
