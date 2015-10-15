@@ -208,6 +208,8 @@ class INET_API TCPSocket
      */
     static const char *stateName(int state);
 
+    void setState(enum State state) { sockstate = state; };
+
     /** @name Getter functions */
     //@{
     L3Address getLocalAddress() { return localAddr; }

@@ -1,5 +1,8 @@
 %description:
-SUT is a server, i.e. it opens a socket, sends 1000 bytes, receives 500 bytes and closes the socket.
+SUT is a server, i.e. it opens a socket, binds and listens. The peer connects to the server.
+The peer send 3 messages. The first and third are acked. A retransmission should be sent
+within the next second.
+Problem: The RTO is too high, more than 2 seconds.
 
 %#--------------------------------------------------------------------------------------------------------------
 
@@ -8,30 +11,39 @@ SUT is a server, i.e. it opens a socket, sends 1000 bytes, receives 500 bytes an
 %inifile: omnetpp.ini
 
 [General]
-network = PacketDrillUdp
+network = PacketDrillTcp
 debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
-**.scriptFile="../../udptests/udpSendRecv.pkt"
+**.scriptFile="../../tcptests/tcpHighCumAck.pkt"
 **.pdhost.tunApp[0].typename = "PacketDrillApp"
-**.pdhost.numUdpTunApps = 1
-**.hasTun = true
+**.pdhost.numTcpTunApps = 1
 **.pdhost.numTunInterfaces = 1
+**.hasTun = true
+
+**.startTime = 2s
+
+**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
 **.pdhost.tunApp[0].localPort = 1000
 **.pdhost.tunApp[0].remotePort = 2000
 **.pdhost.tunApp[0].localAddress = "192.168.0.1"
 **.pdhost.tunApp[0].remoteAddress = "192.168.0.2"
 
-**.startTime = 2s
-
-**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
 **.pdhost.numPcapRecorders=1
-**.pdhost.pcapRecorder[0].pcapFile="udpSendRecv.pcap"
+**.pdhost.pcapRecorder[0].pcapFile="tcpHighCumAck.pcap"
 **.pdhost.pcapRecorder[0].moduleNamePatterns="tun[0]"
 **.pdhost.pcapRecorder[0].sendingSignalNames="packetSentToUpper"
 **.pdhost.pcapRecorder[0].receivingSignalNames="packetReceivedFromUpper"
 **.pdhost.pcapRecorder[0].alwaysFlush = true
+
+**.pdapp.dataTransferMode = "bytecount"
+**.tcp.mss = 1000
+**.tcp.sackSupport = true
+**.tcp.windowScalingSupport = true
+**.tcp.windowScalingFactor = 6
+**.tcp.advertisedWindow = 29200
+**.tcp.useDataNotification = true
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: test.out

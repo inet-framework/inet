@@ -1,0 +1,24 @@
+// SUT is a server, i.e. it opens a socket, binds and listens. The peer connects to the server.
+// The peer send 3 messages. The first and third are acked. The ACK is repeated 3 times.
+// A fast retransmission is expected.
+
+0.000 socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
+0.000 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+0.000 bind(3, ..., ...) = 0
+0.000 listen(3, 1) = 0
+
+0.100 < S 0:0(0) win 32792 <mss 1000,nop, wscale 6, nop, nop, sackOK>
+0.100 > S. 0:0(0) ack 1 <...>
+0.150 < . 1:1(0) ack 1 win 257
+0.150 accept(3, ..., ...) = 4
+
+0.200 write(4, ..., 1000) = 1000
+0.200 > . 1:1001(1000) ack 1
+0.210 < . 1:1(0) ack 2001 win 257
+
++0 > . 1001:1001(0) ack 1
+
+0.310 close(4) = 0
++0 > F. 1001:1001(0) ack 1
++0 < F. 1:1(0) ack 1002 win 257
++0 > . 1002:1002(0) ack 2
