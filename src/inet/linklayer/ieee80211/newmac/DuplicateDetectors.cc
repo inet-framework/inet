@@ -35,14 +35,16 @@ bool LegacyDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 {
     ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     const MACAddress& address = frame->getTransmitterAddress();
-    int16_t seqNum = frame->getSequenceNumber();
+    SeqVal seqVal;
+    seqVal.seqNum = frame->getSequenceNumber();
+    seqVal.fragNum = frame->getFragmentNumber();
     auto it = lastSeenSeqNumCache.find(address);
     if (it == lastSeenSeqNumCache.end())
-        lastSeenSeqNumCache[address] = seqNum;
-    else if (it->second == seqNum && frame->getRetry())
+        lastSeenSeqNumCache[address] = seqVal;
+    else if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
         return true;
     else
-        it->second = seqNum;
+        it->second = seqVal;
     return false;
 }
 
@@ -123,20 +125,22 @@ void QoSDuplicateDetector::assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame)
 
 bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
 {
-    int seqNum = frame->getSequenceNumber();
+    SeqVal seqVal;
+    seqVal.seqNum = frame->getSequenceNumber();
+    seqVal.fragNum = frame->getFragmentNumber();
     bool isManagementFrame = dynamic_cast<Ieee80211ManagementFrame *>(frame);
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
         MACAddress transmitterAddr = frame->getTransmitterAddress();
-        std::map<MACAddress,int16_t>& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
+        Mac2SeqValMap& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
         auto it = cache.find(transmitterAddr);
         if (it == cache.end())
-            cache[transmitterAddr] = seqNum;
-        if (it->second == seqNum && frame->getRetry())
+            cache[transmitterAddr] = seqVal;
+        if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
             return true;
         else
-            it->second = seqNum;
+            it->second = seqVal;
         return false;
     }
     else
@@ -145,15 +149,14 @@ bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
         Key key(frame->getTransmitterAddress(), qosDataFrame->getTid());
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end())
-            lastSeenSeqNumCache[key] = seqNum;
-        if (it->second == seqNum && frame->getRetry())
+            lastSeenSeqNumCache[key] = seqVal;
+        if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
             return true;
         else
-            it->second = seqNum;
+            it->second = seqVal;
         return false;
     }
 }
-
 
 } // namespace ieee80211
 } // namespace inet
