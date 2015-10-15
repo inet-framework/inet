@@ -18,7 +18,7 @@
 
 import inet.node.packetdrill.PacketDrillHost;
 
-network PacketDrillUdp
+network PacketDrillTcp
 {
     parameters:
 
@@ -30,4 +30,3 @@ network PacketDrillUdp
         }
     connections:
 }
-

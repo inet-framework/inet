@@ -35,6 +35,20 @@ struct int_symbol {
     const char *name;
 };
 
+/* TCP option numbers and lengths. */
+#define TCPOPT_EOL                0
+#define TCPOPT_NOP                1
+#define TCPOPT_MAXSEG             2
+#define TCPOLEN_MAXSEG            4
+#define TCPOPT_WINDOW             3
+#define TCPOLEN_WINDOW            3
+#define TCPOPT_SACK_PERMITTED     4
+#define TCPOLEN_SACK_PERMITTED    2
+#define TCPOPT_SACK               5
+#define TCPOPT_TIMESTAMP          8
+#define TCPOLEN_TIMESTAMP         10
+#define TCPOPT_EXP                254    /* Experimental */
+
 enum direction_t {
     DIRECTION_INVALID,
     DIRECTION_INBOUND,  /* packet coming into the kernel under test */
@@ -342,6 +356,42 @@ class PacketDrillStruct: public cObject
     private:
         uint32 value1;
         uint32 value2;
+};
+
+class PacketDrillTcpOption : public cObject
+{
+    public:
+        PacketDrillTcpOption(uint16 kind_, uint16 length_);
+
+    private:
+        uint16 kind;
+        uint16 length;
+        uint16 mss; /* in network order */
+        struct
+        {
+                uint32 val; /* in network order */
+                uint32 ecr; /* in network order */
+        } timeStamp;
+        cQueue *blockList;
+        uint8 windowScale;
+        uint16 blockCount;
+
+    public:
+        uint16 getKind() { return kind; };
+        uint16 getLength() { return length; };
+        void setLength(uint16 len) {length = len;};
+        uint16 getMss() { return mss; };
+        void setMss(uint16 mss_) { mss = mss_; };
+        uint16 getWindowScale() { return windowScale; };
+        void setWindowScale(uint16 ws_) { windowScale = ws_; };
+        uint32 getVal() { return timeStamp.val; };
+        void setVal(uint32 val_) { timeStamp.val = val_; };
+        uint32 getEcr() { return timeStamp.ecr; };
+        void setEcr(uint32 ecr_) { timeStamp.ecr = ecr_; };
+        cQueue *getBlockList() { return blockList; };
+        void setBlockList(cQueue *bList) { blockList = bList; };
+        uint16 getBlockCount() { return blockCount; };
+        void increaseBlockCount() { blockCount++; };
 };
 
 #endif

@@ -135,8 +135,19 @@ v12     ({seg}[:]){1,4}[:]{ipv4_addr}
 ipv6_addr ({v0}|{v1}|{v2}|{v3}|{v4}|{v5}|{v6}|{v7}|{v8}|{v9}|{v10}|{v11}|{v12})
 
 %%
-udp             return UDP;
-[.][.][.]       return ELLIPSIS;
+udp                 return UDP;
+ack                 return ACK;
+eol                 return EOL;
+ecr                 return ECR;
+mss                 return MSS;
+nop                 return NOP;
+sack                return TCPSACK;
+sackOK              return SACKOK;
+TS                  return TIMESTAMP;
+val                 return VAL;
+win                 return WIN;
+wscale              return WSCALE;
+[.][.][.]           return ELLIPSIS;
 --[a-zA-Z0-9_]+     yylval.string = option(yytext); return OPTION;
 [-]?[0-9]*[.][0-9]+ yylval.floating = atof(yytext);   return MYFLOAT;
 [-]?[0-9]+          yylval.integer = atoll(yytext);  return INTEGER;

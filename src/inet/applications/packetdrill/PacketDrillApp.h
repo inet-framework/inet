@@ -36,6 +36,7 @@ class PacketDrillScript;
 
 namespace inet {
 
+using namespace tcp;
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
@@ -52,6 +53,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
     const int getRemotePort() { return remotePort;};
     const uint32 getIdInbound() { return idInbound;};
     const uint32 getIdOutbound() { return idOutbound;};
+    uint32 getPeerTS() { return peerTS; };
     void increaseIdInbound() { idInbound++;};
     void increaseIdOutbound() { idOutbound++;};
     const L3Address getLocalAddress() { return localAddress; };
@@ -74,7 +76,9 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int localPort;
         int remotePort;
         int protocol;
+        int tcpConnId;
         UDPSocket udpSocket;
+        TCPSocket tcpSocket;
         PacketDrill *pd;
         bool msgArrived;
         bool recvFromSet;
@@ -86,6 +90,10 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         simtime_t simStartTime;
         simtime_t simRelTime;
         uint32 expectedMessageSize;
+        uint32 relSequenceIn;
+        uint32 relSequenceOut;
+        uint32 peerTS;
+        uint16 peerWindow;
         uint32 eventCounter;
         uint32 numEvents;
         uint32 idInbound;
@@ -106,9 +114,13 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallConnect(struct syscall_spec *syscall, cQueue *args, char **error);
 
+        int syscallWrite(struct syscall_spec *syscall, cQueue *args, char **error);
+
         int syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error);
+
+        int syscallRead(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallRecvFrom(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error);
 
@@ -117,6 +129,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         bool compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram);
 
         bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);
+
+        bool compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,
