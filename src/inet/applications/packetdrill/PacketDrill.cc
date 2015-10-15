@@ -219,7 +219,7 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
         uint16 optionsCounter = 0;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
-            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(*iter);
+            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(iter());
 
             option = setOptionValues(opt);
             tcpOptionsLength += opt->getLength();
@@ -297,8 +297,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(*it))->getType());
-        if (evaluate((PacketDrillExpression *)(*it), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(it()))->getType());
+        if (evaluate((PacketDrillExpression *)(it()), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }

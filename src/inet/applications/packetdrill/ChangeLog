@@ -2,6 +2,10 @@
 
 2015-10-15  ------ inet-3.1.0 released ------
 
+2015-10-14  Irene Rungeler
+
+	Added TCP support for packetDrill
+
 2015-04-23  Irene Rungeler
 
 	Initial implementation for packet drill UDP testing.

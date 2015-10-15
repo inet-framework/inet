@@ -47,12 +47,23 @@ extern int yydebug;
   {
     ELLIPSIS = 258,
     UDP = 259,
-    OPTION = 260,
-    MYFLOAT = 261,
-    INTEGER = 262,
-    HEX_INTEGER = 263,
-    MYWORD = 264,
-    MYSTRING = 265
+    ACK = 260,
+    WIN = 261,
+    WSCALE = 262,
+    MSS = 263,
+    NOP = 264,
+    TIMESTAMP = 265,
+    ECR = 266,
+    EOL = 267,
+    TCPSACK = 268,
+    VAL = 269,
+    SACKOK = 270,
+    OPTION = 271,
+    MYFLOAT = 272,
+    INTEGER = 273,
+    HEX_INTEGER = 274,
+    MYWORD = 275,
+    MYSTRING = 276
   };
 #endif
 
@@ -61,7 +72,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 208 "parser.y" /* yacc.c:1909  */
+#line 210 "parser.y" /* yacc.c:1909  */
 
     int64 integer;
     double floating;
@@ -72,6 +83,11 @@ union YYSTYPE
     uint16 port;
     int32 window;
     uint32 sequence_number;
+    struct {
+        int protocol;    /* IPPROTO_TCP or IPPROTO_UDP */
+        uint32 start_sequence;
+        uint16 payload_bytes;
+    } tcp_sequence_info;
     struct option_list *option;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
@@ -79,9 +95,11 @@ union YYSTYPE
     PacketDrillStruct *sack_block;
     PacketDrillExpression *expression;
     cQueue *expression_list;
+    PacketDrillTcpOption *tcp_option;
+    cQueue *tcp_options;
     struct errno_spec *errno_info;
 
-#line 85 "parser.h" /* yacc.c:1909  */
+#line 103 "parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
