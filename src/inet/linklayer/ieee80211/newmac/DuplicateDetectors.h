@@ -34,12 +34,17 @@ class INET_API NoDuplicateDetector : public IDuplicateDetector
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override {return false;}
 };
 
-//TODO we should track received fragment numbers, too! int16 -> struct{int16 seq; int8 frag;};
 class INET_API LegacyDuplicateDetector : public IDuplicateDetector
 {
     protected:
-        int16_t lastSeqNum = 0;
-        std::map<MACAddress, int16_t> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
+        struct SeqVal
+        {
+            uint16_t seqNum;
+            short fragNum;
+        };
+        typedef std::map<MACAddress, SeqVal> Mac2SeqValMap;
+        Mac2SeqValMap lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
+        uint16_t lastSeqNum = 0;
     public:
         virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
         virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
@@ -66,9 +71,16 @@ class INET_API QoSDuplicateDetector : public IDuplicateDetector
     protected:
         typedef int8_t tid_t;
         typedef std::pair<MACAddress,tid_t> Key;
-        std::map<Key, int16_t> lastSeenSeqNumCache;// cache of last seen sequence numbers per TA
-        std::map<MACAddress, int16_t> lastSeenSharedSeqNumCache;
-        std::map<MACAddress, int16_t> lastSeenTimePriorityManagementSeqNumCache;
+        struct SeqVal
+        {
+            uint16_t seqNum;
+            short fragNum;
+        };
+        typedef std::map<Key, SeqVal> Key2SeqValMap;
+        typedef std::map<MACAddress, SeqVal> Mac2SeqValMap;
+        Key2SeqValMap lastSeenSeqNumCache;// cache of last seen sequence numbers per TA
+        Mac2SeqValMap lastSeenSharedSeqNumCache;
+        Mac2SeqValMap lastSeenTimePriorityManagementSeqNumCache;
 
         std::map<Key, int16_t> lastSentSeqNums; // last sent sequence numbers per RA
         std::map<MACAddress, int16_t> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
