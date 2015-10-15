@@ -1,0 +1,41 @@
+// SUT is a server, i.e. it opens a socket, binds and listens. The peer connects to the server.
+// The peer sends 3 messages. The first and third are acked. A fourth and fifth packet are sent
+// and acked.
+// A fast retransmission is expected.
+
+0.000 socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
+0.000 setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+0.000 bind(3, ..., ...) = 0
+0.000 listen(3, 1) = 0
+
+0.100 < S 0:0(0) win 32792 <mss 1000,nop, wscale 6, nop, nop, sackOK>
+0.100 > S. 0:0(0) ack 1 <mss 1000,nop, wscale 6, nop, nop, sackOK>
+0.150 < . 1:1(0) ack 1 win 257
+0.150 accept(3, ..., ...) = 4
+
+0.200 write(4, ..., 1000) = 1000
+0.200 > . 1:1001(1000) ack 1
+0.210 < . 1:1(0) ack 1001 win 257
+
+0.220 write(4, ..., 1000) = 1000
+0.220 > . 1001:2001(1000) ack 1
+
+0.225 write(4, ..., 1000) = 1000
+0.225 > . 2001:3001(1000) ack 1
++0 < . 1:1(0) ack 1001 win 257 <sack 2001:3001,nop,nop>
+
+0.230 write(4, ..., 1000) = 1000
+0.230 > . 3001:4001(1000) ack 1
++0 < . 1:1(0) ack 1001 win 257 <sack 2001:4001,nop,nop>
+
+0.235 write(4, ..., 1000) = 1000
+0.235 > . 4001:5001(1000) ack 1
++0 < . 1:1(0) ack 1001 win 257 <sack 2001:5001,nop,nop>
+
+* > . 1001:2001(1000) ack 1  // Retransmission
+0.3 < . 1:1(0) ack 5001 win 257
+
+0.310 close(4) = 0
++0 > F. 5001:5001(0) ack 1
++0 < F. 1:1(0) ack 5002 win 257
++0 > . 5002:5002(0) ack 2

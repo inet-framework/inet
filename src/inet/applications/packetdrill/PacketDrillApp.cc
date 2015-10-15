@@ -41,6 +41,10 @@ PacketDrillApp::PacketDrillApp()
     protocol = 0;
     idInbound = 0;
     idOutbound = 0;
+    relSequenceIn = 0;
+    relSequenceOut = 0;
+    peerTS = 0;
+    peerWindow = 0;
     localAddress = L3Address("127.0.0.1");
     remoteAddress = L3Address("127.0.0.1");
 }
@@ -163,6 +167,46 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     scheduleEvent();
                 }
             }
+        } else if (msg->getArrivalGate()->isName("tcpIn")) {
+            switch (msg->getKind()) {
+                case TCP_I_ESTABLISHED:
+                    if (listenSet) {
+                        if (acceptSet) {
+                            tcpSocket.setState(TCPSocket::CONNECTED);
+                            tcpConnId = check_and_cast<TCPCommand *>(msg->getControlInfo())->getConnId();
+                            listenSet = false;
+                            acceptSet = false;
+                        } else {
+                            tcpConnId = check_and_cast<TCPCommand *>(msg->getControlInfo())->getConnId();
+                            establishedPending = true;
+                        }
+                    } else {
+                        tcpSocket.setState(TCPSocket::CONNECTED);
+                        tcpConnId = check_and_cast<TCPCommand *>(msg->getControlInfo())->getConnId();
+                    }
+                    delete msg;
+                    break;
+                case TCP_I_CLOSED:
+                    delete msg;
+                    break;
+                case TCP_I_DATA_NOTIFICATION:
+                    if (recvFromSet)
+                    {
+                        cMessage *msg = new cMessage("data request");
+                        msg->setKind(TCP_C_READ);
+                        TCPCommand *cmd = new TCPCommand();
+                        cmd->setConnId(tcpConnId);
+                        msg->setControlInfo(cmd);
+                        send(msg, "tcpOut");
+                        recvFromSet = false;
+                        // send a receive request to TCP
+                    }
+                    msgArrived = true;
+                    delete msg;
+                    break;
+                default: EV_INFO << "Message kind not supported (yet)";
+            }
+
         } else {
             delete msg;
             throw cRuntimeError("Unknown gate");
@@ -209,6 +253,22 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
     if (event->getType() == PACKET_EVENT) {
         IPv4Datagram *ip = check_and_cast<IPv4Datagram *>(event->getPacket()->getInetPacket());
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
+            if (protocol == IP_PROT_TCP) {
+                TCPSegment* tcp = check_and_cast<TCPSegment*>(ip->decapsulate());
+                tcp->setAckNo(tcp->getAckNo() + relSequenceOut);
+                if (tcp->getHeaderOptionArraySize() > 0) {
+                    for (int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
+                        if (tcp->getHeaderOption(i)->getKind() == TCPOPT_TIMESTAMP) {
+                            TCPOptionTimestamp *option = new TCPOptionTimestamp();
+                            option->setEchoedTimestamp(peerTS);
+                            tcp->setHeaderOption(i, option);
+                        }
+                    }
+                }
+                ip->encapsulate(tcp);
+                snprintf(str, sizeof(str), "inbound %d", eventCounter);
+                ip->setName(str);
+            }
             send(ip, "tunOut");
         } else if (event->getPacket()->getDirection() == DIRECTION_OUTBOUND) { // >
             if (receivedPackets->getLength() > 0) {
@@ -304,6 +364,10 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
         syscallBind(syscall, args, &error);
     } else if (!strcmp(name, "listen")) {
         syscallListen(syscall, args, &error);
+    } else if (!strcmp(name, "write")) {
+        syscallWrite(syscall, args, &error);
+    } else if (!strcmp(name, "read")) {
+        syscallRead((PacketDrillEvent*) event, syscall, args, &error);
     } else if (!strcmp(name, "sendto")) {
         syscallSendTo(syscall, args, &error);
     } else if (!strcmp(name, "recvfrom")) {
@@ -315,7 +379,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
     } else if (!strcmp(name, "accept")) {
         syscallAccept(syscall, args, &error);
     } else {
-        printf("System call %s not known (yet).\n", name);
+        EV_INFO << "System call %s not known (yet)." << name;
     }
 
     delete(args);
@@ -355,6 +419,11 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             udpSocket.bind(localPort);
             break;
 
+        case IP_PROT_TCP:
+            tcpSocket.readDataTransferModePar(*this);
+            tcpSocket.setOutputGate(gate("tcpOut"));
+            tcpSocket.bind(localPort);
+        break;
         default:
             throw cRuntimeError("Protocol type not supported for this system call");
     }
@@ -383,6 +452,11 @@ int PacketDrillApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char
         case IP_PROT_UDP:
             break;
 
+        case IP_PROT_TCP:
+            if (tcpSocket.getState() == TCPSocket::NOT_BOUND) {
+                tcpSocket.bind(localAddress, localPort);
+            }
+            break;
         default:
             throw cRuntimeError("Protocol type not supported for this system call");
     }
@@ -407,6 +481,10 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
         case IP_PROT_UDP:
             break;
 
+        case IP_PROT_TCP:
+            listenSet = true;
+            tcpSocket.listenOnce();
+        break;
         default:
             throw cRuntimeError("Protocol type not supported for this system call");
     }
@@ -422,6 +500,37 @@ int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, ch
         establishedPending = false;
     } else {
         acceptSet = true;
+    }
+
+    return STATUS_OK;
+}
+
+int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, char **error)
+{
+    int script_fd, count;
+    PacketDrillExpression* exp;
+
+    if (args->getLength() != 3)
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(0);
+    if (!exp || exp->getS32(&script_fd, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(1);
+    if (!exp || (exp->getType() != EXPR_ELLIPSIS))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(2);
+    if (!exp || exp->getS32(&count, error))
+        return STATUS_ERR;
+
+    switch (protocol)
+    {
+        case IP_PROT_TCP: {
+            cPacket *payload = new cPacket("Write");
+            payload->setByteLength(syscall->result->getNum());
+            tcpSocket.send(payload);
+            break;
+        }
+        default: EV_INFO << "Protocol not supported for this socket call";
     }
 
     return STATUS_OK;
@@ -449,6 +558,9 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
         case IP_PROT_UDP:
             break;
 
+        case IP_PROT_TCP:
+            tcpSocket.connect(remoteAddress, remotePort);
+        break;
         default:
             throw cRuntimeError("Protocol type not supported for this system call");
     }
@@ -498,6 +610,57 @@ int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, ch
     return STATUS_OK;
 }
 
+int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error)
+{
+    int script_fd, count;
+    PacketDrillExpression* exp;
+
+    if (args->getLength() != 3)
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(0);
+    if (!exp || exp->getS32(&script_fd, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(1);
+    if (!exp || (exp->getType() != EXPR_ELLIPSIS))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(2);
+    if (!exp || exp->getS32(&count, error))
+        return STATUS_ERR;
+
+    if ((expectedMessageSize = syscall->result->getNum()) > 0) {
+        if (msgArrived) {
+            switch (protocol) {
+                case IP_PROT_TCP: {
+                    cMessage *msg = new cMessage("dataRequest");
+                    msg->setKind(TCP_C_READ);
+                    TCPCommand *tcpcmd = new TCPCommand();
+                    tcpcmd->setConnId(tcpConnId);
+                    msg->setControlInfo(tcpcmd);
+                    send(msg, "tcpOut");
+                    break;
+                }
+                default: EV_INFO << "Protoocl not supported for this system call.";
+            }
+            msgArrived = false;
+            expectedMessageSize = syscall->result->getNum();
+            recvFromSet = true;
+            // send a receive request to TCP
+        }
+        else
+        {
+            recvFromSet = true;
+        }
+    }
+    else
+    {
+        if (msgArrived)
+        {
+            outboundPackets->pop();
+            msgArrived = false;
+        }
+    }
+    return STATUS_OK;
+}
 
 int PacketDrillApp::syscallRecvFrom(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **err)
 {
@@ -566,6 +729,15 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
             break;
         }
 
+        case IP_PROT_TCP: {
+            cMessage *msg = new cMessage("close");
+            msg->setKind(TCP_C_CLOSE);
+            TCPCommand *cmd = new TCPCommand();
+            cmd->setConnId(tcpConnId);
+            msg->setControlInfo(cmd);
+            send(msg, "tcpOut");
+            break;
+        }
         default:
             EV_INFO << "Protocol " << protocol << " is not supported for this system call\n";
     }
@@ -667,7 +839,22 @@ bool PacketDrillApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram 
             break;
         }
 
-        default: printf("Transport protocol %d is not supported yet\n", storedDatagram->getTransportProtocol());
+        case IP_PROT_TCP: {
+            TCPSegment *storedTcp = check_and_cast<TCPSegment *>(storedDatagram->getEncapsulatedPacket());
+            TCPSegment *liveTcp = check_and_cast<TCPSegment *>(liveDatagram->getEncapsulatedPacket());
+            if (storedTcp->getSynBit()) { // SYN was sent. Store the sequence number for comparisons
+                relSequenceOut = liveTcp->getSequenceNo();
+            }
+            if (storedTcp->getSynBit() && storedTcp->getAckBit()) {
+                peerWindow = liveTcp->getWindow();
+            }
+            if (!(compareTcpPacket(storedTcp, liveTcp))) {
+                return false;
+            }
+            break;
+        }
+
+        default: EV_INFO << "Transport protocol %d is not supported yet" << storedDatagram->getTransportProtocol();
     }
     return true;
 }
@@ -676,6 +863,96 @@ bool PacketDrillApp::compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp)
 {
     return (storedUdp->getSourcePort() == liveUdp->getSourcePort()) &&
         (storedUdp->getDestinationPort() == liveUdp->getDestinationPort());
+}
+
+bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp)
+{
+    if (!(storedTcp->getSrcPort() == liveTcp->getSrcPort())) {
+        return false;
+    }
+    if (!(storedTcp->getDestPort() == liveTcp->getDestPort())) {
+        return false;
+    }
+    if (!(storedTcp->getSequenceNo() + relSequenceOut == liveTcp->getSequenceNo())) {
+        return false;
+    }
+    if (!(storedTcp->getAckNo() == liveTcp->getAckNo())) {
+        return false;
+    }
+    if (!(storedTcp->getUrgBit() == liveTcp->getUrgBit()) || !(storedTcp->getAckBit() == liveTcp->getAckBit()) ||
+        !(storedTcp->getPshBit() == liveTcp->getPshBit()) || !(storedTcp->getRstBit() == liveTcp->getRstBit()) ||
+        !(storedTcp->getSynBit() == liveTcp->getSynBit()) || !(storedTcp->getFinBit() == liveTcp->getFinBit())) {
+        return false;
+    }
+    if (!(storedTcp->getUrgentPointer() == liveTcp->getUrgentPointer())) {
+        return false;
+    }
+
+    if (storedTcp->getHeaderOptionArraySize() > 0 || liveTcp->getHeaderOptionArraySize()) {
+     EV_DETAIL << "Options present";
+        if (storedTcp->getHeaderOptionArraySize() == 0) {
+            return true;
+        }
+        if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
+            TCPOption *liveOption;
+            for (int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
+                liveOption = liveTcp->getHeaderOption(i);
+            }
+            return false;
+        } else {
+            TCPOption *storedOption, *liveOption;
+            for (int i = 0; i < storedTcp->getHeaderOptionArraySize(); i++) {
+                storedOption = storedTcp->getHeaderOption(i);
+                liveOption = liveTcp->getHeaderOption(i);
+                if (storedOption->getKind() == liveOption->getKind()) {
+                    switch (storedOption->getKind()) {
+                        case TCPOPT_EOL:
+                        case TCPOPT_NOP:
+                            if (!(storedOption->getLength() == liveOption->getLength())) {
+                                return false;
+                            }
+                            break;
+                        case TCPOPT_SACK_PERMITTED:
+                            if (!(storedOption->getLength() == liveOption->getLength() &&
+                                storedOption->getLength() == 2)) {
+                                return false;
+                            }
+                            break;
+                        case TCPOPT_WINDOW:
+                            if (!(storedOption->getLength() == liveOption->getLength() &&
+                                storedOption->getLength() == 3 &&
+                                check_and_cast<TCPOptionWindowScale *>(storedOption)->getWindowScale()
+                                 == check_and_cast<TCPOptionWindowScale *>(liveOption)->getWindowScale())) {
+                                return false;
+                            }
+                            break;
+                        case TCPOPT_SACK:
+                            if (!(storedOption->getLength() == liveOption->getLength() &&
+                                storedOption->getLength() > 2 && (storedOption->getLength() % 8) == 2 &&
+                                check_and_cast<TCPOptionSack *>(storedOption)->getSackItemArraySize()
+                                == check_and_cast<TCPOptionSack *>(liveOption)->getSackItemArraySize())) {
+                                return false;
+                            }
+                            break;
+                        case TCPOPT_TIMESTAMP:
+                            if (!(storedOption->getLength() == liveOption->getLength() &&
+                                storedOption->getLength() == 10 &&
+                                check_and_cast<TCPOptionTimestamp *>(storedOption)->getSenderTimestamp()
+                                == check_and_cast<TCPOptionTimestamp *>(liveOption)->getSenderTimestamp())) {
+                                return false;
+                            }
+                            break;
+                        default: EV_INFO << "Option not supported";
+                    }
+                } else {
+                    EV_INFO << "Wrong sequence or option kind not present";
+                    return false;
+                }
+            }
+        }
+
+    }
+    return true;
 }
 
 } // namespace INET

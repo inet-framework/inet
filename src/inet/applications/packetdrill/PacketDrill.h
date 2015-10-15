@@ -23,6 +23,7 @@
 
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
 #include "PacketDrillApp.h"
 
@@ -41,8 +42,12 @@ class INET_API PacketDrill
         ~PacketDrill();
 
         static cPacket *buildUDPPacket(int address_family, enum direction_t direction,
-        uint16 udp_payload_bytes,
-        char **error);
+                                       uint16 udp_payload_bytes, char **error);
+
+        static cPacket* buildTCPPacket(int address_family, enum direction_t direction,
+                                       const char *flags, uint32 startSequence,
+                                       uint16 tcpPayloadBytes, uint32 ackSequence,
+                                       int32 window, cQueue *tcpOptions, char **error);
 
         static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 

@@ -162,7 +162,9 @@ int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct in
      * can do more than one yyparse().
      */
     yylineno = 1;
+    printf("opened script. now parse it\n");
     int result = yyparse(); /* invoke bison-generated parser */
+    printf("parsing finished\n");
     current_script_path = NULL;
     if (fclose(yyin))
         printf("fclose: error closing script buffer");
@@ -215,6 +217,11 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
     uint16 port;
     int32 window;
     uint32 sequence_number;
+    struct {
+        int protocol;    /* IPPROTO_TCP or IPPROTO_UDP */
+        uint32 start_sequence;
+        uint16 payload_bytes;
+    } tcp_sequence_info;
     struct option_list *option;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
@@ -222,6 +229,8 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
     PacketDrillStruct *sack_block;
     PacketDrillExpression *expression;
     cQueue *expression_list;
+    PacketDrillTcpOption *tcp_option;
+    cQueue *tcp_options;
     struct errno_spec *errno_info;
 }
 
@@ -231,6 +240,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
  */
 %token ELLIPSIS
 %token <reserved> UDP
+%token <reserved> ACK WIN WSCALE MSS NOP TIMESTAMP ECR EOL TCPSACK VAL SACKOK
 %token <reserved> OPTION
 %token <floating> MYFLOAT
 %token <integer> INTEGER HEX_INTEGER
@@ -238,13 +248,20 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %type <direction> direction
 %type <event> event events event_time action
 %type <time_usecs> time opt_end_time
-%type <packet> packet_spec udp_packet_spec
+%type <packet> packet_spec tcp_packet_spec udp_packet_spec
 %type <packet> packet_prefix
 %type <syscall> syscall_spec
+%type <string> flags
+%type <tcp_sequence_info> seq
+%type <tcp_options> opt_tcp_options tcp_option_list
+%type <tcp_option> tcp_option
 %type <string> opt_note note word_list
+%type <sack_block> sack_block
+%type <window> opt_window
+%type <sequence_number> opt_ack
 %type <string> script
 %type <string> function_name
-%type <expression_list> expression_list function_arguments
+%type <expression_list> expression_list function_arguments sack_block_list
 %type <expression> expression binary_expression array
 %type <expression> decimal_integer hex_integer
 %type <errno_info> opt_errno
@@ -362,11 +379,42 @@ action
 ;
 
 packet_spec
-: udp_packet_spec {
+: tcp_packet_spec {
+    $$ = $1;
+}
+| udp_packet_spec {
     $$ = $1;
 }
 ;
 
+tcp_packet_spec
+: packet_prefix flags seq opt_ack opt_window opt_tcp_options {
+    char *error = NULL;
+    PacketDrillPacket *outer = $1, *inner = NULL;
+    enum direction_t direction = outer->getDirection();
+
+    if (($6 == NULL) && (direction != DIRECTION_OUTBOUND)) {
+        yylineno = @6.first_line;
+        printf("<...> for TCP options can only be used with outbound packets");
+    }
+    printf("build tcp packet with options: %p\n", $6);
+    cPacket* pkt = PacketDrill::buildTCPPacket(in_config->getWireProtocol(), direction,
+                                               $2,
+                                               $3.start_sequence, $3.payload_bytes,
+                                               $4, $5, $6, &error);
+
+    free($2);
+
+    inner = new PacketDrillPacket();
+    printf("new inetPacket %p\n", inner->getInetPacket());
+    inner->setInetPacket(pkt);
+
+    printf("inner-inetPkt gespeichert\n");
+    inner->setDirection(direction);
+
+    $$ = inner;
+}
+;
 
 udp_packet_spec
 : packet_prefix UDP '(' INTEGER ')' {
@@ -408,6 +456,173 @@ direction
 }
 ;
 
+flags
+: MYWORD {
+    $$ = $1;
+}
+| '.' {
+    $$ = strdup(".");
+}
+| MYWORD '.' {
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
+    asprintf(&($$), "%s.", $1);
+#else
+    sprintf(&($$), "%s.", $1);
+#endif
+    free($1);
+}
+| '-' {
+    $$ = strdup("");
+}    /* no TCP flags set in segment */
+;
+
+seq
+: INTEGER ':' INTEGER '(' INTEGER ')' {
+    if (!is_valid_u32($1)) {
+        printf("TCP start sequence number out of range");
+    }
+    if (!is_valid_u32($3)) {
+        printf("TCP end sequence number out of range");
+    }
+    if (!is_valid_u16($5)) {
+        printf("TCP payload size out of range");
+    }
+    if ($3 != ($1 +$5)) {
+        printf("inconsistent TCP sequence numbers and payload size");
+    }
+    $$.start_sequence = $1;
+    $$.payload_bytes = $5;
+    $$.protocol = IPPROTO_TCP;
+}
+;
+
+opt_ack
+: {
+    $$ = 0;
+}
+| ACK INTEGER {
+    if (!is_valid_u32($2)) {
+    printf("TCP ack sequence number out of range");
+    }
+    $$ = $2;
+}
+;
+
+opt_window
+: {
+    $$ = -1;
+}
+| WIN INTEGER {
+    if (!is_valid_u16($2)) {
+        printf("TCP window value out of range");
+    }
+    $$ = $2;
+}
+;
+
+opt_tcp_options
+: {
+    $$ = new cQueue("opt_tcp_options");
+    printf("opt_tcp_options: %p\n", $$);
+}
+| '<' tcp_option_list '>' {
+    $$ = $2;
+}
+| '<' ELLIPSIS '>' {
+    $$ = NULL; /* FLAG_OPTIONS_NOCHECK */
+}
+;
+
+
+tcp_option_list
+: tcp_option {
+    $$ = new cQueue("tcp_option");
+    $$->insert($1);
+}
+| tcp_option_list ',' tcp_option {
+    $$ = $1;
+    $$->insert($3);
+}
+;
+
+
+tcp_option
+: NOP {
+    $$ = new PacketDrillTcpOption(TCPOPT_NOP, 1);
+}
+| EOL {
+    $$ = new PacketDrillTcpOption(TCPOPT_EOL, 1);
+}
+| MSS INTEGER {
+    $$ = new PacketDrillTcpOption(TCPOPT_MAXSEG, TCPOLEN_MAXSEG);
+    if (!is_valid_u16($2)) {
+        printf("mss value out of range");
+    }
+    $$->setMss($2);
+}
+| WSCALE INTEGER {
+    $$ = new PacketDrillTcpOption(TCPOPT_WINDOW, TCPOLEN_WINDOW);
+    if (!is_valid_u8($2)) {
+        printf("window scale shift count out of range");
+    }
+    $$->setWindowScale($2);
+}
+| SACKOK {
+    $$ = new PacketDrillTcpOption(TCPOPT_SACK_PERMITTED, TCPOLEN_SACK_PERMITTED);
+}
+| TCPSACK sack_block_list {
+    $$ = new PacketDrillTcpOption(TCPOPT_SACK, 2+8*$2->getLength());
+    printf("tcp_option: sack block list\n");
+    $$->setBlockList($2);
+}
+| TIMESTAMP VAL INTEGER ECR INTEGER {
+    uint32 val, ecr;
+    $$ = new PacketDrillTcpOption(TCPOPT_TIMESTAMP, TCPOLEN_TIMESTAMP);
+    if (!is_valid_u32($3)) {
+        printf("ts val out of range");
+    }
+    if (!is_valid_u32($5)) {
+        printf("ecr val out of range");
+    }
+    val = $3;
+    ecr = $5;
+    $$->setVal(val);
+    $$->setEcr(ecr);
+}
+;
+
+sack_block_list
+: sack_block {
+    printf("sack_block_list\n");
+    $$ = new cQueue("sack_block_list");
+    printf("links=%d rechts=%d\n", $1->getValue1(), $1->getValue2());
+    $$->insert($1);
+}
+| sack_block_list sack_block {
+    printf("links=%d rechts=%d\n", $2->getValue1(), $2->getValue2());
+    $$ = $1; $1->insert($2);
+};
+
+
+sack_block
+: INTEGER ':' INTEGER {
+    printf("sack block\n");
+    if (!is_valid_u32($1)) {
+        printf("TCP SACK left sequence number out of range");
+    }
+    if (!is_valid_u32($3)) {
+        printf("TCP SACK right sequence number out of range");
+    }
+    PacketDrillStruct *block = new PacketDrillStruct($1, $3);
+    if (!is_valid_u32($1)) {
+        printf("TCP SACK left sequence number out of range");
+    }
+    if (!is_valid_u32($3)) {
+        printf("TCP SACK right sequence number out of range");
+    }
+    $$ = block;
+}
+;
 
 syscall_spec
 : opt_end_time function_name function_arguments '=' expression opt_errno opt_note {

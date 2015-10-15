@@ -37,9 +37,11 @@ struct int_symbol platform_symbols_table[] = {
     { AF_INET,                          "AF_INET"                         },
 
     { SOCK_DGRAM,                       "SOCK_DGRAM"                      },
+    { SOCK_STREAM,                      "SOCK_STREAM"                     },
 
     { IPPROTO_IP,                       "IPPROTO_IP"                      },
     { IPPROTO_UDP,                      "IPPROTO_UDP"                     },
+    { IPPROTO_TCP,                      "IPPROTO_TCP"                     },
 
     /* Sentinel marking the end of the table. */
     { 0, NULL },
@@ -198,8 +200,6 @@ PacketDrillScript::PacketDrillScript(const char *scriptFile)
 
 PacketDrillScript::~PacketDrillScript()
 {
-    printf("Name eventlist: %s\n", eventList->getName());
-
     delete eventList;
 }
 
@@ -245,7 +245,7 @@ void PacketDrillScript::readScript()
     if (close(fd))
         EV_INFO << "File destriptor was closed\n";
     }
-    EV_INFO << "Script " << scriptPath << " was read with " << length << "length\n";
+    EV_INFO << "Script " << scriptPath << " was read with " << length << " length\n";
 }
 
 int PacketDrillScript::parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer)
@@ -275,4 +275,11 @@ PacketDrillStruct::PacketDrillStruct(uint32 v1, uint32 v2)
 {
     value1 = v1;
     value2 = v2;
+}
+
+PacketDrillTcpOption::PacketDrillTcpOption(uint16 kind_, uint16 length_)
+{
+    kind = kind_;
+    length = length_;
+    blockCount = 0;
 }
