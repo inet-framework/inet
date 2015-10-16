@@ -87,7 +87,7 @@ BasicContentionTx::~BasicContentionTx()
     cancelAndDelete(startTxEvent);
 }
 
-void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback)
+void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback)
 {
     Enter_Method("transmitContentionFrame(\"%s\")", frame->getName());
     ASSERT(fsm.getState() == IDLE);
@@ -99,7 +99,25 @@ void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t
     this->cwMax = cwMax;
     this->slotTime = slotTime;
     this->retryCount = retryCount;
-    this->completionCallback = completionCallback;
+    this->callback = callback;
+
+    int cw = computeCw(cwMin, cwMax, retryCount);
+    backoffSlots = intrand(cw + 1);
+    handleWithFSM(START, frame);
+}
+
+void BasicContentionTx::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback)
+{
+    Enter_Method("startContention()");
+    ASSERT(fsm.getState() == IDLE);
+    this->frame = nullptr;
+    this->ifs = ifs;
+    this->eifs = eifs;
+    this->cwMin = cwMin;
+    this->cwMax = cwMax;
+    this->slotTime = slotTime;
+    this->retryCount = retryCount;
+    this->callback = callback;
 
     int cw = computeCw(cwMin, cwMax, retryCount);
     backoffSlots = intrand(cw + 1);
@@ -179,7 +197,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(TRANSMIT) {
-            FSMA_Enter(mac->sendFrame(frame));
+            FSMA_Enter(sendDownFrame());
             FSMA_Event_Transition(TxFinished,
                     event == TRANSMISSION_FINISHED,
                     IDLE,
@@ -287,14 +305,23 @@ void BasicContentionTx::computeRemainingBackoffSlots()
         backoffSlots = remainingSlots;
 }
 
+void BasicContentionTx::sendDownFrame()
+{
+    if (!frame) {
+        frame = upperMac->getFrameToTransmit(callback, txIndex);
+        take(frame);
+    }
+    mac->sendFrame(frame);
+}
+
 void BasicContentionTx::reportTransmissionComplete()
 {
-    upperMac->transmissionComplete(completionCallback, txIndex);
+    upperMac->transmissionComplete(callback, txIndex);
 }
 
 void BasicContentionTx::reportInternalCollision()
 {
-    upperMac->internalCollision(completionCallback, txIndex);
+    upperMac->internalCollision(callback, txIndex);
 }
 
 const char *BasicContentionTx::getEventName(EventType event)

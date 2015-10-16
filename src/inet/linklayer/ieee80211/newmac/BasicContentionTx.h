@@ -53,7 +53,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         int cwMax = 0;
         simtime_t slotTime;
         int retryCount = 0;
-        ITxCallback *completionCallback = nullptr;
+        ITxCallback *callback = nullptr;
 
         cFSM fsm;
         simtime_t endEifsTime = SIMTIME_ZERO;
@@ -75,6 +75,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         virtual void cancelTransmissionRequest();
         virtual void switchToEifs();
         virtual void computeRemainingBackoffSlots();
+        virtual void sendDownFrame();
         virtual void reportTransmissionComplete();
         virtual void reportInternalCollision();
         virtual void updateDisplayString();
@@ -85,7 +86,8 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         ~BasicContentionTx();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) override;
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) override;
+        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) override; // will get frame via ITxCallback::getFrameToTransmit()
 
         virtual void mediumStateChanged(bool mediumFree) override;
         virtual void radioTransmissionFinished() override;

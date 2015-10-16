@@ -45,9 +45,25 @@ void FrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, 
     contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
+void FrameExchange::startContention(int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
+{
+    // frame will be obtained by calling back getFrameToTransmit() immediately before transmission
+    contentionTx[txIndex]->startContention(ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
+}
+
 void FrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
 {
     immediateTx->transmitImmediateFrame(frame, ifs, this);
+}
+
+bool FrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
+{
+    return false;  // not ours
+}
+
+Ieee80211DataOrMgmtFrame *FrameExchange::getFrameToTransmit(int txIndex)
+{
+    throw cRuntimeError(this, "Override getFrameToTransmit() if you want to use lazy transmission");
 }
 
 void FrameExchange::reportSuccess()
