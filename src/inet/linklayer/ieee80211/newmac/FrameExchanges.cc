@@ -253,11 +253,6 @@ void SendMulticastDataFrameExchange::start()
     transmitFrame();
 }
 
-bool SendMulticastDataFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
-{
-    return false;  // not ours
-}
-
 void SendMulticastDataFrameExchange::transmissionComplete(int txIndex)
 {
     reportSuccess();

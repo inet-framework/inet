@@ -239,6 +239,12 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+Ieee80211DataOrMgmtFrame *EdcaUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)
+{
+    Enter_Method("getFrameToTransmit()");
+    return callback->getFrameToTransmit(txIndex);
+}
+
 void EdcaUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");

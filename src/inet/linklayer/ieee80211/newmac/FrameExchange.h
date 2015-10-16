@@ -57,9 +57,13 @@ class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public I
 
     protected:
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
+        virtual void startContention(int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void reportSuccess();
         virtual void reportFailure();
+
+        virtual bool lowerFrameReceived(Ieee80211Frame *frame) override;
+        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(int txIndex) override;
 
     public:
         FrameExchange(FrameExchangeContext *context, IFinishedCallback *callback);

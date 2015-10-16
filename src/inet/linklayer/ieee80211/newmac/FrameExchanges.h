@@ -96,7 +96,6 @@ class INET_API SendMulticastDataFrameExchange : public FrameExchange
         SendMulticastDataFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendMulticastDataFrameExchange();
         virtual void start() override;
-        virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage* timer) override;

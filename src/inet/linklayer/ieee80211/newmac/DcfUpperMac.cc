@@ -188,6 +188,12 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+Ieee80211DataOrMgmtFrame *DcfUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)
+{
+    Enter_Method("getFrameToTransmit()");
+    return callback->getFrameToTransmit(txIndex);
+}
+
 void DcfUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
 {
     Enter_Method("transmissionComplete()");
