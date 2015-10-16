@@ -25,6 +25,8 @@
 namespace inet {
 namespace ieee80211 {
 
+class Ieee80211DataOrMgmtFrame;
+
 /**
  * Tx processes use this interface to notify their callers that the
  * last frame transmission has been completed, or that the transmission
@@ -34,6 +36,7 @@ namespace ieee80211 {
  */
 class INET_API ITxCallback {
     public:
+        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(int txIndex) = 0;
         virtual void transmissionComplete(int txIndex) = 0; // -1: immediate tx
         virtual void internalCollision(int txIndex) = 0;
 };

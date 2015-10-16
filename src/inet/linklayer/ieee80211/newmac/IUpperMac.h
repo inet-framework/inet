@@ -42,6 +42,7 @@ class INET_API IUpperMac
     public:
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
+        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(ITxCallback *callback, int txIndex) = 0;
         virtual void transmissionComplete(ITxCallback *callback, int txIndex) = 0;
         virtual void internalCollision(ITxCallback *callback, int txIndex) = 0;
 };

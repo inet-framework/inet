@@ -31,7 +31,7 @@ class ITxCallback;
 /**
  * Abstract interface for processes that implement contention-based channel access.
  * For each frame, ContentionTx listens on the channel for a DIFS (AIFS) period
- * then for a random backoff period before transitting the frame, and defers when
+ * then for a random backoff period before transmitting the frame, and defers when
  * busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
  * of the original DIFS (AIFS).
  *
@@ -43,7 +43,8 @@ class INET_API IContentionTx
 {
     public:
         virtual ~IContentionTx() {}
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *completionCallback) = 0;
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) = 0;
+        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) = 0; // will get frame via ITxCallback::getFrameToTransmit()
 
         // notifications
         virtual void mediumStateChanged(bool mediumFree) = 0;
