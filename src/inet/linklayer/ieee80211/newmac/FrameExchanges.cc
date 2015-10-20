@@ -239,7 +239,7 @@ void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
 SendMulticastDataFrameExchange::SendMulticastDataFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     FrameExchange(context, callback), dataFrame(dataFrame), txIndex(txIndex), accessCategory(accessCategory)
 {
-    ASSERT(utils->isBroadcast(dataFrame) || utils->isMulticast(dataFrame));
+    ASSERT(utils->isBroadcastOrMulticast(dataFrame));
     dataFrame->setDuration(0);
 }
 

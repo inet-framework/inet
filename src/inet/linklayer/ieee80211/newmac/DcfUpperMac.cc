@@ -157,7 +157,7 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             delete rtsFrame;
         }
         else if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
-            if (!utils->isBroadcast(frame) && !utils->isMulticast(frame))
+            if (!utils->isBroadcastOrMulticast(frame))
                 sendAck(dataOrMgmtFrame);
             if (duplicateDetection->isDuplicate(dataOrMgmtFrame)) {
                 EV_INFO << "Duplicate frame " << frame->getName() << ", dropping\n";
@@ -212,7 +212,7 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
 {
     ASSERT(!frameExchange);
 
-    if (utils->isBroadcast(frame) || utils->isMulticast(frame))
+    if (utils->isBroadcastOrMulticast(frame))
         utils->setFrameMode(frame, params->getBasicFrameMode());
     else
         utils->setFrameMode(frame, params->getDefaultDataFrameMode());
@@ -225,7 +225,7 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
     context.immediateTx = immediateTx;
 
     bool useRtsCts = frame->getByteLength() > params->getRtsThreshold();
-    if (utils->isBroadcast(frame) || utils->isMulticast(frame))
+    if (utils->isBroadcastOrMulticast(frame))
         frameExchange = new SendMulticastDataFrameExchange(&context, this, frame, txIndex, ac);
     else if (useRtsCts)
         frameExchange = new SendDataWithRtsCtsFrameExchange(&context, this, frame, txIndex, ac);
