@@ -36,6 +36,7 @@ class INET_API MacParameters : public IMacParameters
         const IIeee80211Mode *defaultDataFrameMode = nullptr;
         int shortRetryLimit;
         int rtsThreshold;
+        simtime_t phyRxStartDelay;
         bool edca = false;
         simtime_t slotTime;
         simtime_t sifsTime;
@@ -59,6 +60,7 @@ class INET_API MacParameters : public IMacParameters
         void setBasicFrameMode(const IIeee80211Mode *basicFrameMode) {this->basicFrameMode = basicFrameMode;}
         void setDefaultDataFrameMode(const IIeee80211Mode *defaultDataFrameMode) { this->defaultDataFrameMode = defaultDataFrameMode; }
         void setRtsThreshold(int rtsThreshold) { this->rtsThreshold = rtsThreshold; }
+        void setPhyRxStartDelay(simtime_t phyRxStartDelay) {this->phyRxStartDelay = phyRxStartDelay;}
         void setShortRetryLimit(int shortRetryLimit) { this->shortRetryLimit = shortRetryLimit; }
         void setEdcaEnabled(bool enabled) {edca = enabled;}
         void setSlotTime(simtime_t value) {slotTime = value;}
@@ -78,6 +80,7 @@ class INET_API MacParameters : public IMacParameters
         virtual const IIeee80211Mode *getDefaultDataFrameMode() const override {return defaultDataFrameMode;}
         virtual int getShortRetryLimit() const override {return shortRetryLimit;}
         virtual int getRtsThreshold() const override {return rtsThreshold;}
+        virtual simtime_t getPhyRxStartDelay() const override {return phyRxStartDelay;}
         virtual bool isEdcaEnabled() const override {return edca;}
         virtual simtime_t getSlotTime() const override {return slotTime;}
         virtual simtime_t getSifsTime() const override {return sifsTime;}
