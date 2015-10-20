@@ -136,9 +136,9 @@ bool MacUtils::isSentByUs(Ieee80211Frame *frame) const
 }
 
 
-bool MacUtils::isMulticast(Ieee80211Frame *frame) const
+bool MacUtils::isBroadcastOrMulticast(Ieee80211Frame *frame) const
 {
-    return frame && frame->getReceiverAddress().isMulticast();
+    return frame && frame->getReceiverAddress().isMulticast();  // also true for broadcast frames
 }
 
 bool MacUtils::isBroadcast(Ieee80211Frame *frame) const
