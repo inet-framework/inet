@@ -90,6 +90,7 @@ void DcfUpperMac::readParameters()
     params->setDefaultDataFrameMode(dataFrameMode);
     params->setShortRetryLimit(fallback(par("shortRetryLimit"), 7));
     params->setRtsThreshold(par("rtsThreshold"));
+    params->setPhyRxStartDelay(basicFrameMode->getPhyRxStartDelay());
 
     params->setEdcaEnabled(false);
     params->setSlotTime(fallback(par("slotTime"), dataFrameMode->getSlotTime()));

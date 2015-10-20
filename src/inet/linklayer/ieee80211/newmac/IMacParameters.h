@@ -61,6 +61,7 @@ class INET_API IMacParameters
         // other parameters
         virtual int getShortRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
+        virtual simtime_t getPhyRxStartDelay() const = 0;
 };
 
 } // namespace ieee80211
