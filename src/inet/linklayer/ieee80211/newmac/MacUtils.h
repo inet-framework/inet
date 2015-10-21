@@ -48,16 +48,19 @@ class INET_API MacUtils
 
         virtual simtime_t getAckDuration() const;
         virtual simtime_t getCtsDuration() const;
-        virtual simtime_t getAckEarlyTimeout() const;  // reception of ACK should begin after this time; TODO use this
-        virtual simtime_t getAckFullTimeout() const;  // ACK should be received after this time
+        virtual simtime_t getAckEarlyTimeout() const;  // reception of ACK should begin within this timeout period
+        virtual simtime_t getAckFullTimeout() const;  // ACK should be fully received within this timeout period
         virtual simtime_t getCtsEarlyTimeout() const;
         virtual simtime_t getCtsFullTimeout() const;
 
+        virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame) const;
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame, const IIeee80211Mode *dataFrameMode) const;
+        virtual Ieee80211RTSFrame *buildRtsFrame(const MACAddress& receiverAddress, simtime_t duration) const;
         virtual Ieee80211CTSFrame *buildCtsFrame(Ieee80211RTSFrame *rtsFrame) const;
         virtual Ieee80211ACKFrame *buildAckFrame(Ieee80211DataOrMgmtFrame *dataFrame) const;
 
         virtual Ieee80211Frame *setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
+        virtual const IIeee80211Mode *getFrameMode(Ieee80211Frame *frame) const;
 
         virtual bool isForUs(Ieee80211Frame *frame) const;
         virtual bool isSentByUs(Ieee80211Frame *frame) const;
