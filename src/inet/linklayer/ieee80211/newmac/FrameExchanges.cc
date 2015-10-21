@@ -199,7 +199,7 @@ SendDataWithRtsCtsFrameExchange::~SendDataWithRtsCtsFrameExchange()
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame, params->getDefaultDataFrameMode()), retryCount); break;
+        case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame), retryCount); break;
         case 1: expectReply(utils->getCtsFullTimeout()); break;
         case 2: transmitImmediateFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
         case 3: expectReply(utils->getAckFullTimeout()); break;
