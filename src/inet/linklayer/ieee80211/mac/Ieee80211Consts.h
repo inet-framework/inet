@@ -64,7 +64,7 @@ const double RED_PHY_HEADER_DURATION = 0.000020;
 /* @brief Length of PLCP header and preamble */
 const double PHY_HEADER_LENGTH = 192;
 
-const short int MAX_NUMBER_OF_FRAGMENTS = 16;
+const short int MAX_NUM_FRAGMENTS = 16;
 
 } // namespace ieee80211
 
