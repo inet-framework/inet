@@ -42,25 +42,39 @@ void ReassemblyNotSupported::purge(const MACAddress& address, int tid, int start
 
 std::vector<Ieee80211DataOrMgmtFrame*> BasicFragmentation::fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold)
 {
+    // Notes:
+    // 1. only the MSDU is carried in the fragments (i.e. only frame's payload, without the 802.11 header)
+    // 2. fragmentationThreshold refers to the MPDU size, i.e. 802.11 header included
+    // 3. for convenience, this implementation sends the original frame encapsulated in the last fragment, all other fragments are dummies with no data
+    //
     std::vector<Ieee80211DataOrMgmtFrame*> fragments;
-    Ieee80211DataOrMgmtFrame *newFrame0 = frame->dup();
-    delete newFrame0->decapsulate();
-    newFrame0->encapsulate(frame);
-    if (newFrame0->getByteLength() > MAX_NUMBER_OF_FRAGMENTS * fragmentationThreshold)
-        throw cRuntimeError("Too big frame");
-    int i=0;
-    for( ; fragmentationThreshold < newFrame0->getByteLength(); i++) {
-        Ieee80211DataOrMgmtFrame *newFrame = newFrame0->dup();
-        newFrame->setByteLength(fragmentationThreshold);
-        newFrame->setFragmentNumber(i);
-        newFrame->setMoreFragments(true);
-        fragments.push_back(newFrame);
-        newFrame0->addByteLength(-fragmentationThreshold);
+
+    cPacket *payload = frame->decapsulate();
+    int payloadLength = payload->getByteLength();
+    Ieee80211DataOrMgmtFrame *fragmentHeader = frame->dup();
+    int headerLength = fragmentHeader->getByteLength();
+    frame->encapsulate(payload); // restore original state
+
+    int maxFragmentPayload = fragmentationThreshold - headerLength;
+    if (payloadLength >= maxFragmentPayload * MAX_NUM_FRAGMENTS)
+        throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
+
+    int i = 0;
+    for( ; headerLength + payloadLength > fragmentationThreshold; i++) {
+        Ieee80211DataOrMgmtFrame *fragment = fragmentHeader->dup();
+        fragment->setByteLength(fragmentationThreshold);
+        fragment->setFragmentNumber(i);
+        fragment->setMoreFragments(true);
+        fragments.push_back(fragment);
+        payloadLength -= maxFragmentPayload;
     }
-    ASSERT(i > 0 && i < MAX_NUMBER_OF_FRAGMENTS);
-    newFrame0->setFragmentNumber(i);
-    newFrame0->setMoreFragments(false);
-    fragments.push_back(newFrame0);
+
+    Ieee80211DataOrMgmtFrame *lastFragment = fragmentHeader;
+    lastFragment->encapsulate(frame);
+    lastFragment->setByteLength(headerLength + payloadLength);
+    lastFragment->setFragmentNumber(i);
+    lastFragment->setMoreFragments(false);
+    fragments.push_back(lastFragment);
     return fragments;
 }
 
@@ -77,7 +91,7 @@ Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame 
             key.tid = qosDataFrame->getTid();
     key.seqNum = frame->getSequenceNumber();
     short fragNum = frame->getFragmentNumber();
-    ASSERT(fragNum >= 0 && fragNum < MAX_NUMBER_OF_FRAGMENTS);
+    ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
     auto& value = fragmentsMap[key];
 
     // update entry
@@ -87,7 +101,7 @@ Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame 
         value.allFragments = (fragmentBit << 1) - 1;
     if (!value.frame) {
         frame->setByteLength(0);  // needed for decapsulation of larger packet
-        value.frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(frame->decapsulate());
+        value.frame = check_and_cast_nullable<Ieee80211DataOrMgmtFrame *>(frame->decapsulate());
     }
     delete frame;
 
