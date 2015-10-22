@@ -40,7 +40,7 @@ class INET_API IFragmenter
          * Splits up the frame, and returns the fragments in a vector. The decision whether
          * a given frame needs to be fragmented or not is outside the scope of this class.
          */
-        virtual std::vector<Ieee80211DataOrMgmtFrame*> fragment(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual std::vector<Ieee80211DataOrMgmtFrame*> fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold) = 0;
         virtual ~IFragmenter() {}
 };
 
