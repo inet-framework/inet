@@ -24,9 +24,15 @@ Define_Module(OnoeRateControl);
 
 void OnoeRateControl::initialize(const Ieee80211ModeSet* modeSet, const IIeee80211Mode *initialRate)
 {
-    this->modeSet = modeSet;
+    Enter_Method_Silent("initialize()");
+    RateControlBase::initialize(modeSet);
     this->currentMode = initialRate;
     interval = par("interval");
+    WATCH(numOfRetries);
+    WATCH(credit);
+    WATCH(numOfSuccTransmissions);
+    WATCH(numOfGivenUpTransmissions);
+    WATCH(avgRetriesPerFrame);
 }
 
 void OnoeRateControl::resetStatisticalVariables()
@@ -38,23 +44,27 @@ void OnoeRateControl::resetStatisticalVariables()
 
 void OnoeRateControl::handleMessage(cMessage* msg)
 {
-    if (msg == timer)
-    {
-        computeMode();
-        scheduleAt(simTime() + interval, timer);
-    }
-    else
-        throw cRuntimeError("Unknown msg = %s", msg->getName());
+    throw cRuntimeError("This module doesn't handle self messages");
 }
 
 void OnoeRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee80211Mode* mode, int retryCount, bool isSuccessful, bool isGivenUp)
 {
+    computeModeIfTimerIsExpired();
     if (isSuccessful)
         numOfSuccTransmissions++;
     else if (isGivenUp)
         numOfGivenUpTransmissions++;
     if (retryCount > 0)
         numOfRetries++;
+}
+
+void OnoeRateControl::computeModeIfTimerIsExpired()
+{
+    if (simTime() - timer >= interval)
+    {
+        computeMode();
+        timer = simTime();
+    }
 }
 
 void OnoeRateControl::frameReceived(const Ieee80211Frame* frame, const Ieee80211ReceptionIndication* receptionIndication)
@@ -70,7 +80,7 @@ void OnoeRateControl::computeMode()
     {
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1)
         {
-            currentMode = modeSet->getSlowerMode(currentMode);
+            currentMode = decreaseRateIfPossible(currentMode);
             credit = 0;
         }
         else if (avgRetriesPerFrame >= 0.1)
@@ -80,7 +90,7 @@ void OnoeRateControl::computeMode()
 
         if (credit >= 10)
         {
-            currentMode = modeSet->getFasterMode(currentMode);
+            currentMode = increaseRateIfPossible(currentMode);
             credit = 0;
         }
 
@@ -88,8 +98,11 @@ void OnoeRateControl::computeMode()
     }
 }
 
-const IIeee80211Mode* OnoeRateControl::getRate() const
+const IIeee80211Mode* OnoeRateControl::getRate()
 {
+    Enter_Method_Silent("getRate()");
+    computeModeIfTimerIsExpired();
+    EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;
 }
 

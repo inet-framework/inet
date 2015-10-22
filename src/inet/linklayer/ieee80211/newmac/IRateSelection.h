@@ -32,6 +32,11 @@ class Ieee80211Frame;
 class Ieee80211DataOrMgmtFrame;
 class IRateControl;
 
+/**
+ * Abstract interface for rate selection. Rate selection decides what bit rate
+ * (or MCS) should be used for any particular frame. The rules of rate selection
+ * is described in the 802.11 specification in the section titled "Multirate Support".
+ */
 class INET_API IRateSelection
 {
     public:

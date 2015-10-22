@@ -28,6 +28,10 @@ namespace ieee80211 {
 
 using namespace physicallayer;
 
+/**
+ * Abstract interface for auto rate control algorithms. Examples of rate
+ * control algorithms are ARF, AARF, Onoe and Minstrel.
+ */
 class INET_API IRateControl
 {
     public:
