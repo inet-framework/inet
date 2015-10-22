@@ -15,9 +15,9 @@
 
 package inet.linklayer.ieee80211.newmac;
 
-simple OnoeRateControl like IRateControl
+simple ARFRateControl extends AARFRateControl
 {
     parameters:
-        double interval @unit("s") = default(1s);
+        increaseThresholdFactor = default(1);
         @display("i=block/control");
 }

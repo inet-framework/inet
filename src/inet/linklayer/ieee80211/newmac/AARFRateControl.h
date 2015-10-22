@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ONOERATECONTROL_H
-#define __INET_ONOERATECONTROL_H
+#ifndef __INET_AARFRATECONTROL_H
+#define __INET_AARFRATECONTROL_H
 
 #include "RateControlBase.h"
 
@@ -24,28 +24,29 @@ namespace inet {
 namespace ieee80211 {
 
 /**
- * Implements the Onoe rate control algorithms.
+ * Implements the ARF and AARF rate control algorithms.
  */
-class INET_API OnoeRateControl : public RateControlBase, public cSimpleModule
+class INET_API AARFRateControl : public RateControlBase, public cSimpleModule
 {
     protected:
         const IIeee80211Mode *currentMode = nullptr;
 
         simtime_t timer = SIMTIME_ZERO;
         simtime_t interval = SIMTIME_ZERO;
+        bool probing = false;
+        int increaseThreshold = -1;
+        int maxIncreaseThreshold = -1;
+        int decreaseThreshold = -1;
+        double factor = -1;
 
-        int numOfRetries = 0;
-        int numOfSuccTransmissions = 0;
-        int numOfGivenUpTransmissions = 0;
-
-        double avgRetriesPerFrame = 0;
-        int credit = 0;
+        int numberOfConsSuccTransmissions = 0;
 
     protected:
         void handleMessage(cMessage *msg);
-        void computeMode();
-        void resetStatisticalVariables();
-        void computeModeIfTimerIsExpired();
+        void multiplyIncreaseThreshold(double factor);
+        void resetIncreaseThreshdold();
+        void resetTimer();
+        void increaseRateIfTimerIsExpired();
 
     public:
         void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) override;
@@ -58,4 +59,4 @@ class INET_API OnoeRateControl : public RateControlBase, public cSimpleModule
 } /* namespace ieee80211 */
 } /* namespace inet */
 
-#endif // infndef __INET_ONOERATECONTROL_H
+#endif // infndef __INET_AARFRATECONTROL_H

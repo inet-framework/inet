@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2015 Andras Varga
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -13,11 +15,28 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee80211.newmac;
+#ifndef __INET_RATECONTROLBASE_H
+#define __INET_RATECONTROLBASE_H
 
-simple OnoeRateControl like IRateControl
+#include "IRateControl.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class RateControlBase : public IRateControl
 {
-    parameters:
-        double interval @unit("s") = default(1s);
-        @display("i=block/control");
-}
+    protected:
+        const Ieee80211ModeSet *modeSet = nullptr;
+
+    protected:
+        const IIeee80211Mode *increaseRateIfPossible(const IIeee80211Mode *currentMode);
+        const IIeee80211Mode *decreaseRateIfPossible(const IIeee80211Mode *currentMode);
+
+    public:
+        void initialize(const Ieee80211ModeSet *modeSet) { this->modeSet = modeSet; }
+};
+
+} /* namespace ieee80211 */
+} /* namespace inet */
+
+#endif /* __INET_RATECONTROLBASE_H */
