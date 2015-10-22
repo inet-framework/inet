@@ -89,8 +89,8 @@ void EdcaUpperMac::initialize()
     statistics->setRateControl(rateControl);
 
     duplicateDetection = new QoSDuplicateDetector();
-    fragmenter = new FragmentationNotSupported();
-    reassembly = new ReassemblyNotSupported();
+    fragmenter = new BasicFragmentation();
+    reassembly = new BasicReassembly();
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
@@ -154,7 +154,7 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
     if (frame->getByteLength() <= fragmentationThreshold)
         enqueue(frame, ac);
     else {
-        auto fragments = fragmenter->fragment(frame);
+        auto fragments = fragmenter->fragment(frame, fragmentationThreshold);
         for (Ieee80211DataOrMgmtFrame *fragment : fragments)
             enqueue(fragment, ac);
     }
