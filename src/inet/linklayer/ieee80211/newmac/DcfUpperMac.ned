@@ -43,5 +43,7 @@ simple DcfUpperMac like IUpperMac
         int cwMin = default(-1); // minimum contention window, -1 means default
         int cwMax = default(-1); // maximum contention window, -1 means default
         int cwMulticast = default(-1); // contention window for multicast frames, -1 means default
+        string fragmenterClass = default("BasicFragmentation");
+        string reassemblyClass = default("BasicReassembly");
         @display("i=block/layer");
 }

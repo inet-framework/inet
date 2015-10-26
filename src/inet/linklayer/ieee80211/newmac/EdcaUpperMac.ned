@@ -75,5 +75,8 @@ simple EdcaUpperMac like IUpperMac
         int cwMulticast2 = default(-1); // contention window for multicast frames in AC_VI, -1 means default
         int cwMulticast3 = default(-1); // contention window for multicast frames in AC_VO, -1 means default
 
+        string fragmenterClass = default("BasicFragmentation");
+        string reassemblyClass = default("BasicReassembly");
+
         @display("i=block/layer");
 }

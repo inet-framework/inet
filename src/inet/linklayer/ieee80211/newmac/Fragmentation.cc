@@ -24,10 +24,14 @@
 namespace inet {
 namespace ieee80211 {
 
+Register_Class(FragmentationNotSupported);
+
 std::vector<Ieee80211DataOrMgmtFrame*> FragmentationNotSupported::fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold)
 {
     throw cRuntimeError("Fragmentation not supported");
 }
+
+Register_Class(ReassemblyNotSupported);
 
 Ieee80211DataOrMgmtFrame *ReassemblyNotSupported::addFragment(Ieee80211DataOrMgmtFrame *frame)
 {
@@ -39,6 +43,8 @@ void ReassemblyNotSupported::purge(const MACAddress& address, int tid, int start
 }
 
 //---
+
+Register_Class(BasicFragmentation);
 
 std::vector<Ieee80211DataOrMgmtFrame*> BasicFragmentation::fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold)
 {
@@ -79,6 +85,8 @@ std::vector<Ieee80211DataOrMgmtFrame*> BasicFragmentation::fragment(Ieee80211Dat
 }
 
 //---
+
+Register_Class(BasicReassembly);
 
 Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame *frame)
 {

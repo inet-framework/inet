@@ -25,26 +25,26 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API FragmentationNotSupported : public IFragmenter
+class INET_API FragmentationNotSupported : public IFragmenter, public cObject
 {
     public:
         virtual std::vector<Ieee80211DataOrMgmtFrame*> fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold);
 };
 
-class INET_API ReassemblyNotSupported : public IReassembly
+class INET_API ReassemblyNotSupported : public IReassembly, public cObject
 {
     public:
         virtual Ieee80211DataOrMgmtFrame *addFragment(Ieee80211DataOrMgmtFrame *frame);
         virtual void purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber);
 };
 
-class INET_API BasicFragmentation : public IFragmenter
+class INET_API BasicFragmentation : public IFragmenter, public cObject
 {
     public:
         virtual std::vector<Ieee80211DataOrMgmtFrame*> fragment(Ieee80211DataOrMgmtFrame *frame, int fragmentationThreshold);
 };
 
-class INET_API BasicReassembly : public IReassembly
+class INET_API BasicReassembly : public IReassembly, public cObject
 {
     protected:
         struct Key {
