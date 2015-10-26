@@ -30,6 +30,7 @@
 #include "BasicRateSelection.h"
 #include "OnoeRateControl.h"
 #include "Statistics.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -76,8 +77,8 @@ void DcfUpperMac::initialize()
     statistics->setRateControl(rateControl);
 
     duplicateDetection = new NonQoSDuplicateDetector(); //TODO or LegacyDuplicateDetector();
-    fragmenter = new BasicFragmentation();
-    reassembly = new BasicReassembly();
+    fragmenter = check_and_cast<IFragmenter *>(inet::utils::createOne(par("fragmenterClass")));
+    reassembly = check_and_cast<IReassembly *>(inet::utils::createOne(par("reassemblyClass")));
 
     WATCH(maxQueueSize);
     WATCH(fragmentationThreshold);
