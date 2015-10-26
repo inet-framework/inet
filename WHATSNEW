@@ -1,6 +1,13 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.1.1 (Oct, 2015) - Stable
+-------------------------------
+
+Changes:
+
+  - Fixed build problem on Windows
+
 INET-3.1.0 (Oct, 2015) - Stable
 -------------------------------
 
