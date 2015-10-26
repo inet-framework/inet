@@ -124,17 +124,20 @@
  */
 
 
+#define _GNU_SOURCE
 #include "inet/common/INETDefs.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#else
+#include "winsock2.h"
 #endif
+#include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -266,7 +269,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 }*/
 
 
-#line 270 "parser.cc" /* yacc.c:339  */
+#line 273 "parser.cc" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -328,7 +331,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 210 "parser.y" /* yacc.c:355  */
+#line 213 "parser.y" /* yacc.c:355  */
 
     int64 integer;
     double floating;
@@ -355,7 +358,7 @@ union YYSTYPE
     cQueue *tcp_options;
     struct errno_spec *errno_info;
 
-#line 359 "parser.cc" /* yacc.c:355  */
+#line 362 "parser.cc" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -384,7 +387,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 388 "parser.cc" /* yacc.c:358  */
+#line 391 "parser.cc" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -685,14 +688,14 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   272,   272,   279,   283,   290,   320,   327,   334,   340,
-     347,   357,   363,   372,   375,   382,   385,   391,   420,   441,
-     449,   453,   460,   463,   466,   474,   480,   500,   503,   512,
-     515,   524,   528,   531,   538,   542,   550,   553,   556,   563,
-     570,   573,   578,   595,   601,   608,   628,   640,   643,   649,
-     656,   659,   665,   669,   676,   679,   681,   684,   688,   693,
-     698,   701,   709,   715,   721,   732,   736,   745,   748,   756,
-     759,   765,   771,   774
+       0,   275,   275,   282,   286,   293,   323,   330,   337,   343,
+     350,   360,   366,   375,   378,   385,   388,   394,   423,   444,
+     452,   456,   463,   466,   469,   473,   479,   499,   502,   511,
+     514,   523,   527,   530,   537,   541,   549,   552,   555,   562,
+     569,   572,   577,   594,   600,   607,   627,   639,   642,   648,
+     655,   658,   664,   668,   675,   678,   680,   683,   687,   692,
+     697,   700,   708,   714,   720,   731,   735,   744,   747,   755,
+     758,   764,   770,   773
 };
 #endif
 
@@ -1638,33 +1641,33 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 272 "parser.y" /* yacc.c:1646  */
+#line 275 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = NULL;    /* The parser output is in out_script */
 }
-#line 1646 "parser.cc" /* yacc.c:1646  */
+#line 1649 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 279 "parser.y" /* yacc.c:1646  */
+#line 282 "parser.y" /* yacc.c:1646  */
     {
     out_script->addEvent((yyvsp[0].event));    /* save pointer to event list as output of parser */
     (yyval.event) = (yyvsp[0].event);    /* return the tail so that we can append to it */
 }
-#line 1655 "parser.cc" /* yacc.c:1646  */
+#line 1658 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 283 "parser.y" /* yacc.c:1646  */
+#line 286 "parser.y" /* yacc.c:1646  */
     {
     out_script->addEvent((yyvsp[0].event));
     (yyval.event) = (yyvsp[0].event);    /* return the tail so that we can append to it */
 }
-#line 1664 "parser.cc" /* yacc.c:1646  */
+#line 1667 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 290 "parser.y" /* yacc.c:1646  */
+#line 293 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = (yyvsp[0].event);
     (yyval.event)->setLineNumber((yyvsp[-1].event)->getLineNumber());    /* use timestamp's line */
@@ -1692,11 +1695,11 @@ yyreduce:
     }
     free((yyvsp[-1].event));
 }
-#line 1696 "parser.cc" /* yacc.c:1646  */
+#line 1699 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 320 "parser.y" /* yacc.c:1646  */
+#line 323 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(INVALID_EVENT);
     (yyval.event)->setLineNumber((yylsp[0]).first_line);
@@ -1704,11 +1707,11 @@ yyreduce:
     (yyval.event)->setTimeType(RELATIVE_TIME);
     printf("relative done\n");
 }
-#line 1708 "parser.cc" /* yacc.c:1646  */
+#line 1711 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 327 "parser.y" /* yacc.c:1646  */
+#line 330 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(INVALID_EVENT);
     (yyval.event)->setLineNumber((yylsp[0]).first_line);
@@ -1716,22 +1719,22 @@ yyreduce:
     (yyval.event)->setTimeType(ABSOLUTE_TIME);
     printf("absolute done\n");
 }
-#line 1720 "parser.cc" /* yacc.c:1646  */
+#line 1723 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 334 "parser.y" /* yacc.c:1646  */
+#line 337 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(INVALID_EVENT);
     (yyval.event)->setLineNumber((yylsp[0]).first_line);
     (yyval.event)->setTimeType(ANY_TIME);
     printf("any done\n");
 }
-#line 1731 "parser.cc" /* yacc.c:1646  */
+#line 1734 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 340 "parser.y" /* yacc.c:1646  */
+#line 343 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(INVALID_EVENT);
     (yyval.event)->setLineNumber((yylsp[-2]).first_line);
@@ -1739,11 +1742,11 @@ yyreduce:
     (yyval.event)->setEventTime((yyvsp[-2].time_usecs));
     (yyval.event)->setEventTimeEnd((yyvsp[0].time_usecs));
 }
-#line 1743 "parser.cc" /* yacc.c:1646  */
+#line 1746 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 347 "parser.y" /* yacc.c:1646  */
+#line 350 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(INVALID_EVENT);
     (yyval.event)->setLineNumber((yylsp[-4]).first_line);
@@ -1751,66 +1754,66 @@ yyreduce:
     (yyval.event)->setEventTime((yyvsp[-3].time_usecs));
     (yyval.event)->setEventTimeEnd((yyvsp[0].time_usecs));
 }
-#line 1755 "parser.cc" /* yacc.c:1646  */
+#line 1758 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 357 "parser.y" /* yacc.c:1646  */
+#line 360 "parser.y" /* yacc.c:1646  */
     {
     if ((yyvsp[0].floating) < 0) {
         printf("negative time");
     }
     (yyval.time_usecs) = (int64)((yyvsp[0].floating) * 1.0e6); /* convert float secs to s64 microseconds */
 }
-#line 1766 "parser.cc" /* yacc.c:1646  */
+#line 1769 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 363 "parser.y" /* yacc.c:1646  */
+#line 366 "parser.y" /* yacc.c:1646  */
     {
     if ((yyvsp[0].integer) < 0) {
         printf("negative time");
     }
     (yyval.time_usecs) = (int64)((yyvsp[0].integer) * 1000000); /* convert int secs to s64 microseconds */
 }
-#line 1777 "parser.cc" /* yacc.c:1646  */
+#line 1780 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 372 "parser.y" /* yacc.c:1646  */
+#line 375 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(PACKET_EVENT);  (yyval.event)->setPacket((yyvsp[0].packet));
 }
-#line 1785 "parser.cc" /* yacc.c:1646  */
+#line 1788 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 375 "parser.y" /* yacc.c:1646  */
+#line 378 "parser.y" /* yacc.c:1646  */
     {
     (yyval.event) = new PacketDrillEvent(SYSCALL_EVENT);
     (yyval.event)->setSyscall((yyvsp[0].syscall));
 }
-#line 1794 "parser.cc" /* yacc.c:1646  */
+#line 1797 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 382 "parser.y" /* yacc.c:1646  */
-    {
-    (yyval.packet) = (yyvsp[0].packet);
-}
-#line 1802 "parser.cc" /* yacc.c:1646  */
-    break;
-
-  case 16:
 #line 385 "parser.y" /* yacc.c:1646  */
     {
     (yyval.packet) = (yyvsp[0].packet);
 }
-#line 1810 "parser.cc" /* yacc.c:1646  */
+#line 1805 "parser.cc" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 388 "parser.y" /* yacc.c:1646  */
+    {
+    (yyval.packet) = (yyvsp[0].packet);
+}
+#line 1813 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 391 "parser.y" /* yacc.c:1646  */
+#line 394 "parser.y" /* yacc.c:1646  */
     {
     char *error = NULL;
     PacketDrillPacket *outer = (yyvsp[-5].packet), *inner = NULL;
@@ -1837,11 +1840,11 @@ yyreduce:
 
     (yyval.packet) = inner;
 }
-#line 1841 "parser.cc" /* yacc.c:1646  */
+#line 1844 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 420 "parser.y" /* yacc.c:1646  */
+#line 423 "parser.y" /* yacc.c:1646  */
     {
     char *error = NULL;
     PacketDrillPacket *outer = (yyvsp[-4].packet), *inner = NULL;
@@ -1859,75 +1862,71 @@ yyreduce:
 
     (yyval.packet) = inner;
 }
-#line 1863 "parser.cc" /* yacc.c:1646  */
+#line 1866 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 441 "parser.y" /* yacc.c:1646  */
+#line 444 "parser.y" /* yacc.c:1646  */
     {
     (yyval.packet) = new PacketDrillPacket();
     (yyval.packet)->setDirection((yyvsp[0].direction));
 }
-#line 1872 "parser.cc" /* yacc.c:1646  */
+#line 1875 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 449 "parser.y" /* yacc.c:1646  */
+#line 452 "parser.y" /* yacc.c:1646  */
     {
     (yyval.direction) = DIRECTION_INBOUND;
     current_script_line = yylineno;
 }
-#line 1881 "parser.cc" /* yacc.c:1646  */
+#line 1884 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 453 "parser.y" /* yacc.c:1646  */
+#line 456 "parser.y" /* yacc.c:1646  */
     {
     (yyval.direction) = DIRECTION_OUTBOUND;
     current_script_line = yylineno;
 }
-#line 1890 "parser.cc" /* yacc.c:1646  */
+#line 1893 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 460 "parser.y" /* yacc.c:1646  */
+#line 463 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = (yyvsp[0].string);
 }
-#line 1898 "parser.cc" /* yacc.c:1646  */
+#line 1901 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 463 "parser.y" /* yacc.c:1646  */
+#line 466 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = strdup(".");
 }
-#line 1906 "parser.cc" /* yacc.c:1646  */
+#line 1909 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 466 "parser.y" /* yacc.c:1646  */
+#line 469 "parser.y" /* yacc.c:1646  */
     {
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
     asprintf(&((yyval.string)), "%s.", (yyvsp[-1].string));
-#else
-    sprintf(&((yyval.string)), "%s.", (yyvsp[-1].string));
-#endif
     free((yyvsp[-1].string));
 }
-#line 1919 "parser.cc" /* yacc.c:1646  */
+#line 1918 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 474 "parser.y" /* yacc.c:1646  */
+#line 473 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = strdup("");
 }
-#line 1927 "parser.cc" /* yacc.c:1646  */
+#line 1926 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 480 "parser.y" /* yacc.c:1646  */
+#line 479 "parser.y" /* yacc.c:1646  */
     {
     if (!is_valid_u32((yyvsp[-5].integer))) {
         printf("TCP start sequence number out of range");
@@ -1945,108 +1944,108 @@ yyreduce:
     (yyval.tcp_sequence_info).payload_bytes = (yyvsp[-1].integer);
     (yyval.tcp_sequence_info).protocol = IPPROTO_TCP;
 }
-#line 1949 "parser.cc" /* yacc.c:1646  */
+#line 1948 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 500 "parser.y" /* yacc.c:1646  */
+#line 499 "parser.y" /* yacc.c:1646  */
     {
     (yyval.sequence_number) = 0;
 }
-#line 1957 "parser.cc" /* yacc.c:1646  */
+#line 1956 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 503 "parser.y" /* yacc.c:1646  */
+#line 502 "parser.y" /* yacc.c:1646  */
     {
     if (!is_valid_u32((yyvsp[0].integer))) {
     printf("TCP ack sequence number out of range");
     }
     (yyval.sequence_number) = (yyvsp[0].integer);
 }
-#line 1968 "parser.cc" /* yacc.c:1646  */
+#line 1967 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 512 "parser.y" /* yacc.c:1646  */
+#line 511 "parser.y" /* yacc.c:1646  */
     {
     (yyval.window) = -1;
 }
-#line 1976 "parser.cc" /* yacc.c:1646  */
+#line 1975 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 515 "parser.y" /* yacc.c:1646  */
+#line 514 "parser.y" /* yacc.c:1646  */
     {
     if (!is_valid_u16((yyvsp[0].integer))) {
         printf("TCP window value out of range");
     }
     (yyval.window) = (yyvsp[0].integer);
 }
-#line 1987 "parser.cc" /* yacc.c:1646  */
+#line 1986 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 524 "parser.y" /* yacc.c:1646  */
+#line 523 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_options) = new cQueue("opt_tcp_options");
     printf("opt_tcp_options: %p\n", (yyval.tcp_options));
 }
-#line 1996 "parser.cc" /* yacc.c:1646  */
+#line 1995 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 528 "parser.y" /* yacc.c:1646  */
+#line 527 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_options) = (yyvsp[-1].tcp_options);
 }
-#line 2004 "parser.cc" /* yacc.c:1646  */
+#line 2003 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 531 "parser.y" /* yacc.c:1646  */
+#line 530 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_options) = NULL; /* FLAG_OPTIONS_NOCHECK */
 }
-#line 2012 "parser.cc" /* yacc.c:1646  */
+#line 2011 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 538 "parser.y" /* yacc.c:1646  */
+#line 537 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_options) = new cQueue("tcp_option");
     (yyval.tcp_options)->insert((yyvsp[0].tcp_option));
 }
-#line 2021 "parser.cc" /* yacc.c:1646  */
+#line 2020 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 542 "parser.y" /* yacc.c:1646  */
+#line 541 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_options) = (yyvsp[-2].tcp_options);
     (yyval.tcp_options)->insert((yyvsp[0].tcp_option));
 }
-#line 2030 "parser.cc" /* yacc.c:1646  */
+#line 2029 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 550 "parser.y" /* yacc.c:1646  */
+#line 549 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_NOP, 1);
 }
-#line 2038 "parser.cc" /* yacc.c:1646  */
+#line 2037 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 553 "parser.y" /* yacc.c:1646  */
+#line 552 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_EOL, 1);
 }
-#line 2046 "parser.cc" /* yacc.c:1646  */
+#line 2045 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 556 "parser.y" /* yacc.c:1646  */
+#line 555 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_MAXSEG, TCPOLEN_MAXSEG);
     if (!is_valid_u16((yyvsp[0].integer))) {
@@ -2054,11 +2053,11 @@ yyreduce:
     }
     (yyval.tcp_option)->setMss((yyvsp[0].integer));
 }
-#line 2058 "parser.cc" /* yacc.c:1646  */
+#line 2057 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 563 "parser.y" /* yacc.c:1646  */
+#line 562 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_WINDOW, TCPOLEN_WINDOW);
     if (!is_valid_u8((yyvsp[0].integer))) {
@@ -2066,29 +2065,29 @@ yyreduce:
     }
     (yyval.tcp_option)->setWindowScale((yyvsp[0].integer));
 }
-#line 2070 "parser.cc" /* yacc.c:1646  */
+#line 2069 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 570 "parser.y" /* yacc.c:1646  */
+#line 569 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_SACK_PERMITTED, TCPOLEN_SACK_PERMITTED);
 }
-#line 2078 "parser.cc" /* yacc.c:1646  */
+#line 2077 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 573 "parser.y" /* yacc.c:1646  */
+#line 572 "parser.y" /* yacc.c:1646  */
     {
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_SACK, 2+8*(yyvsp[0].expression_list)->getLength());
     printf("tcp_option: sack block list\n");
     (yyval.tcp_option)->setBlockList((yyvsp[0].expression_list));
 }
-#line 2088 "parser.cc" /* yacc.c:1646  */
+#line 2087 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 578 "parser.y" /* yacc.c:1646  */
+#line 577 "parser.y" /* yacc.c:1646  */
     {
     uint32 val, ecr;
     (yyval.tcp_option) = new PacketDrillTcpOption(TCPOPT_TIMESTAMP, TCPOLEN_TIMESTAMP);
@@ -2103,31 +2102,31 @@ yyreduce:
     (yyval.tcp_option)->setVal(val);
     (yyval.tcp_option)->setEcr(ecr);
 }
-#line 2107 "parser.cc" /* yacc.c:1646  */
+#line 2106 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 595 "parser.y" /* yacc.c:1646  */
+#line 594 "parser.y" /* yacc.c:1646  */
     {
     printf("sack_block_list\n");
     (yyval.expression_list) = new cQueue("sack_block_list");
     printf("links=%d rechts=%d\n", (yyvsp[0].sack_block)->getValue1(), (yyvsp[0].sack_block)->getValue2());
     (yyval.expression_list)->insert((yyvsp[0].sack_block));
 }
-#line 2118 "parser.cc" /* yacc.c:1646  */
+#line 2117 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 601 "parser.y" /* yacc.c:1646  */
+#line 600 "parser.y" /* yacc.c:1646  */
     {
     printf("links=%d rechts=%d\n", (yyvsp[0].sack_block)->getValue1(), (yyvsp[0].sack_block)->getValue2());
     (yyval.expression_list) = (yyvsp[-1].expression_list); (yyvsp[-1].expression_list)->insert((yyvsp[0].sack_block));
 }
-#line 2127 "parser.cc" /* yacc.c:1646  */
+#line 2126 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 608 "parser.y" /* yacc.c:1646  */
+#line 607 "parser.y" /* yacc.c:1646  */
     {
     printf("sack block\n");
     if (!is_valid_u32((yyvsp[-2].integer))) {
@@ -2145,11 +2144,11 @@ yyreduce:
     }
     (yyval.sack_block) = block;
 }
-#line 2149 "parser.cc" /* yacc.c:1646  */
+#line 2148 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 628 "parser.y" /* yacc.c:1646  */
+#line 627 "parser.y" /* yacc.c:1646  */
     {
     (yyval.syscall) = (struct syscall_spec *)calloc(1, sizeof(struct syscall_spec));
     (yyval.syscall)->end_usecs = (yyvsp[-6].time_usecs);
@@ -2159,154 +2158,154 @@ yyreduce:
     (yyval.syscall)->error = (yyvsp[-1].errno_info);
     (yyval.syscall)->note = (yyvsp[0].string);
 }
-#line 2163 "parser.cc" /* yacc.c:1646  */
+#line 2162 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 640 "parser.y" /* yacc.c:1646  */
+#line 639 "parser.y" /* yacc.c:1646  */
     {
     (yyval.time_usecs) = -1;
 }
-#line 2171 "parser.cc" /* yacc.c:1646  */
+#line 2170 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 643 "parser.y" /* yacc.c:1646  */
+#line 642 "parser.y" /* yacc.c:1646  */
     {
     (yyval.time_usecs) = (yyvsp[0].time_usecs);
 }
-#line 2179 "parser.cc" /* yacc.c:1646  */
+#line 2178 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 649 "parser.y" /* yacc.c:1646  */
+#line 648 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = (yyvsp[0].string);
     current_script_line = yylineno;
 }
-#line 2188 "parser.cc" /* yacc.c:1646  */
+#line 2187 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 656 "parser.y" /* yacc.c:1646  */
+#line 655 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression_list) = NULL;
 }
-#line 2196 "parser.cc" /* yacc.c:1646  */
+#line 2195 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 659 "parser.y" /* yacc.c:1646  */
+#line 658 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression_list) = (yyvsp[-1].expression_list);
 }
-#line 2204 "parser.cc" /* yacc.c:1646  */
+#line 2203 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 665 "parser.y" /* yacc.c:1646  */
+#line 664 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression_list) = new cQueue("expressionList");
     (yyval.expression_list)->insert((cObject*)(yyvsp[0].expression));
 }
-#line 2213 "parser.cc" /* yacc.c:1646  */
+#line 2212 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 669 "parser.y" /* yacc.c:1646  */
+#line 668 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression_list) = (yyvsp[-2].expression_list);
     (yyvsp[-2].expression_list)->insert((yyvsp[0].expression));
 }
-#line 2222 "parser.cc" /* yacc.c:1646  */
+#line 2221 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 676 "parser.y" /* yacc.c:1646  */
+#line 675 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_ELLIPSIS);
 }
-#line 2230 "parser.cc" /* yacc.c:1646  */
+#line 2229 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 679 "parser.y" /* yacc.c:1646  */
+#line 678 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = (yyvsp[0].expression); }
-#line 2237 "parser.cc" /* yacc.c:1646  */
+#line 2236 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 681 "parser.y" /* yacc.c:1646  */
+#line 680 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = (yyvsp[0].expression);
 }
-#line 2245 "parser.cc" /* yacc.c:1646  */
+#line 2244 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 684 "parser.y" /* yacc.c:1646  */
+#line 683 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_WORD);
     (yyval.expression)->setString((yyvsp[0].string));
 }
-#line 2254 "parser.cc" /* yacc.c:1646  */
+#line 2253 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 688 "parser.y" /* yacc.c:1646  */
+#line 687 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_STRING);
     (yyval.expression)->setString((yyvsp[0].string));
     (yyval.expression)->setFormat("\"%s\"");
 }
-#line 2264 "parser.cc" /* yacc.c:1646  */
+#line 2263 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 693 "parser.y" /* yacc.c:1646  */
+#line 692 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_STRING);
     (yyval.expression)->setString((yyvsp[-1].string));
     (yyval.expression)->setFormat("\"%s\"...");
 }
-#line 2274 "parser.cc" /* yacc.c:1646  */
+#line 2273 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 698 "parser.y" /* yacc.c:1646  */
+#line 697 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = (yyvsp[0].expression);
 }
-#line 2282 "parser.cc" /* yacc.c:1646  */
+#line 2281 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 701 "parser.y" /* yacc.c:1646  */
+#line 700 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = (yyvsp[0].expression);
 }
-#line 2290 "parser.cc" /* yacc.c:1646  */
+#line 2289 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 709 "parser.y" /* yacc.c:1646  */
+#line 708 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new_integer_expression((yyvsp[0].integer), "%ld");
 }
-#line 2298 "parser.cc" /* yacc.c:1646  */
+#line 2297 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 715 "parser.y" /* yacc.c:1646  */
+#line 714 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new_integer_expression((yyvsp[0].integer), "%#lx");
 }
-#line 2306 "parser.cc" /* yacc.c:1646  */
+#line 2305 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 721 "parser.y" /* yacc.c:1646  */
+#line 720 "parser.y" /* yacc.c:1646  */
     {    /* bitwise OR */
     (yyval.expression) = new PacketDrillExpression(EXPR_BINARY);
     struct binary_expression *binary = (struct binary_expression *) malloc(sizeof(struct binary_expression));
@@ -2315,93 +2314,89 @@ yyreduce:
     binary->rhs = (yyvsp[0].expression);
     (yyval.expression)->setBinary(binary);
 }
-#line 2319 "parser.cc" /* yacc.c:1646  */
+#line 2318 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 732 "parser.y" /* yacc.c:1646  */
+#line 731 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_LIST);
     (yyval.expression)->setList(NULL);
 }
-#line 2328 "parser.cc" /* yacc.c:1646  */
+#line 2327 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 736 "parser.y" /* yacc.c:1646  */
+#line 735 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_LIST);
     (yyval.expression)->setList((yyvsp[-1].expression_list));
 }
-#line 2337 "parser.cc" /* yacc.c:1646  */
+#line 2336 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 745 "parser.y" /* yacc.c:1646  */
+#line 744 "parser.y" /* yacc.c:1646  */
     {
     (yyval.errno_info) = NULL;
 }
-#line 2345 "parser.cc" /* yacc.c:1646  */
+#line 2344 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 748 "parser.y" /* yacc.c:1646  */
+#line 747 "parser.y" /* yacc.c:1646  */
     {
     (yyval.errno_info) = (struct errno_spec*)malloc(sizeof(struct errno_spec));
     (yyval.errno_info)->errno_macro = (yyvsp[-1].string);
     (yyval.errno_info)->strerror = (yyvsp[0].string);
 }
-#line 2355 "parser.cc" /* yacc.c:1646  */
+#line 2354 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 756 "parser.y" /* yacc.c:1646  */
+#line 755 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = NULL;
 }
-#line 2363 "parser.cc" /* yacc.c:1646  */
+#line 2362 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 759 "parser.y" /* yacc.c:1646  */
+#line 758 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = (yyvsp[0].string);
 }
-#line 2371 "parser.cc" /* yacc.c:1646  */
+#line 2370 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 765 "parser.y" /* yacc.c:1646  */
+#line 764 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = (yyvsp[-1].string);
 }
-#line 2379 "parser.cc" /* yacc.c:1646  */
+#line 2378 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 771 "parser.y" /* yacc.c:1646  */
+#line 770 "parser.y" /* yacc.c:1646  */
     {
     (yyval.string) = (yyvsp[0].string);
 }
-#line 2387 "parser.cc" /* yacc.c:1646  */
+#line 2386 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 774 "parser.y" /* yacc.c:1646  */
+#line 773 "parser.y" /* yacc.c:1646  */
     {
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
     asprintf(&((yyval.string)), "%s %s", (yyvsp[-1].string), (yyvsp[0].string));
-#else
-    sprintf((yyval.string),"%s %s", (yyvsp[-1].string), (yyvsp[0].string));
-#endif
     free((yyvsp[-1].string));
     free((yyvsp[0].string));
 }
-#line 2401 "parser.cc" /* yacc.c:1646  */
+#line 2396 "parser.cc" /* yacc.c:1646  */
     break;
 
 
-#line 2405 "parser.cc" /* yacc.c:1646  */
+#line 2400 "parser.cc" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

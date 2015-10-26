@@ -59,17 +59,20 @@
  */
 
 
+#define _GNU_SOURCE
 #include "inet/common/INETDefs.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#else
+#include "winsock2.h"
 #endif
+#include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -464,11 +467,7 @@ flags
     $$ = strdup(".");
 }
 | MYWORD '.' {
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
     asprintf(&($$), "%s.", $1);
-#else
-    sprintf(&($$), "%s.", $1);
-#endif
     free($1);
 }
 | '-' {
@@ -772,11 +771,7 @@ word_list
     $$ = $1;
 }
 | word_list MYWORD {
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
     asprintf(&($$), "%s %s", $1, $2);
-#else
-    sprintf($$,"%s %s", $1, $2);
-#endif
     free($1);
     free($2);
 }
