@@ -14,6 +14,7 @@ src/Makefile.vc
 /examples/*/*/results/
 /examples/*/*/*/results/
 /tests/*/work/
+/tests/*/*/work/
 /tests/*/results*/
 *.log
 *.sim
@@ -21,6 +22,7 @@ src/Makefile.vc
 *.pcap
 *.sca
 *.vec
+*.vci
 .buildlog*
 # ignore binary files
 out/
@@ -43,6 +45,8 @@ netanim-trace.txt
 gcc-debug
 
 # ignore backup and temp files
+*.UPDATED
+*.FAILED
 *.bak
 backups
 *~
