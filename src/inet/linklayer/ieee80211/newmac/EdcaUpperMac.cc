@@ -292,7 +292,7 @@ void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange == what)
             ac = (AccessCategory)i;
-    ASSERT(ac != -1);
+    ASSERT((int)ac != -1);
 
     delete acData[ac].frameExchange;
     acData[ac].frameExchange = nullptr;

@@ -109,8 +109,8 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, AccessCategory accessCategory);
         virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame);
         virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, AccessCategory accessCategory);
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
+        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount) override;
+        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs) override;
         virtual void expectReply(simtime_t timeout);
         virtual void gotoStep(int step); // ~setNextStep()
         virtual void fail();
