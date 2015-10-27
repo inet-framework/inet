@@ -38,7 +38,7 @@ void Ieee80211ReceiverBase::initialize(int stage)
     FlatReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opMode = par("opMode");
-        setModeSet(*opMode != '\0' ? Ieee80211ModeSet::getModeSet(*opMode) : nullptr);
+        setModeSet(*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
         const char *bandName = par("bandName");
         setBand(*bandName != '\0' ? Ieee80211CompliantBands::getBand(bandName) : nullptr);
         int channelNumber = par("channelNumber");

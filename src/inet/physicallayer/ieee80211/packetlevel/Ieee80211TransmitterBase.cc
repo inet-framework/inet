@@ -39,7 +39,7 @@ void Ieee80211TransmitterBase::initialize(int stage)
     FlatTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *opMode = par("opMode");
-        setModeSet(*opMode != '\0' ? Ieee80211ModeSet::getModeSet(*opMode) : nullptr);
+        setModeSet(*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
         setMode(modeSet != nullptr ? modeSet->getMode(bitrate) : nullptr);
         const char *bandName = par("bandName");
         setBand(*bandName != '\0' ? Ieee80211CompliantBands::getBand(bandName) : nullptr);

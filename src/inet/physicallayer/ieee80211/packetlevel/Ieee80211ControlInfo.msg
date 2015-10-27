@@ -42,7 +42,7 @@ class noncobject ReceptionIndication;
 //
 class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
-    char opMode = 0;                       // new default operation mode or '\0' if not set.
+    string opMode;                         // new default operation mode or "" if not set.
     Ieee80211ModeSetPtr modeSet = nullptr; // new default mode set or nullptr if not set.
     IIeee80211ModePtr mode = nullptr;      // new default transmission mode or nullptr if not set.
     IIeee80211BandPtr band = nullptr;      // new default band or nullptr if not set.
