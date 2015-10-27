@@ -29,10 +29,12 @@ simple DcfUpperMac like IUpperMac
         string rxModule;
         string immediateTxModule;
         string firstContentionTxModule;
-        string opMode @enum("a", "b", "g", "n", "p") = default("g");
-        double bitrate @unit("bps");
+        string rateSelectionModule;
+        string rateControlModule;
+
         int rtsThreshold @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
         int shortRetryLimit = default(-1); // maximum number of retries per frame, -1 means default
+        int longRetryLimit = default(-1); // maximum number of retries for frames sent via RTS/CTS, -1 means default
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         int maxQueueSize = default(14); // max queue length in frames
         double sifsTime @unit("s") = default(-1s); // SIFS time, -1 means default (mode dependent)

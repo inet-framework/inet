@@ -19,6 +19,7 @@
 
 #include "MacUtils.h"
 #include "IMacParameters.h"
+#include "IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
@@ -26,18 +27,18 @@
 namespace inet {
 namespace ieee80211 {
 
-MacUtils::MacUtils(IMacParameters *params) : params(params)
+MacUtils::MacUtils(IMacParameters *params, IRateSelection *rateSelection) : params(params), rateSelection(rateSelection)
 {
 }
 
 simtime_t MacUtils::getAckDuration() const
 {
-    return params->getBasicFrameMode()->getDuration(LENGTH_ACK);
+    return rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_ACK);
 }
 
 simtime_t MacUtils::getCtsDuration() const
 {
-    return params->getBasicFrameMode()->getDuration(LENGTH_CTS);
+    return rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_CTS);
 }
 
 simtime_t MacUtils::getAckEarlyTimeout() const
@@ -70,9 +71,10 @@ Ieee80211RTSFrame *MacUtils::buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame, 
 {
     // protect CTS + Data + ACK
     simtime_t duration =
-            3 * params->getSifsTime() + params->getBasicFrameMode()->getDuration(LENGTH_CTS)
+            3 * params->getSifsTime()
+            + rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_CTS)
             + dataFrameMode->getDuration(dataFrame->getBitLength())
-            + params->getBasicFrameMode()->getDuration(LENGTH_ACK);
+            + rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_ACK);
     return buildRtsFrame(dataFrame->getReceiverAddress(), duration);
 }
 
@@ -82,28 +84,29 @@ Ieee80211RTSFrame *MacUtils::buildRtsFrame(const MACAddress& receiverAddress, si
     rtsFrame->setTransmitterAddress(params->getAddress());
     rtsFrame->setReceiverAddress(receiverAddress);
     rtsFrame->setDuration(duration);
+    setFrameMode(rtsFrame, rateSelection->getModeForControlFrame(rtsFrame));
     return rtsFrame;
 }
 
 Ieee80211CTSFrame *MacUtils::buildCtsFrame(Ieee80211RTSFrame *rtsFrame) const
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS");
-    setFrameMode(rtsFrame, params->getBasicFrameMode());
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - params->getSifsTime() - params->getBasicFrameMode()->getDuration(LENGTH_CTS));
+    frame->setDuration(rtsFrame->getDuration() - params->getSifsTime() - rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_CTS));
+    setFrameMode(rtsFrame, rateSelection->getModeForControlFrame(rtsFrame));
     return frame;
 }
 
 Ieee80211ACKFrame *MacUtils::buildAckFrame(Ieee80211DataOrMgmtFrame *dataFrame) const
 {
     Ieee80211ACKFrame *ackFrame = new Ieee80211ACKFrame("ACK");
-    setFrameMode(ackFrame, params->getBasicFrameMode());
     ackFrame->setReceiverAddress(dataFrame->getTransmitterAddress());
 
     if (!dataFrame->getMoreFragments())
         ackFrame->setDuration(0);
     else
-        ackFrame->setDuration(dataFrame->getDuration() - params->getSifsTime() - params->getBasicFrameMode()->getDuration(LENGTH_ACK));
+        ackFrame->setDuration(dataFrame->getDuration() - params->getSifsTime() - rateSelection->getResponseControlFrameMode()->getDuration(LENGTH_ACK));
+    setFrameMode(ackFrame, rateSelection->getModeForControlFrame(ackFrame));
     return ackFrame;
 }
 

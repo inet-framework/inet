@@ -32,9 +32,8 @@ class INET_API MacParameters : public IMacParameters
 {
     private:
         MACAddress address;
-        const IIeee80211Mode *basicFrameMode = nullptr;
-        const IIeee80211Mode *defaultDataFrameMode = nullptr;
         int shortRetryLimit;
+        int longRetryLimit;
         int rtsThreshold;
         simtime_t phyRxStartDelay;
         bool edca = false;
@@ -57,11 +56,10 @@ class INET_API MacParameters : public IMacParameters
         virtual ~MacParameters() {}
 
         void setAddress(const MACAddress& address) {this->address = address;}
-        void setBasicFrameMode(const IIeee80211Mode *basicFrameMode) {this->basicFrameMode = basicFrameMode;}
-        void setDefaultDataFrameMode(const IIeee80211Mode *defaultDataFrameMode) { this->defaultDataFrameMode = defaultDataFrameMode; }
         void setRtsThreshold(int rtsThreshold) { this->rtsThreshold = rtsThreshold; }
         void setPhyRxStartDelay(simtime_t phyRxStartDelay) {this->phyRxStartDelay = phyRxStartDelay;}
         void setShortRetryLimit(int shortRetryLimit) { this->shortRetryLimit = shortRetryLimit; }
+        void setLongRetryLimit(int longRetryLimit) { this->longRetryLimit = longRetryLimit; }
         void setEdcaEnabled(bool enabled) {edca = enabled;}
         void setSlotTime(simtime_t value) {slotTime = value;}
         void setSifsTime(simtime_t value) {sifsTime = value;}
@@ -76,9 +74,8 @@ class INET_API MacParameters : public IMacParameters
 
         //TODO throw error when accessing parameters not previously set
         virtual const MACAddress& getAddress() const override {return address;}
-        virtual const IIeee80211Mode *getBasicFrameMode() const override {return basicFrameMode;}
-        virtual const IIeee80211Mode *getDefaultDataFrameMode() const override {return defaultDataFrameMode;}
         virtual int getShortRetryLimit() const override {return shortRetryLimit;}
+        virtual int getLongRetryLimit() const override {return longRetryLimit;}
         virtual int getRtsThreshold() const override {return rtsThreshold;}
         virtual simtime_t getPhyRxStartDelay() const override {return phyRxStartDelay;}
         virtual bool isEdcaEnabled() const override {return edca;}

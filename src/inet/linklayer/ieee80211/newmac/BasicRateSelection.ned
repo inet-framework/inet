@@ -15,8 +15,12 @@
 
 package inet.linklayer.ieee80211.newmac;
 
-simple OnoeRateControl like IRateControl
+simple BasicRateSelection like IRateSelection
 {
     parameters:
-        double interval @unit("s") = default(1s);
+        string modeSet @enum("a", "b", "g", "n", "p") = default("g");
+        double dataBitrate @unit("bps") = default(-1bps); // unicast data and management frames
+        double multicastBitrate @unit("bps") = default(-1bps); // multicast data and management frames
+        double controlBitrate @unit("bps") = default(-1bps); // RTS, CTS, ACK, etc.
+        @display("i=block/cogwheel");
 }

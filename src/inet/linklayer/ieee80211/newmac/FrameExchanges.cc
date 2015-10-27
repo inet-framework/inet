@@ -24,6 +24,7 @@
 #include "IImmediateTx.h"
 #include "IRx.h"
 #include "IMacParameters.h"
+#include "IStatistics.h"
 #include "MacUtils.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -154,7 +155,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
     switch (step) {
         case 0: transmitContentionFrame(dupPacketAndControlInfo(dataFrame), retryCount); break;
         case 1: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 2: succeed(); break;
+        case 2: statistics->frameTransmissionSuccessful(dataFrame, retryCount); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -185,12 +186,16 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
 
 void SendDataWithAckFrameExchange::retry()
 {
-    if (++retryCount < params->getShortRetryLimit()) {
+    if (retryCount < params->getShortRetryLimit()) {
+        statistics->frameTransmissionUnsuccessful(dataFrame, retryCount);
         dataFrame->setRetry(true);
+        retryCount++;
         gotoStep(0);
     }
-    else
+    else {
+        statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, retryCount);
         fail();
+    }
 }
 
 //------------------------------
@@ -209,11 +214,11 @@ SendDataWithRtsCtsFrameExchange::~SendDataWithRtsCtsFrameExchange()
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame), retryCount); break;
+        case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame), shortRetryCount); break;
         case 1: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
         case 2: transmitImmediateFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
         case 3: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 4: succeed(); break;
+        case 4: statistics->frameTransmissionSuccessful(dataFrame, longRetryCount); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -230,8 +235,8 @@ bool SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *fra
 void SendDataWithRtsCtsFrameExchange::processTimeout(int step)
 {
     switch (step) {
-        case 1: if (++retryCount < params->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
-        case 3: fail(); break;
+        case 1: retryRtsCts(); break;
+        case 3: retryData(); break;
         default: ASSERT(false);
     }
 }
@@ -239,8 +244,34 @@ void SendDataWithRtsCtsFrameExchange::processTimeout(int step)
 void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
 {
     switch (step) {
-        case 0: if (++retryCount < params->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
+        case 0: retryRtsCts(); break;
         default: ASSERT(false);
+    }
+}
+
+void SendDataWithRtsCtsFrameExchange::retryRtsCts()
+{
+    if (shortRetryCount < params->getShortRetryLimit()) {
+        shortRetryCount++;
+        gotoStep(0);
+    }
+    else {
+        statistics->frameTransmissionGivenUp(dataFrame);
+        fail();
+    }
+}
+
+void SendDataWithRtsCtsFrameExchange::retryData()
+{
+    if (longRetryCount < params->getLongRetryLimit()) {
+        statistics->frameTransmissionUnsuccessful(dataFrame, longRetryCount);
+        dataFrame->setRetry(true);
+        longRetryCount++;
+        gotoStep(0);
+    }
+    else {
+        statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, longRetryCount);
+        fail();
     }
 }
 

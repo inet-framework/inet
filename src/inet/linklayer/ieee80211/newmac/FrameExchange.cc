@@ -34,6 +34,7 @@ FrameExchange::FrameExchange(FrameExchangeContext *context, IFinishedCallback *c
     immediateTx(context->immediateTx),
     contentionTx(context->contentionTx),
     rx(context->rx),
+    statistics(context->statistics),
     finishedCallback(callback)
 {
 }

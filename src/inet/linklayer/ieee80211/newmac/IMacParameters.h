@@ -22,9 +22,6 @@
 
 #include "AccessCategory.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-
-using namespace inet::physicallayer;
 
 namespace inet {
 namespace ieee80211 {
@@ -41,10 +38,6 @@ class INET_API IMacParameters
 
         virtual const MACAddress& getAddress() const = 0;
 
-        // modes
-        virtual const IIeee80211Mode *getBasicFrameMode() const = 0;
-        virtual const IIeee80211Mode *getDefaultDataFrameMode() const = 0;
-
         // timing parameters
         virtual bool isEdcaEnabled() const = 0;
         virtual simtime_t getSlotTime() const = 0;
@@ -60,6 +53,7 @@ class INET_API IMacParameters
 
         // other parameters
         virtual int getShortRetryLimit() const = 0;
+        virtual int getLongRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
         virtual simtime_t getPhyRxStartDelay() const = 0;
 };

@@ -23,6 +23,9 @@
 #include "IUpperMac.h"
 #include "IFrameExchange.h"
 #include "AccessCategory.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+
+using namespace inet::physicallayer;
 
 namespace inet {
 namespace ieee80211 {
@@ -39,6 +42,9 @@ class IContentionTx;
 class IDuplicateDetector;
 class IFragmenter;
 class IReassembly;
+class IRateSelection;
+class IRateControl;
+class IStatistics;
 
 /**
  * UpperMac for DCF mode.
@@ -64,10 +70,13 @@ class INET_API DcfUpperMac : public cSimpleModule, public IUpperMac, protected I
         IDuplicateDetector *duplicateDetection = nullptr;
         IFragmenter *fragmenter = nullptr;
         IReassembly *reassembly = nullptr;
+        IRateSelection *rateSelection = nullptr;
+        IRateControl *rateControl = nullptr;
+        IStatistics *statistics = nullptr;
 
     protected:
         void initialize() override;
-        virtual void readParameters();
+        virtual IMacParameters *extractParameters(const IIeee80211Mode *slowestMandatoryMode);
         void handleMessage(cMessage *msg) override;
 
         virtual void enqueue(Ieee80211DataOrMgmtFrame *frame);

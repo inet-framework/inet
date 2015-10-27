@@ -73,12 +73,16 @@ class INET_API SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
 {
     protected:
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
-        int retryCount = 0;
+        int shortRetryCount = 0;
+        int longRetryCount = 0;
     protected:
         virtual void doStep(int step) override;
         virtual bool processReply(int step, Ieee80211Frame *frame) override;
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
+        virtual void retryRtsCts();
+        virtual void retryData();
+
     public:
         SendDataWithRtsCtsFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithRtsCtsFrameExchange();
