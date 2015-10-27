@@ -86,13 +86,15 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
+        string rateControlModuleType = default("");
         string upperMacModule = ".upperMac";
         string rxModule = ".rx";
         string immediateTxModule = ".iTx";
         string firstContentionTxModule = ".cTx[0]";
         int numContentionTx = default(4);
         string collisionControllerModule = ".ctrl";
-        string parametersModule = ".params";
+        string rateSelectionModule = ".rateSelection";
+        string rateControlModule = ".rateControl";
 
         *.macModule = "^";
         *.upperMacModule = "^" + upperMacModule;
@@ -100,7 +102,8 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         *.immediateTxModule = "^" + immediateTxModule;
         *.firstContentionTxModule = "^" + firstContentionTxModule;
         *.collisionControllerModule = "^" + collisionControllerModule;
-        *.parametersModule = "^" + parametersModule;
+        *.rateSelectionModule = "^" + rateSelectionModule;
+        *.rateControlModule = "^" + rateControlModule;
 
         @display("i=block/layer");
         @class(Ieee80211NewMac);
@@ -110,6 +113,12 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     submodules:
+        rateSelection: <default("BasicRateSelection")> like IRateSelection {
+            @display("p=70,66");
+        }
+        rateControl: <rateControlModuleType> like IRateControl if rateControlModuleType != "" {
+            @display("p=140,66");
+        }
         upperMac: <default("EdcaUpperMac")> like IUpperMac {
             @display("p=208,66");
         }
@@ -159,8 +168,8 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
         numContentionTx = EDCA ? 4 : 1;
 
-        upperMac.opMode = opMode; // DcfUpperMac, EdcaUpperMac
-        upperMac.bitrate = bitrate; // DcfUpperMac, EdcaUpperMac
+        rateSelection.modeSet = opMode; // BasicRateSelection
+        rateSelection.dataBitrate = bitrate; // BasicRateSelection
         upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
         upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
         upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac

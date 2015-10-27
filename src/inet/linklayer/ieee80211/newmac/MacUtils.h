@@ -35,6 +35,7 @@ class Ieee80211CTSFrame;
 class Ieee80211ACKFrame;
 class Ieee80211DataOrMgmtFrame;
 class IMacParameters;
+class IRateSelection;
 
 /**
  * Frame manipulation and other utilities for use by frame exchanges and UpperMac.
@@ -43,8 +44,10 @@ class INET_API MacUtils
 {
     private:
         IMacParameters *params;
+        IRateSelection *rateSelection;
+
     public:
-        MacUtils(IMacParameters *params);
+        MacUtils(IMacParameters *params, IRateSelection *rateSelection);
 
         virtual simtime_t getAckDuration() const;
         virtual simtime_t getCtsDuration() const;

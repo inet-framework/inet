@@ -23,6 +23,9 @@
 #include "IUpperMac.h"
 #include "IFrameExchange.h"
 #include "AccessCategory.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+
+using namespace inet::physicallayer;
 
 namespace inet {
 namespace ieee80211 {
@@ -39,6 +42,9 @@ class IContentionTx;
 class IDuplicateDetector;
 class IFragmenter;
 class IReassembly;
+class IRateSelection;
+class IRateControl;
+class IStatistics;
 
 /**
  * UpperMac for EDCA (802.11e QoS mode)
@@ -68,11 +74,14 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         IDuplicateDetector *duplicateDetection = nullptr;
         IFragmenter *fragmenter = nullptr;
         IReassembly *reassembly = nullptr;
+        IRateSelection *rateSelection = nullptr;
+        IRateControl *rateControl = nullptr;
+        IStatistics *statistics = nullptr;
 
     protected:
         void initialize() override;
-        virtual void readParameters();
         virtual void handleMessage(cMessage *msg) override;
+        IMacParameters *extractParameters(const IIeee80211Mode *slowestMandatoryMode);
 
         virtual AccessCategory classifyFrame(Ieee80211DataOrMgmtFrame *frame);
         virtual AccessCategory mapTidToAc(int tid);

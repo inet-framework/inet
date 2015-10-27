@@ -27,6 +27,9 @@
 #include "FrameExchanges.h"
 #include "DuplicateDetectors.h"
 #include "Fragmentation.h"
+#include "BasicRateSelection.h"
+#include "OnoeRateControl.h"
+#include "Statistics.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -61,9 +64,16 @@ void DcfUpperMac::initialize()
     transmissionQueue.setName("txQueue");
     transmissionQueue.setup(par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData);
 
-    readParameters();
-    utils = new MacUtils(params);
+    rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+    rateControl = dynamic_cast<IRateControl*>(getModuleByPath(par("rateControlModule"))); // optional module
+    rateSelection->setRateControl(rateControl);
+
+    params = extractParameters(rateSelection->getSlowestMandatoryMode());
+    utils = new MacUtils(params, rateSelection);
     rx->setAddress(params->getAddress());
+
+    statistics = new BasicStatistics(utils);
+    statistics->setRateControl(rateControl);
 
     duplicateDetection = new NonQoSDuplicateDetector(); //TODO or LegacyDuplicateDetector();
     fragmenter = new FragmentationNotSupported();
@@ -76,32 +86,25 @@ void DcfUpperMac::initialize()
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}
 inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 
-void DcfUpperMac::readParameters()
+IMacParameters *DcfUpperMac::extractParameters(const IIeee80211Mode *slowestMandatoryMode)
 {
+    const IIeee80211Mode *referenceMode = slowestMandatoryMode;  // or any other; slotTime etc must be the same for all modes we use
+
     MacParameters *params = new MacParameters();
-
-    const Ieee80211ModeSet *modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
-    double bitrate = par("bitrate");
-    const IIeee80211Mode *dataFrameMode = (bitrate == -1) ? modeSet->getFastestMode() : modeSet->getMode(bps(bitrate));
-    const IIeee80211Mode *basicFrameMode = modeSet->getSlowestMode();
-
     params->setAddress(mac->getAddress());
-    params->setBasicFrameMode(basicFrameMode);
-    params->setDefaultDataFrameMode(dataFrameMode);
     params->setShortRetryLimit(fallback(par("shortRetryLimit"), 7));
+    params->setLongRetryLimit(fallback(par("longRetryLimit"), 4));
     params->setRtsThreshold(par("rtsThreshold"));
-    params->setPhyRxStartDelay(basicFrameMode->getPhyRxStartDelay());
-
+    params->setPhyRxStartDelay(referenceMode->getPhyRxStartDelay());
     params->setEdcaEnabled(false);
-    params->setSlotTime(fallback(par("slotTime"), dataFrameMode->getSlotTime()));
-    params->setSifsTime(fallback(par("sifsTime"), dataFrameMode->getSifsTime()));
-    params->setAifsTime(AC_LEGACY, fallback(par("difsTime"), dataFrameMode->getSifsTime() + dataFrameMode->getAifsNumber(AC_LEGACY)*params->getSlotTime()));
-    params->setEifsTime(AC_LEGACY, params->getSifsTime() + params->getAifsTime(AC_LEGACY) + basicFrameMode->getDuration(LENGTH_ACK));
-    params->setCwMin(AC_LEGACY, fallback(par("cwMin"), dataFrameMode->getCwMin(AC_LEGACY)));
-    params->setCwMax(AC_LEGACY, fallback(par("cwMax"), dataFrameMode->getCwMax(AC_LEGACY)));
-    params->setCwMulticast(AC_LEGACY, fallback(par("cwMulticast"), dataFrameMode->getCwMin(AC_LEGACY)));
-
-    this->params = params;
+    params->setSlotTime(fallback(par("slotTime"), referenceMode->getSlotTime()));
+    params->setSifsTime(fallback(par("sifsTime"), referenceMode->getSifsTime()));
+    params->setAifsTime(AC_LEGACY, fallback(par("difsTime"), referenceMode->getSifsTime() + referenceMode->getAifsNumber(AC_LEGACY)*params->getSlotTime()));
+    params->setEifsTime(AC_LEGACY, params->getSifsTime() + params->getAifsTime(AC_LEGACY) + slowestMandatoryMode->getDuration(LENGTH_ACK));
+    params->setCwMin(AC_LEGACY, fallback(par("cwMin"), referenceMode->getCwMin(AC_LEGACY)));
+    params->setCwMax(AC_LEGACY, fallback(par("cwMax"), referenceMode->getCwMax(AC_LEGACY)));
+    params->setCwMulticast(AC_LEGACY, fallback(par("cwMulticast"), referenceMode->getCwMin(AC_LEGACY)));
+    return params;
 }
 
 void DcfUpperMac::handleMessage(cMessage *msg)
@@ -220,9 +223,9 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
     ASSERT(!frameExchange);
 
     if (utils->isBroadcastOrMulticast(frame))
-        utils->setFrameMode(frame, params->getBasicFrameMode());
+        utils->setFrameMode(frame, rateSelection->getModeForMulticastDataOrMgmtFrame(frame));
     else
-        utils->setFrameMode(frame, params->getDefaultDataFrameMode());
+        utils->setFrameMode(frame, rateSelection->getModeForUnicastDataOrMgmtFrame(frame));
 
     FrameExchangeContext context;
     context.ownerModule = this;
@@ -231,6 +234,7 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
     context.contentionTx = contentionTx;
     context.immediateTx = immediateTx;
     context.rx = rx;
+    context.statistics = statistics;
 
     bool useRtsCts = frame->getByteLength() > params->getRtsThreshold();
     if (utils->isBroadcastOrMulticast(frame))

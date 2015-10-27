@@ -32,7 +32,7 @@ class INET_API IRateControl
 {
     public:
         virtual void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) = 0;
-        virtual const IIeee80211Mode *getRate() const = 0;
+        virtual const IIeee80211Mode *getRate() = 0;
         virtual void frameTransmitted(const Ieee80211Frame *frame, const IIeee80211Mode *mode, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
         virtual void frameReceived(const Ieee80211Frame *frame, const Ieee80211ReceptionIndication *receptionIndication) = 0;
 };

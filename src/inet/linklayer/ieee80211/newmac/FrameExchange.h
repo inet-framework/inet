@@ -33,16 +33,18 @@ class MacUtils;
 class IImmediateTx;
 class IContentionTx;
 class IRx;
+class IStatistics;
 
 class INET_API FrameExchangeContext
 {
     public:
-        cSimpleModule *ownerModule;
-        IMacParameters *params;
-        IImmediateTx *immediateTx;
-        IContentionTx **contentionTx;
-        IRx *rx;
-        MacUtils *utils;
+        cSimpleModule *ownerModule = nullptr;
+        IMacParameters *params = nullptr;
+        MacUtils *utils = nullptr;
+        IImmediateTx *immediateTx = nullptr;
+        IContentionTx **contentionTx = nullptr;
+        IRx *rx = nullptr;
+        IStatistics *statistics = nullptr;
 };
 
 /**
@@ -56,6 +58,7 @@ class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public I
         IImmediateTx *immediateTx;
         IContentionTx **contentionTx;
         IRx *rx;
+        IStatistics *statistics;
         IFinishedCallback *finishedCallback = nullptr;
 
     protected:
