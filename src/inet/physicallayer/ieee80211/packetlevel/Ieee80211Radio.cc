@@ -49,8 +49,8 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         FlatRadioBase::handleUpperCommand(message);
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
-            char opMode = configureCommand->getOpMode();
-            if (opMode != 0)
+            const char *opMode = configureCommand->getOpMode();
+            if (*opMode)
                 setModeSet(Ieee80211ModeSet::getModeSet(opMode));
             const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
             if (modeSet != nullptr)

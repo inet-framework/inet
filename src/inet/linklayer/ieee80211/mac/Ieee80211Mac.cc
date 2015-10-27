@@ -115,7 +115,7 @@ void Ieee80211Mac::initialize(int stage)
             edcCAF.push_back(catEdca);
         }
         // initialize parameters
-        modeSet = Ieee80211ModeSet::getModeSet(*par("opMode").stringValue());
+        modeSet = Ieee80211ModeSet::getModeSet(par("opMode").stringValue());
 
         PHY_HEADER_LENGTH = par("phyHeaderLength");    //26us
 

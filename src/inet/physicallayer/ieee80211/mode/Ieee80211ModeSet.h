@@ -40,7 +40,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject
     };
 
   protected:
-    const char name;
+    std::string name;
     const std::vector<Entry> entries;
 
   public:
@@ -51,11 +51,11 @@ class INET_API Ieee80211ModeSet : public IPrintableObject
     int getModeIndex(const IIeee80211Mode *mode) const;
 
   public:
-    Ieee80211ModeSet(char name, const std::vector<Entry> entries);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
-    const char getName() const { return name; }
+    const char *getName() const { return name.c_str(); }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
@@ -67,8 +67,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject
     const IIeee80211Mode *getSlowerMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMode(const IIeee80211Mode *mode) const;
 
-    static const Ieee80211ModeSet *findModeSet(char mode);
-    static const Ieee80211ModeSet *getModeSet(char mode);
+    static const Ieee80211ModeSet *findModeSet(const char *mode);
+    static const Ieee80211ModeSet *getModeSet(const char *mode);
 };
 
 } // namespace physicallayer
