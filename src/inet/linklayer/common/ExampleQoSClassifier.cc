@@ -19,7 +19,6 @@
 #include "ExampleQoSClassifier.h"
 #include "UserPriority.h"
 
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #ifdef WITH_IPv4
 #  include "inet/networklayer/ipv4/IPv4Datagram.h"
 #  include "inet/networklayer/ipv4/ICMPMessage_m.h"
