@@ -141,8 +141,8 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    if (maxQueueSize > 0 && acData[ac].transmissionQueue.length() >= maxQueueSize) {
-        EV << "Frame " << frame << " received from higher layer, but its MAC subqueue is full, dropping\n";
+    if (maxQueueSize > 0 && acData[ac].transmissionQueue.length() >= maxQueueSize && dynamic_cast<Ieee80211DataFrame *>(frame)) {
+        EV << "Dataframe " << frame << " received from higher layer, but its MAC subqueue is full, dropping\n";
         delete frame;
         return;
     }
