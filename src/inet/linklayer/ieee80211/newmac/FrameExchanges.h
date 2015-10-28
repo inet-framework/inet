@@ -41,7 +41,7 @@ class INET_API SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchan
         State state = INIT;
 
     protected:
-        bool handleWithFSM(EventType event, cMessage *frameOrTimer) override;
+        FrameProcessingResult handleWithFSM(EventType event, cMessage *frameOrTimer) override;
 
         void transmitDataFrame();
         void retryDataFrame();
@@ -61,7 +61,7 @@ class INET_API SendDataWithAckFrameExchange : public StepBasedFrameExchange
     protected:
         virtual void retry();
         virtual void doStep(int step) override;
-        virtual bool processReply(int step, Ieee80211Frame *frame) override;
+        virtual FrameProcessingResult processReply(int step, Ieee80211Frame *frame) override;
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
     public:
@@ -78,7 +78,7 @@ class INET_API SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
         int longRetryCount = 0;
     protected:
         virtual void doStep(int step) override;
-        virtual bool processReply(int step, Ieee80211Frame *frame) override;
+        virtual FrameProcessingResult processReply(int step, Ieee80211Frame *frame) override;
         virtual void processTimeout(int step) override;
         virtual void processInternalCollision(int step) override;
         virtual void retryRtsCts();

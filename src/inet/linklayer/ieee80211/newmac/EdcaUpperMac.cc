@@ -203,8 +203,37 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     delete frame->removeControlInfo();
     take(frame);
 
-    if (utils->isForUs(frame)) {
-        if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
+    if (!utils->isForUs(frame)) {
+        EV_INFO << "This frame is not for us" << std::endl;
+        delete frame;
+        int numACs = params->isEdcaEnabled() ? 4 : 1;
+        for (int i = 0; i < numACs; i++)
+            if (acData[i].frameExchange)
+                acData[i].frameExchange->corruptedOrNotForUsFrameReceived();
+    }
+    else {
+        // show frame to ALL ongoing frame exchanges
+        int numACs = params->isEdcaEnabled() ? 4 : 1;
+        bool alreadyProcessed = false;
+        bool shouldDelete = false;
+        for (int i = 0; i < numACs; i++) {
+            if (acData[i].frameExchange) {
+                IFrameExchange::FrameProcessingResult result = acData[i].frameExchange->lowerFrameReceived(frame);
+                bool justProcessed = (result != IFrameExchange::IGNORED);
+                ASSERT(!alreadyProcessed || !justProcessed); // ensure it's not double-processed
+                if (justProcessed) {
+                    alreadyProcessed = true;
+                    shouldDelete = (result == IFrameExchange::PROCESSED_DISCARD);
+                }
+            }
+        }
+
+        if (alreadyProcessed) {
+            // jolly good, nothing more to do
+            if (shouldDelete)
+                delete frame;
+        }
+        else if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
             sendCts(rtsFrame);
             delete rtsFrame;
         }
@@ -226,21 +255,9 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             }
         }
         else {
-            // offer frame to all ongoing frame exchanges
-            int numACs = params->isEdcaEnabled() ? 4 : 1;
-            bool processed = false;
-            for (int i = 0; i < numACs && !processed; i++)
-                if (acData[i].frameExchange)
-                    processed = acData[i].frameExchange->lowerFrameReceived(frame);
-            if (!processed) {
-                EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
-                delete frame;
-            }
+            EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
+            delete frame;
         }
-    }
-    else {
-        EV_INFO << "This frame is not for us" << std::endl;
-        delete frame;
     }
 }
 
@@ -249,7 +266,7 @@ void EdcaUpperMac::corruptedFrameReceived()
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange)
-            acData[i].frameExchange->corruptedFrameReceived();
+            acData[i].frameExchange->corruptedOrNotForUsFrameReceived();
 }
 
 Ieee80211DataOrMgmtFrame *EdcaUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)

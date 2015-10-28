@@ -28,7 +28,7 @@ namespace ieee80211 {
 class Ieee80211Frame;
 
 /**
- * Abstract interface for frame exhange classes. Frame exchanges are a basic
+ * Abstract interface for frame exchange classes. Frame exchanges are a basic
  * building block of UpperMac (see IUpperMac), and coordinate frame sequences.
  */
 class INET_API IFrameExchange
@@ -40,11 +40,13 @@ class INET_API IFrameExchange
                 virtual ~IFinishedCallback() {}
         };
 
+        enum FrameProcessingResult { IGNORED, PROCESSED_DISCARD, PROCESSED_KEEP };
+
     public:
         virtual ~IFrameExchange() {}
         virtual void start() = 0;
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
-        virtual void corruptedFrameReceived() = 0;
+        virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame *frame) = 0;
+        virtual void corruptedOrNotForUsFrameReceived() = 0;
 };
 
 } // namespace ieee80211

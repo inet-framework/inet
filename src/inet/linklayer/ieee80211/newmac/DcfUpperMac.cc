@@ -156,8 +156,22 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     delete frame->removeControlInfo();          //TODO
     take(frame);
 
-    if (utils->isForUs(frame)) {
-        if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
+    if (!utils->isForUs(frame)) {
+        EV_INFO << "This frame is not for us" << std::endl;
+        delete frame;
+        if (frameExchange)
+            frameExchange->corruptedOrNotForUsFrameReceived();
+    }
+    else {
+        // offer frame to ongoing frame exchange
+        IFrameExchange::FrameProcessingResult result = frameExchange ? frameExchange->lowerFrameReceived(frame) : IFrameExchange::IGNORED;
+        bool processed = (result != IFrameExchange::IGNORED);
+        if (processed) {
+            // already processed, nothing more to do
+            if (result == IFrameExchange::PROCESSED_DISCARD)
+                delete frame;
+        }
+        else if (Ieee80211RTSFrame *rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame)) {
             sendCts(rtsFrame);
             delete rtsFrame;
         }
@@ -179,24 +193,16 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             }
         }
         else {
-            // offer frame to ongoing frame exchange
-            bool processed = frameExchange ? frameExchange->lowerFrameReceived(frame) : false;
-            if (!processed) {
-                EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
-                delete frame;
-            }
+            EV_INFO << "Unexpected frame " << frame->getName() << ", dropping\n";
+            delete frame;
         }
-    }
-    else {
-        EV_INFO << "This frame is not for us" << std::endl;
-        delete frame;
     }
 }
 
 void DcfUpperMac::corruptedFrameReceived()
 {
     if (frameExchange)
-        frameExchange->corruptedFrameReceived();
+        frameExchange->corruptedOrNotForUsFrameReceived();
 }
 
 Ieee80211DataOrMgmtFrame *DcfUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)

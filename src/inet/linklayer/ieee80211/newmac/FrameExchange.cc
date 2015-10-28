@@ -59,12 +59,12 @@ void FrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
     immediateTx->transmitImmediateFrame(frame, ifs, this);
 }
 
-bool FrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
+IFrameExchange::FrameProcessingResult FrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
-    return false;  // not ours
+    return IGNORED;  // not ours
 }
 
-void FrameExchange::corruptedFrameReceived()
+void FrameExchange::corruptedOrNotForUsFrameReceived()
 {
     // we don't care
 }
@@ -94,12 +94,12 @@ void FsmBasedFrameExchange::start()
     handleWithFSM(EVENT_START);
 }
 
-bool FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
+IFrameExchange::FrameProcessingResult FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
     return handleWithFSM(EVENT_FRAMEARRIVED, frame);
 }
 
-void FsmBasedFrameExchange::corruptedFrameReceived()
+void FsmBasedFrameExchange::corruptedOrNotForUsFrameReceived()
 {
     handleWithFSM(EVENT_CORRUPTEDFRAMEARRIVED);
 }
@@ -227,18 +227,18 @@ void StepBasedFrameExchange::transmissionComplete(int txIndex)
     proceed();
 }
 
-bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
+IFrameExchange::FrameProcessingResult StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
     EV_DETAIL << "Lower frame received in step " << step << "\n";
     ASSERT(status == INPROGRESS);
 
     if (operation == EXPECT_FULL_REPLY) {
         operation = NONE;
-        bool accepted = processReply(step, frame);
+        FrameProcessingResult result = processReply(step, frame);
         if (status == INPROGRESS) {
-            logStatus(accepted ? "processReply() returned ACCEPT": "processReply() returned REJECT");
+            logStatus(result == IGNORED ? "processReply(): frame IGNORED": "processReply(): frame PROCESSED");
             checkOperation(operation, "processReply()");
-            if (accepted || operation != NONE)
+            if (result == PROCESSED_KEEP || result == PROCESSED_DISCARD || operation != NONE)
                 proceed();
             else
                 operation = EXPECT_FULL_REPLY; // restore
@@ -246,15 +246,15 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
         else {
             cleanupAndReportResult(); // should be the last call in the lifetime of the object
         }
-        return accepted;
+        return result;
     }
     else if (operation == EXPECT_REPLY_RXSTART) {
         operation = NONE;
-        bool accepted = processReply(step, frame);
+        FrameProcessingResult result = processReply(step, frame);
         if (status == INPROGRESS) {
-            logStatus(accepted ? "processReply() returned ACCEPT": "processReply() returned REJECT");
+            logStatus(result == IGNORED ? "processReply(): frame IGNORED": "processReply(): frame PROCESSED");
             checkOperation(operation, "processReply()");
-            if (accepted || operation != NONE) {
+            if (result == PROCESSED_KEEP || result == PROCESSED_DISCARD || operation != NONE) {
                 proceed();
             }
             else {
@@ -267,14 +267,14 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
         else {
             cleanupAndReportResult(); // should be the last call in the lifetime of the object
         }
-        return accepted;
+        return result;
     }
     else {
-        return false; // momentarily not interested in received frames
+        return IGNORED; // momentarily not interested in received frames
     }
 }
 
-void StepBasedFrameExchange::corruptedFrameReceived()
+void StepBasedFrameExchange::corruptedOrNotForUsFrameReceived()
 {
     if (operation == EXPECT_REPLY_RXSTART && !timeoutMsg->isScheduled())
         handleTimeout();  // the frame we were receiving when the timeout expired was received incorrectly
