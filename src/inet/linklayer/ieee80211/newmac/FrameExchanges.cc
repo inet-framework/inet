@@ -150,6 +150,16 @@ SendDataWithAckFrameExchange::~SendDataWithAckFrameExchange()
     delete dataFrame;
 }
 
+std::string SendDataWithAckFrameExchange::info() const
+{
+    std::string ret = StepBasedFrameExchange::info();
+    if (dataFrame) {
+        ret += ", frame=";
+        ret += dataFrame->getName();
+    }
+    return ret;
+}
+
 void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
@@ -209,6 +219,16 @@ SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(FrameExchangeCo
 SendDataWithRtsCtsFrameExchange::~SendDataWithRtsCtsFrameExchange()
 {
     delete dataFrame;
+}
+
+std::string SendDataWithRtsCtsFrameExchange::info() const
+{
+    std::string ret = StepBasedFrameExchange::info();
+    if (dataFrame) {
+        ret += ", frame=";
+        ret += dataFrame->getName();
+    }
+    return ret;
 }
 
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
@@ -287,6 +307,11 @@ SendMulticastDataFrameExchange::SendMulticastDataFrameExchange(FrameExchangeCont
 SendMulticastDataFrameExchange::~SendMulticastDataFrameExchange()
 {
     delete dataFrame;
+}
+
+std::string SendMulticastDataFrameExchange::info() const
+{
+    return dataFrame ? std::string("frame=") + dataFrame->getName() : "";
 }
 
 void SendMulticastDataFrameExchange::start()

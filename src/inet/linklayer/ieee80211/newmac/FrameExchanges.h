@@ -67,6 +67,7 @@ class INET_API SendDataWithAckFrameExchange : public StepBasedFrameExchange
     public:
         SendDataWithAckFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithAckFrameExchange();
+        virtual std::string info() const override;
 };
 
 class INET_API SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
@@ -86,6 +87,7 @@ class INET_API SendDataWithRtsCtsFrameExchange : public StepBasedFrameExchange
     public:
         SendDataWithRtsCtsFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithRtsCtsFrameExchange();
+        virtual std::string info() const override;
 };
 
 class INET_API SendMulticastDataFrameExchange : public FrameExchange
@@ -104,6 +106,7 @@ class INET_API SendMulticastDataFrameExchange : public FrameExchange
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage* timer) override;
+        virtual std::string info() const override;
 };
 
 } // namespace ieee80211
