@@ -68,8 +68,8 @@ class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public I
         virtual void reportSuccess();
         virtual void reportFailure();
 
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) override;
-        virtual void corruptedFrameReceived() override;
+        virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame *frame) override;
+        virtual void corruptedOrNotForUsFrameReceived() override;
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(int txIndex) override;
 
     public:
@@ -84,13 +84,13 @@ class INET_API FsmBasedFrameExchange : public FrameExchange
         enum EventType { EVENT_START, EVENT_FRAMEARRIVED, EVENT_CORRUPTEDFRAMEARRIVED, EVENT_TXFINISHED, EVENT_INTERNALCOLLISION, EVENT_TIMER };
 
     protected:
-        virtual bool handleWithFSM(EventType eventType, cMessage *frameOrTimer=nullptr) = 0;  // return value: for EVENT_FRAMEARRIVED: whether frame was processed; unused otherwise
+        virtual FrameProcessingResult handleWithFSM(EventType eventType, cMessage *frameOrTimer=nullptr) = 0;  // return value: for EVENT_FRAMEARRIVED: whether frame was processed; unused otherwise
 
     public:
         FsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback) : FrameExchange(context, callback) { fsm.setName("Frame Exchange FSM"); }
         virtual void start() override;
-        virtual bool lowerFrameReceived(Ieee80211Frame* frame) override;
-        virtual void corruptedFrameReceived() override;
+        virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame* frame) override;
+        virtual void corruptedOrNotForUsFrameReceived() override;
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage* timer) override;
@@ -112,7 +112,7 @@ class INET_API StepBasedFrameExchange : public FrameExchange
     protected:
         // to be redefined by user
         virtual void doStep(int step) = 0;
-        virtual bool processReply(int step, Ieee80211Frame *frame) = 0; // true = frame accepted as reply and processing will continue on next step
+        virtual FrameProcessingResult processReply(int step, Ieee80211Frame *frame) = 0; // true = frame accepted as reply and processing will continue on next step
         virtual void processTimeout(int step) = 0;
         virtual void processInternalCollision(int step) = 0;
 
@@ -146,8 +146,8 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual ~StepBasedFrameExchange();
         std::string info() const override;
         virtual void start() override;
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) override; // true = frame processed
-        virtual void corruptedFrameReceived() override;
+        virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame *frame) override;
+        virtual void corruptedOrNotForUsFrameReceived() override;
         virtual void transmissionComplete(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage *timer) override;

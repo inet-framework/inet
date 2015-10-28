@@ -47,9 +47,9 @@ SendDataWithAckFsmBasedFrameExchange::~SendDataWithAckFsmBasedFrameExchange()
         delete cancelEvent(ackTimer);
 }
 
-bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessage *frameOrTimer)
+IFrameExchange::FrameProcessingResult SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessage *frameOrTimer)
 {
-    bool frameProcessed = false;
+    FrameProcessingResult result = IGNORED;
     Ieee80211Frame *receivedFrame = event == EVENT_FRAMEARRIVED ? check_and_cast<Ieee80211Frame *>(frameOrTimer) : nullptr;
 
     FSMA_Switch(fsm) {
@@ -79,9 +79,7 @@ bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessa
             FSMA_Event_Transition(Ack - arrived,
                     event == EVENT_FRAMEARRIVED && isAck(receivedFrame),
                     SUCCESS,
-                    { frameProcessed = true;
-                      delete receivedFrame;
-                    }
+                    result = PROCESSED_DISCARD;
                     );
             FSMA_Event_Transition(Frame - arrived,
                     event == EVENT_FRAMEARRIVED && !isAck(receivedFrame),
@@ -106,7 +104,7 @@ bool SendDataWithAckFsmBasedFrameExchange::handleWithFSM(EventType event, cMessa
             FSMA_Enter(reportFailure());
         }
     }
-    return frameProcessed;
+    return result;
 }
 
 void SendDataWithAckFsmBasedFrameExchange::transmitDataFrame()
@@ -170,11 +168,11 @@ void SendDataWithAckFrameExchange::doStep(int step)
     }
 }
 
-bool SendDataWithAckFrameExchange::processReply(int step, Ieee80211Frame *frame)
+IFrameExchange::FrameProcessingResult SendDataWithAckFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
     switch (step) {
-        case 1: if (utils->isAck(frame)) {delete frame; return true;} else return false;
-        default: ASSERT(false); return false;
+        case 1: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        default: ASSERT(false); return IGNORED;
     }
 }
 
@@ -243,12 +241,12 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
     }
 }
 
-bool SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
+IFrameExchange::FrameProcessingResult SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
     switch (step) {
-        case 1: if (utils->isCts(frame)) {delete frame; return true;} else return false;
-        case 3: if (utils->isAck(frame)) {delete frame; return true;} else return false;
-        default: ASSERT(false); return false;
+        case 1: if (utils->isCts(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        case 3: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        default: ASSERT(false); return IGNORED;
     }
 }
 
