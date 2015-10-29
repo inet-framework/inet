@@ -15,25 +15,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_STATISTICS_H
-#define __INET_STATISTICS_H
+#ifndef __INET_BASICSTATISTICS_H
+#define __INET_BASICSTATISTICS_H
 
 #include "IStatistics.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class MacUtils;
-class IRateControl;
-
-class INET_API BasicStatistics : public IStatistics
+class INET_API BasicStatistics : public IStatistics, public cSimpleModule
 {
     private:
-        MacUtils *utils;
+        MacUtils *utils = nullptr;
         IRateControl *rateControl = nullptr; //TODO maybe there should be a listener list instead of a direct pointer here
 
     public:
-        BasicStatistics(MacUtils *utils) : utils(utils) {}
+        virtual void setMacUtils(MacUtils *utils) override;
         virtual void setRateControl(IRateControl *rateControl) override;
         virtual void frameTransmissionSuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount) override;
         virtual void frameTransmissionUnsuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount) override;

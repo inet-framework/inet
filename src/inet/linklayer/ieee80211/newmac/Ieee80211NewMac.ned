@@ -95,6 +95,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string collisionControllerModule = ".ctrl";
         string rateSelectionModule = ".rateSelection";
         string rateControlModule = ".rateControl";
+        string statisticsModule = ".statistics";
 
         *.macModule = "^";
         *.upperMacModule = "^" + upperMacModule;
@@ -104,6 +105,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         *.collisionControllerModule = "^" + collisionControllerModule;
         *.rateSelectionModule = "^" + rateSelectionModule;
         *.rateControlModule = "^" + rateControlModule;
+        *.statisticsModule = "^" + statisticsModule;
 
         @display("i=block/layer");
         @class(Ieee80211NewMac);
@@ -118,6 +120,9 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         }
         rateControl: <rateControlModuleType> like IRateControl if rateControlModuleType != "" {
             @display("p=140,66");
+        }
+        statistics: <default("BasicStatistics")> like IStatistics {
+            @display("p=70,125");
         }
         upperMac: <default("EdcaUpperMac")> like IUpperMac {
             @display("p=208,66");

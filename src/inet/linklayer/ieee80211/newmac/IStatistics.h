@@ -23,6 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
+class MacUtils;
 class IRateControl;
 class Ieee80211Frame;
 class Ieee80211DataOrMgmtFrame;
@@ -30,6 +31,7 @@ class Ieee80211DataOrMgmtFrame;
 class INET_API IStatistics
 {
     public:
+        virtual void setMacUtils(MacUtils *utils) = 0;
         virtual void setRateControl(IRateControl *rateControl) = 0;  // is interested in the statistics
 
         // events to compute statistics from; TODO there should be many more, e.g. about the contention, queueing time, etc
