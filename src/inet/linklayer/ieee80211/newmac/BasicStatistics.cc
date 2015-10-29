@@ -15,13 +15,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "Statistics.h"
+#include "BasicStatistics.h"
 #include "MacUtils.h"
 #include "IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
+
+Define_Module(BasicStatistics);
+
+void BasicStatistics::setMacUtils(MacUtils *utils)
+{
+    this->utils = utils;
+}
 
 void BasicStatistics::setRateControl(IRateControl *rateControl)
 {

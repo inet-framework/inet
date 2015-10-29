@@ -20,13 +20,8 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// The default implementation of IImmediateTx.
+// Interface for MAC statistics collection modules
 //
-simple BasicImmediateTx like IImmediateTx
+moduleinterface IStatistics
 {
-    parameters:
-        string macModule;
-        string upperMacModule;
-        string statisticsModule;
-        @display("i=block/tx");
 }

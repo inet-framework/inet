@@ -40,6 +40,7 @@ simple EdcaUpperMac like IUpperMac
         string firstContentionTxModule;
         string rateSelectionModule;
         string rateControlModule;
+        string statisticsModule;
 
         int rtsThreshold @unit("B") = default(2346B); // longer frames will be sent using RTS/CTS
         int shortRetryLimit = default(-1); // maximum number of retries per frame, -1 means default

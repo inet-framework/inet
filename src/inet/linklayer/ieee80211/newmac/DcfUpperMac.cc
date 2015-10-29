@@ -26,10 +26,10 @@
 #include "MacParameters.h"
 #include "FrameExchanges.h"
 #include "DuplicateDetectors.h"
-#include "Fragmentation.h"
-#include "BasicRateSelection.h"
-#include "OnoeRateControl.h"
-#include "Statistics.h"
+#include "IFragmentation.h"
+#include "IRateSelection.h"
+#include "IRateControl.h"
+#include "IStatistics.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
@@ -73,7 +73,8 @@ void DcfUpperMac::initialize()
     utils = new MacUtils(params, rateSelection);
     rx->setAddress(params->getAddress());
 
-    statistics = new BasicStatistics(utils);
+    statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
+    statistics->setMacUtils(utils);
     statistics->setRateControl(rateControl);
 
     duplicateDetection = new NonQoSDuplicateDetector(); //TODO or LegacyDuplicateDetector();
