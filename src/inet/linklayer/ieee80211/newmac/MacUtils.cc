@@ -44,22 +44,22 @@ simtime_t MacUtils::getCtsDuration() const
 simtime_t MacUtils::getAckEarlyTimeout() const
 {
     // Note: This excludes ACK duration. If there's no RXStart indication within this interval, retransmission should begin immediately
-    return params->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime();
+    return params->getSifsTime() + params->getSlotTime() + params->getPhyRxStartDelay();
 }
 
 simtime_t MacUtils::getAckFullTimeout() const
 {
-    return params->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getAckDuration();
+    return params->getSifsTime() + params->getSlotTime() + getAckDuration();
 }
 
 simtime_t MacUtils::getCtsEarlyTimeout() const
 {
-    return params->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime();
+    return params->getSifsTime() + params->getSlotTime() + params->getPhyRxStartDelay(); // see getAckEarlyTimeout()
 }
 
 simtime_t MacUtils::getCtsFullTimeout() const
 {
-    return params->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getCtsDuration();
+    return params->getSifsTime() + params->getSlotTime() + getCtsDuration();
 }
 
 Ieee80211RTSFrame *MacUtils::buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame) const
