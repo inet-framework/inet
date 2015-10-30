@@ -48,7 +48,8 @@ simtime_t MacUtils::getAckEarlyTimeout() const
 
 simtime_t MacUtils::getAckFullTimeout() const
 {
-    return params->getPhyRxStartDelay() + params->getSifsTime() + params->getSlotTime() + getAckDuration();
+    std::cout << "getPhyRxStartDelay="<< params->getPhyRxStartDelay() << ", getSifsTime=" << params->getSifsTime() << ", getSlotTime=" << params->getSlotTime() << ", getAckDuration=" << getAckDuration() << "\n";
+    return params->getSifsTime() + params->getSlotTime() + getAckDuration();
 }
 
 simtime_t MacUtils::getCtsEarlyTimeout() const

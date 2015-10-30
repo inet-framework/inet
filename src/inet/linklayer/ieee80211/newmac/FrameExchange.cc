@@ -26,6 +26,8 @@
 namespace inet {
 namespace ieee80211 {
 
+#define CLIHOST  (getFullPath().find("cliHost")!=std::string::npos)
+
 FrameExchange::FrameExchange(FrameExchangeContext *context, IFinishedCallback *callback) :
     MacPlugin(context->ownerModule),
     params(context->params),
@@ -123,9 +125,9 @@ std::string StepBasedFrameExchange::info() const
 {
     std::stringstream out;
     switch (status) {
-        case SUCCEEDED: out << "SUCCEEDED in step " << step; break;
-        case FAILED: out << "FAILED in step " << step; break;
-        case INPROGRESS: out << "step " << step << ", operation=" << operationName(operation); break;
+        case SUCCEEDED: out << getClassName() << "  #" << defaultTxIndex << ": SUCCEEDED in step " << step; break;
+        case FAILED: out << getClassName() << "  #" << defaultTxIndex << ": FAILED in step " << step; break;
+        case INPROGRESS: out << getClassName() << "  #" << defaultTxIndex << ": step " << step << ", operation=" << operationName(operation); break;
     }
     return out.str();
 }
@@ -209,6 +211,7 @@ void StepBasedFrameExchange::transmissionComplete(int txIndex)
     ASSERT(status == INPROGRESS);
     ASSERT(operation == TRANSMIT_CONTENTION_FRAME || operation == TRANSMIT_IMMEDIATE_FRAME);
     EV_DETAIL << "Transmission complete\n";
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": transmissionComplete\n";
     proceed();
 }
 
@@ -217,9 +220,12 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
     EV_DETAIL << "Lower frame received in step " << step << "\n";
     ASSERT(status == INPROGRESS);
 
-    if (operation != EXPECT_REPLY)
+    if (operation != EXPECT_REPLY) {
+        if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": lowerFrameReceived, ignored: " << frame->getName() << "\n";
         return false;    // not ready to process frames
+    }
     else {
+        if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": lowerFrameReceived in EXPECT_REPLY: " << frame->getName() << "\n";
         operation = NONE;
         bool accepted = processReply(step, frame);
         if (status == INPROGRESS) {
@@ -243,6 +249,7 @@ void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
     ASSERT(msg == timeoutMsg);
 
     operation = NONE;
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": processTimeout\n";
     processTimeout(step);
     if (status == INPROGRESS) {
         logStatus("processTimeout()");
@@ -256,6 +263,8 @@ void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
 
 void StepBasedFrameExchange::internalCollision(int txIndex)
 {
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": internalCollision\n";
+
     EV_DETAIL << "Internal collision in step " << step << "\n";
     ASSERT(status == INPROGRESS);
     ASSERT(operation == TRANSMIT_CONTENTION_FRAME);
@@ -301,6 +310,7 @@ void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int 
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, AccessCategory ac)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << txIndex << ": transmitContentionFrame\n";
     contentionTx[txIndex]->transmitContentionFrame(frame, params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
 }
 
@@ -312,23 +322,27 @@ void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *fr
 void StepBasedFrameExchange::transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, AccessCategory ac)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << txIndex << ": transmitMulticastContentionFrame\n";
     contentionTx[txIndex]->transmitContentionFrame(frame, params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMulticast(ac), params->getCwMulticast(ac), params->getSlotTime(), 0, this);
 }
 
 void StepBasedFrameExchange::transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount)
 {
     setOperation(TRANSMIT_CONTENTION_FRAME);
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << txIndex << ": transmitContentionFrame\n";
     contentionTx[txIndex]->transmitContentionFrame(frame, ifs, eifs, cwMin, cwMax, slotTime, retryCount, this);
 }
 
 void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs)
 {
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "#" << defaultTxIndex << ": transmitImmediateFrame\n";
     setOperation(TRANSMIT_IMMEDIATE_FRAME);
     immediateTx->transmitImmediateFrame(frame, ifs, this);
 }
 
 void StepBasedFrameExchange::expectReply(simtime_t timeout)
 {
+    if (CLIHOST) std::cout << "*** " << getFullPath() << " t=" << simTime() << "  #" << defaultTxIndex << ": expectReply, timeout=" << timeout << ", expires=" << (simTime()+timeout) << "\n";
     setOperation(EXPECT_REPLY);
     if (!timeoutMsg)
         timeoutMsg = new cMessage("timeout");

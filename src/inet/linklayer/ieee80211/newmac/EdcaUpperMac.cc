@@ -227,6 +227,7 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             for (int i = 0; i < numACs; i++)
                 if (acData[i].frameExchange)
                     numprocessed += static_cast<StepBasedFrameExchange *>(acData[i].frameExchange)->operation == StepBasedFrameExchange::EXPECT_REPLY;
+            std::cout.flush();
             ASSERT(numprocessed <= 1);
             // offer frame to all ongoing frame exchanges
 //            int numACs = params->isEdcaEnabled() ? 4 : 1;
