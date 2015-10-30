@@ -27,12 +27,14 @@ namespace ieee80211 {
 
 class IUpperMac;
 class IMacRadioInterface;
+class IStatistics;
 
 class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
 {
     protected:
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
+        IStatistics *statistics;
         Ieee80211Frame *frame = nullptr;
         cMessage *endIfsTimer = nullptr;
         bool transmitting = false;

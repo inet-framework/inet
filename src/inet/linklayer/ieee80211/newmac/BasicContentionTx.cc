@@ -20,6 +20,7 @@
 #include "BasicContentionTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
+#include "IStatistics.h"
 #include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -54,6 +55,7 @@ void BasicContentionTx::initialize()
     mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
+    statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
 
     txIndex = getIndex();
     if (txIndex > 0 && !collisionController)

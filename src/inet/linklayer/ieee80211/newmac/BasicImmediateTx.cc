@@ -20,6 +20,7 @@
 #include "BasicImmediateTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
+#include "IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -38,6 +39,7 @@ void BasicImmediateTx::initialize()
 {
     mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+    statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
     endIfsTimer = new cMessage("endIFS");
 
     WATCH(transmitting);

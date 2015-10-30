@@ -31,6 +31,7 @@ using namespace inet::physicallayer;
 
 class IUpperMac;
 class IMacRadioInterface;
+class IStatistics;
 
 class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
 {
@@ -42,6 +43,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
         ICollisionController *collisionController;  // optional
+        IStatistics *statistics;
         cMessage *startTxEvent = nullptr;  // in the absence of collisionController
         int txIndex;
 

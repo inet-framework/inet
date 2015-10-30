@@ -25,7 +25,8 @@ package inet.linklayer.ieee80211.newmac;
 simple BasicImmediateTx like IImmediateTx
 {
     parameters:
-        string macModule = default("^");
+        string macModule;
         string upperMacModule;
+        string statisticsModule;
         @display("i=block/tx");
 }
