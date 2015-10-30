@@ -90,7 +90,7 @@ class INET_API FsmBasedFrameExchange : public FrameExchange
 
 class INET_API StepBasedFrameExchange : public FrameExchange
 {
-    private:
+    public:
         enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_REPLY, GOTO_STEP, FAIL, SUCCEED };
         enum Status { INPROGRESS, SUCCEEDED, FAILED };
         int defaultTxIndex;

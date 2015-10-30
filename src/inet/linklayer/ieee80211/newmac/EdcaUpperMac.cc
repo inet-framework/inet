@@ -222,8 +222,14 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
             }
         }
         else {
-            // offer frame to all ongoing frame exchanges
             int numACs = params->isEdcaEnabled() ? 4 : 1;
+            int numprocessed = 0;
+            for (int i = 0; i < numACs; i++)
+                if (acData[i].frameExchange)
+                    numprocessed += static_cast<StepBasedFrameExchange *>(acData[i].frameExchange)->operation == StepBasedFrameExchange::EXPECT_REPLY;
+            ASSERT(numprocessed <= 1);
+            // offer frame to all ongoing frame exchanges
+//            int numACs = params->isEdcaEnabled() ? 4 : 1;
             bool processed = false;
             for (int i = 0; i < numACs && !processed; i++)
                 if (acData[i].frameExchange)
