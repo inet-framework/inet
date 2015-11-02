@@ -1106,7 +1106,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             /*Ieee 802.11 2007 9.9.1.2 EDCA TXOPs*/
             FSMA_Event_Transition(Receive - ACK,
                     isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK,
-                    DEFER,
+                    IDLE,
                     currentAC = oldcurrentAC;
                     if (retryCounter() == 0)
                         numSentWithoutRetry()++;
