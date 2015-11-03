@@ -47,11 +47,7 @@ class Ieee80211Frame;
 
 
 /**
- * IEEE 802.11b Media Access Control Layer.
- *
- * Various comments in the code refer to the Wireless LAN Medium Access
- * Control (MAC) and Physical Layer(PHY) Specifications
- * ANSI/IEEE Std 802.11, 1999 Edition (R2003)
+ * Implements the IEEE 802.11 MAC.
  */
 class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterface
 {
@@ -69,19 +65,8 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
     // The last change channel message received and not yet sent to the physical layer, or NULL.
     cMessage *pendingRadioConfigMsg = nullptr;
 
-    /** @name Statistics */
-    //@{
-    long numRetry;
-    long numSentWithoutRetry;
-    long numGivenUp;
-    long numCollision;
-    long numSent;
-    long numReceived;
-    long numSentBroadcast;
-    long numReceivedBroadcast;
     static simsignal_t stateSignal;
     static simsignal_t radioStateSignal;
-    //@}
 
   protected:
     virtual int numInitStages() const override {return NUM_INIT_STAGES;}

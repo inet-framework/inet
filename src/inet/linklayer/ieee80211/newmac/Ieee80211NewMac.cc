@@ -74,25 +74,6 @@ void Ieee80211NewMac::initialize(int stage)
             addressString = par("address");
         }
         address.setAddress(addressString);
-
-        // statistics
-        numRetry = 0;
-        numSentWithoutRetry = 0;
-        numGivenUp = 0;
-        numCollision = 0;
-        numSent = 0;
-        numReceived = 0;
-        numSentBroadcast = 0;
-        numReceivedBroadcast = 0;
-
-        WATCH(numRetry);
-        WATCH(numSentWithoutRetry);
-        WATCH(numGivenUp);
-        WATCH(numCollision);
-        WATCH(numSent);
-        WATCH(numReceived);
-        WATCH(numSentBroadcast);
-        WATCH(numReceivedBroadcast);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // interface

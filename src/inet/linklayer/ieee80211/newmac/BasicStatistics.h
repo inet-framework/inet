@@ -29,6 +29,19 @@ class INET_API BasicStatistics : public IStatistics, public cSimpleModule
         MacUtils *utils = nullptr;
         IRateControl *rateControl = nullptr; //TODO maybe there should be a listener list instead of a direct pointer here
 
+        long numRetry;
+        long numSentWithoutRetry;
+        long numGivenUp;
+        long numCollision;
+        long numSent;
+        long numReceived;
+        long numSentBroadcast;
+        long numReceivedBroadcast;
+
+    protected:
+        virtual void initialize() override;
+        void resetStatistics();
+
     public:
         virtual void setMacUtils(MacUtils *utils) override;
         virtual void setRateControl(IRateControl *rateControl) override;

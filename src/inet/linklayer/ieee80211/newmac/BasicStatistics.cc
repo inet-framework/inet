@@ -25,6 +25,33 @@ namespace ieee80211 {
 
 Define_Module(BasicStatistics);
 
+void BasicStatistics::initialize()
+{
+    resetStatistics();
+
+    WATCH(numRetry);
+    WATCH(numSentWithoutRetry);
+    WATCH(numGivenUp);
+    WATCH(numCollision);
+    WATCH(numSent);
+    WATCH(numReceived);
+    WATCH(numSentBroadcast);
+    WATCH(numReceivedBroadcast);
+
+}
+
+void BasicStatistics::resetStatistics()
+{
+    numRetry = 0;
+    numSentWithoutRetry = 0;
+    numGivenUp = 0;
+    numCollision = 0;
+    numSent = 0;
+    numReceived = 0;
+    numSentBroadcast = 0;
+    numReceivedBroadcast = 0;
+}
+
 void BasicStatistics::setMacUtils(MacUtils *utils)
 {
     this->utils = utils;
