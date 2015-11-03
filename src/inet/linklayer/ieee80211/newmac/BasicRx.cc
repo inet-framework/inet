@@ -80,6 +80,13 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+void BasicRx::frameTransmitted(simtime_t durationField)
+{
+    // the txIndex that transmitted the frame should already own the TXOP, so
+    // it has no need to (and should not) check the NAV.
+    setOrExtendNav(durationField);
+}
+
 bool BasicRx::isReceptionInProgress() const
 {
     return receptionState == IRadio::RECEPTION_STATE_RECEIVING;

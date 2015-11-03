@@ -52,6 +52,7 @@ class INET_API IRx
 
         // from ContentionTx
         virtual bool isMediumFree() const = 0;
+        virtual void frameTransmitted(simtime_t durationField) = 0;
 
         // events
         virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;

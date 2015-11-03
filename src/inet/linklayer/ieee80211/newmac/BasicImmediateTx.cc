@@ -20,6 +20,7 @@
 #include "BasicImmediateTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
+#include "IRx.h"
 #include "IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -39,6 +40,7 @@ void BasicImmediateTx::initialize()
 {
     mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+    rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
     endIfsTimer = new cMessage("endIFS");
 
@@ -67,6 +69,7 @@ void BasicImmediateTx::radioTransmissionFinished()
         upperMac->transmissionComplete(completionCallback, -1);
         transmitting = false;
         frame = nullptr;
+        rx->frameTransmitted(durationField);
         if (hasGUI())
             updateDisplayString();
     }
@@ -77,6 +80,7 @@ void BasicImmediateTx::handleMessage(cMessage *msg)
     if (msg == endIfsTimer) {
         EV_DETAIL << "BasicImmediateTx: endIfsTimer expired\n";
         transmitting = true;
+        durationField = frame->getDuration();
         mac->sendFrame(frame);
         if (hasGUI())
             updateDisplayString();

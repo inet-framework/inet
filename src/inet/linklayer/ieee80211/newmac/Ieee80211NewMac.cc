@@ -172,7 +172,7 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree()) {    // TODO: !!!
+        if (rx->isMediumFree()) {    // TODO: this should be just the physical channel sense!!!!
             EV_DEBUG << "Sending it down immediately\n";
 /*
    // Dynamic power

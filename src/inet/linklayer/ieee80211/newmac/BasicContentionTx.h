@@ -31,6 +31,7 @@ using namespace inet::physicallayer;
 
 class IUpperMac;
 class IMacRadioInterface;
+class IRx;
 class IStatistics;
 
 class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
@@ -43,6 +44,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
         ICollisionController *collisionController;  // optional
+        IRx *rx;
         IStatistics *statistics;
         cMessage *startTxEvent = nullptr;  // in the absence of collisionController
         int txIndex;
@@ -63,6 +65,7 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
         simtime_t channelLastBusyTime = SIMTIME_ZERO;
         bool mediumFree = false;
+        simtime_t durationField;
 
     protected:
         virtual void initialize() override;

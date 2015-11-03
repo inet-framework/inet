@@ -27,6 +27,7 @@ namespace ieee80211 {
 
 class IUpperMac;
 class IMacRadioInterface;
+class IRx;
 class IStatistics;
 
 class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
@@ -34,9 +35,11 @@ class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
     protected:
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
+        IRx *rx;
         IStatistics *statistics;
         Ieee80211Frame *frame = nullptr;
         cMessage *endIfsTimer = nullptr;
+        simtime_t durationField;
         bool transmitting = false;
         ITxCallback *completionCallback = nullptr;
 

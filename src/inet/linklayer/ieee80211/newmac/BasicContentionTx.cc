@@ -21,6 +21,7 @@
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "IStatistics.h"
+#include "IRx.h"
 #include "inet/common/FSMA.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -55,6 +56,7 @@ void BasicContentionTx::initialize()
     mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
+    rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
 
     txIndex = getIndex();
@@ -313,11 +315,13 @@ void BasicContentionTx::sendDownFrame()
         frame = upperMac->getFrameToTransmit(callback, txIndex);
         take(frame);
     }
+    durationField = frame->getDuration();
     mac->sendFrame(frame);
 }
 
 void BasicContentionTx::reportTransmissionComplete()
 {
+    rx->frameTransmitted(durationField);
     upperMac->transmissionComplete(callback, txIndex);
 }
 
