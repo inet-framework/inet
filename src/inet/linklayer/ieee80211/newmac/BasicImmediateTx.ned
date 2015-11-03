@@ -27,6 +27,7 @@ simple BasicImmediateTx like IImmediateTx
     parameters:
         string macModule;
         string upperMacModule;
+        string rxModule;
         string statisticsModule;
         @display("i=block/tx");
 }

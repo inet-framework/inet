@@ -63,7 +63,7 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
         virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
-
+        virtual void frameTransmitted(simtime_t durationField) override;
 };
 
 } // namespace ieee80211
