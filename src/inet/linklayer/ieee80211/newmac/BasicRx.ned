@@ -27,5 +27,6 @@ simple BasicRx like IRx
     parameters:
         string upperMacModule;
         string firstContentionModule;
+        string statisticsModule;
         @display("i=block/uparrow");
 }

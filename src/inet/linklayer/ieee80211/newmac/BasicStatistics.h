@@ -29,6 +29,24 @@ class INET_API BasicStatistics : public IStatistics, public cSimpleModule
         MacUtils *utils = nullptr;
         IRateControl *rateControl = nullptr; //TODO maybe there should be a listener list instead of a direct pointer here
 
+        long numRetry;
+        long numSentWithoutRetry;
+        long numGivenUp;
+        long numCollision;
+        long numSent;
+        long numSentBroadcast;
+
+        long numReceivedUnicast;
+        long numReceivedMulticast;
+        long numReceivedBroadcast;
+        long numReceivedNotForUs;
+        long numReceivedErroneous;
+
+    protected:
+        virtual void initialize() override;
+        virtual void finish() override;
+        virtual void resetStatistics();
+
     public:
         virtual void setMacUtils(MacUtils *utils) override;
         virtual void setRateControl(IRateControl *rateControl) override;
@@ -37,6 +55,7 @@ class INET_API BasicStatistics : public IStatistics, public cSimpleModule
         virtual void frameTransmissionUnsuccessfulGivingUp(Ieee80211DataOrMgmtFrame *frame, int retryCount) override;
         virtual void frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void frameReceived(Ieee80211Frame *frame) override;
+        virtual void erroneousFrameReceived() override;
 };
 
 }  // namespace ieee80211

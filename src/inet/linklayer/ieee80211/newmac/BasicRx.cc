@@ -21,6 +21,7 @@
 #include "IContention.h"
 #include "ITx.h"
 #include "IUpperMac.h"
+#include "IStatistics.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -40,6 +41,7 @@ void BasicRx::initialize()
 {
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collectContentionModules(getModuleByPath(par("firstContentionModule")), contention);
+    statistics = check_and_cast<IStatistics *>(getModuleByPath(par("statisticsModule")));
     endNavTimer = new cMessage("NAV");
     recomputeMediumFree();
 
@@ -69,6 +71,7 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
         EV_INFO << "Received frame from PHY: " << frame << endl;
         if (frame->getReceiverAddress() != address)
             setOrExtendNav(frame->getDuration());
+        statistics->frameReceived(frame);
         upperMac->lowerFrameReceived(frame);
     }
     else {
@@ -77,6 +80,7 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
         for (int i = 0; contention[i]; i++)
             contention[i]->corruptedFrameReceived();
         upperMac->corruptedFrameReceived();
+        statistics->erroneousFrameReceived();
     }
 }
 
