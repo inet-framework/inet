@@ -34,7 +34,7 @@ namespace serializer {
 /**
  * Converts between TCPSegment and binary (network byte order) TCP header.
  */
-class TCPSerializer : public SerializerBase
+class INET_API TCPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;

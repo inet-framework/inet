@@ -25,7 +25,7 @@ namespace inet {
 
 namespace serializer {
 
-class IPv4OptionSerializerBase : public cOwnedObject
+class INET_API IPv4OptionSerializerBase : public cOwnedObject
 {
   public:
     IPv4OptionSerializerBase(const char *name = nullptr) : cOwnedObject(name, false) {}

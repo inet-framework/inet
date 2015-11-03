@@ -27,7 +27,7 @@ namespace serializer {
 /**
  * Converts between EtherFrame and binary (network byte order) Ethernet header.
  */
-class EthernetSerializer : public SerializerBase
+class INET_API EthernetSerializer : public SerializerBase
 {
   protected:
     /**

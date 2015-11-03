@@ -28,7 +28,7 @@ namespace serializer {
 /**
  * Converts between ARPPacket and binary (network byte order)  ARP header.
  */
-class ARPSerializer : public SerializerBase
+class INET_API ARPSerializer : public SerializerBase
 {
   protected:
     /**
