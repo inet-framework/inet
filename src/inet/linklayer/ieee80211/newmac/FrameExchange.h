@@ -64,6 +64,7 @@ class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public I
     protected:
         virtual void startContention(int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs);
+        virtual void releaseChannel(int txIndex);
         virtual void reportSuccess();
         virtual void reportFailure();
 
@@ -126,8 +127,10 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual void expectFullReplyWithin(simtime_t timeout);  // may invoke processReply() and processTimeout()
         virtual void expectReplyRxStartWithin(simtime_t timeout); // may invoke processReply() and processTimeout()
         virtual void gotoStep(int step); // ~setNextStep()
+        virtual void releaseChannel();
         virtual void fail();
         virtual void succeed();
+        using FrameExchange::releaseChannel;
 
         // internal
         virtual void proceed();

@@ -37,8 +37,8 @@ class IStatistics;
 class INET_API BasicContention : public cSimpleModule, public IContention, protected ICollisionController::ICallback
 {
     public:
-        enum State { IDLE, DEFER, IFS_AND_BACKOFF, TRANSMIT };
-        enum EventType { START, MEDIUM_STATE_CHANGED, CORRUPTED_FRAME_RECEIVED, TRANSMISSION_GRANTED, INTERNAL_COLLISION, TRANSMISSION_FINISHED };
+        enum State { IDLE, DEFER, IFS_AND_BACKOFF, OWNING };
+        enum EventType { START, MEDIUM_STATE_CHANGED, CORRUPTED_FRAME_RECEIVED, TRANSMISSION_GRANTED, INTERNAL_COLLISION, CHANNEL_RELEASED };
 
     protected:
         IMacRadioInterface *mac;
@@ -88,6 +88,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
         virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback) override;
+        virtual void channelReleased() override;
 
         virtual void mediumStateChanged(bool mediumFree) override;
         virtual void corruptedFrameReceived() override;

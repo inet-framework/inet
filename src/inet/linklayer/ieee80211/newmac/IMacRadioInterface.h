@@ -28,7 +28,7 @@ namespace ieee80211 {
 class Ieee80211Frame;
 
 /**
- * Rx and Tx processes use this interface to transmit trames over the radio.
+ * Rx and Tx processes use this interface to transmit frames over the radio.
  */
 class INET_API IMacRadioInterface
 {
