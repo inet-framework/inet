@@ -139,7 +139,7 @@ void BasicStatistics::frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame)
 
 void BasicStatistics::frameReceived(Ieee80211Frame *frame)
 {
-    if (Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
+    if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
         if (!utils->isForUs(frame))
             numReceivedNotForUs++;
         else if (utils->isBroadcast(frame))
@@ -156,7 +156,7 @@ void BasicStatistics::frameReceived(Ieee80211Frame *frame)
     }
 }
 
-void BasicStatistics::erroneousFrameReceived(Ieee80211Frame *frame)
+void BasicStatistics::erroneousFrameReceived()
 {
     numReceivedErroneous++;
 }

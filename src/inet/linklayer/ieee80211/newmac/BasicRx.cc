@@ -71,8 +71,8 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
         EV_INFO << "Received frame from PHY: " << frame << endl;
         if (frame->getReceiverAddress() != address)
             setOrExtendNav(frame->getDuration());
-        upperMac->lowerFrameReceived(frame);
         statistics->frameReceived(frame);
+        upperMac->lowerFrameReceived(frame);
     }
     else {
         EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
@@ -80,7 +80,7 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
         for (int i = 0; contention[i]; i++)
             contention[i]->corruptedFrameReceived();
         upperMac->corruptedFrameReceived();
-        statistics->erroneousFrameReceived(frame);
+        statistics->erroneousFrameReceived();
     }
 }
 
