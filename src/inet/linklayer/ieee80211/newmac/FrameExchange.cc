@@ -53,6 +53,11 @@ void FrameExchange::transmitFrame(Ieee80211Frame *frame, simtime_t ifs)
     tx->transmitFrame(frame, ifs, this);
 }
 
+void FrameExchange::releaseChannel(int txIndex)
+{
+    contention[txIndex]->channelReleased();
+}
+
 IFrameExchange::FrameProcessingResult FrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
 {
     return IGNORED;  // not ours
@@ -429,6 +434,11 @@ void StepBasedFrameExchange::succeed()
     setOperation(SUCCEED);
     status = SUCCEEDED;
     // note: we cannot call reportSuccess() right here as it might delete the frame exchange object
+}
+
+void StepBasedFrameExchange::releaseChannel()
+{
+    releaseChannel(defaultTxIndex);
 }
 
 void StepBasedFrameExchange::setOperation(Operation newOperation)

@@ -166,7 +166,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
         case 0: startContention(retryCount); break;
         case 1: transmitFrame(dupPacketAndControlInfo(dataFrame)); break;
         case 2: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 3: statistics->frameTransmissionSuccessful(dataFrame, retryCount); succeed(); break;
+        case 3: statistics->frameTransmissionSuccessful(dataFrame, retryCount); releaseChannel(); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -197,6 +197,7 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
 
 void SendDataWithAckFrameExchange::retry()
 {
+    releaseChannel();
     if (retryCount < params->getShortRetryLimit()) {
         statistics->frameTransmissionUnsuccessful(dataFrame, retryCount);
         dataFrame->setRetry(true);
@@ -240,7 +241,7 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
         case 2: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
         case 3: transmitFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
         case 4: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 5: statistics->frameTransmissionSuccessful(dataFrame, longRetryCount); succeed(); break;
+        case 5: statistics->frameTransmissionSuccessful(dataFrame, longRetryCount); releaseChannel(); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -273,6 +274,7 @@ void SendDataWithRtsCtsFrameExchange::processInternalCollision(int step)
 
 void SendDataWithRtsCtsFrameExchange::retryRtsCts()
 {
+    releaseChannel();
     if (shortRetryCount < params->getShortRetryLimit()) {
         shortRetryCount++;
         gotoStep(0);
@@ -285,6 +287,7 @@ void SendDataWithRtsCtsFrameExchange::retryRtsCts()
 
 void SendDataWithRtsCtsFrameExchange::retryData()
 {
+    releaseChannel();
     if (longRetryCount < params->getLongRetryLimit()) {
         statistics->frameTransmissionUnsuccessful(dataFrame, longRetryCount);
         dataFrame->setRetry(true);
@@ -350,6 +353,7 @@ void SendMulticastDataFrameExchange::channelAccessGranted(int txIndex)
 
 void SendMulticastDataFrameExchange::transmissionComplete()
 {
+    releaseChannel(txIndex);
     reportSuccess();
 }
 

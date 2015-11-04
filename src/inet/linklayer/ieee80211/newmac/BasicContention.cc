@@ -33,7 +33,7 @@ Register_Enum(BasicContention::State,
         (BasicContention::IDLE,
          BasicContention::DEFER,
          BasicContention::IFS_AND_BACKOFF,
-         BasicContention::TRANSMIT));
+         BasicContention::OWNING));
 
 Define_Module(BasicContention);
 
@@ -133,8 +133,8 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
                     ;
                     );
             FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
-            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);
             FSMA_Ignore_Event(event==CORRUPTED_FRAME_RECEIVED);
+            FSMA_Ignore_Event(event==CHANNEL_RELEASED);
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(DEFER) {
@@ -149,14 +149,13 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
                     DEFER,
                     endEifsTime = simTime() + eifs;
                     );
-            FSMA_Ignore_Event(event==TRANSMISSION_FINISHED);  // i.e. of another Tx
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(IFS_AND_BACKOFF) {
             FSMA_Enter();
             FSMA_Event_Transition(Backoff-expired,
                     event == TRANSMISSION_GRANTED,
-                    IDLE,
+                    OWNING,
                     finallyReportChannelAccessGranted = true;
                     );
             FSMA_Event_Transition(Defer-on-channel-busy,
@@ -175,6 +174,15 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
                     IFS_AND_BACKOFF,
                     switchToEifs();
                     );
+            FSMA_Fail_On_Unhandled_Event();
+        }
+        FSMA_State(OWNING) {
+            FSMA_Event_Transition(Channel-Released,
+                    event == CHANNEL_RELEASED,
+                    IDLE,
+                    ;
+                    );
+            FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
             FSMA_Fail_On_Unhandled_Event();
         }
     }
@@ -217,6 +225,12 @@ void BasicContention::internalCollision(int txIndex)
 {
     Enter_Method("internalCollision()");
     handleWithFSM(INTERNAL_COLLISION, nullptr);
+}
+
+void BasicContention::channelReleased()
+{
+    Enter_Method("channelReleased()");
+    handleWithFSM(CHANNEL_RELEASED, nullptr);
 }
 
 void BasicContention::scheduleTransmissionRequestFor(simtime_t txStartTime)
@@ -289,7 +303,7 @@ const char *BasicContention::getEventName(EventType event)
         CASE(CORRUPTED_FRAME_RECEIVED);
         CASE(TRANSMISSION_GRANTED);
         CASE(INTERNAL_COLLISION);
-        CASE(TRANSMISSION_FINISHED);
+        CASE(CHANNEL_RELEASED);
         default: ASSERT(false); return "";
     }
 #undef CASE
