@@ -1418,7 +1418,7 @@ simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
             cw = cwMax();
     }
 
-    int c = intrand(cw + 1);
+    int c = msg ? intrand(cw + 1) : 0;
 
     EV_DEBUG << "generated backoff slot number: " << c << " , cw: " << cw << " ,cwMin:cwMax = " << cwMin() << ":" << cwMax() << endl;
 
