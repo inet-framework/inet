@@ -66,7 +66,7 @@ simple Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 
         bool EDCA = default(false); // enable Enhanced Distributed Channel Access (802.11e)
         // parameters for EDCA = true
-        string classifier = default("Ieee80211eClassifier");
+        string classifier = default("");    // not in use, use the Ieee80211Nic.classifierType parameter instead
         int defaultAC = default(1); // the default AC category for frames that cannot be classified
         int AIFSN0 = default(7); // AIFSN for background
         int AIFSN1 = default(3); // AIFSN for best effort

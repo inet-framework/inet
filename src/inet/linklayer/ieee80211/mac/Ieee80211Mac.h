@@ -35,7 +35,7 @@
 #include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
-#include "inet/linklayer/ieee80211/mac/IQoSClassifier.h"
+#include "inet/linklayer/ieee80211/newmac/AccessCategory.h"
 
 namespace inet {
 
@@ -309,8 +309,6 @@ class INET_API Ieee80211Mac : public MACProtocolBase
      */
     //int retryCounter[4];
 
-    IQoSClassifier *classifier = nullptr;
-
   public:
     /** 80211 MAC operation modes */
     enum Mode {
@@ -571,8 +569,11 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void flushQueue();
     virtual void clearQueue();
 
+    int classifyFrame(Ieee80211DataOrMgmtFrame *frame);
+    AccessCategory mapTidToAc(int tid);
+
     /** @brief Mapping to access categories. */
-    virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);     // FIXME rename it, change return type, change 'return 200'
+    virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);
 
     /** @brief Send down the change channel message to the physical layer if there is any. */
     virtual void sendDownPendingRadioConfigMsg();

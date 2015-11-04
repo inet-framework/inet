@@ -22,7 +22,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211eClassifier.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -85,7 +84,6 @@ Ieee80211Mac::~Ieee80211Mac()
     edcCAFOutVector.clear();
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
-    delete classifier;
 }
 
 /****************************************************************
@@ -102,9 +100,9 @@ void Ieee80211Mac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         int numQueues = 1;
         if (par("EDCA")) {
-            const char *classifierClass = par("classifier");
-            classifier = check_and_cast<IQoSClassifier *>(inet::utils::createOne(classifierClass));
-            numQueues = classifier->getNumQueues();
+            if (strcmp(par("classifier").stringValue(), ""))
+                throw cRuntimeError("'classifier' parameter not in use, use the Ieee80211Nic.classifierType parameter instead");
+            numQueues = 4;
         }
 
         for (int i = 0; i < numQueues; i++) {
@@ -153,8 +151,6 @@ void Ieee80211Mac::initialize(int stage)
         EV_DEBUG << " cwMinMulticast=" << cwMinMulticast;
 
         defaultAC = par("defaultAC");
-        if (classifier && dynamic_cast<Ieee80211eClassifier *>(classifier))
-            static_cast<Ieee80211eClassifier *>(classifier)->setDefaultClass(defaultAC);
 
         for (int i = 0; i < numCategories(); i++) {
             std::stringstream os;
@@ -551,11 +547,41 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
     handleWithFSM(frame);
 }
 
+int Ieee80211Mac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
+{
+    if (edcCAF.size() <= 1)
+        return 0;
+    if (frame->getType() == ST_DATA) {
+        return defaultAC;
+    }
+    else if (frame->getType() == ST_DATA_WITH_QOS) {
+        Ieee80211DataFrame *dataFrame = check_and_cast<Ieee80211DataFrame*>(frame);
+        return mapTidToAc(dataFrame->getTid());  // QoS frames: map TID to AC
+    }
+    else {
+        return AC_VO; // management frames travel in the Voice category
+    }
+}
+
+AccessCategory Ieee80211Mac::mapTidToAc(int tid)
+{
+    // standard static mapping (see "UP-to-AC mappings" table in the 802.11 spec.)
+    switch (tid) {
+        case 1: case 2: return AC_BK;
+        case 0: case 3: return AC_BE;
+        case 4: case 5: return AC_VI;
+        case 6: case 7: return AC_VO;
+        default: throw cRuntimeError("No mapping from TID=%d to AccessCategory (must be in the range 0..7)", tid);
+    }
+}
+
+
+
 int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 {
     bool isDataFrame = (dynamic_cast<Ieee80211DataFrame *>(frame) != nullptr);
 
-    currentAC = classifier ? classifier->classifyPacket(frame) : 0;
+    currentAC = classifyFrame(frame);
 
     // check for queue overflow
     if (isDataFrame && maxQueueSize > 0 && (int)transmissionQueue()->size() >= maxQueueSize) {
