@@ -109,7 +109,7 @@ void Ieee80211Mac::initialize(int stage)
 
         for (int i = 0; i < numQueues; i++) {
             Edca catEdca;
-            catEdca.backoff = false;
+            catEdca.backoff = true;
             catEdca.backoffPeriod = -1;
             catEdca.retryCounter = 0;
             edcCAF.push_back(catEdca);
