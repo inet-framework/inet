@@ -43,7 +43,7 @@ Register_Class(Ieee80211eClassifier);
 
 Ieee80211eClassifier::Ieee80211eClassifier()
 {
-    defaultAC = 0;
+    defaultAC = 1;
     defaultManagement = 3;
 }
 
