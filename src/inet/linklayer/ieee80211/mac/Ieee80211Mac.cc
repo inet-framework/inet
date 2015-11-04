@@ -371,6 +371,7 @@ void Ieee80211Mac::initWatches()
         WATCH(edcCAF[i].numDropped);
     if (throughputTimer)
         WATCH(throughputLastPeriod);
+    WATCH(ST);
 }
 
 void Ieee80211Mac::configureAutoBitRate()
