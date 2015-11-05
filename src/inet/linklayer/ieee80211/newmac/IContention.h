@@ -49,6 +49,7 @@ class INET_API IContention
         virtual void mediumStateChanged(bool mediumFree) = 0;
         virtual void corruptedFrameReceived() = 0;
         virtual void channelReleased() = 0;
+        virtual bool isOwning() = 0;
 };
 
 void collectContentionModules(cModule *firstContentionModule, IContention **& contention);
