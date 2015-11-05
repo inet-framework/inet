@@ -92,6 +92,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
 
         virtual void mediumStateChanged(bool mediumFree) override;
         virtual void corruptedFrameReceived() override;
+        virtual bool isOwning() override;
 };
 
 } // namespace ieee80211

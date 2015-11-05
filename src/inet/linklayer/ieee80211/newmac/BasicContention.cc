@@ -317,6 +317,11 @@ void BasicContention::updateDisplayString()
     getDisplayString().setTagArg("t", 0, stateName);
 }
 
+bool BasicContention::isOwning()
+{
+    return fsm.getState() == OWNING;
+}
+
 } // namespace ieee80211
 } // namespace inet
 
