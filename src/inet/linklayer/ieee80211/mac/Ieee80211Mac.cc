@@ -336,35 +336,54 @@ void Ieee80211Mac::initWatches()
 {
 // initialize watches
     WATCH(fsm);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].retryCounter);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].backoff);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].backoffPeriod);
+    char namebuff[100];
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].retryCounter", i);
+        createWatch(namebuff, edcCAF[i].retryCounter);
+    }
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].backoff", i);
+        createWatch(namebuff, edcCAF[i].backoff);
+    }
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].backoffPeriod", i);
+        createWatch(namebuff, edcCAF[i].backoffPeriod);
+    }
     WATCH(currentAC);
     WATCH(oldcurrentAC);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH_LIST(edcCAF[i].transmissionQueue);
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].transmissionQueue", i);
+        createStdListWatcher(namebuff, edcCAF[i].transmissionQueue);
+    }
     WATCH(nav);
     WATCH(txop);
 
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].numRetry);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].numSentWithoutRetry);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].numGivenUp);
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].numRetry", i);
+        createWatch(namebuff, edcCAF[i].numRetry);
+    }
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].numSentWithoutRetry", i);
+        createWatch(namebuff, edcCAF[i].numSentWithoutRetry);
+    }
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].numGivenUp", i);
+        createWatch(namebuff, edcCAF[i].numGivenUp);
+    }
     WATCH(numCollision);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].numSent);
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].numSent", i);
+        createWatch(namebuff, edcCAF[i].numSent);
+    }
     WATCH(numBits);
     WATCH(numSentTXOP);
     WATCH(numReceived);
     WATCH(numSentMulticast);
     WATCH(numReceivedMulticast);
-    for (int i = 0; i < numCategories(); i++)
-        WATCH(edcCAF[i].numDropped);
+    for (int i = 0; i < numCategories(); i++) {
+        sprintf(namebuff, "edcCAF[%i].numDropped", i);
+        createWatch(namebuff, edcCAF[i].numDropped);
+    }
     if (throughputTimer)
         WATCH(throughputLastPeriod);
     WATCH(ST);
