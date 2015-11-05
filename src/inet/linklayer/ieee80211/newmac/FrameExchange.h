@@ -117,6 +117,7 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual void processInternalCollision(int step) = 0;
 
         // operations that can be called from doStep()
+        virtual void startContentionIfNeeded(int retryCount);
         virtual void startContention(int retryCount); // may invoke processInternalCollision()
         virtual void startContention(int retryCount, int txIndex, AccessCategory accessCategory);
         virtual void startContentionForMulticast(); // may invoke processInternalCollision()

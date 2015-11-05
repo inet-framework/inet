@@ -163,7 +163,7 @@ std::string SendDataWithAckFrameExchange::info() const
 void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: startContention(retryCount); break;
+        case 0: startContentionIfNeeded(retryCount); break;
         case 1: transmitFrame(dupPacketAndControlInfo(dataFrame)); break;
         case 2: {
             if (params->getUseFullAckTimeout())
@@ -251,7 +251,7 @@ std::string SendDataWithRtsCtsFrameExchange::info() const
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: startContention(shortRetryCount); break;
+        case 0: startContentionIfNeeded(shortRetryCount); break;
         case 1: transmitFrame(utils->buildRtsFrame(dataFrame)); break;
         case 2: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
         case 3: transmitFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
