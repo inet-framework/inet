@@ -48,7 +48,6 @@ package inet.linklayer.ieee80211.mgmt;
 simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
 {
     parameters:
-        int frameCapacity = default(100);
         string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
