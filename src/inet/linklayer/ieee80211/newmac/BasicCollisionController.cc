@@ -102,7 +102,7 @@ void BasicCollisionController::reschedule()
 {
     // choose smallest time
     simtime_t nextTxTime = MAX_TIME;
-    for (int i = 0; i < maxTxIndex; i++)
+    for (int i = 0; i <= maxTxIndex; i++)
         if (txTime[i] < nextTxTime)
             nextTxTime = txTime[i];
 
