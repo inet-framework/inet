@@ -1778,7 +1778,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
 
 Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
-    Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("wlan-ack");
+    Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("ACK");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
 
     if (!frameToACK->getMoreFragments())
@@ -1791,7 +1791,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
 
 Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
-    Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
+    Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("RTS");
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(frameToSend->getReceiverAddress());
     frame->setDuration(3 * getSIFS() + controlFrameTxTime(LENGTH_CTS)
@@ -1803,7 +1803,7 @@ Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameTo
 
 Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
-    Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
+    Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("CTS");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
     frame->setDuration(rtsFrame->getDuration() - getSIFS() - controlFrameTxTime(LENGTH_CTS));
 
