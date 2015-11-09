@@ -27,7 +27,7 @@ namespace serializer {
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
-class IPv6Serializer : public SerializerBase
+class INET_API IPv6Serializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;

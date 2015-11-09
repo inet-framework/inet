@@ -28,7 +28,7 @@ namespace serializer {
 /**
  * Converts between IGMPMessage and binary (network byte order) IGMP header.
  */
-class IGMPSerializer : public SerializerBase
+class INET_API IGMPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;

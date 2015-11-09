@@ -28,7 +28,7 @@ namespace serializer {
 /**
  * Converts between UDPPacket and binary (network byte order) UDP header.
  */
-class UDPSerializer : public SerializerBase
+class INET_API UDPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;

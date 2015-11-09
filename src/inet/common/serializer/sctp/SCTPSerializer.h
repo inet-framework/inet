@@ -28,7 +28,7 @@ namespace serializer {
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
-class SCTPSerializer : public SerializerBase
+class INET_API SCTPSerializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
