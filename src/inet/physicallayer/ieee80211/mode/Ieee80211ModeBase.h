@@ -30,10 +30,6 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
     public:
         Ieee80211ModeBase(const char *name) : name(name) {}
         virtual const char *getName() const override { return name.c_str(); }
-        virtual int getAifsNumber(AccessCategory ac) const override;
-        // TODO: These are the default parameters when dot11OCBActivated is false.
-        virtual int getCwMin(AccessCategory ac) const override;
-        virtual int getCwMax(AccessCategory ac) const override;
 };
 
 } /* namespace physicallayer */

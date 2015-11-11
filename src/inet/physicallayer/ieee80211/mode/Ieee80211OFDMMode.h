@@ -164,7 +164,6 @@ class INET_API Ieee80211OFDMMode : public Ieee80211ModeBase, public Ieee80211OFD
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return signalMode->getDuration(); }
     virtual inline int getMpduMaxLength() const override { return 4095; }
-    virtual const simtime_t getTxopLimit(AccessCategory ac) const override;
 };
 
 class INET_API Ieee80211OFDMCompliantModes

@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ieee80211/newmac/AccessCategory.h"
 
 using namespace inet::physicallayer;
 
@@ -72,6 +73,11 @@ class INET_API MacUtils
         virtual bool isFragment(Ieee80211DataOrMgmtFrame *frame) const;
         virtual bool isCts(Ieee80211Frame *frame) const;
         virtual bool isAck(Ieee80211Frame *frame) const;
+
+        static simtime_t getTxopLimit(AccessCategory ac, const IIeee80211Mode *mode);
+        static int getAifsNumber(AccessCategory ac);
+        static int getCwMax(AccessCategory ac, int aCwMax, int aCwMin);
+        static int getCwMin(AccessCategory ac, int aCwMin);
 
         static int cmpMgmtOverData(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);
         static int cmpMgmtOverMulticastOverUnicast(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);

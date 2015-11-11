@@ -114,14 +114,17 @@ IMacParameters *EdcaUpperMac::extractParameters(const IIeee80211Mode *slowestMan
     params->setEdcaEnabled(true);
     params->setSlotTime(fallback(par("slotTime"), referenceMode->getSlotTime()));
     params->setSifsTime(fallback(par("sifsTime"), referenceMode->getSifsTime()));
+    int aCwMin = referenceMode->getLegacyCwMin();
+    int aCwMax = referenceMode->getLegacyCwMax();
+
     for (int i = 0; i < 4; i++) {
         AccessCategory ac = (AccessCategory)i;
-        int aifsn = fallback(par(suffix("aifsn",i).c_str()), referenceMode->getAifsNumber(ac));
+        int aifsn = fallback(par(suffix("aifsn",i).c_str()), MacUtils::getAifsNumber(ac));
         params->setAifsTime(ac, params->getSifsTime() + aifsn*params->getSlotTime());
         params->setEifsTime(ac, params->getSifsTime() + params->getAifsTime(ac) + slowestMandatoryMode->getDuration(LENGTH_ACK));
-        params->setCwMin(ac, fallback(par(suffix("cwMin",i).c_str()), referenceMode->getCwMin(ac)));
-        params->setCwMax(ac, fallback(par(suffix("cwMax",i).c_str()), referenceMode->getCwMax(ac)));
-        params->setCwMulticast(ac, fallback(par(suffix("cwMulticast",i).c_str()), referenceMode->getCwMin(ac)));
+        params->setCwMin(ac, fallback(par(suffix("cwMin",i).c_str()), MacUtils::getCwMin(ac, aCwMin)));
+        params->setCwMax(ac, fallback(par(suffix("cwMax",i).c_str()), MacUtils::getCwMax(ac, aCwMax, aCwMin)));
+        params->setCwMulticast(ac, fallback(par(suffix("cwMulticast",i).c_str()), MacUtils::getCwMin(ac, aCwMin)));
     }
     return params;
 }
