@@ -31,21 +31,6 @@ const simtime_t Ieee80211DsssDataMode::getDuration(int bitLength) const
     return (simtime_t)(lrint(ceil(bitLength / getGrossBitrate().get() * 1E+6))) / 1E+6;
 }
 
-const simtime_t Ieee80211DsssMode::getTxopLimit(AccessCategory ac) const
-{
-    switch (ac)
-    {
-        case AC_BK: return 0;
-        case AC_BE: return 0;
-        case AC_VI: return ms(6.016).get();
-        case AC_VO: return ms(3.264).get();
-        case AC_LEGACY: return 0;
-        case AC_NUMCATEGORIES: break;
-    }
-    throw cRuntimeError("Unknown access category = %d", ac);
-    return 0;
-}
-
 Ieee80211DsssMode::Ieee80211DsssMode(const char *name, const Ieee80211DsssPreambleMode *preambleMode, const Ieee80211DsssHeaderMode *headerMode, const Ieee80211DsssDataMode *dataMode) :
     Ieee80211ModeBase(name),
     preambleMode(preambleMode),

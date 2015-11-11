@@ -19,13 +19,10 @@
 #define __INET_IIEEE80211MODE_H
 
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
-#include "inet/linklayer/ieee80211/newmac/AccessCategory.h"  //TODO REMOVE -- do not reference AccessCategory from the physical layer!
 
 namespace inet {
 
 namespace physicallayer {
-
-using namespace inet::ieee80211; // for the AccessCategory enum -- TODO remove!
 
 class INET_API IIeee80211PreambleMode : public IPrintableObject
 {
@@ -56,17 +53,14 @@ class INET_API IIeee80211DataMode : public IPrintableObject
 
 class INET_API IIeee80211Mode : public IPrintableObject
 {
-  protected:
+  public:
     virtual int getLegacyCwMin() const = 0;
     virtual int getLegacyCwMax() const = 0;
-
-  public:
     virtual const char *getName() const = 0;
     virtual const IIeee80211PreambleMode *getPreambleMode() const = 0;
     virtual const IIeee80211HeaderMode *getHeaderMode() const = 0;
     virtual const IIeee80211DataMode *getDataMode() const = 0;
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
-    virtual int getAifsNumber(AccessCategory ac) const = 0;
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
@@ -75,9 +69,6 @@ class INET_API IIeee80211Mode : public IPrintableObject
     virtual const simtime_t getRxTxTurnaroundTime() const = 0;
     virtual const simtime_t getPreambleLength() const = 0;
     virtual const simtime_t getPlcpHeaderLength() const = 0;
-    virtual const simtime_t getTxopLimit(AccessCategory ac) const = 0; // Table 8-105—Default EDCA Parameter Set element parameter values if dot11OCBActivated is false
-    virtual int getCwMin(AccessCategory ac) const = 0;
-    virtual int getCwMax(AccessCategory ac) const = 0;
     virtual int getMpduMaxLength() const = 0;
 };
 

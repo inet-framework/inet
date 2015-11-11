@@ -101,11 +101,13 @@ IMacParameters *DcfUpperMac::extractParameters(const IIeee80211Mode *slowestMand
     params->setEdcaEnabled(false);
     params->setSlotTime(fallback(par("slotTime"), referenceMode->getSlotTime()));
     params->setSifsTime(fallback(par("sifsTime"), referenceMode->getSifsTime()));
-    params->setAifsTime(AC_LEGACY, fallback(par("difsTime"), referenceMode->getSifsTime() + referenceMode->getAifsNumber(AC_LEGACY)*params->getSlotTime()));
+    int aCwMin = referenceMode->getLegacyCwMin();
+    int aCwMax = referenceMode->getLegacyCwMax();
+    params->setAifsTime(AC_LEGACY, fallback(par("difsTime"), referenceMode->getSifsTime() + MacUtils::getAifsNumber(AC_LEGACY) * params->getSlotTime()));
     params->setEifsTime(AC_LEGACY, params->getSifsTime() + params->getAifsTime(AC_LEGACY) + slowestMandatoryMode->getDuration(LENGTH_ACK));
-    params->setCwMin(AC_LEGACY, fallback(par("cwMin"), referenceMode->getCwMin(AC_LEGACY)));
-    params->setCwMax(AC_LEGACY, fallback(par("cwMax"), referenceMode->getCwMax(AC_LEGACY)));
-    params->setCwMulticast(AC_LEGACY, fallback(par("cwMulticast"), referenceMode->getCwMin(AC_LEGACY)));
+    params->setCwMin(AC_LEGACY, fallback(par("cwMin"), MacUtils::getCwMin(AC_LEGACY, aCwMin)));
+    params->setCwMax(AC_LEGACY, fallback(par("cwMax"), MacUtils::getCwMax(AC_LEGACY, aCwMax, aCwMin)));
+    params->setCwMulticast(AC_LEGACY, fallback(par("cwMulticast"), MacUtils::getCwMin(AC_LEGACY, aCwMin)));
     return params;
 }
 

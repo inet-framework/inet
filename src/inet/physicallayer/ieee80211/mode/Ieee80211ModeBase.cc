@@ -20,54 +20,6 @@
 namespace inet {
 namespace physicallayer {
 
-int Ieee80211ModeBase::getAifsNumber(AccessCategory ac) const
-{
-    switch (ac)
-    {
-        case AC_BK: return 7;
-        case AC_BE: return 3;
-        case AC_VI: return 2;
-        case AC_VO: return 2;
-        case AC_LEGACY: return 2;
-        case AC_NUMCATEGORIES: break;
-    }
-    throw cRuntimeError("Unknown access category = %d", ac);
-    return -1;
-}
-
-int Ieee80211ModeBase::getCwMax(AccessCategory ac) const
-{
-    int legacyCwMax = getLegacyCwMax();
-    int legacyCwMin = getLegacyCwMin();
-    switch (ac)
-    {
-        case AC_BK: return legacyCwMax;
-        case AC_BE: return legacyCwMax;
-        case AC_VI: return legacyCwMin;
-        case AC_VO: return (legacyCwMin + 1) / 2 - 1;
-        case AC_LEGACY: return legacyCwMax;
-        case AC_NUMCATEGORIES: break;
-    }
-    throw cRuntimeError("Unknown access category = %d", ac);
-    return -1;
-}
-
-int Ieee80211ModeBase::getCwMin(AccessCategory ac) const
-{
-    int legacyCwMin = getLegacyCwMin();
-    switch (ac)
-    {
-        case AC_BK: return legacyCwMin;
-        case AC_BE: return legacyCwMin;
-        case AC_VI: return (legacyCwMin + 1) / 2 - 1;
-        case AC_VO: return (legacyCwMin + 1) / 4 - 1;
-        case AC_LEGACY: return legacyCwMin;
-        case AC_NUMCATEGORIES: break;
-    }
-    throw cRuntimeError("Unknown access category = %d", ac);
-    return -1;
-}
-
 } /* namespace physicallayer */
 } /* namespace inet */
 

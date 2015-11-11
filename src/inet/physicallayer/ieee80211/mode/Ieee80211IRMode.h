@@ -115,7 +115,6 @@ class INET_API Ieee80211IrMode : public Ieee80211ModeBase
     virtual inline const simtime_t getPreambleLength() const override { return preambleMode->getDuration(); }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return headerMode->getDuration(); }
     virtual inline int getMpduMaxLength() const override { return 2500; }
-    virtual const simtime_t getTxopLimit(AccessCategory ac) const override { return 0; }
 };
 
 /**

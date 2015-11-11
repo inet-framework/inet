@@ -23,6 +23,10 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HTMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -164,6 +168,73 @@ bool MacUtils::isAck(Ieee80211Frame *frame) const
     return dynamic_cast<Ieee80211ACKFrame *>(frame);
 }
 
+simtime_t MacUtils::getTxopLimit(AccessCategory ac, const IIeee80211Mode *mode)
+{
+    switch (ac)
+    {
+        case AC_BK: return 0;
+        case AC_BE: return 0;
+        case AC_VI:
+            if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(6.016).get();
+            else if (dynamic_cast<const Ieee80211HTMode*>(mode) || dynamic_cast<const Ieee80211OFDMMode*>(mode)) return ms(3.008).get();
+            else return 0;
+        case AC_VO:
+            if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(3.264).get();
+            else if (dynamic_cast<const Ieee80211HTMode*>(mode) || dynamic_cast<const Ieee80211OFDMMode*>(mode)) return ms(1.504).get();
+            else return 0;
+        case AC_LEGACY: return 0;
+        case AC_NUMCATEGORIES: break;
+    }
+    throw cRuntimeError("Unknown access category = %d", ac);
+    return 0;
+}
+
+int MacUtils::getAifsNumber(AccessCategory ac)
+{
+    switch (ac)
+    {
+        case AC_BK: return 7;
+        case AC_BE: return 3;
+        case AC_VI: return 2;
+        case AC_VO: return 2;
+        case AC_LEGACY: return 2;
+        case AC_NUMCATEGORIES: break;
+    }
+    throw cRuntimeError("Unknown access category = %d", ac);
+    return -1;
+}
+
+int MacUtils::getCwMax(AccessCategory ac, int aCwMax, int aCwMin)
+{
+    switch (ac)
+    {
+        case AC_BK: return aCwMax;
+        case AC_BE: return aCwMax;
+        case AC_VI: return aCwMin;
+        case AC_VO: return (aCwMin + 1) / 2 - 1;
+        case AC_LEGACY: return aCwMax;
+        case AC_NUMCATEGORIES: break;
+    }
+    throw cRuntimeError("Unknown access category = %d", ac);
+    return -1;
+}
+
+int MacUtils::getCwMin(AccessCategory ac, int aCwMin)
+{
+    switch (ac)
+    {
+        case AC_BK: return aCwMin;
+        case AC_BE: return aCwMin;
+        case AC_VI: return (aCwMin + 1) / 2 - 1;
+        case AC_VO: return (aCwMin + 1) / 4 - 1;
+        case AC_LEGACY: return aCwMin;
+        case AC_NUMCATEGORIES: break;
+    }
+    throw cRuntimeError("Unknown access category = %d", ac);
+    return -1;
+}
+
+
 int MacUtils::cmpMgmtOverData(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b)
 {
     int aPri = dynamic_cast<Ieee80211ManagementFrame*>(a) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
@@ -177,6 +248,7 @@ int MacUtils::cmpMgmtOverMulticastOverUnicast(Ieee80211DataOrMgmtFrame *a, Ieee8
     int bPri = dynamic_cast<Ieee80211ManagementFrame*>(a) ? 2 : b->getReceiverAddress().isMulticast() ? 1 : 0;
     return bPri - aPri;
 }
+
 
 } // namespace ieee80211
 } // namespace inet
