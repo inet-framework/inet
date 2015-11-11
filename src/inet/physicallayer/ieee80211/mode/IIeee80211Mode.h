@@ -70,10 +70,6 @@ class INET_API IIeee80211Mode : public IPrintableObject
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
-    virtual const simtime_t getEifsTime(const IIeee80211Mode *slowestMandatoryMode, AccessCategory ac, int ackLength) const = 0;
-    virtual const simtime_t getDifsTime() const = 0;
-    virtual const simtime_t getPifsTime() const = 0;
-    virtual const simtime_t getAifsTime(AccessCategory ac) const = 0;
     virtual const simtime_t getCcaTime() const = 0;
     virtual const simtime_t getPhyRxStartDelay() const = 0;
     virtual const simtime_t getRxTxTurnaroundTime() const = 0;
