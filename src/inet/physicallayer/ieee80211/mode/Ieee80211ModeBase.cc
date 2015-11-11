@@ -68,26 +68,6 @@ int Ieee80211ModeBase::getCwMin(AccessCategory ac) const
     return -1;
 }
 
-const simtime_t Ieee80211ModeBase::getAifsTime(AccessCategory ac) const
-{
-    return getSlotTime() * getAifsNumber(ac) + getSifsTime();
-}
-
-const simtime_t Ieee80211ModeBase::getEifsTime(const IIeee80211Mode* slowestMandatoryMode, AccessCategory ac, int ackLength) const
-{
-    return getSifsTime() + getAifsTime(ac) + slowestMandatoryMode->getDuration(ackLength);
-}
-
-const simtime_t Ieee80211ModeBase::getDifsTime() const
-{
-    return getSifsTime() + 2 * getSlotTime();
-}
-
-const simtime_t Ieee80211ModeBase::getPifsTime() const
-{
-    return getSifsTime() + getSlotTime();
-}
-
 } /* namespace physicallayer */
 } /* namespace inet */
 
