@@ -57,7 +57,7 @@ cmdenv-express-mode = false
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.elog
-results in reception is ignored
+not attempting
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 Changing radio reception state from IDLE to BUSY\.
