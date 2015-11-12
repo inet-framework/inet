@@ -30,9 +30,10 @@ ListeningDecision::ListeningDecision(const IListening *listening, bool isListeni
 std::ostream& ListeningDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ListeningDecision";
+    if (level >= PRINT_LEVEL_DETAIL)
+        stream << (isListeningPossible_ ? ", possible" : ", impossible");
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", listening = " << printObjectToString(listening, level - 1) 
-               << (isListeningPossible_ ? ", possible" : ", impossible");
+        stream << ", listening = " << printObjectToString(listening, level - 1);
     return stream;
 }
 

@@ -40,19 +40,19 @@ class INET_API IErrorModel : public IPrintableObject
      * Returns the packet error rate based on SNIR, modulation, FEC encoding
      * and any other physical layer characteristics.
      */
-    virtual double computePacketErrorRate(const ISNIR *snir) const = 0;
+    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
 
     /**
      * Returns the bit error rate based on SNIR, modulation, FEC encoding
      * and any other physical layer characteristics.
      */
-    virtual double computeBitErrorRate(const ISNIR *snir) const = 0;
+    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
 
     /**
      * Returns the symbol error rate based on SNIR, modulation, and any other
      * physical layer characteristics.
      */
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const = 0;
+    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
 };
 
 } // namespace physicallayer

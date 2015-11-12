@@ -15,21 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IRECEPTIONDECISION_H
-#define __INET_IRECEPTIONDECISION_H
+#ifndef __INET_IRECEPTIONRESULT_H
+#define __INET_IRECEPTIONRESULT_H
 
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 /**
- * This interface represents the decisions of a receiver's reception process.
+ * This interface represents the result of a receiver's reception process.
  *
  * This interface is strictly immutable to safely support parallel computation.
  */
-class INET_API IReceptionDecision : public IPrintableObject
+class INET_API IReceptionResult : public IPrintableObject
 {
   public:
     /**
@@ -39,31 +41,32 @@ class INET_API IReceptionDecision : public IPrintableObject
     virtual const IReception *getReception() const = 0;
 
     /**
-     * Returns the signal part of this decision.
+     * TODO.
      */
-    virtual IRadioSignal::SignalPart getSignalPart() const = 0;
+    virtual const std::vector<const IReceptionDecision *> *getDecisions() const = 0;
 
     /**
-     * Returns whether reception was possible according to the physical
-     * properties of the received radio signal.
+     * Returns the physical properties of the reception. This function never
+     * returns nullptr.
      */
-    virtual bool isReceptionPossible() const = 0;
+    virtual const ReceptionIndication *getIndication() const = 0;
 
     /**
-     * Returns whether the receiver decided to attempt the reception or
-     * it decided to ignore it.
+     * Returns the PHY frame corresponding to the reception. This function
+     * may return nullptr.
      */
-    virtual bool isReceptionAttempted() const = 0;
+    virtual const cPacket *getPhyFrame() const = 0;
 
     /**
-     * Returns whether the reception was completely successful or not.
+     * Returns the MAC frame corresponding to this reception. This function
+     * may return nullptr.
      */
-    virtual bool isReceptionSuccessful() const = 0;
+    virtual const cPacket *getMacFrame() const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IRECEPTIONDECISION_H
+#endif // ifndef __INET_IRECEPTIONRESULT_H
 

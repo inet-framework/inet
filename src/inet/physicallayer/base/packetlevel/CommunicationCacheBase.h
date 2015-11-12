@@ -70,7 +70,8 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         const IInterference *interference;
         const INoise *noise;
         const ISNIR *snir;
-        const IReceptionDecision *decision;
+        std::vector<const IReceptionDecision *> receptionDecisions;
+        const IReceptionResult *receptionResult;
 
       private:
         ReceptionCacheEntry(const ReceptionCacheEntry &other);
@@ -125,61 +126,65 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
 
     /** @name Interference cache */
     //@{
-    virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime);
+    virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) override;
     //@}
 
     /** @name Transmission cache */
     //@{
-    virtual const simtime_t getCachedInterferenceEndTime(const ITransmission *transmission);
-    virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime);
-    virtual void removeCachedInterferenceEndTime(const ITransmission *transmission);
+    virtual const simtime_t getCachedInterferenceEndTime(const ITransmission *transmission) override;
+    virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) override;
+    virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) override;
 
-    virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission);
-    virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame);
-    virtual void removeCachedFrame(const ITransmission *transmission);
+    virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission) override;
+    virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame) override;
+    virtual void removeCachedFrame(const ITransmission *transmission) override;
 
-    virtual cFigure *getCachedFigure(const ITransmission *transmission);
-    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure);
-    virtual void removeCachedFigure(const ITransmission *transmission);
+    virtual cFigure *getCachedFigure(const ITransmission *transmission) override;
+    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure) override;
+    virtual void removeCachedFigure(const ITransmission *transmission) override;
     //@}
 
     /** @name Reception cache */
     //@{
-    virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival);
-    virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission);
+    virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) override;
+    virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission) override;
 
-    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval);
-    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission);
+    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval) override;
+    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission) override;
 
-    virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening);
-    virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission);
+    virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) override;
+    virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission) override;
 
-    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception);
-    virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission);
+    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception) override;
+    virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission) override;
 
-    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference);
-    virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission);
+    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) override;
+    virtual void removeCachedInterference(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise);
-    virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission);
+    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) override;
+    virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission);
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir);
-    virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission);
+    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) override;
+    virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision);
-    virtual void removeCachedDecision(const IRadio *radio, const ITransmission *transmission);
+    virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
+    virtual void setCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision) override;
+    virtual void removeCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
 
-    virtual const IRadioFrame *getCachedFrame(const IRadio *radio, const ITransmission *transmission);
-    virtual void setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *frame);
-    virtual void removeCachedFrame(const IRadio *radio, const ITransmission *transmission);
+    virtual const IReceptionResult *getCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedReceptionResult(const IRadio *radio, const ITransmission *transmission, const IReceptionResult *receptionResult) override;
+    virtual void removeCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) override;
+
+    virtual const IRadioFrame *getCachedFrame(const IRadio *radio, const ITransmission *transmission) override;
+    virtual void setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *frame) override;
+    virtual void removeCachedFrame(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 };
 

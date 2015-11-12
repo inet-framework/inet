@@ -19,8 +19,8 @@
 #define __INET_RECEIVERBASE_H
 
 #include "inet/physicallayer/contract/packetlevel/IReceiver.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -30,16 +30,22 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override = 0;
 
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const override;
+    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
 
   public:
-    ReceiverBase() {}
+    ReceiverBase() { }
 
     virtual W getMinInterferencePower() const override { return W(NaN); }
     virtual W getMinReceptionPower() const override { return W(NaN); }
+
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const override;
+
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer

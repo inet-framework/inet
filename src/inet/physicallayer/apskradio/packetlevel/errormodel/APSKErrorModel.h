@@ -32,11 +32,11 @@ class INET_API APSKErrorModel : public ErrorModelBase
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const override;
+    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
 
-    virtual double computeBitErrorRate(const ISNIR *snir) const override;
+    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
 
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
+    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
 };
 
 } // namespace physicallayer

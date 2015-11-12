@@ -43,14 +43,16 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    const simtime_t duration = (macFrame->getBitLength() + headerBitLength) / transmissionBitrate.get();
+    const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
+    const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
+    const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

@@ -72,6 +72,18 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
     static simsignal_t transmissionStateChangedSignal;
 
     /**
+     * This signal is emitted every time the received part changes.
+     * The signal value is the new received part.
+     */
+    static simsignal_t receivedSignalPartChangedSignal;
+
+    /**
+     * This signal is emitted every time the transmitted part changes.
+     * The signal value is the new transmitted part.
+     */
+    static simsignal_t transmittedSignalPartChangedSignal;
+
+    /**
      * This enumeration specifies the requested operational mode of the radio.
      * NOTE: Some parts of the code base may be sensitive to the order of the
      * enum items because they may be used as an array index.
@@ -143,15 +155,8 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
         RECEPTION_STATE_BUSY,
 
         /**
-         * The radio medium is busy, a signal strong enough to evaluate is detected,
-         * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
-         * above the reception threshold but the SNIR is not yet evaluated)
-         */
-        RECEPTION_STATE_SYNCHRONIZING,
-
-        /**
          * The radio medium is busy, a signal strong enough to receive is detected.
-         * (e.g. the SNIR was above the reception threshold during synchronize)
+         * (e.g. the SNIR was above the reception threshold)
          */
         RECEPTION_STATE_RECEIVING
     };
@@ -175,9 +180,10 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
         /**
          * The radio medium is busy, the radio is currently transmitting a signal.
          */
-        TRANSMISSION_STATE_TRANSMITTING,
+        TRANSMISSION_STATE_TRANSMITTING
     };
 
+  protected:
     /**
      * The enumeration registered for radio mode.
      */
@@ -212,14 +218,14 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
     virtual void setRadioMode(RadioMode radioMode) = 0;
 
     /**
-     * Returns the current radio reception state. This is the same state as the one emitted
-     * with the last receptionStateChangedSignal
+     * Returns the current radio reception state. This is the same state as the
+     * one emitted with the last receptionStateChangedSignal.
      */
     virtual ReceptionState getReceptionState() const = 0;
 
     /**
-     * Returns the current radio transmission state. This is the same state as the one emitted
-     * with the last transmissionStateChangedSignal
+     * Returns the current radio transmission state. This is the same state as
+     * the one emitted with the last transmissionStateChangedSignal.
      */
     virtual TransmissionState getTransmissionState() const = 0;
 
@@ -262,6 +268,20 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
      * or nullptr.
      */
     virtual const ITransmission *getReceptionInProgress() const = 0;
+
+    /**
+     * Returns the signal part of the ongoing transmission that the transmitter
+     * is currently transmitting or -1 if no transmission is in progress. This
+     * is the same part as the one emitted with the last transmittedPartChangedSignal.
+     */
+    virtual IRadioSignal::SignalPart getTransmittedSignalPart() const = 0;
+
+    /**
+     * Returns the signal part of the ongoing reception that the receiver is
+     * currently receiving or -1 if no reception is in progress. This is the
+     * same part as the one emitted with the last receivedPartChangedSignal.
+     */
+    virtual IRadioSignal::SignalPart getReceivedSignalPart() const = 0;
 
   public:
     /**

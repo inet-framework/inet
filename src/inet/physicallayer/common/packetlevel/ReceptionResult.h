@@ -15,40 +15,41 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RECEPTIONDECISION_H
-#define __INET_RECEPTIONDECISION_H
+#ifndef __INET_RECEPTIONRESULT_H
+#define __INET_RECEPTIONRESULT_H
 
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ReceptionDecision : public IReceptionDecision, public cObject
+class INET_API ReceptionResult : public IReceptionResult, public cObject
 {
   protected:
     const IReception *reception;
-    IRadioSignal::SignalPart part;
-    const bool isReceptionPossible_;
-    const bool isReceptionAttempted_;
-    const bool isReceptionSuccessful_;
+    const std::vector<const IReceptionDecision *> *decisions;
+    const ReceptionIndication *indication;
+    const cPacket *macFrame;
 
   public:
-    ReceptionDecision(const IReception *reception, IRadioSignal::SignalPart part, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
+    ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication);
+    ~ReceptionResult();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IReception *getReception() const override { return reception; }
-    virtual IRadioSignal::SignalPart getSignalPart() const { return part; }
+    virtual const std::vector<const IReceptionDecision *> *getDecisions() const override { return decisions; }
+    virtual const ReceptionIndication *getIndication() const override { return indication; }
 
-    virtual bool isReceptionPossible() const override { return isReceptionPossible_; }
-    virtual bool isReceptionAttempted() const override { return isReceptionAttempted_; }
-    virtual bool isReceptionSuccessful() const override { return isReceptionSuccessful_; }
+    virtual const cPacket *getPhyFrame() const override;
+    virtual const cPacket *getMacFrame() const override;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEPTIONDECISION_H
+#endif // ifndef __INET_RECEPTIONRESULT_H
 

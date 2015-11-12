@@ -28,16 +28,16 @@ class INET_API FlatTransmissionBase : public NarrowbandTransmissionBase
 {
   protected:
     const int headerBitLength;
-    const int payloadBitLength;
+    const int dataBitLength;
     const bps bitrate;
 
   public:
-    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, int headerBitLength, int payloadBitLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth);
+    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, int headerBitLength, int payloadBitLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual int getHeaderBitLength() const { return headerBitLength; }
-    virtual int getPayloadBitLength() const { return payloadBitLength; }
+    virtual int getDataBitLength() const { return dataBitLength; }
     virtual bps getBitrate() const { return bitrate; }
 };
 

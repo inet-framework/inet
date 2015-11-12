@@ -19,6 +19,7 @@
 #define __INET_IRECEPTION_H
 
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
@@ -57,6 +58,41 @@ class INET_API IReception : public IPrintableObject
      * transmission. It is the end of the last bit's reception.
      */
     virtual const simtime_t getEndTime() const = 0;
+
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const = 0;
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const = 0;
+
+    virtual const simtime_t getPreambleStartTime() const = 0;
+    virtual const simtime_t getPreambleEndTime() const = 0;
+    virtual const simtime_t getHeaderStartTime() const = 0;
+    virtual const simtime_t getHeaderEndTime() const = 0;
+    virtual const simtime_t getDataStartTime() const = 0;
+    virtual const simtime_t getDataEndTime() const = 0;
+
+    /**
+     * Returns the total length of this reception.
+     */
+    virtual const simtime_t getDuration() const = 0;
+
+    /**
+     * Returns the length of the provided part of this reception.
+     */
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart part) const = 0;
+
+    /**
+     * Returns the length of the preamble part of this reception.
+     */
+    virtual const simtime_t getPreambleDuration() const = 0;
+
+    /**
+     * Returns the length of the header part of this reception.
+     */
+    virtual const simtime_t getHeaderDuration() const = 0;
+
+    /**
+     * Returns the length of the data part of this reception.
+     */
+    virtual const simtime_t getDataDuration() const = 0;
 
     /**
      * Returns the antenna's position when the receiver started to receive

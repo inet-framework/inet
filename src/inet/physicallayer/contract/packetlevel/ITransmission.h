@@ -18,11 +18,12 @@
 #ifndef __INET_ITRANSMISSION_H
 #define __INET_ITRANSMISSION_H
 
-#include "inet/common/Units.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/common/Units.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 
@@ -78,6 +79,41 @@ class INET_API ITransmission : public IPrintableObject
      * the end of the last bit's transmission.
      */
     virtual const simtime_t getEndTime() const = 0;
+
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const = 0;
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const = 0;
+
+    virtual const simtime_t getPreambleStartTime() const = 0;
+    virtual const simtime_t getPreambleEndTime() const = 0;
+    virtual const simtime_t getHeaderStartTime() const = 0;
+    virtual const simtime_t getHeaderEndTime() const = 0;
+    virtual const simtime_t getDataStartTime() const = 0;
+    virtual const simtime_t getDataEndTime() const = 0;
+
+    /**
+     * Returns the total length of this transmission.
+     */
+    virtual const simtime_t getDuration() const = 0;
+
+    /**
+     * Returns the length of the provided part of this transmission.
+     */
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart part) const = 0;
+
+    /**
+     * Returns the length of the preamble part of this transmission.
+     */
+    virtual const simtime_t getPreambleDuration() const = 0;
+
+    /**
+     * Returns the length of the header part of this transmission.
+     */
+    virtual const simtime_t getHeaderDuration() const = 0;
+
+    /**
+     * Returns the length of the data part of this transmission.
+     */
+    virtual const simtime_t getDataDuration() const = 0;
 
     /**
      * Returns the antenna's position when the transmitter started this transmission.

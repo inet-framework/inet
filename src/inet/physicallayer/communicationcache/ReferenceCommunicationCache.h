@@ -33,39 +33,39 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
   protected:
     /** @name Cache data structures */
     //@{
-    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio);
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission);
-    virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission);
+    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
+    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 
   public:
     ReferenceCommunicationCache();
     virtual ~ReferenceCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const { return stream << "ReferenceCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "ReferenceCommunicationCache"; }
 
     /** @name Medium state change notifications */
     //@{
-    virtual void addRadio(const IRadio *radio);
-    virtual void removeRadio(const IRadio *radio);
+    virtual void addRadio(const IRadio *radio) override;
+    virtual void removeRadio(const IRadio *radio) override;
 
-    virtual void addTransmission(const ITransmission *transmission);
-    virtual void removeTransmission(const ITransmission *transmission);
+    virtual void addTransmission(const ITransmission *transmission) override;
+    virtual void removeTransmission(const ITransmission *transmission) override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions();
-    virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime);
+    virtual void removeNonInterferingTransmissions() override;
+    virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) override;
     //@}
 
     /** @name Reception cache */
     //@{
-    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) { return nullptr; }
-    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) { return nullptr; }
-    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) { return nullptr; }
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) { return nullptr; }
-    virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission) { return nullptr; }
+    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) override { return nullptr; }
+    virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override { return nullptr; }
     //@}
 };
 

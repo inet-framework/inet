@@ -49,24 +49,11 @@ void FlatReceiverBase::initialize(int stage)
 std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level - 1)
-               << ", energyDetection = " << energyDetection
+        stream << ", errorModel = " << printObjectToString(errorModel, level - 1);
+    if (level >= PRINT_LEVEL_INFO)
+        stream << ", energyDetection = " << energyDetection
                << ", sensitivity = " << sensitivity;
     return NarrowbandReceiverBase::printToStream(stream, level);
-}
-
-// TODO: this is not purely functional, see interface comment
-bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
-{
-    if (!NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception))
-        return false;
-    else {
-        const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
-        W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime());
-        bool isReceptionPossible = minReceptionPower >= sensitivity;
-        EV_DEBUG << "Computing reception possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
-        return isReceptionPossible;
-    }
 }
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const IInterference *interference) const
@@ -79,18 +66,32 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     W maxPower = narrowbandNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
     bool isListeningPossible = maxPower >= energyDetection;
     delete noise;
-    EV_DEBUG << "Computing listening possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
+    EV_DEBUG << "Computing whether listening is possible: maximum power = " << maxPower << ", energy detection = " << energyDetection << " -> listening is " << (isListeningPossible ? "possible" : "impossible") << endl;
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+// TODO: this is not purely functional, see interface comment
+bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    if (!SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, interference, snir))
+    if (!NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part))
+        return false;
+    else {
+        const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
+        W minReceptionPower = flatReception->computeMinPower(reception->getStartTime(part), reception->getEndTime(part));
+        bool isReceptionPossible = minReceptionPower >= sensitivity;
+        EV_DEBUG << "Computing whether reception is possible: minimum reception power = " << minReceptionPower << ", sensitivity = " << sensitivity << " -> reception is " << (isReceptionPossible ? "possible" : "impossible") << endl;
+        return isReceptionPossible;
+    }
+}
+
+bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+{
+    if (!SNIRReceiverBase::computeIsReceptionSuccessful(listening, reception, part, interference, snir))
         return false;
     else if (!errorModel)
         return true;
     else {
-        double packetErrorRate = errorModel->computePacketErrorRate(snir);
+        double packetErrorRate = errorModel->computePacketErrorRate(snir, part);
         if (packetErrorRate == 0.0)
             return true;
         else if (packetErrorRate == 1.0)
@@ -103,9 +104,9 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 const ReceptionIndication *FlatReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     ReceptionIndication *indication = const_cast<ReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
-    indication->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir) : 0.0);
-    indication->setBitErrorRate(errorModel ? errorModel->computeBitErrorRate(snir) : 0.0);
-    indication->setSymbolErrorRate(errorModel ? errorModel->computeSymbolErrorRate(snir) : 0.0);
+    indication->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    indication->setBitErrorRate(errorModel ? errorModel->computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    indication->setSymbolErrorRate(errorModel ? errorModel->computeSymbolErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
     return indication;
 }
 

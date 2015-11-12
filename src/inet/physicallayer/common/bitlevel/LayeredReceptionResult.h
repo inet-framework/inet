@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LAYEREDRECEPTIONDECISION_H
-#define __INET_LAYEREDRECEPTIONDECISION_H
+#ifndef __INET_LAYEREDRECEPTIONRESULT_H
+#define __INET_LAYEREDRECEPTIONRESULT_H
 
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
@@ -30,7 +30,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API LayeredReceptionDecision : public ReceptionDecision
+class INET_API LayeredReceptionResult : public ReceptionResult
 {
   protected:
     const IReceptionPacketModel *packetModel;
@@ -40,8 +40,8 @@ class INET_API LayeredReceptionDecision : public ReceptionDecision
     const IReceptionAnalogModel *analogModel;
 
   public:
-    LayeredReceptionDecision(const IReception *reception, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
-    virtual ~LayeredReceptionDecision();
+    LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel);
+    virtual ~LayeredReceptionResult();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
@@ -59,5 +59,5 @@ class INET_API LayeredReceptionDecision : public ReceptionDecision
 
 } // namespace inet
 
-#endif // ifndef __INET_LAYEREDRECEPTIONDECISION_H
+#endif // ifndef __INET_LAYEREDRECEPTIONRESULT_H
 

@@ -18,19 +18,20 @@
 #ifndef __INET_APSKLAYEREDTRANSMITTER_H
 #define __INET_APSKLAYEREDTRANSMITTER_H
 
-#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
 #include "inet/physicallayer/contract/bitlevel/IEncoder.h"
 #include "inet/physicallayer/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
-#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModule
+class INET_API APSKLayeredTransmitter : public TransmitterBase
 {
   public:
     enum LevelOfDetail {
@@ -52,7 +53,6 @@ class INET_API APSKLayeredTransmitter : public ITransmitter, public cSimpleModul
     Hz carrierFrequency;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
     virtual int computePaddingLength(BitVector *bits) const;

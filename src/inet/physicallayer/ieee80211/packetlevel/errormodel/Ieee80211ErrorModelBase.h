@@ -28,14 +28,15 @@ namespace physicallayer {
 class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 {
   protected:
-    virtual double getSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, unsigned int payloadBitLength, double snr) const = 0;
+    virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
+    virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
 
   public:
     Ieee80211ErrorModelBase();
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const override;
-    virtual double computeBitErrorRate(const ISNIR *snir) const override;
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
+    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
 };
 
 } // namespace physicallayer

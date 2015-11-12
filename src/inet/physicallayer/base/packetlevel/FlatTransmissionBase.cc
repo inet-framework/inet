@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, int headerBitLength, int payloadBitLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
-    NarrowbandTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, carrierFrequency, bandwidth),
+FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, int headerBitLength, int payloadBitLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
+    NarrowbandTransmissionBase(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, carrierFrequency, bandwidth),
     headerBitLength(headerBitLength),
-    payloadBitLength(payloadBitLength),
+    dataBitLength(payloadBitLength),
     bitrate(bitrate)
 {
 }
@@ -35,7 +35,7 @@ std::ostream& FlatTransmissionBase::printToStream(std::ostream& stream, int leve
         stream << ", bitrate = " << bitrate;
     if (level >= PRINT_LEVEL_TRACE)
         stream << ", headerBitLength = " << headerBitLength
-               << ", payloadBitLength = " << payloadBitLength;
+               << ", payloadBitLength = " << dataBitLength;
     return NarrowbandTransmissionBase::printToStream(stream, level);
 }
 

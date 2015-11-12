@@ -18,19 +18,20 @@
 #ifndef __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 #define __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
 #include "inet/physicallayer/contract/bitlevel/IEncoder.h"
 #include "inet/physicallayer/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
-#include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSimpleModule
+class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
 {
     // TODO: copy
 
@@ -59,9 +60,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public ITransmitter, public cSi
     W power;
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
     /* Packet domain */
     const ITransmissionPacketModel *createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const;

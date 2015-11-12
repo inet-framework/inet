@@ -21,11 +21,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
     startPropagationTime(startPropagationTime),
     endPropagationTime(endPropagationTime),
     startTime(startTime),
     endTime(endTime),
+    preambleDuration(preambleDuration),
+    headerDuration(headerDuration),
+    dataDuration(dataDuration),
     startPosition(startPosition),
     endPosition(endPosition),
     startOrientation(startOrientation),
@@ -41,11 +44,46 @@ std::ostream& Arrival::printToStream(std::ostream& stream, int level) const
               << ", endPropagationTime = " << endPropagationTime
               << ", startTime = " << startTime
               << ", endTime = " << endTime
+              << ", preambleDuration = " << preambleDuration
+              << ", headerDuration = " << headerDuration
+              << ", dataDuration = " << dataDuration
               << ", startPosition = " << startPosition
               << ", endPosition = " << endPosition
               << ", startOrientation = " << startOrientation
               << ", endOrientation = " << endOrientation;
     return stream;
+}
+
+const simtime_t Arrival::getStartTime(IRadioSignal::SignalPart part) const
+{
+    switch (part) {
+        case IRadioSignal::SIGNAL_PART_WHOLE:
+            return getStartTime();
+        case IRadioSignal::SIGNAL_PART_PREAMBLE:
+            return getPreambleStartTime();
+        case IRadioSignal::SIGNAL_PART_HEADER:
+            return getHeaderStartTime();
+        case IRadioSignal::SIGNAL_PART_DATA:
+            return getDataStartTime();
+        default:
+            throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
+    }
+}
+
+const simtime_t Arrival::getEndTime(IRadioSignal::SignalPart part) const
+{
+    switch (part) {
+        case IRadioSignal::SIGNAL_PART_WHOLE:
+            return getEndTime();
+        case IRadioSignal::SIGNAL_PART_PREAMBLE:
+            return getPreambleEndTime();
+        case IRadioSignal::SIGNAL_PART_HEADER:
+            return getHeaderEndTime();
+        case IRadioSignal::SIGNAL_PART_DATA:
+            return getDataEndTime();
+        default:
+            throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
+    }
 }
 
 } // namespace physicallayer

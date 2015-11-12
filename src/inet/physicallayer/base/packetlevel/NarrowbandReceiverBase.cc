@@ -61,7 +61,7 @@ const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, c
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
 }
 
-bool NarrowbandReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
+bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     // TODO: check if modulation matches?
     const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(transmission);
@@ -69,26 +69,26 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const ITransmission *tra
 }
 
 // TODO: this is not purely functional, see interface comment
-bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
+bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() != narrowbandReception->getCarrierFrequency() || bandListening->getBandwidth() != narrowbandReception->getBandwidth()) {
-        EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
+        EV_DEBUG << "Computing whether reception is possible: listening and reception bands are different -> reception is impossible" << endl;
         return false;
     }
     else
         return true;
 }
 
-const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() == narrowbandReception->getBandwidth())
-        return SNIRReceiverBase::computeReceptionDecision(listening, reception, interference, snir);
+        return SNIRReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
     else
-        return new ReceptionDecision(reception, new ReceptionIndication(), false, false, false);
+        return new ReceptionDecision(reception, part, false, false, false);
 }
 
 } // namespace physicallayer

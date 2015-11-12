@@ -18,13 +18,15 @@
 #ifndef __INET_IRECEIVER_H
 #define __INET_IRECEIVER_H
 
-#include "inet/physicallayer/contract/packetlevel/IListening.h"
-#include "inet/physicallayer/contract/packetlevel/INoise.h"
-#include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IInterference.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/IListening.h"
 #include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
+#include "inet/physicallayer/contract/packetlevel/INoise.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
@@ -45,7 +47,7 @@ namespace physicallayer {
  * that can change over time to avoid non-deterministic behavior. These functions
  * may be called from background threads running parallel with the main simulation
  * thread. They may also be called several times due to cache invalidation before
- * the actual result is needed. This process is controlled by the radio medium.
+ * the actual result is needed. This process is controlled by the medium.
  */
 class INET_API IReceiver : public IPrintableObject
 {
@@ -65,7 +67,7 @@ class INET_API IReceiver : public IPrintableObject
     virtual W getMinReceptionPower() const = 0;
 
     /**
-     * Returns a description of how the receiver is listening on the radio medium.
+     * Returns a description of how the receiver is listening on the medium.
      */
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
 
@@ -77,39 +79,66 @@ class INET_API IReceiver : public IPrintableObject
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const = 0;
 
     /**
-     * Returns whether the transmission can be received successfully or not.
-     * This function need not be purely functional and need not support
-     * optimistic parallel computation.
-     */
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const = 0;
-
-    /**
-     * Returns whether the transmission represented by the reception can be
-     * received successfully or not. This function must be purely functional
-     * and support optimistic parallel computation.
-     */
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
-
-    /**
-     * Returns whether the reception is actually attempted or ignored by the
-     * receiver. This function must be purely functional and support optimistic
+     * Returns whether the reception of the provided transmission is possible or
+     * not independently of the reception conditions. For example, it might check
+     * if the carrier frequency and the modulation of the transmission matches
+     * how the receiver is listening on the medium.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const = 0;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const = 0;
 
     /**
-     * Returns whether the reception is actually successful or failed by the
-     * receiver. This function must be purely functional and support optimistic
+     * Returns whether the reception of the provided part is possible or not.
+     * For example, it might check if the reception power is above sensitivity.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const = 0;
 
     /**
-     * Returns the result of the reception process specifying whether it was
-     * successful or not and any other physical properties. This function must
-     * be purely functional and support optimistic parallel computation.
+     * Returns whether the reception of the provided part is actually attempted
+     * or ignored by the receiver. For example, it might check that the radio is
+     * not already receiving another signal.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
+     * parallel computation.
      */
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const = 0;
+
+    /**
+     * Returns whether the reception of the provided part is actually successful
+     * or failed by the receiver. For example, it might compute the error rate
+     * and draw a random number to make the decision.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
+
+    /**
+     * Returns the complete result of the reception process for the provided part.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
+
+    /**
+     * TODO:
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
 };
 
 } // namespace physicallayer

@@ -21,6 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 
@@ -40,6 +41,16 @@ class INET_API IArrival : public IPrintableObject
 
     virtual const simtime_t getStartTime() const = 0;
     virtual const simtime_t getEndTime() const = 0;
+
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const = 0;
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const = 0;
+
+    virtual const simtime_t getPreambleStartTime() const = 0;
+    virtual const simtime_t getPreambleEndTime() const = 0;
+    virtual const simtime_t getHeaderStartTime() const = 0;
+    virtual const simtime_t getHeaderEndTime() const = 0;
+    virtual const simtime_t getDataStartTime() const = 0;
+    virtual const simtime_t getDataEndTime() const = 0;
 
     virtual const Coord getStartPosition() const = 0;
     virtual const Coord getEndPosition() const = 0;

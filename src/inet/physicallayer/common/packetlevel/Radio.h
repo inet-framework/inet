@@ -18,11 +18,11 @@
 #ifndef __INET_RADIO_H
 #define __INET_RADIO_H
 
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
 #include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 
@@ -71,26 +71,26 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * An identifier which is globally unique for the whole lifetime of the
      * simulation among all radios.
      */
-    const int id;
+    const int id = nextId++;
 
     /** @name Parameters that determine the behavior of the radio. */
     //@{
     /**
      * The radio antenna model is never nullptr.
      */
-    const IAntenna *antenna;
+    const IAntenna *antenna = nullptr;
     /**
      * The transmitter model is never nullptr.
      */
-    const ITransmitter *transmitter;
+    const ITransmitter *transmitter = nullptr;
     /**
      * The receiver model is never nullptr.
      */
-    const IReceiver *receiver;
+    const IReceiver *receiver = nullptr;
     /**
      * The radio medium model is never nullptr.
      */
-    IRadioMedium *medium;
+    IRadioMedium *medium = nullptr;
     /**
      * The module id of the medim model.
      */
@@ -100,20 +100,30 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      */
     simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
     /**
+     * Determines whether the transmission of the preamble, header and data part
+     * are simulated separately or not.
+     */
+    bool separateTransmissionParts = false;
+    /**
+     * Determines whether the reception of the preamble, header and data part
+     * are simulated separately or not.
+     */
+    bool separateReceptionParts = false;
+    /**
      * Displays a circle around the host submodule representing the communication range.
      */
-    bool displayCommunicationRange;
+    bool displayCommunicationRange = false;
     /**
      * Displays a circle around the host submodule representing the interference range.
      */
-    bool displayInterferenceRange;
+    bool displayInterferenceRange = false;
     //@}
 
     /** Gates */
     //@{
-    cGate *upperLayerOut;
-    cGate *upperLayerIn;
-    cGate *radioIn;
+    cGate *upperLayerOut = nullptr;
+    cGate *upperLayerIn = nullptr;
+    cGate *radioIn = nullptr;
     //@}
 
     /** State */
@@ -121,25 +131,33 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     /**
      * The current radio mode.
      */
-    RadioMode radioMode;
+    RadioMode radioMode = RADIO_MODE_OFF;
     /**
      * The radio is switching to this radio radio mode if a switch is in
      * progress, otherwise this is the same as the current radio mode.
      */
-    RadioMode nextRadioMode;
+    RadioMode nextRadioMode = RADIO_MODE_OFF;
     /**
      * The radio is switching from this radio mode to another if a switch is
      * in progress, otherwise this is the same as the current radio mode.
      */
-    RadioMode previousRadioMode;
+    RadioMode previousRadioMode = RADIO_MODE_OFF;
     /**
      * The current reception state.
      */
-    ReceptionState receptionState;
+    ReceptionState receptionState = RECEPTION_STATE_UNDEFINED;
     /**
      * The current transmission state.
      */
-    TransmissionState transmissionState;
+    TransmissionState transmissionState = TRANSMISSION_STATE_UNDEFINED;
+    /**
+     * The current received signal part.
+     */
+    IRadioSignal::SignalPart receivedSignalPart = IRadioSignal::SIGNAL_PART_NONE;
+    /**
+     * The current transmitted signal part.
+     */
+    IRadioSignal::SignalPart transmittedSignalPart = IRadioSignal::SIGNAL_PART_NONE;
     //@}
 
     /** @name Timer */
@@ -148,17 +166,17 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * The timer that is scheduled to the end of the current transmission.
      * If this timer is not scheduled then no transmission is in progress.
      */
-    cMessage *endTransmissionTimer;
+    cMessage *transmissionTimer = nullptr;
     /**
      * The timer that is scheduled to the end of the current reception.
      * If this timer is nullptr then no attempted reception is in progress but
      * there still may be incoming receptions which are not attempted.
      */
-    cMessage *endReceptionTimer;
+    cMessage *receptionTimer = nullptr;
     /**
      * The timer that is scheduled to the end of the radio mode switch.
      */
-    cMessage *endSwitchTimer;
+    cMessage *switchTimer = nullptr;
     //@}
 
   private:
@@ -167,31 +185,49 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     void completeRadioModeSwitch(RadioMode newRadioMode);
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
     virtual void handleMessageWhenDown(cMessage *message) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSwitchTimer(cMessage *message);
+    virtual void handleTransmissionTimer(cMessage *message);
+    virtual void handleReceptionTimer(cMessage *message);
     virtual void handleUpperCommand(cMessage *command);
     virtual void handleLowerCommand(cMessage *command);
+    virtual void handleUpperPacket(cPacket *packet);
+    virtual void handleLowerPacket(RadioFrame *packet);
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-    virtual void startTransmission(cPacket *macFrame);
+    virtual void startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part);
+    virtual void continueTransmission();
     virtual void endTransmission();
+    virtual void abortTransmission();
 
-    virtual void startReception(RadioFrame *radioFrame);
-    virtual void endReception(cMessage *message);
-    virtual bool isReceptionEndTimer(cMessage *message);
+    virtual RadioFrame *createRadioFrame(cPacket *packet) const;
 
-    virtual bool isListeningPossible();
+    virtual void startReception(cMessage *timer, IRadioSignal::SignalPart part);
+    virtual void continueReception(cMessage *timer);
+    virtual void endReception(cMessage *timer);
+    virtual void abortReception(cMessage *timer);
+    virtual void captureReception(cMessage *timer);
+
+    virtual void sendUp(cPacket *macFrame);
+    virtual cMessage *createReceptionTimer(RadioFrame *radioFrame) const;
+    virtual bool isReceptionTimer(const cMessage *message) const;
+
+    virtual bool isReceiverMode(IRadio::RadioMode radioMode) const;
+    virtual bool isTransmitterMode(IRadio::RadioMode radioMode) const;
+    virtual bool isListeningPossible() const;
+
     virtual void updateTransceiverState();
+    virtual void updateTransceiverPart();
     virtual void updateDisplayString();
 
   public:
-    Radio();
+    Radio() { }
     virtual ~Radio();
 
     virtual int getId() const override { return id; }
@@ -213,6 +249,9 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual const ITransmission *getTransmissionInProgress() const override;
     virtual const ITransmission *getReceptionInProgress() const override;
+
+    virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
+    virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;
 };
 
 } // namespace physicallayer

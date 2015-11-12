@@ -30,25 +30,38 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
 }
 
-double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir) const
+double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const ITransmission *transmission = snir->getReception()->getTransmission();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
     const IIeee80211Mode *mode = ieee80211Transmission->getMode();
-    // Probability of no bit error in the payload and the header
-    double succesRate = getSuccessRate(mode, flatTransmission->getHeaderBitLength(), flatTransmission->getPayloadBitLength(), snir->getMin());
-    return 1 - succesRate;
+    double headerSuccessRate = getHeaderSuccessRate(mode, flatTransmission->getHeaderBitLength(), snir->getMin());
+    double dataSuccessRate = getDataSuccessRate(mode, flatTransmission->getDataBitLength(), snir->getMin());
+    switch (part) {
+        case IRadioSignal::SIGNAL_PART_WHOLE:
+            return 1.0 - headerSuccessRate * dataSuccessRate;
+        case IRadioSignal::SIGNAL_PART_PREAMBLE:
+            return 0;
+        case IRadioSignal::SIGNAL_PART_HEADER:
+            return 1.0 - headerSuccessRate;
+        case IRadioSignal::SIGNAL_PART_DATA:
+            return 1.0 - dataSuccessRate;
+        default:
+            throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
+    }
 }
 
-double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir) const
+double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     return NaN;
 }
 
-double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISNIR *snir) const
+double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     return NaN;
 }
 

@@ -24,6 +24,7 @@
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 
 namespace inet {
@@ -97,9 +98,13 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) = 0;
     virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const IReceptionDecision *getCachedDecision(const IRadio *radio, const ITransmission *transmission) = 0;
-    virtual void setCachedDecision(const IRadio *radio, const ITransmission *transmission, const IReceptionDecision *decision) = 0;
-    virtual void removeCachedDecision(const IRadio *radio, const ITransmission *transmission) = 0;
+    virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) = 0;
+    virtual void setCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision) = 0;
+    virtual void removeCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) = 0;
+
+    virtual const IReceptionResult *getCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) = 0;
+    virtual void setCachedReceptionResult(const IRadio *radio, const ITransmission *transmission, const IReceptionResult *receptionResult) = 0;
+    virtual void removeCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) = 0;
 
     virtual const IRadioFrame *getCachedFrame(const IRadio *radio, const ITransmission *transmission) = 0;
     virtual void setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *radioFrame) = 0;

@@ -62,7 +62,9 @@ RadioMedium::RadioMedium() :
     cacheSNIRGetCount(0),
     cacheSNIRHitCount(0),
     cacheDecisionGetCount(0),
-    cacheDecisionHitCount(0)
+    cacheDecisionHitCount(0),
+    cacheResultGetCount(0),
+    cacheResultHitCount(0)
 {
 }
 
@@ -120,6 +122,7 @@ void RadioMedium::finish()
     double noiseCacheHitPercentage = 100 * (double)cacheNoiseHitCount / (double)cacheNoiseGetCount;
     double snirCacheHitPercentage = 100 * (double)cacheSNIRHitCount / (double)cacheSNIRGetCount;
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
+    double resultCacheHitPercentage = 100 * (double)cacheResultHitCount / (double)cacheResultGetCount;
     EV_INFO << "Transmission count = " << transmissionCount << endl;
     EV_INFO << "Radio frame send count = " << radioFrameSendCount << endl;
     EV_INFO << "Reception computation count = " << receptionComputationCount << endl;
@@ -131,6 +134,7 @@ void RadioMedium::finish()
     EV_INFO << "Noise cache hit = " << noiseCacheHitPercentage << " %" << endl;
     EV_INFO << "SNIR cache hit = " << snirCacheHitPercentage << " %" << endl;
     EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
+    EV_INFO << "Reception result cache hit = " << resultCacheHitPercentage << " %" << endl;
     recordScalar("transmission count", transmissionCount);
     recordScalar("radio frame send count", radioFrameSendCount);
     recordScalar("reception computation count", receptionComputationCount);
@@ -142,6 +146,7 @@ void RadioMedium::finish()
     recordScalar("noise cache hit", noiseCacheHitPercentage, "%");
     recordScalar("snir cache hit", snirCacheHitPercentage, "%");
     recordScalar("reception decision cache hit", decisionCacheHitPercentage, "%");
+    recordScalar("reception result cache hit", resultCacheHitPercentage, "%");
 }
 
 std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
@@ -291,14 +296,22 @@ const IInterference *RadioMedium::computeInterference(const IRadio *receiver, co
     return new Interference(noise, interferingReceptions);
 }
 
-const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const
+const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part, const std::vector<const ITransmission *> *transmissions) const
 {
     receptionDecisionComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
     const ISNIR *snir = getSNIR(radio, transmission);
-    const IReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interference, snir);
-    return decision;
+    return radio->getReceiver()->computeReceptionDecision(listening, reception, part, interference, snir);
+}
+
+const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const
+{
+    receptionResultComputationCount++;
+    const IReception *reception = getReception(radio, transmission);
+    const IInterference *interference = getInterference(radio, listening, transmission);
+    const ISNIR *snir = getSNIR(radio, transmission);
+    return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir);
 }
 
 const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const
@@ -382,18 +395,32 @@ const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *t
     return snir;
 }
 
-const IReceptionDecision *RadioMedium::getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
+const IReceptionDecision *RadioMedium::getReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
     cacheDecisionGetCount++;
-    const IReceptionDecision *decision = communicationCache->getCachedDecision(radio, transmission);
+    const IReceptionDecision *decision = communicationCache->getCachedReceptionDecision(radio, transmission, part);
     if (decision)
         cacheDecisionHitCount++;
     else {
-        decision = computeReceptionDecision(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-        communicationCache->setCachedDecision(radio, transmission, decision);
+        decision = computeReceptionDecision(radio, listening, transmission, part, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+        communicationCache->setCachedReceptionDecision(radio, transmission, part, decision);
         EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << decision->getReception() << " and results in " << decision << endl;
     }
     return decision;
+}
+
+const IReceptionResult *RadioMedium::getReceptionResult(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
+{
+    cacheResultGetCount++;
+    const IReceptionResult *result = communicationCache->getCachedReceptionResult(radio, transmission);
+    if (result)
+        cacheResultHitCount++;
+    else {
+        result = computeReceptionResult(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+        communicationCache->setCachedReceptionResult(radio, transmission, result);
+        EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << result->getReception() << " and results in " << result << endl;
+    }
+    return result;
 }
 
 void RadioMedium::addRadio(const IRadio *radio)
@@ -530,6 +557,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         communicationLog.writeTransmission(radio, radioFrame);
     sendToAffectedRadios(const_cast<IRadio *>(radio), radioFrame);
     cMethodCallContextSwitcher contextSwitcher(this);
+    contextSwitcher.methodCallSilent();
     communicationCache->setCachedFrame(transmission, radioFrame->dup());
     return radioFrame;
 }
@@ -540,20 +568,20 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
     if (recordCommunicationLog)
         communicationLog.writeReception(radio, radioFrame);
-    const IReceptionDecision *decision = getReceptionDecision(radio, listening, transmission);
-    communicationCache->removeCachedDecision(radio, transmission);
-    cPacket *macFrame = decision->getMacFrame()->dup();
-    macFrame->setControlInfo(const_cast<ReceptionIndication *>(decision->getIndication()));
+    const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
+    communicationCache->removeCachedReceptionResult(radio, transmission);
+    cPacket *macFrame = result->getMacFrame()->dup();
+    macFrame->setControlInfo(const_cast<ReceptionIndication *>(result->getIndication()));
     if (mediumVisualizer != nullptr)
-        mediumVisualizer->receivePacket(decision);
-    delete decision;
+        mediumVisualizer->receivePacket(result);
+    delete result;
     return macFrame;
 }
 
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
     const IListeningDecision *decision = computeListeningDecision(radio, listening, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    EV_DEBUG << "Listening " << listening << " on medium by " << radio << " results in " << decision << endl;
+    EV_DEBUG << "Listening with " << listening << " on medium by " << radio << " results in " << decision << endl;
     return decision;
 }
 
@@ -562,7 +590,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
     const Radio *receiverRadio = check_and_cast<const Radio *>(radio);
     if (radioModeFilter && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
         return false;
-    else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(transmission))
+    else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
     else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getDestinationAddress()))
         return false;
@@ -578,17 +606,44 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return true;
 }
 
-bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission *transmission) const
+bool RadioMedium::isReceptionPossible(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
-    const IReception *reception = getReception(radio, transmission);
-    const IListening *listening = communicationCache->getCachedListening(radio, transmission);
-    const IInterference *interference = computeInterference(radio, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interference);
+    const IReception *reception = getReception(receiver, transmission);
+    const IListening *listening = getListening(receiver, transmission);
+    // TODO: why compute?
+    const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+    bool isReceptionPossible = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
     delete interference;
-    EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << " and results in reception is " << (isReceptionAttempted ? "attempted" : "ignored") << endl;
+    if (mediumVisualizer != nullptr)
+        mediumVisualizer->mediumChanged();
+    return isReceptionPossible;
+}
+
+bool RadioMedium::isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    const IReception *reception = getReception(receiver, transmission);
+    const IListening *listening = getListening(receiver, transmission);
+    // TODO: why compute?
+    const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+    bool isReceptionAttempted = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
+    delete interference;
     if (mediumVisualizer != nullptr)
         mediumVisualizer->mediumChanged();
     return isReceptionAttempted;
+}
+
+bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    const IReception *reception = getReception(receiver, transmission);
+    const IListening *listening = getListening(receiver, transmission);
+    // TODO: why compute?
+    const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
+    const ISNIR *snir = getSNIR(receiver, transmission);
+    bool isReceptionSuccessful = receiver->getReceiver()->computeIsReceptionSuccessful(listening, reception, part, interference, snir);
+    delete interference;
+    if (mediumVisualizer != nullptr)
+        mediumVisualizer->mediumChanged();
+    return isReceptionSuccessful;
 }
 
 void RadioMedium::sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame)

@@ -58,7 +58,11 @@ module Radio like IRadio
 
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
         string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
+
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
+
+        bool separateTransmissionParts = default(false); // when enabled the transmission of preamble, header and data part are simulated separately
+        bool separateReceptionParts = default(false);    // when enabled the reception of preamble, header and data part are simulated separately 
 
         bool displayCommunicationRange = default(true); // if true communication range is displayed as a blue circle around the node
         bool displayInterferenceRange = default(true);  // if true interference range is displayed as a gray circle around the node
@@ -72,6 +76,8 @@ module Radio like IRadio
         @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);
         @signal[transmissionStateChanged](type=long);
+        @signal[receivedSignalPartChanged](type=long);
+        @signal[transmittedSignalPartChanged](type=long);
         @signal[minSNIR];
         @signal[packetErrorRate];
         @signal[bitErrorRate];

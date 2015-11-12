@@ -27,7 +27,10 @@ namespace physicallayer {
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
   protected:
-    const ITransmission *transmission;
+    const ITransmission *transmission = nullptr;
+    mutable const IArrival *arrival = nullptr;
+    mutable const IListening *listening = nullptr;
+    mutable const IReception *reception = nullptr;
 
   public:
     RadioFrame(const ITransmission *transmission);
@@ -37,7 +40,10 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ITransmission *getTransmission() const override { return transmission; }
+    virtual const ITransmission *getTransmission() const override;
+    virtual const IArrival *getArrival() const override;
+    virtual const IListening *getListening() const override;
+    virtual const IReception *getReception() const override;
 };
 
 } // namespace physicallayer

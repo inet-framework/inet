@@ -43,25 +43,16 @@ std::ostream& SNIRReceiverBase::printToStream(std::ostream& stream, int level) c
     return stream;
 }
 
-const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
-{
-    ReceptionIndication *indication = new ReceptionIndication();
-    indication->setMinSNIR(snir->getMin());
-    return indication;
-}
-
-bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
 {
     return snir->getMin() > snirThreshold;
 }
 
-const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
-    bool isReceptionPossible = computeIsReceptionPossible(listening, reception);
-    bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, interference);
-    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, interference, snir);
-    const ReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(snir) : nullptr;
-    return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
+    auto indication = const_cast<ReceptionIndication *>(ReceiverBase::computeReceptionIndication(snir));
+    indication->setMinSNIR(snir->getMin());
+    return indication;
 }
 
 } // namespace physicallayer

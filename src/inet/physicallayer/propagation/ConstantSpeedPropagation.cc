@@ -76,15 +76,21 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         const Coord endArrivalPosition = startArrivalPosition;
         const simtime_t endPropagationTime = startPropagationTime;
         const simtime_t endArrivalTime = endTime + startPropagationTime;
+        const simtime_t preambleDuration = transmission->getPreambleDuration();
+        const simtime_t headerDuration = transmission->getHeaderDuration();
+        const simtime_t dataDuration = transmission->getDataDuration();
         const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
-        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
     else {
         const Coord endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
         const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
         const simtime_t endArrivalTime = endTime + endPropagationTime;
+        const simtime_t preambleDuration = transmission->getPreambleDuration();
+        const simtime_t headerDuration = transmission->getHeaderDuration();
+        const simtime_t dataDuration = transmission->getDataDuration();
         const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
-        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
+        return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
 }
 

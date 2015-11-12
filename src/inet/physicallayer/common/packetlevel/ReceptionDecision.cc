@@ -21,45 +21,23 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionDecision::ReceptionDecision(const IReception *reception, const ReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
+ReceptionDecision::ReceptionDecision(const IReception *reception, IRadioSignal::SignalPart part, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
     reception(reception),
-    indication(indication),
-    isSynchronizationPossible_(false),
-    isSynchronizationAttempted_(false),
-    isSynchronizationSuccessful_(false),
+    part(part),
     isReceptionPossible_(isReceptionPossible),
     isReceptionAttempted_(isReceptionAttempted),
-    isReceptionSuccessful_(isReceptionSuccessful),
-    macFrame(nullptr)
+    isReceptionSuccessful_(isReceptionSuccessful)
 {
-    macFrame = reception->getTransmission()->getMacFrame()->dup();
-    const_cast<cPacket *>(macFrame)->setBitError(!isReceptionSuccessful);
-}
-
-ReceptionDecision::~ReceptionDecision()
-{
-    delete macFrame;
 }
 
 std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionDecision";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level >= PRINT_LEVEL_DETAIL)
         stream << (isReceptionPossible_ ? ", possible" : ", impossible")
                << (isReceptionAttempted_ ? ", attempted" : ", ignored")
-               << (isReceptionSuccessful_ ? ", successful" : ", unsuccessful")
-               << ", indication = " << indication ;
+               << (isReceptionSuccessful_ ? ", successful" : ", unsuccessful");
     return stream;
-}
-
-const cPacket* inet::physicallayer::ReceptionDecision::getPhyFrame() const
-{
-    return nullptr;
-}
-
-const cPacket* inet::physicallayer::ReceptionDecision::getMacFrame() const
-{
-    return macFrame;
 }
 
 } // namespace physicallayer

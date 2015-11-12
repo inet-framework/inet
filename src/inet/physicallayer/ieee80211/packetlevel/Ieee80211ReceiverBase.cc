@@ -51,8 +51,9 @@ std::ostream& Ieee80211ReceiverBase::printToStream(std::ostream& stream, int lev
 {
     if (level >= PRINT_LEVEL_TRACE)
         stream << ", modeSet = " << printObjectToString(modeSet, level - 1)
-               << ", band = " << printObjectToString(band, level - 1)
-               << ", channel = " << printObjectToString(channel, level - 1);
+               << ", band = " << printObjectToString(band, level - 1);
+    if (level >= PRINT_LEVEL_INFO)
+        stream << ", channel = " << printObjectToString(channel, level - 1);
     return FlatReceiverBase::printToStream(stream, level);
 }
 

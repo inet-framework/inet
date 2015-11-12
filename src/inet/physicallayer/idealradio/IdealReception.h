@@ -33,10 +33,10 @@ class INET_API IdealReception : public ReceptionBase
 {
   public:
     enum Power {
-        POWER_RECEIVABLE,
-        POWER_INTERFERING,
+        POWER_UNDETECTABLE,
         POWER_DETECTABLE,
-        POWER_UNDETECTABLE
+        POWER_INTERFERING,
+        POWER_RECEIVABLE
     };
 
   protected:

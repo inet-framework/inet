@@ -50,26 +50,31 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
 {
     stream << "IdealTransmitter";
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", headerBitLength = " << headerBitLength
-               << ", bitrate = " << bitrate
-               << ", maxCommunicationRange = " << maxCommunicationRange
-               << ", maxInterferenceRange = " << maxInterferenceRange
+        stream << ", preambleDuration = " << preambleDuration
+               << ", headerBitLength = " << headerBitLength
+               << ", bitrate = " << bitrate;
+    if (level >= PRINT_LEVEL_INFO)
+        stream << ", maxCommunicationRange = " << maxCommunicationRange;
+    if (level >= PRINT_LEVEL_TRACE)
+        stream << ", maxInterferenceRange = " << maxInterferenceRange
                << ", maxDetectionRange = " << maxDetectionRange;
     return stream;
 }
 
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    const simtime_t duration = (macFrame->getBitLength() + headerBitLength) / transmissionBitrate.get();
-    const simtime_t endTime = startTime + duration;
-    IMobility *mobility = transmitter->getAntenna()->getMobility();
-    const Coord startPosition = mobility->getCurrentPosition();
-    const Coord endPosition = mobility->getCurrentPosition();
-    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
+    auto controlInfo = dynamic_cast<TransmissionRequest*>(macFrame->getControlInfo());
+    auto transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
+    auto headerDuration = headerBitLength / transmissionBitrate.get();
+    auto dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
+    auto duration = preambleDuration + headerDuration + dataDuration;
+    auto endTime = startTime + duration;
+    auto mobility = transmitter->getAntenna()->getMobility();
+    auto startPosition = mobility->getCurrentPosition();
+    auto endPosition = mobility->getCurrentPosition();
+    auto startOrientation = mobility->getCurrentAngularPosition();
+    auto endOrientation = mobility->getCurrentAngularPosition();
+    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
 }
 
 } // namespace physicallayer

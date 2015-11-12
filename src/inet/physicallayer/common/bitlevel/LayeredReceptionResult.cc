@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionDecision.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-LayeredReceptionDecision::LayeredReceptionDecision(const IReception *reception, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
-    ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful),
+LayeredReceptionResult::LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel) :
+    ReceptionResult(reception, decisions, indication),
     packetModel(packetModel),
     bitModel(bitModel),
     symbolModel(symbolModel),
@@ -31,7 +31,7 @@ LayeredReceptionDecision::LayeredReceptionDecision(const IReception *reception, 
 {
 }
 
-LayeredReceptionDecision::~LayeredReceptionDecision()
+LayeredReceptionResult::~LayeredReceptionResult()
 {
     delete packetModel->getPacket();
     delete packetModel;
@@ -41,9 +41,9 @@ LayeredReceptionDecision::~LayeredReceptionDecision()
     delete analogModel;
 }
 
-std::ostream& LayeredReceptionDecision::printToStream(std::ostream& stream, int level) const
+std::ostream& LayeredReceptionResult::printToStream(std::ostream& stream, int level) const
 {
-    stream << "LayeredReceptionDecision";
+    stream << "LayeredReceptionResult";
     if (level >= PRINT_LEVEL_TRACE)
        stream << ", packetModel = " << printObjectToString(packetModel, level - 1)
               << ", bitModel = " << printObjectToString(bitModel, level - 1)
@@ -53,12 +53,12 @@ std::ostream& LayeredReceptionDecision::printToStream(std::ostream& stream, int 
     return stream;
 }
 
-const cPacket *LayeredReceptionDecision::getPhyFrame() const
+const cPacket *LayeredReceptionResult::getPhyFrame() const
 {
     return packetModel->getPacket();
 }
 
-const cPacket *LayeredReceptionDecision::getMacFrame() const
+const cPacket *LayeredReceptionResult::getMacFrame() const
 {
     return packetModel->getPacket()->getEncapsulatedPacket();
 }

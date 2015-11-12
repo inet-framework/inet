@@ -28,51 +28,53 @@ namespace physicallayer {
 Define_Module(IdealReceiver);
 
 IdealReceiver::IdealReceiver() :
+    ReceiverBase(),
     ignoreInterference(false)
 {
 }
 
 void IdealReceiver::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
+    ReceiverBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
         ignoreInterference = par("ignoreInterference");
-    }
 }
 
 std::ostream& IdealReceiver::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealReceiver";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level >= PRINT_LEVEL_INFO)
         stream << (ignoreInterference ? ", ignoring interference" : ", considering interference");
     return stream;
 }
 
-bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
+bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    const IdealReception::Power power = check_and_cast<const IdealReception *>(reception)->getPower();
+    auto power = check_and_cast<const IdealReception *>(reception)->getPower();
     return power == IdealReception::POWER_RECEIVABLE;
 }
 
-bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const IInterference *interference) const
+bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
 {
     if (ignoreInterference)
-        return computeIsReceptionPossible(listening, reception);
+        return computeIsReceptionPossible(listening, reception, part);
     else
-        return ReceiverBase::computeIsReceptionAttempted(listening, reception, interference);
+        return ReceiverBase::computeIsReceptionAttempted(listening, reception, part, interference);
 }
 
-bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
 {
-    const IdealReception::Power power = check_and_cast<const IdealReception *>(reception)->getPower();
+    auto power = check_and_cast<const IdealReception *>(reception)->getPower();
     if (power == IdealReception::POWER_RECEIVABLE) {
         if (ignoreInterference)
             return true;
         else {
-            const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
+            auto startTime = reception->getStartTime(part);
+            auto endTime = reception->getEndTime(part);
+            auto interferingReceptions = interference->getInterferingReceptions();
             for (auto interferingReception : *interferingReceptions) {
-
-                IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
-                if (interferingPower == IdealReception::POWER_RECEIVABLE || interferingPower == IdealReception::POWER_INTERFERING)
+                auto interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
+                if (interferingPower >= IdealReception::POWER_INTERFERING && startTime <= interferingReception->getEndTime() && endTime >= interferingReception->getStartTime())
                     return false;
             }
             return true;
@@ -82,6 +84,17 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
         return false;
 }
 
+const ReceptionIndication *IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
+{
+    auto indication = new ReceptionIndication();
+//    // TODO: revive
+//    double errorRate = isReceptionSuccessful ? 0 : 1;
+//    indication->setSymbolErrorRate(errorRate);
+//    indication->setBitErrorRate(errorRate);
+//    indication->setPacketErrorRate(errorRate);
+    return indication;
+}
+
 const IListening *IdealReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     return new IdealListening(radio, startTime, endTime, startPosition, endPosition);
@@ -89,25 +102,13 @@ const IListening *IdealReceiver::createListening(const IRadio *radio, const simt
 
 const IListeningDecision *IdealReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
-    const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
+    auto interferingReceptions = interference->getInterferingReceptions();
     for (auto interferingReception : *interferingReceptions) {
-
-        IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
+        auto interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
         if (interferingPower != IdealReception::POWER_UNDETECTABLE)
             return new ListeningDecision(listening, true);
     }
     return new ListeningDecision(listening, false);
-}
-
-const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
-{
-    ReceptionIndication *indication = new ReceptionIndication();
-    bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, interference, snir);
-    double errorRate = isReceptionSuccessful ? 0 : 1;
-    indication->setSymbolErrorRate(errorRate);
-    indication->setBitErrorRate(errorRate);
-    indication->setPacketErrorRate(errorRate);
-    return new ReceptionDecision(reception, indication, true, true, isReceptionSuccessful);
 }
 
 } // namespace physicallayer

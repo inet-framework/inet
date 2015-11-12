@@ -184,9 +184,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable long interferenceComputationCount;
     /**
-     * Total number of reception decision computations.
+     * Total number of data reception decision computations.
      */
     mutable long receptionDecisionComputationCount;
+    /**
+     * Total number of data reception result computations.
+     */
+    mutable long receptionResultComputationCount;
     /**
      * Total number of listening decision computations.
      */
@@ -231,6 +235,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Total number of reception decision cache hits.
      */
     mutable long cacheDecisionHitCount;
+    /**
+     * Total number of reception result cache queries.
+     */
+    mutable long cacheResultGetCount;
+    /**
+     * Total number of reception result cache hits.
+     */
+    mutable long cacheResultHitCount;
     //@}
 
   protected:
@@ -292,17 +304,9 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IInterference *computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
-    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part, const std::vector<const ITransmission *> *transmissions) const;
+    virtual const IReceptionResult *computeReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, const std::vector<const ITransmission *> *transmissions) const;
     virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
-
-    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
-    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
     //@}
 
   public:
@@ -317,7 +321,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }
     virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
-    virtual const IPhysicalEnvironment *getPhysicalEnvironment() const { return physicalEnvironment; }
+    virtual const IPhysicalEnvironment *getPhysicalEnvironment() const override { return physicalEnvironment; }
 
     virtual const IMediumLimitCache *getMediumLimitCache() const { return mediumLimitCache; }
     virtual const INeighborCache *getNeighborCache() const { return neighborCache; }
@@ -333,7 +337,19 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 
-    virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
+    virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
+
+    virtual bool isReceptionPossible(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+    virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+    virtual bool isReceptionSuccessful(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+    virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+    virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG) override;
 };

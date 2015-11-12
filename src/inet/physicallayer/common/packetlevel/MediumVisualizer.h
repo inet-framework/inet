@@ -18,12 +18,12 @@
 #ifndef __INET_MEDIUMVISUALIZER_H
 #define __INET_MEDIUMVISUALIZER_H
 
-#include "inet/common/figures/TrailFigure.h"
 #include "inet/common/figures/HeatMapFigure.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
-#include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/common/figures/TrailFigure.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -124,7 +124,7 @@ class INET_API MediumVisualizer : public cSimpleModule
     virtual void addTransmission(const ITransmission *transmission);
     virtual void removeTransmission(const ITransmission *transmission);
 
-    virtual void receivePacket(const IReceptionDecision *decision);
+    virtual void receivePacket(const IReceptionResult *result);
 
     virtual void mediumChanged() const;
 };

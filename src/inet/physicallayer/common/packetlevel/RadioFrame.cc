@@ -16,6 +16,8 @@
 //
 
 #include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 
@@ -35,6 +37,38 @@ RadioFrame::RadioFrame(const RadioFrame& other) :
 std::ostream& RadioFrame::printToStream(std::ostream& stream, int level) const
 {
     return stream << (cPacket *)this;
+}
+
+const ITransmission *RadioFrame::getTransmission() const
+{
+    return transmission;
+}
+
+const IArrival *RadioFrame::getArrival() const
+{
+    if (arrival == nullptr) {
+        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
+        arrival = transmission->getTransmitter()->getMedium()->getArrival(receiver, transmission);
+    }
+    return arrival;
+}
+
+const IListening *RadioFrame::getListening() const
+{
+    if (listening == nullptr) {
+        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
+        listening = transmission->getTransmitter()->getMedium()->getListening(receiver, transmission);
+    }
+    return listening;
+}
+
+const IReception *RadioFrame::getReception() const
+{
+    if (reception == nullptr) {
+        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
+        reception = transmission->getTransmitter()->getMedium()->getReception(receiver, transmission);
+    }
+    return reception;
 }
 
 } // namespace physicallayer

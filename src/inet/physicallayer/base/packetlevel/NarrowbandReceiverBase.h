@@ -36,16 +36,17 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
-
   public:
     NarrowbandReceiverBase();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
+
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
 
     virtual const IModulation *getModulation() const { return modulation; }
     virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }

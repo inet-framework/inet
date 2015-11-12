@@ -43,10 +43,15 @@ class INET_API StateBasedEnergyConsumer : public cSimpleModule, public IEnergyCo
     W switchingPowerConsumption;
     W receiverIdlePowerConsumption;
     W receiverBusyPowerConsumption;
-    W receiverSynchronizingPowerConsumption;
     W receiverReceivingPowerConsumption;
+    W receiverReceivingPreamblePowerConsumption;
+    W receiverReceivingHeaderPowerConsumption;
+    W receiverReceivingDataPowerConsumption;
     W transmitterIdlePowerConsumption;
     W transmitterTransmittingPowerConsumption;
+    W transmitterTransmittingPreamblePowerConsumption;
+    W transmitterTransmittingHeaderPowerConsumption;
+    W transmitterTransmittingDataPowerConsumption;
 
     // environment
     IRadio *radio;

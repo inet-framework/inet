@@ -18,7 +18,7 @@
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionDecision.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
@@ -161,7 +161,7 @@ const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketMo
         return check_and_cast<const APSKPhyFrame *>(packetModel->getPacket()->dup());
 }
 
-const IReceptionDecision *APSKLayeredReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
@@ -178,7 +178,8 @@ const IReceptionDecision *APSKLayeredReceiver::computeReceptionDecision(const IL
 //    receptionIndication->setPacketErrorRate(packetModel->getPacketErrorRate());
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
-    return new LayeredReceptionDecision(reception, receptionIndication, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel, true, true, receptionPacketModel->isPacketErrorless());
+// TODO: true, true, receptionPacketModel->isPacketErrorless()
+    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionIndication, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *APSKLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
@@ -203,7 +204,7 @@ const IListeningDecision *APSKLayeredReceiver::computeListeningDecision(const IL
 
 // TODO: this is not purely functional, see interface comment
 // TODO: copy
-bool APSKLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
+bool APSKLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);

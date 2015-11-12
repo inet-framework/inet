@@ -50,22 +50,40 @@ std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int leve
     return stream;
 }
 
-double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
-    if (!isNaN(packetErrorRate))
-        return packetErrorRate;
+    Enter_Method_Silent();
+    const IReception *reception = snir->getReception();
+    if (!isNaN(packetErrorRate)) {
+        double factor = reception->getDuration(part) / reception->getDuration();
+        return pow(packetErrorRate, factor);
+    }
     else {
-        double bitErrorRate = computeBitErrorRate(snir);
-        const IReception *reception = snir->getReception();
         const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
-        return 1.0 - pow(1.0 - bitErrorRate, flatTransmission->getPayloadBitLength());
+        double bitErrorRate = computeBitErrorRate(snir, part);
+        double headerSuccessRate = pow(1.0 - bitErrorRate, flatTransmission->getHeaderBitLength());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, flatTransmission->getDataBitLength());
+        switch (part) {
+            case IRadioSignal::SIGNAL_PART_WHOLE:
+                return 1.0 - headerSuccessRate * dataSuccessRate;
+            case IRadioSignal::SIGNAL_PART_PREAMBLE:
+                return 0;
+            case IRadioSignal::SIGNAL_PART_HEADER:
+                return 1.0 - headerSuccessRate;
+            case IRadioSignal::SIGNAL_PART_DATA:
+                return 1.0 - dataSuccessRate;
+            default:
+                throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
+        }
     }
 }
 
-double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
-    if (!isNaN(bitErrorRate))
+    Enter_Method_Silent();
+    if (!isNaN(bitErrorRate)) {
         return bitErrorRate;
+    }
     else {
         // TODO: compute bit error rate based on symbol error rate and modulation
 //        const IReception *reception = snir->getReception();
@@ -76,8 +94,9 @@ double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir) const
     }
 }
 
-double StochasticErrorModel::computeSymbolErrorRate(const ISNIR *snir) const
+double StochasticErrorModel::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     return symbolErrorRate;
 }
 

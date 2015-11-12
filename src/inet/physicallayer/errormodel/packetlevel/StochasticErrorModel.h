@@ -25,7 +25,7 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * Implements the ConstantErrorModel model, see the NED file for details.
+ * Implements the StochasticErrorModel model, see the NED file for details.
  */
 class INET_API StochasticErrorModel : public ErrorModelBase
 {
@@ -42,9 +42,9 @@ class INET_API StochasticErrorModel : public ErrorModelBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual double computePacketErrorRate(const ISNIR *snir) const override;
-    virtual double computeBitErrorRate(const ISNIR *snir) const override;
-    virtual double computeSymbolErrorRate(const ISNIR *snir) const override;
+    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
 };
 
 } // namespace physicallayer

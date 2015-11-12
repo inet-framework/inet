@@ -33,10 +33,15 @@ simple StateBasedEnergyConsumer extends EnergyConsumerBase
         double switchingPowerConsumption @unit(W) = default(1mW);
         double receiverIdlePowerConsumption @unit(W) = default(2mW);
         double receiverBusyPowerConsumption @unit(W) = default(5mW);
-        double receiverSynchronizingPowerConsumption @unit(W) = default(10mW);
         double receiverReceivingPowerConsumption @unit(W) = default(10mW);
+        double receiverReceivingPreamblePowerConsumption @unit(W) = default(receiverReceivingPowerConsumption);
+        double receiverReceivingHeaderPowerConsumption @unit(W) = default(receiverReceivingPowerConsumption);
+        double receiverReceivingDataPowerConsumption @unit(W) = default(receiverReceivingPowerConsumption);
         double transmitterIdlePowerConsumption @unit(W) = default(2mW);
         double transmitterTransmittingPowerConsumption @unit(W) = default(100mW);
+        double transmitterTransmittingPreamblePowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
+        double transmitterTransmittingHeaderPowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
+        double transmitterTransmittingDataPowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
         @display("i=block/cogwheel");
         @class(StateBasedEnergyConsumer);
 }

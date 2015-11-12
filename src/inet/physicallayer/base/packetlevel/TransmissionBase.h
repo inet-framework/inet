@@ -33,13 +33,16 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const cPacket *macFrame;
     const simtime_t startTime;
     const simtime_t endTime;
+    const simtime_t preambleDuration;
+    const simtime_t headerDuration;
+    const simtime_t dataDuration;
     const Coord startPosition;
     const Coord endPosition;
     const EulerAngles startOrientation;
     const EulerAngles endOrientation;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
     virtual int getId() const override { return id; }
 
@@ -51,7 +54,22 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const;
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const;
+
+    virtual const simtime_t getPreambleStartTime() const override { return startTime; }
+    virtual const simtime_t getPreambleEndTime() const override { return startTime + preambleDuration; }
+    virtual const simtime_t getHeaderStartTime() const override { return startTime + preambleDuration; }
+    virtual const simtime_t getHeaderEndTime() const override { return endTime - dataDuration; }
+    virtual const simtime_t getDataStartTime() const override { return endTime - dataDuration; }
+    virtual const simtime_t getDataEndTime() const override { return endTime; }
+
     virtual const simtime_t getDuration() const override { return endTime - startTime; }
+    virtual const simtime_t getDuration(IRadioSignal::SignalPart part) const override;
+
+    virtual const simtime_t getPreambleDuration() const override { return preambleDuration; }
+    virtual const simtime_t getHeaderDuration() const override { return headerDuration; }
+    virtual const simtime_t getDataDuration() const override { return dataDuration; }
 
     virtual const Coord getStartPosition() const override { return startPosition; }
     virtual const Coord getEndPosition() const override { return endPosition; }

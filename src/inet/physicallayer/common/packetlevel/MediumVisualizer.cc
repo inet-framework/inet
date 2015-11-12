@@ -166,11 +166,14 @@ void MediumVisualizer::removeTransmission(const ITransmission *transmission)
     }
 }
 
-void MediumVisualizer::receivePacket(const IReceptionDecision *decision)
+void MediumVisualizer::receivePacket(const IReceptionResult *result)
 {
-    if (decision->isReceptionSuccessful()) {
-        const ITransmission *transmission = decision->getReception()->getTransmission();
-        const IReception *reception = decision->getReception();
+    bool isReceptionSuccessful;
+    for (auto decision : *result->getDecisions())
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    if (isReceptionSuccessful) {
+        const ITransmission *transmission = result->getReception()->getTransmission();
+        const IReception *reception = result->getReception();
         if (leaveCommunicationTrail) {
             const IPhysicalEnvironment *physicalEnvironment = radioMedium->getPhysicalEnvironment();
             cLineFigure *communicationFigure = new cLineFigure();

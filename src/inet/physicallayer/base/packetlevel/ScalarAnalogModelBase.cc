@@ -108,13 +108,13 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
         else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, scalarBackgroundNoise->getCarrierFrequency(), scalarBackgroundNoise->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
-    EV_DEBUG << "Noise power begin " << endl;
+    EV_TRACE << "Noise power begin " << endl;
     W noise = W(0);
     for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++) {
         noise += it->second;
-        EV << "Noise at " << it->first << " = " << noise << endl;
+        EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
-    EV_DEBUG << "Noise power end" << endl;
+    EV_TRACE << "Noise power end" << endl;
     return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
 }
 

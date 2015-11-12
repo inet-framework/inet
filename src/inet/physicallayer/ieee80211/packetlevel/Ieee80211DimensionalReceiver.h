@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API Ieee80211DimensionalReceiver : public Ieee80211ReceiverBase
 {
   protected:
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
 
   public:
     Ieee80211DimensionalReceiver();

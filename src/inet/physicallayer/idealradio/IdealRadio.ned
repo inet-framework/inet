@@ -41,4 +41,6 @@ module IdealRadio extends Radio
         antennaType = default("IsotropicAntenna");
         transmitterType = default("IdealTransmitter");
         receiverType = default("IdealReceiver");
+        separateTransmissionParts = default(false);
+        separateReceptionParts = default(false);
 }

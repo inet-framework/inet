@@ -45,16 +45,12 @@ void CommunicationLog::writeTransmission(const IRadio *transmitter, const IRadio
 void CommunicationLog::writeReception(const IRadio *receiver, const IRadioFrame *radioFrame)
 {
     const ITransmission *transmission = radioFrame->getTransmission();
-    const IRadioMedium *radioMedium = transmission->getTransmitter()->getMedium();
+    const IReception *reception = radioFrame->getReception();
     const Radio *receiverRadio = check_and_cast<const Radio *>(receiver);
-    const IListening *listening = radioMedium->getListening(receiverRadio, transmission);
-    const IReceptionDecision *decision = radioMedium->getReceptionDecision(receiverRadio, listening, transmission);
-    const IReception *reception = decision->getReception();
     output << "R " << receiverRadio->getFullPath() << " " << reception->getReceiver()->getId() << " "
            << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
            << "S " << reception->getStartTime() << " " << reception->getStartPosition() << " -> "
-           << "E " << reception->getEndTime() << " " << reception->getEndPosition() << " "
-           << "D " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
+           << "E " << reception->getEndTime() << " " << reception->getEndPosition() << endl;
 }
 
 } // namespace physicallayer

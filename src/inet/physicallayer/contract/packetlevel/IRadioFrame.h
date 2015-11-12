@@ -18,7 +18,10 @@
 #ifndef __INET_IRADIOFRAME_H
 #define __INET_IRADIOFRAME_H
 
+#include "inet/physicallayer/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/contract/packetlevel/IListening.h"
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayerFrame.h"
+#include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
@@ -38,22 +41,19 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
     virtual const ITransmission *getTransmission() const = 0;
 
     /**
-     * TODO: fill in the background?
      * This function may return nullptr if this is not yet computed.
      */
-    // virtual const IArrival *getArrival() const = 0;
+    virtual const IArrival *getArrival() const = 0;
 
     /**
-     * TODO: fill in the background?
      * This function may return nullptr if this is not yet computed.
      */
-    // virtual const IReception *getReception() const = 0;
+    virtual const IListening *getListening() const = 0;
 
     /**
-     * TODO: fill in the background?
      * This function may return nullptr if this is not yet computed.
      */
-    // virtual const IReceptionDecision *getReceptionDecision() const = 0;
+    virtual const IReception *getReception() const = 0;
 };
 
 } // namespace physicallayer

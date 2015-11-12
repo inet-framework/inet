@@ -192,7 +192,7 @@ const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation);
+    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, macFrame, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
 }
 
 } // namespace physicallayer

@@ -21,6 +21,12 @@ namespace inet {
 
 namespace physicallayer {
 
+Register_Enum(inet::physicallayer::IdealReception::Power,
+        (IdealReception::POWER_UNDETECTABLE,
+         IdealReception::POWER_DETECTABLE,
+         IdealReception::POWER_INTERFERING,
+         IdealReception::POWER_RECEIVABLE));
+
 IdealReception::IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
     ReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
     power(power)
@@ -30,8 +36,8 @@ IdealReception::IdealReception(const IRadio *radio, const ITransmission *transmi
 std::ostream& IdealReception::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealReception";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", power = " << power;
+    if (level >= PRINT_LEVEL_INFO)
+        stream << ", power = " << cEnum::get(opp_typename(typeid(IdealReception::Power)))->getStringFor(power) + 6;
     return ReceptionBase::printToStream(stream, level);
 }
 

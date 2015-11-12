@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
-    TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+    TransmissionBase(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation),
     maxCommunicationRange(maxCommunicationRange),
     maxInterferenceRange(maxInterferenceRange),
     maxDetectionRange(maxDetectionRange)
@@ -32,9 +32,10 @@ IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *m
 std::ostream& IdealTransmission::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealTransmission";
+    if (level >= PRINT_LEVEL_INFO)
+        stream << ", maxCommunicationRange = " << maxCommunicationRange;
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", maxCommunicationRange = " << maxCommunicationRange
-               << ", maxInterferenceRange = " << maxInterferenceRange
+        stream << ", maxInterferenceRange = " << maxInterferenceRange
                << ", maxDetectionRange = " << maxDetectionRange;
     return TransmissionBase::printToStream(stream, level);
 }

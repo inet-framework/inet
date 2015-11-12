@@ -43,7 +43,10 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
     const EulerAngles orientation = mobility->getCurrentAngularPosition();
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();
-    return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, position, position, orientation, orientation);
+    const simtime_t preambleDuration = transmission->getPreambleDuration();
+    const simtime_t headerDuration = transmission->getHeaderDuration();
+    const simtime_t dataDuration = transmission->getDataDuration();
+    return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, preambleDuration, headerDuration, dataDuration, position, position, orientation, orientation);
 }
 
 std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level) const

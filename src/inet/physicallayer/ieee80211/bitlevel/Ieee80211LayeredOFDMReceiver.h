@@ -98,10 +98,10 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
   public:
     virtual ~Ieee80211LayeredOFDMReceiver();
 
-    bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const override;
-    const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
-    const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 } /* namespace physicallayer */

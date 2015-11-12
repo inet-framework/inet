@@ -139,9 +139,9 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
         dimensions.addDimension(Dimension::time);
     ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
-    EV_DEBUG << "Noise power begin " << endl;
+    EV_TRACE << "Noise power begin " << endl;
     noisePower->print(EVSTREAM);
-    EV_DEBUG << "Noise power end" << endl;
+    EV_TRACE << "Noise power end" << endl;
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 

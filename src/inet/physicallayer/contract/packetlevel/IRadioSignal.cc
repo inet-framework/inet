@@ -15,26 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
-    ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-    carrierFrequency(carrierFrequency),
-    bandwidth(bandwidth)
-{
-}
+cEnum *IRadioSignal::signalPartEnum = nullptr;
 
-std::ostream& BandListening::printToStream(std::ostream& stream, int level) const
+Register_Enum(inet::physicallayer::IRadioSignal::SignalPart,
+    (IRadioSignal::SIGNAL_PART_NONE,
+     IRadioSignal::SIGNAL_PART_WHOLE,
+     IRadioSignal::SIGNAL_PART_PREAMBLE,
+     IRadioSignal::SIGNAL_PART_HEADER,
+     IRadioSignal::SIGNAL_PART_DATA));
+
+const char *IRadioSignal::getSignalPartName(SignalPart signalPart)
 {
-    stream << "BandListening";
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", carrierFrequency = " << carrierFrequency
-               << ", bandwidth = " << bandwidth;
-    return ListeningBase::printToStream(stream, level);
+    if (signalPartEnum == nullptr)
+        signalPartEnum = cEnum::get(opp_typename(typeid(IRadioSignal::SignalPart)));
+    return signalPartEnum->getStringFor(signalPart) + 12;
 }
 
 } // namespace physicallayer
