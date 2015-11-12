@@ -55,6 +55,7 @@ ned-path = .;../../../../src
 *.host*.wlan[*].mac.fullDuplex = false
 *.host*.wlan[*].radioType = "APSKScalarRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.carrierFrequency = 2.4GHz
 *.host*.wlan[*].radio.bandwidth = 2MHz
