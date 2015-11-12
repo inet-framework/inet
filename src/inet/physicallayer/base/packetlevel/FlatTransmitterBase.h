@@ -27,6 +27,7 @@ namespace physicallayer {
 class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
 {
   protected:
+    simtime_t preambleDuration;
     int headerBitLength;
     bps bitrate;
     W power;

@@ -23,6 +23,7 @@ namespace physicallayer {
 
 FlatTransmitterBase::FlatTransmitterBase() :
     NarrowbandTransmitterBase(),
+    preambleDuration(-1),
     headerBitLength(-1),
     bitrate(bps(NaN)),
     power(W(NaN))
@@ -33,6 +34,7 @@ void FlatTransmitterBase::initialize(int stage)
 {
     NarrowbandTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        preambleDuration = par("preambleDuration");
         headerBitLength = par("headerBitLength");
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
@@ -42,7 +44,8 @@ void FlatTransmitterBase::initialize(int stage)
 std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
     if (level >= PRINT_LEVEL_TRACE)
-        stream << ", headerBitLength = " << headerBitLength
+        stream << ", preambleDuration = " << preambleDuration
+               << ", headerBitLength = " << headerBitLength
                << ", bitrate = " << bitrate
                << ", power = " << power;
     return NarrowbandTransmitterBase::printToStream(stream, level);

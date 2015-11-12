@@ -37,6 +37,7 @@ IdealTransmitter::IdealTransmitter() :
 void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        preambleDuration = par("preambleDuration");
         headerBitLength = par("headerBitLength");
         bitrate = bps(par("bitrate"));
         maxCommunicationRange = m(par("maxCommunicationRange"));
