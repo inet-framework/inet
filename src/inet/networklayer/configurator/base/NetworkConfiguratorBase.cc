@@ -394,11 +394,12 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
-            const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, interference, snir);
-            const ReceptionIndication *receptionIndication = receptionDecision->getIndication();
-            double packetErrorRate = receptionDecision->isReceptionPossible() ? receptionIndication->getPacketErrorRate() : 1;
+            const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir);
+            const ReceptionIndication *receptionIndication = receptionResult->getIndication();
+            bool isReceptionPossible = medium->isReceptionPossible(receiverRadio, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
+            double packetErrorRate = isReceptionPossible ? receptionIndication->getPacketErrorRate() : 1;
             delete receptionIndication;
-            delete receptionDecision;
+            delete receptionResult;
             delete snir;
             delete interference;
             delete reception;
