@@ -83,7 +83,8 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
 
 bool BasicRx::isReceptionInProgress() const
 {
-    return receptionState == IRadio::RECEPTION_STATE_RECEIVING;
+    return receptionState == IRadio::RECEPTION_STATE_RECEIVING &&
+           (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
 bool BasicRx::isFcsOk(Ieee80211Frame *frame) const
@@ -107,6 +108,13 @@ void BasicRx::receptionStateChanged(IRadio::ReceptionState state)
 {
     Enter_Method_Silent();
     receptionState = state;
+    recomputeMediumFree();
+}
+
+void BasicRx::receivedSignalPartChanged(IRadioSignal::SignalPart part)
+{
+    Enter_Method_Silent();
+    receivedPart = part;
     recomputeMediumFree();
 }
 
@@ -156,7 +164,6 @@ void BasicRx::updateDisplayString()
                 case IRadio::RECEPTION_STATE_IDLE: os << "Rx-Idle"; break; // cannot happen
                 case IRadio::RECEPTION_STATE_BUSY: os << "Noise"; break;
                 case IRadio::RECEPTION_STATE_RECEIVING: os << "Recv"; break;
-                case IRadio::RECEPTION_STATE_SYNCHRONIZING: os << "Syncing"; break;
             }
             addSpace = true;
         }

@@ -60,6 +60,7 @@ void Ieee80211NewMac::initialize(int stage)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
         upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
@@ -214,6 +215,9 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);    //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }
         rx->transmissionStateChanged(transmissionState);
+    }
+    else if (signalID == IRadio::receivedSignalPartChangedSignal) {
+        rx->receivedSignalPartChanged((IRadioSignal::SignalPart)value);
     }
 }
 

@@ -41,6 +41,7 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+        IRadioSignal::SignalPart receivedPart = IRadioSignal::SIGNAL_PART_NONE;
         bool mediumFree;  // cached state
 
     protected:
@@ -60,6 +61,7 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         virtual bool isMediumFree() const override { return mediumFree; }
         virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;
         virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
+        virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
 
 };
