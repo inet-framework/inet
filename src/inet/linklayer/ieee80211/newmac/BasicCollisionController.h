@@ -41,6 +41,7 @@ class INET_API BasicCollisionController : public cSimpleModule, public ICollisio
         cMessage *timer = nullptr;
         simtime_t timeLastProcessed;
     protected:
+        virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
         void reschedule();
     public:
