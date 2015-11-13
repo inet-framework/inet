@@ -40,6 +40,15 @@ BasicCollisionController::~BasicCollisionController()
     cancelAndDelete(timer);
 }
 
+void BasicCollisionController::initialize()
+{
+    char buff[100];
+    for (int i = 0; i < MAX_NUM_TX; i++) {
+        sprintf(buff, "txTime[%i]", i);
+        createWatch(buff, txTime[i]);
+    }
+}
+
 void BasicCollisionController::scheduleTransmissionRequest(int txIndex, simtime_t txStartTime, ICallback *cb)
 {
     Enter_Method("scheduleTransmissionRequest(%d)", txIndex);
