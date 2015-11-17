@@ -258,13 +258,13 @@ class PacketDrillEvent : public cObject
         int getLineNumber() { return lineNumber; };
         void setEventNumber(int number) { eventNumber = number; };
         int getEventNumber() { return eventNumber; };
-        void setEventTime(int64 usecs) { eventTime = SimTime(usecs, -6); };
+        void setEventTime(int64 usecs) { eventTime = SimTime(usecs, SIMTIME_US); };
         void setEventTime(simtime_t time) { eventTime = time; };
         simtime_t getEventTime() { return eventTime; };
-        void setEventTimeEnd(int64 usecs) { eventTimeEnd = SimTime(usecs, -6); };
+        void setEventTimeEnd(int64 usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); };
         void setEventTimeEnd(simtime_t time) { eventTimeEnd = time; };
         simtime_t getEventTimeEnd() { return eventTimeEnd; };
-        void setEventOffset(int64 usecs) { eventOffset = SimTime(usecs, -6); };
+        void setEventOffset(int64 usecs) { eventOffset = SimTime(usecs, SIMTIME_US); };
         void setEventOffset(simtime_t time) { eventOffset = time; };
         simtime_t getEventOffset() { return eventOffset; };
         void setTimeType(enum eventTime_t ttype) { timeType = ttype; };

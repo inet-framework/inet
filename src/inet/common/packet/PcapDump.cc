@@ -108,8 +108,8 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     memset((void *)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
-    ph.ts_sec = (int32)stime.inUnit(0);
-    ph.ts_usec = (uint32)(stime.inUnit(-6) - (uint32)1000000 * stime.inUnit(0));
+    ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);
+    ph.ts_usec = (uint32)(stime.inUnit(SIMTIME_US) - (uint32)1000000 * stime.inUnit(SIMTIME_S));
     // Write Ethernet header
     uint32 hdr = 2;    //AF_INET
 
@@ -142,8 +142,8 @@ void PcapDump::writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket)
     memset((void *)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
-    ph.ts_sec = (int32)stime.inUnit(0);
-    ph.ts_usec = (uint32)(stime.inUnit(-6) - (uint32)1000000 * stime.inUnit(0));
+    ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);
+    ph.ts_usec = (uint32)(stime.inUnit(SIMTIME_US) - (uint32)1000000 * stime.inUnit(SIMTIME_S));
     // Write Ethernet header
     uint32 hdr = 2;    //AF_INET
 

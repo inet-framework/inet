@@ -766,7 +766,7 @@ int PacketDrillApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, 
     simtime_t expectedTime = scriptTime;
     simtime_t expectedTimeEnd = scriptTimeEnd;
     simtime_t actualTime = liveTime;
-    simtime_t tolerance = SimTime(config->getToleranceUsecs(), -6);
+    simtime_t tolerance = SimTime(config->getToleranceUsecs(), SIMTIME_US);
 
     if (timeType == ANY_TIME) {
         return STATUS_OK;
