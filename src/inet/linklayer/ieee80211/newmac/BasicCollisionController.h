@@ -35,7 +35,7 @@ class INET_API BasicCollisionController : public cSimpleModule, public ICollisio
     private:
         static simtime_t MAX_TIME;   // used as the "invalid" value
         static const int MAX_NUM_TX = 4;
-        int maxTxIndex = 0;
+        int txCount = 0;
         simtime_t txTime[MAX_NUM_TX];
         ICallback *callback[MAX_NUM_TX];
         cMessage *timer = nullptr;

@@ -56,8 +56,8 @@ void BasicCollisionController::scheduleTransmissionRequest(int txIndex, simtime_
     ASSERT(txTime[txIndex] == MAX_TIME);  // not yet scheduled
     ASSERT(txStartTime > timeLastProcessed); // if equal then it's too late, that round was already done and notified (check timer's scheduling priority if that happens!)
 
-    if (maxTxIndex < txIndex)
-        maxTxIndex = txIndex;
+    if (txCount <= txIndex)
+        txCount = txIndex+1;
 
     // store request
     txTime[txIndex] = txStartTime;
@@ -88,7 +88,7 @@ void BasicCollisionController::handleMessage(cMessage *msg)
     // highest priority one (largest txIndex), and signal internal collision to the others
     simtime_t now = simTime();
     bool granted = false;
-    for (int i = maxTxIndex; i >= 0; i--) {
+    for (int i = txCount-1; i >= 0; i--) {
         if (txTime[i] == now) {
             txTime[i] = MAX_TIME;
             if (!granted) {
@@ -111,7 +111,7 @@ void BasicCollisionController::reschedule()
 {
     // choose smallest time
     simtime_t nextTxTime = MAX_TIME;
-    for (int i = 0; i <= maxTxIndex; i++)
+    for (int i = 0; i < txCount; i++)
         if (txTime[i] < nextTxTime)
             nextTxTime = txTime[i];
 
