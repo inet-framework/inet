@@ -30,5 +30,6 @@ simple BasicContention like IContention
         string collisionControllerModule;
         string rxModule;
         string statisticsModule;
+        bool initialBackoffOptimization = default(true);    // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         @display("i=block/control");
 }
