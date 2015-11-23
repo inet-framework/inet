@@ -56,26 +56,31 @@ simple EdcaUpperMac like IUpperMac
         int aifsn1 = default(-1); // AIFSN for AC_BE, -1 means default
         int aifsn2 = default(-1); // AIFSN for AC_VI, -1 means default
         int aifsn3 = default(-1); // AIFSN for AC_VO, -1 means default
+        int aifsn4 = default(-1); // AIFSN for AC_LEGACY, -1 means default
 
         double txopLimit0 @unit(s) = default(-1s);  // TXOP limit for AC_BK, -1 means default
         double txopLimit1 @unit(s) = default(-1s);  // TXOP limit for AC_BE, -1 means default
         double txopLimit2 @unit(s) = default(-1s);  // TXOP limit for AC_VI, -1 means default
         double txopLimit3 @unit(s) = default(-1s);  // TXOP limit for AC_VO, -1 means default
+        double txopLimit4 @unit(s) = default(-1s);  // TXOP limit for AC_LEGACY, -1 means default
 
         int cwMin0 = default(-1); // minimum contention window for frames in AC_BK, -1 means default
         int cwMin1 = default(-1); // minimum contention window for frames in AC_BE, -1 means default
         int cwMin2 = default(-1); // minimum contention window for frames in AC_VI, -1 means default
         int cwMin3 = default(-1); // minimum contention window for frames in AC_VO, -1 means default
+        int cwMin4 = default(-1); // minimum contention window for frames in AC_LEGACY, -1 means default
 
         int cwMax0 = default(-1); // maximum contention window for frames in AC_BK, -1 means default
         int cwMax1 = default(-1); // maximum contention window for frames in AC_BE, -1 means default
         int cwMax2 = default(-1); // maximum contention window for frames in AC_VI, -1 means default
         int cwMax3 = default(-1); // maximum contention window for frames in AC_VO, -1 means default
+        int cwMax4 = default(-1); // maximum contention window for frames in AC_LEGACY, -1 means default
 
         int cwMulticast0 = default(-1); // contention window for multicast frames in AC_BK, -1 means default
         int cwMulticast1 = default(-1); // contention window for multicast frames in AC_BE, -1 means default
         int cwMulticast2 = default(-1); // contention window for multicast frames in AC_VI, -1 means default
         int cwMulticast3 = default(-1); // contention window for multicast frames in AC_VO, -1 means default
+        int cwMulticast4 = default(-1); // contention window for multicast frames in AC_LEGACY, -1 means default
 
         string fragmenterClass = default("BasicFragmentation");
         string reassemblyClass = default("BasicReassembly");

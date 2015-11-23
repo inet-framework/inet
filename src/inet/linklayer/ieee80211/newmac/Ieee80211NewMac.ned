@@ -121,7 +121,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string rxModule = ".rx";
         string txModule = ".tx";
         string firstContentionModule = ".ctn[0]";
-        int numContention = default(4);
+        int numContention = default(5);
         string collisionControllerModule = ".ctrl";
         string rateSelectionModule = ".rateSelection";
         string rateControlModule = ".rateControl";
@@ -203,7 +203,7 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
 
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
-        numContention = EDCA ? 4 : 1;
+        numContention = EDCA ? 5 : 1;
 
         rateSelection.modeSet = opMode; // BasicRateSelection
         rateSelection.dataBitrate = bitrate; // BasicRateSelection

@@ -43,6 +43,8 @@ Define_Module(EdcaUpperMac);
 
 inline std::string suffix(const char *s, int i) {std::stringstream ss; ss << s << i; return ss.str();}
 
+#define EDCA_TX_NUM 5
+
 EdcaUpperMac::EdcaUpperMac()
 {
 }
@@ -53,7 +55,7 @@ EdcaUpperMac::~EdcaUpperMac()
     delete fragmenter;
     delete reassembly;
 
-    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
     for (int i = 0; i < numACs; i++) {
         delete acData[i].frameExchange;
     }
@@ -78,7 +80,7 @@ void EdcaUpperMac::initialize()
     utils = new MacUtils(params, rateSelection);
     rx->setAddress(params->getAddress());
 
-    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
     acData = new AccessCategoryData[numACs];
     CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
     for (int i = 0; i < numACs; i++) {
@@ -118,7 +120,7 @@ IMacParameters *EdcaUpperMac::extractParameters(const IIeee80211Mode *slowestMan
     int aCwMin = referenceMode->getLegacyCwMin();
     int aCwMax = referenceMode->getLegacyCwMax();
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < EDCA_TX_NUM; i++) {
         AccessCategory ac = (AccessCategory)i;
         int aifsn = fallback(par(suffix("aifsn",i).c_str()), MacUtils::getAifsNumber(ac));
         params->setAifsTime(ac, params->getSifsTime() + aifsn*params->getSlotTime());
@@ -179,7 +181,7 @@ void EdcaUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac)
 AccessCategory EdcaUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
     if (frame->getType() == ST_DATA) {
-        return AC_BE;  // non-QoS frames are Best Effort
+        return AC_LEGACY;  // non-QoS frames are Legacy
     }
     else if (frame->getType() == ST_DATA_WITH_QOS) {
         Ieee80211DataFrame *dataFrame = check_and_cast<Ieee80211DataFrame*>(frame);
@@ -211,14 +213,14 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     if (!utils->isForUs(frame)) {
         EV_INFO << "This frame is not for us" << std::endl;
         delete frame;
-        int numACs = params->isEdcaEnabled() ? 4 : 1;
+        int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
         for (int i = 0; i < numACs; i++)
             if (acData[i].frameExchange)
                 acData[i].frameExchange->corruptedOrNotForUsFrameReceived();
     }
     else {
         // show frame to ALL ongoing frame exchanges
-        int numACs = params->isEdcaEnabled() ? 4 : 1;
+        int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
         bool alreadyProcessed = false;
         bool shouldDelete = false;
         for (int i = 0; i < numACs; i++) {
@@ -268,7 +270,7 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
 
 void EdcaUpperMac::corruptedFrameReceived()
 {
-    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
     for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange)
             acData[i].frameExchange->corruptedOrNotForUsFrameReceived();
@@ -330,7 +332,7 @@ void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     EV_INFO << "Frame exchange finished" << std::endl;
 
     // find ac for this frame exchange
-    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    int numACs = params->isEdcaEnabled() ? EDCA_TX_NUM : 1;
     AccessCategory ac = (AccessCategory) -1;
     for (int i = 0; i < numACs; i++)
         if (acData[i].frameExchange == what)

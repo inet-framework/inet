@@ -58,19 +58,19 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 #ifdef WITH_IPv4
     ipData = dynamic_cast<IPv4Datagram *>(msg);
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
-        return UP_BE; // ICMP class
+        return -1; // ICMP class
 #endif
 
 #ifdef WITH_IPv6
     if (!ipData) {
         ipData = dynamic_cast<IPv6Datagram *>(msg);
         if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
-            return UP_BE; // ICMPv6 class
+            return -1; // ICMPv6 class
     }
 #endif
 
     if (!ipData)
-        return UP_BE;
+        return -1;
 
 #ifdef WITH_UDP
     UDPPacket *udp = dynamic_cast<UDPPacket *>(ipData->getEncapsulatedPacket());
@@ -100,7 +100,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
     }
 #endif
 
-    return UP_BE;
+    return -1;
 }
 
 } // namespace inet

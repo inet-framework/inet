@@ -50,7 +50,7 @@ class INET_API MacParameters : public IMacParameters
         simtime_t txopLimit[AC_NUMCATEGORIES];
 
     private:
-        void checkAC(AccessCategory ac) const {if (edca) ASSERT(ac>=0 && ac<4); else ASSERT(ac == AC_LEGACY);}
+        void checkAC(AccessCategory ac) const {if (edca) ASSERT(ac>=0 && ac<5); else ASSERT(ac == AC_LEGACY);}
 
     public:
         MacParameters() {}
