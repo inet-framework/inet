@@ -30,12 +30,14 @@ namespace ieee80211 {
 class IUpperMac;
 class ITx;
 class IContention;
+class IStatistics;
 
 class INET_API BasicRx : public cSimpleModule, public IRx
 {
     protected:
         IUpperMac *upperMac = nullptr;
         IContention **contention = nullptr; // nullptr-terminated pointer array
+        IStatistics *statistics;
 
         MACAddress address;
         cMessage *endNavTimer = nullptr;

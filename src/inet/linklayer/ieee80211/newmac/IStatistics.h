@@ -31,6 +31,7 @@ class Ieee80211DataOrMgmtFrame;
 class INET_API IStatistics
 {
     public:
+        ~IStatistics() {}
         virtual void setMacUtils(MacUtils *utils) = 0;
         virtual void setRateControl(IRateControl *rateControl) = 0;  // is interested in the statistics
 
@@ -40,7 +41,7 @@ class INET_API IStatistics
         virtual void frameTransmissionUnsuccessfulGivingUp(Ieee80211DataOrMgmtFrame *frame, int retryCount) = 0;
         virtual void frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual void frameReceived(Ieee80211Frame *frame) = 0;
-        ~IStatistics() {}
+        virtual void erroneousFrameReceived(Ieee80211Frame *frame) = 0;
 };
 
 }  // namespace ieee80211

@@ -34,13 +34,18 @@ class INET_API BasicStatistics : public IStatistics, public cSimpleModule
         long numGivenUp;
         long numCollision;
         long numSent;
-        long numReceived;
         long numSentBroadcast;
+
+        long numReceivedUnicast;
+        long numReceivedMulticast;
         long numReceivedBroadcast;
+        long numReceivedNotForUs;
+        long numReceivedErroneous;
 
     protected:
         virtual void initialize() override;
-        void resetStatistics();
+        virtual void finish() override;
+        virtual void resetStatistics();
 
     public:
         virtual void setMacUtils(MacUtils *utils) override;
@@ -50,6 +55,7 @@ class INET_API BasicStatistics : public IStatistics, public cSimpleModule
         virtual void frameTransmissionUnsuccessfulGivingUp(Ieee80211DataOrMgmtFrame *frame, int retryCount) override;
         virtual void frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void frameReceived(Ieee80211Frame *frame) override;
+        virtual void erroneousFrameReceived(Ieee80211Frame *frame) override;
 };
 
 }  // namespace ieee80211
