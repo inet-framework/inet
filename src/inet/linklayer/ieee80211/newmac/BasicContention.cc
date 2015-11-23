@@ -57,6 +57,7 @@ void BasicContention::initialize()
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
+    initialBackoffOptimization = par("initialBackoffOptimization");
 
     txIndex = getIndex();
     if (txIndex > 0 && !collisionController)
@@ -257,7 +258,7 @@ void BasicContention::scheduleTransmissionRequest()
     bool useEifs = endEifsTime > now + ifs;
     simtime_t waitInterval = (useEifs ? eifs : ifs) + backoffSlots * slotTime;
 
-    if (retryCount == 0) {
+    if (retryCount == 0 && initialBackoffOptimization) {
         // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         simtime_t elapsedFreeChannelTime = now - channelLastBusyTime;
         if (elapsedFreeChannelTime > waitInterval)
