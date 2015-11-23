@@ -48,36 +48,66 @@ module MACProtocolBase extends LayeredProtocolBase
 }
 
 //
-// Implementation of the 802.11b MAC protocol. This module is intended
-// to be used in combination with the ~Ieee80211Radio module as the physical
-// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
-// per-packet bitrate setting gets implemented.)
-// 
-// Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in ~Ieee80211Nic).
-// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
-// module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
-// (the management module). This module will assign the transmitter address
-// (address 2) and the frame sequence number/fragment number fields in the
-// frames; all other fields must already be filled when this module gets
-// the frame for transmission.
-// 
-// The module has an internal queue, but usually it is to be used with an
-// external passive queue module (its name should be given in the queueModule
-// parameter; specifying "" causes the internal queue to be used). The passive
-// queue module is a simple module whose C++ class implements the IPassiveQueue
-// interface.
-// 
-// <b>Limitations</b>
-// 
-// The following features not supported: 1) fragmentation, 2) power management,
-// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
-// direct sequence spread spectrum are not modelled directly.
-// 
-// Fields related to the above unsupported features are omitted from
-// management frame formats as well (for example, FH/DS/CF parameter sets,
-// beacon/probe timestamp which is related to physical layer synchronization,
-// listen interval which is related to power management, capability information        @display("i=block/layer");
+// Implementation of the 802.11b MAC protocol. This module is intended
+
+// to be used in combination with the ~Ieee80211Radio module as the physical
+
+// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
+
+// per-packet bitrate setting gets implemented.)
+
+// 
+
+// Encapsulation/decapsulation must be done in the upper layers. (It is
+
+// typically in the 802.11 management module, see in ~Ieee80211Nic).
+
+// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
+
+// module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
+
+// (the management module). This module will assign the transmitter address
+
+// (address 2) and the frame sequence number/fragment number fields in the
+
+// frames; all other fields must already be filled when this module gets
+
+// the frame for transmission.
+
+// 
+
+// The module has an internal queue, but usually it is to be used with an
+
+// external passive queue module (its name should be given in the queueModule
+
+// parameter; specifying "" causes the internal queue to be used). The passive
+
+// queue module is a simple module whose C++ class implements the IPassiveQueue
+
+// interface.
+
+// 
+
+// <b>Limitations</b>
+
+// 
+
+// The following features not supported: 1) fragmentation, 2) power management,
+
+// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
+
+// direct sequence spread spectrum are not modelled directly.
+
+// 
+
+// Fields related to the above unsupported features are omitted from
+
+// management frame formats as well (for example, FH/DS/CF parameter sets,
+
+// beacon/probe timestamp which is related to physical layer synchronization,
+
+// listen interval which is related to power management, capability information
+        @display("i=block/layer");
 // which is related to PCF and other non-modelled features).
 //
 module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
@@ -150,6 +180,8 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
     parameters:
         string opMode @enum("a","b","g","n","p") = default("g");
         double bitrate @unit("bps");
+        double basicBitrate @unit("bps") = default(-1bps);
+        double controlBitrate @unit("bps") = default(-1bps);
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
         bool EDCA = default(false);
@@ -175,6 +207,8 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
 
         rateSelection.modeSet = opMode; // BasicRateSelection
         rateSelection.dataBitrate = bitrate; // BasicRateSelection
+        rateSelection.multicastBitrate = basicBitrate;
+        rateSelection.controlBitrate = controlBitrate;
         upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
         upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
         upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac
