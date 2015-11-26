@@ -33,7 +33,7 @@ TCPVegasStateVariables::TCPVegasStateVariables()
     v_recoverypoint = 0;
     v_cwnd_changed = 0;
 
-    v_baseRTT = 0x7fffffff;
+    v_baseRTT = SIMTIME_MAX;
 
     v_inc_flag = true;
     v_incr_ss = false;
