@@ -262,9 +262,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     emit(mosSignal, mos);
 
     // add calculated MOS value to fingerprint
-    cHasher *hasher = getSimulation()->getHasher();
-    if (hasher)
-        hasher->add(mos);
+    FINGERPRINT_ADD_EXTRA_DATA(mos);
 
     double tailDropRate = ((double)tailDropLoss / (double)talkspurtNumPackets);
     emit(taildropLossRateSignal, tailDropRate);

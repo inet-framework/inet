@@ -36,7 +36,7 @@ void ScenarioManager::initialize()
             throw cRuntimeError("attribute 't' missing at %s", node->getSourceLocation());
 
         // schedule self-message
-        simtime_t t = STR_SIMTIME(tAttr);
+        simtime_t t = SimTime::parse(tAttr);
         cMessage *msg = new cMessage("scenario-event");
         msg->setContextPointer(node);
         scheduleAt(t, msg);

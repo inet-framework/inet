@@ -31,69 +31,69 @@ namespace filters {
 
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
-void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
-        fire(this, t, t - msg->getCreationTime());
+        fire(this, t, t - msg->getCreationTime() DETAILS_ARG_NAME);
     }
 }
 
 Register_ResultFilter("messageTSAge", MessageTSAgeFilter);
 
-void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
-        fire(this, t, t - msg->getTimestamp());
+        fire(this, t, t - msg->getTimestamp() DETAILS_ARG_NAME);
     }
 }
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 
-void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     IMobility *module = dynamic_cast<IMobility *>(object);
     if (module) {
         Coord coord = module->getCurrentPosition();
-        fire(this, t, &coord);
+        fire(this, t, &coord DETAILS_ARG_NAME);
     }
 }
 
 Register_ResultFilter("xCoord", XCoordFilter);
 
-void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->x);
+        fire(this, t, ((Coord *)object)->x DETAILS_ARG_NAME);
 }
 
 Register_ResultFilter("yCoord", YCoordFilter);
 
-void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->y);
+        fire(this, t, ((Coord *)object)->y DETAILS_ARG_NAME);
 }
 
 Register_ResultFilter("zCoord", ZCoordFilter);
 
-void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->z);
+        fire(this, t, ((Coord *)object)->z DETAILS_ARG_NAME);
 }
 
 Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 
-void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
+void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
 
         INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
         if (ctrl != nullptr) {
-            fire(this, t, ctrl->getSourceAddress().str().c_str());
+            fire(this, t, ctrl->getSourceAddress().str().c_str() DETAILS_ARG_NAME);
         }
     }
 }

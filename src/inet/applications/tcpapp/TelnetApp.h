@@ -43,7 +43,7 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
+    virtual void checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

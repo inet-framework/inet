@@ -351,7 +351,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 SCTPShutdownChunk *shutdownChunk;
                 shutdownChunk = check_and_cast<SCTPShutdownChunk *>(header);
                 if (shutdownChunk->getCumTsnAck() > state->lastTsnAck) {
-                    simtime_t rttEstimation = MAXTIME;
+                    simtime_t rttEstimation = SIMTIME_MAX;
                     dequeueAckedChunks(shutdownChunk->getCumTsnAck(),
                             getPath(remoteAddr), rttEstimation);
                     state->lastTsnAck = shutdownChunk->getCumTsnAck();
@@ -946,7 +946,7 @@ inline void SCTPAssociation::cucProcessGapReports(const SCTPDataVariables *chunk
 
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
 {
-    simtime_t rttEstimation = MAXTIME;
+    simtime_t rttEstimation = SIMTIME_MAX;
     const uint64 sendBufferBeforeUpdate = state->sendBuffer;
     SCTPPathVariables *path = getPath(remoteAddr);    // Path for *this* SACK!
     const uint64 arwnd = sackChunk->getA_rwnd();
@@ -1887,7 +1887,7 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables *chunk,
     if ((chunkHasBeenAcked(chunk) == false) && (chunk->countsAsOutstanding)) {
         if ((chunk->numberOfTransmissions == 1) && (lastPath == sackPath) && (chunk->hasBeenMoved == false)) {
             const simtime_t timeDifference = simTime() - chunk->sendTime;
-            if ((timeDifference < rttEstimation) || (rttEstimation == MAXTIME)) {
+            if ((timeDifference < rttEstimation) || (rttEstimation == SIMTIME_MAX)) {
                 rttEstimation = timeDifference;
             }
         }
@@ -2004,7 +2004,7 @@ void SCTPAssociation::dequeueAckedChunks(const uint32 tsna,
     SCTP::AssocStat *assocStat = sctpMain->getAssocStat(assocId);
 
     // Set it ridiculously high
-    rttEstimation = MAXTIME;
+    rttEstimation = SIMTIME_MAX;
 
     // Are there chunks in the retransmission queue ? If Yes -> check for dequeue.
     auto iterator = retransmissionQ->payloadQueue.begin();

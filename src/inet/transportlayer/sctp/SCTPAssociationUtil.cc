@@ -2687,7 +2687,7 @@ void SCTPAssociation::pathStatusIndication(const SCTPPathVariables *path,
 void SCTPAssociation::pmRttMeasurement(SCTPPathVariables *path,
         const simtime_t& rttEstimation)
 {
-    if (rttEstimation < MAXTIME) {
+    if (rttEstimation < SIMTIME_MAX) {
         if (simTime() > path->rttUpdateTime) {
             if (path->rttUpdateTime == SIMTIME_ZERO) {
                 path->rttvar = rttEstimation.dbl() / 2;

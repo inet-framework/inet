@@ -59,7 +59,7 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
 
     friend class BGPSession;
     //functions used by the BGPSession class
-    int getScheduleAt(simtime_t t, cMessage *msg) { return scheduleAt(t, msg); }
+    void getScheduleAt(simtime_t t, cMessage *msg) { scheduleAt(t, msg); }
     simtime_t getSimTime() { return simTime(); }
     void getCancelAndDelete(cMessage *msg) { return cancelAndDelete(msg); }
     cMessage *getCancelEvent(cMessage *msg) { return cancelEvent(msg); }
