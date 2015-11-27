@@ -211,7 +211,7 @@ void Batman::choose_gw(void)
     int download_speed, upload_speed;
 
     current_time = getTime();
-    if ((routing_class == 0) || ((routing_class < 4) && ((int64_t)(SIMTIME_RAW(current_time) - (SIMTIME_RAW(originator_interval) * local_win_size)) < 0))) {
+    if ((routing_class == 0) || ((routing_class < 4) && (current_time < (originator_interval * local_win_size)))) {
         return;
     }
 
@@ -237,7 +237,7 @@ void Batman::choose_gw(void)
         if (gw_node->orig_node->router == nullptr)
             continue;
 
-        if (SIMTIME_RAW(gw_node->deleted))
+        if (gw_node->deleted != SIMTIME_ZERO)
             continue;
 
         switch (routing_class) {
