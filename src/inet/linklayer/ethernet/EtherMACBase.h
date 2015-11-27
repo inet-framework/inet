@@ -242,7 +242,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void updateConnectionColor(int txState);
 
     // model change related functions
-    virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj DETAILS_ARG) override;
     virtual void refreshConnection();
 };
 

@@ -193,7 +193,7 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
     }
 }
 
-void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent("receiveSignal()");
     if (signalID == IRadio::receptionStateChangedSignal) {

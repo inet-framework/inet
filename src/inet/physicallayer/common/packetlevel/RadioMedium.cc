@@ -598,7 +598,7 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame)
             sendToRadio(transmitter, radio, frame);
 }
 
-void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value)
+void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG)
 {
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);

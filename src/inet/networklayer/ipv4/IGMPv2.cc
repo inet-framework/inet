@@ -403,7 +403,7 @@ IGMPv2::~IGMPv2()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void IGMPv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
 

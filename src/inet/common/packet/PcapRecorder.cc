@@ -109,7 +109,7 @@ void PcapRecorder::handleMessage(cMessage *msg)
     throw cRuntimeError("This module does not handle messages");
 }
 
-void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
     cPacket *packet = dynamic_cast<cPacket *>(obj);

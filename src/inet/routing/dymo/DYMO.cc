@@ -1444,7 +1444,7 @@ bool DYMO::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 // notification
 //
 
-void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {

@@ -76,7 +76,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     return true;
 }
 
-void MACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void MACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (signalID == NF_INTERFACE_DELETED) {
         if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))

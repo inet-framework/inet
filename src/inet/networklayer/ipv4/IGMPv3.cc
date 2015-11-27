@@ -463,7 +463,7 @@ IGMPv3::~IGMPv3()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
+void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
 
@@ -471,12 +471,12 @@ void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *de
     int interfaceId;
     const IPv4MulticastGroupSourceInfo *info;
     if (signalID == NF_INTERFACE_CREATED) {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(details));
+        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
         if (ie->isMulticast())
             configureInterface(ie);
     }
     else if (signalID == NF_INTERFACE_DELETED) {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(details));
+        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
         if (ie->isMulticast()) {
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
@@ -484,7 +484,7 @@ void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *de
         }
     }
     else if (signalID == NF_IPv4_MCAST_CHANGE) {
-        info = check_and_cast<const IPv4MulticastGroupSourceInfo *>(details);
+        info = check_and_cast<const IPv4MulticastGroupSourceInfo *>(obj);
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
 }

@@ -331,11 +331,11 @@ bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage
     return MACBase::handleOperationStage(operation, stage, doneCallback);
 }
 
-void EtherMACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void EtherMACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
 
-    MACBase::receiveSignal(source, signalID, obj);
+    MACBase::receiveSignal(source, signalID, obj DETAILS_ARG_NAME);
 
     if (signalID != POST_MODEL_CHANGE)
         return;

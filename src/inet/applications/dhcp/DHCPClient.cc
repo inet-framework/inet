@@ -495,7 +495,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
     }
 }
 
-void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj)
+void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

@@ -117,7 +117,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
 
     /**
      * Returns the host or router this interface table lives in.

@@ -51,7 +51,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
   public:
     STPBase();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override {}
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -85,11 +85,6 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     return payload;
 }
 
-void Ieee80211MgmtAdhoc::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
-{
-    Enter_Method_Silent();
-}
-
 void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)
 {
     sendUp(decapsulate(frame));

@@ -580,7 +580,7 @@ void BMacLayer::sendDataPacket()
     sendDown(pkt);
 }
 
-void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::radioModeChangedSignal) {

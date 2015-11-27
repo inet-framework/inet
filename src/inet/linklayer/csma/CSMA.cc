@@ -918,7 +918,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
     }
 }
 
-void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

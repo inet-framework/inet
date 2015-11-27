@@ -48,9 +48,6 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
-    /** Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-
     /** @name Processing of different frame types */
     //@{
     virtual void handleDataFrame(Ieee80211DataFrame *frame) override;

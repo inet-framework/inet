@@ -1034,44 +1034,44 @@ void PIMDM::processAssertTimer(cMessage *timer)
     }
 }
 
-void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
+void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, details);
+    printNotificationBanner(signalID, obj);
     IPv4Datagram *datagram;
     PIMInterface *pimInterface;
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST) {
-        datagram = check_and_cast<IPv4Datagram *>(details);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             unroutableMulticastPacketArrived(datagram->getSrcAddress(), datagram->getDestAddress(), datagram->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED) {
-        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo *>(details);
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastReceiverAdded(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
     else if (signalID == NF_IPv4_MCAST_UNREGISTERED) {
-        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo *>(details);
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastReceiverRemoved(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<IPv4Datagram *>(details);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
-        datagram = check_and_cast<IPv4Datagram *>(details);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(),
@@ -1079,7 +1079,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     }
     // RPF interface has changed
     else if (signalID == NF_ROUTE_ADDED) {
-        IPv4Route *entry = check_and_cast<IPv4Route *>(details);
+        IPv4Route *entry = check_and_cast<IPv4Route *>(obj);
         IPv4Address routeSource = entry->getDestination();
         IPv4Address routeNetmask = entry->getNetmask();
 

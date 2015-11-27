@@ -53,10 +53,10 @@ class INET_API GaugeFigure : public cOvalFigure, protected cListener, protected 
     void setLabel(const char *newValue);
     virtual const char *getClassNameForRenderer() const;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
 
     virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details);
 };

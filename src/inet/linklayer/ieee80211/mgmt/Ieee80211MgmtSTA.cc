@@ -354,7 +354,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime() + timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
@@ -367,7 +367,7 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, l
     }
 }
 
-void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

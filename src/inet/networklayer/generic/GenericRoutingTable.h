@@ -61,7 +61,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
 
     virtual void configureRouterId();
 

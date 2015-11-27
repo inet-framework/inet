@@ -335,7 +335,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission) const override;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG) override;
 };
 
 } // namespace physicallayer

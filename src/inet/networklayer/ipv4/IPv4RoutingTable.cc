@@ -158,7 +158,7 @@ void IPv4RoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize

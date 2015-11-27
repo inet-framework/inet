@@ -84,7 +84,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     /// @}
 
     // cListener
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
 
   protected:
     virtual void initialize(int stage) override;

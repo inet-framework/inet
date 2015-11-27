@@ -585,7 +585,7 @@ void DSRUU::handleMessage(cMessage* msg)
     return;
 }
 
-void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     IPv4Datagram  *dgram = nullptr;
     //current_time = simTime();

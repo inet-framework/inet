@@ -67,7 +67,7 @@ void StateBasedEnergyConsumer::initialize(int stage)
     }
 }
 
-void StateBasedEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void StateBasedEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal)
         energySource->setPowerConsumption(energyConsumerId, getPowerConsumption());

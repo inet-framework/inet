@@ -122,18 +122,18 @@ PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
     return nullptr;
 }
 
-void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
+void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, details);
+    printNotificationBanner(signalID, obj);
 
     if (signalID == NF_INTERFACE_CREATED) {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(details);
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             addInterface(ie);
     }
     else if (signalID == NF_INTERFACE_DELETED) {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(details);
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             removeInterface(ie);
     }
