@@ -412,7 +412,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 lineColor.blue = atoi(tok);
             }
             else
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
                 lineColor = cFigure::Color(lineColorAttribute);
 #else
                 lineColor = cFigure::Color::byName(lineColorAttribute);
@@ -437,7 +437,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 fillColor.blue = atoi(tok);
             }
             else
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
                 fillColor = cFigure::Color(fillColorAttribute);
 #else
                 fillColor = cFigure::Color::byName(fillColorAttribute);
@@ -511,7 +511,7 @@ void PhysicalEnvironment::updateCanvas()
             figure->setLineWidth(object->getLineWidth());
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
             figure->setLineOpacity(object->getOpacity());
             figure->setFillOpacity(object->getOpacity());
             figure->setScaleLineWidth(false);
@@ -542,7 +542,7 @@ void PhysicalEnvironment::updateCanvas()
         const char *name = object->getName();
         if (name)
         {
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
             cLabelFigure *nameFigure = new cLabelFigure();
             nameFigure->setPosition(computeCanvasPoint(position, viewRotation, viewTranslation));
 #else
@@ -567,7 +567,7 @@ void PhysicalEnvironment::updateCanvas()
         xAxis->setEndArrowHead(cFigure::ARROW_BARBED);
         yAxis->setEndArrowHead(cFigure::ARROW_BARBED);
         zAxis->setEndArrowHead(cFigure::ARROW_BARBED);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
         xAxis->setScaleLineWidth(false);
         yAxis->setScaleLineWidth(false);
         zAxis->setScaleLineWidth(false);
@@ -581,7 +581,7 @@ void PhysicalEnvironment::updateCanvas()
         objectsLayer->addFigure(xAxis);
         objectsLayer->addFigure(yAxis);
         objectsLayer->addFigure(zAxis);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
         cLabelFigure *xLabel = new cLabelFigure();
         cLabelFigure *yLabel = new cLabelFigure();
         cLabelFigure *zLabel = new cLabelFigure();
@@ -596,7 +596,7 @@ void PhysicalEnvironment::updateCanvas()
         xLabel->setText("X");
         yLabel->setText("Y");
         zLabel->setText("Z");
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
         xLabel->setPosition(computeCanvasPoint(Coord(axisLength, 0, 0)));
         yLabel->setPosition(computeCanvasPoint(Coord(0, axisLength, 0)));
         zLabel->setPosition(computeCanvasPoint(Coord(0, 0, axisLength)));
@@ -629,7 +629,7 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
         figure->setLineWidth(object->getLineWidth());
         figure->setLineColor(object->getLineColor());
         figure->setFillColor(object->getFillColor());
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
         figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
         figure->setScaleLineWidth(false);

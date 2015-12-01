@@ -19,7 +19,7 @@
 
 namespace inet {
 
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
 HeatMapFigure::HeatMapFigure(int size, const char *name) :
     cPixmapFigure(name)
 {

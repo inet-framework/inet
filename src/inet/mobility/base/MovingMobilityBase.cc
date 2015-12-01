@@ -96,7 +96,7 @@ void MovingMobilityBase::updateVisualRepresentation()
             movementLine->setStart(startPosition);
             movementLine->setEnd(endPosition);
             movementLine->setLineWidth(1);
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
             cFigure::Color color = cFigure::GOOD_DARK_COLORS[getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
             movementLine->setLineColor(color);
             movementLine->setScaleLineWidth(false);

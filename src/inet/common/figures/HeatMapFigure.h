@@ -23,7 +23,7 @@
 namespace inet {
 
 
-#if OMNETPP_CANVAS_VERSION >= 0x20140908
+#if OMNETPP_VERSION >= 0x500
 class INET_API HeatMapFigure : public cPixmapFigure
 {
   protected:
