@@ -128,6 +128,18 @@ class FingerprintTestCaseGenerator():
             if 'computedFingerprint' in simulation:
                 oldFingerprint = simulation['fingerprint']
                 newFingerprint = simulation['computedFingerprint']
+                oldFpList = oldFingerprint.split(' ')
+                if '/' in newFingerprint:
+                    # keep old omnetpp4 fp
+                    keepFpList = [elem for elem in oldFpList if not '/' in elem]
+                    if keepFpList:
+                        newFingerprint = ' '.join(keepFpList) + ' ' + newFingerprint
+                else:
+                    # keep all old omnetpp5 fp
+                    keepFpList = [elem for elem in oldFpList if '/' in elem]
+                    if keepFpList:
+                        newFingerprint = newFingerprint + ' ' + ' '.join(keepFpList)
+
                 if ',' in newFingerprint:
                     newFingerprint = '"' + newFingerprint + '"'
                 containsComputedFingerprint = True
@@ -215,7 +227,7 @@ class SimulationTestCase(unittest.TestCase):
                 if re.search("successfully", err):
                     result.isFingerprintOK = True
                 else:
-                    m = re.search("(computed|calculated): ([-a-zA-Z0-9]+)", err)
+                    m = re.search("(computed|calculated): ([-a-zA-Z0-9]+(/[a-z0]+)?)", err)
                     if m:
                         result.isFingerprintOK = False
                         result.computedFingerprint = m.group(2)
@@ -270,11 +282,11 @@ class FingerprintTestCase(SimulationTestCase):
                 pass
         command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
-            " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
+            " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
             " --result-dir=" + resultdir + \
             extraOppRunArgs;
-
+        # print "COMMAND: " + command + '\n'
         anyFingerprintBad = False;
         computedFingerprints = set()
         for rep in range(self.repeat):
