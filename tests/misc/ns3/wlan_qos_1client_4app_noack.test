@@ -1,0 +1,46 @@
+%description:
+This test compares the INET wireless model against the NS3 wireless model.
+
+The test scenario contains 1 adhoc EDCA QoS client. The client runs 4 different
+UDP applications, one for each EDCA queue. The server is out of range.
+
+%testprog: opp_run
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ns3Test
+ned-path = .;../../../../../src;../../lib
+include ../../lib/ns3test.ini
+sim-time-limit = 1s
+**.useFullAckTimeout = true
+*.withQos = true
+*.numClients = 1
+*.numApps = 4
+*.serverYPos = 3000m
+*.appStartTime = 0.5s
+*.appStartDelta = 0s
+*.sendInterval = 0.0001s
+
+%postrun-command: grep TX: test.out
+%postrun-command: pwd ; cd ../../ns3; ./waf --run "examples/wireless/inet-wireless-udp --withQos=true --numClients=1 --numApps=4 --serverYPos=3000 --appStartTime=0.5 --sendInterval=0.0001 --simulationTime=1"
+%postrun-command: grep TX: postrun-command\(2\).out
+%postrun-command: diff -s postrun-command\(1\).out postrun-command\(3\).out ; echo ""
+
+%contains: postrun-command(4).out
+Files postrun-command(1).out and postrun-command(3).out are identical
+
+%contains: postrun-command(1).out
+node = 1
+
+%not-contains: postrun-command(1).out
+node = 2
+
+%contains: postrun-command(1).out
+ac = AC_VO
+
+%contains: postrun-command(1).out
+ac = AC_VI
+
+%not-contains: postrun-command(1).out
+duration = 44000000
