@@ -39,6 +39,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
     public:
         enum State { IDLE, DEFER, IFS_AND_BACKOFF, OWNING };
         enum EventType { START, MEDIUM_STATE_CHANGED, CORRUPTED_FRAME_RECEIVED, TRANSMISSION_GRANTED, INTERNAL_COLLISION, CHANNEL_RELEASED };
+        static simsignal_t stateChangedSignal;
 
     protected:
         IMacRadioInterface *mac;
