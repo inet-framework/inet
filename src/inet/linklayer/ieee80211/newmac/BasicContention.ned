@@ -32,4 +32,6 @@ simple BasicContention like IContention
         string statisticsModule;
         bool initialBackoffOptimization = default(true);    // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         @display("i=block/control");
+        @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::BasicContention::State
+        @statistic[state](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
 }

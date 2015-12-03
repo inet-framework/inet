@@ -28,6 +28,8 @@
 namespace inet {
 namespace ieee80211 {
 
+simsignal_t BasicContention::stateChangedSignal = registerSignal("stateChanged");
+
 // for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(BasicContention::State,
         (BasicContention::IDLE,
@@ -116,7 +118,7 @@ int BasicContention::computeCw(int cwMin, int cwMax, int retryCount)
 
 void BasicContention::handleWithFSM(EventType event, cMessage *msg)
 {
-    // emit(stateSignal, fsm.getState()); TODO
+    emit(stateChangedSignal, fsm.getState());
     EV_DEBUG << "handleWithFSM: processing event " << getEventName(event) << "\n";
     bool finallyReportInternalCollision = false;
     bool finallyReportChannelAccessGranted = false;
@@ -192,7 +194,7 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Fail_On_Unhandled_Event();
         }
     }
-    // emit(stateSignal, fsm.getState()); TODO
+    emit(stateChangedSignal, fsm.getState());
     if (finallyReportChannelAccessGranted)
         reportChannelAccessGranted();
     if (finallyReportInternalCollision)
