@@ -56,6 +56,7 @@ class INET_API IMacParameters
         virtual int getLongRetryLimit() const = 0;
         virtual int getRtsThreshold() const = 0;
         virtual simtime_t getPhyRxStartDelay() const = 0;
+        virtual bool getUseFullAckTimeout() const = 0;
 };
 
 } // namespace ieee80211

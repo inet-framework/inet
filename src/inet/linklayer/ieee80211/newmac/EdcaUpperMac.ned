@@ -47,6 +47,7 @@ simple EdcaUpperMac like IUpperMac
         int longRetryLimit = default(-1); // maximum number of retries for frames sent via RTS/CTS, -1 means default
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         int maxQueueSize = default(14); // max queue length per access category
+        bool useFullAckTimeout = default(false); // when true wait for the full ack frame to arrive instead of waiting for RX start
 
         double sifsTime @unit("s") = default(-1s); // SIFS time, -1 means default (mode dependent)
         double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)

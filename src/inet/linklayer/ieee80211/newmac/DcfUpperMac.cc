@@ -98,6 +98,7 @@ IMacParameters *DcfUpperMac::extractParameters(const IIeee80211Mode *slowestMand
     params->setLongRetryLimit(fallback(par("longRetryLimit"), 4));
     params->setRtsThreshold(par("rtsThreshold"));
     params->setPhyRxStartDelay(referenceMode->getPhyRxStartDelay());
+    params->setUseFullAckTimeout(par("useFullAckTimeout"));
     params->setEdcaEnabled(false);
     params->setSlotTime(fallback(par("slotTime"), referenceMode->getSlotTime()));
     params->setSifsTime(fallback(par("sifsTime"), referenceMode->getSifsTime()));
