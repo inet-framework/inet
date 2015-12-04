@@ -65,19 +65,18 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     take(frame);
 
     bool isFrameOk = isFcsOk(frame);
-    if (!isFrameOk)
-        for (int i = 0; contentionTx[i]; i++)
-            contentionTx[i]->corruptedFrameReceived();
-
     if (isFrameOk) {
-        EV_INFO << "Received message from lower layer: " << frame << endl;
+        EV_INFO << "Received frame from PHY: " << frame << endl;
         if (frame->getReceiverAddress() != address)
             setOrExtendNav(frame->getDuration());
         upperMac->lowerFrameReceived(frame);
     }
     else {
-        EV_INFO << "Received an erroneous frame. Dropping it." << std::endl;
+        EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
         delete frame;
+        for (int i = 0; contentionTx[i]; i++)
+            contentionTx[i]->corruptedFrameReceived();
+        upperMac->corruptedFrameReceived();
     }
 }
 

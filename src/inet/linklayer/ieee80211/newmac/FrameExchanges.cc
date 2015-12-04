@@ -22,6 +22,7 @@
 #include "inet/common/FSMA.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
+#include "IRx.h"
 #include "IMacParameters.h"
 #include "MacUtils.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -31,8 +32,7 @@ using namespace inet::utils;
 namespace inet {
 namespace ieee80211 {
 
-//TODO utilize rx->isReceptionInProgress() after AckTimeout-AckDuration to determine if a frame (expectedly an ACK) is being received, and start retransmission immediately if not
-
+//TODO with the introduction of earlyAckTimeout, this class has become obsolete
 SendDataWithAckFsmBasedFrameExchange::SendDataWithAckFsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory) :
     FsmBasedFrameExchange(context, callback), frame(frame), txIndex(txIndex), accessCategory(accessCategory)
 {
@@ -153,7 +153,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
         case 0: transmitContentionFrame(dupPacketAndControlInfo(dataFrame), retryCount); break;
-        case 1: expectReply(utils->getAckFullTimeout()); break;
+        case 1: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
         case 2: succeed(); break;
         default: ASSERT(false);
     }
@@ -170,7 +170,7 @@ bool SendDataWithAckFrameExchange::processReply(int step, Ieee80211Frame *frame)
 void SendDataWithAckFrameExchange::processTimeout(int step)
 {
     switch (step) {
-        case 1: if (++retryCount < params->getShortRetryLimit()) {dataFrame->setRetry(true); gotoStep(0);} else fail(); break;
+        case 1: retry(); break;
         default: ASSERT(false);
     }
 }
@@ -178,9 +178,19 @@ void SendDataWithAckFrameExchange::processTimeout(int step)
 void SendDataWithAckFrameExchange::processInternalCollision(int step)
 {
     switch (step) {
-        case 0: if (++retryCount < params->getShortRetryLimit()) {gotoStep(0);} else fail(); break;
+        case 0: retry(); break;
         default: ASSERT(false);
     }
+}
+
+void SendDataWithAckFrameExchange::retry()
+{
+    if (++retryCount < params->getShortRetryLimit()) {
+        dataFrame->setRetry(true);
+        gotoStep(0);
+    }
+    else
+        fail();
 }
 
 //------------------------------
@@ -200,9 +210,9 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
         case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame), retryCount); break;
-        case 1: expectReply(utils->getCtsFullTimeout()); break;
+        case 1: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
         case 2: transmitImmediateFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
-        case 3: expectReply(utils->getAckFullTimeout()); break;
+        case 3: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
         case 4: succeed(); break;
         default: ASSERT(false);
     }

@@ -35,13 +35,19 @@ class Ieee80211DataOrMgmtFrame;
  * frames, and build on the services of IContentionTx, IImmediateTx and IRx
  * for accessing the channel. Responsibilities of UpperMacs include queueing,
  * ACK generation and retransmissions, RTS/CTS, duplicate detection,
- * fragmentation, aggregation, block acknowledgement, rate selection, and more.
+ * fragmentation, aggregation, block acknowledgment, rate selection, and more.
  */
 class INET_API IUpperMac
 {
     public:
+        // from container MAC module:
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) = 0;
+
+        // from Rx:
         virtual void lowerFrameReceived(Ieee80211Frame *frame) = 0;
+        virtual void corruptedFrameReceived() = 0;
+
+        // from Tx:
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(ITxCallback *callback, int txIndex) = 0;
         virtual void transmissionComplete(ITxCallback *callback, int txIndex) = 0;
         virtual void internalCollision(ITxCallback *callback, int txIndex) = 0;
