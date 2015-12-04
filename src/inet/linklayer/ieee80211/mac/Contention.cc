@@ -105,6 +105,10 @@ void Contention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int c
 
     int cw = computeCw(cwMin, cwMax, retryCount);
     backoffSlots = intrand(cw + 1);
+
+    static const char *AC[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO"};
+    std::cout << "GB: " << "ac = " << AC[getIndex()] << ", cw = " << cw << ", slots = " << backoffSlots << ", nth = " << getRNG(0)->getNumbersDrawn() << std::endl;
+
     handleWithFSM(START, nullptr);
 }
 
@@ -309,6 +313,13 @@ void Contention::revokeBackoffOptimization()
     backoffOptimizationDelta = SIMTIME_ZERO;
     cancelTransmissionRequest();
     computeRemainingBackoffSlots();
+
+    int cw = computeCw(cwMin, cwMax, retryCount);
+    backoffSlots = intrand(cw + 1);
+
+    static const char *AC[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO"};
+    std::cout << "GB: " << "ac = " << AC[getIndex()] << ", cw = " << cw << ", slots = " << backoffSlots << ", nth = " << getRNG(0)->getNumbersDrawn() << std::endl;
+
     scheduleTransmissionRequest();
 }
 
