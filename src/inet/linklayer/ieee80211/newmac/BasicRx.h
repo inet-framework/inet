@@ -37,13 +37,13 @@ class INET_API BasicRx : public cSimpleModule, public IRx
     protected:
         IUpperMac *upperMac = nullptr;
         IContention **contention = nullptr; // nullptr-terminated pointer array
-        IStatistics *statistics;
+        IStatistics *statistics = nullptr;
 
         MACAddress address;
         cMessage *endNavTimer = nullptr;
         IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
         IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-        bool mediumFree;  // cached state
+        bool mediumFree = true;  // cached state
 
     protected:
         virtual void initialize() override;
