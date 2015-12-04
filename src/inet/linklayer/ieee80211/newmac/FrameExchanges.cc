@@ -204,7 +204,16 @@ void SendDataWithAckFrameExchange::processInternalCollision(int step)
 void SendDataWithAckFrameExchange::retry()
 {
     releaseChannel();
-    if (retryCount < params->getShortRetryLimit()) {
+    // 9.19.2.6 Retransmit procedures
+    // Retries for failed transmission attempts shall continue until the short retry count for the MSDU, A-MSDU, or
+    // MMPDU is equal to dot11ShortRetryLimit or until the long retry count for the MSDU, A-MSDU, or MMPDU
+    // is equal to dot11LongRetryLimit.
+    //
+    // Annex C MIB
+    // This attribute indicates the maximum number of transmission attempts of a
+    // frame, the length of which is less than or equal to dot11RTSThreshold,
+    // that is made before a failure condition is indicated.
+    if (retryCount + 1 < params->getShortRetryLimit()) {
         statistics->frameTransmissionUnsuccessful(dataFrame, retryCount);
         dataFrame->setRetry(true);
         retryCount++;
