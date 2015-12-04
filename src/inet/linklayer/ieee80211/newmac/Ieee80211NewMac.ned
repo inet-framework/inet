@@ -48,36 +48,36 @@ module MACProtocolBase extends LayeredProtocolBase
 }
 
 //
-// Implementation of the 802.11b MAC protocol. This module is intended
-// to be used in combination with the ~Ieee80211Radio module as the physical
-// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
-// per-packet bitrate setting gets implemented.)
-//
-// Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in ~Ieee80211Nic).
-// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
-// module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
-// (the management module). This module will assign the transmitter address
-// (address 2) and the frame sequence number/fragment number fields in the
-// frames; all other fields must already be filled when this module gets
-// the frame for transmission.
-//
-// The module has an internal queue, but usually it is to be used with an
-// external passive queue module (its name should be given in the queueModule
-// parameter; specifying "" causes the internal queue to be used). The passive
-// queue module is a simple module whose C++ class implements the IPassiveQueue
-// interface.
-//
-// <b>Limitations</b>
-//
-// The following features not supported: 1) fragmentation, 2) power management,
-// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
-// direct sequence spread spectrum are not modelled directly.
-//
-// Fields related to the above unsupported features are omitted from
-// management frame formats as well (for example, FH/DS/CF parameter sets,
-// beacon/probe timestamp which is related to physical layer synchronization,
-// listen interval which is related to power management, capability information
+// Implementation of the 802.11b MAC protocol. This module is intended
+// to be used in combination with the ~Ieee80211Radio module as the physical
+// layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
+// per-packet bitrate setting gets implemented.)
+// 
+// Encapsulation/decapsulation must be done in the upper layers. (It is
+// typically in the 802.11 management module, see in ~Ieee80211Nic).
+// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
+// module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
+// (the management module). This module will assign the transmitter address
+// (address 2) and the frame sequence number/fragment number fields in the
+// frames; all other fields must already be filled when this module gets
+// the frame for transmission.
+// 
+// The module has an internal queue, but usually it is to be used with an
+// external passive queue module (its name should be given in the queueModule
+// parameter; specifying "" causes the internal queue to be used). The passive
+// queue module is a simple module whose C++ class implements the IPassiveQueue
+// interface.
+// 
+// <b>Limitations</b>
+// 
+// The following features not supported: 1) fragmentation, 2) power management,
+// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
+// direct sequence spread spectrum are not modelled directly.
+// 
+// Fields related to the above unsupported features are omitted from
+// management frame formats as well (for example, FH/DS/CF parameter sets,
+// beacon/probe timestamp which is related to physical layer synchronization,
+// listen interval which is related to power management, capability information        @display("i=block/layer");
 // which is related to PCF and other non-modelled features).
 //
 module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
@@ -89,9 +89,9 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         string rateControlModuleType = default("");
         string upperMacModule = ".upperMac";
         string rxModule = ".rx";
-        string immediateTxModule = ".iTx";
-        string firstContentionTxModule = ".cTx[0]";
-        int numContentionTx = default(4);
+        string txModule = ".tx";
+        string firstContentionModule = ".ctn[0]";
+        int numContention = default(4);
         string collisionControllerModule = ".ctrl";
         string rateSelectionModule = ".rateSelection";
         string rateControlModule = ".rateControl";
@@ -100,14 +100,14 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         *.macModule = "^";
         *.upperMacModule = "^" + upperMacModule;
         *.rxModule = "^" + rxModule;
-        *.immediateTxModule = "^" + immediateTxModule;
-        *.firstContentionTxModule = "^" + firstContentionTxModule;
+        *.txModule = "^" + txModule;
+        *.firstContentionModule = "^" + firstContentionModule;
         *.collisionControllerModule = "^" + collisionControllerModule;
         *.rateSelectionModule = "^" + rateSelectionModule;
         *.rateControlModule = "^" + rateControlModule;
         *.statisticsModule = "^" + statisticsModule;
 
-        @display("i=block/layer");
+        @display("i=block/layer;bgb=721,355");
         @class(Ieee80211NewMac);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -116,28 +116,28 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
 
     submodules:
         rateSelection: <default("BasicRateSelection")> like IRateSelection {
-            @display("p=70,66");
+            @display("p=492,66");
         }
         rateControl: <rateControlModuleType> like IRateControl if rateControlModuleType != "" {
-            @display("p=140,66");
+            @display("p=581,66");
         }
         statistics: <default("BasicStatistics")> like IStatistics {
-            @display("p=70,125");
+            @display("p=49,66");
         }
         upperMac: <default("EdcaUpperMac")> like IUpperMac {
-            @display("p=208,66");
+            @display("p=227,88");
         }
-        iTx: <default("BasicImmediateTx")> like IImmediateTx {
-            @display("p=70,200");
+        tx: <default("BasicTx")> like ITx {
+            @display("p=198,260");
         }
-        cTx[numContentionTx]: <default("BasicContentionTx")> like IContentionTx {
-            @display("p=140,200,r,60");
+        ctn[numContention]: <default("BasicContention")> like IContention {
+            @display("p=295,260,r,60");
         }
         rx: <default("BasicRx")> like IRx {
-            @display("p=420,200");
+            @display("p=112,260");
         }
-        ctrl: <default("BasicCollisionController")> like ICollisionController if numContentionTx > 1 {
-            @display("p=208,300");
+        ctrl: <default("BasicCollisionController")> like ICollisionController if numContention > 1 {
+            @display("p=334,180");
         }
 }
 
@@ -171,14 +171,14 @@ module Ieee80211CompatibleNewMac extends Ieee80211NewMac
         int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
 
         upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
-        numContentionTx = EDCA ? 4 : 1;
+        numContention = EDCA ? 4 : 1;
 
         rateSelection.modeSet = opMode; // BasicRateSelection
         rateSelection.dataBitrate = bitrate; // BasicRateSelection
         upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
         upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
         upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac
-        
+
         upperMac.aifsn0 = AIFSN0; // EdcaUpperMac
         upperMac.aifsn1 = AIFSN1; // EdcaUpperMac
         upperMac.aifsn2 = AIFSN2; // EdcaUpperMac

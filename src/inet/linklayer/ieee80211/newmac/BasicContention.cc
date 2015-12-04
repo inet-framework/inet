@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "BasicContentionTx.h"
+#include "BasicContention.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "IStatistics.h"
@@ -29,39 +29,38 @@ namespace inet {
 namespace ieee80211 {
 
 // for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(BasicContentionTx::State,
-        (BasicContentionTx::IDLE,
-         BasicContentionTx::DEFER,
-         BasicContentionTx::IFS_AND_BACKOFF,
-         BasicContentionTx::TRANSMIT));
+Register_Enum(BasicContention::State,
+        (BasicContention::IDLE,
+         BasicContention::DEFER,
+         BasicContention::IFS_AND_BACKOFF,
+         BasicContention::TRANSMIT));
 
-Define_Module(BasicContentionTx);
+Define_Module(BasicContention);
 
 // non-member utility function
-void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx **& contentionTx)
+void collectContentionModules(cModule *firstContentionModule, IContention **& contentionTx)
 {
-    ASSERT(firstContentionTxModule != nullptr);
-    int count = firstContentionTxModule->getVectorSize();
+    ASSERT(firstContentionModule != nullptr);
+    int count = firstContentionModule->getVectorSize();
 
-    contentionTx = new IContentionTx *[count + 1];
+    contentionTx = new IContention *[count + 1];
     for (int i = 0; i < count; i++) {
-        cModule *sibling = firstContentionTxModule->getParentModule()->getSubmodule(firstContentionTxModule->getName(), i);
-        contentionTx[i] = check_and_cast<IContentionTx *>(sibling);
+        cModule *sibling = firstContentionModule->getParentModule()->getSubmodule(firstContentionModule->getName(), i);
+        contentionTx[i] = check_and_cast<IContention *>(sibling);
     }
     contentionTx[count] = nullptr;
 }
 
-void BasicContentionTx::initialize()
+void BasicContention::initialize()
 {
     mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
-    rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
 
     txIndex = getIndex();
     if (txIndex > 0 && !collisionController)
-        throw cRuntimeError("No collision controller module -- one is needed when multiple ContentionTx instances are present");
+        throw cRuntimeError("No collision controller module -- one is needed when multiple Contention instances are present");
 
     if (!collisionController)
         startTxEvent = new cMessage("startTx");
@@ -84,37 +83,15 @@ void BasicContentionTx::initialize()
     updateDisplayString();
 }
 
-BasicContentionTx::~BasicContentionTx()
+BasicContention::~BasicContention()
 {
-    if (frame && fsm.getState() != TRANSMIT)
-        delete frame;
     cancelAndDelete(startTxEvent);
 }
 
-void BasicContentionTx::transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback)
-{
-    Enter_Method("transmitContentionFrame(\"%s\")", frame->getName());
-    ASSERT(fsm.getState() == IDLE);
-    take(frame);
-    this->frame = frame;
-    this->ifs = ifs;
-    this->eifs = eifs;
-    this->cwMin = cwMin;
-    this->cwMax = cwMax;
-    this->slotTime = slotTime;
-    this->retryCount = retryCount;
-    this->callback = callback;
-
-    int cw = computeCw(cwMin, cwMax, retryCount);
-    backoffSlots = intrand(cw + 1);
-    handleWithFSM(START, frame);
-}
-
-void BasicContentionTx::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback)
+void BasicContention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback)
 {
     Enter_Method("startContention()");
     ASSERT(fsm.getState() == IDLE);
-    this->frame = nullptr;
     this->ifs = ifs;
     this->eifs = eifs;
     this->cwMin = cwMin;
@@ -125,10 +102,10 @@ void BasicContentionTx::startContention(simtime_t ifs, simtime_t eifs, int cwMin
 
     int cw = computeCw(cwMin, cwMax, retryCount);
     backoffSlots = intrand(cw + 1);
-    handleWithFSM(START, frame);
+    handleWithFSM(START, nullptr);
 }
 
-int BasicContentionTx::computeCw(int cwMin, int cwMax, int retryCount)
+int BasicContention::computeCw(int cwMin, int cwMax, int retryCount)
 {
     int cw = ((cwMin + 1) << retryCount) - 1;
     if (cw > cwMax)
@@ -136,15 +113,15 @@ int BasicContentionTx::computeCw(int cwMin, int cwMax, int retryCount)
     return cw;
 }
 
-void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
+void BasicContention::handleWithFSM(EventType event, cMessage *msg)
 {
     // emit(stateSignal, fsm.getState()); TODO
     EV_DEBUG << "handleWithFSM: processing event " << getEventName(event) << "\n";
     bool finallyReportInternalCollision = false;
-    bool finallyReportTransmissionComplete = false;
+    bool finallyReportChannelAccessGranted = false;
     FSMA_Switch(fsm) {
         FSMA_State(IDLE) {
-            FSMA_Enter(mac->sendDownPendingRadioConfigMsg(); frame = nullptr);
+            FSMA_Enter(mac->sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Starting-IFS-and-Backoff,
                     event == START && mediumFree,
                     IFS_AND_BACKOFF,
@@ -179,8 +156,8 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Enter();
             FSMA_Event_Transition(Backoff-expired,
                     event == TRANSMISSION_GRANTED,
-                    TRANSMIT,
-                    ;
+                    IDLE,
+                    finallyReportChannelAccessGranted = true;
                     );
             FSMA_Event_Transition(Defer-on-channel-busy,
                     event == MEDIUM_STATE_CHANGED && !mediumFree,
@@ -191,7 +168,7 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
                     IDLE,
-                    finallyReportInternalCollision = true; delete frame;
+                    finallyReportInternalCollision = true;
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
@@ -200,65 +177,49 @@ void BasicContentionTx::handleWithFSM(EventType event, cMessage *msg)
                     );
             FSMA_Fail_On_Unhandled_Event();
         }
-        FSMA_State(TRANSMIT) {
-            FSMA_Enter(sendDownFrame());
-            FSMA_Event_Transition(TxFinished,
-                    event == TRANSMISSION_FINISHED,
-                    IDLE,
-                    finallyReportTransmissionComplete = true;
-                    );
-            FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
-            FSMA_Fail_On_Unhandled_Event();
-        }
     }
     // emit(stateSignal, fsm.getState()); TODO
-    if (finallyReportTransmissionComplete)
-        reportTransmissionComplete();
+    if (finallyReportChannelAccessGranted)
+        reportChannelAccessGranted();
     if (finallyReportInternalCollision)
         reportInternalCollision();
     if (hasGUI())
         updateDisplayString();
 }
 
-void BasicContentionTx::mediumStateChanged(bool mediumFree)
+void BasicContention::mediumStateChanged(bool mediumFree)
 {
-    Enter_Method(mediumFree ? "medium FREE" : "medium BUSY");
+    Enter_Method_Silent(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
     channelLastBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
-void BasicContentionTx::radioTransmissionFinished()
-{
-    Enter_Method_Silent();
-    handleWithFSM(TRANSMISSION_FINISHED, nullptr);
-}
-
-void BasicContentionTx::handleMessage(cMessage *msg)
+void BasicContention::handleMessage(cMessage *msg)
 {
     ASSERT(msg == startTxEvent);
     transmissionGranted(txIndex);
 }
 
-void BasicContentionTx::corruptedFrameReceived()
+void BasicContention::corruptedFrameReceived()
 {
     Enter_Method("corruptedFrameReceived()");
     handleWithFSM(CORRUPTED_FRAME_RECEIVED, nullptr);
 }
 
-void BasicContentionTx::transmissionGranted(int txIndex)
+void BasicContention::transmissionGranted(int txIndex)
 {
     Enter_Method("transmissionGranted()");
     handleWithFSM(TRANSMISSION_GRANTED, nullptr);
 }
 
-void BasicContentionTx::internalCollision(int txIndex)
+void BasicContention::internalCollision(int txIndex)
 {
     Enter_Method("internalCollision()");
     handleWithFSM(INTERNAL_COLLISION, nullptr);
 }
 
-void BasicContentionTx::scheduleTransmissionRequestFor(simtime_t txStartTime)
+void BasicContention::scheduleTransmissionRequestFor(simtime_t txStartTime)
 {
     if (collisionController)
         collisionController->scheduleTransmissionRequest(txIndex, txStartTime, this);
@@ -266,7 +227,7 @@ void BasicContentionTx::scheduleTransmissionRequestFor(simtime_t txStartTime)
         scheduleAt(txStartTime, startTxEvent);
 }
 
-void BasicContentionTx::cancelTransmissionRequest()
+void BasicContention::cancelTransmissionRequest()
 {
     if (collisionController)
         collisionController->cancelTransmissionRequest(txIndex);
@@ -274,7 +235,7 @@ void BasicContentionTx::cancelTransmissionRequest()
         cancelEvent(startTxEvent);
 }
 
-void BasicContentionTx::scheduleTransmissionRequest()
+void BasicContention::scheduleTransmissionRequest()
 {
     ASSERT(mediumFree);
 
@@ -294,14 +255,14 @@ void BasicContentionTx::scheduleTransmissionRequest()
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
 }
 
-void BasicContentionTx::switchToEifs()
+void BasicContention::switchToEifs()
 {
     endEifsTime = simTime() + eifs;
     cancelTransmissionRequest();
     scheduleTransmissionRequest();
 }
 
-void BasicContentionTx::computeRemainingBackoffSlots()
+void BasicContention::computeRemainingBackoffSlots()
 {
     simtime_t remainingTime = scheduledTransmissionTime - simTime();
     int remainingSlots = (int)ceil(remainingTime / slotTime);  //TODO this is not accurate
@@ -309,28 +270,17 @@ void BasicContentionTx::computeRemainingBackoffSlots()
         backoffSlots = remainingSlots;
 }
 
-void BasicContentionTx::sendDownFrame()
+void BasicContention::reportChannelAccessGranted()
 {
-    if (!frame) {
-        frame = upperMac->getFrameToTransmit(callback, txIndex);
-        take(frame);
-    }
-    durationField = frame->getDuration();
-    mac->sendFrame(frame);
+    upperMac->channelAccessGranted(callback, txIndex);
 }
 
-void BasicContentionTx::reportTransmissionComplete()
-{
-    rx->frameTransmitted(durationField);
-    upperMac->transmissionComplete(callback, txIndex);
-}
-
-void BasicContentionTx::reportInternalCollision()
+void BasicContention::reportInternalCollision()
 {
     upperMac->internalCollision(callback, txIndex);
 }
 
-const char *BasicContentionTx::getEventName(EventType event)
+const char *BasicContention::getEventName(EventType event)
 {
 #define CASE(x)   case x: return #x;
     switch (event) {
@@ -345,17 +295,12 @@ const char *BasicContentionTx::getEventName(EventType event)
 #undef CASE
 }
 
-void BasicContentionTx::updateDisplayString()
+void BasicContention::updateDisplayString()
 {
-    // faster version is just to display the state: getDisplayString().setTagArg("t", 0, fsm.getStateName());
-    std::stringstream os;
-    if (frame)
-        os << frame->getName() << "\n";
     const char *stateName = fsm.getStateName();
     if (strcmp(stateName, "IFS_AND_BACKOFF") == 0)
         stateName = "IFS+BKOFF";  // original text is too long
-    os << stateName;
-    getDisplayString().setTagArg("t", 0, os.str().c_str());
+    getDisplayString().setTagArg("t", 0, stateName);
 }
 
 } // namespace ieee80211

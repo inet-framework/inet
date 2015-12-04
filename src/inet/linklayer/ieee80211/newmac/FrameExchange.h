@@ -30,8 +30,8 @@ namespace ieee80211 {
 
 class IMacParameters;
 class MacUtils;
-class IImmediateTx;
-class IContentionTx;
+class ITx;
+class IContention;
 class IRx;
 class IStatistics;
 
@@ -41,8 +41,8 @@ class INET_API FrameExchangeContext
         cSimpleModule *ownerModule = nullptr;
         IMacParameters *params = nullptr;
         MacUtils *utils = nullptr;
-        IImmediateTx *immediateTx = nullptr;
-        IContentionTx **contentionTx = nullptr;
+        ITx *tx = nullptr;
+        IContention **contention = nullptr;
         IRx *rx = nullptr;
         IStatistics *statistics = nullptr;
 };
@@ -50,27 +50,26 @@ class INET_API FrameExchangeContext
 /**
  * The default base class for implementing frame exchanges (see IFrameExchange).
  */
-class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback
+class INET_API FrameExchange : public MacPlugin, public IFrameExchange, public ITxCallback, public IContentionCallback
 {
     protected:
         IMacParameters *params;
         MacUtils *utils;
-        IImmediateTx *immediateTx;
-        IContentionTx **contentionTx;
+        ITx *tx;
+        IContention **contention;
         IRx *rx;
         IStatistics *statistics;
         IFinishedCallback *finishedCallback = nullptr;
 
     protected:
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
         virtual void startContention(int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount);
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs);
+        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs);
         virtual void reportSuccess();
         virtual void reportFailure();
 
         virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame *frame) override;
         virtual void corruptedOrNotForUsFrameReceived() override;
-        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(int txIndex) override;
+        virtual void channelAccessGranted(int txIndex) override;
 
     public:
         FrameExchange(FrameExchangeContext *context, IFinishedCallback *callback);
@@ -91,7 +90,7 @@ class INET_API FsmBasedFrameExchange : public FrameExchange
         virtual void start() override;
         virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame* frame) override;
         virtual void corruptedOrNotForUsFrameReceived() override;
-        virtual void transmissionComplete(int txIndex) override;
+        virtual void transmissionComplete() override;
         virtual void internalCollision(int txIndex) override;
         virtual void handleSelfMessage(cMessage* timer) override;
 };
@@ -99,7 +98,7 @@ class INET_API FsmBasedFrameExchange : public FrameExchange
 class INET_API StepBasedFrameExchange : public FrameExchange
 {
     private:
-        enum Operation { NONE, TRANSMIT_CONTENTION_FRAME, TRANSMIT_IMMEDIATE_FRAME, EXPECT_FULL_REPLY, EXPECT_REPLY_RXSTART, GOTO_STEP, FAIL, SUCCEED };
+        enum Operation { NONE, START_CONTENTION, TRANSMIT_FRAME, EXPECT_FULL_REPLY, EXPECT_REPLY_RXSTART, GOTO_STEP, FAIL, SUCCEED };
         enum Status { INPROGRESS, SUCCEEDED, FAILED };
         int defaultTxIndex;
         AccessCategory defaultAccessCategory;
@@ -117,12 +116,13 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual void processInternalCollision(int step) = 0;
 
         // operations that can be called from doStep()
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount); // may invoke processInternalCollision()
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int retryCount, int txIndex, AccessCategory accessCategory);
-        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame);
-        virtual void transmitMulticastContentionFrame(Ieee80211Frame *frame, int txIndex, AccessCategory accessCategory);
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount) override;
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs) override;
+        virtual void startContention(int retryCount); // may invoke processInternalCollision()
+        virtual void startContention(int retryCount, int txIndex, AccessCategory accessCategory);
+        virtual void startContentionForMulticast(); // may invoke processInternalCollision()
+        virtual void startContentionForMulticast(int txIndex, AccessCategory accessCategory);
+        virtual void startContention(int txIndex, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount) override;
+        virtual void transmitFrame(Ieee80211Frame *frame);
+        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs) override;
         virtual void expectFullReplyWithin(simtime_t timeout);  // may invoke processReply() and processTimeout()
         virtual void expectReplyRxStartWithin(simtime_t timeout); // may invoke processReply() and processTimeout()
         virtual void gotoStep(int step); // ~setNextStep()
@@ -148,8 +148,9 @@ class INET_API StepBasedFrameExchange : public FrameExchange
         virtual void start() override;
         virtual FrameProcessingResult lowerFrameReceived(Ieee80211Frame *frame) override;
         virtual void corruptedOrNotForUsFrameReceived() override;
-        virtual void transmissionComplete(int txIndex) override;
+        virtual void channelAccessGranted(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
+        virtual void transmissionComplete() override;
         virtual void handleSelfMessage(cMessage *timer) override;
 };
 

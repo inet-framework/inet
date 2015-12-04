@@ -28,7 +28,7 @@ namespace ieee80211 {
 /**
  * Abstract interface for collision controllers. A collision controller is
  * used with EDCA, and it detects and reports internal collisions between
- * ContentionTx instances.
+ * Contention instances.
  */
 class INET_API ICollisionController
 {

@@ -25,8 +25,8 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "IUpperMac.h"
 #include "IRx.h"
-#include "IImmediateTx.h"
-#include "IContentionTx.h"
+#include "ITx.h"
+#include "IContention.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -64,8 +64,8 @@ void Ieee80211NewMac::initialize(int stage)
 
         upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
-        collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
+        tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
+        collectContentionModules(getModuleByPath(par("firstContentionModule")), contention);
 
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
@@ -206,10 +206,7 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
 
         if (transmissionFinished) {
-            immediateTx->radioTransmissionFinished();
-            for (int i = 0; contentionTx[i]; i++)
-                contentionTx[i]->radioTransmissionFinished();
-
+            tx->radioTransmissionFinished();
             EV_DEBUG << "changing radio to receiver mode\n";
             configureRadioMode(IRadio::RADIO_MODE_RECEIVER);    //FIXME this is in a very wrong place!!! should be done explicitly from UpperMac!
         }

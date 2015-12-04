@@ -20,9 +20,9 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// The default implementation of IContentionTx.
+// The default implementation of IContention.
 //
-simple BasicContentionTx like IContentionTx
+simple BasicContention like IContention
 {
     parameters:
         string macModule;
@@ -30,5 +30,5 @@ simple BasicContentionTx like IContentionTx
         string collisionControllerModule;
         string rxModule;
         string statisticsModule;
-        @display("i=block/tx");
+        @display("i=block/control");
 }

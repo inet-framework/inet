@@ -28,14 +28,14 @@ namespace inet {
 namespace ieee80211 {
 
 class IUpperMac;
-class IImmediateTx;
-class IContentionTx;
+class ITx;
+class IContention;
 
 class INET_API BasicRx : public cSimpleModule, public IRx
 {
     protected:
         IUpperMac *upperMac = nullptr;
-        IContentionTx **contentionTx = nullptr; // nullptr-terminated pointer array
+        IContention **contention = nullptr; // nullptr-terminated pointer array
 
         MACAddress address;
         cMessage *endNavTimer = nullptr;

@@ -23,7 +23,7 @@ package inet.linklayer.ieee80211.newmac;
 // UpperMac for EDCA (802.11e QoS mode).
 //
 // Note: Access Category comes from the TID fields of QoS Data frames.
-// Non-QoS Data frames are always transmitted in the AC_BE, and management 
+// Non-QoS Data frames are always transmitted in the AC_BE, and management
 // frames in the AC_VO category.
 //
 // Currently TID is filled in by the Mgmt modules encapsulate higher-layer packets
@@ -36,8 +36,8 @@ simple EdcaUpperMac like IUpperMac
     parameters:
         string macModule;
         string rxModule;
-        string immediateTxModule;
-        string firstContentionTxModule;
+        string txModule;
+        string firstContentionModule;
         string rateSelectionModule;
         string rateControlModule;
         string statisticsModule;

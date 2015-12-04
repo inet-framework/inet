@@ -25,6 +25,7 @@
 namespace inet {
 namespace ieee80211 {
 
+class IContentionCallback;
 class ITxCallback;
 class IUpperMacContext;
 class Ieee80211Frame;
@@ -32,7 +33,7 @@ class Ieee80211DataOrMgmtFrame;
 
 /**
  * Abstract class interface for UpperMacs. UpperMacs deal with exchanging
- * frames, and build on the services of IContentionTx, IImmediateTx and IRx
+ * frames, and build on the services of IContention, ITx and IRx
  * for accessing the channel. Responsibilities of UpperMacs include queueing,
  * ACK generation and retransmissions, RTS/CTS, duplicate detection,
  * fragmentation, aggregation, block acknowledgment, rate selection, and more.
@@ -48,9 +49,9 @@ class INET_API IUpperMac
         virtual void corruptedFrameReceived() = 0;
 
         // from Tx:
-        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(ITxCallback *callback, int txIndex) = 0;
-        virtual void transmissionComplete(ITxCallback *callback, int txIndex) = 0;
-        virtual void internalCollision(ITxCallback *callback, int txIndex) = 0;
+        virtual void channelAccessGranted(IContentionCallback *callback, int txIndex) = 0;
+        virtual void internalCollision(IContentionCallback *callback, int txIndex) = 0;
+        virtual void transmissionComplete(ITxCallback *callback) = 0;
 };
 
 } // namespace ieee80211

@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_ICONTENTIONTX_H
-#define __INET_ICONTENTIONTX_H
+#ifndef __INET_ICONTENTION_H
+#define __INET_ICONTENTION_H
 
 #include "inet/common/INETDefs.h"
 
@@ -26,11 +26,11 @@ namespace inet {
 namespace ieee80211 {
 
 class Ieee80211Frame;
-class ITxCallback;
+class IContentionCallback;
 
 /**
  * Abstract interface for processes that implement contention-based channel access.
- * For each frame, ContentionTx listens on the channel for a DIFS (AIFS) period
+ * For each frame, Contention listens on the channel for a DIFS (AIFS) period
  * then for a random backoff period before transmitting the frame, and defers when
  * busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
  * of the original DIFS (AIFS).
@@ -39,20 +39,18 @@ class ITxCallback;
  * it does not arrive is not handled by this process. Instead, that is typically
  * performed by a frame exchange class INET_API inside UpperMac (see IFrameExchange, IUpperMac).
  */
-class INET_API IContentionTx
+class INET_API IContention
 {
     public:
-        virtual ~IContentionTx() {}
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) = 0;
-        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) = 0; // will get frame via ITxCallback::getFrameToTransmit()
+        virtual ~IContention() {}
+        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback) = 0;
 
         // notifications
         virtual void mediumStateChanged(bool mediumFree) = 0;
-        virtual void radioTransmissionFinished() = 0;
         virtual void corruptedFrameReceived() = 0;
 };
 
-void collectContentionTxModules(cModule *firstContentionTxModule, IContentionTx **& contentionTx);
+void collectContentionModules(cModule *firstContentionModule, IContention **& contention);
 
 } // namespace ieee80211
 } // namespace inet

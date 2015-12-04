@@ -18,8 +18,8 @@
 //
 
 #include "BasicRx.h"
-#include "IContentionTx.h"
-#include "IImmediateTx.h"
+#include "IContention.h"
+#include "ITx.h"
 #include "IUpperMac.h"
 
 namespace inet {
@@ -39,7 +39,7 @@ BasicRx::~BasicRx()
 void BasicRx::initialize()
 {
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
-    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
+    collectContentionModules(getModuleByPath(par("firstContentionModule")), contention);
     endNavTimer = new cMessage("NAV");
     recomputeMediumFree();
 
@@ -74,8 +74,8 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     else {
         EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
         delete frame;
-        for (int i = 0; contentionTx[i]; i++)
-            contentionTx[i]->corruptedFrameReceived();
+        for (int i = 0; contention[i]; i++)
+            contention[i]->corruptedFrameReceived();
         upperMac->corruptedFrameReceived();
     }
 }
@@ -104,8 +104,8 @@ void BasicRx::recomputeMediumFree()
     mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
     updateDisplayString();
     if (mediumFree != oldMediumFree) {
-        for (int i = 0; contentionTx[i]; i++)
-            contentionTx[i]->mediumStateChanged(mediumFree);
+        for (int i = 0; contention[i]; i++)
+            contention[i]->mediumStateChanged(mediumFree);
     }
 }
 
