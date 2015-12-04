@@ -36,6 +36,7 @@ class INET_API MacParameters : public IMacParameters
         int longRetryLimit;
         int rtsThreshold;
         simtime_t phyRxStartDelay;
+        bool useFullAckTimeout = false;
         bool edca = false;
         simtime_t slotTime;
         simtime_t sifsTime;
@@ -60,6 +61,7 @@ class INET_API MacParameters : public IMacParameters
         void setPhyRxStartDelay(simtime_t phyRxStartDelay) {this->phyRxStartDelay = phyRxStartDelay;}
         void setShortRetryLimit(int shortRetryLimit) { this->shortRetryLimit = shortRetryLimit; }
         void setLongRetryLimit(int longRetryLimit) { this->longRetryLimit = longRetryLimit; }
+        void setUseFullAckTimeout(bool useFullAckTimeout) { this->useFullAckTimeout = useFullAckTimeout; }
         void setEdcaEnabled(bool enabled) {edca = enabled;}
         void setSlotTime(simtime_t value) {slotTime = value;}
         void setSifsTime(simtime_t value) {sifsTime = value;}
@@ -78,6 +80,7 @@ class INET_API MacParameters : public IMacParameters
         virtual int getLongRetryLimit() const override {return longRetryLimit;}
         virtual int getRtsThreshold() const override {return rtsThreshold;}
         virtual simtime_t getPhyRxStartDelay() const override {return phyRxStartDelay;}
+        virtual bool getUseFullAckTimeout() const override {return useFullAckTimeout; }
         virtual bool isEdcaEnabled() const override {return edca;}
         virtual simtime_t getSlotTime() const override {return slotTime;}
         virtual simtime_t getSifsTime() const override {return sifsTime;}
