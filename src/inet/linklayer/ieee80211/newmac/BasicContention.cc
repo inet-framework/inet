@@ -168,7 +168,7 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
                     IDLE,
-                    finallyReportInternalCollision = true;
+                    finallyReportInternalCollision = true; delete frame; lastIdleStartTime = simTime();
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
@@ -181,7 +181,7 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Event_Transition(Channel-Released,
                     event == CHANNEL_RELEASED,
                     IDLE,
-                    ;
+                    lastIdleStartTime = simTime();
                     );
             FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
             FSMA_Fail_On_Unhandled_Event();
@@ -258,13 +258,11 @@ void BasicContention::scheduleTransmissionRequest()
     bool useEifs = endEifsTime > now + ifs;
     simtime_t waitInterval = (useEifs ? eifs : ifs) + backoffSlots * slotTime;
 
-    if (retryCount == 0 && initialBackoffOptimization) {
+    if (initialBackoffOptimization && fsm.getState() == IDLE) {
         // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         simtime_t elapsedFreeChannelTime = now - channelLastBusyTime;
-        if (elapsedFreeChannelTime > waitInterval)
-            waitInterval = 0;
-        else
-            waitInterval -= elapsedFreeChannelTime;
+        simtime_t elapsedIdleTime = now - lastIdleStartTime;
+        waitInterval = std::max(SIMTIME_ZERO, waitInterval - std::min(elapsedFreeChannelTime, elapsedIdleTime));
     }
     scheduledTransmissionTime = now + waitInterval;
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
@@ -280,7 +278,7 @@ void BasicContention::switchToEifs()
 void BasicContention::computeRemainingBackoffSlots()
 {
     simtime_t remainingTime = scheduledTransmissionTime - simTime();
-    int remainingSlots = (int)ceil(remainingTime / slotTime);  //TODO this is not accurate
+    int remainingSlots = (remainingTime.raw() + slotTime.raw() - 1) / slotTime.raw();
     if (remainingSlots < backoffSlots) // don't count IFS
         backoffSlots = remainingSlots;
 }

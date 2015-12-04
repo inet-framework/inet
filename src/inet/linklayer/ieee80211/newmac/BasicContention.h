@@ -62,6 +62,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
         int backoffSlots = 0;
         simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
         simtime_t channelLastBusyTime = SIMTIME_ZERO;
+        simtime_t lastIdleStartTime = SIMTIME_ZERO;
         bool mediumFree = false;
         bool initialBackoffOptimization = true;
 
