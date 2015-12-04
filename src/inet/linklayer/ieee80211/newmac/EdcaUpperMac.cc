@@ -240,6 +240,14 @@ void EdcaUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+void EdcaUpperMac::corruptedFrameReceived()
+{
+    int numACs = params->isEdcaEnabled() ? 4 : 1;
+    for (int i = 0; i < numACs; i++)
+        if (acData[i].frameExchange)
+            acData[i].frameExchange->corruptedFrameReceived();
+}
+
 Ieee80211DataOrMgmtFrame *EdcaUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)
 {
     Enter_Method("getFrameToTransmit()");
@@ -275,6 +283,7 @@ void EdcaUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, i
     context.utils = utils;
     context.contentionTx = contentionTx;
     context.immediateTx = immediateTx;
+    context.rx = rx;
 
     IFrameExchange *frameExchange;
     bool useRtsCts = frame->getByteLength() > params->getRtsThreshold();

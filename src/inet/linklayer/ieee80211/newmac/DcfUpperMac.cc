@@ -189,6 +189,12 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
+void DcfUpperMac::corruptedFrameReceived()
+{
+    if (frameExchange)
+        frameExchange->corruptedFrameReceived();
+}
+
 Ieee80211DataOrMgmtFrame *DcfUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)
 {
     Enter_Method("getFrameToTransmit()");
@@ -224,6 +230,7 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
     context.utils = utils;
     context.contentionTx = contentionTx;
     context.immediateTx = immediateTx;
+    context.rx = rx;
 
     bool useRtsCts = frame->getByteLength() > params->getRtsThreshold();
     if (utils->isBroadcastOrMulticast(frame))

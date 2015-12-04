@@ -88,6 +88,7 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         ~EdcaUpperMac();
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
+        virtual void corruptedFrameReceived() override;
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(ITxCallback *callback, int txIndex) override;
         virtual void transmissionComplete(ITxCallback *callback, int txIndex) override;
         virtual void internalCollision(ITxCallback *callback, int txIndex) override;

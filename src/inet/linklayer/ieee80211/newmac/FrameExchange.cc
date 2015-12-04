@@ -21,6 +21,7 @@
 #include "IMacParameters.h"
 #include "IContentionTx.h"
 #include "IImmediateTx.h"
+#include "IRx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -32,6 +33,7 @@ FrameExchange::FrameExchange(FrameExchangeContext *context, IFinishedCallback *c
     utils(context->utils),
     immediateTx(context->immediateTx),
     contentionTx(context->contentionTx),
+    rx(context->rx),
     finishedCallback(callback)
 {
 }
@@ -61,6 +63,11 @@ bool FrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
     return false;  // not ours
 }
 
+void FrameExchange::corruptedFrameReceived()
+{
+    // we don't care
+}
+
 Ieee80211DataOrMgmtFrame *FrameExchange::getFrameToTransmit(int txIndex)
 {
     throw cRuntimeError(this, "Override getFrameToTransmit() if you want to use lazy transmission");
@@ -83,7 +90,7 @@ void FrameExchange::reportFailure()
 void FsmBasedFrameExchange::start()
 {
     EV_DETAIL << "Starting frame exchange " << getClassName() << std::endl;
-    handleWithFSM(EVENT_START, nullptr);
+    handleWithFSM(EVENT_START);
 }
 
 bool FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
@@ -91,14 +98,19 @@ bool FsmBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
     return handleWithFSM(EVENT_FRAMEARRIVED, frame);
 }
 
+void FsmBasedFrameExchange::corruptedFrameReceived()
+{
+    handleWithFSM(EVENT_CORRUPTEDFRAMEARRIVED);
+}
+
 void FsmBasedFrameExchange::transmissionComplete(int txIndex)
 {
-    handleWithFSM(EVENT_TXFINISHED, nullptr);
+    handleWithFSM(EVENT_TXFINISHED);
 }
 
 void FsmBasedFrameExchange::internalCollision(int txIndex)
 {
-    handleWithFSM(EVENT_INTERNALCOLLISION, nullptr);
+    handleWithFSM(EVENT_INTERNALCOLLISION);
 }
 
 void FsmBasedFrameExchange::handleSelfMessage(cMessage *msg)
@@ -149,7 +161,8 @@ const char *StepBasedFrameExchange::operationName(Operation operation)
         CASE(NONE);
         CASE(TRANSMIT_CONTENTION_FRAME);
         CASE(TRANSMIT_IMMEDIATE_FRAME);
-        CASE(EXPECT_REPLY);
+        CASE(EXPECT_FULL_REPLY);
+        CASE(EXPECT_REPLY_RXSTART);
         CASE(GOTO_STEP);
         CASE(FAIL);
         CASE(SUCCEED);
@@ -164,7 +177,8 @@ const char *StepBasedFrameExchange::operationFunctionName(Operation operation)
         case NONE: return "no-op";
         case TRANSMIT_CONTENTION_FRAME: return "transmitContentionFrame()";
         case TRANSMIT_IMMEDIATE_FRAME: return "transmitImmediateFrame()";
-        case EXPECT_REPLY: return "expectReply()";
+        case EXPECT_FULL_REPLY: return "expectFullReplyWithin()";
+        case EXPECT_REPLY_RXSTART: return "expectReplyStartTxWithin()";
         case GOTO_STEP: return "gotoStep()";
         case FAIL: return "fail()";
         case SUCCEED: return "succeed()";
@@ -217,40 +231,72 @@ bool StepBasedFrameExchange::lowerFrameReceived(Ieee80211Frame *frame)
     EV_DETAIL << "Lower frame received in step " << step << "\n";
     ASSERT(status == INPROGRESS);
 
-    if (operation != EXPECT_REPLY)
-        return false;    // not ready to process frames
-    else {
+    if (operation == EXPECT_FULL_REPLY) {
         operation = NONE;
         bool accepted = processReply(step, frame);
         if (status == INPROGRESS) {
             logStatus(accepted ? "processReply() returned ACCEPT": "processReply() returned REJECT");
-            checkOperation(operation, "processReply()"); //FIXME gotoStep+return false will result in strange behavior
-            if (accepted)
+            checkOperation(operation, "processReply()");
+            if (accepted || operation != NONE)
                 proceed();
+            else
+                operation = EXPECT_FULL_REPLY; // restore
         }
         else {
             cleanupAndReportResult(); // should be the last call in the lifetime of the object
         }
         return accepted;
     }
+    else if (operation == EXPECT_REPLY_RXSTART) {
+        operation = NONE;
+        bool accepted = processReply(step, frame);
+        if (status == INPROGRESS) {
+            logStatus(accepted ? "processReply() returned ACCEPT": "processReply() returned REJECT");
+            checkOperation(operation, "processReply()");
+            if (accepted || operation != NONE) {
+                proceed();
+            }
+            else {
+                if (timeoutMsg->isScheduled())
+                    operation = EXPECT_REPLY_RXSTART; // restore operation and continue waiting
+                else
+                    handleTimeout();  // frame being received when timeout expired was not accepted as response: declare timeout
+            }
+        }
+        else {
+            cleanupAndReportResult(); // should be the last call in the lifetime of the object
+        }
+        return accepted;
+    }
+    else {
+        return false; // momentarily not interested in received frames
+    }
+}
+
+void StepBasedFrameExchange::corruptedFrameReceived()
+{
+    if (operation == EXPECT_REPLY_RXSTART && !timeoutMsg->isScheduled())
+        handleTimeout();  // the frame we were receiving when the timeout expired was received incorrectly
 }
 
 void StepBasedFrameExchange::handleSelfMessage(cMessage *msg)
 {
     EV_DETAIL << "Timeout in step " << step << "\n";
     ASSERT(status == INPROGRESS);
-    ASSERT(operation == EXPECT_REPLY);
     ASSERT(msg == timeoutMsg);
 
-    operation = NONE;
-    processTimeout(step);
-    if (status == INPROGRESS) {
-        logStatus("processTimeout()");
-        checkOperation(operation, "processTimeout()");
-        proceed();
+    if (operation == EXPECT_FULL_REPLY) {
+        handleTimeout();
+    }
+    else if (operation == EXPECT_REPLY_RXSTART) {
+        // If there's no sign of the reply (e.g ACK) being received, declare timeout.
+        // Otherwise we'll wait for the frame to be fully received and be reported
+        // to us via lowerFrameReceived() or corruptedFrameReceived(), and decide then.
+        if (!rx->isReceptionInProgress())
+            handleTimeout();
     }
     else {
-        cleanupAndReportResult(); // should be the last call in the lifetime of the object
+        ASSERT(false);
     }
 }
 
@@ -275,9 +321,23 @@ void StepBasedFrameExchange::internalCollision(int txIndex)
 void StepBasedFrameExchange::checkOperation(Operation operation, const char *where)
 {
     switch (operation) {
-        case NONE: case GOTO_STEP: break; // compensate for step++ in proceed()
+        case NONE: case GOTO_STEP: break;
         case FAIL: case SUCCEED: ASSERT(false); break;  // it is not safe to do anything after fail() or succeed(), as the callback may delete this object
         default: throw cRuntimeError(this, "operation %s is not permitted inside %s, only gotoStep(), fail() and succeed())", where, operationFunctionName(operation));
+    }
+}
+
+void StepBasedFrameExchange::handleTimeout()
+{
+    operation = NONE;
+    processTimeout(step);
+    if (status == INPROGRESS) {
+        logStatus("processTimeout()");
+        checkOperation(operation, "processTimeout()");
+        proceed();
+    }
+    else {
+        cleanupAndReportResult(); // should be the last call in the lifetime of the object
     }
 }
 
@@ -327,9 +387,17 @@ void StepBasedFrameExchange::transmitImmediateFrame(Ieee80211Frame *frame, simti
     immediateTx->transmitImmediateFrame(frame, ifs, this);
 }
 
-void StepBasedFrameExchange::expectReply(simtime_t timeout)
+void StepBasedFrameExchange::expectFullReplyWithin(simtime_t timeout)
 {
-    setOperation(EXPECT_REPLY);
+    setOperation(EXPECT_FULL_REPLY);
+    if (!timeoutMsg)
+        timeoutMsg = new cMessage("timeout");
+    scheduleAt(simTime() + timeout, timeoutMsg);
+}
+
+void StepBasedFrameExchange::expectReplyRxStartWithin(simtime_t timeout)
+{
+    setOperation(EXPECT_REPLY_RXSTART);
     if (!timeoutMsg)
         timeoutMsg = new cMessage("timeout");
     scheduleAt(simTime() + timeout, timeoutMsg);

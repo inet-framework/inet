@@ -44,6 +44,7 @@ class INET_API IFrameExchange
         virtual ~IFrameExchange() {}
         virtual void start() = 0;
         virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;  // true = processed
+        virtual void corruptedFrameReceived() = 0;
 };
 
 } // namespace ieee80211

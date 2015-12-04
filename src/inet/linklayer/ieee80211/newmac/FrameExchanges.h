@@ -59,6 +59,7 @@ class INET_API SendDataWithAckFrameExchange : public StepBasedFrameExchange
         Ieee80211DataOrMgmtFrame *dataFrame = nullptr;
         int retryCount = 0;
     protected:
+        virtual void retry();
         virtual void doStep(int step) override;
         virtual bool processReply(int step, Ieee80211Frame *frame) override;
         virtual void processTimeout(int step) override;
