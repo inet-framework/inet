@@ -63,6 +63,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
         simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
         simtime_t channelLastBusyTime = SIMTIME_ZERO;
         simtime_t lastIdleStartTime = SIMTIME_ZERO;
+        simtime_t backoffOptimizationDelta = SIMTIME_ZERO;
         bool mediumFree = false;
         bool initialBackoffOptimization = true;
 
@@ -81,6 +82,7 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
         virtual void computeRemainingBackoffSlots();
         virtual void reportChannelAccessGranted();
         virtual void reportInternalCollision();
+        virtual void revokeBackoffOptimization();
         virtual void updateDisplayString();
         const char *getEventName(EventType event);
 

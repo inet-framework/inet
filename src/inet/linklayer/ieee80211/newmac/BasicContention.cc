@@ -165,10 +165,15 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
                     cancelTransmissionRequest();
                     computeRemainingBackoffSlots();
                     );
+            FSMA_Event_Transition(optimized-internal-collision,
+                    event == INTERNAL_COLLISION && backoffOptimizationDelta != SIMTIME_ZERO,
+                    IFS_AND_BACKOFF,
+                    revokeBackoffOptimization();
+                    );
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
                     IDLE,
-                    finallyReportInternalCollision = true; delete frame; lastIdleStartTime = simTime();
+                    finallyReportInternalCollision = true; lastIdleStartTime = simTime();
                     );
             FSMA_Event_Transition(Use-EIFS,
                     event == CORRUPTED_FRAME_RECEIVED,
@@ -262,7 +267,9 @@ void BasicContention::scheduleTransmissionRequest()
         // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         simtime_t elapsedFreeChannelTime = now - channelLastBusyTime;
         simtime_t elapsedIdleTime = now - lastIdleStartTime;
-        waitInterval = std::max(SIMTIME_ZERO, waitInterval - std::min(elapsedFreeChannelTime, elapsedIdleTime));
+        backoffOptimizationDelta = std::min(waitInterval, std::min(elapsedFreeChannelTime, elapsedIdleTime));
+        if (backoffOptimizationDelta > SIMTIME_ZERO)
+            waitInterval -= backoffOptimizationDelta;
     }
     scheduledTransmissionTime = now + waitInterval;
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
@@ -291,6 +298,15 @@ void BasicContention::reportChannelAccessGranted()
 void BasicContention::reportInternalCollision()
 {
     upperMac->internalCollision(callback, txIndex);
+}
+
+void BasicContention::revokeBackoffOptimization()
+{
+    scheduledTransmissionTime += backoffOptimizationDelta;
+    backoffOptimizationDelta = SIMTIME_ZERO;
+    cancelTransmissionRequest();
+    computeRemainingBackoffSlots();
+    scheduleTransmissionRequest();
 }
 
 const char *BasicContention::getEventName(EventType event)
