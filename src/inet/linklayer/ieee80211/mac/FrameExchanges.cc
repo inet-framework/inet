@@ -197,7 +197,11 @@ static const char *ac[] = {"AC_BK", "AC_BE", "AC_VI", "AC_VO", "???"};
 
 void SendDataWithAckFrameExchange::processInternalCollision(int step)
 {
-    const char *lastSeq = strchr(dataFrame->getName(), '-') + 1;
+    const char *lastSeq = strchr(dataFrame->getName(), '-');
+    if (lastSeq == nullptr)
+        lastSeq = "-1";
+    else
+        lastSeq++;
     std::cout << "IC: " << "ac = " << ac[defaultAccessCategory] << ", seq = " << lastSeq << endl;
     switch (step) {
         case 0: retry(); break;
@@ -217,7 +221,11 @@ void SendDataWithAckFrameExchange::retry()
     // This attribute indicates the maximum number of transmission attempts of a
     // frame, the length of which is less than or equal to dot11RTSThreshold,
     // that is made before a failure condition is indicated.
-    const char *lastSeq = strchr(dataFrame->getName(), '-') + 1;
+    const char *lastSeq = strchr(dataFrame->getName(), '-');
+    if (lastSeq == nullptr)
+        lastSeq = "-1";
+    else
+        lastSeq++;
     if (retryCount + 1 < params->getShortRetryLimit()) {
         statistics->frameTransmissionUnsuccessful(dataFrame, retryCount);
         dataFrame->setRetry(true);
