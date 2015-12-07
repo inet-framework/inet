@@ -24,73 +24,54 @@ namespace ieee80211 {
 
 Define_Module(BasicCollisionController);
 
-simtime_t BasicCollisionController::MAX_TIME;
-
 BasicCollisionController::BasicCollisionController()
 {
-    MAX_TIME = SimTime::getMaxTime();
     for (int i = 0; i < MAX_NUM_TX; i++)
-        txTime[i] = MAX_TIME;
-    timer = new cMessage("nextTx");
-    timer->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
+        timer[i] = nullptr;
 }
 
 BasicCollisionController::~BasicCollisionController()
 {
-    cancelAndDelete(timer);
-}
-
-void BasicCollisionController::initialize()
-{
-    char buff[100];
-    for (int i = 0; i < MAX_NUM_TX; i++) {
-        sprintf(buff, "txTime[%i]", i);
-        createWatch(buff, txTime[i]);
-    }
+    for (int i = 0; i < MAX_NUM_TX; i++)
+        cancelAndDelete(timer[i]);
 }
 
 void BasicCollisionController::scheduleTransmissionRequest(int txIndex, simtime_t txStartTime, ICallback *cb)
 {
     Enter_Method("scheduleTransmissionRequest(%d)", txIndex);
     ASSERT(txIndex >=0 && txIndex < MAX_NUM_TX);
-    ASSERT(txTime[txIndex] == MAX_TIME);  // not yet scheduled
     ASSERT(txStartTime > timeLastProcessed); // if equal then it's too late, that round was already done and notified (check timer's scheduling priority if that happens!)
 
     if (txCount <= txIndex)
         txCount = txIndex+1;
 
-    // store request
-    txTime[txIndex] = txStartTime;
-    callback[txIndex] = cb;
-
-    // reschedule timer if needed
-    bool isScheduled = timer->isScheduled();
-    if (!isScheduled || txStartTime < timer->getArrivalTime()) {
-        if (isScheduled)
-            cancelEvent(timer);
-        scheduleAt(txStartTime, timer);
+    if (timer[txIndex] == nullptr) {
+        char name[16];
+        sprintf(name, "txStart-%d", txIndex);
+        timer[txIndex] = new cMessage(name);
+        timer[txIndex]->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
     }
+
+    ASSERT(!timer[txIndex]->isScheduled());
+    scheduleAt(txStartTime, timer[txIndex]);
 }
 
 void BasicCollisionController::cancelTransmissionRequest(int txIndex)
 {
     Enter_Method("cancelTransmissionRequest(%d)", txIndex);
-    ASSERT(txIndex >=0 && txIndex < MAX_NUM_TX);
-    txTime[txIndex] = MAX_TIME;
-    reschedule();
+    ASSERT(txIndex >=0 && txIndex < txCount && timer[txIndex] != nullptr);
+    cancelEvent(timer[txIndex]);
 }
 
 void BasicCollisionController::handleMessage(cMessage *msg)
 {
-    ASSERT(msg == timer);
-
-    // from the ones with the current time as timestamp: grant transmission to the
+    // from the ones scheduled for the current simulation time: grant transmission to the
     // highest priority one (largest txIndex), and signal internal collision to the others
     simtime_t now = simTime();
     bool granted = false;
     for (int i = txCount-1; i >= 0; i--) {
-        if (txTime[i] == now) {
-            txTime[i] = MAX_TIME;
+        if (timer[i] == msg || (timer[i] && timer[i]->isScheduled() && timer[i]->getArrivalTime() == now)) {
+            cancelEvent(timer[i]);
             if (!granted) {
                 callback[i]->transmissionGranted(i);
                 granted = true;
@@ -100,33 +81,7 @@ void BasicCollisionController::handleMessage(cMessage *msg)
             }
         }
     }
-
-    // reschedule next event
-    reschedule();
-
     timeLastProcessed = now;
-}
-
-void BasicCollisionController::reschedule()
-{
-    // choose smallest time
-    simtime_t nextTxTime = MAX_TIME;
-    for (int i = 0; i < txCount; i++)
-        if (txTime[i] < nextTxTime)
-            nextTxTime = txTime[i];
-
-    // reschedule timer for it
-    if (!timer->isScheduled()) {
-        if (nextTxTime != MAX_TIME)
-            scheduleAt(nextTxTime, timer);
-    }
-    else {
-        if (timer->getArrivalTime() != nextTxTime) {
-            cancelEvent(timer);
-            if (nextTxTime != MAX_TIME)
-                scheduleAt(nextTxTime, timer);
-        }
-    }
 }
 
 } // namespace ieee80211

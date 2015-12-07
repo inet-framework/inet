@@ -26,24 +26,19 @@ namespace inet {
 namespace ieee80211 {
 
 /**
- * The default implementation of a collision controller. Collision controllers
- * detect and report internal collisions between Contention instances
- * (i.e. EDCA queues). This implementation uses a single timer.
+ * The default implementation of a collision controller, best suitable for
+ * demonstration and debugging purposes. It uses per-AC timers.
  */
 class INET_API BasicCollisionController : public cSimpleModule, public ICollisionController
 {
     private:
-        static simtime_t MAX_TIME;   // used as the "invalid" value
-        static const int MAX_NUM_TX = 4;
+        static const int MAX_NUM_TX = 10;
         int txCount = 0;
-        simtime_t txTime[MAX_NUM_TX];
+        cMessage *timer[MAX_NUM_TX];
         ICallback *callback[MAX_NUM_TX];
-        cMessage *timer = nullptr;
         simtime_t timeLastProcessed;
     protected:
-        virtual void initialize() override;
         virtual void handleMessage(cMessage* msg) override;
-        void reschedule();
     public:
         BasicCollisionController();
         ~BasicCollisionController();
