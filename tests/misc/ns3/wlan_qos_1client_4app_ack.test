@@ -14,7 +14,15 @@ network = Ns3Test
 ned-path = .;../../../../../src;../../lib
 include ../../lib/ns3test.ini
 sim-time-limit = 1s
+
+*.srvHost.wlan[0].mac.ctn[0].rng-0 = 1
+*.cliHost[0].wlan[0].mac.ctn[0].rng-0 = 11
+*.cliHost[0].wlan[0].mac.ctn[1].rng-0 = 10
+*.cliHost[0].wlan[0].mac.ctn[2].rng-0 = 9
+*.cliHost[0].wlan[0].mac.ctn[3].rng-0 = 8
+
 **.useFullAckTimeout = true
+
 *.withQos = true
 *.numClients = 1
 *.numApps = 4
@@ -24,7 +32,7 @@ sim-time-limit = 1s
 *.sendInterval = 0.0001s
 
 %postrun-command: grep TX: test.out
-%postrun-command: pwd ; cd ../../ns3; ./waf --run "examples/wireless/inet-wireless-udp --withQos=true --numClients=1 --numApps=4 --serverYPos=11 --appStartTime=0.5 --sendInterval=0.0001 --simulationTime=1"
+%postrun-command: pwd ; cd ../../ns3; ./waf --run "examples/wireless/inet-wireless-udp --withQos=true --numClients=1 --numApps=4 --serverYPos=11 --appStartTime=0.5 --appStartDelta=0.0 --sendInterval=0.0001 --simulationTime=1"
 %postrun-command: grep TX: postrun-command\(2\).out
 %postrun-command: diff -s postrun-command\(1\).out postrun-command\(3\).out ; echo ""
 
