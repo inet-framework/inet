@@ -191,6 +191,7 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
                     lastIdleStartTime = simTime();
                     );
             FSMA_Ignore_Event(event==MEDIUM_STATE_CHANGED);
+            FSMA_Ignore_Event(event==CORRUPTED_FRAME_RECEIVED);
             FSMA_Fail_On_Unhandled_Event();
         }
     }
