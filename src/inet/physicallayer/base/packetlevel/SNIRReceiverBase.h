@@ -39,7 +39,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
      * This function must be purely functional and support optimistic parallel
      * computation.
      */
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
+    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
 
   public:
     SNIRReceiverBase();

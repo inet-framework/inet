@@ -66,8 +66,8 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual const IPathLoss *getPathLoss() const = 0;
 
     /**
-     * Returns the radio signal path loss model of this radio medium. This
-     * function may return nullptr.
+     * Returns the radio signal obstacle loss model of this radio medium. This
+     * function may return nullptr if there's no obstacle loss model.
      */
     virtual const IObstacleLoss *getObstacleLoss() const = 0;
 
@@ -79,13 +79,13 @@ class INET_API IRadioMedium : public IPrintableObject
 
     /**
      * Returns the background noise model of this radio medium. This function
-     * may return nullptr.
+     * may return nullptr if there's no background noise model.
      */
     virtual const IBackgroundNoise *getBackgroundNoise() const = 0;
 
     /**
      * Returns the physical environment model of this radio medium. This function
-     * may return nullptr.
+     * may return nullptr if there's no physical environment model.
      */
     virtual const IPhysicalEnvironment *getPhysicalEnvironment() const = 0;
 
@@ -167,28 +167,29 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
+     * Returns true when the reception is possible of the transmission part.
      */
     virtual bool isReceptionPossible(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const = 0;
 
     /**
-     * Returns true when the radio attempts the reception of the provided part
-     * of the provided transmission.
+     * Returns true when the reception is attempted of the transmission part.
      */
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const = 0;
 
     /**
-     * TODO
+     * Returns true when the reception is successful of the transmission part.
      */
     virtual bool isReceptionSuccessful(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const = 0;
 
     /**
-     * Returns the reception decision for the provided part that describes the
-     * end result of the reception process with respect to the given transmission.
+     * Returns the reception decision for the transmission part that specifies
+     * whether the reception is possible, attempted, and successful.
      */
     virtual const IReceptionDecision *getReceptionDecision(const IRadio *receiver, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const = 0;
 
     /**
-     * TODO
+     * Returns the reception result for the transmission that describes the end
+     * result of the reception process.
      */
     virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const = 0;
 };

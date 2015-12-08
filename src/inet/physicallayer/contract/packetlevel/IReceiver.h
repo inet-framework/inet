@@ -123,7 +123,8 @@ class INET_API IReceiver : public IPrintableObject
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
 
     /**
-     * Returns the complete result of the reception process for the provided part.
+     * Returns the reception decision for the transmission part that specifies
+     * whether the reception is possible, attempted, and successful.
      *
      * This function may be called before the reception actually starts at the
      * receiver, thus it must be purely functional and support optimistic
@@ -132,7 +133,7 @@ class INET_API IReceiver : public IPrintableObject
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
 
     /**
-     * TODO:
+     * Returns the complete result of the reception process for the provided reception.
      *
      * This function may be called before the reception actually starts at the
      * receiver, thus it must be purely functional and support optimistic

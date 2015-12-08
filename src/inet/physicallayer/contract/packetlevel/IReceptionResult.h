@@ -41,7 +41,8 @@ class INET_API IReceptionResult : public IPrintableObject
     virtual const IReception *getReception() const = 0;
 
     /**
-     * TODO.
+     * Returns the reception decisions made by the receiver in the order of
+     * received signal parts. This function never returns an empty vector.
      */
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const = 0;
 

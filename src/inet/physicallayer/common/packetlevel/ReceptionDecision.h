@@ -39,7 +39,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IReception *getReception() const override { return reception; }
-    virtual IRadioSignal::SignalPart getSignalPart() const { return part; }
+    virtual IRadioSignal::SignalPart getSignalPart() const override { return part; }
 
     virtual bool isReceptionPossible() const override { return isReceptionPossible_; }
     virtual bool isReceptionAttempted() const override { return isReceptionAttempted_; }

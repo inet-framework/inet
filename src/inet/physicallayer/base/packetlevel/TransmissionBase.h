@@ -54,8 +54,8 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
-    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const;
-    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const;
+    virtual const simtime_t getStartTime(IRadioSignal::SignalPart part) const override;
+    virtual const simtime_t getEndTime(IRadioSignal::SignalPart part) const override;
 
     virtual const simtime_t getPreambleStartTime() const override { return startTime; }
     virtual const simtime_t getPreambleEndTime() const override { return startTime + preambleDuration; }
