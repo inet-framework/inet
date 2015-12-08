@@ -140,6 +140,15 @@ class INET_API IReceiver : public IPrintableObject
      * parallel computation.
      */
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
+
+    /**
+     * Returns the reception indication (control info) that is sent up to the MAC.
+     *
+     * This function may be called before the reception actually starts at the
+     * receiver, thus it must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const = 0;
 };
 
 } // namespace physicallayer

@@ -383,10 +383,9 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
+            const IRadioMedium *medium = receiverRadio->getMedium();
             cPacket *macFrame = new cPacket();
             macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
-            const IReceiver *receiver = receiverRadio->getReceiver();
-            const IRadioMedium *medium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
@@ -394,12 +393,12 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
-            const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir);
-            const ReceptionIndication *receptionIndication = receptionResult->getIndication();
-            bool isReceptionPossible = medium->isReceptionPossible(receiverRadio, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
+            const IReceiver *receiver = receiverRadio->getReceiver();
+            const ReceptionIndication *receptionIndication = receiver->computeReceptionIndication(snir);
+            bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
+            bool isReceptionSuccessful = isReceptionPossible ? receiver->computeIsReceptionSuccessful(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE, interference, snir) : false;
             double packetErrorRate = isReceptionPossible ? receptionIndication->getPacketErrorRate() : 1;
             delete receptionIndication;
-            delete receptionResult;
             delete snir;
             delete interference;
             delete reception;

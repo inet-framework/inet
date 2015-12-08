@@ -31,8 +31,6 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const;
-
   public:
     ReceiverBase() { }
 
@@ -46,6 +44,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
+    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer
