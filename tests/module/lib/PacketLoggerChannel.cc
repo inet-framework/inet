@@ -66,11 +66,11 @@ void PacketLoggerChannel::processMessage(cMessage *msg, simtime_t t, result_t& r
     counter++;
     if (logfile.is_open())
     {
-        logfile << '#' << counter << ':' << SIMTIME_RAW(t) << ": '" << msg->getName() << "' (" << msg->getClassName() << ") sent:" << SIMTIME_RAW(msg->getSendingTime());
+        logfile << '#' << counter << ':' << t.raw() << ": '" << msg->getName() << "' (" << msg->getClassName() << ") sent:" << msg->getSendingTime().raw();
         cPacket* pk = dynamic_cast<cPacket *>(msg);
         if (pk)
             logfile << " (" << pk->getByteLength() << " byte)";
-        logfile << " discard:" << result.discard << ", delay:" << SIMTIME_RAW(result.delay) << ", duration:" << SIMTIME_RAW(result.duration);
+        logfile << " discard:" << result.discard << ", delay:" << result.delay.raw() << ", duration:" << result.duration.raw();
         logfile << endl;
     }
 }
