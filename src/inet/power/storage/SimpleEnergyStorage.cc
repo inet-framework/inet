@@ -55,7 +55,7 @@ void SimpleEnergyStorage::initialize(int stage)
         lastResidualCapacityUpdate = simTime();
         emit(residualCapacityChangedSignal, residualCapacity.get());
         timer = new cMessage("timer");
-        if (!isNaN(nodeStartCapacity.get()) || !isNaN(nodeShutdownCapacity.get())) {
+        if (!std::isnan(nodeStartCapacity.get()) || !std::isnan(nodeShutdownCapacity.get())) {
             node = findContainingNode(this);
             nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
             if (!nodeStatus)
@@ -98,14 +98,14 @@ void SimpleEnergyStorage::setPowerGeneration(int energyGeneratorId, W generatedP
 
 void SimpleEnergyStorage::executeNodeOperation(J newResidualCapacity)
 {
-    if (!isNaN(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
+    if (!std::isnan(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
         EV_WARN << "Capacity reached node shutdown threshold" << endl;
         LifecycleOperation::StringMap params;
         NodeShutdownOperation *operation = new NodeShutdownOperation();
         operation->initialize(node, params);
         lifecycleController->initiateOperation(operation);
     }
-    else if (!isNaN(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
+    else if (!std::isnan(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
         EV_INFO << "Capacity reached node start threshold" << endl;
         LifecycleOperation::StringMap params;
         NodeStartOperation *operation = new NodeStartOperation();
@@ -146,23 +146,23 @@ void SimpleEnergyStorage::scheduleTimer()
     W totalPower = totalGeneratedPower - totalConsumedPower;
     targetCapacity = residualCapacity;
     if (totalPower > W(0)) {
-        targetCapacity = isNaN(printCapacityStep.get()) ? nominalCapacity : ceil(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        targetCapacity = std::isnan(printCapacityStep.get()) ? nominalCapacity : ceil(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
         // NOTE: make sure capacity will change over time despite double arithmetic
         simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
         if (remainingTime == 0)
             targetCapacity += printCapacityStep;
         // override target capacity if start is needed
-        if (!isNaN(nodeStartCapacity.get()) && nodeStatus->getState() == NodeStatus::DOWN && residualCapacity < nodeStartCapacity && nodeStartCapacity < targetCapacity)
+        if (!std::isnan(nodeStartCapacity.get()) && nodeStatus->getState() == NodeStatus::DOWN && residualCapacity < nodeStartCapacity && nodeStartCapacity < targetCapacity)
             targetCapacity = nodeStartCapacity;
     }
     else if (totalPower < W(0)) {
-        targetCapacity = isNaN(printCapacityStep.get()) ? J(0) : floor(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        targetCapacity = std::isnan(printCapacityStep.get()) ? J(0) : floor(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
         // make sure capacity will change over time despite double arithmetic
         simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
         if (remainingTime == 0)
             targetCapacity -= printCapacityStep;
         // override target capacity if shutdown is needed
-        if (!isNaN(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeShutdownCapacity && nodeShutdownCapacity > targetCapacity)
+        if (!std::isnan(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeShutdownCapacity && nodeShutdownCapacity > targetCapacity)
             targetCapacity = nodeShutdownCapacity;
     }
     // enforce target capacity to be in range

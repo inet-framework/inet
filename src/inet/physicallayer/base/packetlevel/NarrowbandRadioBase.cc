@@ -40,10 +40,10 @@ void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
         if (newModulation != nullptr)
             setModulation(newModulation);
         Hz newCarrierFrequency = configureCommand->getCarrierFrequency();
-        if (!isNaN(newCarrierFrequency.get()))
+        if (!std::isnan(newCarrierFrequency.get()))
             setCarrierFrequency(newCarrierFrequency);
         Hz newBandwidth = configureCommand->getBandwidth();
-        if (!isNaN(newBandwidth.get()))
+        if (!std::isnan(newBandwidth.get()))
             setBandwidth(newBandwidth);
     }
     else

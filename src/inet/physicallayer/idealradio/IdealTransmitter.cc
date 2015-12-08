@@ -64,7 +64,7 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     auto controlInfo = dynamic_cast<TransmissionRequest*>(macFrame->getControlInfo());
-    auto transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
+    auto transmissionBitrate = controlInfo && !std::isnan(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     auto headerDuration = headerBitLength / transmissionBitrate.get();
     auto dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
     auto duration = preambleDuration + headerDuration + dataDuration;

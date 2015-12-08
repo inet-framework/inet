@@ -26,9 +26,9 @@ Define_Module(MediumLimitCache);
 
 template<typename T> inline T minIgnoreNaN(T a, T b)
 {
-    if (isNaN(a.get()))
+    if (std::isnan(a.get()))
         return b;
-    else if (isNaN(b.get()))
+    else if (std::isnan(b.get()))
         return a;
     else if (a < b)
         return a;
@@ -38,9 +38,9 @@ template<typename T> inline T minIgnoreNaN(T a, T b)
 
 template<typename T> inline T maxIgnoreNaN(T a, T b)
 {
-    if (isNaN(a.get()))
+    if (std::isnan(a.get()))
         return b;
-    else if (isNaN(b.get()))
+    else if (std::isnan(b.get()))
         return a;
     else if (a > b)
         return a;
@@ -50,9 +50,9 @@ template<typename T> inline T maxIgnoreNaN(T a, T b)
 
 inline double maxIgnoreNaN(double a, double b)
 {
-    if (isNaN(a))
+    if (std::isnan(a))
         return b;
-    else if (isNaN(b))
+    else if (std::isnan(b))
         return a;
     else if (a > b)
         return a;
@@ -244,7 +244,7 @@ Coord MediumLimitCache::computeMaxConstreaintArea() const
 m MediumLimitCache::getMaxInterferenceRange(const IRadio* radio) const
 {
     m maxInterferenceRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
-    if (!isNaN(maxInterferenceRange.get()))
+    if (!std::isnan(maxInterferenceRange.get()))
         return maxInterferenceRange;
     return radio->getTransmitter()->getMaxInterferenceRange();
 }
@@ -252,7 +252,7 @@ m MediumLimitCache::getMaxInterferenceRange(const IRadio* radio) const
 m MediumLimitCache::getMaxCommunicationRange(const IRadio* radio) const
 {
     m maxCommunicationRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minReceptionPower);
-    if (!isNaN(maxCommunicationRange.get()))
+    if (!std::isnan(maxCommunicationRange.get()))
         return maxCommunicationRange;
     return radio->getTransmitter()->getMaxCommunicationRange();
 }

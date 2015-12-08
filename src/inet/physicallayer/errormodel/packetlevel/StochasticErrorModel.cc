@@ -54,7 +54,7 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
 {
     Enter_Method_Silent();
     const IReception *reception = snir->getReception();
-    if (!isNaN(packetErrorRate)) {
+    if (!std::isnan(packetErrorRate)) {
         double factor = reception->getDuration(part) / reception->getDuration();
         return pow(packetErrorRate, factor);
     }
@@ -81,7 +81,7 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
 double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
-    if (!isNaN(bitErrorRate)) {
+    if (!std::isnan(bitErrorRate)) {
         return bitErrorRate;
     }
     else {

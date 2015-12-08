@@ -72,7 +72,7 @@ double DimensionalSNIR::computeMin() const
 
 double DimensionalSNIR::getMin() const
 {
-    if (isNaN(minSNIR))
+    if (std::isnan(minSNIR))
         minSNIR = computeMin();
     return minSNIR;
 }

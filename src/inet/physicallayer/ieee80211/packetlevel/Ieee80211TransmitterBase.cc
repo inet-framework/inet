@@ -68,7 +68,7 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Tr
             throw cRuntimeError("Unsupported mode requested");
         return ieee80211TransmissionRequest->getMode();
     }
-    else if (modeSet != nullptr && transmissionRequest != nullptr && !isNaN(transmissionRequest->getBitrate().get()))
+    else if (modeSet != nullptr && transmissionRequest != nullptr && !std::isnan(transmissionRequest->getBitrate().get()))
         return modeSet->getMode(transmissionRequest->getBitrate());
     else
         return mode;
@@ -85,7 +85,7 @@ const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(con
 
 W Ieee80211TransmitterBase::computeTransmissionPower(const TransmissionRequest *transmissionRequest) const
 {
-    if (transmissionRequest != nullptr && !isNaN(transmissionRequest->getPower().get()))
+    if (transmissionRequest != nullptr && !std::isnan(transmissionRequest->getPower().get()))
         return transmissionRequest->getPower();
     else
         return power;

@@ -46,7 +46,7 @@ double ScalarSNIR::computeMin() const
 
 double ScalarSNIR::getMin() const
 {
-    if (isNaN(minSNIR))
+    if (std::isnan(minSNIR))
         minSNIR = computeMin();
     return minSNIR;
 }

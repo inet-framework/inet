@@ -74,14 +74,14 @@ bps Ieee80211OFDMModeBase::computeNetBitrate(bps grossBitrate, const Ieee80211OF
 
 bps Ieee80211OFDMModeBase::getGrossBitrate() const
 {
-    if (isNaN(grossBitrate.get()))
+    if (std::isnan(grossBitrate.get()))
         grossBitrate = computeGrossBitrate(modulation);
     return grossBitrate;
 }
 
 bps Ieee80211OFDMModeBase::getNetBitrate() const
 {
-    if (isNaN(netBitrate.get()))
+    if (std::isnan(netBitrate.get()))
         netBitrate = computeNetBitrate(getGrossBitrate(), code);
     return netBitrate;
 }

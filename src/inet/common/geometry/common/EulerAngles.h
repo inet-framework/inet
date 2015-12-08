@@ -35,7 +35,7 @@ class INET_API EulerAngles
 
     bool isUnspecified() const
     {
-        return isNaN(alpha) && isNaN(beta) && isNaN(gamma);
+        return std::isnan(alpha) && std::isnan(beta) && std::isnan(gamma);
     }
 
     EulerAngles operator+(const EulerAngles a) const { return EulerAngles(alpha + a.alpha, beta + a.beta, gamma + a.gamma); }

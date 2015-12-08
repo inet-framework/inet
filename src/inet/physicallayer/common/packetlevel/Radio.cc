@@ -469,11 +469,11 @@ void Radio::sendUp(cPacket *macFrame)
 {
     auto indication = check_and_cast<const ReceptionIndication*>(macFrame->getControlInfo());
     emit(minSNIRSignal, indication->getMinSNIR());
-    if (!isNaN(indication->getPacketErrorRate()))
+    if (!std::isnan(indication->getPacketErrorRate()))
         emit(packetErrorRateSignal, indication->getPacketErrorRate());
-    if (!isNaN(indication->getBitErrorRate()))
+    if (!std::isnan(indication->getBitErrorRate()))
         emit(bitErrorRateSignal, indication->getBitErrorRate());
-    if (!isNaN(indication->getSymbolErrorRate()))
+    if (!std::isnan(indication->getSymbolErrorRate()))
         emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
     EV_INFO << "Sending up " << macFrame << endl;
     send(macFrame, upperLayerOut);
