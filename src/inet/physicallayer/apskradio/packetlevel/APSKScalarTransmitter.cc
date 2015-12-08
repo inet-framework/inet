@@ -42,7 +42,7 @@ const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *tra
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    const simtime_t headerDuration = + headerBitLength / transmissionBitrate.get();
+    const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
     const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
