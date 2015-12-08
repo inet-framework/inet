@@ -63,16 +63,20 @@ INET_API cModule *findModuleUnderContainingNode(cModule *from);
  * or type mismatch.
  */
 template<typename T>
-INET_API T *findModuleFromPar(cPar& par, cModule *from);
+INET_API T *findModuleFromPar(cPar& par, cModule *from, bool required = true);
 
 template<typename T>
-T *findModuleFromPar(cPar& par, cModule *from)
+T *findModuleFromPar(cPar& par, cModule *from, bool required)
 {
     const char *path = par.stringValue();
     if (path && *path) {
         cModule *mod = from->getModuleByPath(path);
-        if (!mod)
-            throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+        if (!mod) {
+            if (required)
+                throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+            else
+                return nullptr;
+        }
         T *m = dynamic_cast<T *>(mod);
         if (!m)
             throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
@@ -88,15 +92,19 @@ T *findModuleFromPar(cPar& par, cModule *from)
  * or type mismatch.
  */
 template<typename T>
-INET_API T *getModuleFromPar(cPar& par, cModule *from);
+INET_API T *getModuleFromPar(cPar& par, cModule *from, bool required = true);
 
 template<typename T>
-T *getModuleFromPar(cPar& par, cModule *from)
+T *getModuleFromPar(cPar& par, cModule *from, bool required)
 {
     const char *path = par.stringValue();
     cModule *mod = from->getModuleByPath(path);
-    if (!mod)
-        throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+    if (!mod) {
+        if (required)
+            throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+        else
+            return nullptr;
+    }
     T *m = dynamic_cast<T *>(mod);
     if (!m)
         throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
