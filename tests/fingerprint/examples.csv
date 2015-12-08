@@ -101,7 +101,7 @@
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             1cc3-48bb 96bb-654a/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             18fd-c880 f3f1-9633/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        7775-28ad 2567-d386/tplx
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            e3cc-455b 6445-1ec6/tplx
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            e3cc-455b 9dc2-a889/tplx
 
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            b4fd-7612 049f-3c69/tplx
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            b4fd-7612 049f-3c69/tplx

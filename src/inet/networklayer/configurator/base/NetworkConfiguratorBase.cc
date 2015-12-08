@@ -396,7 +396,6 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IReceiver *receiver = receiverRadio->getReceiver();
             const ReceptionIndication *receptionIndication = receiver->computeReceptionIndication(snir);
             bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
-            bool isReceptionSuccessful = isReceptionPossible ? receiver->computeIsReceptionSuccessful(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE, interference, snir) : false;
             double packetErrorRate = isReceptionPossible ? receptionIndication->getPacketErrorRate() : 1;
             delete receptionIndication;
             delete snir;
