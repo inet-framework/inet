@@ -13,14 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
-simple BasicRateSelection like IRateSelection
+simple OnoeRateControl like IRateControl
 {
     parameters:
-        string modeSet @enum("a", "b", "g", "n", "p") = default("g");
-        double dataBitrate @unit("bps") = default(-1bps); // unicast data and management frames
-        double multicastBitrate @unit("bps") = default(-1bps); // multicast data and management frames
-        double controlBitrate @unit("bps") = default(-1bps); // RTS, CTS, ACK, etc.
-        @display("i=block/cogwheel");
+        double interval @unit("s") = default(1s);
+        @display("i=block/control");
 }

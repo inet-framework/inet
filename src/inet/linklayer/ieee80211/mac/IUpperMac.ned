@@ -17,15 +17,15 @@
 // Author: Andras Varga
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
 //
-// Interface for modules that implement contention-based channel access.
-// For each frame, Contention listens on the channel for a DIFS (AIFS) period
-// then for a random backoff period before transitting the frame, and defers when
-// busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
-// of the original DIFS (AIFS).
+// Interface for UpperMacs. UpperMacs deal with exchanging frames, and build
+// on the services of IContention, ITx and IRx for accessing the
+// channel. Responsibilities of UpperMacs include queueing, ACK generation
+// and retransmissions, RTS/CTS, duplicate detection, fragmentation,
+// aggregation, block acknowledgement, rate selection, and more.
 //
-moduleinterface IContention
+moduleinterface IUpperMac
 {
 }

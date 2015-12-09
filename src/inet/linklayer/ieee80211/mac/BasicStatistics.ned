@@ -17,11 +17,13 @@
 // Author: Andras Varga
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
 //
-// Interface for MAC statistics collection modules
+// The default implementation of IStatistics
 //
-moduleinterface IStatistics
+simple BasicStatistics like IStatistics
 {
+    parameters:
+        @display("i=block/control");
 }

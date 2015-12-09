@@ -22,7 +22,7 @@
 
 #include "Ieee80211NewMac.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "IUpperMac.h"
 #include "IRx.h"

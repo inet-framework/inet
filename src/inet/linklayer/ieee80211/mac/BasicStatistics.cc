@@ -18,7 +18,7 @@
 #include "BasicStatistics.h"
 #include "MacUtils.h"
 #include "IRateControl.h"
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {

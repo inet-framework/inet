@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
 import inet.linklayer.ieee80211.IIeee80211Mac;
 

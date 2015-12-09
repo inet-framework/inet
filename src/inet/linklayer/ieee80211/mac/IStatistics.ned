@@ -12,20 +12,16 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 // Author: Andras Varga
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
 //
-// Interface for UpperMacs. UpperMacs deal with exchanging frames, and build
-// on the services of IContention, ITx and IRx for accessing the
-// channel. Responsibilities of UpperMacs include queueing, ACK generation
-// and retransmissions, RTS/CTS, duplicate detection, fragmentation,
-// aggregation, block acknowledgement, rate selection, and more.
+// Interface for MAC statistics collection modules
 //
-moduleinterface IUpperMac
+moduleinterface IStatistics
 {
 }

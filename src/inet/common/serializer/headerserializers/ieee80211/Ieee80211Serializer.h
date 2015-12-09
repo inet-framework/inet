@@ -20,7 +20,7 @@
 
 #include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/SerializerBase.h"
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
 
 

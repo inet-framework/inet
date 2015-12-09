@@ -54,7 +54,7 @@ namespace inet { class UDPPacket; }
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IEEE80211
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #else // ifdef WITH_IEEE80211
 namespace inet { namespace ieee80211 { class Ieee80211Frame; } }
 #endif // ifdef WITH_IEEE80211

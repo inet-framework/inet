@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee80211.newmac;
+package inet.linklayer.ieee80211.mac;
 
 // References:
 //   [1] ftp://ftp-sop.inria.fr/planete/ivs/papers/mswim04.pdf

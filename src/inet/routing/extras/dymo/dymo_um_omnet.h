@@ -58,7 +58,7 @@
 /* System-dependent datatypes */
 /* Needed by some network-related datatypes */
 #include "inet/routing/extras/base/ManetRoutingBase.h"
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "dymoum/dlist.h"
 #include "dymo_msg_struct.h"
 #include "inet/networklayer/contract/INetworkDatagram.h"

@@ -66,7 +66,7 @@
 #include "inet/routing/extras/base/ManetRoutingBase.h"
 #include "aodv-uu/list.h"
 
-#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 #include "aodv_msg_struct.h"
 /* Forward declaration needed to be able to reference the class */

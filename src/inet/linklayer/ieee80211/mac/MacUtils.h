@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/ieee80211/newmac/AccessCategory.h"
+#include "inet/linklayer/ieee80211/mac/AccessCategory.h"
 
 using namespace inet::physicallayer;
 
