@@ -27,7 +27,7 @@
 #endif // ifdef WITH_IDEALWIRELESS
 
 #ifdef WITH_IEEE80211
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
 #include "inet/networklayer/common/L3AddressResolver.h"

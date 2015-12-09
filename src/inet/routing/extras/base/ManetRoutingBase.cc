@@ -33,7 +33,7 @@
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/routing/extras/base/ControlInfoBreakLink_m.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
 #include "inet/common/ModuleAccess.h"

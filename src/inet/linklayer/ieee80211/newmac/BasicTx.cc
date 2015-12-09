@@ -22,7 +22,7 @@
 #include "IMacRadioInterface.h"
 #include "IRx.h"
 #include "IStatistics.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {

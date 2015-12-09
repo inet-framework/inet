@@ -33,7 +33,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {

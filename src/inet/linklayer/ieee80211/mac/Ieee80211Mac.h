@@ -33,7 +33,7 @@
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/newmac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/ieee80211/newmac/AccessCategory.h"
 
