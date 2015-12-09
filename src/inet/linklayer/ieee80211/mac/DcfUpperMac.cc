@@ -18,7 +18,7 @@
 //
 
 #include "DcfUpperMac.h"
-#include "Ieee80211NewMac.h"
+#include "Ieee80211Mac.h"
 #include "IRx.h"
 #include "IContention.h"
 #include "ITx.h"
@@ -55,7 +55,7 @@ DcfUpperMac::~DcfUpperMac()
 
 void DcfUpperMac::initialize()
 {
-    mac = check_and_cast<Ieee80211NewMac *>(getModuleByPath(par("macModule")));
+    mac = check_and_cast<Ieee80211Mac *>(getModuleByPath(par("macModule")));
     rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
     tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
     contention = nullptr;

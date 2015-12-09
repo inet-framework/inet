@@ -33,7 +33,7 @@ namespace ieee80211 {
 class IRx;
 class IContentionCallback;
 class ITxCallback;
-class Ieee80211NewMac;
+class Ieee80211Mac;
 class Ieee80211RTSFrame;
 class IMacQoSClassifier;
 class IMacParameters;
@@ -58,7 +58,7 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
     protected:
         IMacParameters *params;
         MacUtils *utils;
-        Ieee80211NewMac *mac = nullptr;
+        Ieee80211Mac *mac = nullptr;
         IRx *rx = nullptr;
         ITx *tx;
         IContention **contention;

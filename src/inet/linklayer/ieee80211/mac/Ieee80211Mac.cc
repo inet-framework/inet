@@ -20,7 +20,7 @@
 #include <algorithm>
 
 
-#include "Ieee80211NewMac.h"
+#include "Ieee80211Mac.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
@@ -34,22 +34,22 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(Ieee80211NewMac);
+Define_Module(Ieee80211Mac);
 
-simsignal_t Ieee80211NewMac::stateSignal = SIMSIGNAL_NULL;
-simsignal_t Ieee80211NewMac::radioStateSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211Mac::stateSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211Mac::radioStateSignal = SIMSIGNAL_NULL;
 
-Ieee80211NewMac::Ieee80211NewMac()
+Ieee80211Mac::Ieee80211Mac()
 {
 }
 
-Ieee80211NewMac::~Ieee80211NewMac()
+Ieee80211Mac::~Ieee80211Mac()
 {
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
 }
 
-void Ieee80211NewMac::initialize(int stage)
+void Ieee80211Mac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
 
@@ -88,7 +88,7 @@ void Ieee80211NewMac::initialize(int stage)
     }
 }
 
-const MACAddress& Ieee80211NewMac::isInterfaceRegistered()
+const MACAddress& Ieee80211Mac::isInterfaceRegistered()
 {
 //    if (!par("multiMac").boolValue())
 //        return MACAddress::UNSPECIFIED_ADDRESS;
@@ -106,7 +106,7 @@ const MACAddress& Ieee80211NewMac::isInterfaceRegistered()
     return MACAddress::UNSPECIFIED_ADDRESS;
 }
 
-InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
+InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
@@ -124,22 +124,22 @@ InterfaceEntry *Ieee80211NewMac::createInterfaceEntry()
     return e;
 }
 
-void Ieee80211NewMac::handleSelfMessage(cMessage *msg)
+void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 {
     ASSERT(false);
 }
 
-void Ieee80211NewMac::handleUpperPacket(cPacket *msg)
+void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 {
     upperMac->upperFrameReceived(check_and_cast<Ieee80211DataOrMgmtFrame *>(msg));
 }
 
-void Ieee80211NewMac::handleLowerPacket(cPacket *msg)
+void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     rx->lowerFrameReceived(check_and_cast<Ieee80211Frame *>(msg));
 }
 
-void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
+void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 {
     if (msg->getKind() == RADIO_C_CONFIGURE) {
         EV_DEBUG << "Passing on command " << msg->getName() << " to physical layer\n";
@@ -176,7 +176,7 @@ void Ieee80211NewMac::handleUpperCommand(cMessage *msg)
     }
 }
 
-void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent("receiveSignal()");
     if (signalID == IRadio::receptionStateChangedSignal) {
@@ -200,7 +200,7 @@ void Ieee80211NewMac::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
 }
 
-void Ieee80211NewMac::configureRadioMode(IRadio::RadioMode radioMode)
+void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
 {
     if (radio->getRadioMode() != radioMode) {
         ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
@@ -211,14 +211,14 @@ void Ieee80211NewMac::configureRadioMode(IRadio::RadioMode radioMode)
     }
 }
 
-void Ieee80211NewMac::sendUp(cMessage *msg)
+void Ieee80211Mac::sendUp(cMessage *msg)
 {
     Enter_Method("sendUp(\"%s\")", msg->getName());
     take(msg);
     MACProtocolBase::sendUp(msg);
 }
 
-void Ieee80211NewMac::sendFrame(Ieee80211Frame *frame)
+void Ieee80211Mac::sendFrame(Ieee80211Frame *frame)
 {
     Enter_Method("sendFrame(\"%s\")", frame->getName());
     take(frame);
@@ -226,7 +226,7 @@ void Ieee80211NewMac::sendFrame(Ieee80211Frame *frame)
     sendDown(frame);
 }
 
-void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
+void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
     if (pendingRadioConfigMsg != NULL) {
         sendDown(pendingRadioConfigMsg);
@@ -235,7 +235,7 @@ void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
 }
 
 // FIXME
-bool Ieee80211NewMac::handleNodeStart(IDoneCallback *doneCallback)
+bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
 {
     if (!doneCallback)
         return true;    // do nothing when called from initialize()
@@ -246,7 +246,7 @@ bool Ieee80211NewMac::handleNodeStart(IDoneCallback *doneCallback)
 }
 
 // FIXME
-bool Ieee80211NewMac::handleNodeShutdown(IDoneCallback *doneCallback)
+bool Ieee80211Mac::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     bool ret = MACProtocolBase::handleNodeStart(doneCallback);
     handleNodeCrash();
@@ -254,7 +254,7 @@ bool Ieee80211NewMac::handleNodeShutdown(IDoneCallback *doneCallback)
 }
 
 // FIXME
-void Ieee80211NewMac::handleNodeCrash()
+void Ieee80211Mac::handleNodeCrash()
 {
 }
 

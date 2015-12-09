@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IEEE80211NEWMAC_H
-#define __INET_IEEE80211NEWMAC_H
+#ifndef __INET_IEEE80211MAC_H
+#define __INET_IEEE80211MAC_H
 
 // uncomment this if you do not want to log state machine transitions
 #define FSM_DEBUG
@@ -48,7 +48,7 @@ class Ieee80211Frame;
 /**
  * Implements the IEEE 802.11 MAC.
  */
-class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterface
+class INET_API Ieee80211Mac : public MACProtocolBase, public IMacRadioInterface
 {
   protected:
     MACAddress address; // only because createInterfaceEntry() needs it
@@ -94,8 +94,8 @@ class INET_API Ieee80211NewMac : public MACProtocolBase, public IMacRadioInterfa
     virtual void handleNodeCrash() override;
 
   public:
-    Ieee80211NewMac();
-    virtual ~Ieee80211NewMac();
+    Ieee80211Mac();
+    virtual ~Ieee80211Mac();
 
     virtual const MACAddress& getAddress() const {return address;}
     virtual void sendUp(cMessage *message) override;

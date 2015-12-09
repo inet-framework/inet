@@ -110,7 +110,7 @@ module MACProtocolBase extends LayeredProtocolBase
         @display("i=block/layer");
 // which is related to PCF and other non-modelled features).
 //
-module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
+module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -138,7 +138,7 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
         *.statisticsModule = "^" + statisticsModule;
 
         @display("i=block/layer;bgb=721,355");
-        @class(Ieee80211NewMac);
+        @class(Ieee80211Mac);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -172,10 +172,10 @@ module Ieee80211NewMac extends MACProtocolBase like IIeee80211Mac
 }
 
 //
-// Delegate some upperMac parameters to Ieee80211NewMac, to be more compatible with the old MAC.
+// Delegate some upperMac parameters to Ieee80211Mac, to be more compatible with the old MAC.
 // NOTE: NOT ALL PARAMETERS OF THE OLD MAC CAN BE MAPPED.
 //
-module Ieee80211CompatibleNewMac extends Ieee80211NewMac
+module Ieee80211CompatibleNewMac extends Ieee80211Mac
 {
     parameters:
         string opMode @enum("a","b","g","n","p") = default("g");
