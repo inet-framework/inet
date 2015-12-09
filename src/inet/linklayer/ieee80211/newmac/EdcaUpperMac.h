@@ -31,14 +31,15 @@ namespace inet {
 namespace ieee80211 {
 
 class IRx;
+class IContentionCallback;
 class ITxCallback;
 class Ieee80211NewMac;
 class Ieee80211RTSFrame;
 class IMacQoSClassifier;
 class IMacParameters;
 class MacUtils;
-class IImmediateTx;
-class IContentionTx;
+class ITx;
+class IContention;
 class IDuplicateDetector;
 class IFragmenter;
 class IReassembly;
@@ -59,8 +60,8 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         MacUtils *utils;
         Ieee80211NewMac *mac = nullptr;
         IRx *rx = nullptr;
-        IImmediateTx *immediateTx;
-        IContentionTx **contentionTx;
+        ITx *tx;
+        IContention **contention;
 
         int maxQueueSize;
         int fragmentationThreshold = 2346;
@@ -98,9 +99,9 @@ class INET_API EdcaUpperMac : public cSimpleModule, public IUpperMac, protected 
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
         virtual void corruptedFrameReceived() override;
-        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(ITxCallback *callback, int txIndex) override;
-        virtual void transmissionComplete(ITxCallback *callback, int txIndex) override;
-        virtual void internalCollision(ITxCallback *callback, int txIndex) override;
+        virtual void channelAccessGranted(IContentionCallback *callback, int txIndex) override;
+        virtual void internalCollision(IContentionCallback *callback, int txIndex) override;
+        virtual void transmissionComplete(ITxCallback *callback) override;
 };
 
 } // namespace ieee80211

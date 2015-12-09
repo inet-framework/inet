@@ -17,10 +17,10 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICCONTENTIONTX_H
-#define __INET_BASICCONTENTIONTX_H
+#ifndef __INET_BASICCONTENTION_H
+#define __INET_BASICCONTENTION_H
 
-#include "IContentionTx.h"
+#include "IContention.h"
 #include "ICollisionController.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
@@ -34,7 +34,7 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
-class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, protected ICollisionController::ICallback
+class INET_API BasicContention : public cSimpleModule, public IContention, protected ICollisionController::ICallback
 {
     public:
         enum State { IDLE, DEFER, IFS_AND_BACKOFF, TRANSMIT };
@@ -44,20 +44,18 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         IMacRadioInterface *mac;
         IUpperMac *upperMac;
         ICollisionController *collisionController;  // optional
-        IRx *rx;
         IStatistics *statistics;
         cMessage *startTxEvent = nullptr;  // in the absence of collisionController
         int txIndex;
 
-        // current transmission's parameters
-        Ieee80211Frame *frame = nullptr;
+        // current contention's parameters
         simtime_t ifs = SIMTIME_ZERO;
         simtime_t eifs = SIMTIME_ZERO;
         int cwMin = 0;
         int cwMax = 0;
         simtime_t slotTime;
         int retryCount = 0;
-        ITxCallback *callback = nullptr;
+        IContentionCallback *callback = nullptr;
 
         cFSM fsm;
         simtime_t endEifsTime = SIMTIME_ZERO;
@@ -65,7 +63,6 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         simtime_t scheduledTransmissionTime = SIMTIME_ZERO;
         simtime_t channelLastBusyTime = SIMTIME_ZERO;
         bool mediumFree = false;
-        simtime_t durationField;
 
     protected:
         virtual void initialize() override;
@@ -80,22 +77,19 @@ class INET_API BasicContentionTx : public cSimpleModule, public IContentionTx, p
         virtual void cancelTransmissionRequest();
         virtual void switchToEifs();
         virtual void computeRemainingBackoffSlots();
-        virtual void sendDownFrame();
-        virtual void reportTransmissionComplete();
+        virtual void reportChannelAccessGranted();
         virtual void reportInternalCollision();
         virtual void updateDisplayString();
         const char *getEventName(EventType event);
 
     public:
-        BasicContentionTx() {}
-        ~BasicContentionTx();
+        BasicContention() {}
+        ~BasicContention();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
-        virtual void transmitContentionFrame(Ieee80211Frame *frame, simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) override;
-        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, ITxCallback *callback) override; // will get frame via ITxCallback::getFrameToTransmit()
+        virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback) override;
 
         virtual void mediumStateChanged(bool mediumFree) override;
-        virtual void radioTransmissionFinished() override;
         virtual void corruptedFrameReceived() override;
 };
 

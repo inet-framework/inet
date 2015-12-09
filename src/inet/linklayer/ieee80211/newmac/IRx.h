@@ -50,7 +50,7 @@ class INET_API IRx
         virtual void setAddress(const MACAddress& address) = 0;
         virtual bool isReceptionInProgress() const = 0; // needed on ACK timeout
 
-        // from ContentionTx
+        // from Contention
         virtual bool isMediumFree() const = 0;
         virtual void frameTransmitted(simtime_t durationField) = 0;
 

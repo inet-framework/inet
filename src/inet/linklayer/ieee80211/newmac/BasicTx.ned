@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 // Author: Andras Varga
 //
@@ -20,12 +20,14 @@
 package inet.linklayer.ieee80211.newmac;
 
 //
-// Interface for modules that implement contention-based channel access.
-// For each frame, ContentionTx listens on the channel for a DIFS (AIFS) period
-// then for a random backoff period before transitting the frame, and defers when
-// busy channel is sensed. After receiving a corrupted frame, EIFS is used instead
-// of the original DIFS (AIFS).
+// The default implementation of ITx.
 //
-moduleinterface IContentionTx
+simple BasicTx like ITx
 {
+    parameters:
+        string macModule;
+        string upperMacModule;
+        string rxModule;
+        string statisticsModule;
+        @display("i=block/downarrow");
 }

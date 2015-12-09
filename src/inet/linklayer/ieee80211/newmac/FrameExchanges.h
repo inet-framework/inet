@@ -27,6 +27,7 @@ namespace ieee80211 {
 
 class Ieee80211DataOrMgmtFrame;
 
+#if 0
 // just to demonstrate the use FsmBasedFrameExchange; otherwise we prefer the step-based because it's simpler
 class INET_API SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchange
 {
@@ -52,6 +53,7 @@ class INET_API SendDataWithAckFsmBasedFrameExchange : public FsmBasedFrameExchan
         SendDataWithAckFsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory);
         ~SendDataWithAckFsmBasedFrameExchange();
 };
+#endif
 
 class INET_API SendDataWithAckFrameExchange : public StepBasedFrameExchange
 {
@@ -98,13 +100,14 @@ class INET_API SendMulticastDataFrameExchange : public FrameExchange
         AccessCategory accessCategory;
         int retryCount = 0;
     protected:
-        virtual void transmitFrame();
+        virtual void startContention();
     public:
         SendMulticastDataFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory);
         ~SendMulticastDataFrameExchange();
         virtual void start() override;
-        virtual void transmissionComplete(int txIndex) override;
+        virtual void channelAccessGranted(int txIndex) override;
         virtual void internalCollision(int txIndex) override;
+        virtual void transmissionComplete() override;
         virtual void handleSelfMessage(cMessage* timer) override;
         virtual std::string info() const override;
 };

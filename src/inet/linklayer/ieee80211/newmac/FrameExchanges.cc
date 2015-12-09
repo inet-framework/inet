@@ -20,8 +20,8 @@
 #include "FrameExchanges.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/FSMA.h"
-#include "IContentionTx.h"
-#include "IImmediateTx.h"
+#include "IContention.h"
+#include "ITx.h"
 #include "IRx.h"
 #include "IMacParameters.h"
 #include "IStatistics.h"
@@ -33,6 +33,7 @@ using namespace inet::utils;
 namespace inet {
 namespace ieee80211 {
 
+#if 0
 //TODO with the introduction of earlyAckTimeout, this class has become obsolete
 SendDataWithAckFsmBasedFrameExchange::SendDataWithAckFsmBasedFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory accessCategory) :
     FsmBasedFrameExchange(context, callback), frame(frame), txIndex(txIndex), accessCategory(accessCategory)
@@ -111,7 +112,7 @@ void SendDataWithAckFsmBasedFrameExchange::transmitDataFrame()
 {
     retryCount = 0;
     AccessCategory ac = accessCategory; // abbreviate
-    contentionTx[txIndex]->transmitContentionFrame(dupPacketAndControlInfo(frame), params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
+    contention[txIndex]->transmitContentionFrame(dupPacketAndControlInfo(frame), params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
 }
 
 void SendDataWithAckFsmBasedFrameExchange::retryDataFrame()
@@ -119,7 +120,7 @@ void SendDataWithAckFsmBasedFrameExchange::retryDataFrame()
     retryCount++;
     frame->setRetry(true);
     AccessCategory ac = accessCategory; // abbreviate
-    contentionTx[txIndex]->transmitContentionFrame(dupPacketAndControlInfo(frame), params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
+    contention[txIndex]->transmitContentionFrame(dupPacketAndControlInfo(frame), params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
 }
 
 void SendDataWithAckFsmBasedFrameExchange::scheduleAckTimeout()
@@ -134,6 +135,7 @@ bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame *frame)
 {
     return dynamic_cast<Ieee80211ACKFrame *>(frame) != nullptr;
 }
+#endif
 
 //------------------------------
 
@@ -161,9 +163,10 @@ std::string SendDataWithAckFrameExchange::info() const
 void SendDataWithAckFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(dupPacketAndControlInfo(dataFrame), retryCount); break;
-        case 1: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 2: statistics->frameTransmissionSuccessful(dataFrame, retryCount); succeed(); break;
+        case 0: startContention(retryCount); break;
+        case 1: transmitFrame(dupPacketAndControlInfo(dataFrame)); break;
+        case 2: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
+        case 3: statistics->frameTransmissionSuccessful(dataFrame, retryCount); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -171,7 +174,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
 IFrameExchange::FrameProcessingResult SendDataWithAckFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
     switch (step) {
-        case 1: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        case 2: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
         default: ASSERT(false); return IGNORED;
     }
 }
@@ -179,7 +182,7 @@ IFrameExchange::FrameProcessingResult SendDataWithAckFrameExchange::processReply
 void SendDataWithAckFrameExchange::processTimeout(int step)
 {
     switch (step) {
-        case 1: retry(); break;
+        case 2: retry(); break;
         default: ASSERT(false);
     }
 }
@@ -232,11 +235,12 @@ std::string SendDataWithRtsCtsFrameExchange::info() const
 void SendDataWithRtsCtsFrameExchange::doStep(int step)
 {
     switch (step) {
-        case 0: transmitContentionFrame(utils->buildRtsFrame(dataFrame), shortRetryCount); break;
-        case 1: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
-        case 2: transmitImmediateFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
-        case 3: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
-        case 4: statistics->frameTransmissionSuccessful(dataFrame, longRetryCount); succeed(); break;
+        case 0: startContention(shortRetryCount); break;
+        case 1: transmitFrame(utils->buildRtsFrame(dataFrame)); break;
+        case 2: expectReplyRxStartWithin(utils->getCtsEarlyTimeout()); break;
+        case 3: transmitFrame(dupPacketAndControlInfo(dataFrame), params->getSifsTime()); break;
+        case 4: expectReplyRxStartWithin(utils->getAckEarlyTimeout()); break;
+        case 5: statistics->frameTransmissionSuccessful(dataFrame, longRetryCount); succeed(); break;
         default: ASSERT(false);
     }
 }
@@ -244,8 +248,8 @@ void SendDataWithRtsCtsFrameExchange::doStep(int step)
 IFrameExchange::FrameProcessingResult SendDataWithRtsCtsFrameExchange::processReply(int step, Ieee80211Frame *frame)
 {
     switch (step) {
-        case 1: if (utils->isCts(frame)) return PROCESSED_DISCARD; else return IGNORED;
-        case 3: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        case 2: if (utils->isCts(frame)) return PROCESSED_DISCARD; else return IGNORED;
+        case 4: if (utils->isAck(frame)) return PROCESSED_DISCARD; else return IGNORED;
         default: ASSERT(false); return IGNORED;
     }
 }
@@ -253,8 +257,8 @@ IFrameExchange::FrameProcessingResult SendDataWithRtsCtsFrameExchange::processRe
 void SendDataWithRtsCtsFrameExchange::processTimeout(int step)
 {
     switch (step) {
-        case 1: retryRtsCts(); break;
-        case 3: retryData(); break;
+        case 2: retryRtsCts(); break;
+        case 4: retryData(); break;
         default: ASSERT(false);
     }
 }
@@ -312,37 +316,43 @@ std::string SendMulticastDataFrameExchange::info() const
     return dataFrame ? std::string("frame=") + dataFrame->getName() : "";
 }
 
-void SendMulticastDataFrameExchange::start()
+void SendMulticastDataFrameExchange::handleSelfMessage(cMessage *msg)
 {
-    transmitFrame();
+    ASSERT(false);
 }
 
-void SendMulticastDataFrameExchange::transmissionComplete(int txIndex)
+void SendMulticastDataFrameExchange::start()
 {
-    reportSuccess();
+    startContention();
+}
+
+void SendMulticastDataFrameExchange::startContention()
+{
+    AccessCategory ac = accessCategory;  // abbreviate
+    contention[txIndex]->startContention(params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMulticast(ac), params->getCwMulticast(ac), params->getSlotTime(), 0, this);
 }
 
 void SendMulticastDataFrameExchange::internalCollision(int txIndex)
 {
     if (++retryCount < params->getShortRetryLimit()) {
         dataFrame->setRetry(true);
-        transmitFrame();
+        startContention();
     }
     else {
         reportFailure();
     }
 }
 
-void SendMulticastDataFrameExchange::handleSelfMessage(cMessage *msg)
+void SendMulticastDataFrameExchange::channelAccessGranted(int txIndex)
 {
-    ASSERT(false);
+    tx->transmitFrame(dupPacketAndControlInfo(dataFrame), SIMTIME_ZERO, this);
 }
 
-void SendMulticastDataFrameExchange::transmitFrame()
+void SendMulticastDataFrameExchange::transmissionComplete()
 {
-    AccessCategory ac = accessCategory;  // abbreviate
-    contentionTx[txIndex]->transmitContentionFrame(dupPacketAndControlInfo(dataFrame), params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMulticast(ac), params->getCwMulticast(ac), params->getSlotTime(), 0, this);
+    reportSuccess();
 }
+
 
 } // namespace ieee80211
 } // namespace inet

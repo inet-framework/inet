@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_IIMMEDIATETX_H
-#define __INET_IIMMEDIATETX_H
+#ifndef __INET_ITX_H
+#define __INET_ITX_H
 
 #include "inet/common/INETDefs.h"
 
@@ -29,16 +29,15 @@ class Ieee80211Frame;
 class ITxCallback;
 
 /**
- * Abstract interface for processes that unconditionally transmit a frame
- * after waiting for a specified inter-frame space (usually SIFS). Such
- * processes can be used to transmit frames where no contention is needed,
- * e.g. ACK, CTS, or the second and further frames of a TXOP.
+ * Abstract interface for unconditionally transmitting a frame immediately
+ * or after waiting for a specified inter-frame space (usually SIFS).
  */
-class INET_API IImmediateTx
+class INET_API ITx
 {
     public:
-        virtual ~IImmediateTx() {}
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) = 0;
+        virtual ~ITx() {}
+        virtual void transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback) = 0;
+        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 

@@ -22,7 +22,7 @@ package inet.linklayer.ieee80211.newmac;
 //
 // Interface for collision controllers. A collision controller is used
 // with EDCA, and it detects and reports internal collisions between
-// ContentionTx instances.
+// Contention instances.
 //
 moduleinterface ICollisionController
 {

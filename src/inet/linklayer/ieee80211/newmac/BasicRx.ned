@@ -26,6 +26,6 @@ simple BasicRx like IRx
 {
     parameters:
         string upperMacModule;
-        string firstContentionTxModule;
-        @display("i=block/rx");
+        string firstContentionModule;
+        @display("i=block/uparrow");
 }

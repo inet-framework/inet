@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "BasicImmediateTx.h"
+#include "BasicTx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "IRx.h"
@@ -27,16 +27,16 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(BasicImmediateTx);
+Define_Module(BasicTx);
 
-BasicImmediateTx::~BasicImmediateTx()
+BasicTx::~BasicTx()
 {
     cancelAndDelete(endIfsTimer);
     if (frame && !transmitting)
         delete frame;
 }
 
-void BasicImmediateTx::initialize()
+void BasicTx::initialize()
 {
     mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
@@ -48,12 +48,17 @@ void BasicImmediateTx::initialize()
     updateDisplayString();
 }
 
-void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback)
+void BasicTx::transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback)
 {
-    Enter_Method("transmitImmediateFrame(\"%s\")", frame->getName());
+    transmitFrame(frame, SIMTIME_ZERO, txCallback); //TODO make dedicated version, without the timer
+}
+
+void BasicTx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback)
+{
+    Enter_Method("transmitFrame(\"%s\")", frame->getName());
     take(frame);
     this->frame = frame;
-    this->completionCallback = completionCallback;
+    this->txCallback = txCallback;
 
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
@@ -61,12 +66,12 @@ void BasicImmediateTx::transmitImmediateFrame(Ieee80211Frame *frame, simtime_t i
         updateDisplayString();
 }
 
-void BasicImmediateTx::radioTransmissionFinished()
+void BasicTx::radioTransmissionFinished()
 {
     Enter_Method_Silent();
     if (transmitting) {
-        EV_DETAIL << "BasicImmediateTx: radioTransmissionFinished()\n";
-        upperMac->transmissionComplete(completionCallback, -1);
+        EV_DETAIL << "BasicTx: radioTransmissionFinished()\n";
+        upperMac->transmissionComplete(txCallback);
         transmitting = false;
         frame = nullptr;
         rx->frameTransmitted(durationField);
@@ -75,10 +80,10 @@ void BasicImmediateTx::radioTransmissionFinished()
     }
 }
 
-void BasicImmediateTx::handleMessage(cMessage *msg)
+void BasicTx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
-        EV_DETAIL << "BasicImmediateTx: endIfsTimer expired\n";
+        EV_DETAIL << "BasicTx: endIfsTimer expired\n";
         transmitting = true;
         durationField = frame->getDuration();
         mac->sendFrame(frame);
@@ -89,7 +94,7 @@ void BasicImmediateTx::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void BasicImmediateTx::updateDisplayString()
+void BasicTx::updateDisplayString()
 {
     const char *stateName = endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
     // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);

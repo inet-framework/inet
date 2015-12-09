@@ -25,20 +25,28 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+/**
+ * Contention processes use this interface to notify their callers that channel
+ * access was granted, or suffered an internal collision with a higher priority
+ * process (EDCA).
+ *
+ * @see IContention.
+ */
+class INET_API IContentionCallback {
+    public:
+        virtual void channelAccessGranted(int txIndex) = 0;
+        virtual void internalCollision(int txIndex) = 0;
+};
 
 /**
- * Tx processes use this interface to notify their callers that the
- * last frame transmission has been completed, or that the transmission
- * has had an internal collision with a higher priority Tx process (EDCA).
+ * The Tx process uses this interface to notify its caller that the
+ * last frame transmission has been completed.
  *
- * @see IContentionTx and IImmediateTx
+ * @see ITx
  */
 class INET_API ITxCallback {
     public:
-        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit(int txIndex) = 0;
-        virtual void transmissionComplete(int txIndex) = 0; // -1: immediate tx
-        virtual void internalCollision(int txIndex) = 0;
+        virtual void transmissionComplete() = 0;
 };
 
 } // namespace ieee80211

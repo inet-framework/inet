@@ -20,8 +20,8 @@
 #include "DcfUpperMac.h"
 #include "Ieee80211NewMac.h"
 #include "IRx.h"
-#include "IContentionTx.h"
-#include "IImmediateTx.h"
+#include "IContention.h"
+#include "ITx.h"
 #include "MacUtils.h"
 #include "MacParameters.h"
 #include "FrameExchanges.h"
@@ -57,9 +57,9 @@ void DcfUpperMac::initialize()
 {
     mac = check_and_cast<Ieee80211NewMac *>(getModuleByPath(par("macModule")));
     rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-    immediateTx = check_and_cast<IImmediateTx *>(getModuleByPath(par("immediateTxModule")));
-    contentionTx = nullptr;
-    collectContentionTxModules(getModuleByPath(par("firstContentionTxModule")), contentionTx);
+    tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
+    contention = nullptr;
+    collectContentionModules(getModuleByPath(par("firstContentionModule")), contention);
 
     maxQueueSize = par("maxQueueSize");
     transmissionQueue.setName("txQueue");
@@ -206,24 +206,24 @@ void DcfUpperMac::corruptedFrameReceived()
         frameExchange->corruptedOrNotForUsFrameReceived();
 }
 
-Ieee80211DataOrMgmtFrame *DcfUpperMac::getFrameToTransmit(ITxCallback *callback, int txIndex)
+void DcfUpperMac::channelAccessGranted(IContentionCallback *callback, int txIndex)
 {
-    Enter_Method("getFrameToTransmit()");
-    return callback->getFrameToTransmit(txIndex);
+    Enter_Method("channelAccessGranted()");
+    callback->channelAccessGranted(txIndex);
 }
 
-void DcfUpperMac::transmissionComplete(ITxCallback *callback, int txIndex)
+void DcfUpperMac::internalCollision(IContentionCallback *callback, int txIndex)
 {
-    Enter_Method("transmissionComplete()");
-    if (callback)
-        callback->transmissionComplete(txIndex);
-}
-
-void DcfUpperMac::internalCollision(ITxCallback *callback, int txIndex)
-{
-    Enter_Method("transmissionComplete()");
+    Enter_Method("internalCollision()");
     if (callback)
         callback->internalCollision(txIndex);
+}
+
+void DcfUpperMac::transmissionComplete(ITxCallback *callback)
+{
+    Enter_Method("transmissionComplete()");
+    if (callback)
+        callback->transmissionComplete();
 }
 
 void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, int txIndex, AccessCategory ac)
@@ -239,8 +239,8 @@ void DcfUpperMac::startSendDataFrameExchange(Ieee80211DataOrMgmtFrame *frame, in
     context.ownerModule = this;
     context.params = params;
     context.utils = utils;
-    context.contentionTx = contentionTx;
-    context.immediateTx = immediateTx;
+    context.contention = contention;
+    context.tx = tx;
     context.rx = rx;
     context.statistics = statistics;
 
@@ -270,13 +270,13 @@ void DcfUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
 void DcfUpperMac::sendAck(Ieee80211DataOrMgmtFrame *frame)
 {
     Ieee80211ACKFrame *ackFrame = utils->buildAckFrame(frame);
-    immediateTx->transmitImmediateFrame(ackFrame, params->getSifsTime(), nullptr);
+    tx->transmitFrame(ackFrame, params->getSifsTime(), nullptr);
 }
 
 void DcfUpperMac::sendCts(Ieee80211RTSFrame *frame)
 {
     Ieee80211CTSFrame *ctsFrame = utils->buildCtsFrame(frame);
-    immediateTx->transmitImmediateFrame(ctsFrame, params->getSifsTime(), nullptr);
+    tx->transmitFrame(ctsFrame, params->getSifsTime(), nullptr);
 }
 
 } // namespace ieee80211

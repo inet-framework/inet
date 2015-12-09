@@ -17,10 +17,10 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICIMMEDIATETX_H
-#define __INET_BASICIMMEDIATETX_H
+#ifndef __INET_BASICTX_H
+#define __INET_BASICTX_H
 
-#include "IImmediateTx.h"
+#include "ITx.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -30,7 +30,7 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
-class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
+class INET_API BasicTx : public cSimpleModule, public ITx
 {
     protected:
         IMacRadioInterface *mac;
@@ -41,7 +41,7 @@ class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
         cMessage *endIfsTimer = nullptr;
         simtime_t durationField;
         bool transmitting = false;
-        ITxCallback *completionCallback = nullptr;
+        ITxCallback *txCallback = nullptr;
 
     protected:
         virtual void initialize() override;
@@ -49,10 +49,11 @@ class INET_API BasicImmediateTx : public cSimpleModule, public IImmediateTx
         virtual void updateDisplayString();
 
     public:
-        BasicImmediateTx() {}
-        ~BasicImmediateTx();
+        BasicTx() {}
+        ~BasicTx();
 
-        virtual void transmitImmediateFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *completionCallback) override;
+        virtual void transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback) override;
+        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback) override;
         virtual void radioTransmissionFinished() override;
 };
 

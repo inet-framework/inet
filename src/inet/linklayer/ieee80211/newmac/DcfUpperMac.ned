@@ -27,8 +27,8 @@ simple DcfUpperMac like IUpperMac
     parameters:
         string macModule;
         string rxModule;
-        string immediateTxModule;
-        string firstContentionTxModule;
+        string txModule;
+        string firstContentionModule;
         string rateSelectionModule;
         string rateControlModule;
         string statisticsModule;
