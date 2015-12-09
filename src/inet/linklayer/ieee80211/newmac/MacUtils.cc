@@ -20,7 +20,6 @@
 #include "MacUtils.h"
 #include "IMacParameters.h"
 #include "IRateSelection.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"

@@ -27,7 +27,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h" //TODO not needed here
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h" //TODO not needed here
