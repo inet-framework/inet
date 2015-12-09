@@ -20,11 +20,8 @@
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
-
-using namespace ieee80211;
 
 namespace physicallayer {
 

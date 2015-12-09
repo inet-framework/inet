@@ -18,11 +18,8 @@
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalReceiver.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
-
-using namespace ieee80211;
 
 namespace physicallayer {
 

@@ -19,13 +19,10 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211BerTableErrorModel.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
 
 namespace physicallayer {
-
-using namespace ieee80211;
 
 Define_Module(Ieee80211BerTableErrorModel);
 

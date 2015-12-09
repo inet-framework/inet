@@ -21,11 +21,8 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmitter.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
-
-using namespace ieee80211;
 
 namespace physicallayer {
 

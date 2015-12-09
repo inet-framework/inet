@@ -18,13 +18,10 @@
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 
 namespace inet {
 
 namespace physicallayer {
-
-using namespace ieee80211;
 
 Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
