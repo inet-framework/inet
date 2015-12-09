@@ -19,7 +19,6 @@
 // Required for MACAddress declarations
 //
 cplusplus {{
-#include "inet/linklayer/ieee80211/mac/Ieee80211Consts.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
 }}
@@ -29,6 +28,17 @@ class noncobject MACAddress;
 enum EtherType;
 
 namespace inet::ieee80211;
+
+cplusplus {{
+const unsigned int LENGTH_RTS = 160;    //bits
+const unsigned int LENGTH_CTS = 112;    //bits
+const unsigned int LENGTH_ACK = 112;    //bits
+const unsigned int LENGTH_MGMT = 28 * 8;    //bits
+const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4, without SNAP: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
+const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
+const unsigned int SNAP_HEADER_BYTES = 8;
+const short int MAX_NUM_FRAGMENTS = 16;
+}}
 
 //
 // 802.11 frame type constants (type+subtype), for the "type" field of

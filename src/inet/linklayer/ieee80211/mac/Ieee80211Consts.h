@@ -22,16 +22,6 @@ namespace inet {
 
 namespace ieee80211 {
 
-// frame lengths in bits
-const unsigned int LENGTH_RTS = 160;    //bits
-const unsigned int LENGTH_CTS = 112;    //bits
-const unsigned int LENGTH_ACK = 112;    //bits
-const unsigned int LENGTH_MGMT = 28 * 8;    //bits
-const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4, without SNAP: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
-const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field
-
-const unsigned int SNAP_HEADER_BYTES = 8;
-
 // time slot ST, short interframe space SIFS, distributed interframe
 // space DIFS, and extended interframe space EIFS
 
@@ -63,8 +53,6 @@ const double RED_PHY_HEADER_DURATION = 0.000020;
 
 /* @brief Length of PLCP header and preamble */
 const double PHY_HEADER_LENGTH = 192;
-
-const short int MAX_NUM_FRAGMENTS = 16;
 
 } // namespace ieee80211
 
