@@ -17,7 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.linklayer.ieee80211.mac;
+package inet.linklayer.ieee80211.oldmac;
 
 import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.ieee80211.IIeee80211Mac;
