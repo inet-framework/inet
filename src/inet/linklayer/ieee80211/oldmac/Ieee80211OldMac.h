@@ -19,8 +19,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_IEEE80211MAC_H
-#define __INET_IEEE80211MAC_H
+#ifndef __INET_IEEE80211OLDMAC_H
+#define __INET_IEEE80211OLDMAC_H
 
 // un-comment this if you do not want to log state machine transitions
 //#define FSM_DEBUG
@@ -65,7 +65,7 @@ using namespace physicallayer;
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public MACProtocolBase
+class INET_API Ieee80211OldMac : public MACProtocolBase
 {
     typedef std::list<Ieee80211DataOrMgmtFrame *> Ieee80211DataOrMgmtFrameList;
     /**
@@ -196,7 +196,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
   public:
     /**
-     * @name Ieee80211Mac state variables
+     * @name Ieee80211OldMac state variables
      * Various state information checked and modified according to the state machine.
      */
     //@{
@@ -426,8 +426,8 @@ class INET_API Ieee80211Mac : public MACProtocolBase
      * @name Construction functions
      */
     //@{
-    Ieee80211Mac();
-    virtual ~Ieee80211Mac();
+    Ieee80211OldMac();
+    virtual ~Ieee80211OldMac();
     //@}
 
   protected:
@@ -687,5 +687,5 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211MAC_H
+#endif // ifndef __INET_IEEE80211OLDMAC_H
 

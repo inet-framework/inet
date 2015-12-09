@@ -56,7 +56,7 @@ import inet.linklayer.ieee80211.IIeee80211Mac;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
+simple Ieee80211OldMac extends MACProtocolBase like IIeee80211Mac
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -117,7 +117,7 @@ simple Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement statistic
         bool multiMac = default(false); // allows multiples mac interfaces in the same link layer
 
-        @class(Ieee80211Mac);
+        @class(Ieee80211OldMac);
         @display("i=block/layer");
 
         @signal[NF_LINK_FULL_PROMISCUOUS](type=cPacket);
