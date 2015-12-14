@@ -49,65 +49,35 @@ module MACProtocolBase extends LayeredProtocolBase
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
-
 // to be used in combination with the ~Ieee80211Radio module as the physical
-
 // layer. (The ~SnrEval80211 and ~Decider80211 modules should also work if
-
 // per-packet bitrate setting gets implemented.)
-
-// 
-
+//
 // Encapsulation/decapsulation must be done in the upper layers. (It is
-
 // typically in the 802.11 management module, see in ~Ieee80211Nic).
-
 // The base class for 802.11 frame messages is ~Ieee80211Frame, but this
-
 // module expects ~Ieee80211DataOrMgmtFrame (a subclass) from upper layers
-
 // (the management module). This module will assign the transmitter address
-
 // (address 2) and the frame sequence number/fragment number fields in the
-
 // frames; all other fields must already be filled when this module gets
-
 // the frame for transmission.
-
-// 
-
+//
 // The module has an internal queue, but usually it is to be used with an
-
 // external passive queue module (its name should be given in the queueModule
-
 // parameter; specifying "" causes the internal queue to be used). The passive
-
 // queue module is a simple module whose C++ class implements the IPassiveQueue
-
 // interface.
-
-// 
-
+//
 // <b>Limitations</b>
-
-// 
-
+//
 // The following features not supported: 1) fragmentation, 2) power management,
-
 // 3) polling (PCF). Physical layer algorithms such as frequency hopping and
-
 // direct sequence spread spectrum are not modelled directly.
-
-// 
-
+//
 // Fields related to the above unsupported features are omitted from
-
 // management frame formats as well (for example, FH/DS/CF parameter sets,
-
 // beacon/probe timestamp which is related to physical layer synchronization,
-
 // listen interval which is related to power management, capability information
-        @display("i=block/layer");
 // which is related to PCF and other non-modelled features).
 //
 module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
@@ -175,7 +145,7 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 // Delegate some upperMac parameters to Ieee80211Mac, to be more compatible with the old MAC.
 // NOTE: NOT ALL PARAMETERS OF THE OLD MAC CAN BE MAPPED.
 //
-module Ieee80211CompatibleNewMac extends Ieee80211Mac
+module Ieee80211CompatibleMac extends Ieee80211Mac
 {
     parameters:
         string opMode @enum("a","b","g","n","p") = default("g");
