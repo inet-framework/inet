@@ -1,0 +1,13 @@
+//SUT is a client, i.e. it opens a socket and connects to the server.
+//When the association is established, it calls Shutdown.
+
++0  socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0  connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
++0     > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=1, ...]
++0.05  < sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=1500, os=1, is=1, tsn=1, STATE_COOKIE[len=4, val=...]]
++0     > sctp: COOKIE_ECHO[flgs=0, len=4, val=...]
++0.05  < sctp: COOKIE_ACK[flgs=0]
++1  close(3) = 0
++0  > sctp: SHUTDOWN[flgs=0, cum_tsn=0]
++0.05  < sctp: SHUTDOWN_ACK[flgs=0]
++0  > sctp: SHUTDOWN_COMPLETE[flgs=0] // Other flags allowed: T, Is SHUTDOWN_COMPLETE[] allowed?
