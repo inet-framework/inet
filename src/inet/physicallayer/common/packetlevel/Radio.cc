@@ -20,6 +20,10 @@
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 
+#ifdef NS3_VALIDATION
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#endif
+
 namespace inet {
 
 namespace physicallayer {
@@ -334,6 +338,27 @@ void Radio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
     auto transmission = radioFrame->getTransmission();
     transmissionTimer->setKind(part);
     transmissionTimer->setControlInfo(const_cast<RadioFrame *>(radioFrame));
+
+#ifdef NS3_VALIDATION
+    auto *df = dynamic_cast<inet::ieee80211::Ieee80211DataFrame *>(macFrame);
+    const char *ac = "NA";
+    if (df != nullptr && df->getType() == inet::ieee80211::ST_DATA_WITH_QOS) {
+        switch (df->getTid()) {
+            case 1: case 2: ac = "AC_BK"; break;
+            case 0: case 3: ac = "AC_BE"; break;
+            case 4: case 5: ac = "AC_VI"; break;
+            case 6: case 7: ac = "AC_VO"; break;
+            default: ac = "???"; break;
+        }
+    }
+    const char *lastSeq = strchr(macFrame->getName(), '-');
+    if (lastSeq == nullptr)
+        lastSeq = "-1";
+    else
+        lastSeq++;
+    std::cout << "TX: node = " << getId() << ", ac = " << ac << ", seq = " << lastSeq << ", start = " << simTime().inUnit(SIMTIME_PS) << ", duration = " << radioFrame->getDuration().inUnit(SIMTIME_PS) << std::endl;
+#endif
+
     scheduleAt(transmission->getEndTime(part), transmissionTimer);
     EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();

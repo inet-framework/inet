@@ -193,8 +193,21 @@ void SendDataWithAckFrameExchange::processTimeout(int step)
     }
 }
 
+#ifdef NS3_VALIDATION
+static const char *ac[] = {"AC_BK", "AC_BE", "AC_VI", "AC_VO", "???"};
+#endif
+
 void SendDataWithAckFrameExchange::processInternalCollision(int step)
 {
+#ifdef NS3_VALIDATION
+    const char *lastSeq = strchr(dataFrame->getName(), '-');
+    if (lastSeq == nullptr)
+        lastSeq = "-1";
+    else
+        lastSeq++;
+    std::cout << "IC: " << "ac = " << ac[defaultAccessCategory] << ", seq = " << lastSeq << endl;
+#endif
+
     switch (step) {
         case 0: retry(); break;
         default: ASSERT(false);
@@ -213,15 +226,34 @@ void SendDataWithAckFrameExchange::retry()
     // This attribute indicates the maximum number of transmission attempts of a
     // frame, the length of which is less than or equal to dot11RTSThreshold,
     // that is made before a failure condition is indicated.
+
+#ifdef NS3_VALIDATION
+    const char *lastSeq = strchr(dataFrame->getName(), '-');
+    if (lastSeq == nullptr)
+        lastSeq = "-1";
+    else
+        lastSeq++;
+#endif
+
     if (retryCount + 1 < params->getShortRetryLimit()) {
         statistics->frameTransmissionUnsuccessful(dataFrame, retryCount);
         dataFrame->setRetry(true);
         retryCount++;
         gotoStep(0);
+
+#ifdef NS3_VALIDATION
+        std::cout << "RE: " << "ac = " << ac[defaultAccessCategory] << ", seq = " << lastSeq << ", num = " << retryCount << endl;
+#endif
     }
     else {
         statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, retryCount);
         fail();
+
+#ifdef NS3_VALIDATION
+        if (*lastSeq == '0' && defaultAccessCategory == 1)
+            std::cout << "BREAK\n";
+        std::cout << "CA: " << "ac = " << ac[defaultAccessCategory] << ", seq = " << lastSeq << endl;
+#endif
     }
 }
 
