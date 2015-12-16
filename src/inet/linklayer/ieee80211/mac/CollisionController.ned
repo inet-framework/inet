@@ -22,7 +22,7 @@ package inet.linklayer.ieee80211.mac;
 //
 // The default implementation of ICollisionController.
 //
-simple BasicCollisionController like ICollisionController
+simple CollisionController like ICollisionController
 {
     parameters:
         @display("i=block/control");

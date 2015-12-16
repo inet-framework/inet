@@ -20,18 +20,14 @@
 package inet.linklayer.ieee80211.mac;
 
 //
-// The default implementation of IContention.
+// The default implementation of ITx.
 //
-simple BasicContention like IContention
+simple Tx like ITx
 {
     parameters:
         string macModule;
         string upperMacModule;
-        string collisionControllerModule;
         string rxModule;
         string statisticsModule;
-        bool initialBackoffOptimization = default(true);    // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
-        @display("i=block/control");
-        @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::BasicContention::State
-        @statistic[state](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
+        @display("i=block/downarrow");
 }

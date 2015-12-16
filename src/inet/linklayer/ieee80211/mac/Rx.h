@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICRX_H
-#define __INET_BASICRX_H
+#ifndef __INET_RX_H
+#define __INET_RX_H
 
 #include "IRx.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
@@ -32,7 +32,7 @@ class ITx;
 class IContention;
 class IStatistics;
 
-class INET_API BasicRx : public cSimpleModule, public IRx
+class INET_API Rx : public cSimpleModule, public IRx
 {
     protected:
         IUpperMac *upperMac = nullptr;
@@ -55,8 +55,8 @@ class INET_API BasicRx : public cSimpleModule, public IRx
         virtual void updateDisplayString();
 
     public:
-        BasicRx();
-        ~BasicRx();
+        Rx();
+        ~Rx();
 
         virtual void setAddress(const MACAddress& address) override { this->address = address; }
         virtual bool isReceptionInProgress() const override;

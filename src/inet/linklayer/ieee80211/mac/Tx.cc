@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "BasicTx.h"
+#include "Tx.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "IRx.h"
@@ -27,16 +27,16 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(BasicTx);
+Define_Module(Tx);
 
-BasicTx::~BasicTx()
+Tx::~Tx()
 {
     cancelAndDelete(endIfsTimer);
     if (frame && !transmitting)
         delete frame;
 }
 
-void BasicTx::initialize()
+void Tx::initialize()
 {
     mac = dynamic_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = dynamic_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
@@ -48,12 +48,12 @@ void BasicTx::initialize()
     updateDisplayString();
 }
 
-void BasicTx::transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback)
+void Tx::transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback)
 {
     transmitFrame(frame, SIMTIME_ZERO, txCallback); //TODO make dedicated version, without the timer
 }
 
-void BasicTx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback)
+void Tx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback)
 {
     Enter_Method("transmitFrame(\"%s\")", frame->getName());
     take(frame);
@@ -66,11 +66,11 @@ void BasicTx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *t
         updateDisplayString();
 }
 
-void BasicTx::radioTransmissionFinished()
+void Tx::radioTransmissionFinished()
 {
     Enter_Method_Silent();
     if (transmitting) {
-        EV_DETAIL << "BasicTx: radioTransmissionFinished()\n";
+        EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         upperMac->transmissionComplete(txCallback);
         transmitting = false;
         frame = nullptr;
@@ -80,10 +80,10 @@ void BasicTx::radioTransmissionFinished()
     }
 }
 
-void BasicTx::handleMessage(cMessage *msg)
+void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
-        EV_DETAIL << "BasicTx: endIfsTimer expired\n";
+        EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
         durationField = frame->getDuration();
         mac->sendFrame(frame);
@@ -94,7 +94,7 @@ void BasicTx::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void BasicTx::updateDisplayString()
+void Tx::updateDisplayString()
 {
     const char *stateName = endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
     // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);

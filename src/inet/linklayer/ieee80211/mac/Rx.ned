@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 // Author: Andras Varga
 //
@@ -20,14 +20,13 @@
 package inet.linklayer.ieee80211.mac;
 
 //
-// The default implementation of ITx.
+// The default implementation of IRx.
 //
-simple BasicTx like ITx
+simple Rx like IRx
 {
     parameters:
-        string macModule;
         string upperMacModule;
-        string rxModule;
+        string firstContentionModule;
         string statisticsModule;
-        @display("i=block/downarrow");
+        @display("i=block/uparrow");
 }

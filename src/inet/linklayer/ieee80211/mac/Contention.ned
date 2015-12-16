@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see http://www.gnu.org/licenses/.
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 // Author: Andras Varga
 //
@@ -20,13 +20,18 @@
 package inet.linklayer.ieee80211.mac;
 
 //
-// The default implementation of IRx.
+// The default implementation of IContention.
 //
-simple BasicRx like IRx
+simple Contention like IContention
 {
     parameters:
+        string macModule;
         string upperMacModule;
-        string firstContentionModule;
+        string collisionControllerModule;
+        string rxModule;
         string statisticsModule;
-        @display("i=block/uparrow");
+        bool initialBackoffOptimization = default(true);    // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
+        @display("i=block/control");
+        @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::Contention::State
+        @statistic[state](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
 }

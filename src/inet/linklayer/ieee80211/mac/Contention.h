@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICCONTENTION_H
-#define __INET_BASICCONTENTION_H
+#ifndef __INET_CONTENTION_H
+#define __INET_CONTENTION_H
 
 #include "IContention.h"
 #include "ICollisionController.h"
@@ -34,7 +34,7 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
-class INET_API BasicContention : public cSimpleModule, public IContention, protected ICollisionController::ICallback
+class INET_API Contention : public cSimpleModule, public IContention, protected ICollisionController::ICallback
 {
     public:
         enum State { IDLE, DEFER, IFS_AND_BACKOFF, OWNING };
@@ -88,8 +88,8 @@ class INET_API BasicContention : public cSimpleModule, public IContention, prote
         const char *getEventName(EventType event);
 
     public:
-        BasicContention() {}
-        ~BasicContention();
+        Contention() {}
+        ~Contention();
 
         //TODO also add a switchToReception() method? because switching takes time, so we dont automatically switch to tx after completing a transmission! (as we may want to transmit immediate frames afterwards)
         virtual void startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback) override;

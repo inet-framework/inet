@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "BasicRx.h"
+#include "Rx.h"
 #include "IContention.h"
 #include "ITx.h"
 #include "IUpperMac.h"
@@ -26,18 +26,18 @@
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(BasicRx);
+Define_Module(Rx);
 
-BasicRx::BasicRx()
+Rx::Rx()
 {
 }
 
-BasicRx::~BasicRx()
+Rx::~Rx()
 {
     delete cancelEvent(endNavTimer);
 }
 
-void BasicRx::initialize()
+void Rx::initialize()
 {
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
     collectContentionModules(getModuleByPath(par("firstContentionModule")), contention);
@@ -51,7 +51,7 @@ void BasicRx::initialize()
     WATCH(mediumFree);
 }
 
-void BasicRx::handleMessage(cMessage *msg)
+void Rx::handleMessage(cMessage *msg)
 {
     if (msg == endNavTimer) {
         EV_INFO << "The radio channel has become free according to the NAV" << std::endl;
@@ -61,7 +61,7 @@ void BasicRx::handleMessage(cMessage *msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
+void Rx::lowerFrameReceived(Ieee80211Frame *frame)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
     take(frame);
@@ -84,25 +84,25 @@ void BasicRx::lowerFrameReceived(Ieee80211Frame *frame)
     }
 }
 
-void BasicRx::frameTransmitted(simtime_t durationField)
+void Rx::frameTransmitted(simtime_t durationField)
 {
     // the txIndex that transmitted the frame should already own the TXOP, so
     // it has no need to (and should not) check the NAV.
     setOrExtendNav(durationField);
 }
 
-bool BasicRx::isReceptionInProgress() const
+bool Rx::isReceptionInProgress() const
 {
     return receptionState == IRadio::RECEPTION_STATE_RECEIVING &&
            (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
-bool BasicRx::isFcsOk(Ieee80211Frame *frame) const
+bool Rx::isFcsOk(Ieee80211Frame *frame) const
 {
     return !frame->hasBitError();
 }
 
-void BasicRx::recomputeMediumFree()
+void Rx::recomputeMediumFree()
 {
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
@@ -114,28 +114,28 @@ void BasicRx::recomputeMediumFree()
     }
 }
 
-void BasicRx::receptionStateChanged(IRadio::ReceptionState state)
+void Rx::receptionStateChanged(IRadio::ReceptionState state)
 {
     Enter_Method_Silent();
     receptionState = state;
     recomputeMediumFree();
 }
 
-void BasicRx::receivedSignalPartChanged(IRadioSignal::SignalPart part)
+void Rx::receivedSignalPartChanged(IRadioSignal::SignalPart part)
 {
     Enter_Method_Silent();
     receivedPart = part;
     recomputeMediumFree();
 }
 
-void BasicRx::transmissionStateChanged(IRadio::TransmissionState state)
+void Rx::transmissionStateChanged(IRadio::TransmissionState state)
 {
     Enter_Method_Silent();
     transmissionState = state;
     recomputeMediumFree();
 }
 
-void BasicRx::setOrExtendNav(simtime_t navInterval)
+void Rx::setOrExtendNav(simtime_t navInterval)
 {
     ASSERT(navInterval >= 0);
     if (navInterval > 0) {
@@ -152,7 +152,7 @@ void BasicRx::setOrExtendNav(simtime_t navInterval)
     }
 }
 
-void BasicRx::updateDisplayString()
+void Rx::updateDisplayString()
 {
     if (mediumFree)
         getDisplayString().setTagArg("t", 0, "FREE");

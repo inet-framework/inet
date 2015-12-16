@@ -17,26 +17,26 @@
 // Author: Andras Varga
 //
 
-#include "BasicCollisionController.h"
+#include "CollisionController.h"
 
 namespace inet {
 namespace ieee80211 {
 
-Define_Module(BasicCollisionController);
+Define_Module(CollisionController);
 
-BasicCollisionController::BasicCollisionController()
+CollisionController::CollisionController()
 {
     for (int i = 0; i < MAX_NUM_TX; i++)
         timer[i] = nullptr;
 }
 
-BasicCollisionController::~BasicCollisionController()
+CollisionController::~CollisionController()
 {
     for (int i = 0; i < MAX_NUM_TX; i++)
         cancelAndDelete(timer[i]);
 }
 
-void BasicCollisionController::scheduleTransmissionRequest(int txIndex, simtime_t txStartTime, ICallback *cb)
+void CollisionController::scheduleTransmissionRequest(int txIndex, simtime_t txStartTime, ICallback *cb)
 {
     Enter_Method("scheduleTransmissionRequest(%d)", txIndex);
     ASSERT(txIndex >=0 && txIndex < MAX_NUM_TX);
@@ -56,14 +56,14 @@ void BasicCollisionController::scheduleTransmissionRequest(int txIndex, simtime_
     scheduleAt(txStartTime, timer[txIndex]);
 }
 
-void BasicCollisionController::cancelTransmissionRequest(int txIndex)
+void CollisionController::cancelTransmissionRequest(int txIndex)
 {
     Enter_Method("cancelTransmissionRequest(%d)", txIndex);
     ASSERT(txIndex >=0 && txIndex < txCount && timer[txIndex] != nullptr);
     cancelEvent(timer[txIndex]);
 }
 
-void BasicCollisionController::handleMessage(cMessage *msg)
+void CollisionController::handleMessage(cMessage *msg)
 {
     // from the ones scheduled for the current simulation time: grant transmission to the
     // highest priority one (largest txIndex), and signal internal collision to the others

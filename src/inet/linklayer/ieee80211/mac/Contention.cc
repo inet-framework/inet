@@ -17,7 +17,7 @@
 // Author: Andras Varga
 //
 
-#include "BasicContention.h"
+#include "Contention.h"
 #include "IUpperMac.h"
 #include "IMacRadioInterface.h"
 #include "IStatistics.h"
@@ -28,16 +28,16 @@
 namespace inet {
 namespace ieee80211 {
 
-simsignal_t BasicContention::stateChangedSignal = registerSignal("stateChanged");
+simsignal_t Contention::stateChangedSignal = registerSignal("stateChanged");
 
 // for @statistic; don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(BasicContention::State,
-        (BasicContention::IDLE,
-         BasicContention::DEFER,
-         BasicContention::IFS_AND_BACKOFF,
-         BasicContention::OWNING));
+Register_Enum(Contention::State,
+        (Contention::IDLE,
+         Contention::DEFER,
+         Contention::IFS_AND_BACKOFF,
+         Contention::OWNING));
 
-Define_Module(BasicContention);
+Define_Module(Contention);
 
 // non-member utility function
 void collectContentionModules(cModule *firstContentionModule, IContention **& contentionTx)
@@ -53,7 +53,7 @@ void collectContentionModules(cModule *firstContentionModule, IContention **& co
     contentionTx[count] = nullptr;
 }
 
-void BasicContention::initialize()
+void Contention::initialize()
 {
     mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
     upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
@@ -86,12 +86,12 @@ void BasicContention::initialize()
     updateDisplayString();
 }
 
-BasicContention::~BasicContention()
+Contention::~Contention()
 {
     cancelAndDelete(startTxEvent);
 }
 
-void BasicContention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback)
+void Contention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int cwMax, simtime_t slotTime, int retryCount, IContentionCallback *callback)
 {
     Enter_Method("startContention()");
     ASSERT(fsm.getState() == IDLE);
@@ -108,7 +108,7 @@ void BasicContention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, 
     handleWithFSM(START, nullptr);
 }
 
-int BasicContention::computeCw(int cwMin, int cwMax, int retryCount)
+int Contention::computeCw(int cwMin, int cwMax, int retryCount)
 {
     int cw = ((cwMin + 1) << retryCount) - 1;
     if (cw > cwMax)
@@ -116,7 +116,7 @@ int BasicContention::computeCw(int cwMin, int cwMax, int retryCount)
     return cw;
 }
 
-void BasicContention::handleWithFSM(EventType event, cMessage *msg)
+void Contention::handleWithFSM(EventType event, cMessage *msg)
 {
     emit(stateChangedSignal, fsm.getState());
     EV_DEBUG << "handleWithFSM: processing event " << getEventName(event) << "\n";
@@ -204,7 +204,7 @@ void BasicContention::handleWithFSM(EventType event, cMessage *msg)
         updateDisplayString();
 }
 
-void BasicContention::mediumStateChanged(bool mediumFree)
+void Contention::mediumStateChanged(bool mediumFree)
 {
     Enter_Method_Silent(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
@@ -212,37 +212,37 @@ void BasicContention::mediumStateChanged(bool mediumFree)
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
-void BasicContention::handleMessage(cMessage *msg)
+void Contention::handleMessage(cMessage *msg)
 {
     ASSERT(msg == startTxEvent);
     transmissionGranted(txIndex);
 }
 
-void BasicContention::corruptedFrameReceived()
+void Contention::corruptedFrameReceived()
 {
     Enter_Method("corruptedFrameReceived()");
     handleWithFSM(CORRUPTED_FRAME_RECEIVED, nullptr);
 }
 
-void BasicContention::transmissionGranted(int txIndex)
+void Contention::transmissionGranted(int txIndex)
 {
     Enter_Method("transmissionGranted()");
     handleWithFSM(TRANSMISSION_GRANTED, nullptr);
 }
 
-void BasicContention::internalCollision(int txIndex)
+void Contention::internalCollision(int txIndex)
 {
     Enter_Method("internalCollision()");
     handleWithFSM(INTERNAL_COLLISION, nullptr);
 }
 
-void BasicContention::channelReleased()
+void Contention::channelReleased()
 {
     Enter_Method("channelReleased()");
     handleWithFSM(CHANNEL_RELEASED, nullptr);
 }
 
-void BasicContention::scheduleTransmissionRequestFor(simtime_t txStartTime)
+void Contention::scheduleTransmissionRequestFor(simtime_t txStartTime)
 {
     if (collisionController)
         collisionController->scheduleTransmissionRequest(txIndex, txStartTime, this);
@@ -250,7 +250,7 @@ void BasicContention::scheduleTransmissionRequestFor(simtime_t txStartTime)
         scheduleAt(txStartTime, startTxEvent);
 }
 
-void BasicContention::cancelTransmissionRequest()
+void Contention::cancelTransmissionRequest()
 {
     if (collisionController)
         collisionController->cancelTransmissionRequest(txIndex);
@@ -258,7 +258,7 @@ void BasicContention::cancelTransmissionRequest()
         cancelEvent(startTxEvent);
 }
 
-void BasicContention::scheduleTransmissionRequest()
+void Contention::scheduleTransmissionRequest()
 {
     ASSERT(mediumFree);
 
@@ -278,14 +278,14 @@ void BasicContention::scheduleTransmissionRequest()
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
 }
 
-void BasicContention::switchToEifs()
+void Contention::switchToEifs()
 {
     endEifsTime = simTime() + eifs;
     cancelTransmissionRequest();
     scheduleTransmissionRequest();
 }
 
-void BasicContention::computeRemainingBackoffSlots()
+void Contention::computeRemainingBackoffSlots()
 {
     simtime_t remainingTime = scheduledTransmissionTime - simTime();
     int remainingSlots = (remainingTime.raw() + slotTime.raw() - 1) / slotTime.raw();
@@ -293,17 +293,17 @@ void BasicContention::computeRemainingBackoffSlots()
         backoffSlots = remainingSlots;
 }
 
-void BasicContention::reportChannelAccessGranted()
+void Contention::reportChannelAccessGranted()
 {
     upperMac->channelAccessGranted(callback, txIndex);
 }
 
-void BasicContention::reportInternalCollision()
+void Contention::reportInternalCollision()
 {
     upperMac->internalCollision(callback, txIndex);
 }
 
-void BasicContention::revokeBackoffOptimization()
+void Contention::revokeBackoffOptimization()
 {
     scheduledTransmissionTime += backoffOptimizationDelta;
     backoffOptimizationDelta = SIMTIME_ZERO;
@@ -312,7 +312,7 @@ void BasicContention::revokeBackoffOptimization()
     scheduleTransmissionRequest();
 }
 
-const char *BasicContention::getEventName(EventType event)
+const char *Contention::getEventName(EventType event)
 {
 #define CASE(x)   case x: return #x;
     switch (event) {
@@ -327,7 +327,7 @@ const char *BasicContention::getEventName(EventType event)
 #undef CASE
 }
 
-void BasicContention::updateDisplayString()
+void Contention::updateDisplayString()
 {
     const char *stateName = fsm.getStateName();
     if (strcmp(stateName, "IFS_AND_BACKOFF") == 0)
@@ -335,7 +335,7 @@ void BasicContention::updateDisplayString()
     getDisplayString().setTagArg("t", 0, stateName);
 }
 
-bool BasicContention::isOwning()
+bool Contention::isOwning()
 {
     return fsm.getState() == OWNING;
 }

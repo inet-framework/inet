@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICTX_H
-#define __INET_BASICTX_H
+#ifndef __INET_TX_H
+#define __INET_TX_H
 
 #include "ITx.h"
 
@@ -30,7 +30,7 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
-class INET_API BasicTx : public cSimpleModule, public ITx
+class INET_API Tx : public cSimpleModule, public ITx
 {
     protected:
         IMacRadioInterface *mac;
@@ -49,8 +49,8 @@ class INET_API BasicTx : public cSimpleModule, public ITx
         virtual void updateDisplayString();
 
     public:
-        BasicTx() {}
-        ~BasicTx();
+        Tx() {}
+        ~Tx();
 
         virtual void transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback) override;
         virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCallback) override;

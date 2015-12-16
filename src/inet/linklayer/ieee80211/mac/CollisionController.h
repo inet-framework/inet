@@ -17,8 +17,8 @@
 // Author: Andras Varga
 //
 
-#ifndef __INET_BASICCOLLISIONCONTROLLER_H
-#define __INET_BASICCOLLISIONCONTROLLER_H
+#ifndef __INET_COLLISIONCONTROLLER_H
+#define __INET_COLLISIONCONTROLLER_H
 
 #include "ICollisionController.h"
 
@@ -29,7 +29,7 @@ namespace ieee80211 {
  * The default implementation of a collision controller, best suitable for
  * demonstration and debugging purposes. It uses per-AC timers.
  */
-class INET_API BasicCollisionController : public cSimpleModule, public ICollisionController
+class INET_API CollisionController : public cSimpleModule, public ICollisionController
 {
     private:
         static const int MAX_NUM_TX = 10;
@@ -40,8 +40,8 @@ class INET_API BasicCollisionController : public cSimpleModule, public ICollisio
     protected:
         virtual void handleMessage(cMessage* msg) override;
     public:
-        BasicCollisionController();
-        ~BasicCollisionController();
+        CollisionController();
+        ~CollisionController();
         virtual void scheduleTransmissionRequest(int txIndex, simtime_t txStartTime, ICallback *callback) override;
         virtual void cancelTransmissionRequest(int txIndex) override;
 };

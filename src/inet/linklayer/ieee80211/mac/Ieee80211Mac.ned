@@ -127,16 +127,16 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         upperMac: <default("EdcaUpperMac")> like IUpperMac {
             @display("p=227,88");
         }
-        tx: <default("BasicTx")> like ITx {
+        tx: <default("Tx")> like ITx {
             @display("p=198,260");
         }
-        ctn[numContention]: <default("BasicContention")> like IContention {
+        ctn[numContention]: <default("Contention")> like IContention {
             @display("p=295,260,r,60");
         }
-        rx: <default("BasicRx")> like IRx {
+        rx: <default("Rx")> like IRx {
             @display("p=112,260");
         }
-        ctrl: <default("BasicCollisionController")> like ICollisionController if numContention > 1 {
+        ctrl: <default("CollisionController")> like ICollisionController if numContention > 1 {
             @display("p=334,180");
         }
 }
