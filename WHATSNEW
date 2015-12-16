@@ -1,6 +1,32 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.2 (Dec, 2015) - Stable
+-----------------------------
+
+This release requires either OMNeT++ 4.6 or 5.0b3 or later. (Earlier test
+versions of OMNeT++ will not work.)
+
+Fixes:
+
+- The voipstream app has been updated to work with the ffmpeg version
+  distributed in Ubuntu 15.10
+- Added some INET_API macros to compile properly on Windows.
+- QoSClassifier example no longer needs the 802.11 project feature.
+- BPDU packet length was incorrectly set sometimes in the 802.1d model.
+- Fixed incorrect sign of lastSpeed in some mobility models.
+- Added support for the simulation of separate signal parts in the Radio.
+ 	The preamble, header and data parts can be optionally simulated
+ 	separately. This results in a more accurate simulation, because a
+ 	reception may be aborted before the data part is received.
+- Added separate preambleDuration parameters to each radio transmitter for more
+  flexible configuration.
+- Fixed PER computation in NetworkConfiguratorBase.
+- Added a simplified 802.11 model using ideal transmissions and medium.
+- Fixed missing byte length in AODV and added control packet length configuration.
+- RTT initialization was fixed in TCP (Vegas, Westwood) because the original
+  value caused "out of range" with the overflow check introduced in OMNeT++ 5.0b3.
+
 INET-3.1.1 (Oct, 2015) - Stable
 -------------------------------
 
@@ -68,7 +94,7 @@ it features the following additions compared to INET-3.0:
    at http://summit.omnetpp.org.
 
 3. Manet protocols in inet.routing.extras package are now disabled by default.
-   You can still enable the MANET feature manually or you can use INETMANET 
+   You can still enable the MANET feature manually or you can use INETMANET
    (a fork of INET) which contains a more up to date codebase for these protocols.
 
 4. Changes and bug fixes in the (old) 802.11 MAC:
@@ -2151,6 +2177,3 @@ created and developed at University of Karlsruhe, Germany.
 
         * CREDITS: Put your name here if you have contributed to the
         OMNeT++ Internet Protocol Suite
-
-
-
