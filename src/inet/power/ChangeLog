@@ -12,7 +12,7 @@
 
 	Applied C++ source code modernizer.
 
-2014-11-17  Levente Mészáros
+2014-11-17  Levente Meszaros
 
 	Fixed copy-paste bug found by Coverity.
 

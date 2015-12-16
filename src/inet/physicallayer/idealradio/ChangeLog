@@ -8,27 +8,27 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Fixed noise and snir computation for IdealAnalogModel.
+	Fixed noise and snir computation for IdealAnalogModel.
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
-    to computeReceptionDecision.
+	Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
+	to computeReceptionDecision.
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
-2015-03-17  Levente Mészáros
+2015-03-17  Levente Meszaros
 
-    Added missing headerBitLength parameter to IdealTransmitter.
+	Added missing headerBitLength parameter to IdealTransmitter.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed ideal to idealradio.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed ideal to idealradio.
 
 2015-01-21  Zoltan Bojthe
 

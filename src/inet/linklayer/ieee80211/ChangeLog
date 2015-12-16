@@ -63,7 +63,7 @@
 
 	ethernet: added EtherFrame.h
 
-2013-11-29  Levente Mészáros
+2013-11-29  Levente Meszaros
 
 	Ieee80211: send interface ID in notifications
 

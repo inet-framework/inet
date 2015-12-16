@@ -12,9 +12,9 @@
 
 2014-10-31  Levente Meszaros
 
-    Added initial implementation:
-    IEnergyConsumer, IEnergyGenerator, IEnergySink, IEnergySource,
-    IEnergyStorage
+	Added initial implementation:
+	IEnergyConsumer, IEnergyGenerator, IEnergySink, IEnergySource,
+	IEnergyStorage
 
 ====== inet-2.x ======
 

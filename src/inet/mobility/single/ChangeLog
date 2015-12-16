@@ -8,9 +8,9 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-03-26  Levente Mészáros
+2015-03-26  Levente Meszaros
 
-    Added lastSpeed calculation to RectangleMobility.
+	Added lastSpeed calculation to RectangleMobility.
 
 2015-01-21  Zoltan Bojthe
 
@@ -20,7 +20,7 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-11-26  Levente Mészáros
+2014-11-26  Levente Meszaros
 
 	Fixed memory management problems found by valgrind memcheck.
 

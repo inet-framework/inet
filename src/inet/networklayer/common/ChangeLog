@@ -10,8 +10,8 @@
 
 2015-03-23  Zoltan Bojthe
 
-    Added getAddressBitLength() and getAddressByteLength() function to
-    IL3AddressType.
+	Added getAddressBitLength() and getAddressByteLength() function to
+	IL3AddressType.
 
 2015-01-05  Zoltan Bojthe
 
@@ -23,11 +23,11 @@
 
 	Applied C++ source code modernizer.
 
-2014-12-11  Levente Mészáros
+2014-12-11  Levente Meszaros
 
 	Moved interfaces from common to contract.
 
-2014-12-10  Levente Mészáros
+2014-12-10  Levente Meszaros
 
 	Renamed getNetworkInterfaceModule to getInterfaceModule.
 
@@ -39,7 +39,7 @@
 
 	Implemented info and detailedInfo in GenericNetworkProtocolInterfaceData.
 
-2014-11-12  Levente Mészáros & Zoltan Bojthe
+2014-11-12  Levente Meszaros & Zoltan Bojthe
 
 	Fixed memory management problems found by valgrind memcheck.
 

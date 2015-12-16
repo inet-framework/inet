@@ -70,7 +70,7 @@
 	backport: Mobility: Replaced getParentNode with the more inentional
 	getContainingNode.
 
-2013-04-12  Levente Mészáros
+2013-04-12  Levente Meszaros
 
 	backport: Logging: Refactored mobility logging to be more consistent and
 	less redundant.

@@ -20,7 +20,7 @@
 
 	Added missing header guards.
 
-2015-03-04  Levente Mészáros
+2015-03-04  Levente Meszaros
 
 	Removed timestamp from ping payload.
 

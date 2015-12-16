@@ -10,27 +10,27 @@
 
 2015-04-20  Zoltan Bojthe
 
-    UDPPacket totalLength field renamed to totalLengthField.
+	UDPPacket totalLength field renamed to totalLengthField.
 
 2015-04-10  Zoltan Bojthe
 
-    Added totalLength field to UDPPacket. The total length maybe different from
-    than getByteLength().
+	Added totalLength field to UDPPacket. The total length maybe different from
+	than getByteLength().
 
-2015-03-30  Levente Mészáros
+2015-03-30  Levente Meszaros
 
-    Fixed double delete after merging master.
+	Fixed double delete after merging master.
 
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
-    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
-    SCTPMessage. This change allows generic handling of transport packets. For
-    example, see TunLoopbackApp.
+	Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+	SCTPMessage. This change allows generic handling of transport packets. For
+	example, see TunLoopbackApp.
 
 2015-03-11  Zoltan Bojthe
 
-    Fixed udp packet size.
+	Fixed udp packet size.
 
 2015-01-21  Zoltan Bojthe
 

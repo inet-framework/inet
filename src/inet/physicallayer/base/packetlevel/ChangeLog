@@ -8,43 +8,43 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
-    to computeReceptionDecision. Added arrival parameter to computeReceptionPower.
+	Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
+	to computeReceptionDecision. Added arrival parameter to computeReceptionPower.
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added basic antenna array support. Added level parameter to printToStream
-    functions.
+	Added basic antenna array support. Added level parameter to printToStream
+	functions.
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
-    Fixed memory management by delaying allocation.
+	Fixed memory management by delaying allocation.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Extracted DimensionalTransmitterBase class. This change fixes compilation
-    with individual radio features turned off.
+	Extracted DimensionalTransmitterBase class. This change fixes compilation
+	with individual radio features turned off.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed base/layered to base/bitlevel. Moved
-    remaining base contents to base/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed base/layered to base/bitlevel. Moved
+	remaining base contents to base/packetlevel.
 
 2015-02-25  Levente Meszaros
 
 	Added modulation base classes:
 	APSKModulationBase, DPSKModulationBase, GFSKModulationBase, MQAMModulationBase, PPMModulationBase
 
-2015-02-24  Levente Mészáros
+2015-02-24  Levente Meszaros
 
 	Extracted classes from narrowband radio: FlatRadioBase, FlatTransmitterBase,
 	FlatTransmissionBase, FlatReceiverBase, FlatReceptionBase
 	Fixed initstages for transmitters/receivers.
 
-2015-02-04  Levente Mészáros
+2015-02-04  Levente Meszaros
 
 	Refactored the interface and implementation of modulations.
 

@@ -16,7 +16,7 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-12-09  Florian Meier & Levente Mészáros
+2014-12-09  Florian Meier & Levente Meszaros
 
 	Factored out the network topology extraction algorithm from IPv4NetworkConfigurator.
 	Added support to IPv4NetworkConfigurator for computing wireless shortest

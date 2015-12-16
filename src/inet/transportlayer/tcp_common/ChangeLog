@@ -10,17 +10,17 @@
 
 2015-04-16  Zoltan Bojthe
 
-    Refactored and cleaned up TCP header options.
+	Refactored and cleaned up TCP header options.
 
 2015-04-14  Andras Varga
 
-    Fixed TCPSegment parsimPack/unpack for OMNeT++ 4.6
+	Fixed TCPSegment parsimPack/unpack for OMNeT++ 4.6
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
-    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
-    SCTPMessage. This change allows generic handling of transport packets. For
-    example, see TunLoopbackApp.
+	Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+	SCTPMessage. This change allows generic handling of transport packets. For
+	example, see TunLoopbackApp.
 
 2015-01-21  Zoltan Bojthe
 

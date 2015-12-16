@@ -8,11 +8,11 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Moved generic dimensional data structures to common.
+	Moved generic dimensional data structures to common.
 
-2015-03-02  Levente Mészáros
+2015-03-02  Levente Meszaros
 
 	Fixed memory managements bugs found by valgrind memcheck.
 

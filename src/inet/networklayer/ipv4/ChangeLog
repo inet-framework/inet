@@ -8,45 +8,45 @@
 
 2015-05-13  Zoltan Bojthe
 
-    Refactored IPv4Options to use TLVOptions.
+	Refactored IPv4Options to use TLVOptions.
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-22  Levente Mészáros
+2015-04-22  Levente Meszaros
 
-    Added netmaskRoutes parameter to IPv4RoutingTable to control whether netmask
-    routes are required or not.
+	Added netmaskRoutes parameter to IPv4RoutingTable to control whether netmask
+	routes are required or not.
 
 2015-04-16  Zoltan Bojthe
 
-    Added real ICMP type codes.
+	Added real ICMP type codes.
 
 2015-04-10  Zoltan Bojthe
 
-    Added totalLengthField to IPv4Datagram, the total length maybe different
-    than getByteLength().
+	Added totalLengthField to IPv4Datagram, the total length maybe different
+	than getByteLength().
 
 2015-03-12  Zoltan Bojthe
 
-    IPv4FragBuf accepts fragments with encapsulated RawPacket. Merges RawPackets
-    of fragments and deserialize it when the complete packet received.
+	IPv4FragBuf accepts fragments with encapsulated RawPacket. Merges RawPackets
+	of fragments and deserialize it when the complete packet received.
 
 2015-04-13  Zoltan Bojthe
 
-    Added useAdminDist parameter to IPv4RoutingTable to enable/disable the use
-    of Cisco specific routing entry extension (disabled by default).
+	Added useAdminDist parameter to IPv4RoutingTable to enable/disable the use
+	of Cisco specific routing entry extension (disabled by default).
 
 2015-03-13  Zoltan Bojthe
 
-    Removed unnecessary setType() from IGMP: type is already set in msg file.
+	Removed unnecessary setType() from IGMP: type is already set in msg file.
 
 2015-02-12  Zoltan Bojthe
 
-    Fixed IGMPv3 packet length, and also fixed a memory leak.
+	Fixed IGMPv3 packet length, and also fixed a memory leak.
 
 2015-02-10  Zoltan Bojthe
 
-    Fixed ICMP packet length.
+	Fixed ICMP packet length.
 
 2015-01-06  Zoltan Bojthe
 
@@ -65,7 +65,7 @@
 	Added IGMPv3 implementation (based on ANS project). The code
 	has been extensively refactored and extended.
 
-2014-11-18  Levente Mészáros & Zoltan Bojthe
+2014-11-18  Levente Meszaros & Zoltan Bojthe
 
 	Fixed memory leaks detected by valgrind memcheck.
 

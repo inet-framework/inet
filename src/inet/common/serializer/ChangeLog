@@ -10,68 +10,68 @@
 
 2015-04-08  Zoltan Bojthe
 
-    Fixed fragmented packets in IPv4Serializer.
+	Fixed fragmented packets in IPv4Serializer.
 
 2015-03-30  Zoltan Bojthe
 
-    Added support for EtherLLC, and EtherSNAP to EthernetSerializer.
+	Added support for EtherLLC, and EtherSNAP to EthernetSerializer.
 
 2015-04-01  Zoltan Bojthe
 
-    Refactored the serialization of TCP options in TCPSerializer.
+	Refactored the serialization of TCP options in TCPSerializer.
 
 2015-04-01  Zoltan Bojthe
 
-    UDPSerializer: verify checksum only if pseudo header data is available
+	UDPSerializer: verify checksum only if pseudo header data is available
 
 2015-03-26  Zoltan Bojthe
 
-    Added IGMPv3_REPORT to IGMPSerializer.
+	Added IGMPv3_REPORT to IGMPSerializer.
 
 2015-03-30  Zoltan Bojthe
 
-    Deserialize only packet length bytes in IPv4Serializer. Fixed serialization
-    of header length.
+	Deserialize only packet length bytes in IPv4Serializer. Fixed serialization
+	of header length.
 
 2015-04-02  Zoltan Bojthe
 
-    Added timestamps to Ieee80211Serializer.
+	Added timestamps to Ieee80211Serializer.
 
-2015-03-23  Levente Mészáros
+2015-03-23  Levente Meszaros
 
-    Replaced magic numbers with proper CRC calculations. CRC residue is not part
-    of the standard, it's a hardware implementation detail. We couldn't find a
-    reliable source how to use them, so we reverted back to simply recalculating
-    the CRC value.
+	Replaced magic numbers with proper CRC calculations. CRC residue is not part
+	of the standard, it's a hardware implementation detail. We couldn't find a
+	reliable source how to use them, so we reverted back to simply recalculating
+	the CRC value.
 
 2015-03-12  Zoltan Bojthe
 
-    Renamed ByteArrayMessage to RawPacket.
+	Renamed ByteArrayMessage to RawPacket.
 
 2015-03-11  Zoltan Bojthe
 
-    IPv4Serializer serializes only true IPv4Datagrams, it doesn't serialize
-    DSRPkt and DSRPktExt as IPv4Datagram.
+	IPv4Serializer serializes only true IPv4Datagrams, it doesn't serialize
+	DSRPkt and DSRPktExt as IPv4Datagram.
 
-2015-03-06  Levente Mészáros
+2015-03-06  Levente Meszaros
 
-    Added ByteArraySerializer, DefaultSerializer.
+	Added ByteArraySerializer, DefaultSerializer.
 
 2015-02-20  Zoltan Bojthe
 
-    Refactored packet serializer classes to use a safe buffer class to read and
-    write binary data. This allows parsing incorrect binary representations without
-    runtime errors required by bit precise physical layer models.
+	Refactored packet serializer classes to use a safe buffer class to read and
+	write binary data. This allows parsing incorrect binary representations without
+	runtime errors required by bit precise physical layer models.
 
-    Refactored recursion in serializers to be extensible with new packet formats
-    without modifying existing code. Fixed a number of packet length bugs and
-    inconsistencies between serialized and non-serialized forms.
+	Refactored recursion in serializers to be extensible with new packet formats
+	without modifying existing code. Fixed a number of packet length bugs and
+	inconsistencies between serialized and non-serialized forms.
 
-    Refactored the following serializers:
-    TCPSerializer, SCTPSerializer, UDPSerializer,
-    IPv4Serializer, ICMPSerializer, ARPSerializer, IGMPSerializer,
-    IPv6Serializer, ICMPv6Serializer,
-    EthernetSerializer, Ieee80211Serializer
+	Refactored the following serializers:
+	TCPSerializer, SCTPSerializer, UDPSerializer,
+	IPv4Serializer, ICMPSerializer, ARPSerializer, IGMPSerializer,
+	IPv6Serializer, ICMPv6Serializer,
+	EthernetSerializer, Ieee80211Serializer
 
 2015-02-25  Benjamin Seregi
 

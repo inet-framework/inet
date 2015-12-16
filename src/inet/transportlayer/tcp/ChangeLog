@@ -10,19 +10,19 @@
 
 2015-04-16  Zoltan Bojthe
 
-    Refactored and cleaned up TCP header options.
+	Refactored and cleaned up TCP header options.
 
 2015-04-13  Irene Ruengeler
 
-    Added data receive handling via indications.
+	Added data receive handling via indications.
 
 2015-02-19  Zoltan Bojthe
 
-    Removed obsolete SACK_AS_C_ARRAY from TCPConnection.h
+	Removed obsolete SACK_AS_C_ARRAY from TCPConnection.h
 
 2015-02-12  Zoltan Bojthe
 
-    Fixed packet length.
+	Fixed packet length.
 
 2015-02-10  Martin Becke
 
@@ -40,7 +40,7 @@
 
 	Fixed cloneListeningConnection / TCPSACKRexmitQueue.
 
-2014-11-26  Levente Mészáros
+2014-11-26  Levente Meszaros
 
 	Fixed memory management problems found by valgrind memcheck.
 

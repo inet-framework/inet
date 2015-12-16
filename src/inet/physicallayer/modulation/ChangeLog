@@ -8,13 +8,13 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
 2015-03-20  Benjamin Seregi
 
-    Added QBPSKModulation modulation.
+	Added QBPSKModulation modulation.
 
 2015-02-25  Benjamin Seregi & Levente Meszaros
 

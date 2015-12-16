@@ -10,92 +10,92 @@
 
 2015-04-24  Irene Ruengeler
 
-    Set the primary path when the path is established.
-    Do not update a sockPair that is already stored.
+	Set the primary path when the path is established.
+	Do not update a sockPair that is already stored.
 
 2015-04-24  Thomas Dreibholz
 
-    Bugfix for SCTPAssociation::process_RCV_Message(): After
-    "sctpMain->removeAssociation(this);", a return is necessary. Otherwise,
-    the not-any-longer-existing association will cause a segfault due to
-    access to already-free'd memory at the end of the method.
+	Bugfix for SCTPAssociation::process_RCV_Message(): After
+	"sctpMain->removeAssociation(this);", a return is necessary. Otherwise,
+	the not-any-longer-existing association will cause a segfault due to
+	access to already-free'd memory at the end of the method.
 
 2015-04-17  Thomas Dreibholz
 
-    Fixed signed/unsigned warnings.
+	Fixed signed/unsigned warnings.
 
 2015-04-16  Thomas Dreibholz
 
-    Fixed wrong usage of cPacket by replacing with cMessage.
+	Fixed wrong usage of cPacket by replacing with cMessage.
 
 2015-04-10  Thomas Dreibholz
 
-    Also send SCTP_I_SENDQUEUE_FULL indication for unordered messages.
+	Also send SCTP_I_SENDQUEUE_FULL indication for unordered messages.
 
 2015-03-13  Irene Ruengeler
 
-    Set length according to address type.
+	Set length according to address type.
 
 2015-03-10  Irene Ruengeler
 
-    Fixed unknown define.
+	Fixed unknown define.
 
 2015-03-10  Irene Ruengeler
 
-    Fixed bug concerning different sizes for written bytes and getByteLength.
+	Fixed bug concerning different sizes for written bytes and getByteLength.
 
 2015-03-20  Irene Ruengeler
 
-    Look up addresses in Init-Ack chunk to verify source address.
+	Look up addresses in Init-Ack chunk to verify source address.
 
 2015-03-11  Thomas Dreibholz
 
-    Set sctpMsg to NULL after delete.
+	Set sctpMsg to NULL after delete.
 
 2015-03-11  Thomas Dreibholz
 
-    If we are not on the primary path, and there is a small chunk to send
-    (bytesToSend > 0), and Nagle turned on: leave inner loop. Otherwise,
-    there will be an infinite loop!
+	If we are not on the primary path, and there is a small chunk to send
+	(bytesToSend > 0), and Nagle turned on: leave inner loop. Otherwise,
+	there will be an infinite loop!
 
 2015-03-11  Thomas Dreibholz
 
-    Bugfix: set sctpMsg to NULL for invalidating pointer.
+	Bugfix: set sctpMsg to NULL for invalidating pointer.
 
 2015-03-11  Thomas Dreibholz
 
-    Bugfix: need to create new SCTPMessage when necessary.
+	Bugfix: need to create new SCTPMessage when necessary.
 
 2015-03-11  Thomas Dreibholz
 
-    Bugfix: set sctpMsg to NULL after sendSACKviaSelectedPath().
+	Bugfix: set sctpMsg to NULL after sendSACKviaSelectedPath().
 
 2015-03-11  Thomas Dreibholz
 
-    Safety check in send loop to avoid endless loops.
+	Safety check in send loop to avoid endless loops.
 
 2015-03-11  Thomas Dreibholz
 
-    Fixed storePacket()/loadPacket().
+	Fixed storePacket()/loadPacket().
 
 2015-03-19  Irene Ruengeler
 
-    Look up addresses in Init-Ack chunk to verify source address
+	Look up addresses in Init-Ack chunk to verify source address
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
-    Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
-    SCTPMessage. This change allows generic handling of transport packets. For
-    example, see TunLoopbackApp.
+	Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
+	SCTPMessage. This change allows generic handling of transport packets. For
+	example, see TunLoopbackApp.
 
 2015-03-16  Thomas Dreibholz
 
-    CC function initialisation bugfix: need to initialise function to call
-    before SACK.
+	CC function initialisation bugfix: need to initialise function to call
+	before SACK.
 
 2015-03-16  Irene Ruengeler
 
-    Arithmetic for removal of chunk was wrong.
+	Arithmetic for removal of chunk was wrong.
 
 2015-01-30  Irene Ruengeler
 

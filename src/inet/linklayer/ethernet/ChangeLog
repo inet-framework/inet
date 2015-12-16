@@ -10,11 +10,11 @@
 
 2015-03-16  Zoltan Bojthe
 
-    EtherMAC accepts raw packets from network.
+	EtherMAC accepts raw packets from network.
 
 2015-03-13  Zoltan Bojthe
 
-    EtherMACFullDuplex accepts raw packets from network.
+	EtherMACFullDuplex accepts raw packets from network.
 
 2015-02-05  Zoltan Bojthe
 

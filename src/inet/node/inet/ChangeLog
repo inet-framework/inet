@@ -19,7 +19,7 @@
 	Added INode module interface so simulation may use this interface to create
 	networks with node types configurable from ini files.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
 	Fixed PIM issues when all features are turned off. Added IPIMRouting and
 	merged MulticastRouter parameters into Router.

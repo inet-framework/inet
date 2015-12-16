@@ -8,15 +8,15 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-03-19  Levente Mészáros
+2015-03-19  Levente Meszaros
 
-    Added better icons to object cache display strings.
+	Added better icons to object cache display strings.
 
 2015-01-21  Zoltan Bojthe
 
 	Applied C++ source code modernizer.
 
-2014-12-09  Levente Mészáros
+2014-12-09  Levente Meszaros
 
 	Renamed cache directory to objectcache.
 

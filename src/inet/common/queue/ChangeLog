@@ -73,8 +73,8 @@
 
 2014-10-29  Thomas Dreibholz
 
-    improved REDDropper, in order to provide a functionality similar to the old REDQueue.
-    (allows specifying avearge packet rate that is used for calculation when the queue is empty)
+	improved REDDropper, in order to provide a functionality similar to the old REDQueue.
+	(allows specifying avearge packet rate that is used for calculation when the queue is empty)
 
 2014-06-12  ------ inet-2.4.0 released ------
 

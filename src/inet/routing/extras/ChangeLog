@@ -16,7 +16,7 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-11-26  Levente Mészáros & Zoltan Bojthe
+2014-11-26  Levente Meszaros & Zoltan Bojthe
 
 	Fixed memory management problems found by valgrind memcheck.
 	The arrays were not correctly initialized, because j was occasionally

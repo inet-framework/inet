@@ -16,7 +16,7 @@
 
 	Fix signatures to correct types.
 
-2014-12-11  Levente Mészáros
+2014-12-11  Levente Meszaros
 
 	TransportLayer: Moved ITCP, IUDP, ISCTP under contract.
 

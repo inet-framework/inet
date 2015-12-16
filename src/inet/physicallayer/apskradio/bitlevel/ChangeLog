@@ -8,23 +8,23 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Added snir parameter to computeReceptionDecision.
+	Added snir parameter to computeReceptionDecision.
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
 2015-03-04  Zoltan Bojthe
 
-    Renamed APSKSerializer to APSKPhyFrameSerializer and adapted to new API.
+	Renamed APSKSerializer to APSKPhyFrameSerializer and adapted to new API.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed apsk/layered to apskradio/bitlevel. Moved
-    remaining apsk contents to apsk/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed apsk/layered to apskradio/bitlevel. Moved
+	remaining apsk contents to apsk/packetlevel.
 
 2015-02-25  Levente Meszaros
 

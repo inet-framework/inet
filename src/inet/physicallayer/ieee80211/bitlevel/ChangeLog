@@ -8,40 +8,40 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Added snir parameter to computeReceptionDecision.
+	Added snir parameter to computeReceptionDecision.
 
-2015-04-09  Levente Mészáros
+2015-04-09  Levente Meszaros
 
-    Changed with isReceptionSuccessful to be true if all nested packets are free
-    of errrors. Replaced default 802.11 mode with the one received in the control
-    info.
+	Changed with isReceptionSuccessful to be true if all nested packets are free
+	of errrors. Replaced default 802.11 mode with the one received in the control
+	info.
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
 2015-04-02  Benjamin Seregi
 
-    Renamed Ieee80211Interleaver to Ieee80211OFDMInterleaver.
+	Renamed Ieee80211Interleaver to Ieee80211OFDMInterleaver.
 
 2015-03-20  Benjamin Seregi
 
-    Ieee80211LayeredOFDMTransmitter: changed pad bitlength computation. The
-    previous version was also correct but this computation method is more
-    close to the standard.
+	Ieee80211LayeredOFDMTransmitter: changed pad bitlength computation. The
+	previous version was also correct but this computation method is more
+	close to the standard.
 
 2015-03-19  Benjamin Seregi
 
-    Dropped dummy code from Ieee80211OFDMModulator and fixed polarity vector
-    indexing. Added support for 5/6 code rate to Ieee80211ConvolutionalCode.
+	Dropped dummy code from Ieee80211OFDMModulator and fixed polarity vector
+	indexing. Added support for 5/6 code rate to Ieee80211ConvolutionalCode.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed ieee80211/layered to ieee80211/bitlevel.
-    Moved remaining ieee80211 contents to ieee80211/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed ieee80211/layered to ieee80211/bitlevel.
+	Moved remaining ieee80211 contents to ieee80211/packetlevel.
 
 2015-02-25  Benjamin Seregi
 

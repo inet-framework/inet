@@ -12,11 +12,11 @@
 
 	Added GaugeFigue that can show the value of a single signal as an analog instrument.
 
-2015-04-09  Levente Mészáros
+2015-04-09  Levente Meszaros
 
 	Added reusable HeatMapFigure.
 
-2015-03-24  Levente Mészáros
+2015-03-24  Levente Meszaros
 
 	Added fade out support to TrailFigure.
 

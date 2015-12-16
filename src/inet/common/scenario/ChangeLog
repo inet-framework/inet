@@ -12,7 +12,7 @@
 
 	Applied C++ source code modernizer.
 
-2015-01-19  Levente Mészáros
+2015-01-19  Levente Meszaros
 
 	Added create-module and delete-module commands to ScenarioManager.
 

@@ -10,7 +10,7 @@
 
 2015-04-16  Zoltan Bojthe
 
-    Added nonstandard ETHERTYPE_INET_GENERIC to generic network protocol.
+	Added nonstandard ETHERTYPE_INET_GENERIC to generic network protocol.
 
 2015-01-21  Zoltan Bojthe
 
@@ -24,7 +24,7 @@
 
 	Added printRoutingTable function to GenericRoutingTable.
 
-2014-11-28  Levente Mészáros
+2014-11-28  Levente Meszaros
 
 	Fixed generic network layer configuration and routing.
 

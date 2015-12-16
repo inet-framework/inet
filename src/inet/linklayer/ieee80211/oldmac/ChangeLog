@@ -39,11 +39,11 @@
 
 	Renamed LENGTH_DATAHDR to DATAFRAME_HEADER_MINLENGTH.
 
-2015-03-19  Levente Mészáros
+2015-03-19  Levente Meszaros
 
 	Renamed the old Radio80211aControlInfo to Ieee80211ReceptionIndication.
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
 	Transport: Added ITransportPacket interface to TCPSegment, UDPPacket, and
 	SCTPMessage. This change allows generic handling of transport packets. For
@@ -57,7 +57,7 @@
 
 	Added ST_DATA_WITH_QOS to 802.11 data frames.
 
-2015-03-10  Levente Mészáros
+2015-03-10  Levente Meszaros
 
 	802.11 MAC: Fixed control frame mode. The specification requires the control
 	frames to be sent with the slowest mandatory mode.
@@ -85,7 +85,7 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-12-17  Levente Mészáros
+2014-12-17  Levente Meszaros
 
 	Changed setting radio mode to be asynchronous using a command.
 	Added guard against recursively calling handleWithFSM.

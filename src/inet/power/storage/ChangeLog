@@ -8,19 +8,19 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-13  Levente Mészáros
+2015-04-13  Levente Meszaros
 
-    Added energyBalance to IdealEnergyStorage, it's also emitted for statistics.
+	Added energyBalance to IdealEnergyStorage, it's also emitted for statistics.
 
-2015-04-13  Levente Mészáros
+2015-04-13  Levente Meszaros
 
-    Added a few helpful WATCHes.
+	Added a few helpful WATCHes.
 
 2015-01-21  Zoltan Bojthe
 
 	Applied C++ source code modernizer.
 
-2014-11-17  Levente Mészáros
+2014-11-17  Levente Meszaros
 
 	Fixed copy-paste bug found by Coverity.
 

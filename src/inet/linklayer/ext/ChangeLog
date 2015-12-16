@@ -10,16 +10,16 @@
 
 2015-03-30  Rudolf Hornig
 
-    Network Emulation feature no longer depends on OMNeT++ to detect the
-    presence of PCAP. Instead the feature can be turned on/off by the user.
+	Network Emulation feature no longer depends on OMNeT++ to detect the
+	presence of PCAP. Instead the feature can be turned on/off by the user.
 
 2015-03-13  Zoltan Bojthe
 
-    Drop packet only when there's an error during serialization.
+	Drop packet only when there's an error during serialization.
 
 2015-02-23  Zoltan Bojthe
 
-    ExtInterface uses the new serializers.
+	ExtInterface uses the new serializers.
 
 2015-03-30  Rudolf Hornig
 

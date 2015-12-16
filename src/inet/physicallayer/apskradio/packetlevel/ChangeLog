@@ -8,25 +8,25 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
-2015-03-17  Levente Mészáros
+2015-03-17  Levente Meszaros
 
-    Added missing headerBitLength and control info handling to
-    APSKDimensionalTransmitter.
+	Added missing headerBitLength and control info handling to
+	APSKDimensionalTransmitter.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Extracted DimensionalTransmitterBase class. This change fixes compilation
-    with individual radio features turned off.
+	Extracted DimensionalTransmitterBase class. This change fixes compilation
+	with individual radio features turned off.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed apsk/layered to apskradio/bitlevel. Moved
-    remaining apsk contents to apsk/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed apsk/layered to apskradio/bitlevel. Moved
+	remaining apsk contents to apsk/packetlevel.
 
 2015-01-21  Zoltan Bojthe
 

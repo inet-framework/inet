@@ -10,13 +10,13 @@
 
 2015-03-23  Zoltan Bojthe
 
-    Get address length from IL3AddressType (instead of getting from ned parameter)
-    Renamed coordByteLength to positionByteLength and set to 2*4 byte
-    Removed confusing addressByteLength.
+	Get address length from IL3AddressType (instead of getting from ned parameter)
+	Renamed coordByteLength to positionByteLength and set to 2*4 byte
+	Removed confusing addressByteLength.
 
 2015-02-12  Zoltan Bojthe
 
-    Fixed packet length.
+	Fixed packet length.
 
 2015-01-21  Zoltan Bojthe
 

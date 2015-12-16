@@ -8,25 +8,25 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-15  Levente Mészáros
+2015-04-15  Levente Meszaros
 
-    Radio: Added arrival parameter to computeReceptionPower.
+	Radio: Added arrival parameter to computeReceptionPower.
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Radio: Added level parameter to printToStream functions.
+	Radio: Added level parameter to printToStream functions.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed analogmodel/layered to analogmodel/bitlevel.
-    Moved remaining analogmodel contents to analogmodel/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed analogmodel/layered to analogmodel/bitlevel.
+	Moved remaining analogmodel contents to analogmodel/packetlevel.
 
-2015-03-02  Levente Mészáros
+2015-03-02  Levente Meszaros
 
 	Fixed memory managements bugs found by valgrind memcheck.
 
-2015-02-24  Levente Mészáros
+2015-02-24  Levente Meszaros
 
 	Updated analog model to support layered radio.
 

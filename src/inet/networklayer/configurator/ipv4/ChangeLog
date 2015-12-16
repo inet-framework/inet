@@ -8,22 +8,22 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-23  Levente Mészáros
+2015-04-23  Levente Meszaros
 
-    Refactored supported metrics (hopCount, delay, dataRate, errorRate) and
-    related parameters.
+	Refactored supported metrics (hopCount, delay, dataRate, errorRate) and
+	related parameters.
 
-2015-04-23  Levente Mészáros
+2015-04-23  Levente Meszaros
 
-    Fixed bridge node handling.
+	Fixed bridge node handling.
 
-2015-04-22  Levente Mészáros
+2015-04-22  Levente Meszaros
 
-    Changed logging to be more user friendly.
+	Changed logging to be more user friendly.
 
-2015-04-22  Levente Mészáros
+2015-04-22  Levente Meszaros
 
-    Added autoroute element to IPv4NetworkConfigurator, see documentation.
+	Added autoroute element to IPv4NetworkConfigurator, see documentation.
 
 2015-01-06  Zoltan Bojthe
 
@@ -37,14 +37,14 @@
 
 	Fixed defects found by static code analyzer (Coverity).
 
-2014-12-09  Florian Meier & Levente Mészáros
+2014-12-09  Florian Meier & Levente Meszaros
 
 	Factored out the network topology extraction algorithm from IPv4NetworkConfigurator.
 	Added support to IPv4NetworkConfigurator for computing wireless shortest
 	paths based on packet error rate.
 	Added printing routing tables.
 
-2014-11-12  Levente Mészáros
+2014-11-12  Levente Meszaros
 
 	Fixed memory leaks detected by valgrind memcheck.
 

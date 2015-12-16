@@ -12,7 +12,7 @@
 
 	Applied C++ source code modernizer.
 
-2014-12-09  Levente Mészáros
+2014-12-09  Levente Meszaros
 
 	Renamed common subdirectory to base.
 	Moved I* module interfaces to contract.

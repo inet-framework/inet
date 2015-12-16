@@ -10,9 +10,9 @@
 
 2015-01-28  Irene Ruengeler
 
-    Added a virtual TUN interface.
+	Added a virtual TUN interface.
 
-2014-12-11  Levente Mészáros
+2014-12-11  Levente Meszaros
 
 	Moved module interfaces under contract.
 
@@ -72,7 +72,7 @@
 	Moved classes shared by implementations from ./contract to ./common
 	Added a new purely virtual contract that defines the interface of MAC protocols.
 
-2013-05-23  Levente Mészáros
+2013-05-23  Levente Meszaros
 
 	backport: MACAddress: Fixed that interfaces were assigned different MAC
 	addresses when multiple runs were executed.

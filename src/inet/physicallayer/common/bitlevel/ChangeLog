@@ -8,15 +8,15 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed common/layered to common/bitlevel. Moved
-    remaining common contents to common/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed common/layered to common/bitlevel. Moved
+	remaining common contents to common/packetlevel.
 
 2015-02-25  Benjamin Seregi & Levente Meszaros
 

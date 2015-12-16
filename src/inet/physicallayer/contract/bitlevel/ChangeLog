@@ -8,11 +8,11 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-03-16  Levente Mészáros
+2015-03-16  Levente Meszaros
 
-    Consistently renamed packet level and bit level implementations into
-    separate subdirectories. Renamed contract/layered to contract/bitlevel.
-    Moved remaining contract contents to contract/packetlevel.
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed contract/layered to contract/bitlevel.
+	Moved remaining contract contents to contract/packetlevel.
 
 2015-02-25  Benjamin Seregi & Levente Meszaros
 

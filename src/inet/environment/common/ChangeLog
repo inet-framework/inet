@@ -8,30 +8,30 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-09  Levente Mészáros
+2015-04-09  Levente Meszaros
 
-    Added tags to axes to allow hiding them in the user interface.
+	Added tags to axes to allow hiding them in the user interface.
 
-2015-03-26  Levente Mészáros
+2015-03-26  Levente Meszaros
 
-    Fixed drawing sphere shape for all view angles.
+	Fixed drawing sphere shape for all view angles.
 
-2015-03-24  Levente Mészáros
+2015-03-24  Levente Meszaros
 
-    Added support for isometric view angles, it supports 48 different axes
-    configurations. Added viewTranslation and axisLength parameters. Changed
-    various line widths to unscaled.
+	Added support for isometric view angles, it supports 48 different axes
+	configurations. Added viewTranslation and axisLength parameters. Changed
+	various line widths to unscaled.
 
-2015-03-18  Levente Mészáros
+2015-03-18  Levente Meszaros
 
-    Fixed computeCanvasPoint nullptr dereference.
+	Fixed computeCanvasPoint nullptr dereference.
 
-2015-03-17  Levente Mészáros
+2015-03-17  Levente Meszaros
 
-    Moved files under the common directory to prepare for adding the contract
-    directory.
+	Moved files under the common directory to prepare for adding the contract
+	directory.
 
-2015-03-02  Levente Mészáros & Zoltan Bojthe
+2015-03-02  Levente Meszaros & Zoltan Bojthe
 
 	Fixed memory leaks detected by valgrind memcheck.
 

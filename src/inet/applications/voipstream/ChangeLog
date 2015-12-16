@@ -10,7 +10,7 @@
 
 2015-03-10  Zoltan Bojthe
 
-    VoIPStreamPacket has a ByteArray member, instead of extending ByteArrayMessage.
+	VoIPStreamPacket has a ByteArray member, instead of extending ByteArrayMessage.
 
 2015-01-21  Zoltan Bojthe
 

@@ -8,16 +8,16 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-04-03  Levente Mészáros
+2015-04-03  Levente Meszaros
 
-    Added level parameter to printToStream functions.
+	Added level parameter to printToStream functions.
 
 2015-04-02  Benjamin Seregi
 
-    Ieee80211ErrorModelBase, Ieee80211{Nist,Yans}ErrorModel: removed chunk
-    mode abstraction.
+	Ieee80211ErrorModelBase, Ieee80211{Nist,Yans}ErrorModel: removed chunk
+	mode abstraction.
 
-2015-02-24  Levente Mészáros
+2015-02-24  Levente Meszaros
 
 	Removed header success rate calculation from Ieee80211BerTableErrorModel.
 	The returned packet error rate value should already include all possible
